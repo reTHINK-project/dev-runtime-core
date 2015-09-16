@@ -3,7 +3,7 @@ var packageJSON = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 
 var structure = {
   src: ['configs', 'jsons', 'utils', 'modules', packageJSON.name + '.js'],
-  test: ['main.js']
+  test: [packageJSON.name + '.spec.js']
 };
 
 // Create the directory structure
