@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import Pipeline from '../src/Pipeline';
+import Pipeline from '../src/bus/Pipeline';
 
 describe('Pipeline', function() {
   it('fail detected', function() {
