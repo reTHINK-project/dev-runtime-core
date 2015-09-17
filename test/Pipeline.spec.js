@@ -16,6 +16,7 @@ describe('Pipeline', function() {
         msgResult = ctx.msg;
         ctx.fail('error-msg');
       },
+
       function(ctx) {
         ctx.msg.value++;
         ctx.next();
@@ -44,6 +45,7 @@ describe('Pipeline', function() {
         ctx.msg.value++;
         ctx.deliver();
       },
+
       function(ctx) {
         ctx.msg.value++;
         ctx.next();
@@ -72,6 +74,7 @@ describe('Pipeline', function() {
         ctx.msg.value++;
         ctx.next();
       },
+
       function(ctx) {
         ctx.msg.value++;
         ctx.next();

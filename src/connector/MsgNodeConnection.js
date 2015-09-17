@@ -12,10 +12,10 @@ export default class MsgNodeConnection {
   get url() { return this._msgNodeURL; }
 
   send(msg) {
-    let _self = this;
+    let _this = this;
 
-    _self._open(() => {
-      _self._sock.send(JSON.stringify(msg));
+    _this._open(() => {
+      _this._sock.send(JSON.stringify(msg));
     });
   }
 
@@ -30,45 +30,45 @@ export default class MsgNodeConnection {
   }
 
   _waitReady(callback) {
-    let _self = this;
+    let _this = this;
 
-    if (_self._sock.readyState === 1) {
+    if (_this._sock.readyState === 1) {
       callback();
     } else {
       setTimeout(() => {
-        _self._waitReady(callback);
+        _this._waitReady(callback);
       });
     }
   }
 
   _open(callback) {
-    let _self = this;
+    let _this = this;
 
-    if (!_self._sock) {
-      if (_self._msgNodeURL.substring(0, 2) === 'ws') {
-        _self._sock = new WebSocket(_self._msgNodeURL);
+    if (!_this._sock) {
+      if (_this._msgNodeURL.substring(0, 2) === 'ws') {
+        _this._sock = new WebSocket(_this._msgNodeURL);
       } else {
-        _self._sock = new SockJS(_self._msgNodeURL);
+        _this._sock = new SockJS(_this._msgNodeURL);
       }
 
-      _self._sock.onopen = function() {
+      _this._sock.onopen = function() {
         console.log('OPEN');
         callback();
       };
 
-      _self._sock.onmessage = function(e) {
+      _this._sock.onmessage = function(e) {
         var msg = JSON.parse(e.data);
-        if (_self._msgCallback) {
-          _self._msgCallback(msg);
+        if (_this._msgCallback) {
+          _this._msgCallback(msg);
         }
       };
 
-      _self._sock.onclose = function() {
+      _this._sock.onclose = function() {
         console.log('CLOSE');
-        delete _self._sock;
+        delete _this._sock;
       };
     } else {
-      _self._waitReady(callback);
+      _this._waitReady(callback);
     }
   }
 }

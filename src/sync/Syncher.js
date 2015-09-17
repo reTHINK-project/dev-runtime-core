@@ -15,19 +15,19 @@ export default class Syncher {
   */
 
   constructor(mb) {
-    let _self = this;
+    let _this = this;
 
-    _self._schemas = {};
-    _self._objs = {};
+    _this._schemas = {};
+    _this._objs = {};
 
-    _self._mb = mb;
+    _this._mb = mb;
     mb.subscribe(Syncher.NAME, (msg) => {
       console.log('RCV: ', msg);
-      let objData = _self._objs[msg.body.res];
+      let objData = _this._objs[msg.body.res];
       if (objData) {
         //only the owner is able to change the object
         if (msg.header.from === objData.owner) {
-          _self._processChange(objData, msg);
+          _this._processChange(objData, msg);
         } else {
           console.log(
             'msg.header.from !== objData.owner',
@@ -42,37 +42,37 @@ export default class Syncher {
   }
 
   addSchema(schemaURL, schema) {
-    let _self = this;
+    let _this = this;
 
-    if (_self._schemas.hasOwnProperty(schemaURL)) {
+    if (_this._schemas.hasOwnProperty(schemaURL)) {
       throw 'There is already available schema: ' + schemaURL;
     }
 
-    _self._schemas[schemaURL] = schema;
+    _this._schemas[schemaURL] = schema;
   }
 
   create(resourceName, schemaURL, data, owner) {
-    let _self = this;
+    let _this = this;
 
-    if (_self._objs.hasOwnProperty(resourceName)) {
+    if (_this._objs.hasOwnProperty(resourceName)) {
       throw 'Already available object: ' + resourceName;
     }
 
-    if (!_self._schemas.hasOwnProperty(schemaURL)) {
+    if (!_this._schemas.hasOwnProperty(schemaURL)) {
       throw 'There is no schema: ' + schemaURL;
     }
 
-    let _owner = _self._mb.owner;
+    let _owner = _this._mb.owner;
     if (owner) {
       _owner = owner;
     }
 
     let so = new SyncObject(resourceName, _owner, schemaURL, data);
     so.observe((event) => {
-      _self._onChange(event);
+      _this._onChange(event);
     });
 
-    _self._objs[so.name] = {
+    _this._objs[so.name] = {
       obj: so,
       subs: [],
       version: 0,
@@ -83,9 +83,9 @@ export default class Syncher {
   }
 
   addSubscription(resourceName, url) {
-    let _self = this;
+    let _this = this;
 
-    let objData = _self._objs[resourceName];
+    let objData = _this._objs[resourceName];
     if (!objData) {
       throw 'Object not found: ' + resourceName;
     }
@@ -94,9 +94,9 @@ export default class Syncher {
   }
 
   removeSubscription(resourceName, url) {
-    let _self = this;
+    let _this = this;
 
-    let objData = _self._objs[resourceName];
+    let objData = _this._objs[resourceName];
     if (!objData) {
       throw 'Object not found: ' + resourceName;
     }
@@ -106,7 +106,7 @@ export default class Syncher {
   }
 
   _processChange(objData, msg) {
-    let _self = this;
+    let _this = this;
 
     if (msg.body.ver) {
       if (msg.body.ver > objData.version) {
@@ -115,22 +115,23 @@ export default class Syncher {
         msg.reply('error', 'Invalid object version!');
       }
 
-      _self._processQueue(objData);
+      _this._processQueue(objData);
     } else {
-      _self._changeObject(objData.obj, msg);
+      _this._changeObject(objData.obj, msg);
     }
   }
 
   _processQueue(objData) {
-    let _self = this;
+    let _this = this;
 
     let nextMsg = objData.cQueue[objData.version + 1];
     if (nextMsg) {
-      _self._changeObject(objData.obj, nextMsg);
+      _this._changeObject(objData.obj, nextMsg);
       objData.version++;
+
       //on change per event loop is more robust to bugs!
       setTimeout(() => {
-        _self._processQueue(objData);
+        _this._processQueue(objData);
       });
     } else {
       console.log('Waiting for version: ' + (objData.version + 1));

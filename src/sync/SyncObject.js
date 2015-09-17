@@ -16,32 +16,35 @@ export default class SyncObject {
   */
 
   constructor(name, owner, schema, data) {
-    let _self = this;
+    let _this = this;
 
-    _self._name = name;
-    _self._owner = owner;
-    _self._schema = schema;
+    _this._name = name;
+    _this._owner = owner;
+    _this._schema = schema;
 
-    _self._observers = [];
-    _self._filters = {};
-    _self._url = SyncObject.URL(owner, name);
+    _this._observers = [];
+    _this._filters = {};
+    _this._url = SyncObject.URL(owner, name);
 
     if (data) {
-      _self._data = data;
+      _this._data = data;
     } else {
-      _self._data = {};
+      _this._data = {};
     }
 
-    _self._internalObserve(new Path(), _self.data);
+    _this._internalObserve(new Path(), _this.data);
   }
 
   static URL(resOwner, resName) { return resOwner + '/' + resName; }
 
   get name() { return this._name; }
+
   get owner() { return this._owner; }
+
   get url() { return this._url; }
 
   get schema() { return this._schema; }
+
   get data() { return this._data; }
 
   observe(callback) {
@@ -88,10 +91,10 @@ export default class SyncObject {
   }
 
   _fireEvent(event) {
-    let _self = this;
+    let _this = this;
 
-    Object.keys(_self._filters).forEach((key) => {
-      let filter = _self._filters[key];
+    Object.keys(_this._filters).forEach((key) => {
+      let filter = _this._filters[key];
       if (filter.type == FilterType.START) {
         //if starts with filter...
         if (event.field.indexOf(key) === 0) {
@@ -105,7 +108,7 @@ export default class SyncObject {
       }
     });
 
-    _self._observers.forEach((callback) => {
+    _this._observers.forEach((callback) => {
       callback(event);
     });
   }
@@ -119,28 +122,28 @@ export default class SyncObject {
   }
 
   _internalObserve(path, obj) {
-    let _self = this;
+    let _this = this;
 
-    if (_self._isObservable(obj)) {
+    if (_this._isObservable(obj)) {
       let handler = (changes) => {
-        _self._onChanges(path, changes);
+        _this._onChanges(path, changes);
       };
 
       if (obj.constructor === Object) {
-        //console.log('OBSERVE-OBJECT: <<' + _self._name + '>>' + path);
+        //console.log('OBSERVE-OBJECT: <<' + _this._name + '>>' + path);
         Object.observe(obj, handler);
         for (let prop in obj) {
-          if (_self._isObservable(obj[prop])) {
-            _self._internalObserve(path.new(prop), obj[prop]);
+          if (_this._isObservable(obj[prop])) {
+            _this._internalObserve(path.new(prop), obj[prop]);
           }
         }
       } else if (obj.constructor === Array) {
-        //console.log('OBSERVE-ARRAY: <<' + _self._name + '>>' + path);
+        //console.log('OBSERVE-ARRAY: <<' + _this._name + '>>' + path);
         Array.observe(obj, handler);
         for (let prop in obj) {
-          if (_self._isObservable(obj[prop])) {
+          if (_this._isObservable(obj[prop])) {
             let np = path.new(new ArrayIndex(obj[prop], prop));
-            _self._internalObserve(np, obj[prop]);
+            _this._internalObserve(np, obj[prop]);
           }
         }
       }
@@ -200,12 +203,14 @@ export default class SyncObject {
             }
           });
         }
+
         //re-define paths...
         if (idx != obj.length - 1) {
           path.reIndexFrom(obj);
         }
       } else {
         let field = path.new(changes[i].name);
+
         //let oldValue = changes[i].oldValue;
         let newValue = obj[changes[i].name];
         if (changes[i].type === 'update') {
@@ -279,6 +284,7 @@ class Path {
       //console.log('PATH-OBSERV: ', idx);
       this._observables[idx.idx] = idx;
     }
+
     let nPath = this.clone();
     nPath._path.push(idx);
 

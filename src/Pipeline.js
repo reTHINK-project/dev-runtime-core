@@ -5,17 +5,17 @@ export default class Pipeline {
   */
 
   constructor(_onFail) {
-    let _self = this;
+    let _this = this;
 
-    _self.handlers = [];
-    _self.onFail = _onFail;
+    _this.handlers = [];
+    _this.onFail = _onFail;
   }
 
   process(msg, onDeliver) {
-    let _self = this;
+    let _this = this;
 
-    let iter = new Iterator(_self.handlers);
-    let ctx = new PipeContext(_self, iter, msg, onDeliver);
+    let iter = new Iterator(_this.handlers);
+    let ctx = new PipeContext(_this, iter, msg, onDeliver);
 
     if (iter.hasNext) {
       iter.next(ctx);
@@ -35,46 +35,47 @@ class PipeContext {
   */
 
   constructor(pipeline, iter, msg, onDeliver) {
-    let _self = this;
+    let _this = this;
 
-    _self._inStop = false;
+    _this._inStop = false;
 
-    _self._pipeline = pipeline;
-    _self._iter = iter;
-    _self._msg = msg;
-    _self._onDeliver = onDeliver;
+    _this._pipeline = pipeline;
+    _this._iter = iter;
+    _this._msg = msg;
+    _this._onDeliver = onDeliver;
   }
 
   get pipeline() { return this._pipeline; }
+
   get msg() { return this._msg; }
 
   next() {
-    let _self = this;
+    let _this = this;
 
-    if (!_self._inStop) {
-      if (_self._iter.hasNext) {
-        _self._iter.next(_self);
+    if (!_this._inStop) {
+      if (_this._iter.hasNext) {
+        _this._iter.next(_this);
       } else {
-        _self._onDeliver(_self._msg);
+        _this._onDeliver(_this._msg);
       }
     }
   }
 
   deliver() {
-    let _self = this;
-    if (!_self._inStop) {
-      _self._inStop = true;
-      _self._onDeliver(_self._msg);
+    let _this = this;
+    if (!_this._inStop) {
+      _this._inStop = true;
+      _this._onDeliver(_this._msg);
     }
   }
 
   fail(error) {
-    let _self = this;
+    let _this = this;
 
-    if (!_self._inStop) {
-      _self._inStop = true;
-      if (_self._pipeline.onFail) {
-        _self._pipeline.onFail(error);
+    if (!_this._inStop) {
+      _this._inStop = true;
+      if (_this._pipeline.onFail) {
+        _this._pipeline.onFail(error);
       }
     }
   }

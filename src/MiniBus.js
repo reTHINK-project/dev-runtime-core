@@ -12,32 +12,32 @@ export default class MiniBus {
   */
 
   constructor(owner, mb) {
-    let _self = this;
+    let _this = this;
 
-    _self._owner = owner;
-    _self._mb = mb;
+    _this._owner = owner;
+    _this._mb = mb;
 
-    _self._msgId = 1;
-    _self._subscriptions = {};
+    _this._msgId = 1;
+    _this._subscriptions = {};
 
-    _self._replyTimeOut = 3000; //default to 3s ?
-    _self._replyCallbacks = {};
+    _this._replyTimeOut = 3000; //default to 3s ?
+    _this._replyCallbacks = {};
 
-    _self._ownerSubscription = _self._mb.subscribe(owner, (msg) => {
-      _self._onMessage(msg);
+    _this._ownerSubscription = _this._mb.subscribe(owner, (msg) => {
+      _this._onMessage(msg);
     });
   }
 
   get owner() { return this._owner; }
 
   subscribe(component, callback) {
-    let _self = this;
+    let _this = this;
 
-    let s = new Subscription(_self._subscriptions, component, callback);
-    let subs = _self._subscriptions[component];
+    let s = new Subscription(_this._subscriptions, component, callback);
+    let subs = _this._subscriptions[component];
     if (!subs) {
       subs = [];
-      _self._subscriptions[component] = subs;
+      _this._subscriptions[component] = subs;
     }
 
     subs.push(s);
@@ -45,21 +45,21 @@ export default class MiniBus {
   }
 
   publish(msg) {
-    let _self = this;
+    let _this = this;
 
-    _self._setupID(msg);
-    _self._sendMsg(msg);
+    _this._setupID(msg);
+    _this._sendMsg(msg);
   }
 
   send(msg, replyCallback) {
-    let _self = this;
-    _self._setupID(msg); //override any existent id
+    let _this = this;
+    _this._setupID(msg); //override any existent id
 
     if (replyCallback) {
-      _self._replyCallbacks[msg.header.id] = replyCallback;
+      _this._replyCallbacks[msg.header.id] = replyCallback;
       setTimeout(() => {
-        let replyFun = _self._replyCallbacks[msg.header.id];
-        delete _self._replyCallbacks[msg.header.id];
+        let replyFun = _this._replyCallbacks[msg.header.id];
+        delete _this._replyCallbacks[msg.header.id];
 
         if (replyFun) {
           let errorMsg = {
@@ -75,10 +75,10 @@ export default class MiniBus {
           replyFun(errorMsg);
           console.log('REPLY-TIMEOUT: ' + msg.header.id);
         }
-      }, _self._replyTimeOut);
+      }, _this._replyTimeOut);
     }
 
-    _self._sendMsg(msg);
+    _this._sendMsg(msg);
   }
 
   _sendMsg(msg) {
@@ -92,24 +92,24 @@ export default class MiniBus {
   }
 
   _onMessage(msg) {
-    let _self = this;
+    let _this = this;
 
     if (msg.header.type === 'reply') {
-      let replyFun = _self._replyCallbacks[msg.header.id];
-      delete _self._replyCallbacks[msg.header.id];
+      let replyFun = _this._replyCallbacks[msg.header.id];
+      delete _this._replyCallbacks[msg.header.id];
 
       if (replyFun) {
         replyFun(msg);
       }
     } else {
-      _self._localPublish(msg);
+      _this._localPublish(msg);
     }
   }
 
   _localPublish(msg) {
-    let _self = this;
+    let _this = this;
 
-    let subs = _self._subscriptions[msg.header.comp];
+    let subs = _this._subscriptions[msg.header.comp];
     if (subs) {
       //set reply function...
       msg.reply = function(code, desc) {
@@ -129,7 +129,7 @@ export default class MiniBus {
           reply.body.desc = desc;
         }
 
-        _self._sendMsg(reply);
+        _this._sendMsg(reply);
       };
 
       subs.forEach((sub) => {
@@ -147,21 +147,21 @@ class Subscription {
   */
 
   constructor(subscriptions, component, callback) {
-    let _self = this;
+    let _this = this;
 
-    _self._subscriptions = subscriptions;
-    _self._component = component;
-    _self.callback = callback;
+    _this._subscriptions = subscriptions;
+    _this._component = component;
+    _this.callback = callback;
   }
 
   get component() { return this._component; }
 
   unsubscribe() {
-    let _self = this;
+    let _this = this;
 
-    let subs = _self._subscriptions[_self._component];
+    let subs = _this._subscriptions[_this._component];
     if (subs) {
-      let index = subs.indexOf(_self);
+      let index = subs.indexOf(_this);
       subs.splice(index, 1);
     }
   }
