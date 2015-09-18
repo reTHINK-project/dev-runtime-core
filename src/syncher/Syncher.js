@@ -22,17 +22,16 @@ export default class Syncher {
 
     _this._mb = mb;
     mb.subscribe(Syncher.NAME, (msg) => {
-      console.log('RCV: ', msg);
       let objData = _this._objs[msg.body.res];
       if (objData) {
         //only the owner is able to change the object
-        if (msg.header.from === objData.owner) {
+        if (msg.header.from === objData.obj.owner) {
           _this._processChange(objData, msg);
         } else {
           console.log(
             'msg.header.from !== objData.owner',
             msg.header.from,
-            objData.owner
+            objData.obj.owner
           );
         }
       } else {
