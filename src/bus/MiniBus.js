@@ -51,6 +51,7 @@ export default class MiniBus {
     _this._sendMsg(msg);
   }
 
+  //TODO: handle transitory responses?
   send(msg, replyCallback) {
     let _this = this;
     _this._setupID(msg); //override any existent id

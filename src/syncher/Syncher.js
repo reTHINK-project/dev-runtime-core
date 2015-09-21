@@ -50,6 +50,8 @@ export default class Syncher {
     _this._schemas[schemaURL] = schema;
   }
 
+  //TODO: returns Promise<SyncObject> or SyncObject ?
+  //Object creation maybe rejected by the system!
   create(resourceName, schemaURL, data, owner) {
     let _this = this;
 
