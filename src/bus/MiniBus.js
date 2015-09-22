@@ -113,7 +113,7 @@ export default class MiniBus {
     let subs = _this._subscriptions[msg.header.comp];
     if (subs) {
       //set reply function...
-      msg.reply = function(code, desc) {
+      msg.reply = function(replyBody) {
         let reply = {
           header: {
             id: msg.header.id,
@@ -121,14 +121,8 @@ export default class MiniBus {
             to: msg.header.from,
             comp: msg.header.comp
           },
-          body: {
-            code: code
-          }
+          body: replyBody
         };
-
-        if (desc) {
-          reply.body.desc = desc;
-        }
 
         _this._sendMsg(reply);
       };
