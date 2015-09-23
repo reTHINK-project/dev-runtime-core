@@ -10,3 +10,4 @@ CVS
 npm-debug.log
 dist
 vendor
+node_modules

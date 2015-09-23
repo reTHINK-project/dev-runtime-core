@@ -1,101 +1,108 @@
-import Pipeline from './Pipeline';
-
 export default class MessageBus {
   /* private
-    _con: IConnection
+    _registry: Registry
 
-    _subscriptions: <string: Subscription[]>
-
-    _outbound: Pipeline
-    _inbound: Pipeline
+    _subscriptions: <string: MsgListener[]>
+    _interceptors: <string: MsgListener[]>
   */
 
-  constructor(con) {
+  constructor(registry) {
     let _this = this;
 
-    _this._con = con;
+    _this._registry = registry;
     _this._subscriptions = {};
-
-    _this._outbound = new Pipeline((error) => { console.log(error); });
-    _this._inbound = new Pipeline((error) => { console.log(error); });
-
-    _this._con.onMessage((message) => {
-      _this._onMessage(message);
-    });
+    _this._interceptors = {};
   }
 
-  get outbounds() { return this._outbound.handlers; }
-
-  set outbounds(handlers) { this._outbound.handlers = handlers; }
-
-  get inbounds() { return this._inbound.handlers; }
-
-  set inbounds(handlers) { this._inbound.handlers = handlers; }
-
-  subscribe(address, callback) {
+  addListener(url, listener, target) {
+    //TODO: include code for target redirection...
     let _this = this;
 
-    let s = new Subscription(_this._subscriptions, address, callback);
-    let subs = _this._subscriptions[address];
-    if (!subs) {
-      subs = [];
-      _this._subscriptions[address] = subs;
+    let item = new MsgListener(_this._subscriptions, url, listener);
+    let itemList = _this._subscriptions[url];
+    if (!itemList) {
+      itemList = [];
+      _this._subscriptions[url] = itemList;
     }
 
-    subs.push(s);
-    return s;
+    itemList.push(item);
+    return item;
   }
 
-  publish(message) {
+  addInterceptor(interceptedURL, listener, interceptorURL) {
+    //TODO: include code for interceptorURL...
     let _this = this;
 
-    _this._outbound.process(message, (msg) => {
-      _this._localPublish(msg);
-      _this._con.send(msg);
+    let item = new MsgListener(_this._interceptors, interceptedURL, listener);
+    let itemList = _this._interceptors[interceptedURL];
+    if (!itemList) {
+      itemList = [];
+      _this._interceptors[interceptedURL] = itemList;
+    }
+
+    itemList.push(item);
+    return item;
+  }
+
+  postMessage(msg) {
+    let _this = this;
+
+    //verify interceptedURL
+    //TODO: interceptedURL é verificado à saida? ou na entrada "_onMessage" ?
+    //if(msg.header.to)
+
+    //resolve protostub URL
+    _this._registry.resolve(msg.header.to).then((protoStubURL) => {
+      let itemList = _this._subscriptions[protoStubURL];
+      if (itemList) {
+        itemList.forEach((sub) => {
+          sub._callback(msg);
+        });
+      }
+    }).catch(function(e) {
+      console.log('PROTO-STUB-ERROR: ', e);
     });
   }
 
-  _onMessage(message) {
+  _onMessage(msg) {
     let _this = this;
 
-    _this._inbound.process(message, (msg) => {
-      _this._localPublish(msg);
-    });
+    _this._localPublish(msg);
   }
 
-  _localPublish(message) {
+  _localPublish(msg) {
     let _this = this;
 
-    let subs = _this._subscriptions[message.header.to];
-    if (subs) {
-      subs.forEach((sub) => {
-        sub._callback(message);
+    let itemList = _this._subscriptions[msg.header.to];
+    if (itemList) {
+      itemList.forEach((sub) => {
+        sub._callback(msg);
       });
     }
   }
 }
 
-class Subscription {
+class MsgListener {
   /* private
-    _subscriptions: <string: Subscription[]>;
-    _address: string;
+    _subscriptions: <string: MsgListener[]>;
+    _url: string;
     _callback: (msg) => void;
   */
 
-  constructor(subscriptions, address, callback) {
+  constructor(subscriptions, url, callback) {
     let _this = this;
 
     _this._subscriptions = subscriptions;
-    _this._address = address;
+    _this._url = url;
     _this._callback = callback;
   }
 
-  get address() { return this._address; }
+  get url() { return this._url; }
 
-  unsubscribe() {
+  remove() {
     let _this = this;
 
-    let subs = _this._subscriptions[_this._address];
+    let subs = _this._subscriptions[_this._url];
     if (subs) {
       let index = subs.indexOf(_this);
       subs.splice(index, 1);
