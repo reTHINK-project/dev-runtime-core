@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: runtime-ua/RuntimeUA.js</title>
+    <title>JSDoc: Source: policy-engine/PolicyEngine.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: runtime-ua/RuntimeUA.js</h1>
+    <h1 class="page-title">Source: policy-engine/PolicyEngine.js</h1>
 
     
 
@@ -27,42 +27,37 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/**
- * Runtime User Agent Interface
+ * Core Policy Engine (PDP/PEP) Interface
  */
-class RuntimeUA {
+class PolicyEngine {
 
   /**
-   * Register Hyperty deployed by the App that is passed as input parameter. To be used when App and Hyperties are from the same domain otherwise the RuntimeUA will raise an exception and the App has to use the loadHyperty(..) function.
-   * @param  {Object} Object                   hypertyInstance
-   * @param  {URL.HypertyCatalogueURL}         descriptor      descriptor
+   * To add policies to be enforced for a certain deployed Hyperty Instance
+   * @param {URL.HypertyURL}     hyperty  hyperty
+   * @param {HypertyPolicyList}  policies policies
    */
-  registerHyperty( hypertyInstance, descriptor ) {
+  addPolicies(hyperty, policies) {
     // Body...
   }
 
   /**
-   * Deploy Stub from Catalogue URL or domain url
-   * @param  {URL.URL}     stub          stub
+   * To remove previously added policies for a certain deployed Hyperty Instance
+   * @param  {URL.HypertyURL}  hyperty       hyperty
    */
-  loadStub( stub) {
+  removePolicies(hyperty) {
     // Body...
   }
 
   /**
-   * Used to check for updates about components handled in the Catalogue including protocol stubs and Hyperties. check relationship with lifecycle management provided by Service Workers
-   * @param  {CatalogueURL}    url           url
+   * Authorisation request to accept a Subscription for a certain resource. Returns a Response Message to be returned to Subscription requester
+   * @param  {Message.Message} message       message
+   * @return {AuthorisationResponse}                 AuthorisationResponse
    */
-  checkForUpdate(url) {
+  authorise(message) {
     // Body...
   }
 
-  /**
-   * Accomodate interoperability in H2H and proto on the fly for newly discovered devices in M2M
-   * @param  {CatalogueDataObject.HypertyDescriptor}   descriptor    descriptor
-   */
-  discoverHiperty(descriptor) {
-    // Body...
-  }
+
 
 }
 </code></pre>
