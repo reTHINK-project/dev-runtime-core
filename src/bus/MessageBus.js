@@ -61,15 +61,6 @@ class MessageBus {
     return item;
   }
 
-/**
- * To remove a previously added interceptor. This function is only accessible by internal Core Components.
- * @param  {Listener} listener listener
- * @param  {URL.URL}  interceptorURL interceptorURL
- */
-  removeInterceptor( listener, interceptorURL) {
-    // Body...
-  }
-
   /**
   * To send messages. This function is accessible outside the Core runtime
   * @param  {Message.Message} msg msg
@@ -92,23 +83,6 @@ class MessageBus {
     }).catch(function(e) {
       console.log('PROTO-STUB-ERROR: ', e);
     });
-  }
-
-  _onMessage(msg) {
-    let _this = this;
-
-    _this._localPublish(msg);
-  }
-
-  _localPublish(msg) {
-    let _this = this;
-
-    let itemList = _this._subscriptions[msg.header.to];
-    if (itemList) {
-      itemList.forEach((sub) => {
-        sub._callback(msg);
-      });
-    }
   }
 }
 

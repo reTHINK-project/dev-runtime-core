@@ -15,16 +15,15 @@ export default class SyncObject {
     _filters: {<filter>: {type: <start, exact>, callback: <function>} }
   */
 
-  constructor(name, owner, schema, data) {
+  constructor(url, schema, owner, data) {
     let _this = this;
 
-    _this._name = name;
-    _this._owner = owner;
+    _this._url = url;
     _this._schema = schema;
+    _this._owner = owner;
 
     _this._observers = [];
     _this._filters = {};
-    _this._url = SyncObject.URL(owner, name);
 
     if (data) {
       _this._data = data;
@@ -35,13 +34,9 @@ export default class SyncObject {
     _this._internalObserve(new Path(), _this.data);
   }
 
-  static URL(resOwner, resName) { return resOwner + '/' + resName; }
-
-  get name() { return this._name; }
+  get url() { return this._url; }
 
   get owner() { return this._owner; }
-
-  get url() { return this._url; }
 
   get schema() { return this._schema; }
 
