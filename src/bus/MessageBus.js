@@ -22,9 +22,9 @@ class MessageBus {
   * To add "listener" functions to be called when routing messages published on a certain "resource" or send to a certain url. Messages are routed to input parameter "redirectTo" in case listener is not in the Core Runtime. This function is only accessible by internal Core Components. To remove the listener just call remove() function from returned object.
   * @param {URL.URL} url      url
   * @param {Listener} listener listener
-  * @param {URL.URL} target   target
+  * @param {URL.URL} redirectTo   redirectTo
   */
-  addListener(url, listener, target) {
+  addListener(url, listener, redirectTo) {
     //TODO: include code for target redirection...
     let _this = this;
 
@@ -44,6 +44,7 @@ class MessageBus {
   * @param {URL.URL} interceptedURL interceptedURL
   * @param {Listener} listener       listener
   * @param {URL.URL} interceptorURL interceptorURL
+  * @return {Interceptor}                 Interceptor
   */
   addInterceptor(interceptedURL, listener, interceptorURL) {
     //TODO: include code for interceptorURL...
@@ -58,6 +59,15 @@ class MessageBus {
 
     itemList.push(item);
     return item;
+  }
+
+/**
+ * To remove a previously added interceptor. This function is only accessible by internal Core Components.
+ * @param  {Listener} listener listener
+ * @param  {URL.URL}  interceptorURL interceptorURL
+ */
+  removeInterceptor( listener, interceptorURL) {
+    // Body...
   }
 
   /**

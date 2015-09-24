@@ -94,10 +94,10 @@ class Registry {
 
   /**
   * To verify if source is valid and to resolve target runtime url address if needed (eg protostub runtime url in case the message is to be dispatched to a remote endpoint ).
-  * @param  {Message.Message} Message.Message message       message
-  * @return {Message.Message}                 Message.Message
+  * @param  {URL.URL}  url       url
+  * @return {Promise<URL.URL>}                 Promise <URL.URL>
   */
-  resolve( message ) {
+  resolve( url ) {
     // body...
   }
 
