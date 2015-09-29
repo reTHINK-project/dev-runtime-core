@@ -1,6 +1,6 @@
 /**
- * Runtime User Agent Interface
- */
+  * Runtime User Agent Interface
+  */
 class RuntimeUA {
 
   /**
@@ -8,21 +8,29 @@ class RuntimeUA {
    * @param  {Object} Object                   hypertyInstance
    * @param  {URL.HypertyCatalogueURL}         descriptor      descriptor
    */
-  registerHyperty( hypertyInstance, descriptor ) {
+  registerHyperty(hypertyInstance, descriptor) {
     // Body...
+  }
+
+  /**
+   * Deploy Hyperty from Catalogue URL
+   * @param  {URL.URL}    hyperty hypertyInstance url;
+   */
+  loadHyperty(hyperty) {
+    // Body
   }
 
   /**
    * Deploy Stub from Catalogue URL or domain url
    * @param  {URL.URL}     stub          stub
    */
-  loadStub( stub) {
+  loadStub(stub) {
     // Body...
   }
 
   /**
    * Used to check for updates about components handled in the Catalogue including protocol stubs and Hyperties. check relationship with lifecycle management provided by Service Workers
-   * @param  {CatalogueURL}    url           url
+   * @param  {CatalogueURL}       url url
    */
   checkForUpdate(url) {
     // Body...
@@ -37,3 +45,5 @@ class RuntimeUA {
   }
 
 }
+
+export default RuntimeUA;

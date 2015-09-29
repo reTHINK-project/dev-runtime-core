@@ -35,140 +35,69 @@ export default
  */
 class Syncher {
   /* private
-    _mb: MiniBus;
+    _postMessage: function(changeMsg);
 
-    _schemas: {};
-    _objs: &lt;resURL, {
-      obj: SyncObject,
-      subs: URL[],
-      version: number,
-      cQueue: {&lt;ver>: msg}
+    _owner: HypertyURL
+    _objs: &lt;resURL: SyncObject>
     }>
   */
 
-  constructor(mb) {
+  constructor(owner, postMessage) {
+    if (!owner || !postMessage) {
+      throw 'Provide mandatory fields';
+    }
+
     let _this = this;
 
-    _this._schemas = {};
+    _this._owner = owner;
+    _this._postMessage = postMessage;
+
     _this._objs = {};
-
-    _this._mb = mb;
-    mb.subscribe(Syncher.NAME, (msg) => {
-      let objData = _this._objs[msg.body.res];
-      if (objData) {
-        //only the owner is able to change the object
-        if (msg.header.from === objData.obj.owner) {
-          _this._processChange(objData, msg);
-        } else {
-          console.log(
-            'msg.header.from !== objData.owner',
-            msg.header.from,
-            objData.obj.owner
-          );
-        }
-      } else {
-        msg.reply('error', 'Object not found!');
-      }
-    });
   }
 
-  addSchema(schemaURL, schema) {
+  postMessage(message) {
     let _this = this;
 
-    if (_this._schemas.hasOwnProperty(schemaURL)) {
-      throw 'There is already available schema: ' + schemaURL;
+    let syncObj = _this._objs[message.body.resource];
+    if (syncObj) {
+      _this._changeObject(syncObj, message);
+    } else {
+      //TODO: _this._postMessage(replyMsg)
+      console.log('Object not found!');
     }
-
-    _this._schemas[schemaURL] = schema;
   }
 
-  //TODO: returns Promise&lt;SyncObject> or SyncObject ?
-  //Object creation maybe rejected by the system!
-  create(resourceName, schemaURL, data, owner) {
+  /**
+   * Hyperty instance uses this function to provide the object to be changed by the (observer) syncher according to messages received. The Hyperty instance has previsouly used the Object.observe javascript api to set as an observer of this object
+   * @param  {Message.Message} receivedMessage receivedMessage
+   */
+  createAsObserver(message) {
     let _this = this;
 
-    if (_this._objs.hasOwnProperty(resourceName)) {
-      throw 'Already available object: ' + resourceName;
+    if (_this._objs.hasOwnProperty(message.body.resource)) {
+      throw 'Already available object: ' + resourceURL;
     }
 
-    if (!_this._schemas.hasOwnProperty(schemaURL)) {
-      throw 'There is no schema: ' + schemaURL;
+    let syncObj = new SyncObject(message.body.resource, message.body.schema, message.header.from, message.body.value);
+
+    _this._objs[syncObj.url] = syncObj;
+    return syncObj;
+  }
+
+  createAsReporter(resourceURL, schemaURL, initialData) {
+    let _this = this;
+
+    if (_this._objs.hasOwnProperty(resourceURL)) {
+      throw 'Already available object: ' + resourceURL;
     }
 
-    let _owner = _this._mb.owner;
-    if (owner) {
-      _owner = owner;
-    }
-
-    let so = new SyncObject(resourceName, _owner, schemaURL, data);
-    so.observe((event) => {
+    let syncObj = new SyncObject(resourceURL, schemaURL, _this._owner, initialData);
+    syncObj.observe((event) => {
       _this._onChange(event);
     });
 
-    _this._objs[so.name] = {
-      obj: so,
-      subs: [],
-      version: 0,
-      cQueue: []
-    };
-
-    return so;
-  }
-
-  addSubscription(resourceName, url) {
-    let _this = this;
-
-    let objData = _this._objs[resourceName];
-    if (!objData) {
-      throw 'Object not found: ' + resourceName;
-    }
-
-    objData.subs.push(url);
-  }
-
-  removeSubscription(resourceName, url) {
-    let _this = this;
-
-    let objData = _this._objs[resourceName];
-    if (!objData) {
-      throw 'Object not found: ' + resourceName;
-    }
-
-    let index = objData.subs.indexOf(url);
-    objData.subs.splice(index, 1);
-  }
-
-  _processChange(objData, msg) {
-    let _this = this;
-
-    if (msg.body.ver) {
-      if (msg.body.ver > objData.version) {
-        objData.cQueue[msg.body.ver] = msg;
-      } else {
-        msg.reply('error', 'Invalid object version!');
-      }
-
-      _this._processQueue(objData);
-    } else {
-      _this._changeObject(objData.obj, msg);
-    }
-  }
-
-  _processQueue(objData) {
-    let _this = this;
-
-    let nextMsg = objData.cQueue[objData.version + 1];
-    if (nextMsg) {
-      _this._changeObject(objData.obj, nextMsg);
-      objData.version++;
-
-      //on change per event loop is more robust to bugs!
-      setTimeout(() => {
-        _this._processQueue(objData);
-      });
-    } else {
-      console.log('Waiting for version: ' + (objData.version + 1));
-    }
+    _this._objs[syncObj.url] = syncObj;
+    return syncObj;
   }
 
   _changeObject(syncObj, msg) {
@@ -203,55 +132,27 @@ class Syncher {
   }
 
   _onChange(event) {
-    let objData = this._objs[event.obj.name];
-    objData.version++;
+    let _this = this;
 
-    //send deltas to all subscribers...
-    objData.subs.forEach((url) => {
-      let msg = {
-        header: {
-          type: event.cType,
-          to: url
-        },
-        body: {
-          //ver: objData.version,
-          res: event.obj.name,
-          oType: event.objType,
-          attrib: event.field,
-          value: event.data
-        }
-      };
+    let objData = _this._objs[event.obj.url];
 
-      this._sendMsg(msg);
-    });
-  }
+    let msg = {
+      header: {
+        type: event.cType,
+        from: _this._owner
+      },
+      body: {
+        resource: event.obj.url,
+        oType: event.objType,
+        attrib: event.field,
+        value: event.data
+      }
+    };
 
-  _sendMsg(msg) {
-    msg.header.comp = Syncher.NAME;
-    this._mb.publish(msg);
-  }
-
-
-  // Function Signatures - Runtime-APIS
-
-  /**
-   * To set postMessage() function to be used by the Syncher to send messages, i.e. the MessageBUS postMessage() function.
-   * @param {Message.Message} postMessage postMessage
-   */
-  setSender( postMessage ) {
-    // Body...
-  }
-
-  /**
-   * Hyperty instance uses this function to provide the object to be changed by the (observer) syncher according to messages received. The Hyperty instance has previsouly used the Object.observe javascript api to set as an observer of this object
-   * @param  {Message.Message} receivedMessage receivedMessage
-   */
-  createAsObserver( receivedMessage ) {
-    // Body...
+    //send delta message...
+    _this._postMessage(msg);
   }
 }
-
-Syncher.NAME = 'syncher';
 </code></pre>
         </article>
     </section>
@@ -268,7 +169,7 @@ Syncher.NAME = 'syncher';
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0-dev</a> on Thu Sep 24 2015 10:42:23 GMT+0100 (WEST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0-dev</a> on Tue Sep 29 2015 17:49:01 GMT+0100 (WEST)
 </footer>
 
 <script> prettyPrint(); </script>
