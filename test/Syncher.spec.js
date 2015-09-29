@@ -175,6 +175,8 @@ describe('Syncher', function() {
     this.timeout(10000);
 
     let msgList = [];
+    let evtList = [];
+
     let callback = function(msg) {
       msgList.push(msg);
     };
@@ -183,6 +185,10 @@ describe('Syncher', function() {
     let sObj = db.createAsObserver({
       header: {type: 'create'},
       body: {resource: 'PTIN', schema: 'Persons'}
+    });
+
+    sObj.observe((event) => {
+      evtList.push(event);
     });
 
     let data = sObj.data;
@@ -214,6 +220,16 @@ describe('Syncher', function() {
     });
 
     setTimeout(() => {
+      expect(evtList[0].cType).to.eql('add');
+      expect(evtList[0].objType).to.eql('object');
+      expect(evtList[0].field).to.eql('1');
+      expect(evtList[0].data).to.eql({name: 'Micael', birthdate:'28-01-1981', email: 'micael-xxx@gmail.com', phone: 911000000, obj1: {name: 'xpto'}});
+
+      expect(evtList[1].cType).to.eql('add');
+      expect(evtList[1].objType).to.eql('object');
+      expect(evtList[1].field).to.eql('2');
+      expect(evtList[1].data).to.eql({name: 'Luis Duarte', birthdate: '02-12-1991', email: 'luis-xxx@gmail.com', phone: 910000000, obj1:{name: 'xpto'}});
+
       expect(data).to.eql({
         1: {name: 'Micael', birthdate: '28-01-1981', email: 'micael-xxx@gmail.com', phone: 911000000, obj1: {name: 'xpto'}},
         2: {name: 'Luis Duarte', birthdate: '02-12-1991', email: 'luis-xxx@gmail.com', phone: 910000000, obj1: {name: 'xpto'}}
@@ -254,12 +270,19 @@ describe('Syncher', function() {
             1: {name: 'Micael Pedrosa', birthdate: '28-02-1981', email: 'micael-xxx@gmail.com', phone: 911000000, obj1: {name: 'XPTO'}, arr: [1, 0, {x: 10, y: 20}]}
           });
 
+          evtList = [];
+
           db.postMessage({
             header: {type: 'update'},
             body:{resource: 'PTIN', oType: 'array', attrib: '1.arr.1', value: 2}
           });
 
           setTimeout(() => {
+            expect(evtList[0].cType).to.eql('update');
+            expect(evtList[0].objType).to.eql('array');
+            expect(evtList[0].field).to.eql('1.arr.1');
+            expect(evtList[0].data).to.eql(2);
+
             expect(data).to.eql({
               1: {name: 'Micael Pedrosa', birthdate: '28-02-1981', email: 'micael-xxx@gmail.com', phone: 911000000, obj1: {name: 'XPTO'}, arr: [1, 2, {x: 10, y: 20}]}
             });
@@ -299,16 +322,24 @@ describe('Syncher', function() {
                   1: {name: 'Micael Pedrosa', birthdate: '28-02-1981', email: 'micael-xxx@gmail.com', phone: 911000000, obj1: {name: 'XPTO'}, arr: [1, 10, 11, 12, 3, {x: 10, y: 2}]}
                 });
 
+                evtList = [];
+
                 db.postMessage({
                   header: {type: 'remove'},
                   body: {resource: 'PTIN', oType: 'array', attrib: '1.arr.5', value: 1}
                 });
 
                 setTimeout(() => {
+                  expect(evtList[0].cType).to.eql('remove');
+                  expect(evtList[0].objType).to.eql('array');
+                  expect(evtList[0].field).to.eql('1.arr.5');
+                  expect(evtList[0].data).to.eql(1);
+
                   expect(data).to.eql({
                     1: {name: 'Micael Pedrosa', birthdate: '28-02-1981', email: 'micael-xxx@gmail.com', phone: 911000000, obj1: {name: 'XPTO'}, arr: [1, 10, 11, 12, 3]}
                   });
 
+                  expect(msgList).to.eql([]); //it's an observer, this should be empty...
                   done();
                 });
               });
