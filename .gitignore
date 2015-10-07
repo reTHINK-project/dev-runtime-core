@@ -7,7 +7,6 @@ CVS
 *.swp
 .DS_Store
 ._*
-.idea
 npm-debug.log
 dist
 vendor
