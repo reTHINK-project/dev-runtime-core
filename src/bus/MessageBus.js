@@ -16,6 +16,7 @@ class MessageBus {
     _this._registry = registry;
     _this._subscriptions = {};
     _this._interceptors = {};
+
   }
 
   /**

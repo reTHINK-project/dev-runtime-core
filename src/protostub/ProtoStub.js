@@ -5,11 +5,11 @@ class ProtoStub {
 
   /**
    * To initialise the protocol stub including as input parameters its allocated component runtime url, the runtime BUS postMessage function to be invoked on messages received by the protocol stub and required configuration retrieved from protocolStub descriptor.
-   * @param  {URL.RuntimeURL}                            runtimeProtoSubURL runtimeProtoSubURL
-   * @param  {Message.Message} busPostMessage                           configuration
-   * @param  {ProtoStubDescriptor.ConfigurationDataList}  configuration      configuration
+   * @param  {URL.RuntimeURL}                            runtimeProtoStubURL runtimeProtoSubURL
+   * @param  {Message.Message}                           busPostMessage     configuration
+   * @param  {ProtoStubDescriptor.ConfigurationDataList} configuration      configuration
    */
-  init(runtimeProtoSubURL, busPostMessage, configuration ) {
+  constructor(runtimeProtoStubURL, busPostMessage, configuration) {
     // Body...
   }
 
@@ -17,7 +17,7 @@ class ProtoStub {
    * To connect the protocol stub to the back-end server
    * @param  {IDToken} identity identity
    */
-  connect( identity ) {
+  connect(identity) {
     // Body...
   }
 
@@ -37,3 +37,5 @@ class ProtoStub {
   }
 
 }
+
+export default ProtoStub;

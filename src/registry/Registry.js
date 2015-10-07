@@ -3,83 +3,112 @@
 */
 class Registry {
 
+  constructor() {
+
+    let _this = this;
+
+    _this.registry = {};
+    _this.protoStubs = {};
+
+  }
+
   /**
   * To initialise the Runtime Registry with the RuntimeURL that will be the basis to derive the internal runtime addresses when allocating addresses to internal runtime component. In addition, the Registry domain back-end to be used to remotely register Runtime components, is also passed as input parameter.
-  * @param  {HypertyRuntimeURL} runtimeURL     runtimeURL
-  * @param  {DomainURL} remoteRegistry remoteRegistry
+  * @param  {HypertyRuntimeURL}   runtimeURL            runtimeURL
+  * @param  {DomainURL}           remoteRegistry        remoteRegistry
   */
   init(runtimeURL, remoteRegistry) {
-    // body...
+    let _this = this;
   }
 
   /**
   * To register a new Hyperty in the runtime which returns the HypertyURL allocated to the new Hyperty.
-  * @param  {Message.Message} postMessage         postMessage
-  * @param  {HypertyCatalogueURL} HypertyCatalogueURL    descriptor
-  * @return {HypertyURL}                     HypertyURL
+  * @param  {Message.Message}     postMessage           postMessage
+  * @param  {HypertyCatalogueURL} HypertyCatalogueURL   descriptor
+  * @return {HypertyURL}          HypertyURL
   */
   registerHyperty(postMessage, descriptor) {
     // body...
+    return HypertyURL;
   }
 
   /**
   * To unregister a previously registered Hyperty
-  * @param  {HypertyURL} HypertyURL url           url
+  * @param  {HypertyURL}          HypertyURL url        url
   */
-  unregisterHyperty(url ) {
+  unregisterHyperty(url) {
     // body...
   }
 
   /**
-  * To register a new Protocol Stub in the runtime including as input parameters the function to postMessage, the DomainURL that is connected with the stub, which returns the RuntimeURL allocated to the new ProtocolStub.
-  * @param  {Message.Message} postMessage postMessage
-  * @param  {DomainURL} DomainURL   domainURL
-  * @return {HypertyRuntimeURL}             HypertyRuntimeURL
+  * To discover protocol stubs available in the runtime for a certain domain. If available, it returns the runtime url for the protocol stub that connects to the requested domain. Required by the runtime BUS to route messages to remote servers or peers (do we need something similar for Hyperties?).
+  * @param  {DomainURL}           DomainURL            url
+  * @return {RuntimeURL}           RuntimeURL
   */
-  registerStub( postMessage, domainURL ) {
-    // body...
+  discoverProtostub(url) {
+    let _this = this;
+    let runtimeURL;
+
+    runtimeURL = _this.protoStubs[url] || null;
+
+    return runtimeURL;
+  }
+
+  // /**
+  // * To register a new Protocol Stub in the runtime including as input parameters the function to postMessage, the DomainURL that is connected with the stub, which returns the RuntimeURL allocated to the new ProtocolStub.
+  // * @param  {Message.Message} postMessage postMessage
+  // * @param  {DomainURL}           DomainURL             domainURL
+  // * @return {HypertyRuntimeURL}   HypertyRuntimeURL
+  // */
+  // registerStub(postMessage, domainURL) {
+  //   return HypertyRuntimeURL;
+  // }
+
+  // FIXME check on registerStub the parameters: above /\ or below \/
+
+  /**
+   * To register stub
+   * @param  {DomainURL}     DomainURL service provider domain
+   * @return {RuntimeProtoStubURL}
+   */
+  registerStub(domainURL) {
+    let _this = this;
+    let runtimeProtoStubURL = {};
+
+    return runtimeProtoStubURL;
   }
 
   /**
   * To unregister a previously registered protocol stub
-  * @param  {HypertyRuntimeURL} HypertyRuntimeURL hypertyRuntimeURL
+  * @param  {HypertyRuntimeURL}   HypertyRuntimeURL     hypertyRuntimeURL
   */
-  unregisterStub( hypertyRuntimeURL ) {
+  unregisterStub(hypertyRuntimeURL) {
     // body...
   }
 
   /**
   * To register a new Policy Enforcer in the runtime including as input parameters the function to postMessage, the HypertyURL associated with the PEP, which returns the RuntimeURL allocated to the new Policy Enforcer component.
   * @param  {Message.Message} postMessage postMessage
-  * @param  {HypertyURL} HypertyURL  hyperty
-  * @return {HypertyRuntimeURL}             HypertyRuntimeURL
+  * @param  {HypertyURL}          HypertyURL            hyperty
+  * @return {HypertyRuntimeURL}   HypertyRuntimeURL
   */
-  registerPEP( postMessage, hyperty ) {
+  registerPEP(postMessage, hyperty) {
     // body...
   }
 
   /**
   * To unregister a previously registered protocol stub
-  * @param  {HypertyRuntimeURL} HypertyRuntimeURL HypertyRuntimeURL
+  * @param  {HypertyRuntimeURL}   HypertyRuntimeURL     HypertyRuntimeURL
   */
-  unregisterPEP( HypertyRuntimeURL ) {
+  unregisterPEP(HypertyRuntimeURL) {
     // body...
   }
 
   /**
   * To receive status events from components registered in the Registry.
-  * @param  {Message.Message} Message.Message event
+  * @param  {Message.Message}     Message.Message       event
   */
-  onEvent( event ) {
-    // body...
-  }
-
-  /**
-  * To discover protocol stubs available in the runtime for a certain domain. If available, it returns the runtime url for the protocol stub that connects to the requested domain. Required by the runtime BUS to route messages to remote servers or peers (do we need something similar for Hyperties?).
-  * @param  {DomainURL} DomainURL url
-  * @return {RuntimeURL}           RuntimeURL
-  */
-  discoverProtostub( url) {
+  onEvent(event) {
     // body...
   }
 
@@ -88,17 +117,19 @@ class Registry {
   * @param  {DomainURL} DomainURL url
   * @return {RuntimeSandbox}           RuntimeSandbox
   */
-  getSandbox( url ) {
+  getSandbox(url) {
     // body...
   }
 
   /**
-  * To verify if source is valid and to resolve target runtime url address if needed (eg protostub runtime url in case the message is to be dispatched to a remote endpoint ).
+  * To verify if source is valid and to resolve target runtime url address if needed (eg protostub runtime url in case the message is to be dispatched to a remote endpoint).
   * @param  {URL.URL}  url       url
   * @return {Promise<URL.URL>}                 Promise <URL.URL>
   */
-  resolve( url ) {
+  resolve(url) {
     // body...
   }
 
 }
+
+export default Registry;

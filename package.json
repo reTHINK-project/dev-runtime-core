@@ -4,8 +4,7 @@
   "description": "core runtime development",
   "main": "src/main.js",
   "scripts": {
-    "init-setup": "npm init && npm install -g jspm karma karma-browserify karma-mocha karma-mocha-reporter karma-chrome-launcher && npm install && jspm init && node setup.js",
-    "preinstall": "npm install -g gulp-cli",
+    "init-setup": "npm init && npm install -g jspm karma karma-browserify karma-mocha karma-mocha-reporter karma-chrome-launcher gulp-cli && npm install && jspm init && node setup.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

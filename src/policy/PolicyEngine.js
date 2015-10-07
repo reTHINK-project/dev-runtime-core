@@ -29,6 +29,6 @@ class PolicyEngine {
     // Body...
   }
 
-
-
 }
+
+export default PolicyEngine;

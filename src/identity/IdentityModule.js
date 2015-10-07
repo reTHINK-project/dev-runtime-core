@@ -10,7 +10,7 @@ class IdentityModule {
    * @param  {DOMString} usernameHint usernameHint
    * @return {IdAssertion}              IdAssertion
    */
-  generateAssertion( contents, origin, usernameHint ) {
+  generateAssertion(contents, origin, usernameHint) {
     // Body...
   }
 
@@ -19,8 +19,10 @@ class IdentityModule {
    * @param  {DOMString} assertion assertion
    * @param  {DOMString} origin    origin
    */
-  validateAssertion( assertion, origin ) {
+  validateAssertion(assertion, origin) {
     // Body...
   }
 
 }
+
+export default IdentityModule;
