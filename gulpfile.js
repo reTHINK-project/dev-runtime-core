@@ -11,3 +11,17 @@ gulp.task('doc', function(done) {
   });
 
 });
+
+gulp.task('dist', function(done) {
+
+  var systemDist = 'jspm bundle-sfx runtime/RuntimeUA dist/index.js --format --inject --no-mangle --skip-source-maps';
+  var amdDist = 'jspm bundle-sfx runtime/RuntimeUA dist/index.amd.js --format amd --inject --no-mangle --skip-source-maps';
+
+  var workerDist = 'jspm bundle workers/* dist/workers/worker.js --minify  --no-mangle --skip-source-maps';
+
+  exec(systemDist + '&&' + amdDist + '&&' + workerDist, function(err, stdout, stderr) {
+    if (err) return done(err);
+    done();
+  });
+
+});

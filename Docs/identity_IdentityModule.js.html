@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: qos-ua/QoSUA.js</title>
+    <title>JSDoc: Source: identity/IdentityModule.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: qos-ua/QoSUA.js</h1>
+    <h1 class="page-title">Source: identity/IdentityModule.js</h1>
 
     
 
@@ -27,25 +27,33 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/**
- * QoS User Agent Interface
+ * Functions to deal with assertions compliant with WebRTC RTCIdentityProvider
  */
-class QoSUA {
+class IdentityModule {
 
   /**
-   * Get Connectivity Statistics data
+   * Generates an Identity Assertion
+   * @param  {DOMString} contents     contents
+   * @param  {DOMString} origin       origin
+   * @param  {DOMString} usernameHint usernameHint
+   * @return {IdAssertion}              IdAssertion
    */
-  getCurrentConnectivityStatistics()  {
+  generateAssertion(contents, origin, usernameHint) {
     // Body...
   }
 
   /**
-   * Sends Connectivity Statistics data to QoS Broker
+   * Validates an Identity Assertion
+   * @param  {DOMString} assertion assertion
+   * @param  {DOMString} origin    origin
    */
-  sendConnectivityStatisticsToBroker() {
-    // Body
+  validateAssertion(assertion, origin) {
+    // Body...
   }
 
 }
+
+export default IdentityModule;
 </code></pre>
         </article>
     </section>

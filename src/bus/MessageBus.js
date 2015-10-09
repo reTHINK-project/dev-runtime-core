@@ -70,7 +70,7 @@ class MessageBus {
     let _this = this;
 
     //verify interceptedURL
-    //TODO: interceptedURL é verificado à saida? ou na entrada "_onMessage" ?
+    //TODO: intercept URL is checked to exit? or into the "onMessage"?
     //if(msg.header.to)
 
     //resolve protostub URL

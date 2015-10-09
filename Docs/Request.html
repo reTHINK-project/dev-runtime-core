@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: Syncher</title>
+    <title>JSDoc: Class: Request</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: Syncher</h1>
+    <h1 class="page-title">Class: Request</h1>
 
     
 
@@ -28,9 +28,9 @@
 
 <header>
     
-        <h2>Syncher</h2>
+        <h2>Request</h2>
         
-            <div class="class-description">Syncher</div>
+            <div class="class-description">Make ajax request</div>
         
     
 </header>
@@ -44,7 +44,7 @@
     <h2>Constructor</h2>
     
 
-    <h4 class="name" id="Syncher"><span class="type-signature"></span>new Syncher<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="Request"><span class="type-signature"></span>new Request<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
@@ -91,7 +91,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="syncher_Syncher.js.html">syncher/Syncher.js</a>, <a href="syncher_Syncher.js.html#line8">line 8</a>
+        <a href="utils_Request.js.html">utils/Request.js</a>, <a href="utils_Request.js.html#line4">line 4</a>
     </li></ul></dd>
     
 
@@ -140,14 +140,14 @@
 
     
 
-    <h4 class="name" id="createAsObserver"><span class="type-signature"></span>createAsObserver<span class="signature">(receivedMessage)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="makeRequest"><span class="type-signature"></span>makeRequest<span class="signature">(method, url, params, headers)</span><span class="type-signature"> &rarr; {object}</span></h4>
 
     
 
 
 
 <div class="description">
-    Hyperty instance uses this function to provide the object to be changed by the (observer) syncher according to messages received. The Hyperty instance has previsouly used the Object.observe javascript api to set as an observer of this object
+    Make ajax request
 </div>
 
 
@@ -183,13 +183,13 @@
 
         <tr>
             
-                <td class="name"><code>receivedMessage</code></td>
+                <td class="name"><code>method</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Message.Message</span>
+<span class="param-type">string</span>
 
 
             
@@ -199,7 +199,76 @@
 
             
 
-            <td class="description last">receivedMessage</td>
+            <td class="description last">the CRUD method (get, post, put, delete)</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>url</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the url requested to obtain an response</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>params</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">pass the parameters to request</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>headers</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">set request headers</td>
         </tr>
 
     
@@ -240,7 +309,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="syncher_Syncher.js.html">syncher/Syncher.js</a>, <a href="syncher_Syncher.js.html#line46">line 46</a>
+        <a href="utils_Request.js.html">utils/Request.js</a>, <a href="utils_Request.js.html#line28">line 28</a>
     </li></ul></dd>
     
 
@@ -263,6 +332,24 @@
 
 
 
+<h5>Returns:</h5>
+
+        
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">object</span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 

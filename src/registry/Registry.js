@@ -3,22 +3,17 @@
 */
 class Registry {
 
-  constructor() {
-
-    let _this = this;
-
-    _this.registry = {};
-    _this.protoStubs = {};
-
-  }
-
   /**
   * To initialise the Runtime Registry with the RuntimeURL that will be the basis to derive the internal runtime addresses when allocating addresses to internal runtime component. In addition, the Registry domain back-end to be used to remotely register Runtime components, is also passed as input parameter.
   * @param  {HypertyRuntimeURL}   runtimeURL            runtimeURL
   * @param  {DomainURL}           remoteRegistry        remoteRegistry
   */
-  init(runtimeURL, remoteRegistry) {
+  constructor(runtimeURL, remoteRegistry) {
+
     let _this = this;
+
+    _this.protoStubs = {};
+
   }
 
   /**
@@ -54,20 +49,8 @@ class Registry {
     return runtimeURL;
   }
 
-  // /**
-  // * To register a new Protocol Stub in the runtime including as input parameters the function to postMessage, the DomainURL that is connected with the stub, which returns the RuntimeURL allocated to the new ProtocolStub.
-  // * @param  {Message.Message} postMessage postMessage
-  // * @param  {DomainURL}           DomainURL             domainURL
-  // * @return {HypertyRuntimeURL}   HypertyRuntimeURL
-  // */
-  // registerStub(postMessage, domainURL) {
-  //   return HypertyRuntimeURL;
-  // }
-
-  // FIXME check on registerStub the parameters: above /\ or below \/
-
   /**
-   * To register stub
+   * To register a new Protocol Stub in the runtime including as input parameters the function to postMessage, the DomainURL that is connected with the stub, which returns the RuntimeURL allocated to the new ProtocolStub.
    * @param  {DomainURL}     DomainURL service provider domain
    * @return {RuntimeProtoStubURL}
    */
@@ -127,7 +110,10 @@ class Registry {
   * @return {Promise<URL.URL>}                 Promise <URL.URL>
   */
   resolve(url) {
-    // body...
+    return new Promise((resolve, reject) => {
+      //resolve to the same URL
+      resolve(url);
+    });
   }
 
 }

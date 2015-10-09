@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: MessageBus</title>
+    <title>JSDoc: Class: Sandbox</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: MessageBus</h1>
+    <h1 class="page-title">Class: Sandbox</h1>
 
     
 
@@ -28,9 +28,7 @@
 
 <header>
     
-        <h2>MessageBus</h2>
-        
-            <div class="class-description">Message BUS Interface</div>
+        <h2>Sandbox</h2>
         
     
 </header>
@@ -41,21 +39,95 @@
         
 
     
-    <h2>Constructor</h2>
-    
 
-    <h4 class="name" id="MessageBus"><span class="type-signature"></span>new MessageBus<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="Sandbox"><span class="type-signature"></span>new Sandbox<span class="signature">(sandboxType, messageBus)</span><span class="type-signature"></span></h4>
 
     
 
 
 
+<div class="description">
+    Constructor to instantiate a sandbox passing as input parameter the sandbox Type (Protostub, Hyperty, Interceptor and Applicaion) Message Bus instance that the sandbox will use to send messages to components outside the sandbox.
+</div>
 
 
 
 
 
 
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>sandboxType</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">type</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Describe type of sandbox;</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>messageBus</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">msgbus</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Describe the message bus to be used;</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -91,7 +163,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="bus_MessageBus.js.html">bus/MessageBus.js</a>, <a href="bus_MessageBus.js.html#line5">line 5</a>
+        <a href="utils_Sandbox.js.html">utils/Sandbox.js</a>, <a href="utils_Sandbox.js.html#line17">line 17</a>
     </li></ul></dd>
     
 
@@ -140,14 +212,14 @@
 
     
 
-    <h4 class="name" id="addInterceptor"><span class="type-signature"></span>addInterceptor<span class="signature">(interceptedURL, listener, interceptorURL)</span><span class="type-signature"> &rarr; {Interceptor}</span></h4>
+    <h4 class="name" id="deployComponent"><span class="type-signature"></span>deployComponent<span class="signature">(componentDownloadURL, componentURL, configuration)</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    To add an interceptor (eg a Policy Enforcer) which "listener" function is called when routing messages published on "interceptedURL" or send to the "interceptedURL". To avoid infinite cycles messages originated with from "interceptorURL" are not intercepted. To remove the interceptor just call remove() function from returned object. This function is only accessible by internal Core Components.
+    To download and deploy a new component in the sandbox passing as input parameters the url from where the components is downloaded, the componentURL address previously allocated to the component and its configuration.
 </div>
 
 
@@ -183,7 +255,7 @@
 
         <tr>
             
-                <td class="name"><code>interceptedURL</code></td>
+                <td class="name"><code>componentDownloadURL</code></td>
             
 
             <td class="type">
@@ -199,37 +271,14 @@
 
             
 
-            <td class="description last">interceptedURL</td>
+            <td class="description last">Sourcecode Component address url</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>listener</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Listener</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">listener</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>interceptorURL</code></td>
+                <td class="name"><code>componentURL</code></td>
             
 
             <td class="type">
@@ -245,7 +294,30 @@
 
             
 
-            <td class="description last">interceptorURL</td>
+            <td class="description last">Component address url;</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>configuration</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Configuration object;</td>
         </tr>
 
     
@@ -286,206 +358,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="bus_MessageBus.js.html">bus/MessageBus.js</a>, <a href="bus_MessageBus.js.html#line50">line 50</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    Interceptor
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Interceptor</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="addListener"><span class="type-signature"></span>addListener<span class="signature">(url, listener, redirectTo)</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-<div class="description">
-    To add "listener" functions to be called when routing messages published on a certain "resource" or send to a certain url. Messages are routed to input parameter "redirectTo" in case listener is not in the Core Runtime. This function is only accessible by internal Core Components. To remove the listener just call remove() function from returned object.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>url</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">URL.URL</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">url</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>listener</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Listener</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">listener</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>redirectTo</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">URL.URL</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">redirectTo</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="bus_MessageBus.js.html">bus/MessageBus.js</a>, <a href="bus_MessageBus.js.html#line28">line 28</a>
+        <a href="utils_Sandbox.js.html">utils/Sandbox.js</a>, <a href="utils_Sandbox.js.html#line43">line 43</a>
     </li></ul></dd>
     
 
@@ -516,14 +389,14 @@
 
     
 
-    <h4 class="name" id="postMessage"><span class="type-signature"></span>postMessage<span class="signature">(msg)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="removeComponent"><span class="type-signature"></span>removeComponent<span class="signature">(componentURL)</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    To send messages. This function is accessible outside the Core runtime
+    To remove a component from the sandbox passing as input parameters its URL.
 </div>
 
 
@@ -559,13 +432,13 @@
 
         <tr>
             
-                <td class="name"><code>msg</code></td>
+                <td class="name"><code>componentURL</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">Message.Message</span>
+<span class="param-type">URL.URL</span>
 
 
             
@@ -575,7 +448,7 @@
 
             
 
-            <td class="description last">msg</td>
+            <td class="description last">Component address url;</td>
         </tr>
 
     
@@ -616,7 +489,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="bus_MessageBus.js.html">bus/MessageBus.js</a>, <a href="bus_MessageBus.js.html#line69">line 69</a>
+        <a href="utils_Sandbox.js.html">utils/Sandbox.js</a>, <a href="utils_Sandbox.js.html#line78">line 78</a>
     </li></ul></dd>
     
 

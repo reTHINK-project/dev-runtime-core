@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: qos-ua/QoSUA.js</title>
+    <title>JSDoc: Source: policy/PolicyEngine.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: qos-ua/QoSUA.js</h1>
+    <h1 class="page-title">Source: policy/PolicyEngine.js</h1>
 
     
 
@@ -27,25 +27,39 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/**
- * QoS User Agent Interface
+ * Core Policy Engine (PDP/PEP) Interface
  */
-class QoSUA {
+class PolicyEngine {
 
   /**
-   * Get Connectivity Statistics data
+   * To add policies to be enforced for a certain deployed Hyperty Instance
+   * @param {URL.HypertyURL}     hyperty  hyperty
+   * @param {HypertyPolicyList}  policies policies
    */
-  getCurrentConnectivityStatistics()  {
+  addPolicies(hyperty, policies) {
     // Body...
   }
 
   /**
-   * Sends Connectivity Statistics data to QoS Broker
+   * To remove previously added policies for a certain deployed Hyperty Instance
+   * @param  {URL.HypertyURL}  hyperty       hyperty
    */
-  sendConnectivityStatisticsToBroker() {
-    // Body
+  removePolicies(hyperty) {
+    // Body...
+  }
+
+  /**
+   * Authorisation request to accept a Subscription for a certain resource. Returns a Response Message to be returned to Subscription requester
+   * @param  {Message.Message} message       message
+   * @return {AuthorisationResponse}                 AuthorisationResponse
+   */
+  authorise(message) {
+    // Body...
   }
 
 }
+
+export default PolicyEngine;
 </code></pre>
         </article>
     </section>

@@ -2,7 +2,7 @@
   "name": "runtime-core",
   "version": "0.1.0",
   "description": "core runtime development",
-  "main": "src/main.js",
+  "main": "src/runtime-core.js",
   "scripts": {
     "init-setup": "npm init && npm install -g jspm karma karma-browserify karma-mocha karma-mocha-reporter karma-chrome-launcher gulp-cli && npm install && jspm init && node setup.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -36,7 +36,6 @@
     "directories": {
       "packages": "vendor"
     },
-    "dependencies": {},
     "devDependencies": {
       "babel": "npm:babel-core@^5.8.24",
       "babel-runtime": "npm:babel-runtime@^5.8.24",
