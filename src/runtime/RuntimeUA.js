@@ -1,5 +1,5 @@
 // utils
-import {Sandbox, SandboxType} from '../utils/Sandbox';
+import Sandbox from '../utils/Sandbox';
 
 // Main dependecies
 import Registry from '../registry/Registry';
@@ -70,43 +70,50 @@ export default class RuntimeUA {
 
     return new Promise(function(resolve, reject) {
 
-      let protoStubDescriptor;
+      let stubDescriptor;
 
       // Discover Protocol Stub
-      // Step 2
-      protoStubDescriptor = _this.registry.discoverProtostub(domain);
+      stubDescriptor = _this.registry.discoverProtostub(domain);
 
-      if (!protoStubDescriptor) {
+      if (!stubDescriptor) {
 
-        // Step 3 and 4
         // TODO: get protostub | <sp-domain>/.well-known/protostub
         // for the request you can use the module request in utils;
-
-        // Step 5 to 8
-        protoStubDescriptor = _this.registry.registerStub(domain);
+        stubDescriptor = _this.registry.registerStub(domain);
 
       }
 
-      // Step 9 to 13
       // TODO: temporary address this only static for testing
-      let protoStubURL = 'hyperty-runtime://sp1/protostub/123';
-      let protoStubURLStatus = 'hyperty-runtime://sp1/protostub/123/status';
-      let componentDownloadURL = 'sourcecode.js';
-
+      let stubURL = 'hyperty-runtime://sp1/protostub/123';
+      let componentDownloadURL = 'http://localhost:4000/build/build.js';
       let configuration = {};
-      let prototStub = new Sandbox(SandboxType.Protostub, _this.messageBus);
-      prototStub.deployComponent(componentDownloadURL, protoStubURLStatus, configuration);
 
-      // Step 14
-      _this.messageBus.addListener(protoStubURL, prototStub);
+      // Instantiate the Sandbox
+      let stubSandbox = new Sandbox(_this.messageBus);
 
-      // TODO: handle with promise success or fail on ProtoStub instantiate;
-      resolve('ProtoStub successfully loaded');
+      // Register Sandbox on the Registry
+      let RuntimeSandboxURL = _this.registry.registerSandbox(stubSandbox, domain);
 
-      /* prototStub.addEventListener('message', function(event) {
-        console.log('testing response - send from inside worker', event.data);
-        resolve('testing response - send from inside worker', event.data);
-      }); */
+      // Deploy Component
+      stubSandbox.deployComponent(componentDownloadURL, RuntimeSandboxURL, configuration).then(function(resolved) {
+
+        // Add the message bus listener
+        _this.messageBus.addListener(stubURL, stubSandbox);
+
+        // Handle with deployed component
+        console.log('Component is deployed');
+
+        // Load Stub function resolved with success;
+        resolve('Stub successfully loaded');
+
+      }).catch(function(rejected) {
+
+        // Handle with component if it fails;
+        console.log('Component is not deployed');
+
+        // Load Stub function failed;
+        resolve('Stub failed to load');
+      });
 
     });
 

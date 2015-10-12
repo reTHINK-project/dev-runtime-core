@@ -45,12 +45,13 @@ class Request {
           }
           catch (error) {
             console.log(error);
+            reject(error);
           }
         }
       }
 
       if (!httpRequest) {
-        alert('Giving up :( Cannot create an XMLHTTP instance');
+        reject('Giving up :( Cannot create an XMLHTTP instance');
         return false;
       }
 
@@ -68,14 +69,14 @@ class Request {
         }
       };
 
-      httpRequest.open(method, url);
-
       // Set headers to request
       if (headers) {
         Object.keys(headers).forEach(function(header) {
           httpRequest.setRequestHeader(header, headers[header]);
         });
       }
+
+      httpRequest.open(method, url);
 
       // If have params send them, in string format
       httpRequest.send(params);

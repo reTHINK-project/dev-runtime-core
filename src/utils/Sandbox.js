@@ -1,24 +1,16 @@
 /**
- * Sandbox Type
- * @type {Object}
- */
-export const SandboxType = {Protostub: 'Protostub', Hyperty: 'Hyperty', Interceptor: 'Interceptor', Applicaion: 'Applicaion'};
-
-/**
  * Implements the Sandbox interface to protect all external code;
  */
-export class Sandbox {
+export default class Sandbox {
 
   /**
-   * Constructor to instantiate a sandbox passing as input parameter the sandbox Type (Protostub, Hyperty, Interceptor and Applicaion) Message Bus instance that the sandbox will use to send messages to components outside the sandbox.
-   * @param  {type}      sandboxType Describe type of sandbox;
+   * Constructor to instantiate a sandbox passing as input parameter the Message Bus instance that the sandbox will use to send messages to components outside the sandbox.
    * @param  {msgbus}    messageBus  Describe the message bus to be used;
    */
-  constructor(sandboxType, messageBus) {
+  constructor(messageBus) {
 
     let _this = this;
 
-    _this.sandboxType = sandboxType;
     _this.messageBus = messageBus;
 
     try {
@@ -43,32 +35,47 @@ export class Sandbox {
   deployComponent(componentDownloadURL, componentURL, configuration) {
 
     let _this = this;
-    let sandboxType = _this.sandboxType;
-    let messageBus = _this.messageBus;
-    let worker = _this.worker;
 
-    worker.postMessage({
-      url: componentDownloadURL,
-      configuration: configuration
+    return new Promise(function(resolve, reject) {
+
+      let messageBus = _this.messageBus;
+      let worker = _this.worker;
+
+      worker.postMessage({
+        url: componentDownloadURL,
+        configuration: configuration
+      });
+
+      worker.addEventListener('error', function(event) {
+        let message = _this._message(componentURL, event.message);
+        reject(message);
+      });
+
+      worker.addEventListener('message', function(event) {
+        let message = _this._message(componentURL, event.data);
+        messageBus.postMessage(message);
+        resolve(message);
+
+      });
+
     });
 
-    worker.addEventListener('message', function(event) {
+  }
 
-      let message = {
-        header: {
-          id: '1',
-          type: 'UPDATE',
-          from: 'hyperty-runtime://sp1/protostub/123',
-          to: componentURL
-        },
-        body: {
-          value: 'LIVE'
-        }
-      };
+  _message(componentURL, value) {
+    let message = {
+      header: {
+        id: '1',
+        type: 'UPDATE',
+        from: 'hyperty-runtime://sp1/protostub/123',
+        to: componentURL
+      },
+      body: {
+        value: value
+      }
+    };
 
-      messageBus.postMessage(message);
-    });
-
+    return message;
   }
 
   /**
@@ -81,4 +88,4 @@ export class Sandbox {
 
 }
 
-const SandboxCode = 'onmessage = function(e) { console.log("message: ", e.data); }';
+const SandboxCode = 'self.addEventListener("message", function(event) { if (event.data.url) { importScripts(event.data.url); postMessage("The module has been loaded."); } else { postMessage("You don\'t provide any component Download URL;") } }); self.addEventListener("error", function(event) { postMessage("An error has occurred when we try downloading: " + event.data); })';

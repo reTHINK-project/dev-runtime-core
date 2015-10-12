@@ -96,6 +96,21 @@ class Registry {
   }
 
   /**
+   * This function is used to register a new runtime sandboxes passing as input the sandbox instance and the domain URL associated to the sandbox instance.
+   * @param  {DomainURL} DomainURL url
+   * @return {RuntimeSandboxURL}
+   */
+  registerSandbox(url) {
+    let runtimeSandboxURL = 'hyperty-runtime://sp1/protostub/123/status';
+
+    return runtimeSandboxURL;
+
+    // return new Promise(function(resolve, reject) {
+    // resolve(RuntimeSandboxURL);
+    // });
+  }
+
+  /**
   * To discover sandboxes available in the runtime for a certain domain. Required by the runtime UA to avoid more than one sandbox for the same domain.
   * @param  {DomainURL} DomainURL url
   * @return {RuntimeSandbox}           RuntimeSandbox
