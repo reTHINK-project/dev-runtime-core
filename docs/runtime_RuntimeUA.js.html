@@ -27,7 +27,8 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>// utils
-import {Sandbox, SandboxType} from '../utils/Sandbox';
+import Sandbox from '../utils/Sandbox';
+import request from '../utils/request';
 
 // Main dependecies
 import Registry from '../registry/Registry';
@@ -58,6 +59,14 @@ export default class RuntimeUA {
     // TODO: remove this event listener, only for testing
     let hypertyRuntimeURLStatus = 'hyperty-runtime://sp1/protostub/123/status';
     _this.messageBus.addListener(hypertyRuntimeURLStatus, (msg) => {
+      console.log('Message bus status response with message: ', msg);
+    });
+
+    _this.messageBus.addListener('runtime:/alice', (msg) => {
+      console.log('Message bus alice with message: ', msg);
+    });
+
+    _this.messageBus.addListener('hyperty-runtime://sp1/protostub/123', (msg) => {
       console.log('Message bus response with message: ', msg);
     });
 
@@ -98,43 +107,61 @@ export default class RuntimeUA {
 
     return new Promise(function(resolve, reject) {
 
-      let protoStubDescriptor;
+      let stubDescriptor;
 
       // Discover Protocol Stub
-      // Step 2
-      protoStubDescriptor = _this.registry.discoverProtostub(domain);
+      stubDescriptor = _this.registry.discoverProtostub(domain);
 
-      if (!protoStubDescriptor) {
+      if (!stubDescriptor) {
 
-        // Step 3 and 4
         // TODO: get protostub | &lt;sp-domain>/.well-known/protostub
         // for the request you can use the module request in utils;
-
-        // Step 5 to 8
-        protoStubDescriptor = _this.registry.registerStub(domain);
+        stubDescriptor = _this.registry.registerStub(domain);
 
       }
 
-      // Step 9 to 13
       // TODO: temporary address this only static for testing
-      let protoStubURL = 'hyperty-runtime://sp1/protostub/123';
-      let protoStubURLStatus = 'hyperty-runtime://sp1/protostub/123/status';
-      let componentDownloadURL = 'sourcecode.js';
+      let stubURL = 'hyperty-runtime://sp1/protostub/123';
+      let componentDownloadURL = 'http://localhost:4000/build/VertxProtoStub.js';
+      let configuration = {
+        url: 'ws://193.136.93.114:9090/ws',
+        runtimeURL: 'runtime:/alice'
+      };
 
-      let configuration = {};
-      let prototStub = new Sandbox(SandboxType.Protostub, _this.messageBus);
-      prototStub.deployComponent(componentDownloadURL, protoStubURLStatus, configuration);
+      // Instantiate the Sandbox
+      let stubSandbox = new Sandbox(_this.messageBus);
 
-      // Step 14
-      _this.messageBus.addListener(protoStubURL, prototStub);
+      // Register Sandbox on the Registry
+      let runtimeSandboxURL = _this.registry.registerSandbox(stubSandbox, domain);
 
-      // TODO: handle with promise success or fail on ProtoStub instantiate;
-      resolve('ProtoStub successfully loaded');
+      // Get the component source code referent to component download url;
+      request.get(componentDownloadURL).then(function(componentSourceCode) {
 
-      /* prototStub.addEventListener('message', function(event) {
-        console.log('testing response - send from inside worker', event.data);
-        resolve('testing response - send from inside worker', event.data);
-      }); */
+        // Deploy Component
+        stubSandbox.deployComponent(componentSourceCode, runtimeSandboxURL, configuration).then(function(resolved) {
+
+          // Add the message bus listener
+          _this.messageBus.addListener(stubURL, stubSandbox);
+
+          // Handle with deployed component
+          console.log('Component is deployed');
+
+          // Load Stub function resolved with success;
+          resolve('Stub successfully loaded');
+
+        }).catch(function(rejected) {
+
+          // Handle with component if it fails;
+          console.log('Component is not deployed');
+
+          // Load Stub function failed;
+          resolve('Stub failed to load');
+        });
+
+      }).catch(function(error) {
+        // Error getting the source code for component url;
+        console.log('Error getting the source code for component url ', componentDownloadURL);
+      });
 
     });
 
@@ -159,13 +186,13 @@ export default class RuntimeUA {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="-_.html"></a></li><li><a href="IdentityModule.html">IdentityModule</a></li><li><a href="MessageBus.html">MessageBus</a></li><li><a href="module.exports.html">exports</a></li><li><a href="PolicyEngine.html">PolicyEngine</a></li><li><a href="ProtoStub.html">ProtoStub</a></li><li><a href="QoSUA.html">QoSUA</a></li><li><a href="Registry.html">Registry</a></li><li><a href="Request.html">Request</a></li><li><a href="Sandbox.html">Sandbox</a></li><li><a href="Syncher.html">Syncher</a></li></ul><h3>Global</h3><ul><li><a href="global.html#SandboxType">SandboxType</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="IdentityModule.html">IdentityModule</a></li><li><a href="MessageBus.html">MessageBus</a></li><li><a href="module.exports.html">exports</a></li><li><a href="PolicyEngine.html">PolicyEngine</a></li><li><a href="ProtoStub.html">ProtoStub</a></li><li><a href="QoSUA.html">QoSUA</a></li><li><a href="Registry.html">Registry</a></li><li><a href="Request.html">Request</a></li><li><a href="Sandbox.html">Sandbox</a></li><li><a href="Syncher.html">Syncher</a></li><li><a href="VertxProtoStub.html">VertxProtoStub</a></li></ul><h3><a href="global.html">Global</a></h3>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0-dev</a> on Fri Oct 09 2015 18:19:41 GMT+0100 (WEST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0-dev</a> on Wed Oct 14 2015 10:10:39 GMT+0100 (WEST)
 </footer>
 
 <script> prettyPrint(); </script>

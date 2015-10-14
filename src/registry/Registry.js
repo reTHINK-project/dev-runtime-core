@@ -101,7 +101,7 @@ class Registry {
    * @return {RuntimeSandboxURL}
    */
   registerSandbox(url) {
-    let runtimeSandboxURL = 'hyperty-runtime://sp1/protostub/123/status';
+    let runtimeSandboxURL = 'hyperty-runtime://sp1/protostub/123';
 
     return runtimeSandboxURL;
 

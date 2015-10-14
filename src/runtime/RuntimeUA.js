@@ -1,5 +1,6 @@
 // utils
 import Sandbox from '../utils/Sandbox';
+import request from '../utils/request';
 
 // Main dependecies
 import Registry from '../registry/Registry';
@@ -30,6 +31,14 @@ export default class RuntimeUA {
     // TODO: remove this event listener, only for testing
     let hypertyRuntimeURLStatus = 'hyperty-runtime://sp1/protostub/123/status';
     _this.messageBus.addListener(hypertyRuntimeURLStatus, (msg) => {
+      console.log('Message bus status response with message: ', msg);
+    });
+
+    _this.messageBus.addListener('runtime:/alice', (msg) => {
+      console.log('Message bus alice with message: ', msg);
+    });
+
+    _this.messageBus.addListener('hyperty-runtime://sp1/protostub/123', (msg) => {
       console.log('Message bus response with message: ', msg);
     });
 
@@ -85,34 +94,45 @@ export default class RuntimeUA {
 
       // TODO: temporary address this only static for testing
       let stubURL = 'hyperty-runtime://sp1/protostub/123';
-      let componentDownloadURL = 'http://localhost:4000/build/build.js';
-      let configuration = {};
+      let componentDownloadURL = 'http://localhost:4000/build/VertxProtoStub.js';
+      let configuration = {
+        url: 'ws://193.136.93.114:9090/ws',
+        runtimeURL: 'runtime:/alice'
+      };
 
       // Instantiate the Sandbox
       let stubSandbox = new Sandbox(_this.messageBus);
 
       // Register Sandbox on the Registry
-      let RuntimeSandboxURL = _this.registry.registerSandbox(stubSandbox, domain);
+      let runtimeSandboxURL = _this.registry.registerSandbox(stubSandbox, domain);
 
-      // Deploy Component
-      stubSandbox.deployComponent(componentDownloadURL, RuntimeSandboxURL, configuration).then(function(resolved) {
+      // Get the component source code referent to component download url;
+      request.get(componentDownloadURL).then(function(componentSourceCode) {
 
-        // Add the message bus listener
-        _this.messageBus.addListener(stubURL, stubSandbox);
+        // Deploy Component
+        stubSandbox.deployComponent(componentSourceCode, runtimeSandboxURL, configuration).then(function(resolved) {
 
-        // Handle with deployed component
-        console.log('Component is deployed');
+          // Add the message bus listener
+          _this.messageBus.addListener(stubURL, stubSandbox);
 
-        // Load Stub function resolved with success;
-        resolve('Stub successfully loaded');
+          // Handle with deployed component
+          console.log('Component is deployed');
 
-      }).catch(function(rejected) {
+          // Load Stub function resolved with success;
+          resolve('Stub successfully loaded');
 
-        // Handle with component if it fails;
-        console.log('Component is not deployed');
+        }).catch(function(rejected) {
 
-        // Load Stub function failed;
-        resolve('Stub failed to load');
+          // Handle with component if it fails;
+          console.log('Component is not deployed');
+
+          // Load Stub function failed;
+          resolve('Stub failed to load');
+        });
+
+      }).catch(function(error) {
+        // Error getting the source code for component url;
+        console.log('Error getting the source code for component url ', componentDownloadURL);
       });
 
     });
