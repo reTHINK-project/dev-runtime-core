@@ -11,7 +11,7 @@ import MessageBus from '../bus/MessageBus';
 /**
 * Runtime User Agent Interface
 */
-export default class RuntimeUA {
+class RuntimeUA {
 
   constructor() {
 
@@ -148,3 +148,5 @@ export default class RuntimeUA {
   }
 
 }
+
+export default RuntimeUA;

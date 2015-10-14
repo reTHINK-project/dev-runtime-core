@@ -1,7 +1,7 @@
 /**
  * Implements the Sandbox interface to protect all external code;
  */
-export default class Sandbox {
+class Sandbox {
 
   /**
    * Constructor to instantiate a sandbox passing as input parameter the Message Bus instance that the sandbox will use to send messages to components outside the sandbox.
@@ -71,3 +71,5 @@ export default class Sandbox {
 }
 
 const SandboxCode = 'self.addEventListener("message", function(event) { if (event.data.sourceCode) { eval(event.data.sourceCode); postMessage({header: {}, body: {value: "deployed", desc: "The component has been loaded."}}); } else { postMessage({header: {}, body: {value: "error", desc: "You don\'t provide any source code;"}}); } var callback = function(msg) { console.log("callback msg: ", msg); postMessage(msg); }; self.protoStub = new VertxProtoStub.VertxProtoStub(event.data.componentURL, callback, event.data.configuration); self.protoStub.connect(); }); self.addEventListener("error", function(event) { postMessage({header: {}, body: {value: "error", desc: "An error has occurred when we try downloading: " + event.data}}); });';
+
+export default Sandbox;
