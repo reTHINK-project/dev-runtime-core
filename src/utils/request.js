@@ -44,7 +44,6 @@ class Request {
             httpRequest = new ActiveXObject('Microsoft.XMLHTTP');
           }
           catch (error) {
-            console.log(error);
             reject(error);
           }
         }
@@ -55,19 +54,7 @@ class Request {
         return false;
       }
 
-      httpRequest.onreadystatechange = function(event) {
-        let httpRequest = event.currentTarget;
-
-        if (httpRequest.readyState === 4) {
-          if (httpRequest.status === 200) {
-            // console.log(httpRequest.response);
-            resolve(httpRequest.response);
-          } else {
-            // console.log('There was a problem with the request.');
-            reject('There was a problem with the request.');
-          }
-        }
-      };
+      httpRequest.open(method, url);
 
       // Set headers to request
       if (headers) {
@@ -76,7 +63,18 @@ class Request {
         });
       }
 
-      httpRequest.open(method, url);
+      httpRequest.onreadystatechange = function(event) {
+        let httpRequest = event.currentTarget;
+
+        if (httpRequest.readyState === 4) {
+          if (httpRequest.status === 200) {
+            // console.log(httpRequest.response);
+            resolve(httpRequest.response);
+          } else {
+            reject('There was a problem with the request.');
+          }
+        }
+      };
 
       // If have params send them, in string format
       httpRequest.send(params);

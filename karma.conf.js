@@ -17,6 +17,12 @@ module.exports = function(config) {
       'test/**/*.spec.js'
     ],
 
+    proxies: {
+      '/': 'http://localhost:4000/'
+    },
+
+    urlRoot: '/',
+
     // list of files to exclude
     exclude: [
     ],

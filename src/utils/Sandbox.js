@@ -17,12 +17,12 @@ class Sandbox {
 
       let blob = new Blob([SandboxCode], {type: 'text/javascript'});
       var blobURL = window.URL.createObjectURL(blob);
-      let worker = new Worker(blobURL);
+      let sandbox = new Worker(blobURL);
 
-      _this.worker = worker;
+      _this.sandbox = sandbox;
 
     } catch (e) {
-      new Throw('Your environment does not support worker \n', e);
+      throw new Error('Your environment does not support worker \n', e);
     }
   }
 
@@ -34,24 +34,28 @@ class Sandbox {
    */
   deployComponent(componentSourceCode, componentURL, configuration) {
 
+    if (!componentSourceCode) throw new Error('Parameter needed!');
+    if (!componentURL) throw new Error('Parameter needed!');
+    if (!configuration) throw new Error('Parameter needed!');
+
     let _this = this;
 
     return new Promise(function(resolve, reject) {
 
       let messageBus = _this.messageBus;
-      let worker = _this.worker;
+      let sandbox = _this.sandbox;
 
-      worker.postMessage({
+      sandbox.postMessage({
         sourceCode: componentSourceCode,
         componentURL: componentURL,
         configuration: configuration
       });
 
-      worker.addEventListener('error', function(event) {
+      sandbox.addEventListener('error', function(event) {
         reject(event);
       });
 
-      worker.addEventListener('message', function(event) {
+      sandbox.addEventListener('message', function(event) {
         messageBus.postMessage(event.data);
         resolve(event.data);
       });
@@ -65,7 +69,33 @@ class Sandbox {
    * @param  {URL.URL}        componentURL              Component address url;
    */
   removeComponent(componentURL) {
-    // removeComponent
+
+    //TODO: check the sandbox code and remove the respective component;
+    if (!componentURL) throw new Error('Component URL parameter needed');
+
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+
+      let _this = this;
+      let sandbox = _this.sandbox;
+      let messageBus = _this.messageBus;
+
+      sandbox.postMessage({
+        componentURL: componentURL
+      });
+
+      sandbox.addEventListener('error', function(event) {
+        reject(event);
+      });
+
+      sandbox.addEventListener('message', function(event) {
+        messageBus.postMessage(event.data);
+        resolve(event.data);
+      });
+
+    });
+
   }
 
 }

@@ -77,6 +77,8 @@ class RuntimeUA {
 
     var _this = this;
 
+    if (!domain) throw new Error('domain parameter is needed');
+
     return new Promise(function(resolve, reject) {
 
       let stubDescriptor;
@@ -94,7 +96,7 @@ class RuntimeUA {
 
       // TODO: temporary address this only static for testing
       let stubURL = 'hyperty-runtime://sp1/protostub/123';
-      let componentDownloadURL = 'http://localhost:4000/build/VertxProtoStub.js';
+      let componentDownloadURL = 'build/VertxProtoStub.js';
       let configuration = {
         url: 'ws://193.136.93.114:9090/ws',
         runtimeURL: 'runtime:/alice'
@@ -127,12 +129,13 @@ class RuntimeUA {
           console.log('Component is not deployed');
 
           // Load Stub function failed;
-          resolve('Stub failed to load');
+          reject('Stub failed to load');
         });
 
       }).catch(function(error) {
         // Error getting the source code for component url;
-        console.log('Error getting the source code for component url ', componentDownloadURL);
+        // console.log('Error getting the source code for component url ', componentDownloadURL);
+        reject('Error getting the source code for component url ' + componentDownloadURL);
       });
 
     });

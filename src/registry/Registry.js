@@ -41,8 +41,11 @@ class Registry {
   * @return {RuntimeURL}           RuntimeURL
   */
   discoverProtostub(url) {
+
     let _this = this;
     let runtimeURL;
+
+    if (!url) throw new Error('The domain url is needed');
 
     runtimeURL = _this.protoStubs[url] || null;
 
