@@ -9,7 +9,6 @@ CVS
 ._*
 .idea
 npm-debug.log
-dist
 vendor
 build
 node_modules

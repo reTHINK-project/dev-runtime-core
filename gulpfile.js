@@ -13,32 +13,16 @@ gulp.task('doc', function(done) {
 
 });
 
-// Gulp task to distribute the RuntimeUA in ES6;
-gulp.task('dist', function(done) {
-
-  var systemDist = 'jspm bundle-sfx runtime/RuntimeUA dist/index.js --format --inject --no-mangle --skip-source-maps';
-  var amdDist = 'jspm bundle-sfx runtime/RuntimeUA dist/index.amd.js --format amd --inject --no-mangle --skip-source-maps';
-  var bundle = 'jspm bundle ./src/runtime/RuntimeUA.js dist/core.js';
-
-  exec(systemDist + '&&' + amdDist + '&&' + bundle, function(err, stdout, stderr) {
-    if (err) return done(err);
-    done();
-  });
-
-});
-
-// Task and dependencies to convert ES6 to ES5 with babel;
+// Task and dependencies to distribute for all environments;
 var babel = require('babelify');
 var browserify = require('browserify');
 var source = require('vinyl-source-stream');
 
 gulp.task('build', function() {
 
-  var bundler = browserify('./src/runtime/RuntimeUA.js', {
-    standalone: 'core-runtime',
-    debug: false}).transform(babel.configure({
-    modules: 'umd'
-  }));
+  var bundler = browserify('./src/runtime-core.js', {
+    standalone: 'runtime-core',
+    debug: false}).transform(babel);
 
   function rebundle() {
     bundler.bundle()
@@ -46,8 +30,8 @@ gulp.task('build', function() {
         console.error(err);
         this.emit('end');
       })
-      .pipe(source('Core.js'))
-      .pipe(gulp.dest('./build'));
+      .pipe(source('runtime-core.js'))
+      .pipe(gulp.dest('./dist'));
   }
 
   rebundle();
