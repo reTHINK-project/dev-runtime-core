@@ -18,8 +18,9 @@ gulp.task('dist', function(done) {
 
   var systemDist = 'jspm bundle-sfx runtime/RuntimeUA dist/index.js --format --inject --no-mangle --skip-source-maps';
   var amdDist = 'jspm bundle-sfx runtime/RuntimeUA dist/index.amd.js --format amd --inject --no-mangle --skip-source-maps';
+  var bundle = 'jspm bundle ./src/runtime/RuntimeUA.js dist/core.js';
 
-  exec(systemDist + '&&' + amdDist, function(err, stdout, stderr) {
+  exec(systemDist + '&&' + amdDist + '&&' + bundle, function(err, stdout, stderr) {
     if (err) return done(err);
     done();
   });
@@ -33,8 +34,8 @@ var source = require('vinyl-source-stream');
 
 gulp.task('build', function() {
 
-  var bundler = browserify('./src/protostub/VertxProtoStub.js', {
-    standalone: 'VertxProtoStub',
+  var bundler = browserify('./src/runtime/RuntimeUA.js', {
+    standalone: 'core-runtime',
     debug: false}).transform(babel.configure({
     modules: 'umd'
   }));
@@ -45,7 +46,7 @@ gulp.task('build', function() {
         console.error(err);
         this.emit('end');
       })
-      .pipe(source('VertxProtoStub.js'))
+      .pipe(source('Core.js'))
       .pipe(gulp.dest('./build'));
   }
 

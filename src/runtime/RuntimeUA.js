@@ -1,8 +1,8 @@
 // utils
-import Sandbox from '../utils/Sandbox';
 import request from '../utils/request';
 
 // Main dependecies
+import Sandbox from '../sandbox/Sandbox';
 import Registry from '../registry/Registry';
 import IdentityModule from '../identity/IdentityModule';
 import PolicyEngine from '../policy/PolicyEngine';
