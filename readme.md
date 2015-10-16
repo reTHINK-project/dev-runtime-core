@@ -35,7 +35,61 @@ To generates api documentation you can run ```gulp doc```
 
 ### Unit Testing
 Unit testing can be launched manually with **karma start**.
-It's advisable to use [expect.js](https://github.com/Automattic/expect.js) instead of assert.
+
+~~It's advisable to use [expect.js](https://github.com/Automattic/expect.js) instead of assert.~~
+
+After investigate and testing the [expect.js](https://github.com/Automattic/expect.js) it don't support some features for ES6, because this tool hasn't activity at some time, that is why, it is recomended use the [chaijs](http://chaijs.com/) it is more versatile and have expect.js (but updated) and others tools that can be useful;
+
+---
+
+### How to include this runtime-core code into others parts of reTHINK Project;
+
+How to include this repository in other software parts, like [dev-runtime-browser](https://github.com/reTHINK-project/dev-runtime-browser) or [dev-runtime-node](https://github.com/reTHINK-project/dev-runtime-node) - for example;
+
+#### browser project
+
+example: [dev-runtime-browser](https://github.com/reTHINK-project/dev-runtime-browser)
+
+Verify these use cases:
+ 1. if you will create a new repository, you can use this template, and can configure your development environment;
+ 2. if you already have an respository cloned;
+
+for both cases you just have run the command:
+
+```
+jspm install runtime-core=github:reTHINK-project/dev-runtime-core.git.
+```
+
+and on javascript code you need import the script like other modules;
+
+```
+import {RuntimeUA, Sandbox} from 'runtime-core';
+
+console.log('Runtime: ', RuntimeUA);
+console.log('Sandbox: ', Sandbox);
+
+```
+
+#### nodejs
+
+[dev-runtime-node](https://github.com/reTHINK-project/dev-runtime-node)
+
+```
+npm install git+ssh://git@github.com/reTHINK-project/dev-runtime-core.git --save
+```
+
+after this you can require the runtime-core like other modules on node;
+
+```
+var RuntimeUA = require('runtime-core').RuntimeUA;
+
+var runtime = new RuntimeUA();
+
+```
+
+if you found some issues, please submit them into the respective repository;
+
+---
 
 #### Note
 This repository is ready to start working on development of runtime-core.
