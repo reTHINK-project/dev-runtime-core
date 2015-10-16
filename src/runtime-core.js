@@ -1,9 +1,5 @@
-import RuntimeUA from './runtime/RuntimeUA';
-import Sandbox from './sandbox/Sandbox';
+import RuntimeUACore from './runtime/RuntimeUA';
+import SandboxCore from './sandbox/Sandbox';
 
-let RuntimeCore = {
-  RuntimeUA: RuntimeUA,
-  Sandbox: Sandbox
-};
-
-export default RuntimeCore;
+export var RuntimeUA = RuntimeUACore;
+export var Sandbox = SandboxCore;
