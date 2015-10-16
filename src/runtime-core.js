@@ -1,5 +1,5 @@
-import RuntimeUA from 'runtime/RuntimeUA';
-import Sandbox from 'sandbox/Sandbox';
+import RuntimeUA from './runtime/RuntimeUA';
+import Sandbox from './sandbox/Sandbox';
 
 let RuntimeCore = {
   RuntimeUA: RuntimeUA,
