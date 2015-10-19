@@ -15,12 +15,27 @@
     "reThink",
     "webRTC"
   ],
-  "author": "reThink Project",
   "license": "ISC",
+  "author": "reThink Project",
+  "homepage": "https://rethink-project.eu/",
+  "contributors": [
+    "Vitor Silva <vitor-t-silva@telecom.pt>",
+  ],
   "bugs": {
     "url": "https://github.com/reTHINK-project/core-framework/issues"
   },
-  "homepage": "https://github.com/reTHINK-project/core-framework#readme",
+  "files": [
+    "dist/",
+    "readme.md",
+    "docs",
+    "setup.js",
+    "karma.conf.js",
+    "config.js",
+    "gulpfile.js",
+    ".gitignore",
+    ".jscsrc",
+    ".jshintrc"
+  ],
   "devDependencies": {
     "assert": "^1.3.0",
     "babelify": "^6.3.0",
