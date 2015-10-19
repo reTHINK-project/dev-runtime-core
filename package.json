@@ -25,7 +25,7 @@
     "url": "https://github.com/reTHINK-project/core-framework/issues"
   },
   "files": [
-    "dist/",
+    "dist",
     "readme.md",
     "docs",
     "setup.js",
