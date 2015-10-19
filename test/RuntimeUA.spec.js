@@ -9,7 +9,7 @@ import Registry from '../src/registry/Registry';
 import IdentityModule from '../src/identity/IdentityModule';
 import PolicyEngine from '../src/policy/PolicyEngine';
 import MessageBus from '../src/bus/MessageBus';
-import Sandbox from '../src/utils/Sandbox';
+import Sandbox from '../src/sandbox/Sandbox';
 
 describe('RuntimeUA', function() {
 

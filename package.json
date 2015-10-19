@@ -4,8 +4,8 @@
   "description": "core runtime development",
   "main": "dist/runtime-core.js",
   "scripts": {
-    "init-setup": "npm init && npm install -g jspm karma karma-browserify karma-mocha karma-mocha-reporter karma-chrome-launcher gulp-cli && npm install && jspm init && node setup.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "init-setup": "npm init && npm install -g jspm karma-cli gulp-cli && npm install && jspm init && node setup.js",
+    "test": "karma start"
   },
   "repository": {
     "type": "git",
@@ -16,6 +16,12 @@
     "webRTC"
   ],
   "author": "reThink Project",
+  "contributors": [
+    {
+      "name": "Vitor Silva",
+      "email": "vitor-t-silva@telecom.pt"
+    }
+  ],
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/reTHINK-project/core-framework/issues"
@@ -31,6 +37,9 @@
     "jsdoc": "git+https://github.com/jsdoc3/jsdoc.git",
     "jspm": "^0.16.10",
     "karma": "^0.13.10",
+    "karma-browserify": "^4.4.0",
+    "karma-chrome-launcher": "^0.2.1",
+    "karma-mocha": "^0.2.0",
     "karma-mocha-reporter": "^1.1.1",
     "mocha": "^2.3.2",
     "vinyl-source-stream": "^1.1.0",

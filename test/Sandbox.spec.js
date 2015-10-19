@@ -4,7 +4,7 @@ var expect = chai.expect;
 // testing dependecie
 import request from '../src/utils/request';
 
-import Sandbox from '../src/utils/Sandbox';
+import Sandbox from '../src/sandbox/Sandbox';
 import Registry from '../src/registry/Registry';
 import MessageBus from '../src/bus/MessageBus';
 
@@ -20,6 +20,7 @@ describe('Sandbox', function() {
       componentSourceCode = result;
       return result;
     }).catch(function(error) {
+      componentSourceCode = error;
       console.log('Error: ', error);
     });
   });
