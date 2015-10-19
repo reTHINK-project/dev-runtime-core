@@ -15,15 +15,12 @@
     "reThink",
     "webRTC"
   ],
-  "license": "ISC",
   "author": "reThink Project",
-  "homepage": "https://rethink-project.eu/",
-  "contributors": [
-    "Vitor Silva <vitor-t-silva@telecom.pt>",
-  ],
+  "license": "ISC",
   "bugs": {
     "url": "https://github.com/reTHINK-project/core-framework/issues"
   },
+  "homepage": "https://github.com/reTHINK-project/core-framework#readme",
   "devDependencies": {
     "assert": "^1.3.0",
     "babelify": "^6.3.0",
