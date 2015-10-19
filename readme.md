@@ -91,6 +91,15 @@ if you found some issues, please submit them into the respective repository;
 
 ---
 
+### Karma
+if you have some problems starting the karma tests, try running this commands for the following order:
+
+ 1. ```npm uninstall karma karma-browserify karma-mocha karma-mocha-reporter karma-chrome-launcher -g```
+ 2. ```npm install karma-cli -g```
+ 3. ```npm install```
+ 4. ```jspm update```
+
+
 #### Note
 This repository is ready to start working on development of runtime-core.
 The code will go to the **src** folder.
