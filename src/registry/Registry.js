@@ -10,9 +10,57 @@ class Registry {
   */
   constructor(runtimeURL, remoteRegistry) {
 
+    if (!runtimeURL) throw new Error('runtimeURL is missing.');
+    /*if (!remoteRegistry) throw new Error('remoteRegistry is mission');*/
     let _this = this;
 
+    _this.runtimeURL = runtimeURL;
+    _this.remoteRegistry = remoteRegistry;
     _this.protoStubs = {};
+
+    //the hash table is create until find a better solution, to solve the
+    // async calls problem on indexedDB in function with a return value
+    _this.hypertiesList = {};
+    _this.db = {};
+    _this.DB_NAME = 'registry-DB';
+    _this.DB_VERSION = 1;
+    _this.DB_STORE_HYPERTY = 'hyperty-list';
+
+    let request = indexedDB.open(_this.DB_NAME, _this.DB_VERSION);
+
+    request.onsuccess = function(event) {
+      _this.db = this.result;
+
+      //store all the values in the database to a hash table
+      var transaction = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readonly');
+      var objectStore = transaction.objectStore(_this.DB_STORE_HYPERTY);
+      objectStore.openCursor().onsuccess = function(event) {
+        var cursor = event.target.result;
+        if (cursor) {
+          /*console.log('key: ' + cursor.key + ' protoStubURL ' + cursor.value.protoStubURL +
+        ' pepURL ' + cursor.value.pepURL + ' sandboxURL ' + cursor.value.sandboxURL);*/
+          _this.hypertiesList[cursor.key] = {protoStubURL: cursor.value.protoStubURL,
+          pepURL: cursor.value.pepURL, sandboxURL: cursor.value.sandboxURL};
+          cursor.continue();
+        }
+      };
+    };
+
+    request.onerror = function(event) {
+      console.error('Request open IndexedDB error:', event.target.errorCode);
+    };
+
+    request.onupgradeneeded = function(event) {
+      let objectStore = event.currentTarget.result.createObjectStore(
+        _this.DB_STORE_HYPERTY, {keyPath: 'hyperty'});
+      objectStore.createIndex('protoStubURL', 'protoStubURL', {unique: false});
+      objectStore.createIndex('pepURL', 'pepURL', {unique: false});
+      objectStore.createIndex('sandboxURL', 'sandboxURL', {unique: false});
+
+      //populate with the runtimeURL provided
+      objectStore.put({hyperty: _this.runtimeURL, protoStubURL: null,
+                pepURL: null, sandboxURL: null});
+    };
 
   }
 
@@ -23,7 +71,35 @@ class Registry {
   * @return {HypertyURL}          HypertyURL
   */
   registerHyperty(postMessage, descriptor) {
-    // body...
+    let _this = this;
+
+    // assuming the hyperty name come in the body of the message
+    // this is a very simple way to do it, just for test
+    let HypertyURL = postMessage.body.value;
+    let transaction = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readwrite');
+    let storeValue = transaction.objectStore(_this.DB_STORE_HYPERTY);
+
+    storeValue.put({hyperty: HypertyURL, protoStubURL: null,
+              pepURL: null, sandboxURL: null});
+
+    //add the hyperty in the hypertiesList hash table
+    _this.hypertiesList[HypertyURL] = {protoStubURL: null,
+                        pepURL: null, sandboxURL: null};
+
+    transaction.oncomplete = function(event) {
+      //console.log('Hyperty registered with success');
+    };
+
+    transaction.onerror = function(event) {
+      console.error('Hyperty registration error: ' + event.target.errorCode);
+    };
+
+    //TODO implement the associate to Idetity
+
+    //TODO allocate address for the new Hyperty Instance
+
+    //TODO register Hyperty at SP1 Registry
+
     return HypertyURL;
   }
 
@@ -32,7 +108,14 @@ class Registry {
   * @param  {HypertyURL}          HypertyURL url        url
   */
   unregisterHyperty(url) {
-    // body...
+    let _this = this;
+    let transaction = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readwrite');
+    let request = transaction.objectStore(_this.DB_STORE_HYPERTY);
+    request.delete(url);
+    request.onsuccess = function(event) {
+      // delete the hyperty in the hypertiesList hash table
+      delete _this.hypertiesList[url];
+    };
   }
 
   /**
@@ -41,15 +124,10 @@ class Registry {
   * @return {RuntimeURL}           RuntimeURL
   */
   discoverProtostub(url) {
-
+    if (!url) throw new Error('Parameter name needed');
     let _this = this;
-    let runtimeURL;
-
-    if (!url) throw new Error('The domain url is needed');
-
-    runtimeURL = _this.protoStubs[url] || null;
-
-    return runtimeURL;
+    let runtimeURL = _this.hypertiesList[url];
+    return runtimeURL.protoStubURL;
   }
 
   /**
@@ -59,7 +137,35 @@ class Registry {
    */
   registerStub(domainURL) {
     let _this = this;
-    let runtimeProtoStubURL = {};
+    var runtimeProtoStubURL;
+
+    let objectStore = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readwrite').objectStore(_this.DB_STORE_HYPERTY);
+    let request = objectStore.get(domainURL);
+
+    request.onerror = function(event) {
+      console.error('domainURL not found');
+    };
+
+    request.onsuccess = function(event) {
+      runtimeProtoStubURL = domainURL + '/protostub';
+      let data = request.result;
+      data.protoStubURL = runtimeProtoStubURL;
+
+      let requestUpdate = objectStore.put(data);
+      requestUpdate.onerror = function(event) {
+        console.error('requestUpdate error: ' + event.target.errorCode);
+      };
+
+      requestUpdate.onsuccess = function(event) {
+        //update the value in the hypertiesList hash table
+        let hashValue = _this.hypertiesList[domainURL];
+        let newHashValue = {protoStubURL: runtimeProtoStubURL,
+                            pepURL: hashValue.pepURL, sandboxURL: hashValue.sandboxURL};
+        _this.hypertiesList[domainURL] = newHashValue;
+      };
+    };
+
+    //TODO call the addListener function in Msg BUS
 
     return runtimeProtoStubURL;
   }
@@ -69,7 +175,33 @@ class Registry {
   * @param  {HypertyRuntimeURL}   HypertyRuntimeURL     hypertyRuntimeURL
   */
   unregisterStub(hypertyRuntimeURL) {
-    // body...
+    let _this = this;
+    var runtimeProtoStubURL;
+
+    let objectStore = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readwrite').objectStore(_this.DB_STORE_HYPERTY);
+    let request = objectStore.get(hypertyRuntimeURL);
+
+    request.onerror = function(event) {
+      console.error('hypertyRuntimeURL not found');
+    };
+
+    request.onsuccess = function(event) {
+      let data = request.result;
+      data.protoStubURL = null;
+
+      let requestUpdate = objectStore.put(data);
+      requestUpdate.onerror = function(event) {
+        console.error('requestUpdate error: ' + event.target.errorCode);
+      };
+
+      requestUpdate.onsuccess = function(event) {
+        //update the value in the hypertiesList hash table
+        let hashValue = _this.hypertiesList[hypertyRuntimeURL];
+        let newHashValue = {protoStubURL: null,
+                            pepURL: hashValue.pepURL, sandboxURL: hashValue.sandboxURL};
+        _this.hypertiesList[hypertyRuntimeURL] = newHashValue;
+      };
+    };
   }
 
   /**
@@ -79,7 +211,36 @@ class Registry {
   * @return {HypertyRuntimeURL}   HypertyRuntimeURL
   */
   registerPEP(postMessage, hyperty) {
-    // body...
+    let _this = this;
+    var hypertypepURL;
+
+    let objectStore = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readwrite').objectStore(_this.DB_STORE_HYPERTY);
+    let request = objectStore.get(hyperty);
+
+    request.onerror = function(event) {
+      console.error('hyperty not found');
+    };
+
+    request.onsuccess = function(event) {
+      hypertypepURL = hyperty + '/pep';
+      let data = request.result;
+      data.pepURL = hypertypepURL;
+
+      let requestUpdate = objectStore.put(data);
+      requestUpdate.onerror = function(event) {
+        console.error('requestUpdate error: ' + event.target.errorCode);
+      };
+
+      requestUpdate.onsuccess = function(event) {
+        //update the value in the hypertiesList hash table
+        let hashValue = _this.hypertiesList[hyperty];
+        let newHashValue = {protoStubURL: hashValue.protoStubURL,
+                            pepURL: hypertypepURL, sandboxURL: hashValue.sandboxURL};
+        _this.hypertiesList[hyperty] = newHashValue;
+      };
+    };
+
+    return hypertypepURL;
   }
 
   /**
@@ -87,7 +248,33 @@ class Registry {
   * @param  {HypertyRuntimeURL}   HypertyRuntimeURL     HypertyRuntimeURL
   */
   unregisterPEP(HypertyRuntimeURL) {
-    // body...
+    let _this = this;
+    var hypertypepURL;
+
+    let objectStore = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readwrite').objectStore(_this.DB_STORE_HYPERTY);
+    let request = objectStore.get(HypertyRuntimeURL);
+
+    request.onerror = function(event) {
+      console.error('hyperty not found');
+    };
+
+    request.onsuccess = function(event) {
+      let data = request.result;
+      data.pepURL = null;
+
+      let requestUpdate = objectStore.put(data);
+      requestUpdate.onerror = function(event) {
+        console.error('requestUpdate error: ' + event.target.errorCode);
+      };
+
+      requestUpdate.onsuccess = function(event) {
+        //update the value in the hypertiesList hash table
+        let hashValue = _this.hypertiesList[HypertyRuntimeURL];
+        let newHashValue = {protoStubURL: hashValue.protoStubURL,
+                            pepURL: null, sandboxURL: hashValue.sandboxURL};
+        _this.hypertiesList[HypertyRuntimeURL] = newHashValue;
+      };
+    };
   }
 
   /**
@@ -95,7 +282,7 @@ class Registry {
   * @param  {Message.Message}     Message.Message       event
   */
   onEvent(event) {
-    // body...
+    // TODO body...
   }
 
   /**
@@ -104,7 +291,34 @@ class Registry {
    * @return {RuntimeSandboxURL}
    */
   registerSandbox(url) {
-    let runtimeSandboxURL = 'hyperty-runtime://sp1/protostub/123';
+    let _this = this;
+    var runtimeSandboxURL;
+
+    let objectStore = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readwrite').objectStore(_this.DB_STORE_HYPERTY);
+    let request = objectStore.get(url);
+
+    request.onerror = function(event) {
+      console.error('hyperty not found');
+    };
+
+    request.onsuccess = function(event) {
+      runtimeSandboxURL = url + '/sandbox';
+      let data = request.result;
+      data.sandboxURL = runtimeSandboxURL;
+
+      let requestUpdate = objectStore.put(data);
+      requestUpdate.onerror = function(event) {
+        console.error('requestUpdate error: ' + event.target.errorCode);
+      };
+
+      requestUpdate.onsuccess = function(event) {
+        //update the value in the hypertiesList hash table
+        let hashValue = _this.hypertiesList[url];
+        let newHashValue = {protoStubURL: hashValue.protoStubURL,
+                            pepURL: hashValue.pepURL, sandboxURL: runtimeSandboxURL};
+        _this.hypertiesList[url] = newHashValue;
+      };
+    };
 
     return runtimeSandboxURL;
 
@@ -119,7 +333,10 @@ class Registry {
   * @return {RuntimeSandbox}           RuntimeSandbox
   */
   getSandbox(url) {
-    // body...
+    if (!url) throw new Error('Parameter url needed');
+    let _this = this;
+    let runtimeURL = _this.hypertiesList[url];
+    return runtimeURL.sandboxURL;
   }
 
   /**
