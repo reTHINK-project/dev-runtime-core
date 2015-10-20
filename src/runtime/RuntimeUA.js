@@ -2,7 +2,7 @@
 import request from '../utils/request';
 
 // Main dependecies
-import Sandbox from '../sandbox/Sandbox';
+import SandboxFactory from '../sandbox/SandboxFactory';
 import Registry from '../registry/Registry';
 import IdentityModule from '../identity/IdentityModule';
 import PolicyEngine from '../policy/PolicyEngine';
@@ -13,7 +13,7 @@ import MessageBus from '../bus/MessageBus';
 */
 class RuntimeUA {
 
-  constructor() {
+  constructor(sandbox) {
 
     let _this = this;
 
@@ -27,6 +27,7 @@ class RuntimeUA {
     _this.identityModule = new IdentityModule();
     _this.policyEngine = new PolicyEngine();
     _this.messageBus = new MessageBus(_this.registry);
+    _this.sandbox = sandbox;
 
     // TODO: remove this event listener, only for testing
     let hypertyRuntimeURLStatus = 'hyperty-runtime://sp1/protostub/123/status';
@@ -96,14 +97,20 @@ class RuntimeUA {
 
       // TODO: temporary address this only static for testing
       let stubURL = 'hyperty-runtime://sp1/protostub/123';
-      let componentDownloadURL = 'build/VertxProtoStub.js';
+      let componentDownloadURL = 'dist/VertxProtoStub.js';
       let configuration = {
         url: 'ws://193.136.93.114:9090/ws',
         runtimeURL: 'runtime:/alice'
       };
 
+      // TODO: Check on PEP (policy Engine) if we need the sandbox and check if the Sandbox Factory have the context sandbox;
       // Instantiate the Sandbox
-      let stubSandbox = new Sandbox(_this.messageBus);
+      let stubSandbox;
+      if (_this.sandbox) {
+        stubSandbox = SandboxFactory(_this.sandbox, _this.messageBus);
+      }
+
+      console.log(stubSandbox.removeComponent);
 
       // Register Sandbox on the Registry
       let runtimeSandboxURL = _this.registry.registerSandbox(stubSandbox, domain);

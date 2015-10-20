@@ -6,7 +6,7 @@ describe('Request', function() {
 
     let response;
 
-    request.get('build/VertxProtoStub.js').then(function(resolved) {
+    request.get('dist/VertxProtoStub.js').then(function(resolved) {
       response = resolved;
       expect(response).to.not.be.empty();
       done();

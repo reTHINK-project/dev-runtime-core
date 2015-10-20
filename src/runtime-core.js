@@ -1,5 +1,3 @@
-import RuntimeUACore from './runtime/RuntimeUA';
-import SandboxCore from './sandbox/Sandbox';
+import RuntimeUA from './runtime/RuntimeUA';
 
-export var RuntimeUA = RuntimeUACore;
-export var Sandbox = SandboxCore;
+export default RuntimeUA;

@@ -9,11 +9,15 @@ import Registry from '../src/registry/Registry';
 import IdentityModule from '../src/identity/IdentityModule';
 import PolicyEngine from '../src/policy/PolicyEngine';
 import MessageBus from '../src/bus/MessageBus';
-import Sandbox from '../src/sandbox/Sandbox';
+
+// Only for testing
+import SandboxBrowser from './sandboxes/SandboxBrowser';
 
 describe('RuntimeUA', function() {
 
-  let runtime = new RuntimeUA();
+  let sandbox = new SandboxBrowser();
+
+  let runtime = new RuntimeUA(sandbox);
   let registry = new Registry();
   let messageBus = new MessageBus(registry);
 
@@ -36,7 +40,7 @@ describe('RuntimeUA', function() {
     });
   });
 
-  describe('loadStub(domain)', function() {
+  describe('loadStub(domain)', function(done) {
 
     let domain = 'hyperty-runtime://sp1/protostub/123';
     let hypertyRuntimeURL = 'hyperty-runtime://sp1/protostub/123';
@@ -54,9 +58,11 @@ describe('RuntimeUA', function() {
 
       // TODO: test the result of promises
       result.then(function(resolved) {
+        console.log('resolved:', resolved);
         expect(resolved).to.be.a('string');
         done();
       }).catch(function(rejected) {
+        console.log('load stub error :', rejected);
         expect(rejected).to.be.a('string');
         done();
       });

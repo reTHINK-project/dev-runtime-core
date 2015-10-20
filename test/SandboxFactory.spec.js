@@ -4,24 +4,27 @@ var expect = chai.expect;
 // testing dependecie
 import request from '../src/utils/request';
 
-import Sandbox from '../src/sandbox/Sandbox';
+import SandboxFactory from '../src/sandbox/SandboxFactory';
 import Registry from '../src/registry/Registry';
 import MessageBus from '../src/bus/MessageBus';
 
-describe('Sandbox', function() {
+// Only for testing
+import SandboxBrowser from './sandboxes/SandboxBrowser';
+
+describe('SandboxFactory', function() {
 
   let registry = new Registry();
   let messageBus = new MessageBus(registry);
-  let sandbox;
+  let sandbox = new SandboxBrowser();
+  let sandboxFactory;
   let componentSourceCode;
 
   before(function() {
-    return request.get('build/VertxProtoStub.js').then(function(result) {
+    return request.get('dist/VertxProtoStub.js').then(function(result) {
       componentSourceCode = result;
       return result;
     }).catch(function(error) {
       componentSourceCode = error;
-      console.log('Error: ', error);
     });
   });
 
@@ -29,7 +32,7 @@ describe('Sandbox', function() {
 
     it('should throw when given no arguments', function() {
       expect(function() {
-        sandbox = new Sandbox(messageBus);
+        sandbox = SandboxFactory(sandbox, messageBus);
       }).to.not.throw();
     });
 
@@ -73,12 +76,13 @@ describe('Sandbox', function() {
 
       it('postMessage()', function() {
         let message = {
+          type: 'CREATE',
           sourceCode: componentSourceCode,
           componentURL: componentURL,
           configuration: configuration
         };
 
-        expect(message).to.have.any.keys('sourceCode', 'componentURL', 'configuration');
+        expect(message).to.have.all.keys('type', 'sourceCode', 'componentURL', 'configuration');
 
         sandbox.sandbox.postMessage(message);
 

@@ -451,16 +451,10 @@ var _runtimeRuntimeUA = require('./runtime/RuntimeUA');
 
 var _runtimeRuntimeUA2 = _interopRequireDefault(_runtimeRuntimeUA);
 
-var _sandboxSandbox = require('./sandbox/Sandbox');
+exports['default'] = _runtimeRuntimeUA2['default'];
+module.exports = exports['default'];
 
-var _sandboxSandbox2 = _interopRequireDefault(_sandboxSandbox);
-
-var RuntimeUA = _runtimeRuntimeUA2['default'];
-exports.RuntimeUA = RuntimeUA;
-var Sandbox = _sandboxSandbox2['default'];
-exports.Sandbox = Sandbox;
-
-},{"./runtime/RuntimeUA":6,"./sandbox/Sandbox":7}],6:[function(require,module,exports){
+},{"./runtime/RuntimeUA":6}],6:[function(require,module,exports){
 // utils
 'use strict';
 
@@ -480,9 +474,9 @@ var _utilsRequest2 = _interopRequireDefault(_utilsRequest);
 
 // Main dependecies
 
-var _sandboxSandbox = require('../sandbox/Sandbox');
+var _sandboxSandboxFactory = require('../sandbox/SandboxFactory');
 
-var _sandboxSandbox2 = _interopRequireDefault(_sandboxSandbox);
+var _sandboxSandboxFactory2 = _interopRequireDefault(_sandboxSandboxFactory);
 
 var _registryRegistry = require('../registry/Registry');
 
@@ -505,7 +499,7 @@ var _busMessageBus2 = _interopRequireDefault(_busMessageBus);
 */
 
 var RuntimeUA = (function () {
-  function RuntimeUA() {
+  function RuntimeUA(sandbox) {
     _classCallCheck(this, RuntimeUA);
 
     var _this = this;
@@ -520,6 +514,7 @@ var RuntimeUA = (function () {
     _this.identityModule = new _identityIdentityModule2['default']();
     _this.policyEngine = new _policyPolicyEngine2['default']();
     _this.messageBus = new _busMessageBus2['default'](_this.registry);
+    _this.sandbox = sandbox;
 
     // TODO: remove this event listener, only for testing
     var hypertyRuntimeURLStatus = 'hyperty-runtime://sp1/protostub/123/status';
@@ -596,14 +591,20 @@ var RuntimeUA = (function () {
 
         // TODO: temporary address this only static for testing
         var stubURL = 'hyperty-runtime://sp1/protostub/123';
-        var componentDownloadURL = 'build/VertxProtoStub.js';
+        var componentDownloadURL = 'dist/VertxProtoStub.js';
         var configuration = {
           url: 'ws://193.136.93.114:9090/ws',
           runtimeURL: 'runtime:/alice'
         };
 
+        // TODO: Check on PEP (policy Engine) if we need the sandbox and check if the Sandbox Factory have the context sandbox;
         // Instantiate the Sandbox
-        var stubSandbox = new _sandboxSandbox2['default'](_this.messageBus);
+        var stubSandbox = undefined;
+        if (_this.sandbox) {
+          stubSandbox = (0, _sandboxSandboxFactory2['default'])(_this.sandbox, _this.messageBus);
+        }
+
+        console.log(stubSandbox.removeComponent);
 
         // Register Sandbox on the Registry
         var runtimeSandboxURL = _this.registry.registerSandbox(stubSandbox, domain);
@@ -655,7 +656,7 @@ var RuntimeUA = (function () {
 exports['default'] = RuntimeUA;
 module.exports = exports['default'];
 
-},{"../bus/MessageBus":1,"../identity/IdentityModule":2,"../policy/PolicyEngine":3,"../registry/Registry":4,"../sandbox/Sandbox":7,"../utils/request":8}],7:[function(require,module,exports){
+},{"../bus/MessageBus":1,"../identity/IdentityModule":2,"../policy/PolicyEngine":3,"../registry/Registry":4,"../sandbox/SandboxFactory":7,"../utils/request":8}],7:[function(require,module,exports){
 /**
  * Implements the Sandbox interface to protect all external code;
  */
@@ -664,36 +665,11 @@ module.exports = exports['default'];
 Object.defineProperty(exports, '__esModule', {
   value: true
 });
+exports['default'] = SandboxFactory;
 
-var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+function SandboxFactory(sandbox, messageBus) {
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
-
-var Sandbox = (function () {
-
-  /**
-   * Constructor to instantiate a sandbox passing as input parameter the Message Bus instance that the sandbox will use to send messages to components outside the sandbox.
-   * @param  {msgbus}    messageBus  Describe the message bus to be used;
-   */
-
-  function Sandbox(messageBus) {
-    _classCallCheck(this, Sandbox);
-
-    var _this = this;
-
-    _this.messageBus = messageBus;
-
-    try {
-
-      var blob = new Blob([SandboxCode], { type: 'text/javascript' });
-      var blobURL = window.URL.createObjectURL(blob);
-      var sandbox = new Worker(blobURL);
-
-      _this.sandbox = sandbox;
-    } catch (e) {
-      throw new Error('Your environment does not support worker \n', e);
-    }
-  }
+  sandbox.messageBus = messageBus;
 
   /**
    * To download and deploy a new component in the sandbox passing as input parameters the url from where the components is downloaded, the componentURL address previously allocated to the component and its configuration.
@@ -701,80 +677,72 @@ var Sandbox = (function () {
    * @param  {URL.URL}        componentURL              Component address url;
    * @param  {Object}         configuration             Configuration object;
    */
+  sandbox.deployComponent = function (componentSourceCode, componentURL, configuration) {
 
-  _createClass(Sandbox, [{
-    key: 'deployComponent',
-    value: function deployComponent(componentSourceCode, componentURL, configuration) {
+    if (!componentSourceCode) throw new Error('Component source code parameter needed!');
+    if (!componentURL) throw new Error('Component url parameter needed!');
+    if (!configuration) throw new Error('Configuration parameter needed!');
 
-      if (!componentSourceCode) throw new Error('Parameter needed!');
-      if (!componentURL) throw new Error('Parameter needed!');
-      if (!configuration) throw new Error('Parameter needed!');
+    var _this = this;
 
-      var _this = this;
+    return new Promise(function (resolve, reject) {
 
-      return new Promise(function (resolve, reject) {
+      var messageBus = _this.messageBus;
+      var sandbox = _this.sandbox;
 
-        var messageBus = _this.messageBus;
-        var sandbox = _this.sandbox;
-
-        sandbox.postMessage({
-          sourceCode: componentSourceCode,
-          componentURL: componentURL,
-          configuration: configuration
-        });
-
-        sandbox.addEventListener('error', function (event) {
-          reject(event);
-        });
-
-        sandbox.addEventListener('message', function (event) {
-          messageBus.postMessage(event.data);
-          resolve(event.data);
-        });
+      sandbox.postMessage({
+        type: 'CREATE',
+        sourceCode: componentSourceCode,
+        componentURL: componentURL,
+        configuration: configuration
       });
-    }
 
-    /**
-     * To remove a component from the sandbox passing as input parameters its URL.
-     * @param  {URL.URL}        componentURL              Component address url;
-     */
-  }, {
-    key: 'removeComponent',
-    value: function removeComponent(componentURL) {
-
-      //TODO: check the sandbox code and remove the respective component;
-      if (!componentURL) throw new Error('Component URL parameter needed');
-
-      var _this = this;
-
-      return new Promise(function (resolve, reject) {
-
-        var _this = this;
-        var sandbox = _this.sandbox;
-        var messageBus = _this.messageBus;
-
-        sandbox.postMessage({
-          componentURL: componentURL
-        });
-
-        sandbox.addEventListener('error', function (event) {
-          reject(event);
-        });
-
-        sandbox.addEventListener('message', function (event) {
-          messageBus.postMessage(event.data);
-          resolve(event.data);
-        });
+      sandbox.addEventListener('error', function (event) {
+        reject(event);
       });
-    }
-  }]);
 
-  return Sandbox;
-})();
+      sandbox.addEventListener('message', function (event) {
+        messageBus.postMessage(event.data);
+        resolve(event.data);
+      });
+    });
+  };
 
-var SandboxCode = 'self.addEventListener("message", function(event) { if (event.data.sourceCode) { eval(event.data.sourceCode); postMessage({header: {}, body: {value: "deployed", desc: "The component has been loaded."}}); } else { postMessage({header: {}, body: {value: "error", desc: "You don\'t provide any source code;"}}); } var callback = function(msg) { console.log("callback msg: ", msg); postMessage(msg); }; self.protoStub = new VertxProtoStub.VertxProtoStub(event.data.componentURL, callback, event.data.configuration); self.protoStub.connect(); }); self.addEventListener("error", function(event) { postMessage({header: {}, body: {value: "error", desc: "An error has occurred when we try downloading: " + event.data}}); });';
+  /**
+   * To remove a component from the sandbox passing as input parameters its URL.
+   * @param  {URL.URL}        componentURL              Component address url;
+   */
+  sandbox.removeComponent = function (componentURL) {
 
-exports['default'] = Sandbox;
+    //TODO: check the sandbox code and remove the respective component;
+    if (!componentURL) throw new Error('Component URL parameter needed');
+
+    var _this = this;
+
+    return new Promise(function (resolve, reject) {
+
+      var sandbox = _this.sandbox;
+      var messageBus = _this.messageBus;
+
+      sandbox.postMessage({
+        type: 'REMOVE',
+        componentURL: componentURL
+      });
+
+      sandbox.addEventListener('error', function (event) {
+        reject(event);
+      });
+
+      sandbox.addEventListener('message', function (event) {
+        messageBus.postMessage(event.data);
+        resolve(event.data);
+      });
+    });
+  };
+
+  return sandbox;
+}
+
 module.exports = exports['default'];
 
 },{}],8:[function(require,module,exports){
