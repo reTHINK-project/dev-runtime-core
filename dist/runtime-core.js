@@ -285,9 +285,56 @@ var Registry = (function () {
   function Registry(runtimeURL, remoteRegistry) {
     _classCallCheck(this, Registry);
 
+    if (!runtimeURL) throw new Error('runtimeURL is missing.');
+    /*if (!remoteRegistry) throw new Error('remoteRegistry is mission');*/
     var _this = this;
 
+    _this.runtimeURL = runtimeURL;
+    _this.remoteRegistry = remoteRegistry;
     _this.protoStubs = {};
+
+    //the hash table is create until find a better solution, to solve the
+    // async calls problem on indexedDB in function with a return value
+    _this.hypertiesList = {};
+    _this.db = {};
+    _this.DB_NAME = 'registry-DB';
+    _this.DB_VERSION = 1;
+    _this.DB_STORE_HYPERTY = 'hyperty-list';
+
+    var request = indexedDB.open(_this.DB_NAME, _this.DB_VERSION);
+
+    request.onsuccess = function (event) {
+      _this.db = this.result;
+
+      //store all the values in the database to a hash table
+      var transaction = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readonly');
+      var objectStore = transaction.objectStore(_this.DB_STORE_HYPERTY);
+      objectStore.openCursor().onsuccess = function (event) {
+        var cursor = event.target.result;
+        if (cursor) {
+          /*console.log('key: ' + cursor.key + ' protoStubURL ' + cursor.value.protoStubURL +
+          ' pepURL ' + cursor.value.pepURL + ' sandboxURL ' + cursor.value.sandboxURL);*/
+          _this.hypertiesList[cursor.key] = { protoStubURL: cursor.value.protoStubURL,
+            pepURL: cursor.value.pepURL, sandboxURL: cursor.value.sandboxURL };
+          cursor['continue']();
+        }
+      };
+    };
+
+    request.onerror = function (event) {
+      console.error('Request open IndexedDB error:', event.target.errorCode);
+    };
+
+    request.onupgradeneeded = function (event) {
+      var objectStore = event.currentTarget.result.createObjectStore(_this.DB_STORE_HYPERTY, { keyPath: 'hyperty' });
+      objectStore.createIndex('protoStubURL', 'protoStubURL', { unique: false });
+      objectStore.createIndex('pepURL', 'pepURL', { unique: false });
+      objectStore.createIndex('sandboxURL', 'sandboxURL', { unique: false });
+
+      //populate with the runtimeURL provided
+      objectStore.put({ hyperty: _this.runtimeURL, protoStubURL: null,
+        pepURL: null, sandboxURL: null });
+    };
   }
 
   /**
@@ -300,7 +347,35 @@ var Registry = (function () {
   _createClass(Registry, [{
     key: 'registerHyperty',
     value: function registerHyperty(postMessage, descriptor) {
-      // body...
+      var _this = this;
+
+      // assuming the hyperty name come in the body of the message
+      // this is a very simple way to do it, just for test
+      var HypertyURL = postMessage.body.value;
+      var transaction = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readwrite');
+      var storeValue = transaction.objectStore(_this.DB_STORE_HYPERTY);
+
+      storeValue.put({ hyperty: HypertyURL, protoStubURL: null,
+        pepURL: null, sandboxURL: null });
+
+      //add the hyperty in the hypertiesList hash table
+      _this.hypertiesList[HypertyURL] = { protoStubURL: null,
+        pepURL: null, sandboxURL: null };
+
+      transaction.oncomplete = function (event) {
+        //console.log('Hyperty registered with success');
+      };
+
+      transaction.onerror = function (event) {
+        console.error('Hyperty registration error: ' + event.target.errorCode);
+      };
+
+      //TODO implement the associate to Idetity
+
+      //TODO allocate address for the new Hyperty Instance
+
+      //TODO register Hyperty at SP1 Registry
+
       return HypertyURL;
     }
 
@@ -310,27 +385,29 @@ var Registry = (function () {
     */
   }, {
     key: 'unregisterHyperty',
-    value: function unregisterHyperty(url) {}
-    // body...
+    value: function unregisterHyperty(url) {
+      var _this = this;
+      var transaction = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readwrite');
+      var request = transaction.objectStore(_this.DB_STORE_HYPERTY);
+      request['delete'](url);
+      request.onsuccess = function (event) {
+        // delete the hyperty in the hypertiesList hash table
+        delete _this.hypertiesList[url];
+      };
+    }
 
     /**
     * To discover protocol stubs available in the runtime for a certain domain. If available, it returns the runtime url for the protocol stub that connects to the requested domain. Required by the runtime BUS to route messages to remote servers or peers (do we need something similar for Hyperties?).
     * @param  {DomainURL}           DomainURL            url
     * @return {RuntimeURL}           RuntimeURL
     */
-
   }, {
     key: 'discoverProtostub',
     value: function discoverProtostub(url) {
-
+      if (!url) throw new Error('Parameter name needed');
       var _this = this;
-      var runtimeURL = undefined;
-
-      if (!url) throw new Error('The domain url is needed');
-
-      runtimeURL = _this.protoStubs[url] || null;
-
-      return runtimeURL;
+      var runtimeURL = _this.hypertiesList[url];
+      return runtimeURL.protoStubURL;
     }
 
     /**
@@ -342,7 +419,35 @@ var Registry = (function () {
     key: 'registerStub',
     value: function registerStub(domainURL) {
       var _this = this;
-      var runtimeProtoStubURL = {};
+      var runtimeProtoStubURL;
+
+      var objectStore = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readwrite').objectStore(_this.DB_STORE_HYPERTY);
+      var request = objectStore.get(domainURL);
+
+      request.onerror = function (event) {
+        console.error('domainURL not found');
+      };
+
+      request.onsuccess = function (event) {
+        runtimeProtoStubURL = domainURL + '/protostub';
+        var data = request.result;
+        data.protoStubURL = runtimeProtoStubURL;
+
+        var requestUpdate = objectStore.put(data);
+        requestUpdate.onerror = function (event) {
+          console.error('requestUpdate error: ' + event.target.errorCode);
+        };
+
+        requestUpdate.onsuccess = function (event) {
+          //update the value in the hypertiesList hash table
+          var hashValue = _this.hypertiesList[domainURL];
+          var newHashValue = { protoStubURL: runtimeProtoStubURL,
+            pepURL: hashValue.pepURL, sandboxURL: hashValue.sandboxURL };
+          _this.hypertiesList[domainURL] = newHashValue;
+        };
+      };
+
+      //TODO call the addListener function in Msg BUS
 
       return runtimeProtoStubURL;
     }
@@ -353,8 +458,35 @@ var Registry = (function () {
     */
   }, {
     key: 'unregisterStub',
-    value: function unregisterStub(hypertyRuntimeURL) {}
-    // body...
+    value: function unregisterStub(hypertyRuntimeURL) {
+      var _this = this;
+      var runtimeProtoStubURL;
+
+      var objectStore = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readwrite').objectStore(_this.DB_STORE_HYPERTY);
+      var request = objectStore.get(hypertyRuntimeURL);
+
+      request.onerror = function (event) {
+        console.error('hypertyRuntimeURL not found');
+      };
+
+      request.onsuccess = function (event) {
+        var data = request.result;
+        data.protoStubURL = null;
+
+        var requestUpdate = objectStore.put(data);
+        requestUpdate.onerror = function (event) {
+          console.error('requestUpdate error: ' + event.target.errorCode);
+        };
+
+        requestUpdate.onsuccess = function (event) {
+          //update the value in the hypertiesList hash table
+          var hashValue = _this.hypertiesList[hypertyRuntimeURL];
+          var newHashValue = { protoStubURL: null,
+            pepURL: hashValue.pepURL, sandboxURL: hashValue.sandboxURL };
+          _this.hypertiesList[hypertyRuntimeURL] = newHashValue;
+        };
+      };
+    }
 
     /**
     * To register a new Policy Enforcer in the runtime including as input parameters the function to postMessage, the HypertyURL associated with the PEP, which returns the RuntimeURL allocated to the new Policy Enforcer component.
@@ -362,31 +494,85 @@ var Registry = (function () {
     * @param  {HypertyURL}          HypertyURL            hyperty
     * @return {HypertyRuntimeURL}   HypertyRuntimeURL
     */
-
   }, {
     key: 'registerPEP',
-    value: function registerPEP(postMessage, hyperty) {}
-    // body...
+    value: function registerPEP(postMessage, hyperty) {
+      var _this = this;
+      var hypertypepURL;
+
+      var objectStore = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readwrite').objectStore(_this.DB_STORE_HYPERTY);
+      var request = objectStore.get(hyperty);
+
+      request.onerror = function (event) {
+        console.error('hyperty not found');
+      };
+
+      request.onsuccess = function (event) {
+        hypertypepURL = hyperty + '/pep';
+        var data = request.result;
+        data.pepURL = hypertypepURL;
+
+        var requestUpdate = objectStore.put(data);
+        requestUpdate.onerror = function (event) {
+          console.error('requestUpdate error: ' + event.target.errorCode);
+        };
+
+        requestUpdate.onsuccess = function (event) {
+          //update the value in the hypertiesList hash table
+          var hashValue = _this.hypertiesList[hyperty];
+          var newHashValue = { protoStubURL: hashValue.protoStubURL,
+            pepURL: hypertypepURL, sandboxURL: hashValue.sandboxURL };
+          _this.hypertiesList[hyperty] = newHashValue;
+        };
+      };
+
+      return hypertypepURL;
+    }
 
     /**
     * To unregister a previously registered protocol stub
     * @param  {HypertyRuntimeURL}   HypertyRuntimeURL     HypertyRuntimeURL
     */
-
   }, {
     key: 'unregisterPEP',
-    value: function unregisterPEP(HypertyRuntimeURL) {}
-    // body...
+    value: function unregisterPEP(HypertyRuntimeURL) {
+      var _this = this;
+      var hypertypepURL;
+
+      var objectStore = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readwrite').objectStore(_this.DB_STORE_HYPERTY);
+      var request = objectStore.get(HypertyRuntimeURL);
+
+      request.onerror = function (event) {
+        console.error('hyperty not found');
+      };
+
+      request.onsuccess = function (event) {
+        var data = request.result;
+        data.pepURL = null;
+
+        var requestUpdate = objectStore.put(data);
+        requestUpdate.onerror = function (event) {
+          console.error('requestUpdate error: ' + event.target.errorCode);
+        };
+
+        requestUpdate.onsuccess = function (event) {
+          //update the value in the hypertiesList hash table
+          var hashValue = _this.hypertiesList[HypertyRuntimeURL];
+          var newHashValue = { protoStubURL: hashValue.protoStubURL,
+            pepURL: null, sandboxURL: hashValue.sandboxURL };
+          _this.hypertiesList[HypertyRuntimeURL] = newHashValue;
+        };
+      };
+    }
 
     /**
     * To receive status events from components registered in the Registry.
     * @param  {Message.Message}     Message.Message       event
     */
-
   }, {
     key: 'onEvent',
     value: function onEvent(event) {}
-    // body...
+    // TODO body...
 
     /**
      * This function is used to register a new runtime sandboxes passing as input the sandbox instance and the domain URL associated to the sandbox instance.
@@ -397,7 +583,34 @@ var Registry = (function () {
   }, {
     key: 'registerSandbox',
     value: function registerSandbox(url) {
-      var runtimeSandboxURL = 'hyperty-runtime://sp1/protostub/123';
+      var _this = this;
+      var runtimeSandboxURL;
+
+      var objectStore = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readwrite').objectStore(_this.DB_STORE_HYPERTY);
+      var request = objectStore.get(url);
+
+      request.onerror = function (event) {
+        console.error('hyperty not found');
+      };
+
+      request.onsuccess = function (event) {
+        runtimeSandboxURL = url + '/sandbox';
+        var data = request.result;
+        data.sandboxURL = runtimeSandboxURL;
+
+        var requestUpdate = objectStore.put(data);
+        requestUpdate.onerror = function (event) {
+          console.error('requestUpdate error: ' + event.target.errorCode);
+        };
+
+        requestUpdate.onsuccess = function (event) {
+          //update the value in the hypertiesList hash table
+          var hashValue = _this.hypertiesList[url];
+          var newHashValue = { protoStubURL: hashValue.protoStubURL,
+            pepURL: hashValue.pepURL, sandboxURL: runtimeSandboxURL };
+          _this.hypertiesList[url] = newHashValue;
+        };
+      };
 
       return runtimeSandboxURL;
 
@@ -413,15 +626,18 @@ var Registry = (function () {
     */
   }, {
     key: 'getSandbox',
-    value: function getSandbox(url) {}
-    // body...
+    value: function getSandbox(url) {
+      if (!url) throw new Error('Parameter url needed');
+      var _this = this;
+      var runtimeURL = _this.hypertiesList[url];
+      return runtimeURL.sandboxURL;
+    }
 
     /**
     * To verify if source is valid and to resolve target runtime url address if needed (eg protostub runtime url in case the message is to be dispatched to a remote endpoint).
     * @param  {URL.URL}  url       url
     * @return {Promise<URL.URL>}                 Promise <URL.URL>
     */
-
   }, {
     key: 'resolve',
     value: function resolve(url) {
@@ -450,6 +666,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'd
 var _runtimeRuntimeUA = require('./runtime/RuntimeUA');
 
 var _runtimeRuntimeUA2 = _interopRequireDefault(_runtimeRuntimeUA);
+
+// TODO: Remove this before compiling
+// This is only for testing
+// import Sandbox from '../test/sandboxes/SandboxBrowser';
+// var sandbox = new Sandbox();
+// window.runtime = new RuntimeUA(sandbox);
 
 exports['default'] = _runtimeRuntimeUA2['default'];
 module.exports = exports['default'];
@@ -559,14 +781,56 @@ var RuntimeUA = (function () {
 
   }, {
     key: 'loadHyperty',
-    value: function loadHyperty(hyperty) {}
-    // Body
+    value: function loadHyperty(hyperty) {
+
+      var _this = this;
+
+      if (!hyperty) throw new Error('Hyperty descriptor url parameter is needed');
+
+      return new Promise(function (resolve, reject) {
+
+        var errorReason = function errorReason(reason) {
+          console.log('Hyperty Error:', reason);
+          reject(reason);
+        };
+
+        // Get the component source code referent to component download url;
+        var hypertyDescriptorPromise = _utilsRequest2['default'].get(hyperty).then(function (hypertyDescriptor) {
+
+          // TODO: Update this variables with result of the request
+          // This values are only for testes, should be removed;
+          var hypertySourceCodeUrl = 'dist/VertxProtoStub.js';
+          var hypertySourceCode = _utilsRequest2['default'].get(hypertySourceCodeUrl);
+          var hypertyConfiguration = {};
+
+          // TODO: remove or update this message, because we don't now if the registerHyperty have a messageBus instance or an message object;
+          var message = {
+            body: {
+              value: 'hyperty-runtime://sp1/protostub/123/'
+            }
+          };
+
+          var hypertyURL = _this.registry.registerHyperty(message, hypertyDescriptor);
+
+          // Make all the requests and handle with the results
+          Promise.resolve(hypertySourceCode).then(function (result) {
+            var sourceCode = result;
+
+            var stubSandbox = undefined;
+            if (_this.sandbox) {
+              stubSandbox = (0, _sandboxSandboxFactory2['default'])(_this.sandbox, _this.messageBus);
+            }
+
+            resolve({ code: sourceCode, hypertyURL: hypertyURL, hypertyConfiguration: hypertyConfiguration, messageBus: _this.messageBus });
+          })['catch'](errorReason);
+        })['catch'](errorReason);
+      });
+    }
 
     /**
     * Deploy Stub from Catalogue URL or domain url
     * @param  {URL.URL}     domain          domain
     */
-
   }, {
     key: 'loadStub',
     value: function loadStub(domain) {
@@ -581,7 +845,7 @@ var RuntimeUA = (function () {
 
         // Discover Protocol Stub
         stubDescriptor = _this.registry.discoverProtostub(domain);
-
+        console.log(stubDescriptor);
         if (!stubDescriptor) {
 
           // TODO: get protostub | <sp-domain>/.well-known/protostub
@@ -593,7 +857,7 @@ var RuntimeUA = (function () {
         var stubURL = 'hyperty-runtime://sp1/protostub/123';
         var componentDownloadURL = 'dist/VertxProtoStub.js';
         var configuration = {
-          url: 'ws://193.136.93.114:9090/ws',
+          url: 'ws://localhost:9090/ws',
           runtimeURL: 'runtime:/alice'
         };
 
@@ -604,10 +868,12 @@ var RuntimeUA = (function () {
           stubSandbox = (0, _sandboxSandboxFactory2['default'])(_this.sandbox, _this.messageBus);
         }
 
-        console.log(stubSandbox.removeComponent);
-
         // Register Sandbox on the Registry
-        var runtimeSandboxURL = _this.registry.registerSandbox(stubSandbox, domain);
+        // TODO: Check if the register Sandbox receive 1 or 2 parameters;
+        // 2 parameters: https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+        // 1 parameter: https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/runtime-apis.md#registersandbox
+        // let runtimeSandboxURL = _this.registry.registerSandbox(stubSandbox, domain);
+        var runtimeSandboxURL = _this.registry.registerSandbox(domain);
 
         // Get the component source code referent to component download url;
         _utilsRequest2['default'].get(componentDownloadURL).then(function (componentSourceCode) {
@@ -623,18 +889,18 @@ var RuntimeUA = (function () {
 
             // Load Stub function resolved with success;
             resolve('Stub successfully loaded');
-          })['catch'](function (rejected) {
+          })['catch'](function (reason) {
 
             // Handle with component if it fails;
             console.log('Component is not deployed');
 
             // Load Stub function failed;
-            reject('Stub failed to load');
+            reject(reason);
           });
         })['catch'](function (error) {
           // Error getting the source code for component url;
           // console.log('Error getting the source code for component url ', componentDownloadURL);
-          reject('Error getting the source code for component url ' + componentDownloadURL);
+          reject(error);
         });
       });
     }

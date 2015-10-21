@@ -18,7 +18,7 @@ var babel = require('babelify');
 var browserify = require('browserify');
 var source = require('vinyl-source-stream');
 
-gulp.task('build', function() {
+gulp.task('dist', function() {
 
   var bundler = browserify('./src/runtime-core.js', {
     standalone: 'runtime-core',
