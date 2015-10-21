@@ -67,7 +67,52 @@ class RuntimeUA {
   * @param  {URL.URL}    hyperty hypertyInstance url;
   */
   loadHyperty(hyperty) {
-    // Body
+
+    let _this = this;
+
+    if (!hyperty) throw new Error('Hyperty descriptor url parameter is needed');
+
+    return new Promise(function(resolve, reject) {
+
+      let errorReason = function(reason) {
+        console.log('Hyperty Error:', reason);
+        reject(reason);
+      };
+
+      // Get the component source code referent to component download url;
+      let hypertyDescriptorPromise = request.get(hyperty).then(function(hypertyDescriptor) {
+
+        // TODO: Update this variables with result of the request
+        // This values are only for testes, should be removed;
+        let hypertySourceCodeUrl = 'dist/VertxProtoStub.js';
+        let hypertySourceCode = request.get(hypertySourceCodeUrl);
+        let hypertyConfiguration = {};
+
+        // TODO: remove or update this message, because we don't now if the registerHyperty have a messageBus instance or an message object;
+        let message = {
+          body: {
+            value: 'hyperty-runtime://sp1/protostub/123/'
+          }
+        };
+
+        let hypertyURL = _this.registry.registerHyperty(message, hypertyDescriptor);
+
+        // Make all the requests and handle with the results
+        Promise.resolve(hypertySourceCode).then(function(result) {
+          let sourceCode = result;
+
+          let stubSandbox;
+          if (_this.sandbox) {
+            stubSandbox = SandboxFactory(_this.sandbox, _this.messageBus);
+          }
+
+          resolve({code: sourceCode, hypertyURL: hypertyURL, hypertyConfiguration: hypertyConfiguration, messageBus: _this.messageBus});
+
+        }).catch(errorReason);
+
+      }).catch(errorReason);
+
+    });
   }
 
   /**
@@ -76,7 +121,7 @@ class RuntimeUA {
   */
   loadStub(domain) {
 
-    var _this = this;
+    let _this = this;
 
     if (!domain) throw new Error('domain parameter is needed');
 
@@ -86,7 +131,7 @@ class RuntimeUA {
 
       // Discover Protocol Stub
       stubDescriptor = _this.registry.discoverProtostub(domain);
-
+      console.log(stubDescriptor);
       if (!stubDescriptor) {
 
         // TODO: get protostub | <sp-domain>/.well-known/protostub
@@ -99,7 +144,7 @@ class RuntimeUA {
       let stubURL = 'hyperty-runtime://sp1/protostub/123';
       let componentDownloadURL = 'dist/VertxProtoStub.js';
       let configuration = {
-        url: 'ws://193.136.93.114:9090/ws',
+        url: 'ws://localhost:9090/ws',
         runtimeURL: 'runtime:/alice'
       };
 
@@ -110,10 +155,12 @@ class RuntimeUA {
         stubSandbox = SandboxFactory(_this.sandbox, _this.messageBus);
       }
 
-      console.log(stubSandbox.removeComponent);
-
       // Register Sandbox on the Registry
-      let runtimeSandboxURL = _this.registry.registerSandbox(stubSandbox, domain);
+      // TODO: Check if the register Sandbox receive 1 or 2 parameters;
+      // 2 parameters: https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+      // 1 parameter: https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/runtime-apis.md#registersandbox
+      // let runtimeSandboxURL = _this.registry.registerSandbox(stubSandbox, domain);
+      let runtimeSandboxURL = _this.registry.registerSandbox(domain);
 
       // Get the component source code referent to component download url;
       request.get(componentDownloadURL).then(function(componentSourceCode) {
@@ -130,19 +177,19 @@ class RuntimeUA {
           // Load Stub function resolved with success;
           resolve('Stub successfully loaded');
 
-        }).catch(function(rejected) {
+        }).catch(function(reason) {
 
           // Handle with component if it fails;
           console.log('Component is not deployed');
 
           // Load Stub function failed;
-          reject('Stub failed to load');
+          reject(reason);
         });
 
       }).catch(function(error) {
         // Error getting the source code for component url;
         // console.log('Error getting the source code for component url ', componentDownloadURL);
-        reject('Error getting the source code for component url ' + componentDownloadURL);
+        reject(error);
       });
 
     });

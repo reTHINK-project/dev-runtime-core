@@ -1,5 +1,5 @@
 import chai from 'chai';
-var expect = chai.expect;
+let expect = chai.expect;
 
 // Testing Module
 import RuntimeUA from '../src/runtime/RuntimeUA';
@@ -40,6 +40,38 @@ describe('RuntimeUA', function() {
     });
   });
 
+  describe('loadHyperty(HypertyDescriptorURL)', function(done) {
+
+    describe('describe the status of load hyperty', function() {
+
+      it('should return Hyperty Registration Object', function() {
+
+        let hypertyURL = 'hyperty-runtime://sp1/protostub/123';
+        let hyperty = runtime.loadHyperty(hypertyURL);
+        let hypertyRegistration = {};
+
+        return expect(hyperty.then(function(o) {
+          console.log('result: ', o);
+          return o;
+        })).to.deep.equal();
+      });
+
+      it('should fail the hyperty Registration', function() {
+
+        let hypertyURL = 'aasdfadsf';
+        let hyperty = runtime.loadHyperty(hypertyURL);
+        let hypertyRegistration = {};
+
+        return expect(hyperty.catch(function(reason) {
+          console.log('result: ', o);
+          return o;
+        })).to.be.rejectedWith(TypeError);
+      });
+
+    });
+
+  });
+
   describe('loadStub(domain)', function(done) {
 
     let domain = 'hyperty-runtime://sp1/protostub/123';
@@ -58,15 +90,14 @@ describe('RuntimeUA', function() {
 
       // TODO: test the result of promises
       result.then(function(resolved) {
-        console.log('resolved:', resolved);
         expect(resolved).to.be.a('string');
         done();
       }).catch(function(rejected) {
-        console.log('load stub error :', rejected);
         expect(rejected).to.be.a('string');
         done();
       });
 
+      return result;
     });
 
   });
