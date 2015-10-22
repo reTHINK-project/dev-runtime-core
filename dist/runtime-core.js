@@ -667,16 +667,22 @@ var _runtimeRuntimeUA = require('./runtime/RuntimeUA');
 
 var _runtimeRuntimeUA2 = _interopRequireDefault(_runtimeRuntimeUA);
 
+var _sandboxSandbox = require('./sandbox/Sandbox');
+
+var _sandboxSandbox2 = _interopRequireDefault(_sandboxSandbox);
+
 // TODO: Remove this before compiling
 // This is only for testing
 // import Sandbox from '../test/sandboxes/SandboxBrowser';
 // var sandbox = new Sandbox();
 // window.runtime = new RuntimeUA(sandbox);
 
-exports['default'] = _runtimeRuntimeUA2['default'];
-module.exports = exports['default'];
+var RuntimeUA = _runtimeRuntimeUA2['default'];
+exports.RuntimeUA = RuntimeUA;
+var Sandbox = _sandboxSandbox2['default'];
+exports.Sandbox = Sandbox;
 
-},{"./runtime/RuntimeUA":6}],6:[function(require,module,exports){
+},{"./runtime/RuntimeUA":6,"./sandbox/Sandbox":7}],6:[function(require,module,exports){
 // utils
 'use strict';
 
@@ -695,10 +701,6 @@ var _utilsRequest = require('../utils/request');
 var _utilsRequest2 = _interopRequireDefault(_utilsRequest);
 
 // Main dependecies
-
-var _sandboxSandboxFactory = require('../sandbox/SandboxFactory');
-
-var _sandboxSandboxFactory2 = _interopRequireDefault(_sandboxSandboxFactory);
 
 var _registryRegistry = require('../registry/Registry');
 
@@ -721,8 +723,10 @@ var _busMessageBus2 = _interopRequireDefault(_busMessageBus);
 */
 
 var RuntimeUA = (function () {
-  function RuntimeUA(sandbox) {
+  function RuntimeUA(sandboxFactory) {
     _classCallCheck(this, RuntimeUA);
+
+    if (!sandboxFactory) throw new Error('The sandbox factory is a needed parameter');
 
     var _this = this;
 
@@ -736,7 +740,9 @@ var RuntimeUA = (function () {
     _this.identityModule = new _identityIdentityModule2['default']();
     _this.policyEngine = new _policyPolicyEngine2['default']();
     _this.messageBus = new _busMessageBus2['default'](_this.registry);
-    _this.sandbox = sandbox;
+
+    sandboxFactory.messageBus = _this.messageBus;
+    _this.sandboxFactory = sandboxFactory;
 
     // TODO: remove this event listener, only for testing
     var hypertyRuntimeURLStatus = 'hyperty-runtime://sp1/protostub/123/status';
@@ -789,19 +795,18 @@ var RuntimeUA = (function () {
 
       return new Promise(function (resolve, reject) {
 
+        var hypertyURL = undefined;
+        var hypertyConfiguration = {};
+
         var errorReason = function errorReason(reason) {
-          console.log('Hyperty Error:', reason);
+          // console.log('Hyperty Error:', reason);
           reject(reason);
         };
 
-        // Get the component source code referent to component download url;
-        var hypertyDescriptorPromise = _utilsRequest2['default'].get(hyperty).then(function (hypertyDescriptor) {
+        // Get Hyperty descriptor
+        _utilsRequest2['default'].get(hyperty).then(function (hypertyDescriptor) {
 
-          // TODO: Update this variables with result of the request
-          // This values are only for testes, should be removed;
-          var hypertySourceCodeUrl = 'dist/VertxProtoStub.js';
-          var hypertySourceCode = _utilsRequest2['default'].get(hypertySourceCodeUrl);
-          var hypertyConfiguration = {};
+          console.info('1: return hyperty descriptor');
 
           // TODO: remove or update this message, because we don't now if the registerHyperty have a messageBus instance or an message object;
           var message = {
@@ -810,19 +815,26 @@ var RuntimeUA = (function () {
             }
           };
 
-          var hypertyURL = _this.registry.registerHyperty(message, hypertyDescriptor);
+          // Register hyperty;
+          return _this.registry.registerHyperty(message, hypertyDescriptor);
+        }).then(function (hypertyURL) {
+          console.info('2: return hypertyURL');
 
-          // Make all the requests and handle with the results
-          Promise.resolve(hypertySourceCode).then(function (result) {
-            var sourceCode = result;
+          // TODO: Update this variables with result of the request
+          // This values are only for testes, should be removed;
+          var hypertySourceCodeUrl = 'dist/VertxProtoStub.js';
 
-            var stubSandbox = undefined;
-            if (_this.sandbox) {
-              stubSandbox = (0, _sandboxSandboxFactory2['default'])(_this.sandbox, _this.messageBus);
-            }
+          hypertyURL = hypertyURL;
 
-            resolve({ code: sourceCode, hypertyURL: hypertyURL, hypertyConfiguration: hypertyConfiguration, messageBus: _this.messageBus });
-          })['catch'](errorReason);
+          // Get the hyperty source code
+          return _utilsRequest2['default'].get(hypertySourceCodeUrl);
+        }).then(function (result) {
+          console.info('3: return hyperty source code');
+          var sourceCode = result;
+
+          var stubSandbox = _this.sandboxFactory.createSandbox();
+
+          resolve({ code: sourceCode, hypertyURL: hypertyURL, hypertyConfiguration: hypertyConfiguration, messageBus: _this.messageBus });
         })['catch'](errorReason);
       });
     }
@@ -845,7 +857,7 @@ var RuntimeUA = (function () {
 
         // Discover Protocol Stub
         stubDescriptor = _this.registry.discoverProtostub(domain);
-        console.log(stubDescriptor);
+
         if (!stubDescriptor) {
 
           // TODO: get protostub | <sp-domain>/.well-known/protostub
@@ -863,44 +875,38 @@ var RuntimeUA = (function () {
 
         // TODO: Check on PEP (policy Engine) if we need the sandbox and check if the Sandbox Factory have the context sandbox;
         // Instantiate the Sandbox
-        var stubSandbox = undefined;
-        if (_this.sandbox) {
-          stubSandbox = (0, _sandboxSandboxFactory2['default'])(_this.sandbox, _this.messageBus);
-        }
+        var stubSandbox = _this.sandboxFactory.createSandbox();
 
         // Register Sandbox on the Registry
-        // TODO: Check if the register Sandbox receive 1 or 2 parameters;
-        // 2 parameters: https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-        // 1 parameter: https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/runtime-apis.md#registersandbox
-        // let runtimeSandboxURL = _this.registry.registerSandbox(stubSandbox, domain);
-        var runtimeSandboxURL = _this.registry.registerSandbox(domain);
+        var runtimeSandboxURL = undefined;
 
-        // Get the component source code referent to component download url;
-        _utilsRequest2['default'].get(componentDownloadURL).then(function (componentSourceCode) {
+        // Register Sandbox
+        _this.registry.registerSandbox(domain).then(function (result) {
+          console.info('step 1: return the sandbox runtime url');
+
+          // Save the sandbox runtime URL
+          runtimeSandboxURL = result.sandboxURL;
+
+          // Get the component source code referent to component download url;
+          return _utilsRequest2['default'].get(componentDownloadURL);
+        }).then(function (result) {
+          console.info('step 2: return the component Source Code');
 
           // Deploy Component
-          stubSandbox.deployComponent(componentSourceCode, runtimeSandboxURL, configuration).then(function (resolved) {
+          return stubSandbox.deployComponent(result, runtimeSandboxURL, configuration);
+        }).then(function (result) {
+          console.info('step 3: deploy component for sandbox');
 
-            // Add the message bus listener
-            _this.messageBus.addListener(stubURL, stubSandbox);
+          // Add the message bus listener
+          _this.messageBus.addListener(stubURL, stubSandbox);
 
-            // Handle with deployed component
-            console.log('Component is deployed');
+          // Handle with deployed component
+          console.log('Component is deployed');
 
-            // Load Stub function resolved with success;
-            resolve('Stub successfully loaded');
-          })['catch'](function (reason) {
-
-            // Handle with component if it fails;
-            console.log('Component is not deployed');
-
-            // Load Stub function failed;
-            reject(reason);
-          });
-        })['catch'](function (error) {
-          // Error getting the source code for component url;
-          // console.log('Error getting the source code for component url ', componentDownloadURL);
-          reject(error);
+          // Load Stub function resolved with success;
+          resolve('Stub successfully loaded');
+        })['catch'](function (reason) {
+          console.log('Reason:', reason);
         });
       });
     }
@@ -922,20 +928,24 @@ var RuntimeUA = (function () {
 exports['default'] = RuntimeUA;
 module.exports = exports['default'];
 
-},{"../bus/MessageBus":1,"../identity/IdentityModule":2,"../policy/PolicyEngine":3,"../registry/Registry":4,"../sandbox/SandboxFactory":7,"../utils/request":8}],7:[function(require,module,exports){
+},{"../bus/MessageBus":1,"../identity/IdentityModule":2,"../policy/PolicyEngine":3,"../registry/Registry":4,"../utils/request":8}],7:[function(require,module,exports){
 /**
  * Implements the Sandbox interface to protect all external code;
  */
-'use strict';
+"use strict";
 
-Object.defineProperty(exports, '__esModule', {
+Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports['default'] = SandboxFactory;
 
-function SandboxFactory(sandbox, messageBus) {
+var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
 
-  sandbox.messageBus = messageBus;
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var SandboxBase = (function () {
+  function SandboxBase(messageBus) {
+    _classCallCheck(this, SandboxBase);
+  }
 
   /**
    * To download and deploy a new component in the sandbox passing as input parameters the url from where the components is downloaded, the componentURL address previously allocated to the component and its configuration.
@@ -943,73 +953,25 @@ function SandboxFactory(sandbox, messageBus) {
    * @param  {URL.URL}        componentURL              Component address url;
    * @param  {Object}         configuration             Configuration object;
    */
-  sandbox.deployComponent = function (componentSourceCode, componentURL, configuration) {
 
-    if (!componentSourceCode) throw new Error('Component source code parameter needed!');
-    if (!componentURL) throw new Error('Component url parameter needed!');
-    if (!configuration) throw new Error('Configuration parameter needed!');
+  _createClass(SandboxBase, [{
+    key: "deployComponent",
+    value: function deployComponent(componentSourceCode, componentURL, configuration) {}
 
-    var _this = this;
+    /**
+     * To remove a component from the sandbox passing as input parameters its URL.
+     * @param  {URL.URL}        componentURL              Component address url;
+     */
+  }, {
+    key: "removeComponent",
+    value: function removeComponent(componentURL) {}
+  }]);
 
-    return new Promise(function (resolve, reject) {
+  return SandboxBase;
+})();
 
-      var messageBus = _this.messageBus;
-      var sandbox = _this.sandbox;
-
-      sandbox.postMessage({
-        type: 'CREATE',
-        sourceCode: componentSourceCode,
-        componentURL: componentURL,
-        configuration: configuration
-      });
-
-      sandbox.addEventListener('error', function (event) {
-        reject(event);
-      });
-
-      sandbox.addEventListener('message', function (event) {
-        messageBus.postMessage(event.data);
-        resolve(event.data);
-      });
-    });
-  };
-
-  /**
-   * To remove a component from the sandbox passing as input parameters its URL.
-   * @param  {URL.URL}        componentURL              Component address url;
-   */
-  sandbox.removeComponent = function (componentURL) {
-
-    //TODO: check the sandbox code and remove the respective component;
-    if (!componentURL) throw new Error('Component URL parameter needed');
-
-    var _this = this;
-
-    return new Promise(function (resolve, reject) {
-
-      var sandbox = _this.sandbox;
-      var messageBus = _this.messageBus;
-
-      sandbox.postMessage({
-        type: 'REMOVE',
-        componentURL: componentURL
-      });
-
-      sandbox.addEventListener('error', function (event) {
-        reject(event);
-      });
-
-      sandbox.addEventListener('message', function (event) {
-        messageBus.postMessage(event.data);
-        resolve(event.data);
-      });
-    });
-  };
-
-  return sandbox;
-}
-
-module.exports = exports['default'];
+exports["default"] = SandboxBase;
+module.exports = exports["default"];
 
 },{}],8:[function(require,module,exports){
 /**
@@ -1076,7 +1038,6 @@ var Request = (function () {
 
         if (!httpRequest) {
           reject('Giving up :( Cannot create an XMLHTTP instance');
-          return false;
         }
 
         httpRequest.open(method, url);
@@ -1096,7 +1057,7 @@ var Request = (function () {
               // console.log(httpRequest.response);
               resolve(httpRequest.response);
             } else {
-              reject('There was a problem with the request.');
+              reject(httpRequest.response);
             }
           }
         };

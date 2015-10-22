@@ -1,4 +1,5 @@
-import RuntimeUA from './runtime/RuntimeUA';
+import RuntimeUACore from './runtime/RuntimeUA';
+import SandboxBase from './sandbox/Sandbox';
 
 // TODO: Remove this before compiling
 // This is only for testing
@@ -6,4 +7,5 @@ import RuntimeUA from './runtime/RuntimeUA';
 // var sandbox = new Sandbox();
 // window.runtime = new RuntimeUA(sandbox);
 
-export default RuntimeUA;
+export var RuntimeUA = RuntimeUACore;
+export var Sandbox = SandboxBase;

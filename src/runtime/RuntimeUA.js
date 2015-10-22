@@ -2,7 +2,6 @@
 import request from '../utils/request';
 
 // Main dependecies
-import SandboxFactory from '../sandbox/SandboxFactory';
 import Registry from '../registry/Registry';
 import IdentityModule from '../identity/IdentityModule';
 import PolicyEngine from '../policy/PolicyEngine';
@@ -13,7 +12,9 @@ import MessageBus from '../bus/MessageBus';
 */
 class RuntimeUA {
 
-  constructor(sandbox) {
+  constructor(sandboxFactory) {
+
+    if (!sandboxFactory) throw new Error('The sandbox factory is a needed parameter');
 
     let _this = this;
 
@@ -27,7 +28,9 @@ class RuntimeUA {
     _this.identityModule = new IdentityModule();
     _this.policyEngine = new PolicyEngine();
     _this.messageBus = new MessageBus(_this.registry);
-    _this.sandbox = sandbox;
+
+    sandboxFactory.messageBus = _this.messageBus;
+    _this.sandboxFactory = sandboxFactory;
 
     // TODO: remove this event listener, only for testing
     let hypertyRuntimeURLStatus = 'hyperty-runtime://sp1/protostub/123/status';
@@ -74,19 +77,18 @@ class RuntimeUA {
 
     return new Promise(function(resolve, reject) {
 
+      let hypertyURL;
+      let hypertyConfiguration = {};
+
       let errorReason = function(reason) {
-        console.log('Hyperty Error:', reason);
+        // console.log('Hyperty Error:', reason);
         reject(reason);
       };
 
-      // Get the component source code referent to component download url;
-      let hypertyDescriptorPromise = request.get(hyperty).then(function(hypertyDescriptor) {
+      // Get Hyperty descriptor
+      request.get(hyperty).then(function(hypertyDescriptor) {
 
-        // TODO: Update this variables with result of the request
-        // This values are only for testes, should be removed;
-        let hypertySourceCodeUrl = 'dist/VertxProtoStub.js';
-        let hypertySourceCode = request.get(hypertySourceCodeUrl);
-        let hypertyConfiguration = {};
+        console.info('1: return hyperty descriptor');
 
         // TODO: remove or update this message, because we don't now if the registerHyperty have a messageBus instance or an message object;
         let message = {
@@ -95,24 +97,32 @@ class RuntimeUA {
           }
         };
 
-        let hypertyURL = _this.registry.registerHyperty(message, hypertyDescriptor);
+        // Register hyperty;
+        return _this.registry.registerHyperty(message, hypertyDescriptor);
 
-        // Make all the requests and handle with the results
-        Promise.resolve(hypertySourceCode).then(function(result) {
-          let sourceCode = result;
+      }).then(function(hypertyURL) {
+        console.info('2: return hypertyURL');
 
-          let stubSandbox;
-          if (_this.sandbox) {
-            stubSandbox = SandboxFactory(_this.sandbox, _this.messageBus);
-          }
+        // TODO: Update this variables with result of the request
+        // This values are only for testes, should be removed;
+        let hypertySourceCodeUrl = 'dist/VertxProtoStub.js';
 
-          resolve({code: sourceCode, hypertyURL: hypertyURL, hypertyConfiguration: hypertyConfiguration, messageBus: _this.messageBus});
+        hypertyURL = hypertyURL;
 
-        }).catch(errorReason);
+        // Get the hyperty source code
+        return request.get(hypertySourceCodeUrl);
+      }).then(function(result) {
+        console.info('3: return hyperty source code');
+        let sourceCode = result;
+
+        let stubSandbox = _this.sandboxFactory.createSandbox();
+
+        resolve({code: sourceCode, hypertyURL: hypertyURL, hypertyConfiguration: hypertyConfiguration, messageBus: _this.messageBus});
 
       }).catch(errorReason);
 
     });
+
   }
 
   /**
@@ -131,7 +141,7 @@ class RuntimeUA {
 
       // Discover Protocol Stub
       stubDescriptor = _this.registry.discoverProtostub(domain);
-      console.log(stubDescriptor);
+
       if (!stubDescriptor) {
 
         // TODO: get protostub | <sp-domain>/.well-known/protostub
@@ -150,23 +160,28 @@ class RuntimeUA {
 
       // TODO: Check on PEP (policy Engine) if we need the sandbox and check if the Sandbox Factory have the context sandbox;
       // Instantiate the Sandbox
-      let stubSandbox;
-      if (_this.sandbox) {
-        stubSandbox = SandboxFactory(_this.sandbox, _this.messageBus);
-      }
+      let stubSandbox = _this.sandboxFactory.createSandbox();
 
       // Register Sandbox on the Registry
-      // TODO: Check if the register Sandbox receive 1 or 2 parameters;
-      // 2 parameters: https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-      // 1 parameter: https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/runtime-apis.md#registersandbox
-      // let runtimeSandboxURL = _this.registry.registerSandbox(stubSandbox, domain);
-      let runtimeSandboxURL = _this.registry.registerSandbox(domain);
+      let runtimeSandboxURL;
 
-      // Get the component source code referent to component download url;
-      request.get(componentDownloadURL).then(function(componentSourceCode) {
+      // Register Sandbox
+      _this.registry.registerSandbox(domain)
+        .then(function(result) {
+          console.info('step 1: return the sandbox runtime url');
 
-        // Deploy Component
-        stubSandbox.deployComponent(componentSourceCode, runtimeSandboxURL, configuration).then(function(resolved) {
+          // Save the sandbox runtime URL
+          runtimeSandboxURL = result.sandboxURL;
+
+          // Get the component source code referent to component download url;
+          return request.get(componentDownloadURL);
+        }).then(function(result) {
+          console.info('step 2: return the component Source Code');
+
+          // Deploy Component
+          return stubSandbox.deployComponent(result, runtimeSandboxURL, configuration);
+        }).then(function(result) {
+          console.info('step 3: deploy component for sandbox');
 
           // Add the message bus listener
           _this.messageBus.addListener(stubURL, stubSandbox);
@@ -176,22 +191,10 @@ class RuntimeUA {
 
           // Load Stub function resolved with success;
           resolve('Stub successfully loaded');
-
-        }).catch(function(reason) {
-
-          // Handle with component if it fails;
-          console.log('Component is not deployed');
-
-          // Load Stub function failed;
-          reject(reason);
+        })
+        .catch(function(reason) {
+          console.log('Reason:', reason);
         });
-
-      }).catch(function(error) {
-        // Error getting the source code for component url;
-        // console.log('Error getting the source code for component url ', componentDownloadURL);
-        reject(error);
-      });
-
     });
 
   }

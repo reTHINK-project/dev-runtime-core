@@ -51,7 +51,6 @@ class Request {
 
       if (!httpRequest) {
         reject('Giving up :( Cannot create an XMLHTTP instance');
-        return false;
       }
 
       httpRequest.open(method, url);
@@ -71,7 +70,7 @@ class Request {
             // console.log(httpRequest.response);
             resolve(httpRequest.response);
           } else {
-            reject('There was a problem with the request.');
+            reject(httpRequest.response);
           }
         }
       };

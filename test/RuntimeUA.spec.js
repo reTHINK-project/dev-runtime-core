@@ -10,15 +10,39 @@ import IdentityModule from '../src/identity/IdentityModule';
 import PolicyEngine from '../src/policy/PolicyEngine';
 import MessageBus from '../src/bus/MessageBus';
 
-// Only for testing
-import SandboxBrowser from './sandboxes/SandboxBrowser';
+import Sandbox from '../src/sandbox/Sandbox';
+class SandboxFactoryTest {
+
+  get messageBus() {
+    let _this = this;
+    return _this._messageBus;
+  }
+
+  set messageBus(messageBus) {
+    let _this = this;
+    _this._messageBus = messageBus;
+  }
+
+  createSandbox() {
+    let _this = this;
+    return new Sandbox(_this._messageBus);
+  }
+
+  removeSandbox() {
+
+  }
+
+}
 
 describe('RuntimeUA', function() {
 
-  let sandbox = new SandboxBrowser();
+  // Only for testing
+  let runtimeURL = 'hyperty-runtime://sp1/protostub/123';
 
-  let runtime = new RuntimeUA(sandbox);
-  let registry = new Registry();
+  let sandboxFactory = new SandboxFactoryTest();
+
+  let runtime = new RuntimeUA(sandboxFactory);
+  let registry = new Registry(runtimeURL);
   let messageBus = new MessageBus(registry);
 
   describe('constructor()', function() {
@@ -40,39 +64,45 @@ describe('RuntimeUA', function() {
     });
   });
 
-  describe('loadHyperty(HypertyDescriptorURL)', function(done) {
+  describe('loadHyperty(HypertyDescriptorURL)', function() {
 
     describe('describe the status of load hyperty', function() {
 
-      it('should return Hyperty Registration Object', function() {
+      it('should return Hyperty Registration Object', function(done) {
 
-        let hypertyURL = 'hyperty-runtime://sp1/protostub/123';
+        let hypertyURL = 'dist/VertxProtoStub.js';
         let hyperty = runtime.loadHyperty(hypertyURL);
         let hypertyRegistration = {};
 
-        return expect(hyperty.then(function(o) {
-          console.log('result: ', o);
+        return Promise.resolve(hyperty).then(function(o) {
+          done();
+          expect(o).to.have.all.keys('code', 'hypertyURL', 'hypertyConfiguration', 'messageBus');
           return o;
-        })).to.deep.equal();
+        });
+
       });
 
-      it('should fail the hyperty Registration', function() {
+      it('should fail the hyperty Registration', function(done) {
 
         let hypertyURL = 'aasdfadsf';
         let hyperty = runtime.loadHyperty(hypertyURL);
         let hypertyRegistration = {};
 
-        return expect(hyperty.catch(function(reason) {
-          console.log('result: ', o);
-          return o;
-        })).to.be.rejectedWith(TypeError);
+        hyperty.then(function(result) {
+          console.log(result);
+        }).catch(function(reason) {
+          done();
+          expect(reason).to.not.throw();
+          return reason;
+        });
+
       });
 
     });
 
   });
 
-  describe('loadStub(domain)', function(done) {
+  describe('loadStub(domain)', function() {
 
     let domain = 'hyperty-runtime://sp1/protostub/123';
     let hypertyRuntimeURL = 'hyperty-runtime://sp1/protostub/123';
@@ -88,16 +118,14 @@ describe('RuntimeUA', function() {
 
       expect(result).to.be.instanceof(Promise);
 
-      // TODO: test the result of promises
       result.then(function(resolved) {
+        done();
         expect(resolved).to.be.a('string');
-        done();
+        return;
       }).catch(function(rejected) {
-        expect(rejected).to.be.a('string');
         done();
+        expect(rejected).to.be.a('string');
       });
-
-      return result;
     });
 
   });
