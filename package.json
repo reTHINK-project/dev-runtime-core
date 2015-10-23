@@ -1,6 +1,6 @@
 {
   "name": "runtime-core",
-  "version": "0.1.0",
+  "version": "0.1.4",
   "description": "core runtime development",
   "main": "dist/runtime-core.js",
   "scripts": {
@@ -34,6 +34,10 @@
     "chai": "^3.3.0",
     "expect.js": "^0.3.1",
     "gulp": "^3.9.0",
+    "gulp-bump": "^1.0.0",
+    "gulp-insert": "^0.5.0",
+    "gulp-replace": "^0.5.4",
+    "gulp-uglify": "^1.4.2",
     "jsdoc": "git+https://github.com/jsdoc3/jsdoc.git",
     "jspm": "^0.16.10",
     "karma": "^0.13.10",
@@ -42,6 +46,7 @@
     "karma-mocha": "^0.2.0",
     "karma-mocha-reporter": "^1.1.1",
     "mocha": "^2.3.2",
+    "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.4.0"
   },

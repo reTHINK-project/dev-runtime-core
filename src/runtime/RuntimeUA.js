@@ -77,8 +77,10 @@ class RuntimeUA {
 
     return new Promise(function(resolve, reject) {
 
-      let hypertyURL;
-      let hypertyConfiguration = {};
+      let _hypertySandbox;
+      let _hypertyDescriptor;
+      let _hypertySourceCode;
+      let _hypertyConfiguration = {};
 
       let errorReason = function(reason) {
         // console.log('Hyperty Error:', reason);
@@ -86,9 +88,23 @@ class RuntimeUA {
       };
 
       // Get Hyperty descriptor
-      request.get(hyperty).then(function(hypertyDescriptor) {
+      return request.get(hyperty).then(function(hypertyDescriptor) {
 
         console.info('1: return hyperty descriptor');
+
+        _hypertyDescriptor = hypertyDescriptor;
+
+        // TODO: Update this variables with result of the request
+        // This values are only for testes, should be removed;
+        let hypertySourceCodeUrl = 'dist/VertxProtoStub.js';
+
+        // Get the hyperty source code
+        return request.get(hypertySourceCodeUrl);
+      })
+      .then(function(hypertySourceCode) {
+
+        console.info('2: return hyperty source code');
+        _hypertySourceCode = hypertySourceCode;
 
         // TODO: remove or update this message, because we don't now if the registerHyperty have a messageBus instance or an message object;
         let message = {
@@ -97,29 +113,41 @@ class RuntimeUA {
           }
         };
 
+        console.log(_hypertySourceCode);
+
         // Register hyperty;
-        return _this.registry.registerHyperty(message, hypertyDescriptor);
+        return _this.registry.registerHyperty(message, _hypertyDescriptor);
+      })
+      .then(function(hypertyURL) {
+        console.info('3: return hyperty url, after register hyperty');
 
-      }).then(function(hypertyURL) {
-        console.info('2: return hypertyURL');
+        let inSameSandbox = true;
 
-        // TODO: Update this variables with result of the request
-        // This values are only for testes, should be removed;
-        let hypertySourceCodeUrl = 'dist/VertxProtoStub.js';
+        // TODO: Check if the app and hyperty is in the same sandbox and
+        if (inSameSandbox) {
+          // TODO: getAppSandbox, this will return a promise;
 
-        hypertyURL = hypertyURL;
+          _hypertySandbox = _this.sandboxFactory.createAppSandbox();
+          _hypertySandbox.deployComponent(_hypertySourceCode, hypertyURL, _hypertyConfiguration);
+          return true;
+        } else {
+          // TODO: getHypertySandbox, this will return a promise;
 
-        // Get the hyperty source code
-        return request.get(hypertySourceCodeUrl);
-      }).then(function(result) {
-        console.info('3: return hyperty source code');
-        let sourceCode = result;
+          _hypertySandbox = _this.sandboxFactory.createSandbox();
+          _hypertySandbox.deployComponent(_hypertySourceCode, hypertyURL, hypertyConfiguration);
+          return false;
+        }
+      })
+      .then(function(sandboxInstance) {
+        console.info('4: return the sandbox instance after check if is in the same sandbox or not');
 
-        let stubSandbox = _this.sandboxFactory.createSandbox();
+        //resolve({code: sourceCode, hypertyURL: hypertyURL, hypertyConfiguration: hypertyConfiguration, messageBus: _this.messageBus});
 
-        resolve({code: sourceCode, hypertyURL: hypertyURL, hypertyConfiguration: hypertyConfiguration, messageBus: _this.messageBus});
-
-      }).catch(errorReason);
+      })
+      .then(function(result) {
+        console.info('6: return deploy component for sandbox status');
+      })
+      .catch(errorReason);
 
     });
 
@@ -139,17 +167,6 @@ class RuntimeUA {
 
       let stubDescriptor;
 
-      // Discover Protocol Stub
-      stubDescriptor = _this.registry.discoverProtostub(domain);
-
-      if (!stubDescriptor) {
-
-        // TODO: get protostub | <sp-domain>/.well-known/protostub
-        // for the request you can use the module request in utils;
-        stubDescriptor = _this.registry.registerStub(domain);
-
-      }
-
       // TODO: temporary address this only static for testing
       let stubURL = 'hyperty-runtime://sp1/protostub/123';
       let componentDownloadURL = 'dist/VertxProtoStub.js';
@@ -158,43 +175,70 @@ class RuntimeUA {
         runtimeURL: 'runtime:/alice'
       };
 
-      // TODO: Check on PEP (policy Engine) if we need the sandbox and check if the Sandbox Factory have the context sandbox;
-      // Instantiate the Sandbox
-      let stubSandbox = _this.sandboxFactory.createSandbox();
-
-      // Register Sandbox on the Registry
+      let stubSandbox;
       let runtimeSandboxURL;
+      let runtimeProtoStubURL;
+      let protoStubSourceCode;
 
-      // Register Sandbox
-      _this.registry.registerSandbox(domain)
-        .then(function(result) {
-          console.info('step 1: return the sandbox runtime url');
+      // Discover Protocol Stub
+      return _this.registry.discoverProtostub(domain).then(function(descriptor) {
+        // Is registed?
+        console.info('1. Proto Stub Discovered: ', descriptor);
+        stubDescriptor = descriptor;
+        return stubDescriptor;
+      }, function(reason) {
+        // is not registed?
+        console.info('1. Proto Stub not found:', reason);
 
-          // Save the sandbox runtime URL
-          runtimeSandboxURL = result.sandboxURL;
+        // TODO: get protostub | <sp-domain>/.well-known/protostub
+        // for the request you can use the module request in utils;
+        return request.get(domain);
+      })
+      .then(function(descriptor) {
+        console.info('2. return the ProtoStub descriptor:', descriptor);
+        stubDescriptor = descriptor;
 
-          // Get the component source code referent to component download url;
-          return request.get(componentDownloadURL);
-        }).then(function(result) {
-          console.info('step 2: return the component Source Code');
+        // Get the component source code referent to component download url;
+        return request.get(componentDownloadURL);
+      })
+      .then(function(protoStubSourceCode) {
+        console.info('3. return the ProtoStub Source Code: ');
+        protoStubSourceCode = protoStubSourceCode;
 
-          // Deploy Component
-          return stubSandbox.deployComponent(result, runtimeSandboxURL, configuration);
-        }).then(function(result) {
-          console.info('step 3: deploy component for sandbox');
+        return _this.registry.registerStub(domain);
+      })
+      .then(function(runtimeProtoStubURL) {
+        console.info('4. return the runtimeProtoStubURL, After Register Stub');
+        runtimeProtoStubURL = runtimeProtoStubURL;
 
-          // Add the message bus listener
-          _this.messageBus.addListener(stubURL, stubSandbox);
+        // TODO: Check on PEP (policy Engine) if we need the sandbox and check if the Sandbox Factory have the context sandbox;
+        // Instantiate the Sandbox
+        stubSandbox = _this.sandboxFactory.createSandbox();
 
-          // Handle with deployed component
-          console.log('Component is deployed');
+        return _this.registry.registerSandbox(stubSandbox, domain);
+      })
+      .then(function(runtimeSandboxURL) {
+        console.info('5: return the sandbox runtime url');
 
-          // Load Stub function resolved with success;
-          resolve('Stub successfully loaded');
-        })
-        .catch(function(reason) {
-          console.log('Reason:', reason);
-        });
+        // Deploy Component
+        return stubSandbox.deployComponent(protoStubSourceCode, runtimeSandboxURL, configuration);
+      })
+      .then(function(result) {
+        console.info('6: return deploy component for sandbox status');
+
+        // Add the message bus listener
+        _this.messageBus.addListener(runtimeProtoStubURL, stubSandbox);
+
+        // Handle with deployed component
+        console.log('Component is deployed');
+
+        // Load Stub function resolved with success;
+        resolve('Stub successfully loaded');
+      })
+      .catch(function(reason) {
+        console.log('Reason:', reason);
+      });
+
     });
 
   }
