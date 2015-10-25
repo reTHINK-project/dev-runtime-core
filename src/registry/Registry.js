@@ -36,10 +36,8 @@ class Registry {
       objectStore.openCursor().onsuccess = function(event) {
         var cursor = event.target.result;
         if (cursor) {
-          /*console.log('key: ' + cursor.key + ' protoStubURL ' + cursor.value.protoStubURL +
-        ' pepURL ' + cursor.value.pepURL + ' sandboxURL ' + cursor.value.sandboxURL);*/
           _this.hypertiesList[cursor.key] = {protoStubURL: cursor.value.protoStubURL,
-          pepURL: cursor.value.pepURL, sandboxURL: cursor.value.sandboxURL};
+          pepURL: cursor.value.pepURL, sandboxURL: cursor.value.sandboxURL, identity: cursor.value.identity};
           cursor.continue();
         }
       };
@@ -55,12 +53,31 @@ class Registry {
       objectStore.createIndex('protoStubURL', 'protoStubURL', {unique: false});
       objectStore.createIndex('pepURL', 'pepURL', {unique: false});
       objectStore.createIndex('sandboxURL', 'sandboxURL', {unique: false});
+      objectStore.createIndex('identity', 'identity', {unique: false});
 
       //populate with the runtimeURL provided
       objectStore.put({hyperty: _this.runtimeURL, protoStubURL: null,
-                pepURL: null, sandboxURL: null});
+                pepURL: null, sandboxURL: null, identity: _this.runtimeURL + '/identity'});
     };
 
+  }
+
+  /**
+  * Register the messageBus, so the registry can make calls to messageBus
+  * @param {MessageBus}           messageBus
+  */
+  registerMessageBus(messageBus) {
+    let _this = this;
+    _this.messageBus = messageBus;
+  }
+
+  /**
+  * Return the messageBus in this Registry
+  * @param {MessageBus}           messageBus
+  */
+  discoverMessageBus() {
+    let _this = this;
+    return _this.messageBus;
   }
 
   /**
@@ -74,23 +91,43 @@ class Registry {
 
     // assuming the hyperty name come in the body of the message
     // this is a very simple way to do it, just for test
-    let HypertyURL = postMessage.body.value;
+    let hypertyURL = postMessage.body.value;
+
+    //TODO Call get Identity and set Identity to Identity Module
+    //for simplicity added an identity
+    let hypertyIdentity = postMessage.body.value + '/identity';
 
     var promise = new Promise(function(resolve, reject) {
+
+      if (_this.messageBus === undefined) {
+        reject('MessageBus not found on registerStub');
+      }
+
+      //TODO call the post message to msgBus to read msg to get hyperty address allocation
+      //let message = {header: {id: 1, from: _this.runtimeURL, to: 'sp1/msg-node/address-allocation'},
+      // body: {'hypertyUrl': hypertyURL}};
+      //_this.messageBus.postMessage(message);
+
+      //TODO call the post message with create hypertyRegistration msg
+      //let message = {header: {id: 1, from: _this.runtimeURL, to: 'sp1/msg-node/back-end'},
+      // body: {'hypertyUrl': hypertyURL}};
+      //_this.messageBus.postMessage(message);
 
       let transaction = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readwrite');
       let storeValue = transaction.objectStore(_this.DB_STORE_HYPERTY);
 
-      storeValue.put({hyperty: HypertyURL, protoStubURL: null,
-                pepURL: null, sandboxURL: null});
+      storeValue.put({hyperty: hypertyURL, protoStubURL: null,
+                pepURL: null, sandboxURL: null, identity: hypertyIdentity});
 
       //add the hyperty in the hypertiesList hash table
-      _this.hypertiesList[HypertyURL] = {protoStubURL: null,
+      _this.hypertiesList[hypertyURL] = {protoStubURL: null,
                           pepURL: null, sandboxURL: null};
 
       transaction.oncomplete = function(event) {
-        //console.log('Hyperty registered with success');
-        resolve(HypertyURL);
+        //add to the listener in messageBus
+        //TODO check if those are the correct parameters
+        _this.messageBus.addListener(hypertyURL + '/status', hypertyIdentity);
+        resolve(hypertyURL);
       };
 
       transaction.onerror = function(event) {
@@ -98,12 +135,6 @@ class Registry {
         reject('Error on register hyperty');
       };
     });
-
-    //TODO implement the associate to Idetity
-
-    //TODO allocate address for the new Hyperty Instance
-
-    //TODO register Hyperty at SP1 Registry
 
     return promise;
   }
@@ -194,9 +225,14 @@ class Registry {
 
     var promise = new Promise(function(resolve,reject) {
 
+      if (_this.messageBus === undefined) {
+        reject('MessageBus not found on registerStub');
+      }
+
       let objectStore = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readwrite').objectStore(_this.DB_STORE_HYPERTY);
       let request = objectStore.get(domainURL);
 
+      //check if messageBus is registered in registry or not
       request.onerror = function(event) {
         console.error('domainURL not found');
         reject('Error on registerProtostub');
@@ -220,17 +256,21 @@ class Registry {
 
           requestUpdate.onsuccess = function(event) {
             //update the value in the hypertiesList hash table
+
             let hashValue = _this.hypertiesList[domainURL];
             let newHashValue = {protoStubURL: runtimeProtoStubURL,
                                 pepURL: hashValue.pepURL, sandboxURL: hashValue.sandboxURL};
             _this.hypertiesList[domainURL] = newHashValue;
+
+            //add to the listener in messageBus
+            //TODO check if those are the correct parameters
+            _this.messageBus.addListener(runtimeProtoStubURL + '/status', domainURL);
+
             resolve(runtimeProtoStubURL);
           };
         }
       };
     });
-
-    //TODO call the addListener function in Msg BUS
 
     return promise;
   }
