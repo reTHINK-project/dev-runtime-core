@@ -29,6 +29,8 @@ class RuntimeUA {
     _this.policyEngine = new PolicyEngine();
     _this.messageBus = new MessageBus(_this.registry);
 
+    _this.registry.registerMessageBus(_this.messageBus);
+
     sandboxFactory.messageBus = _this.messageBus;
     _this.sandboxFactory = sandboxFactory;
 
@@ -80,7 +82,10 @@ class RuntimeUA {
       let _hypertySandbox;
       let _hypertyDescriptor;
       let _hypertySourceCode;
-      let _hypertyConfiguration = {};
+      let _hypertyConfiguration = {
+        url: 'ws://localhost:9090/ws',
+        runtimeURL: 'runtime:/alice'
+      };
 
       let errorReason = function(reason) {
         // console.log('Hyperty Error:', reason);
@@ -109,11 +114,9 @@ class RuntimeUA {
         // TODO: remove or update this message, because we don't now if the registerHyperty have a messageBus instance or an message object;
         let message = {
           body: {
-            value: 'hyperty-runtime://sp1/protostub/123/'
+            value: 'hyperty-runtime://sp1/protostub/123'
           }
         };
-
-        console.log(_hypertySourceCode);
 
         // Register hyperty;
         return _this.registry.registerHyperty(message, _hypertyDescriptor);
@@ -145,7 +148,7 @@ class RuntimeUA {
 
       })
       .then(function(result) {
-        console.info('6: return deploy component for sandbox status');
+        console.info('5: return deploy component for sandbox status');
       })
       .catch(errorReason);
 
