@@ -443,11 +443,11 @@ class Registry {
 
     let transaction = _this.db.transaction(_this.DB_STORE_STUB, 'readonly');
     let objectStore = transaction.objectStore(_this.DB_STORE_STUB);
-    let request  = objectStore.get(url);
+    let index  = objectStore.index('protostubURL');
 
     let promise = new Promise((resolve, reject) => {
 
-      let request  = objectStore.get(url);
+      let request  = index.get(url);
 
       request.onsuccess = function(event) {
         let matching = request.result;
