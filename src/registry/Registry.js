@@ -19,9 +19,10 @@ class Registry {
 
     _this.db = {};
     _this.DB_NAME = 'registry-DB';
-    _this.DB_VERSION = 2;
+    _this.DB_VERSION = 1;
     _this.DB_STORE_HYPERTY = 'hyperty-list';
     _this.DB_STORE_STUB = 'protostub-list';
+    _this.DB_STORE_SANDBOX = 'sandbox-list';
 
     let request = indexedDB.open(_this.DB_NAME, _this.DB_VERSION);
 
@@ -37,16 +38,19 @@ class Registry {
       let objectStore = event.currentTarget.result.createObjectStore(
         _this.DB_STORE_HYPERTY, {keyPath: 'hyperty'});
       objectStore.createIndex('pepURL', 'pepURL', {unique: false});
-      objectStore.createIndex('sandboxURL', 'sandboxURL', {unique: false});
       objectStore.createIndex('identity', 'identity', {unique: false});
 
       //populate with the runtimeURL provided
-      objectStore.put({hyperty: _this.runtimeURL, pepURL: null, sandboxURL: null,
+      objectStore.put({hyperty: _this.runtimeURL, pepURL: null,
                       identity: _this.runtimeURL + '/identity'});
 
       let stubStore = event.currentTarget.result.createObjectStore(
         _this.DB_STORE_STUB, {keyPath: 'domainURL'});
       stubStore.createIndex('protostubURL', 'protostubURL', {unique: false});
+
+      let sandboxStore = event.currentTarget.result.createObjectStore(
+        _this.DB_STORE_SANDBOX, {keyPath: 'domainURL'});
+      sandboxStore.createIndex('sandbox', 'sandbox', {unique: false});
     };
 
   }
@@ -105,8 +109,7 @@ class Registry {
         let transaction = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readwrite');
         let storeValue = transaction.objectStore(_this.DB_STORE_HYPERTY);
 
-        storeValue.put({hyperty: hypertyURL, pepURL: null,
-                        sandboxURL: null, identity: hypertyIdentity});
+        storeValue.put({hyperty: hypertyURL, pepURL: null, identity: hypertyIdentity});
 
         transaction.oncomplete = function(event) {
           //add to the listener in messageBus
@@ -374,41 +377,26 @@ class Registry {
 
   /**
    * This function is used to register a new runtime sandboxes passing as input the sandbox instance and the domain URL associated to the sandbox instance.
+   * @param  {Sandbox}   sandbox
    * @param  {DomainURL} DomainURL url
-   * @return {RuntimeSandboxURL}
+   * @return {Promise}
    */
-  registerSandbox(url) {
+  registerSandbox(sandbox, url) {
     let _this = this;
-    var runtimeSandboxURL;
-
-    let objectStore = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readwrite').objectStore(_this.DB_STORE_HYPERTY);
-    let request = objectStore.get(url);
 
     var promise = new Promise(function(resolve,reject) {
 
-      request.onerror = function(event) {
-        reject('requestUpdate couldn\' register the sandbox');
+      let transaction = _this.db.transaction(_this.DB_STORE_SANDBOX, 'readwrite');
+      let objectStore = transaction.objectStore(_this.DB_STORE_SANDBOX);
+
+      objectStore.put({domainURL: url, sandbox: sandbox});
+
+      transaction.onerror = function(event) {
+        reject('Error on register Sandbox');
       };
 
-      request.onsuccess = function(event) {
-        runtimeSandboxURL = url + '/sandbox';
-        let data = request.result;
-        if (data !== undefined) {
-          data.sandboxURL = runtimeSandboxURL;
-          let requestUpdate = objectStore.put(data);
-
-          requestUpdate.onerror = function(event) {
-            reject('requestUpdate couldn\' register the sandbox');
-          };
-
-          requestUpdate.onsuccess = function(event) {
-            resolve(runtimeSandboxURL);
-          };
-
-        } else {
-          // No match was found.
-          reject('The entry don\'t exist.');
-        }
+      transaction.oncomplete = function(event) {
+        resolve('registered sandbox on url: ' + url);
       };
     });
 
@@ -423,8 +411,7 @@ class Registry {
   getSandbox(url) {
     if (!url) throw new Error('Parameter url needed');
     let _this = this;
-    let runtimeURL = _this.hypertiesList[url];
-    let objectStore = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readwrite').objectStore(_this.DB_STORE_HYPERTY);
+    let objectStore = _this.db.transaction(_this.DB_STORE_SANDBOX, 'readonly').objectStore(_this.DB_STORE_SANDBOX);
     let request = objectStore.get(url);
 
     var promise = new Promise(function(resolve,reject) {
@@ -436,9 +423,9 @@ class Registry {
       request.onsuccess = function(event) {
         let data = request.result;
         if (data !== undefined) {
-          resolve(data.sandboxURL);
+          resolve(data.sandbox);
         } else {
-          reject('No sandboxURL was found');
+          reject('No sandbox was found');
         }
       };
     });
