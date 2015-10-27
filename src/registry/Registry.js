@@ -16,31 +16,17 @@ class Registry {
 
     _this.runtimeURL = runtimeURL;
     _this.remoteRegistry = remoteRegistry;
-    _this.protoStubs = {};
 
-    //hash not yet fully removed, because it might be needed
-    _this.hypertiesList = {};
     _this.db = {};
     _this.DB_NAME = 'registry-DB';
-    _this.DB_VERSION = 1;
+    _this.DB_VERSION = 2;
     _this.DB_STORE_HYPERTY = 'hyperty-list';
+    _this.DB_STORE_STUB = 'protostub-list';
 
     let request = indexedDB.open(_this.DB_NAME, _this.DB_VERSION);
 
     request.onsuccess = function(event) {
       _this.db = this.result;
-
-      //store all the values in the database to a hash table
-      var transaction = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readonly');
-      var objectStore = transaction.objectStore(_this.DB_STORE_HYPERTY);
-      objectStore.openCursor().onsuccess = function(event) {
-        var cursor = event.target.result;
-        if (cursor) {
-          _this.hypertiesList[cursor.key] = {protoStubURL: cursor.value.protoStubURL,
-          pepURL: cursor.value.pepURL, sandboxURL: cursor.value.sandboxURL, identity: cursor.value.identity};
-          cursor.continue();
-        }
-      };
     };
 
     request.onerror = function(event) {
@@ -50,14 +36,17 @@ class Registry {
     request.onupgradeneeded = function(event) {
       let objectStore = event.currentTarget.result.createObjectStore(
         _this.DB_STORE_HYPERTY, {keyPath: 'hyperty'});
-      objectStore.createIndex('protoStubURL', 'protoStubURL', {unique: false});
       objectStore.createIndex('pepURL', 'pepURL', {unique: false});
       objectStore.createIndex('sandboxURL', 'sandboxURL', {unique: false});
       objectStore.createIndex('identity', 'identity', {unique: false});
 
       //populate with the runtimeURL provided
-      objectStore.put({hyperty: _this.runtimeURL, protoStubURL: null,
-                pepURL: null, sandboxURL: null, identity: _this.runtimeURL + '/identity'});
+      objectStore.put({hyperty: _this.runtimeURL, pepURL: null, sandboxURL: null,
+                      identity: _this.runtimeURL + '/identity'});
+
+      let stubStore = event.currentTarget.result.createObjectStore(
+        _this.DB_STORE_STUB, {keyPath: 'domainURL'});
+      stubStore.createIndex('protostubURL', 'protostubURL', {unique: false});
     };
 
   }
@@ -101,39 +90,37 @@ class Registry {
 
       if (_this.messageBus === undefined) {
         reject('MessageBus not found on registerStub');
+      } else {
+
+        //TODO call the post message to msgBus to read msg to get hyperty address allocation
+        //let message = {header: {id: 1, from: _this.runtimeURL + '/protostub', to: _this.runtimeURL + '/protostub'},
+        // body: {hypertyUrl: hypertyURL + '/protostub'}};
+        //_this.test = _this.messageBus.postMessage(message);
+
+        //TODO call the post message with create hypertyRegistration msg
+        //let message = {header: {id: 1, from: _this.runtimeURL, to: 'sp1/msg-node/back-end'},
+        // body: {'hypertyUrl': hypertyURL}};
+        //_this.messageBus.postMessage(message);
+
+        let transaction = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readwrite');
+        let storeValue = transaction.objectStore(_this.DB_STORE_HYPERTY);
+
+        storeValue.put({hyperty: hypertyURL, pepURL: null,
+                        sandboxURL: null, identity: hypertyIdentity});
+
+        transaction.oncomplete = function(event) {
+          //add to the listener in messageBus
+          //TODO check if those are the correct parameters
+          _this.messageBus.addListener(hypertyURL + '/status', (msg) => {
+            console.log('Message addListener: ' + msg);
+          });
+          resolve(hypertyURL);
+        };
+
+        transaction.onerror = function(event) {
+          reject('Error on register hyperty');
+        };
       }
-
-      //TODO call the post message to msgBus to read msg to get hyperty address allocation
-      //let message = {header: {id: 1, from: _this.runtimeURL, to: 'sp1/msg-node/address-allocation'},
-      // body: {'hypertyUrl': hypertyURL}};
-      //_this.messageBus.postMessage(message);
-
-      //TODO call the post message with create hypertyRegistration msg
-      //let message = {header: {id: 1, from: _this.runtimeURL, to: 'sp1/msg-node/back-end'},
-      // body: {'hypertyUrl': hypertyURL}};
-      //_this.messageBus.postMessage(message);
-
-      let transaction = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readwrite');
-      let storeValue = transaction.objectStore(_this.DB_STORE_HYPERTY);
-
-      storeValue.put({hyperty: hypertyURL, protoStubURL: null,
-                pepURL: null, sandboxURL: null, identity: hypertyIdentity});
-
-      //add the hyperty in the hypertiesList hash table
-      _this.hypertiesList[hypertyURL] = {protoStubURL: null,
-                          pepURL: null, sandboxURL: null};
-
-      transaction.oncomplete = function(event) {
-        //add to the listener in messageBus
-        //TODO check if those are the correct parameters
-        _this.messageBus.addListener(hypertyURL + '/status', hypertyIdentity);
-        resolve(hypertyURL);
-      };
-
-      transaction.onerror = function(event) {
-        console.error('Hyperty registration error: ' + event.target.errorCode);
-        reject('Error on register hyperty');
-      };
     });
 
     return promise;
@@ -152,7 +139,6 @@ class Registry {
       let request = objectStore.get(url);
 
       request.onerror = function(event) {
-        console.error('hyperty not found');
         reject('Error on delete Hyperty');
       };
 
@@ -160,15 +146,13 @@ class Registry {
 
         let data = request.result;
         if (data === undefined) {
-          reject('Error on registerPEP');
+          reject('Error hyperty not found');
         } else {
 
           var request2 = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readwrite').
           objectStore(_this.DB_STORE_HYPERTY).delete(url);
 
           request2.onsuccess = function(event) {
-            // delete the hyperty in the hypertiesList hash table
-            delete _this.hypertiesList[url];
             resolve('Hyperty delete with success');
           };
 
@@ -191,10 +175,11 @@ class Registry {
   discoverProtostub(url) {
     if (!url) throw new Error('Parameter url needed');
     let _this = this;
-    let objectStore = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readwrite').objectStore(_this.DB_STORE_HYPERTY);
-    let request = objectStore.get(url);
+    let objectStore = _this.db.transaction(_this.DB_STORE_STUB, 'readonly').objectStore(_this.DB_STORE_STUB);
 
     var promise = new Promise(function(resolve,reject) {
+
+      let request = objectStore.get(url);
 
       request.onerror = function(event) {
         reject('requestUpdate couldn\' get the ProtostubURL');
@@ -204,7 +189,7 @@ class Registry {
       request.onsuccess = function(event) {
         let data = request.result;
         if (data !== undefined) {
-          resolve(data.protoStubURL);
+          resolve(data.protostubURL);
         } else {
           reject('No protostubURL was found');
         }
@@ -229,46 +214,23 @@ class Registry {
         reject('MessageBus not found on registerStub');
       }
 
-      let objectStore = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readwrite').objectStore(_this.DB_STORE_HYPERTY);
-      let request = objectStore.get(domainURL);
+      let transaction = _this.db.transaction(_this.DB_STORE_STUB, 'readwrite');
+      let objectStore = transaction.objectStore(_this.DB_STORE_STUB);
+
+      //TODO implement a unique number for the protostubURL
+      runtimeProtoStubURL = domainURL + '/protostub/' + Math.floor((Math.random() * 10000) + 1);
+      objectStore.put({domainURL: domainURL, protostubURL: runtimeProtoStubURL});
 
       //check if messageBus is registered in registry or not
-      request.onerror = function(event) {
-        console.error('domainURL not found');
+      transaction.onerror = function(event) {
         reject('Error on registerProtostub');
       };
 
-      request.onsuccess = function(event) {
-        runtimeProtoStubURL = domainURL + '/protostub';
-        let data = request.result;
-
-        if (data === undefined) {
-          reject('Error on registerProtostub: hyperty not found');
-        } else {
-
-          data.protoStubURL = runtimeProtoStubURL;
-
-          let requestUpdate = objectStore.put(data);
-          requestUpdate.onerror = function(event) {
-            console.error('requestUpdate error: ' + event.target.errorCode);
-            reject('Error on registerPEP: error on database');
-          };
-
-          requestUpdate.onsuccess = function(event) {
-            //update the value in the hypertiesList hash table
-
-            let hashValue = _this.hypertiesList[domainURL];
-            let newHashValue = {protoStubURL: runtimeProtoStubURL,
-                                pepURL: hashValue.pepURL, sandboxURL: hashValue.sandboxURL};
-            _this.hypertiesList[domainURL] = newHashValue;
-
-            //add to the listener in messageBus
-            //TODO check if those are the correct parameters
-            _this.messageBus.addListener(runtimeProtoStubURL + '/status', domainURL);
-
-            resolve(runtimeProtoStubURL);
-          };
-        }
+      transaction.oncomplete = function(event) {
+        resolve(runtimeProtoStubURL);
+        _this.messageBus.addListener(runtimeProtoStubURL + '/status', (msg) => {
+          console.log('RuntimeProtostubURL message: ', msg);
+        });
       };
     });
 
@@ -285,11 +247,10 @@ class Registry {
 
     var promise = new Promise(function(resolve,reject) {
 
-      let objectStore = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readwrite').objectStore(_this.DB_STORE_HYPERTY);
+      let objectStore = _this.db.transaction(_this.DB_STORE_STUB, 'readwrite').objectStore(_this.DB_STORE_STUB);
       let request = objectStore.get(hypertyRuntimeURL);
 
       request.onerror = function(event) {
-        console.error('hypertyRuntimeURL not found');
         reject('Error on unregisterStub');
       };
 
@@ -300,20 +261,14 @@ class Registry {
           reject('Error on unregisterStub: Hyperty not found');
         } else {
 
-          data.protoStubURL = null;
+          var request2 = _this.db.transaction(_this.DB_STORE_STUB, 'readwrite').
+            objectStore(_this.DB_STORE_STUB).delete(hypertyRuntimeURL);
 
-          let requestUpdate = objectStore.put(data);
-          requestUpdate.onerror = function(event) {
-            console.error('requestUpdate error: ' + event.target.errorCode);
+          request2.onerror = function(event) {
             reject('Error on unregisterStub: error on database');
           };
 
-          requestUpdate.onsuccess = function(event) {
-            //update the value in the hypertiesList hash table
-            let hashValue = _this.hypertiesList[hypertyRuntimeURL];
-            let newHashValue = {protoStubURL: null,
-                                pepURL: hashValue.pepURL, sandboxURL: hashValue.sandboxURL};
-            _this.hypertiesList[hypertyRuntimeURL] = newHashValue;
+          request2.onsuccess = function(event) {
             resolve('ProtostubURL removed');
           };
         }
@@ -355,16 +310,10 @@ class Registry {
 
           let requestUpdate = objectStore.put(data);
           requestUpdate.onerror = function(event) {
-            console.error('requestUpdate error: ' + event.target.errorCode);
             reject('Error on update registerPEP');
           };
 
           requestUpdate.onsuccess = function(event) {
-            //update the value in the hypertiesList hash table
-            let hashValue = _this.hypertiesList[hyperty];
-            let newHashValue = {protoStubURL: hashValue.protoStubURL,
-                                pepURL: hypertypepURL, sandboxURL: hashValue.sandboxURL};
-            _this.hypertiesList[hyperty] = newHashValue;
             resolve(hypertypepURL);
           };
         }
@@ -388,7 +337,6 @@ class Registry {
       let request = objectStore.get(HypertyRuntimeURL);
 
       request.onerror = function(event) {
-        console.error('URL not found');
         reject('Error on unregisterPEP');
       };
 
@@ -403,16 +351,10 @@ class Registry {
 
           let requestUpdate = objectStore.put(data);
           requestUpdate.onerror = function(event) {
-            console.error('requestUpdate error: ' + event.target.errorCode);
             reject('Error on unregisterPEP: error on update dabatase');
           };
 
           requestUpdate.onsuccess = function(event) {
-            //update the value in the hypertiesList hash table
-            let hashValue = _this.hypertiesList[HypertyRuntimeURL];
-            let newHashValue = {protoStubURL: hashValue.protoStubURL,
-                                pepURL: null, sandboxURL: hashValue.sandboxURL};
-            _this.hypertiesList[HypertyRuntimeURL] = newHashValue;
             resolve(' PEP sucessfully deleted');
           };
         }
@@ -446,7 +388,6 @@ class Registry {
 
       request.onerror = function(event) {
         reject('requestUpdate couldn\' register the sandbox');
-        console.error('URL not found');
       };
 
       request.onsuccess = function(event) {
@@ -458,15 +399,9 @@ class Registry {
 
           requestUpdate.onerror = function(event) {
             reject('requestUpdate couldn\' register the sandbox');
-            console.error('requestUpdate error: ' + event.target.errorCode);
           };
 
           requestUpdate.onsuccess = function(event) {
-            //update the value in the hypertiesList hash table
-            let hashValue = _this.hypertiesList[url];
-            let newHashValue = {protoStubURL: hashValue.protoStubURL,
-                    pepURL: hashValue.pepURL, sandboxURL: runtimeSandboxURL};
-            _this.hypertiesList[url] = newHashValue;
             resolve(runtimeSandboxURL);
           };
 
@@ -478,10 +413,6 @@ class Registry {
     });
 
     return promise;
-
-    // return new Promise(function(resolve, reject) {
-    // resolve(RuntimeSandboxURL);
-    // });
   }
 
   /**
@@ -500,7 +431,6 @@ class Registry {
 
       request.onerror = function(event) {
         reject('requestUpdate couldn\' get the sandbox');
-        console.error('URL not found');
       };
 
       request.onsuccess = function(event) {
@@ -522,10 +452,30 @@ class Registry {
   * @return {Promise<URL.URL>}                 Promise <URL.URL>
   */
   resolve(url) {
-    return new Promise((resolve, reject) => {
-      //resolve to the same URL
-      resolve(url);
+    let _this = this;
+
+    let transaction = _this.db.transaction(_this.DB_STORE_STUB, 'readonly');
+    let objectStore = transaction.objectStore(_this.DB_STORE_STUB);
+    let request  = objectStore.get(url);
+
+    let promise = new Promise((resolve, reject) => {
+
+      let request  = objectStore.get(url);
+
+      request.onsuccess = function(event) {
+        let matching = request.result;
+        if (matching !== undefined) {
+          resolve(matching.protostubURL);
+        } else {
+          reject('URL ' + url + ' not found');
+        }
+      };
+
+      request.onerror = function(event) {
+        reject('The url ' + url + ' doesn\'t exist: error on dababase');
+      };
     });
+    return promise;
   }
 
 }
