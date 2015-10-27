@@ -69,6 +69,15 @@ gulp.task('build', function() {
 
 });
 
+gulp.task('watch', function() {
+  var watcher = gulp.watch('src/**/*.js', ['build']);
+  watcher.on('change', function(event) {
+    console.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
+  });
+});
+
+gulp.task('default', ['watch']);
+
 /**
  * Bumping version number and tagging the repository with it.
  * Please read http://semver.org/

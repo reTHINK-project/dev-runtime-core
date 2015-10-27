@@ -34,20 +34,6 @@ class RuntimeUA {
     sandboxFactory.messageBus = _this.messageBus;
     _this.sandboxFactory = sandboxFactory;
 
-    // TODO: remove this event listener, only for testing
-    let hypertyRuntimeURLStatus = 'hyperty-runtime://sp1/protostub/123/status';
-    _this.messageBus.addListener(hypertyRuntimeURLStatus, (msg) => {
-      console.log('Message bus status response with message: ', msg);
-    });
-
-    _this.messageBus.addListener('runtime:/alice', (msg) => {
-      console.log('Message bus alice with message: ', msg);
-    });
-
-    _this.messageBus.addListener('hyperty-runtime://sp1/protostub/123', (msg) => {
-      console.log('Message bus response with message: ', msg);
-    });
-
   }
 
   /**
@@ -79,11 +65,12 @@ class RuntimeUA {
 
     return new Promise(function(resolve, reject) {
 
+      let _hypertyURL;
       let _hypertySandbox;
       let _hypertyDescriptor;
       let _hypertySourceCode;
       let _hypertyConfiguration = {
-        url: 'ws://localhost:9090/ws',
+        url: 'ws://193.136.93.214:9090/ws',
         runtimeURL: 'runtime:/alice'
       };
 
@@ -101,7 +88,7 @@ class RuntimeUA {
 
         // TODO: Update this variables with result of the request
         // This values are only for testes, should be removed;
-        let hypertySourceCodeUrl = 'dist/VertxProtoStub.js';
+        let hypertySourceCodeUrl = hyperty;
 
         // Get the hyperty source code
         return request.get(hypertySourceCodeUrl);
@@ -114,7 +101,7 @@ class RuntimeUA {
         // TODO: remove or update this message, because we don't now if the registerHyperty have a messageBus instance or an message object;
         let message = {
           body: {
-            value: 'hyperty-runtime://sp1/protostub/123'
+            value: 'hyperty-runtime://sp1/protostub/HelloHyperty'
           }
         };
 
@@ -124,6 +111,7 @@ class RuntimeUA {
       .then(function(hypertyURL) {
         console.info('3: return hyperty url, after register hyperty');
 
+        _hypertyURL = hypertyURL;
         let inSameSandbox = true;
 
         // TODO: Check if the app and hyperty is in the same sandbox and
@@ -131,25 +119,26 @@ class RuntimeUA {
           // TODO: getAppSandbox, this will return a promise;
 
           _hypertySandbox = _this.sandboxFactory.createAppSandbox();
-          _hypertySandbox.deployComponent(_hypertySourceCode, hypertyURL, _hypertyConfiguration);
-          return true;
+          _hypertySandbox.deployComponent(_hypertySourceCode, _hypertyURL, _hypertyConfiguration);
         } else {
           // TODO: getHypertySandbox, this will return a promise;
 
           _hypertySandbox = _this.sandboxFactory.createSandbox();
-          _hypertySandbox.deployComponent(_hypertySourceCode, hypertyURL, hypertyConfiguration);
-          return false;
+          _hypertySandbox.deployComponent(_hypertySourceCode, _hypertyURL, _hypertyConfiguration);
         }
+
+        return _hypertySandbox;
       })
       .then(function(sandboxInstance) {
         console.info('4: return the sandbox instance after check if is in the same sandbox or not');
 
-        //resolve({code: sourceCode, hypertyURL: hypertyURL, hypertyConfiguration: hypertyConfiguration, messageBus: _this.messageBus});
+        // Add the message bus listener
+        _this.messageBus.addListener(_hypertyURL, sandboxInstance);
 
       })
-      .then(function(result) {
-        console.info('5: return deploy component for sandbox status');
-      })
+      // .then(function(result) {
+      //   console.info('5: return deploy component for sandbox status');
+      // })
       .catch(errorReason);
 
     });
@@ -171,17 +160,16 @@ class RuntimeUA {
       let stubDescriptor;
 
       // TODO: temporary address this only static for testing
-      let stubURL = 'hyperty-runtime://sp1/protostub/123';
       let componentDownloadURL = 'dist/VertxProtoStub.js';
       let configuration = {
-        url: 'ws://localhost:9090/ws',
+        url: 'ws://193.136.93.243:9090/ws',
         runtimeURL: 'runtime:/alice'
       };
 
-      let stubSandbox;
-      let runtimeSandboxURL;
-      let runtimeProtoStubURL;
-      let protoStubSourceCode;
+      let _stubSandbox;
+      let _runtimeSandboxURL;
+      let _runtimeProtoStubURL;
+      let _protoStubSourceCode;
 
       // Discover Protocol Stub
       return _this.registry.discoverProtostub(domain).then(function(descriptor) {
@@ -195,7 +183,8 @@ class RuntimeUA {
 
         // TODO: get protostub | <sp-domain>/.well-known/protostub
         // for the request you can use the module request in utils;
-        return request.get(domain);
+        // return request.get(domain);
+        return {};
       })
       .then(function(descriptor) {
         console.info('2. return the ProtoStub descriptor:', descriptor);
@@ -206,34 +195,43 @@ class RuntimeUA {
       })
       .then(function(protoStubSourceCode) {
         console.info('3. return the ProtoStub Source Code: ');
-        protoStubSourceCode = protoStubSourceCode;
+        _protoStubSourceCode = protoStubSourceCode;
 
         return _this.registry.registerStub(domain);
       })
       .then(function(runtimeProtoStubURL) {
         console.info('4. return the runtimeProtoStubURL, After Register Stub');
-        runtimeProtoStubURL = runtimeProtoStubURL;
+        _runtimeProtoStubURL = runtimeProtoStubURL;
 
         // TODO: Check on PEP (policy Engine) if we need the sandbox and check if the Sandbox Factory have the context sandbox;
         // Instantiate the Sandbox
-        stubSandbox = _this.sandboxFactory.createSandbox();
+        _stubSandbox = _this.sandboxFactory.createSandbox();
 
-        return _this.registry.registerSandbox(stubSandbox, domain);
+        return _this.registry.registerSandbox(_stubSandbox, domain);
       })
       .then(function(runtimeSandboxURL) {
-        console.info('5: return the sandbox runtime url');
+        console.info('5: return the sandbox runtime url', runtimeSandboxURL);
+        _runtimeSandboxURL = runtimeSandboxURL;
 
         // Deploy Component
-        return stubSandbox.deployComponent(protoStubSourceCode, runtimeSandboxURL, configuration);
+        return _stubSandbox.deployComponent(_protoStubSourceCode, _runtimeProtoStubURL, configuration);
+      }, function() {
+        // TODO: delete this fallback;
+        console.info('5.1: return the sandbox runtime url');
+        _runtimeSandboxURL = 'ptinovacao.pt/sandbox/1234';
+
+        // Deploy Component
+        return _stubSandbox.deployComponent(_protoStubSourceCode, _runtimeProtoStubURL, configuration);
       })
       .then(function(result) {
         console.info('6: return deploy component for sandbox status');
 
-        // Add the message bus listener
-        _this.messageBus.addListener(runtimeProtoStubURL, stubSandbox);
-
         // Handle with deployed component
         console.log('Component is deployed');
+
+        // Add the message bus listener
+        console.info('add message bus listener to: ', _runtimeProtoStubURL, ' on ', _stubSandbox);
+        _this.messageBus.addListener(_runtimeProtoStubURL, _stubSandbox);
 
         // Load Stub function resolved with success;
         resolve('Stub successfully loaded');

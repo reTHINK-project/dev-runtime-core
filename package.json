@@ -38,6 +38,7 @@
     "gulp-insert": "^0.5.0",
     "gulp-replace": "^0.5.4",
     "gulp-uglify": "^1.4.2",
+    "gulp-watch": "^4.3.5",
     "jsdoc": "git+https://github.com/jsdoc3/jsdoc.git",
     "jspm": "^0.16.10",
     "karma": "^0.13.10",
