@@ -52,6 +52,11 @@ class RuntimeUA {
   registerHyperty(hypertyInstance, descriptor) {
     // Body...
   }
+  
+  downloadHypertyCode(URL) {
+  
+    
+  }
 
   /**
   * Deploy Hyperty from Catalogue URL
