@@ -12,4 +12,4 @@ npm-debug.log
 vendor
 build
 node_modules
-.komodoproject
+*.komodoproject
