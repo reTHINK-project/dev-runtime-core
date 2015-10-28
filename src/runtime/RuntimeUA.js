@@ -53,7 +53,7 @@ class RuntimeUA {
     // Body...
   }
   
-  downloadHypertyCode(URL) {
+  downloadHypertyCode(hypertyURL) {
   
     
   }
