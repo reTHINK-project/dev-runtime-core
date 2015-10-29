@@ -86,6 +86,9 @@ class RuntimeUA {
 
       // Get Hyperty descriptor
       return request.get(hyperty).then(function(hypertyDescriptor) {
+        
+        // hyperty contains the full path of the catalogue URL, e.g.
+        // catalogue.rethink.eu/.well-known/..........
 
         console.info('1: return hyperty descriptor');
 
@@ -93,6 +96,9 @@ class RuntimeUA {
 
         // TODO: Update this variables with result of the request
         // This values are only for testes, should be removed;
+        // TODO: need to extract the hypertySourceCodeURL from _hypertyDescriptor.
+        // This can be simple done by extending the hyperty URL that was passed
+        // before, since we have well-known path components.
         let hypertySourceCodeUrl = hyperty;
 
         // Get the hyperty source code
@@ -102,30 +108,74 @@ class RuntimeUA {
 
         console.info('2: return hyperty source code');
         _hypertySourceCode = hypertySourceCode;
+        
+        // at this point, we have completed "step 4" as shown in https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md
+        
 
         // TODO: remove or update this message, because we don't now if the registerHyperty have a messageBus instance or an message object;
-        let message = {
+        // can be ignored, was for initial testing
+        // The following is just a test "message" to make things work.  At this point, it is
+        // entirely unclear what this "message" is supposed to be.  This part of the code needs to be implemented
+        // by the provided of the registry class.
+        // 
+        // message.body.value has to contain the path to the runtime hyperty instance.
+        //
+        //
+        // After discussion between PTN and Fokus on 2015-10-29, the message parameter of registry.registerHyperty() does
+        // make no sence and should be skipped.
+        //
+        // TODO: Paulo will open an issue to discuss this problem.  Issue to be closed on Monday, in which the decision
+        // will take place if the message parameter will be dropped.
+        // Attention: dropping the message parameter requries changing the existing specification, im particular the 
+        // message sequence diagrams. 
+        // https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/register-hyperty.md
+        // https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md
+         let message = {
           body: {
             value: 'hyperty-runtime://sp1/protostub/HelloHyperty'
           }
-        };
+         };
 
         // Register hyperty;
         return _this.registry.registerHyperty(message, _hypertyDescriptor);
       })
       .then(function(hypertyURL) {
+        // hypertyURL is the URL to the instantiated hyperty.
+        
+        // we have completed step 7 of https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
+        //
+        // steps 8 -- 11 are skipped.
+        //
+        // As a result of the sipped steps, we know at this point if we execute 
+        // inSameSandbox or not.
         console.info('3: return hyperty url, after register hyperty');
 
         _hypertyURL = hypertyURL;
+        
+        // For testing, just assume we execute in same Sandbox.
         let inSameSandbox = true;
 
         // TODO: Check if the app and hyperty is in the same sandbox and
         if (inSameSandbox) {
-          // TODO: getAppSandbox, this will return a promise;
+          // Steps 12 -- 18
 
+          // the following one lines are the mock-up for the missing steps 12 & 13
+          // TODO: getAppSandbox, this will return a promise;
           _hypertySandbox = _this.sandboxFactory.createAppSandbox();
+          
+          // step 14
+          // Discussion between PT and Fokus 2015-10-29:  unclear if deployComponent returns a
+          // promise or not. Align with spec as well: https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md
           _hypertySandbox.deployComponent(_hypertySourceCode, _hypertyURL, _hypertyConfiguration);
+          
+          // we have completed step 16 here.
+          
+          // Note, steps 17 & 18 are not part of the if-statement as the appear both at the end of the
+          // if statement and of the else statement.  --> common code taken outside
+          // TODO:  Spec needs to be aligned, we need to exlude steps 17 & 18 from the two alternatives.
+          
         } else {
+          // Steps 19 -- 28
           // TODO: getHypertySandbox, this will return a promise;
 
           _hypertySandbox = _this.sandboxFactory.createSandbox();
