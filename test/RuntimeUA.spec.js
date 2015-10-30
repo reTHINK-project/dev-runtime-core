@@ -10,7 +10,23 @@ import IdentityModule from '../src/identity/IdentityModule';
 import PolicyEngine from '../src/policy/PolicyEngine';
 import MessageBus from '../src/bus/MessageBus';
 
-import Sandbox from '../src/sandbox/Sandbox';
+// Mockup code, for tests;
+class SandboxBrowser {
+
+  constructor() {
+    console.log('Sandbox Browser');
+  }
+
+}
+
+class AppSandboxBrowser {
+
+  constructor() {
+    console.log('App Sandbox Browser');
+  }
+
+}
+
 class SandboxFactoryTest {
 
   get messageBus() {
@@ -25,7 +41,12 @@ class SandboxFactoryTest {
 
   createSandbox() {
     let _this = this;
-    return new Sandbox(_this._messageBus);
+    return new SandboxBrowser(_this._messageBus);
+  }
+
+  createAppSandbox() {
+    let _this = this;
+    return new AppSandboxBrowser(_this._messageBus);
   }
 
   removeSandbox() {
@@ -34,6 +55,7 @@ class SandboxFactoryTest {
 
 }
 
+// Testing runtimeUA;
 describe('RuntimeUA', function() {
 
   // Only for testing
@@ -70,7 +92,7 @@ describe('RuntimeUA', function() {
 
       it('should return Hyperty Registration Status', function(done) {
 
-        let hypertyURL = 'dist/VertxProtoStub.js';
+        let hypertyURL = 'ptinovacao.pt';
         let hyperty = runtime.loadHyperty(hypertyURL);
         let hypertyRegistration = {};
 
@@ -80,22 +102,6 @@ describe('RuntimeUA', function() {
         }).catch(function(reason) {
           done();
           expect(reason).to.not.throw();
-        });
-
-      });
-
-      it('should fail the hyperty Registration', function(done) {
-
-        let hypertyURL = 'aasdfadsf';
-        let hyperty = runtime.loadHyperty(hypertyURL);
-        let hypertyRegistration = {};
-
-        hyperty.then(function(result) {
-          console.log("RESYKT:", result);
-        }).catch(function(reason) {
-          done();
-          expect(reason).to.not.throw();
-          return reason;
         });
 
       });

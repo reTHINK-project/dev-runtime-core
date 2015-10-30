@@ -5,45 +5,46 @@
  *
  * The IdentityModule is a component managing user Identity. It downloads, instantiates
  * and manage Identity Provider Proxy (IdP) for its own user identity or for external
- * user identity verification. 
- * 
+ * user identity verification.
+ *
  */
-var IdentityModule = {
+class IdentityModule {
 
-/**
- *          USER'S OWN IDENTITY
- */
+  /**
+   * USER'S OWN IDENTITY
+   */
+  constructor() {
+
+  }
 
   /**
    * Register a new Identity with an Identity Provider
    */
-  registerIdentity: function(){
+  registerIdentity() {
     // Body...
-  },
-  
+  }
+
   /**
    * In relation with a classical Relying Party: Registration
    */
-  registerWithRP: function() {
+  registerWithRP() {
     // Body...
-  },
-  
-  
+  }
+
   /**
    * In relation with a classical Relying Party: Login
    */
-  loginWithRP: function() {
+  loginWithRP() {
     // Body...
-  },
-  
-  
+  }
+
   /**
    * In relation with a Hyperty Instance: Associate identity
    */
-  setHypertyIdentity: function() {
+  setHypertyIdentity() {
     // Body...
-  },
-  
+  }
+
   /**
    * Generates an Identity Assertion for a call session
    * @param  {DOMString} contents     contents
@@ -51,30 +52,30 @@ var IdentityModule = {
    * @param  {DOMString} usernameHint usernameHint
    * @return {IdAssertion}              IdAssertion
    */
-  generateAssertion: function(contents, origin, usernameHint) {
+  generateAssertion(contents, origin, usernameHint) {
     // Body...
-  },
+  }
 
+  /**
+   * OTHER USER'S IDENTITY
+   */
 
-/**
- *          OTHER USER'S IDENTITY
- */
-  
   /**
    * Verification of a received IdAssertion validity
    * @param  {DOMString} assertion assertion
    */
-  validateAssertion: function(assertion) {
+  validateAssertion(assertion) {
     // Body...
-  },
-  
+  }
+
   /**
    * Trust level evaluation of a received IdAssertion
    * @param  {DOMString} assertion assertion
    */
-  getAssertionTrustLevel: function(assertion) {
+  getAssertionTrustLevel(assertion) {
     // Body...
-  },
+  }
+
 }
 
-module.exports = IdentityModule
+export default IdentityModule;
