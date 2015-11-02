@@ -24,10 +24,6 @@ class RuntimeUA {
 
     let hypertyRuntimeURL = 'hyperty-runtime://sp1/protostub/123';
 
-    // Instantiate the Registry Module
-    _this.registry = new Registry(hypertyRuntimeURL);
-    _this.registry.registerMessageBus(_this.messageBus);
-
     // Instantiate the identity Module
     _this.identityModule = new IdentityModule();
 
@@ -36,6 +32,10 @@ class RuntimeUA {
 
     // Instantiate the Message Bus
     _this.messageBus = new MessageBus(_this.registry);
+
+    // Instantiate the Registry Module
+    _this.registry = new Registry(hypertyRuntimeURL);
+    _this.registry.registerMessageBus(_this.messageBus);
 
     // Use sandbox factory to use specific methods
     // and set the message bus to the factory
@@ -219,7 +219,6 @@ class RuntimeUA {
       let stubDescriptor;
 
       // TODO: temporary address this only static for testing
-      let componentDownloadURL = 'dist/VertxProtoStub.js';
       let configuration = {
         url: 'ws://193.136.93.243:9090/ws',
         runtimeURL: 'runtime:/alice'
@@ -248,6 +247,8 @@ class RuntimeUA {
       .then(function(descriptor) {
         console.info('2. return the ProtoStub descriptor:', descriptor);
         stubDescriptor = descriptor;
+
+        let componentDownloadURL = 'dist/VertxProtoStub.js';
 
         // Get the component source code referent to component download url;
         return request.get(componentDownloadURL);
