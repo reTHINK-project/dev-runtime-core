@@ -1,5 +1,9 @@
 import chai from 'chai';
+import chaiAsPromised from 'chai-as-promised';
+
 let expect = chai.expect;
+
+chai.use(chaiAsPromised);
 
 // Testing Module
 import RuntimeUA from '../src/runtime/RuntimeUA';
@@ -89,55 +93,58 @@ describe('RuntimeUA', function() {
     });
   });
 
-  describe('loadHyperty(HypertyDescriptorURL)', function() {
+  describe('loadHyperty(hypertyDescriptorURL)', function() {
 
-    describe('describe the status of load hyperty', function() {
+    let hypertyDescriptorURL = 'test/resources/helloHyperty.js';
+    let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL);
 
-      it('should return Hyperty Registration Status', function(done) {
+    it('should throw when given no arguments', function() {
+      expect(runtime.loadHyperty).to.throw();
+    });
 
-        let hypertyURL = 'ptinovacao.pt';
-        let hyperty = runtime.loadHyperty(hypertyURL);
-        let hypertyRegistration = {};
+    it('should be a Promise', function() {
+      expect(loadHyperty).to.be.instanceof(Promise);
+    });
 
-        hyperty.then(function(result) {
-          done();
-          expect(result).to.not.throw();
-        }).catch(function(reason) {
-          done();
-          expect(reason).to.not.throw();
-        });
+    it('should be deployed', function() {
+      // TODO: pass valid arguments to be deployed;
+      // expect(loadHyperty).be.fulfilled.and.notify(done);
+    });
 
-      });
-
+    it('should be rejected', function(done) {
+      // TODO: make the load hyperty fail;
+      expect(loadHyperty).be.rejected.and.notify(done);
     });
 
   });
 
-  describe('loadStub(domain)', function() {
+  describe('loadStub(sp-domain)', function() {
 
-    let domain = 'ptinovacao.pt';
+    let spDomain = 'ptinovacao.pt';
 
     it('should throw when given no arguments', function() {
-      expect(runtime.loadStub).to.throw();
+      let loadStubPromise = runtime.loadStub;
+      expect(loadStubPromise).to.throw();
     });
 
-    it('should be a Promise', function(done) {
+    it('should be a Promise', function() {
+      let loadStubPromise = runtime.loadStub(spDomain);
+      expect(loadStubPromise).to.be.instanceof(Promise);
+    });
 
-      let result = runtime.loadStub(domain);
-
-      expect(result).to.be.instanceof(Promise);
-
+    it('should be deployed', function(done) {
+      // TODO: make the promise to loadStub and has successfully deployed
+      // TODO: need the server to run and teste the runtimeUA;
+      // let loadStubPromise = runtime.loadStub(spDomain);
+      // expect(loadStubPromise).be.fulfilled.and.notify(done);
       done();
+    });
 
-      // result.then(function(resolved) {
-      //   done();
-      //   expect(resolved).to.not.throw();
-      // }).catch(function(reason) {
-      //   done();
-      //   console.log('REASON: ', reason);
-      //   expect(rejected).to.not.throw();
-      // });
-
+    it('should be rejected', function(done) {
+      // TODO: make the load hyperty fail;
+      // let loadStubPromise = runtime.loadStub(spDomain);
+      // expect(loadStubPromise).be.rejected.and.notify(done);
+      done();
     });
 
   });
