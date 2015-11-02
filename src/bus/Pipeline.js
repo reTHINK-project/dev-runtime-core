@@ -1,4 +1,9 @@
-export default class Pipeline {
+/**
+* @author micaelpedrosa@gmail.com
+* Pipeline
+* Sequencial processor of methods. Similar to how Sequential Promise's work, but better fit for message processing.
+*/
+class Pipeline {
   /* public
     handlers: ((PipeContext) => void)[]
     onFail: (error) => void
@@ -101,3 +106,5 @@ class Iterator {
     return this._array[this._index];
   }
 }
+
+export default Pipeline;
