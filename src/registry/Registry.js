@@ -14,6 +14,7 @@ class Registry {
     /*if (!remoteRegistry) throw new Error('remoteRegistry is mission');*/
     let _this = this;
 
+    _this.registryURL = runtimeURL + '/registry/123';
     _this.runtimeURL = runtimeURL;
     _this.remoteRegistry = remoteRegistry;
 
@@ -62,6 +63,27 @@ class Registry {
   registerMessageBus(messageBus) {
     let _this = this;
     _this.messageBus = messageBus;
+    _this.messageBus.addListener(_this.registryURL, (msg) => {
+      console.log('Registry message: ', msg);
+    });
+  }
+
+  /**
+  * Register the runtimeUA, so the registry can make calls to runtimeUA
+  * @param {RuntimeUA}           runtimeUA
+  */
+  registerRuntimeUA(runtimeUA) {
+    let _this = this;
+    _this.runtimeUA = runtimeUA;
+  }
+
+  /**
+  * Return the runtimeUA in this Registry
+  * @param {RuntimeUA}           runtimeUA
+  */
+  discoverRuntimeUA() {
+    let _this = this;
+    return _this.runtimeUA;
   }
 
   /**
@@ -221,7 +243,7 @@ class Registry {
       let objectStore = transaction.objectStore(_this.DB_STORE_STUB);
 
       //TODO implement a unique number for the protostubURL
-      runtimeProtoStubURL = domainURL + '/protostub/' + Math.floor((Math.random() * 10000) + 1);
+      runtimeProtoStubURL = domainURL + '/protostub/' + 123;//Math.floor((Math.random() * 10000) + 1);
       objectStore.put({domainURL: domainURL, protostubURL: runtimeProtoStubURL});
 
       //check if messageBus is registered in registry or not
@@ -417,7 +439,7 @@ class Registry {
     var promise = new Promise(function(resolve,reject) {
 
       request.onerror = function(event) {
-        reject('requestUpdate couldn\' get the sandbox');
+        reject('requestUpdate couldn\'t get the sandbox');
       };
 
       request.onsuccess = function(event) {
@@ -439,30 +461,10 @@ class Registry {
   * @return {Promise<URL.URL>}                 Promise <URL.URL>
   */
   resolve(url) {
-    let _this = this;
-
-    let transaction = _this.db.transaction(_this.DB_STORE_STUB, 'readonly');
-    let objectStore = transaction.objectStore(_this.DB_STORE_STUB);
-    let index  = objectStore.index('protostubURL');
-
-    let promise = new Promise((resolve, reject) => {
-
-      let request  = index.get(url);
-
-      request.onsuccess = function(event) {
-        let matching = request.result;
-        if (matching !== undefined) {
-          resolve(matching.protostubURL);
-        } else {
-          reject('URL ' + url + ' not found');
-        }
-      };
-
-      request.onerror = function(event) {
-        reject('The url ' + url + ' doesn\'t exist: error on dababase');
-      };
+    return new Promise((resolve, reject) => {
+      //resolve to the same URL
+      resolve(url);
     });
-    return promise;
   }
 
 }
