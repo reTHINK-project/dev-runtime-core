@@ -1,4 +1,3 @@
-export default
 /**
 * Message BUS Interface
 */
@@ -114,3 +113,5 @@ class MsgListener {
     }
   }
 }
+
+export default MessageBus;
