@@ -6,12 +6,21 @@
 */
 class MiniBus {
   /* private
+  _msgId: number;
   _subscriptions: <url: MsgListener[]>
+
+  _replyTimeOut: number
+  _replyCallbacks: <id: (msg) => void>
   */
 
   constructor() {
     let _this = this;
+    _this._msgId = 0;
     _this._subscriptions = {};
+
+    _this._replyTimeOut = 3000; //default to 3s
+    _this._replyCallbacks = {};
+
     _this._registerExternalListener();
   }
 
@@ -37,18 +46,55 @@ class MiniBus {
   }
 
   /**
-  * Send messages to local listeners or if not exists, to external listeners.
-  * @param  {Message} msg msg
+  * Send messages to local listeners, or if not exists to external listeners.
+  * It's has an optional mechanism for automatic management of reply handlers.
+  * The reply handler will be unregistered after receiving the reply, or after reply timeout (default to 3s).
+  * @param  {Message} msg Message to send. Message ID is automatically added to the message.
+  * @param  {Function} replyCallback Optional parameter, if the developer what's automatic reply management.
+  * @return {number} Returns the message ID, in case it should be needed for manual management of the reply handler.
   */
-  postMessage(msg) {
+  postMessage(msg, replyCallback) {
     let _this = this;
 
-    let itemList = _this._subscriptions[msg.header.to];
-    if (itemList) {
-      _this._publishOn(itemList, msg);
-    } else {
-      _this._onPostMessage(msg);
+    //TODO: how do we manage message ID's? Should it be a global runtime counter, or per URL address?
+    //Global counter will not work, because there will be multiple MiniBus instances!
+    //Per URL, can be a lot of data to maintain!
+    //Maybe a counter per MiniBus instance. This is the assumed solution for now.
+    if (!msg.header.id) {
+      _this._msgId++;
+      msg.header.id = _this._msgId;
     }
+
+    //automatic management of reply handlers
+    if (replyCallback) {
+      _this._replyCallbacks[msg.header.id] = replyCallback;
+      setTimeout(() => {
+        let replyFun = _this._replyCallbacks[msg.header.id];
+        delete _this._replyCallbacks[msg.header.id];
+
+        if (replyFun) {
+          let errorMsg = {
+            header: {id: msg.header.id, type: 'reply'},
+            body: {code: 'error', desc: 'Reply timeout!'}
+          };
+
+          replyFun(errorMsg);
+        }
+      }, _this._replyTimeOut);
+    }
+
+    if (!_this._onReply(msg)) {
+      let itemList = _this._subscriptions[msg.header.to];
+      if (itemList) {
+        //do not publish on default address, because of loopback cycle
+        _this._publishOn(itemList, msg);
+      } else {
+        //if there is no listener, send to external interface
+        _this._onPostMessage(msg);
+      }
+    }
+
+    return msg.header.id;
   }
 
   /**
@@ -86,18 +132,36 @@ class MiniBus {
     });
   }
 
-  //publish in the "msg.header.to" subscription list or (if not exists) in the default "*" list.
-  _localPublish(msg) {
+  _onReply(msg) {
     let _this = this;
 
-    let itemList = _this._subscriptions[msg.header.to];
-    if (itemList) {
-      _this._publishOn(itemList, msg);
-    } else {
-      //is there any "*" (default) listeners?
-      itemList = _this._subscriptions['*'];
+    if (msg.header.type === 'reply') {
+      let replyFun = _this._replyCallbacks[msg.header.id];
+      delete _this._replyCallbacks[msg.header.id];
+
+      if (replyFun) {
+        replyFun(msg);
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  //receive messages from external interface
+  _onMessage(msg) {
+    let _this = this;
+
+    if (!_this._onReply(msg)) {
+      let itemList = _this._subscriptions[msg.header.to];
       if (itemList) {
         _this._publishOn(itemList, msg);
+      } else {
+        //is there any "*" (default) listeners?
+        itemList = _this._subscriptions['*'];
+        if (itemList) {
+          _this._publishOn(itemList, msg);
+        }
       }
     }
   }
@@ -112,10 +176,10 @@ class MiniBus {
   /**
    * Not public available, used by the class extension implementation, to process all messages that enter the MiniBus from an external interface, like a WebWorker, IFrame, etc.
    * This method is called one time in the constructor to register external listeners.
-   * The implementation will probably call the "_localPublish" method to publish in the local listeners.
+   * The implementation will probably call the "_onMessage" method to publish in the local listeners.
    * DO NOT call "postMessage", there is a danger that the message enters in a cycle!
    */
-  _registerExternalListener() { /*implementation will register external listener and call "this._localPublish(msg)" */ }
+  _registerExternalListener() { /*implementation will register external listener and call "this._onMessage(msg)" */ }
 
 }
 
