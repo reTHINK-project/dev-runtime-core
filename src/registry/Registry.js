@@ -5,16 +5,29 @@ class Registry {
 
   /**
   * To initialise the Runtime Registry with the RuntimeURL that will be the basis to derive the internal runtime addresses when allocating addresses to internal runtime component. In addition, the Registry domain back-end to be used to remotely register Runtime components, is also passed as input parameter.
+  * @param  {MessageBus}          msgbus                msgbus
   * @param  {HypertyRuntimeURL}   runtimeURL            runtimeURL
+  * @param  {AppSandbox}          appSandbox            appSandbox
   * @param  {DomainURL}           remoteRegistry        remoteRegistry
   */
-  constructor(runtimeURL, remoteRegistry) {
+  constructor(msgbus, runtimeURL, appSandbox, remoteRegistry) {
+
+    // NOTE if the database structure is changed it might cause errors, run the following command
+    // indexedDB.deleteDatabase('registry-DB'); this will delete the database, with the old structure
+
+    // how some functions receive the parameters for example:
+    // new Registry(msgbus, 'hyperty-runtime://sp1/123', appSandbox, remoteRegistry);
+    // registry.registerStub('sp1');
+    // registry.registerHyperty(sandBox, 'hyperty-runtime://sp1/123');
+    // registry.resolve('hyperty-runtime://sp1/123');
 
     if (!runtimeURL) throw new Error('runtimeURL is missing.');
-    /*if (!remoteRegistry) throw new Error('remoteRegistry is mission');*/
+    /*if (!remoteRegistry) throw new Error('remoteRegistry is missing');*/
     let _this = this;
 
     _this.registryURL = runtimeURL + '/registry/123';
+    _this.messageBus = msgbus;
+    _this.appSandbox = appSandbox;
     _this.runtimeURL = runtimeURL;
     _this.remoteRegistry = remoteRegistry;
 
@@ -40,18 +53,21 @@ class Registry {
         _this.DB_STORE_HYPERTY, {keyPath: 'hyperty'});
       objectStore.createIndex('pepURL', 'pepURL', {unique: false});
       objectStore.createIndex('identity', 'identity', {unique: false});
+      objectStore.createIndex('sandbox', 'sandbox', {unique: false});
 
       //populate with the runtimeURL provided
-      objectStore.put({hyperty: _this.runtimeURL, pepURL: null,
-                      identity: _this.runtimeURL + '/identity'});
+      objectStore.put({hyperty: 'test', pepURL: null,
+                      identity: 'testID' });
 
       let stubStore = event.currentTarget.result.createObjectStore(
         _this.DB_STORE_STUB, {keyPath: 'domainURL'});
       stubStore.createIndex('protostubURL', 'protostubURL', {unique: false});
 
+      stubStore.put({domainURL: 'testStub', protostubURL: 'testStubURL'});
+
       let sandboxStore = event.currentTarget.result.createObjectStore(
         _this.DB_STORE_SANDBOX, {keyPath: 'domainURL'});
-      sandboxStore.createIndex('sandbox', 'sandbox', {unique: false});
+      sandboxStore.createIndex('sandBox', 'sandBox', {unique: false});
     };
 
   }
@@ -63,9 +79,6 @@ class Registry {
   registerMessageBus(messageBus) {
     let _this = this;
     _this.messageBus = messageBus;
-    _this.messageBus.addListener(_this.registryURL, (msg) => {
-      console.log('Registry message: ', msg);
-    });
   }
 
   /**
@@ -96,55 +109,91 @@ class Registry {
   }
 
   /**
+  * This function is used to return the sandbox instance where the Application is executing. It is assumed there is just one App per Runtime instance.
+  */
+  getAppSandbox() {
+    let _this = this;
+    return _this.appSandbox;
+  }
+
+  /**
   * To register a new Hyperty in the runtime which returns the HypertyURL allocated to the new Hyperty.
-  * @param  {Message.Message}     postMessage           postMessage
+  * @param  {Sandbox}             sandbox               sandbox
   * @param  {HypertyCatalogueURL} HypertyCatalogueURL   descriptor
   * @return {HypertyURL}          HypertyURL
   */
-  registerHyperty(postMessage, descriptor) {
+  registerHyperty(sandbox, descriptor) {
     let _this = this;
 
-    // assuming the hyperty name come in the body of the message
-    // this is a very simple way to do it, just for test
-    let hypertyURL = postMessage.body.value;
+    //assuming descriptor come in this format, the service-provider-domain url is retrieved by a split instruction
+    //hyperty-catalogue://<service-provider-domain>/<catalogue-object-identifier>
+    let descriptorSplit = descriptor.split('/');
+    let hypertyURL = descriptorSplit[2];
 
     //TODO Call get Identity and set Identity to Identity Module
     //for simplicity added an identity
-    let hypertyIdentity = postMessage.body.value + '/identity';
+    let hypertyIdentity = hypertyURL + '/identity';
 
     var promise = new Promise(function(resolve, reject) {
 
       if (_this.messageBus === undefined) {
         reject('MessageBus not found on registerStub');
       } else {
+        //call check if the protostub exist
 
-        //TODO call the post message to msgBus to read msg to get hyperty address allocation
-        //let message = {header: {id: 1, from: _this.runtimeURL + '/protostub', to: _this.runtimeURL + '/protostub'},
-        // body: {hypertyUrl: hypertyURL + '/protostub'}};
-        //_this.test = _this.messageBus.postMessage(message);
+        return _this.resolve('hyperty-runtime://' + hypertyURL).then(function() {
+        }).then(function() {
 
-        //TODO call the post message with create hypertyRegistration msg
-        //let message = {header: {id: 1, from: _this.runtimeURL, to: 'sp1/msg-node/back-end'},
-        // body: {'hypertyUrl': hypertyURL}};
-        //_this.messageBus.postMessage(message);
+          // addListener with the callback to execute when receive a message from the address-allocation
+          let item = _this.messageBus.addListener(_this.registryURL, (msg) => {
+            let transaction = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readwrite');
+            let storeValue = transaction.objectStore(_this.DB_STORE_HYPERTY);
+            let url = msg.body.hypertyRuntime;
 
-        let transaction = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readwrite');
-        let storeValue = transaction.objectStore(_this.DB_STORE_HYPERTY);
+            storeValue.put({hyperty: url, pepURL: null,
+              identity: url + '/identity', sandBox: sandbox});
 
-        storeValue.put({hyperty: hypertyURL, pepURL: null, identity: hypertyIdentity});
+            //TODO register this hyperty in the Global Registry
 
-        transaction.oncomplete = function(event) {
-          //add to the listener in messageBus
-          //TODO check if those are the correct parameters
-          _this.messageBus.addListener(hypertyURL + '/status', (msg) => {
-            console.log('Message addListener: ' + msg);
+            transaction.oncomplete = function(event) {
+              //add to the listener in messageBus
+              _this.messageBus.addListener(url + '/status', (msg) => {
+                console.log('Message addListener: ' + msg);
+              });
+              resolve(url);
+              item.remove();
+            };
+
+            transaction.onerror = function(event) {
+              reject('Error on register hyperty');
+              item.remove();
+            };
           });
-          resolve(hypertyURL);
-        };
 
-        transaction.onerror = function(event) {
-          reject('Error on register hyperty');
-        };
+          //Message to request address allocated for new Hyperty Instance
+          let message = {header: {id: 1,
+                                  type: 'CREATE',
+                                  from: _this.registryURL,
+                                  to: 'runtime://sp1/msg-node/address-allocation'},
+                          body: {hypertyURL: 'hyperty://' + hypertyURL + '/hy123'}};
+
+          _this.messageBus.postMessage(message);
+
+          //TODO remove later, just for tests
+          //function to simulate the response from the address-allocation
+          setTimeout(function() {
+            let message = {header: {id: 1,
+                                    type: 'CREATE',
+                                    from: 'runtime://sp1/msg-node/address-allocation',
+                                    to: _this.registryURL},
+                            body: {hypertyURL: 'hyperty://' + hypertyURL + '/hy123',
+                                   hypertyRuntime: 'hyperty-runtime://' + hypertyURL + '/123'}};
+            _this.messageBus.postMessage(message);
+          }, 500);
+
+          //TODO call the post message with create hypertyRegistration msg
+
+        });
       }
     });
 
@@ -253,8 +302,11 @@ class Registry {
 
       transaction.oncomplete = function(event) {
         resolve(runtimeProtoStubURL);
-        _this.messageBus.addListener(runtimeProtoStubURL + '/status', (msg) => {
-          console.log('RuntimeProtostubURL message: ', msg);
+
+        _this.messageBus.addListener('hyperty-runtime://' + runtimeProtoStubURL, (msg) => {
+          if (msg.header.resource === msg.header.to + '/status') {
+            console.log('RuntimeProtostubURL/status message: ', msg.body.value);
+          }
         });
       };
     });
@@ -433,7 +485,7 @@ class Registry {
   getSandbox(url) {
     if (!url) throw new Error('Parameter url needed');
     let _this = this;
-    let objectStore = _this.db.transaction(_this.DB_STORE_SANDBOX, 'readonly').objectStore(_this.DB_STORE_SANDBOX);
+    let objectStore = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readonly').objectStore(_this.DB_STORE_HYPERTY);
     let request = objectStore.get(url);
 
     var promise = new Promise(function(resolve,reject) {
@@ -445,7 +497,7 @@ class Registry {
       request.onsuccess = function(event) {
         let data = request.result;
         if (data !== undefined) {
-          resolve(data.sandbox);
+          resolve(data.sandBox);
         } else {
           reject('No sandbox was found');
         }
@@ -461,10 +513,43 @@ class Registry {
   * @return {Promise<URL.URL>}                 Promise <URL.URL>
   */
   resolve(url) {
-    return new Promise((resolve, reject) => {
-      //resolve to the same URL
-      resolve(url);
+    let _this = this;
+
+    //split the url to find the domainURL. deals with the url for example as:
+    //"hyperty-runtime://sp1/protostub/123",
+    let urlSplit = url.split('/');
+    let domainUrl = urlSplit[2];
+
+    let transaction = _this.db.transaction(_this.DB_STORE_STUB, 'readonly');
+    let objectStore = transaction.objectStore(_this.DB_STORE_STUB);
+
+    let promise = new Promise((resolve, reject) => {
+
+      let request  = objectStore.get(domainUrl);
+
+      request.onsuccess = function(event) {
+        let matching = request.result;
+        if (matching !== undefined) {
+          resolve(url);
+        } else {
+          _this.runtimeUA.loadStub(domainUrl);
+
+          //TODO delete later. Function to simulate a loadStub response
+          setTimeout(function() {
+            _this.registerStub(domainUrl).then(function() {
+              resolve(domainUrl);
+            });
+          }, 500);
+
+          //reject('DomainUrl ' + domainUrl + ' not found');
+        }
+      };
+
+      request.onerror = function(event) {
+        reject('The url ' + url + ' doesn\'t exist: error on dababase');
+      };
     });
+    return promise;
   }
 
 }
