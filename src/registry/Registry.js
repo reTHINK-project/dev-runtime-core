@@ -1,7 +1,7 @@
 /**
 * Runtime Registry Interface
 */
-class Registry {
+class Registry extends EventEmitter {
 
   /**
   * To initialise the Runtime Registry with the RuntimeURL that will be the basis to derive the internal runtime addresses when allocating addresses to internal runtime component. In addition, the Registry domain back-end to be used to remotely register Runtime components, is also passed as input parameter.
@@ -17,13 +17,13 @@ class Registry {
 
     // how some functions receive the parameters for example:
     // new Registry(msgbus, 'hyperty-runtime://sp1/123', appSandbox, remoteRegistry);
-    // registry.registerStub('sp1');
+    // registry.registerStub(sandbox, 'sp1');
     // registry.registerHyperty(sandBox, 'hyperty-runtime://sp1/123');
     // registry.resolve('hyperty-runtime://sp1/123');
 
     if (!runtimeURL) throw new Error('runtimeURL is missing.');
     /*if (!remoteRegistry) throw new Error('remoteRegistry is missing');*/
-    let _this = this;
+    let _this = super();
 
     _this.registryURL = runtimeURL + '/registry/123';
     _this.messageBus = msgbus;
@@ -36,7 +36,6 @@ class Registry {
     _this.DB_VERSION = 1;
     _this.DB_STORE_HYPERTY = 'hyperty-list';
     _this.DB_STORE_STUB = 'protostub-list';
-    _this.DB_STORE_SANDBOX = 'sandbox-list';
 
     let request = indexedDB.open(_this.DB_NAME, _this.DB_VERSION);
 
@@ -62,12 +61,9 @@ class Registry {
       let stubStore = event.currentTarget.result.createObjectStore(
         _this.DB_STORE_STUB, {keyPath: 'domainURL'});
       stubStore.createIndex('protostubURL', 'protostubURL', {unique: false});
+      stubStore.createIndex('sandbox', 'sandbox', {unique: false});
 
       stubStore.put({domainURL: 'testStub', protostubURL: 'testStubURL'});
-
-      let sandboxStore = event.currentTarget.result.createObjectStore(
-        _this.DB_STORE_SANDBOX, {keyPath: 'domainURL'});
-      sandboxStore.createIndex('sandBox', 'sandBox', {unique: false});
     };
 
   }
@@ -151,7 +147,7 @@ class Registry {
             let url = msg.body.hypertyRuntime;
 
             storeValue.put({hyperty: url, pepURL: null,
-              identity: url + '/identity', sandBox: sandbox});
+              identity: url + '/identity', sandbox: sandbox});
 
             //TODO register this hyperty in the Global Registry
 
@@ -275,10 +271,11 @@ class Registry {
 
   /**
    * To register a new Protocol Stub in the runtime including as input parameters the function to postMessage, the DomainURL that is connected with the stub, which returns the RuntimeURL allocated to the new ProtocolStub.
+   * @param {Sandbox}        Sandbox
    * @param  {DomainURL}     DomainURL service provider domain
    * @return {RuntimeProtoStubURL}
    */
-  registerStub(domainURL) {
+  registerStub(sandBox, domainURL) {
     let _this = this;
     var runtimeProtoStubURL;
 
@@ -293,7 +290,7 @@ class Registry {
 
       //TODO implement a unique number for the protostubURL
       runtimeProtoStubURL = domainURL + '/protostub/' + 123;//Math.floor((Math.random() * 10000) + 1);
-      objectStore.put({domainURL: domainURL, protostubURL: runtimeProtoStubURL});
+      objectStore.put({domainURL: domainURL, protostubURL: runtimeProtoStubURL, sandbox: sandBox});
 
       //check if messageBus is registered in registry or not
       transaction.onerror = function(event) {
@@ -450,34 +447,6 @@ class Registry {
   }
 
   /**
-   * This function is used to register a new runtime sandboxes passing as input the sandbox instance and the domain URL associated to the sandbox instance.
-   * @param  {Sandbox}   sandbox
-   * @param  {DomainURL} DomainURL url
-   * @return {Promise}
-   */
-  registerSandbox(sandbox, url) {
-    let _this = this;
-
-    var promise = new Promise(function(resolve,reject) {
-
-      let transaction = _this.db.transaction(_this.DB_STORE_SANDBOX, 'readwrite');
-      let objectStore = transaction.objectStore(_this.DB_STORE_SANDBOX);
-
-      objectStore.put({domainURL: url, sandbox: sandbox});
-
-      transaction.onerror = function(event) {
-        reject('Error on register Sandbox');
-      };
-
-      transaction.oncomplete = function(event) {
-        resolve('registered sandbox on url: ' + url);
-      };
-    });
-
-    return promise;
-  }
-
-  /**
   * To discover sandboxes available in the runtime for a certain domain. Required by the runtime UA to avoid more than one sandbox for the same domain.
   * @param  {DomainURL} DomainURL url
   * @return {RuntimeSandbox}           RuntimeSandbox
@@ -488,6 +457,7 @@ class Registry {
     let objectStore = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readonly').objectStore(_this.DB_STORE_HYPERTY);
     let request = objectStore.get(url);
 
+    //This function check in both DB_STORE_STUB and DB_STORE_HYPERTY
     var promise = new Promise(function(resolve,reject) {
 
       request.onerror = function(event) {
@@ -497,9 +467,23 @@ class Registry {
       request.onsuccess = function(event) {
         let data = request.result;
         if (data !== undefined) {
-          resolve(data.sandBox);
+          return resolve(data.sandbox);
         } else {
-          reject('No sandbox was found');
+          let stubStore = _this.db.transaction(_this.DB_STORE_STUB, 'readonly').objectStore(_this.DB_STORE_STUB);
+          let stubRequest = stubStore.get(url);
+
+          stubRequest.onerror = function(event) {
+            return reject('requestUpdate couldn\'t get the sandbox');
+          };
+
+          stubRequest.onsuccess = function(event) {
+            let data = stubRequest.result;
+            if (data !== undefined) {
+              return resolve(data.sandbox);
+            } else {
+              return reject('No sandbox was found');
+            }
+          };
         }
       };
     });
@@ -513,7 +497,12 @@ class Registry {
   * @return {Promise<URL.URL>}                 Promise <URL.URL>
   */
   resolve(url) {
+    console.log('resolve ' + url);
     let _this = this;
+
+    _this.addEventListener('runtime:stubLoaded', function() {
+      resolve(domainUrl);
+    });
 
     //split the url to find the domainURL. deals with the url for example as:
     //"hyperty-runtime://sp1/protostub/123",
@@ -532,14 +521,15 @@ class Registry {
         if (matching !== undefined) {
           resolve(url);
         } else {
-          _this.runtimeUA.loadStub(domainUrl);
+          _this.trigger('runtime:loadStub', domainUrl);
 
           //TODO delete later. Function to simulate a loadStub response
-          setTimeout(function() {
-            _this.registerStub(domainUrl).then(function() {
+          /*setTimeout(function() {
+            _this.registerStub(domainUrl + '/sanbbox', domainUrl).then(function() {
               resolve(domainUrl);
             });
-          }, 500);
+          }, 250);
+          */
 
           //reject('DomainUrl ' + domainUrl + ' not found');
         }
