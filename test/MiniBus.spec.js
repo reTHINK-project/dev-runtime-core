@@ -3,6 +3,7 @@ import MiniBus from '../src/bus/MiniBus';
 
 describe('MiniBus', function() {
   it('simple sending message', function(done) {
+    this.timeout(4000);
     let msgResult;
 
     let mBus = new MiniBus();
@@ -44,6 +45,7 @@ describe('MiniBus', function() {
   });
 
   it('send and reply', function(done) {
+    this.timeout(4000);
     let msgResult = {};
 
     let mBus = new MiniBus();

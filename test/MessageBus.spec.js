@@ -20,7 +20,7 @@ describe('MessageBus', function() {
     });
 
     msgBus.postMessage({
-      header: {id: 1, from: 'hyper-1', to: 'hyper-2'},
+      header: {from: 'hyper-1', to: 'hyper-2'},
       body: {value: 'x'}
     });
 
@@ -34,4 +34,36 @@ describe('MessageBus', function() {
     });
   });
 
+  it('sending using external system', function(done) {
+    var msgResult;
+
+    let mockRegistry = {
+      resolve(url) {
+        return new Promise((resolve, reject) => {
+          //resolve to default
+          resolve('protostub');
+        });
+      }
+    };
+
+    let msgBus = new MessageBus(mockRegistry);
+    msgBus.addListener('protostub', (msg) => {
+      msgResult = msg;
+    });
+
+    msgBus.postMessage({
+      header: {from: 'hyper-1', to: 'hyper-2/other'},
+      body: {value: 'x'}
+    });
+
+    setTimeout(() => {
+      expect(msgResult).to.eql({
+        header: {id: 1, from: 'hyper-1', to: 'hyper-2/other'},
+        body: {value: 'x'}
+      });
+
+      done();
+    });
+
+  });
 });

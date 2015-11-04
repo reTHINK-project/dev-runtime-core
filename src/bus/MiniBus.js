@@ -10,7 +10,7 @@ class MiniBus {
   _subscriptions: <url: MsgListener[]>
 
   _replyTimeOut: number
-  _replyCallbacks: <id: (msg) => void>
+  _replyCallbacks: <url+id: (msg) => void>
   */
 
   constructor() {
@@ -46,6 +46,29 @@ class MiniBus {
   }
 
   /**
+   * Manually add a reply listener. Only one listener per message ID should exist.
+   * ATENTION, there is no timeout for this listener.
+   * The listener should be removed with a removeReplyListener, failing to do this will result in a unreleased memory problem.
+   * @param {URL} url Origin address of the message sent, "msg.header.from".
+   * @param {number} msgId Message ID that is returned from the postMessage.
+   * @param {Function} replyListener Callback function for the reply
+   */
+  addReplyListener(url, msgId, replyListener) {
+    let replyId = url + msgId;
+    _this._replyCallbacks[replyId] = replyListener;
+  }
+
+  /**
+   * Remove the reply listener.
+   * @param {URL} url Origin address of the message sent, "msg.header.from".
+   * @param {number} msgId  Message ID that is returned from the postMessage
+   */
+  removeReplyListener(url, msgId) {
+    let replyId = url + msgId;
+    delete _this._replyCallbacks[replyId];
+  }
+
+  /**
   * Send messages to local listeners, or if not exists to external listeners.
   * It's has an optional mechanism for automatic management of reply handlers.
   * The reply handler will be unregistered after receiving the reply, or after reply timeout (default to 3s).
@@ -67,19 +90,17 @@ class MiniBus {
 
     //automatic management of reply handlers
     if (replyCallback) {
-      _this._replyCallbacks[msg.header.id] = replyCallback;
+      let replyId = msg.header.from + msg.header.id;
+      _this._replyCallbacks[replyId] = replyCallback;
+
       setTimeout(() => {
-        let replyFun = _this._replyCallbacks[msg.header.id];
-        delete _this._replyCallbacks[msg.header.id];
+        delete _this._replyCallbacks[replyId];
+        let errorMsg = {
+          header: {id: msg.header.id, type: 'reply'},
+          body: {code: 'error', desc: 'Reply timeout!'}
+        };
 
-        if (replyFun) {
-          let errorMsg = {
-            header: {id: msg.header.id, type: 'reply'},
-            body: {code: 'error', desc: 'Reply timeout!'}
-          };
-
-          replyFun(errorMsg);
-        }
+        replyCallback(errorMsg);
       }, _this._replyTimeOut);
     }
 
@@ -136,8 +157,9 @@ class MiniBus {
     let _this = this;
 
     if (msg.header.type === 'reply') {
-      let replyFun = _this._replyCallbacks[msg.header.id];
-      delete _this._replyCallbacks[msg.header.id];
+      let replyId = msg.header.to + msg.header.id;
+      let replyFun = _this._replyCallbacks[replyId];
+      delete _this._replyCallbacks[replyId];
 
       if (replyFun) {
         replyFun(msg);
