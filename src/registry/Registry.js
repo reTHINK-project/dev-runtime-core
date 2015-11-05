@@ -1,3 +1,5 @@
+import EventEmitter from '../utils/EventEmitter';
+
 /**
 * Runtime Registry Interface
 */
@@ -12,6 +14,8 @@ class Registry extends EventEmitter {
   */
   constructor(msgbus, runtimeURL, appSandbox, remoteRegistry) {
 
+    super();
+
     // NOTE if the database structure is changed it might cause errors, run the following command
     // indexedDB.deleteDatabase('registry-DB'); this will delete the database, with the old structure
 
@@ -23,7 +27,8 @@ class Registry extends EventEmitter {
 
     if (!runtimeURL) throw new Error('runtimeURL is missing.');
     /*if (!remoteRegistry) throw new Error('remoteRegistry is missing');*/
-    let _this = super();
+
+    let _this = this;
 
     _this.registryURL = runtimeURL + '/registry/123';
     _this.messageBus = msgbus;

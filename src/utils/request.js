@@ -1,5 +1,9 @@
 /**
-  * Make ajax request
+  * NOTE: Check this note
+  * This request should be changed because it only works on
+  * the browser environment, for nodejs we need a new implementation.
+  *
+  * Suggestion: making a Request factory like we done to sandboxes;
   */
 class Request {
 

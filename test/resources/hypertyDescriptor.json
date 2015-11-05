@@ -1,0 +1,17 @@
+{
+  "guid": "guid",
+  "id": "idHyperty",
+  "classname": "IdHypertyClassName",
+  "description": "description of hyperty",
+  "kind": "hyperty",
+  "catalogueURL": "....",
+  "sourceCode": "path/to/the/source/code",
+  "dataObject": "",
+  "type": "",
+  "messageSchema": "",
+  "configuration": "",
+  "policies": "",
+  "constraints": "",
+  "hypertyCapabilities": "",
+  "protocolCapabilities": ""
+}

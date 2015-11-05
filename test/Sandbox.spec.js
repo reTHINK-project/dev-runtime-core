@@ -11,8 +11,9 @@ describe('Sandbox Interface', function() {
   // Only for testing
   let runtimeURL = 'hyperty-runtime://sp1/protostub/123';
 
-  let registry = new Registry(runtimeURL);
   let messageBus = new MessageBus(registry);
+  let registry = new Registry(messageBus, runtimeURL);
+
   let componentSourceCode;
 
   before(function() {

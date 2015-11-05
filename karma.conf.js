@@ -17,6 +17,12 @@ module.exports = function(config) {
       'test/**/*.spec.js'
     ],
 
+    // Proxy the karmar server
+    proxies: {
+      '/': 'http://localhost:4000/'
+    },
+
+    // Define the root
     urlRoot: '/',
 
     // list of files to exclude

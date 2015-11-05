@@ -22,6 +22,7 @@ var replace = require('gulp-replace');
 var insert = require('gulp-insert');
 var uglify = require('gulp-uglify');
 var bump = require('gulp-bump');
+var argv = require('yargs').argv;
 
 var pkg = require('./package.json');
 
@@ -63,6 +64,48 @@ gulp.task('build', function() {
       })
       .pipe(source('runtime-core.js'))
       .pipe(gulp.dest('./dist'));
+  }
+
+  rebundle();
+
+});
+
+/**
+ * Compile on specific file from ES6 to ES5
+ * @param  {string} 'compile' task name
+ *
+ * How to use: gulp compile --file 'path/to/file';
+ */
+gulp.task('compile', function() {
+
+  var filename = argv.file;
+  var path;
+
+  if (!filename) {
+    this.emit('end');
+  } else {
+    var splitIndex = filename.lastIndexOf('/') + 1;
+    path = filename.substr(0, splitIndex);
+    filename = filename.substr(splitIndex).replace('.js', '');
+  }
+
+  console.log('Converting ' + filename + ' on ' + path + ' to ES5');
+
+  var bundler = browserify(path + filename, {
+    standalone: filename,
+    debug: false
+  }).transform(babel);
+
+  function rebundle() {
+    bundler.bundle()
+      .on('error', function(err) {
+        console.error(err);
+        this.emit('end');
+      })
+      .pipe(source(filename + '.ES5.js'))
+      .pipe(buffer())
+      .pipe(uglify())
+      .pipe(gulp.dest(path));
   }
 
   rebundle();
