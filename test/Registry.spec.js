@@ -13,22 +13,23 @@ import MessageBus from '../src/bus/MessageBus';
 
 // Testing Registry
 // some simple tests to test functions
-describe('Registry', function() {
 
-  let registry;
-  let msgbus = new MessageBus(registry);
+let registry;
+let msgbus = new MessageBus(registry);
 
-  let runtimeURL = 'hyperty-runtime://sp1/123';
+let runtimeURL = 'hyperty-runtime://sp1/123';
 
-  let sandboxFactory = new SandboxFactoryTest();
-  let appSandbox = sandboxFactory.createAppSandbox();
+let sandboxFactory = new SandboxFactoryTest();
+let appSandbox = sandboxFactory.createAppSandbox();
 
-  let getRegistry = new Promise(function(resolve, reject) {
-    resolve(new Registry(msgbus, runtimeURL, appSandbox));
-  });
+let getRegistry = new Promise(function(resolve, reject) {
+  resolve(new Registry(msgbus, runtimeURL, appSandbox));
+});
 
-  //registry = new Registry(msgbus, runtimeURL, appSandbox);
-  getRegistry.then(function(registry) {
+//registry = new Registry(msgbus, runtimeURL, appSandbox);
+getRegistry.then(function(registry) {
+  describe('Registry', function() {
+
     describe('constructor()', function() {
 
       it('depends of the MessageBus', function() {

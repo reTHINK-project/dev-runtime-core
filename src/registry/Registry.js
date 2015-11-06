@@ -250,9 +250,11 @@ class Registry extends EventEmitter {
   discoverProtostub(url) {
     if (!url) throw new Error('Parameter url needed');
     let _this = this;
-    let objectStore = _this.db.transaction(_this.DB_STORE_STUB, 'readonly').objectStore(_this.DB_STORE_STUB);
 
     var promise = new Promise(function(resolve,reject) {
+
+      let transaction = _this.db.transaction(_this.DB_STORE_STUB, 'readonly');
+      let objectStore = transaction.objectStore(_this.DB_STORE_STUB);
 
       let request = objectStore.get(url);
 
@@ -261,7 +263,7 @@ class Registry extends EventEmitter {
         console.error('hyperty not found');
       };
 
-      request.onsuccess = function(event) {
+      request.oncomplete = function(event) {
         let data = request.result;
         if (data !== undefined) {
           resolve(data.protostubURL);
@@ -459,17 +461,18 @@ class Registry extends EventEmitter {
   getSandbox(url) {
     if (!url) throw new Error('Parameter url needed');
     let _this = this;
-    let objectStore = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readonly').objectStore(_this.DB_STORE_HYPERTY);
-    let request = objectStore.get(url);
 
     //This function check in both DB_STORE_STUB and DB_STORE_HYPERTY
     var promise = new Promise(function(resolve,reject) {
+
+      let objectStore = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readonly').objectStore(_this.DB_STORE_HYPERTY);
+      let request = objectStore.get(url);
 
       request.onerror = function(event) {
         reject('requestUpdate couldn\'t get the sandbox');
       };
 
-      request.onsuccess = function(event) {
+      request.oncomplete = function(event) {
         let data = request.result;
         if (data !== undefined) {
           return resolve(data.sandbox);
@@ -481,7 +484,7 @@ class Registry extends EventEmitter {
             return reject('requestUpdate couldn\'t get the sandbox');
           };
 
-          stubRequest.onsuccess = function(event) {
+          stubRequest.oncomplete = function(event) {
             let data = stubRequest.result;
             if (data !== undefined) {
               return resolve(data.sandbox);
@@ -514,10 +517,10 @@ class Registry extends EventEmitter {
     let urlSplit = url.split('/');
     let domainUrl = urlSplit[2];
 
-    let transaction = _this.db.transaction(_this.DB_STORE_STUB, 'readonly');
-    let objectStore = transaction.objectStore(_this.DB_STORE_STUB);
-
     let promise = new Promise((resolve, reject) => {
+
+      let transaction = _this.db.transaction(_this.DB_STORE_STUB, 'readonly');
+      let objectStore = transaction.objectStore(_this.DB_STORE_STUB);
 
       let request  = objectStore.get(domainUrl);
 
