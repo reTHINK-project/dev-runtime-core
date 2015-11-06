@@ -161,7 +161,7 @@ describe('RuntimeUA', function() {
 
       });
 
-      it('should can register Hyperty', function(done) {
+      it.skip('should can register Hyperty - in the registry spec test', function(done) {
 
         // TODO: Check the if the hypertyURl returned for registerHyperty
         // match with the specification;

@@ -119,8 +119,8 @@ getRegistry.then(function(registry) {
 
     describe('registerHyperty(sandbox, descriptor)', function(done) {
 
-      it.skip('should register an Hyperty', function() {
-        let sandBox = new SandboxBase('sp1');
+      it('should register an Hyperty', function() {
+        let sandbox = new SandboxBase('sp1');
         let descriptor = 'hyperty-catalogue://sp1/<catalogue-object-identifier>';
 
         registry.registerHyperty(sandbox, descriptor).then(
