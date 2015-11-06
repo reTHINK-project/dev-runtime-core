@@ -30,8 +30,15 @@ class RuntimeUA {
     // Instantiate the Policy Engine
     _this.policyEngine = new PolicyEngine();
 
+    // Instantiate the Registry Module
+    // TODO: fix the first parameter should not be a message bus;
+    _this.registry = new Registry(null, hypertyRuntimeURL, appSandbox);
+
     // Instantiate the Message Bus
     _this.messageBus = new MessageBus(_this.registry);
+
+    // Register messageBus on Registry
+    _this.registry.registerMessageBus(_this.messageBus);
 
     // Use sandbox factory to use specific methods
     // and set the message bus to the factory
@@ -42,9 +49,6 @@ class RuntimeUA {
     // In the future can be decided by policyEngine if we need
     // create a AppSandbox or not;
     let appSandbox = _this.sandboxFactory.createAppSandbox();
-
-    // Instantiate the Registry Module
-    _this.registry = new Registry(_this.messageBus, hypertyRuntimeURL, appSandbox);
 
     _this.registry.addEventListener('runtime:loadStub', function(domainURL) {
 

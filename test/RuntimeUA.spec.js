@@ -63,7 +63,6 @@ describe('RuntimeUA', function() {
     let getHypertyDescriptor;
     let getHypertySourceCode;
     let getHypertySandbox;
-    let registerHyperty;
     let getAppSandbox;
 
     // NOTE: Probably the ajax request to get the hypertyDescriptor
@@ -83,12 +82,6 @@ describe('RuntimeUA', function() {
       getHypertySandbox = function(_hypertyDescriptorURL) {
         return new Promise(function(resolve, reject) {
           resolve(sandbox);
-        });
-      };
-
-      registerHyperty = function(sandbox, _hypertyDescriptorURL) {
-        return new Promise(function(resolve, reject) {
-          resolve('hyperty-runtime://sp-domain/HypertyName');
         });
       };
 
@@ -174,16 +167,10 @@ describe('RuntimeUA', function() {
         // match with the specification;
         // the match should be overide for a RegEX to validate the
         // specification hyperty URL
-
-        let _sandbox;
-        _sandbox = getHypertySandbox('hypertyDescriptorURL');
-
-        expect(_sandbox.then(function(result) {
-          return registerHyperty(result, 'hypertyDescriptorURL').then(function(result) {
-            return result;
-          });
-        })).to.be.fulfilled
-        .and.eventually.to.match(/hyperty-runtime:\/\/sp-domain\/HypertyName/)
+        let hypertyDescriptorURL = 'hyperty-catalogue://sp1/<catalogue-object-identifier>';
+        expect(runtime.registry.registerHyperty(sandbox, hypertyDescriptorURL))
+        .to.be.fulfilled
+        .and.eventually.to.match(/hyperty-runtime:\/\/sp1\/123/)
         .and.notify(done);
 
       });
@@ -222,6 +209,7 @@ describe('RuntimeUA', function() {
       expect(loadStubPromise).to.be.instanceof(Promise);
     });
 
+    // TODO: Check this testes
     it('should be deployed', function(done) {
       // TODO: make the promise to loadStub and has successfully deployed
       // TODO: need the server to run and teste the runtimeUA;
@@ -230,6 +218,7 @@ describe('RuntimeUA', function() {
       done();
     });
 
+    // TODO: Check this testes
     it('should be rejected', function(done) {
       // TODO: make the load hyperty fail;
       let loadStubPromise = runtime.loadStub(spDomain);
