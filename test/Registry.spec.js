@@ -14,21 +14,21 @@ import MessageBus from '../src/bus/MessageBus';
 // Testing Registry
 // some simple tests to test functions
 
-let registry;
-let msgbus = new MessageBus(registry);
-
 let runtimeURL = 'hyperty-runtime://sp1/123';
 
 let sandboxFactory = new SandboxFactoryTest();
 let appSandbox = sandboxFactory.createAppSandbox();
 
 let getRegistry = new Promise(function(resolve, reject) {
-  resolve(new Registry(msgbus, runtimeURL, appSandbox));
+  var registry = new Registry(null, runtimeURL, appSandbox);
+  resolve(registry);
 });
 
 //registry = new Registry(msgbus, runtimeURL, appSandbox);
 getRegistry.then(function(registry) {
   describe('Registry', function() {
+    let msgbus = new MessageBus(registry);
+    registry.registerMessageBus(msgbus);
 
     describe('constructor()', function() {
 
@@ -123,16 +123,10 @@ getRegistry.then(function(registry) {
         let sandbox = new SandboxBase('sp1');
         let descriptor = 'hyperty-catalogue://sp1/<catalogue-object-identifier>';
 
-        registry.registerHyperty(sandbox, descriptor).then(
-          function(result) {
-            // value returned from the message simulated in the registry.
-            result.should.equal('hyperty-runtime://sp1/123');
-            done();
-          },
-          function(err) {
-            done(err);
-          }
-        );
+        expect(registry.registerHyperty(sandbox, descriptor).then(function(response) {
+          return response;
+        })).to.be.fulfilled.and.eventually.equal('hyperty-runtime://sp1/123');
+
       });
     });
 

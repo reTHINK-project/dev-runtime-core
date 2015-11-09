@@ -263,7 +263,7 @@ class Registry extends EventEmitter {
         console.error('hyperty not found');
       };
 
-      request.oncomplete = function(event) {
+      request.onsuccess = function(event) {
         let data = request.result;
         if (data !== undefined) {
           resolve(data.protostubURL);
@@ -472,7 +472,7 @@ class Registry extends EventEmitter {
         reject('requestUpdate couldn\'t get the sandbox');
       };
 
-      request.oncomplete = function(event) {
+      request.onsuccess = function(event) {
         let data = request.result;
         if (data !== undefined) {
           return resolve(data.sandbox);
@@ -484,7 +484,7 @@ class Registry extends EventEmitter {
             return reject('requestUpdate couldn\'t get the sandbox');
           };
 
-          stubRequest.oncomplete = function(event) {
+          stubRequest.onsuccess = function(event) {
             let data = stubRequest.result;
             if (data !== undefined) {
               return resolve(data.sandbox);
