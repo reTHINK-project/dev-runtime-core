@@ -1,0 +1,22 @@
+inst group reachability {
+	
+	/*
+	 * Allows a user to reach another one if both aren't in the blacklist.
+	 */
+	inst auth+ permitNotBlacklisted {
+		subject	s = message.getFrom();
+		target	t = message.getTo();
+		action	reach;
+		when	s.isNotBlacklisted() && t.isNotBlacklisted(),
+	}
+
+	/*
+	 * Allows a user to reach Alice if it's a chat communication.
+	 */
+	inst auth+ permitAliceChat {
+		subject	s = message.getFrom();
+		target	t = "Alice";
+		action	reach;
+		when	message.getType=="chat";
+	}
+}

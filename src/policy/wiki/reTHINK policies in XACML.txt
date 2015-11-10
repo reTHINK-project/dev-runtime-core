@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xacml3:Policy xmlns:xacml3="urn:oasis:names:tc:xacml:3.0:core:schema:wd-17"
+    PolicyId="http://axiomatics.com/alfa/identifier/reachability.userReachability"
+    RuleCombiningAlgId="urn:oasis:names:tc:xacml:3.0:rule-combining-algorithm:deny-overrides"
+    Version="1.0">
+    <xacml3:Description />
+    <xacml3:PolicyDefaults>
+        <xacml3:XPathVersion>http://www.w3.org/TR/1999/REC-xpath-19991116</xacml3:XPathVersion>
+    </xacml3:PolicyDefaults>
+    <xacml3:Target>
+        <xacml3:AnyOf>
+            <xacml3:AllOf>
+                <xacml3:Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+                    <xacml3:AttributeValue
+                        DataType="http://www.w3.org/2001/XMLSchema#string">reach</xacml3:AttributeValue>
+                    <xacml3:AttributeDesignator 
+                        AttributeId="urn:oasis:names:tc:xacml:1.0:action:action-id"
+                        DataType="http://www.w3.org/2001/XMLSchema#string"
+                        Category="urn:oasis:names:tc:xacml:3.0:attribute-category:action"
+                        MustBePresent="false"
+                    />
+                </xacml3:Match>
+            </xacml3:AllOf>
+        </xacml3:AnyOf>
+    </xacml3:Target>
+    <xacml3:Rule 
+            Effect="Permit"
+            RuleId="http://axiomatics.com/alfa/identifier/reachability.userReachability.permitNotBlacklisted">
+        <xacml3:Description>Allows a user to reach another one if both aren't in the blacklist.</xacml3:Description>
+        <xacml3:Target />
+        <xacml3:Condition>
+            <xacml3:Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:not" >
+                <xacml3:Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:and">
+                    <xacml3:Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:all-of" >
+                        <xacml3:Function FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-is-in"/>
+                        <xacml3:AttributeDesignator 
+                            AttributeId="urn:oasis:names:tc:xacml:1.0:subject:subject-id"
+                            DataType="http://www.w3.org/2001/XMLSchema#string"
+                            Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
+                            MustBePresent="false"
+                        />
+                        <xacml3:AttributeDesignator 
+                            AttributeId="urn:oasis:names:tc:xacml:1.0:resource:blacklist"
+                            DataType="http://www.w3.org/2001/XMLSchema#string"
+                            Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
+                            MustBePresent="false"
+                        />
+                    </xacml3:Apply>
+                    <xacml3:Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:not" >
+                        <xacml3:Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:all-of" >
+                            <xacml3:Function FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-is-in"/>
+                            <xacml3:AttributeDesignator 
+                                AttributeId="urn:oasis:names:tc:xacml:1.0:subject:destination-id"
+                                DataType="http://www.w3.org/2001/XMLSchema#string"
+                                Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
+                                MustBePresent="false"
+                            />
+                            <xacml3:AttributeDesignator 
+                                AttributeId="urn:oasis:names:tc:xacml:1.0:resource:blacklist"
+                                DataType="http://www.w3.org/2001/XMLSchema#string"
+                                Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
+                                MustBePresent="false"
+                            />
+                        </xacml3:Apply>
+                    </xacml3:Apply>
+                </xacml3:Apply>
+            </xacml3:Apply>
+        </xacml3:Condition>
+    </xacml3:Rule>
+    <xacml3:Rule 
+            Effect="Permit"
+            RuleId="http://axiomatics.com/alfa/identifier/reachability.userReachability.permitAliceChat">
+        <xacml3:Description>Allows a user to reach Alice if it's a chat communication.</xacml3:Description>
+        <xacml3:Target>
+            <xacml3:AnyOf>
+                <xacml3:AllOf>
+                    <xacml3:Match MatchId="urn:oasis:names:tc:xacml:1.0:function:string-equal">
+                        <xacml3:AttributeValue
+                            DataType="http://www.w3.org/2001/XMLSchema#string">Alice</xacml3:AttributeValue>
+                        <xacml3:AttributeDesignator 
+                            AttributeId="urn:oasis:names:tc:xacml:1.0:subject:destination-id"
+                            DataType="http://www.w3.org/2001/XMLSchema#string"
+                            Category="urn:oasis:names:tc:xacml:1.0:subject-category:access-subject"
+                            MustBePresent="false"
+                        />
+                    </xacml3:Match>
+                </xacml3:AllOf>
+            </xacml3:AnyOf>
+        </xacml3:Target>
+        <xacml3:Condition>
+            <xacml3:Apply FunctionId="urn:oasis:names:tc:xacml:1.0:function:any-of">
+                <xacml3:Function FunctionId="urn:oasis:names:tc:xacml:1.0:function:string-equal"/>
+                <xacml3:AttributeValue
+                    DataType="http://www.w3.org/2001/XMLSchema#string">chat</xacml3:AttributeValue>
+                <xacml3:AttributeDesignator 
+                    AttributeId="urn:oasis:names:tc:xacml:1.0:resource:message-type"
+                    DataType="http://www.w3.org/2001/XMLSchema#string"
+                    Category="urn:oasis:names:tc:xacml:3.0:attribute-category:resource"
+                    MustBePresent="false"
+                />
+            </xacml3:Apply>
+        </xacml3:Condition>
+    </xacml3:Rule>
+    <xacml3:Rule 
+            Effect="Deny"
+            RuleId="http://axiomatics.com/alfa/identifier/reachability.userReachability.defaultEffect">
+        <xacml3:Description>By default, the message isn't authorised.</xacml3:Description>
+        <xacml3:Target />
+    </xacml3:Rule>
+</xacml3:Policy>
