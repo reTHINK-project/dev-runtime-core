@@ -109,4 +109,7 @@ if you have some problems starting the karma tests, try running this commands fo
 
 This repository is ready to start working on development of runtime-core. The code will go to the **src** folder. The unit tests will be on **test** folder, following the name standard <component>.spec.js
 
-The npm module **live-server** can be used for development tests, but it's not mandatory: [live-server](https://www.npmjs.com/package/live-server)
+To run karma tests is mandatory to run **live-server** because of the mock-up's dependencies:
+```
+live-server --port=4000
+```

@@ -92,8 +92,8 @@ gulp.task('compile', function() {
   console.log('Converting ' + filename + ' on ' + path + ' to ES5');
 
   var bundler = browserify(path + filename, {
-    standalone: 'activate',
-    debug: true
+    standalone: filename,
+    debug: false
   }).transform(babel);
 
   function rebundle() {
@@ -145,8 +145,20 @@ function inc(importance) {
    .pipe(gulp.dest('./'));
 }
 
-gulp.task('patch', function() { return inc('patch'); });
+gulp.task('patch', ['test'], function() { return inc('patch'); });
 
-gulp.task('feature', function() { return inc('minor'); });
+gulp.task('feature', ['test'], function() {  return inc('minor'); });
 
-gulp.task('release', function() { return inc('major'); });
+gulp.task('release', ['test'], function() {  return inc('major'); });
+
+var Server = require('karma').Server;
+
+/**
+ * Run test once and exit
+ */
+gulp.task('test', function(done) {
+  new Server({
+    configFile: __dirname + '/karma.conf.js',
+    singleRun: true
+  }, done).start();
+});
