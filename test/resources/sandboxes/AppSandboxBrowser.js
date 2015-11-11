@@ -6,6 +6,12 @@ class AppSandboxBrowser {
 
   deployComponent(sourceCode, componentURL, configuration) {
 
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+      resolve('deployed');
+    });
+
   }
 
 }

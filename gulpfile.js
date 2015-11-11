@@ -92,8 +92,8 @@ gulp.task('compile', function() {
   console.log('Converting ' + filename + ' on ' + path + ' to ES5');
 
   var bundler = browserify(path + filename, {
-    standalone: filename,
-    debug: false
+    standalone: 'activate',
+    debug: true
   }).transform(babel);
 
   function rebundle() {

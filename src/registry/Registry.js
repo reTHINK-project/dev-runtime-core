@@ -1,4 +1,5 @@
 import EventEmitter from '../utils/EventEmitter';
+import AddressAllocation from './AddressAllocation';
 
 /**
 * Runtime Registry Interface
@@ -31,11 +32,11 @@ class Registry extends EventEmitter {
     let _this = this;
 
     _this.registryURL = runtimeURL + '/registry/123';
-    _this.messageBus = msgbus;
     _this.appSandbox = appSandbox;
     _this.runtimeURL = runtimeURL;
     _this.remoteRegistry = remoteRegistry;
 
+    // Database configurations;
     _this.db = {};
     _this.DB_NAME = 'registry-DB';
     _this.DB_VERSION = 1;
@@ -80,6 +81,13 @@ class Registry extends EventEmitter {
   registerMessageBus(messageBus) {
     let _this = this;
     _this.messageBus = messageBus;
+
+    let url = _this.registryURL;
+
+    // Install AddressAllocation
+    let addressAllocation = new AddressAllocation(url, messageBus);
+    _this.addressAllocation = addressAllocation;
+
   }
 
   /**
@@ -141,7 +149,6 @@ class Registry extends EventEmitter {
         reject('MessageBus not found on registerStub');
       } else {
         //call check if the protostub exist
-
         return _this.resolve('hyperty-runtime://' + hypertyURL).then(function() {
         }).then(function() {
 
@@ -171,7 +178,7 @@ class Registry extends EventEmitter {
             };
           });
 
-          //Message to request address allocated for new Hyperty Instance
+          // Message to request address allocated for new Hyperty Instance
           let message = {header: {id: 1,
                                   type: 'CREATE',
                                   from: _this.registryURL,
@@ -191,6 +198,14 @@ class Registry extends EventEmitter {
                                    hypertyRuntime: 'hyperty-runtime://' + hypertyURL + '/123'}};
             _this.messageBus.postMessage(message);
           }, 500);
+
+          /* let numberOfAddresses = 1;
+          let addressDomain = 'ua.pt';
+          _this.addressAllocation.create(addressDomain, numberOfAddresses).then(function(addresses) {
+            console.log('Address Alocation: ', addresses);
+          }).catch(function(reason) {
+            console.log('Address Reason: ', reason);
+          }); */
 
           //TODO call the post message with create hypertyRegistration msg
 
@@ -307,7 +322,7 @@ class Registry extends EventEmitter {
       transaction.oncomplete = function(event) {
         resolve(runtimeProtoStubURL);
 
-        _this.messageBus.addListener('hyperty-runtime://' + runtimeProtoStubURL, (msg) => {
+        _this.messageBus.addListener(runtimeProtoStubURL + '/status', (msg) => {
           if (msg.header.resource === msg.header.to + '/status') {
             console.log('RuntimeProtostubURL/status message: ', msg.body.value);
           }
@@ -475,7 +490,7 @@ class Registry extends EventEmitter {
       request.onsuccess = function(event) {
         let data = request.result;
         if (data !== undefined) {
-          return resolve(data.sandbox);
+          resolve(data.sandbox);
         } else {
           let stubStore = _this.db.transaction(_this.DB_STORE_STUB, 'readonly').objectStore(_this.DB_STORE_STUB);
           let stubRequest = stubStore.get(url);
@@ -508,10 +523,6 @@ class Registry extends EventEmitter {
     console.log('resolve ' + url);
     let _this = this;
 
-    _this.addEventListener('runtime:stubLoaded', function() {
-      resolve(domainUrl);
-    });
-
     //split the url to find the domainURL. deals with the url for example as:
     //"hyperty-runtime://sp1/protostub/123",
     let urlSplit = url.split('/');
@@ -524,10 +535,15 @@ class Registry extends EventEmitter {
 
       let request  = objectStore.get(domainUrl);
 
+      _this.addEventListener('runtime:stubLoaded', function(domainUrl) {
+        resolve(domainUrl);
+      });
+
       request.onsuccess = function(event) {
         let matching = request.result;
+
         if (matching !== undefined) {
-          resolve(url);
+          resolve(matching.protostubURL);
         } else {
           _this.trigger('runtime:loadStub', domainUrl);
 

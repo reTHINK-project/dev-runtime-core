@@ -7,7 +7,7 @@ chai.use(chaiAsPromised);
 
 // Main dependecies
 import Registry from '../src/registry/Registry';
-import SandboxFactoryTest from './resources/sandboxes/SandboxFactoryTest';
+import SandboxFactory from '../resources/sandboxes/SandboxFactory';
 import SandboxBase from '../src/sandbox/Sandbox';
 import MessageBus from '../src/bus/MessageBus';
 
@@ -16,7 +16,7 @@ import MessageBus from '../src/bus/MessageBus';
 
 let runtimeURL = 'hyperty-runtime://sp1/123';
 
-let sandboxFactory = new SandboxFactoryTest();
+let sandboxFactory = new SandboxFactory();
 let appSandbox = sandboxFactory.createAppSandbox();
 
 let getRegistry = new Promise(function(resolve, reject) {

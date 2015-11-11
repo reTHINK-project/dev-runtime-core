@@ -1,7 +1,11 @@
 import SandboxBrowser from './SandboxBrowser';
 import AppSandboxBrowser from './AppSandboxBrowser';
 
-class SandboxFactoryTest {
+class SandboxFactory {
+
+  constructor() {
+    console.log('TESTES SANDBOX FACTORY');
+  }
 
   get messageBus() {
     let _this = this;
@@ -29,4 +33,4 @@ class SandboxFactoryTest {
 
 }
 
-export default SandboxFactoryTest;
+export default SandboxFactory;

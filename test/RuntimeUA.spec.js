@@ -5,9 +5,6 @@ let expect = chai.expect;
 
 chai.use(chaiAsPromised);
 
-// Utils
-import request from '../src/utils/request';
-
 // Testing Module
 import RuntimeUA from '../src/runtime/RuntimeUA';
 
@@ -17,10 +14,7 @@ import IdentityModule from '../src/identity/IdentityModule';
 import PolicyEngine from '../src/policy/PolicyEngine';
 import MessageBus from '../src/bus/MessageBus';
 
-import SandboxFactoryTest from './resources/sandboxes/SandboxFactoryTest';
-
-import mockHypertyDescriptor from './resources/hypertyDescriptor.json';
-import mockHypertySourceCode from './resources/HelloHyperty.ES5.js';
+import SandboxFactory from './resources/sandboxes/SandboxFactory';
 
 // Testing runtimeUA;
 describe('RuntimeUA', function() {
@@ -28,13 +22,27 @@ describe('RuntimeUA', function() {
   // Only for testing
   let runtimeURL = 'hyperty-runtime://sp1/protostub/123';
 
-  let sandboxFactory = new SandboxFactoryTest();
-  let sandbox = sandboxFactory.createSandbox();
-  let appSandbox = sandboxFactory.createAppSandbox();
-
+  let sandboxFactory = new SandboxFactory();
   let runtime = new RuntimeUA(sandboxFactory);
 
+  let _stubDescriptor;
+  let _hypertyDescriptor;
+
   describe('constructor()', function() {
+
+    before(function(done) {
+      // Mockup to open the database before all tests running
+      // Because the Registry have precistence
+      let DB_NAME = 'registry-DB';
+      let DB_VERSION = 1;
+
+      let request = indexedDB.open(DB_NAME, DB_VERSION);
+
+      request.onsuccess = function(event) {
+        done();
+      };
+
+    });
 
     it('depends of the Registry', function() {
       expect(runtime.registry).to.be.instanceof(Registry);
@@ -58,43 +66,7 @@ describe('RuntimeUA', function() {
 
   });
 
-  describe('loadHyperty(hypertyDescriptorURL)', function() {
-
-    let getHypertyDescriptor;
-    let getHypertySourceCode;
-    let getHypertySandbox;
-    let getAppSandbox;
-
-    // NOTE: Probably the ajax request to get the hypertyDescriptor
-    // and the hypertySourceCode should be validated also.
-    // For this tests i don't use the catalogue
-    // i only use local verification of that code;
-    before(function() {
-
-      getHypertyDescriptor = new Promise(function(resolve, reject) {
-        resolve(mockHypertyDescriptor);
-      });
-
-      getHypertySourceCode = new Promise(function(resolve, reject) {
-        resolve(mockHypertySourceCode);
-      });
-
-      getHypertySandbox = function(_hypertyDescriptorURL) {
-        return new Promise(function(resolve, reject) {
-          resolve(sandbox);
-        });
-      };
-
-    });
-
-    it('should throw when given no arguments', function() {
-      expect(runtime.loadHyperty).to.throw(Error);
-    });
-
-    it('should be a Promise', function() {
-      let hypertyURL = 'http://localhost:8080/.well-known/hyperty/MyFirstHyperty';
-      expect(runtime.loadHyperty(hypertyURL)).to.be.instanceof(Promise);
-    });
+  describe('getHypertyDescriptor(hypertyURL)', function() {
 
     it('should get hyperty descriptor', function(done) {
 
@@ -113,83 +85,94 @@ describe('RuntimeUA', function() {
 
       // TODO: Check the hyperty descriptor response and compare
       // with what is defined in the specification;
-      expect(getHypertyDescriptor.then(function(response) {
-        return response;
-      })).to.be.fulfilled.and.eventually.to.have.all.keys(descriptorValidation).and.notify(done);
+      let hypertyDescriptorURL = 'hyperty-catalogue://sp1/HelloHyperty';
+      expect(runtime.getHypertyDescriptor(hypertyDescriptorURL).then(function(hypertyDescriptor) {
+        _hypertyDescriptor = hypertyDescriptor;
+        return _hypertyDescriptor;
+      }))
+      .to.be.fulfilled
+      .and.eventually.to.have.all.keys(descriptorValidation)
+      .and.notify(done);
 
     });
+
+  });
+
+  describe('getHypertySourceCode(hypertySourceCodeURL)', function() {
 
     it('should get hyperty source code', function(done) {
 
-      expect(getHypertySourceCode.then(function(response) {
-        return response;
-      })).to.be.fulfilled.and.notify(done);
+      let hypertySourceCodeURL = _hypertyDescriptor.sourceCode;
+      expect(runtime.getHypertySourceCode(hypertySourceCodeURL))
+      .to.be.fulfilled.and.notify(done);
+
+    });
+  });
+
+  describe('getStubDescriptor(domainURL)', function() {
+
+    it('should get Stub descriptor', function(done) {
+
+      //
+      // guid, id, description, kind, catalogueURL,
+      // sourceCode, dataObject, type, messageSchema,
+      // policies, constraints, configuration,
+      // hypertyCapabilities, protocolCapabilities
+      //
+      let descriptorValidation = [
+        'guid', 'id', 'classname', 'description', 'kind', 'catalogueURL',
+        'sourceCode', 'dataObject', 'type', 'messageSchema',
+        'configuration', 'policies', 'constraints', 'hypertyCapabilities',
+        'protocolCapabilities'
+      ];
+
+      // TODO: Check the hyperty descriptor response and compare
+      // with what is defined in the specification;
+      let domainURL = 'hyperty-catalogue://sp1/HelloHyperty';
+      expect(runtime.getStubDescriptor(domainURL).then(function(stubDescriptor) {
+        _stubDescriptor = stubDescriptor;
+        return _stubDescriptor;
+      }))
+      .to.be.fulfilled
+      .and.eventually.to.have.all.keys(descriptorValidation)
+      .and.notify(done);
 
     });
 
-    it.skip('should check the Policy engine', function() {
-      // TODO: Check the policy engine and handle with the result;
-    });
+  });
 
-    describe('App and Hyperty executes in same sandbox', function() {
+  describe('getStubSourceCode(stubSourceCodeURL)', function() {
 
-      it('should get App Sandbox', function() {
-        let _sandbox;
-        _sandbox = runtime.registry.getAppSandbox();
-        expect(_sandbox).to.not.be.null;
-      });
+    it('should get hyperty source code', function(done) {
+
+      let stubSourceCodeURL = _stubDescriptor.sourceCode;
+      expect(runtime.getStubSourceCode(stubSourceCodeURL))
+      .to.be.fulfilled.and.notify(done);
 
     });
+  });
 
-    describe('App and Hyperty executes in different sandboxes', function() {
+  describe('loadHyperty(hypertyDescriptorURL)', function() {
 
-      it('should get Hyperty Sandbox', function(done) {
+    it('should throw when given no arguments', function() {
+      expect(runtime.loadHyperty).to.throw(Error);
+    });
 
-        let _sandbox;
-        _sandbox = getHypertySandbox('hypertyDescriptorURL');
-        expect(_sandbox).to.be.fulfilled.and.notify(done);
+    it.skip('should be a Promise', function(done) {
 
-      });
-
-      it('should deploy component in the App', function(done) {
-
-        let _sandbox;
-        _sandbox = getHypertySandbox('hypertyDescriptorURL');
-        expect(_sandbox.then(function(result) {
-          return result.deployComponent(mockHypertySourceCode, 'componentURL', {});
-        })).to.be.fulfilled.and.notify(done);
-
-      });
-
-      it.skip('should can register Hyperty - in the registry spec test', function(done) {
-
-        // TODO: Check the if the hypertyURl returned for registerHyperty
-        // match with the specification;
-        // the match should be overide for a RegEX to validate the
-        // specification hyperty URL
-        let hypertyDescriptorURL = 'hyperty-catalogue://sp1/<catalogue-object-identifier>';
-        expect(runtime.registry.registerHyperty(sandbox, hypertyDescriptorURL))
-        .to.be.fulfilled
-        .and.eventually.to.match(/hyperty-runtime:\/\/sp1\/123/)
-        .and.notify(done);
-
-      });
+      let hypertyDescriptorURL = 'hyperty-catalogue://sp1/HelloHyperty';
+      expect(runtime.loadHyperty(hypertyDescriptorURL))
+      .to.be.fulfilled
+      .and.to.be.instanceof(Promise)
+      .and.notify(done);
 
     });
 
-    describe('should return the status of Hyperty', function(done) {
+    it.skip('should be deployed', function(done) {
 
-      it('should be deployed', function() {
-        // TODO: pass valid arguments to be deployed;
-        let hypertyURL = 'http://localhost:8080/.well-known/hyperty/MyFirstHyperty';
-        expect(runtime.loadHyperty(hypertyURL)).be.fulfilled.and.notify(done);
-      });
-
-      it('should be rejected', function() {
-        // TODO: make the load hyperty fail;
-        let hypertyURL = 'http://localhost:8080/.well-known/hyperty/MyThirdHyperty';
-        expect(runtime.loadHyperty(hypertyURL)).be.rejected.and.notify(done);
-      });
+      let hypertyDescriptorURL = 'hyperty-catalogue://sp1/HelloHyperty';
+      expect(runtime.loadHyperty(hypertyDescriptorURL)).to.be.fulfilled
+      .and.notify(done);
 
     });
 
@@ -204,26 +187,14 @@ describe('RuntimeUA', function() {
       expect(loadStubPromise).to.throw();
     });
 
-    it('should be a Promise', function() {
-      let loadStubPromise = runtime.loadStub(spDomain);
-      expect(loadStubPromise).to.be.instanceof(Promise);
+    it.skip('should be a Promise', function(done) {
+      expect(runtime.loadStub(spDomain)).to.be.fulfilled
+      .to.be.instanceof(Promise)
+      .and.notify(done);
     });
 
-    // TODO: Check this testes
-    it('should be deployed', function(done) {
-      // TODO: make the promise to loadStub and has successfully deployed
-      // TODO: need the server to run and teste the runtimeUA;
-      let loadStubPromise = runtime.loadStub(spDomain);
-      expect(loadStubPromise).be.fulfilled.and.notify(done);
-      done();
-    });
-
-    // TODO: Check this testes
-    it('should be rejected', function(done) {
-      // TODO: make the load hyperty fail;
-      let loadStubPromise = runtime.loadStub(spDomain);
-      expect(loadStubPromise).be.rejected.and.notify(done);
-      done();
+    it.skip('should be deployed', function(done) {
+      expect(runtime.loadStub(spDomain)).to.be.fulfilled.and.notify(done);
     });
 
   });

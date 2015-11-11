@@ -6,11 +6,6 @@ class SandboxBrowser {
   }
 
   deployComponent(sourceCode, componentURL, configuration) {
-
-    // TODO: Evaluate the code;
-    // eval(sourceCode);
-    // let hello = new HelloHyperty();
-
     return new Promise(function(resolve, reject) {
       resolve('deployed');
     });

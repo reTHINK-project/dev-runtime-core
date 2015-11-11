@@ -1,9 +1,12 @@
+import MiniBus from '../bus/MiniBus';
+
 /**
  * Implements the Sandbox interface to protect all external code;
  */
-class SandboxBase {
+class SandboxBase extends MiniBus {
 
   constructor(messageBus) {
+    super(messageBus);
   }
 
   /**
