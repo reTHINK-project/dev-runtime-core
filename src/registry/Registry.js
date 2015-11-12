@@ -165,47 +165,37 @@ class Registry extends EventEmitter {
 
             transaction.oncomplete = function(event) {
               //add to the listener in messageBus
-              _this.messageBus.addListener(url + '/status', (msg) => {
-                console.log('Message addListener: ' + msg);
-              });
-              resolve(url);
+              // resolve(url);
               item.remove();
             };
 
             transaction.onerror = function(event) {
-              reject('Error on register hyperty');
+              // reject('Error on register hyperty');
               item.remove();
             };
           });
 
-          // Message to request address allocated for new Hyperty Instance
-          let message = {header: {id: 1,
-                                  type: 'CREATE',
-                                  from: _this.registryURL,
-                                  to: 'runtime://sp1/msg-node/address-allocation'},
-                          body: {hypertyURL: 'hyperty://' + hypertyURL + '/hy123'}};
-
-          _this.messageBus.postMessage(message);
-
-          //TODO remove later, just for tests
-          //function to simulate the response from the address-allocation
-          setTimeout(function() {
-            let message = {header: {id: 1,
-                                    type: 'CREATE',
-                                    from: 'runtime://sp1/msg-node/address-allocation',
-                                    to: _this.registryURL},
-                            body: {hypertyURL: 'hyperty://' + hypertyURL + '/hy123',
-                                   hypertyRuntime: 'hyperty-runtime://' + hypertyURL + '/123'}};
-            _this.messageBus.postMessage(message);
-          }, 500);
-
-          /* let numberOfAddresses = 1;
+          // TODO: should be implemented with addresses poll
+          // In this case we will request and return only one
+          // address
+          let numberOfAddresses = 1;
           let addressDomain = 'ua.pt';
-          _this.addressAllocation.create(addressDomain, numberOfAddresses).then(function(addresses) {
-            console.log('Address Alocation: ', addresses);
+          _this.addressAllocation.create(addressDomain, numberOfAddresses).then(function(adderessList) {
+
+            adderessList.forEach(function(address) {
+
+              _this.messageBus.addListener(address + '/status', (msg) => {
+                console.log('Message addListener for : ', address + '/status -> '  + msg);
+              });
+
+            });
+
+            resolve(adderessList[0]);
+
           }).catch(function(reason) {
             console.log('Address Reason: ', reason);
-          }); */
+            reject(reason);
+          });
 
           //TODO call the post message with create hypertyRegistration msg
 
@@ -311,7 +301,7 @@ class Registry extends EventEmitter {
       let objectStore = transaction.objectStore(_this.DB_STORE_STUB);
 
       //TODO implement a unique number for the protostubURL
-      runtimeProtoStubURL = domainURL + '/protostub/' + 123;//Math.floor((Math.random() * 10000) + 1);
+      runtimeProtoStubURL = domainURL + '/protostub/' + Math.floor((Math.random() * 10000) + 1);
       objectStore.put({domainURL: domainURL, protostubURL: runtimeProtoStubURL, sandbox: sandBox});
 
       //check if messageBus is registered in registry or not

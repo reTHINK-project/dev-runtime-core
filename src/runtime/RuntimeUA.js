@@ -19,9 +19,10 @@ class RuntimeUA {
 
     // TODO: post and return registry/hypertyRuntimeInstance to and from Back-end Service
     // for the request you can use the module request in utils;
-    // the response is like: hyperty-runtime://sp1/protostub/123
+    // the response is like: hyperty-runtime://sp1/123
 
-    let hypertyRuntimeURL = 'hyperty-runtime://sp1/protostub/123';
+    let hypertyRuntimeURL = 'runtime://sp1/' + Math.floor((Math.random() * 10000) + 1);
+    _this.hypertyRuntimeURL = hypertyRuntimeURL;
 
     // Use the sandbox factory to create an AppSandbox;
     // In the future can be decided by policyEngine if we need
@@ -47,10 +48,9 @@ class RuntimeUA {
     _this.registry.addEventListener('runtime:loadStub', function(domainURL) {
 
       _this.loadStub(domainURL).then(function(result) {
-        console.log('result: ', domainURL);
         _this.registry.trigger('runtime:stubLoaded', domainURL);
       }).catch(function(reason) {
-        console.error('reason', reason);
+        console.error(reason);
       });
     });
 
@@ -172,13 +172,9 @@ class RuntimeUA {
       let _hypertySandbox;
       let _hypertyDescriptor;
       let _hypertySourceCode;
-      let _hypertyConfiguration = {
-        url: 'ws://185.17.229.116:9092/ws',
-        runtimeURL: 'ua.pt'
-      };
 
       let errorReason = function(reason) {
-        // // console.log('Hyperty Error:', reason);
+        console.error(reason);
         reject(reason);
       };
 
@@ -186,7 +182,7 @@ class RuntimeUA {
       // TODO: the request Module should be changed,
       // because at this moment it is incompatible with nodejs;
       // Probably we need to pass a factory like we do for sandboxes;
-
+      console.info('Get hyperty descriptor for :', hypertyDescriptorURL);
       return _this.getHypertyDescriptor(hypertyDescriptorURL).then(function(hypertyDescriptor) {
         // at this point, we have completed "step 2 and 3" as shown in https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md
         console.info('1: return hyperty descriptor', hypertyDescriptor);
@@ -269,22 +265,21 @@ class RuntimeUA {
         return _this.registry.registerHyperty(sandbox, hypertyDescriptorURL);
       })
       .then(function(hypertyURL) {
-        console.info('6: return hyperty url, after register hyperty', hypertyURL);
+        console.info('6: Hyperty url, after register hyperty', hypertyURL);
 
         // we have completed step 16 of https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
 
         _hypertyURL = hypertyURL;
 
         // We will deploy the component - step 17 of https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
-        return _hypertySandbox.deployComponent(_hypertySourceCode, _hypertyURL, _hypertyConfiguration);
+        return _hypertySandbox.deployComponent(_hypertySourceCode, _hypertyURL, _hypertyDescriptor.configuration);
       })
       .then(function(deployComponentStatus) {
-        console.info('7: return the status of deployed component');
+        console.info('7: Deploy component status for hyperty: ', _hypertyURL);
 
         // we have completed step 19 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
 
         // Add the message bus listener to the appSandbox or hypertSandbox;
-        //_this.messageBus.addListener(_hypertyURL, _hypertySandbox);
         _this.messageBus.addListener(_hypertyURL, function(msg) {
           _hypertySandbox.postMessage(msg);
         });
@@ -327,8 +322,8 @@ class RuntimeUA {
         type: '',
         messageSchema: '',
         configuration: {
-          url: 'ws://185.17.229.116:9093/ws',
-          runtimeURL: 'ua.pt'
+          url: 'ws://localhost:9090/ws',
+          runtimeURL: _this.hypertyRuntimeURL
         },
         policies: '',
         constraints: '',
@@ -389,11 +384,12 @@ class RuntimeUA {
       let _protoStubSourceCode;
 
       let errorReason = function(reason) {
-        // // console.log('Hyperty Error:', reason);
+        console.error(reason);
         reject(reason);
       };
 
       // Discover Protocol Stub
+      console.info('Discover or Create a new ProtoStub for domain: ', domain);
       return _this.registry.discoverProtostub(domain).then(function(descriptor) {
         // Is registed?
         console.info('1. Proto Stub Discovered: ', descriptor);
@@ -445,7 +441,7 @@ class RuntimeUA {
         // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
         _stubSandbox = stubSandbox;
-
+        return stubSandbox;
       }, function(reason) {
         console.info('5. Sandbox was not found, creating a new one');
 
@@ -481,7 +477,7 @@ class RuntimeUA {
         // Add the message bus listener
         console.log(_runtimeProtoStubURL);
         _this.messageBus.addListener(_runtimeProtoStubURL, function(msg) {
-          console.log('RUNTIMUA:', msg);
+          console.log('RUNTIMUA:', msg, _stubSandbox);
           _stubSandbox.postMessage(msg);
         });
 

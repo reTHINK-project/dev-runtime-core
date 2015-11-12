@@ -1,6 +1,6 @@
 {
   "name": "runtime-core",
-  "version": "0.1.4",
+  "version": "0.1.0",
   "description": "core runtime development",
   "main": "dist/runtime-core.js",
   "scripts": {

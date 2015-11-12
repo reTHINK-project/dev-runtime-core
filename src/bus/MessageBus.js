@@ -23,8 +23,6 @@ class MessageBus extends MiniBus {
     //resolve external protostub...
     _this._registry.resolve(msg.header.to).then((protoStubURL) => {
 
-      console.log('MSG HEADER TO protoStubURL: ', msg, protoStubURL);
-
       let itemList = _this._subscriptions[protoStubURL];
       if (itemList) {
         _this._publishOn(itemList, msg);

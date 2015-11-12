@@ -12,14 +12,24 @@ class SandboxBrowser extends MiniBus {
 
     let _this = this;
 
+    let minibus = new MiniBus();
+    minibus._onPostMessage = function(msg) {
+      console.log('POST MESSAGE REPLAY: ', msg);
+      _this._onMessage(msg);
+    };
+
+    _this.minibus = minibus;
+
     // TODO: Evaluate the code;
     eval(sourceCode);
 
-    let vertxProtoStub = new VertxProtoStub('domain://msg-node.ua.pt/hyperty-address-allocation', this, configuration);
+    // Instatiate the VertxProtoStub;
+    let vertxProtoStub = new VertxProtoStub(componentURL, minibus, configuration);
 
     window.vertx = vertxProtoStub;
 
     return new Promise(function(resolve, reject) {
+
       resolve('deployed');
     });
 
@@ -28,8 +38,7 @@ class SandboxBrowser extends MiniBus {
   _onPostMessage(msg) {
     let _this = this;
     console.log('_onPostMessage: ', JSON.stringify(msg));
-
-    // _this._onMessage(msg);
+    _this.minibus._onMessage(msg);
   }
 
 }

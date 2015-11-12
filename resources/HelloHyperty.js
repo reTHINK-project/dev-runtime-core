@@ -1,14 +1,13 @@
 class HelloHyperty {
 
   constructor(hypertyURL, bus, configuration) {
-    console.log('hello hyperty');
 
     let _this = this;
-    _this.hypertyURL = 'hyperty-runtime://sp1/HelloHyperty';
     _this.bus = bus;
     _this.configuration = configuration;
+    _this.hypertyURL = hypertyURL;
 
-    _this.bus.addListener(_this.hypertyURL, function(msg) {
+    _this.bus.addListener(hypertyURL, function(msg) {
       console.log('Hello Hyperty: ', msg);
     });
 

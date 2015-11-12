@@ -39,20 +39,16 @@ var VertxProtoStub = (function () {
     this._bus = bus;
     this._config = config;
 
-    bus.addListener(runtimeProtoStubURL, function (msg) {
+    bus.addListener('*', function (msg) {
       var _this = _this2;
+
+      console.log('send :', msg);
 
       _this._open(function () {
         _this._sock.send(JSON.stringify(msg));
       });
     });
   }
-
-  /**
-  * Callback used to send messages
-  * @callback PostMessage
-  * @param {Message} msg - Message to send
-  */
 
   /**
    * Get the configuration for this ProtoStub
@@ -210,6 +206,7 @@ var VertxProtoStub = (function () {
               _this._sessionCallback(msg);
             }
           } else {
+            console.log('recieve message:', msg);
             _this._bus.postMessage(msg);
           }
         };
@@ -266,6 +263,12 @@ var VertxProtoStub = (function () {
 })();
 
 exports['default'] = VertxProtoStub;
+
+/**
+* Callback used to send messages
+* @callback PostMessage
+* @param {Message} msg - Message to send
+*/
 module.exports = exports['default'];
 
 },{}]},{},[1])(1)
