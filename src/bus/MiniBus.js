@@ -94,13 +94,17 @@ class MiniBus {
       _this._replyCallbacks[replyId] = replyCallback;
 
       setTimeout(() => {
+        let replyFun = _this._replyCallbacks[replyId];
         delete _this._replyCallbacks[replyId];
-        let errorMsg = {
-          header: {id: msg.header.id, type: 'reply'},
-          body: {code: 'error', desc: 'Reply timeout!'}
-        };
 
-        replyCallback(errorMsg);
+        if (replyFun) {
+          let errorMsg = {
+            header: {id: msg.header.id, type: 'reply'},
+            body: {code: 'error', desc: 'Reply timeout!'}
+          };
+
+          replyFun(errorMsg);
+        }
       }, _this._replyTimeOut);
     }
 
