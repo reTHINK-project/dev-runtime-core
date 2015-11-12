@@ -12,5 +12,4 @@ npm-debug.log
 vendor
 build
 node_modules
-example
 *.komodoproject
