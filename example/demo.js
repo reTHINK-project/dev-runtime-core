@@ -30,7 +30,7 @@ setTimeout(function() {
 
     var message = 'runtime.messageBus.postMessage(' + JSON.stringify(messageObject) + ')';
 
-    document.querySelector('.message').innerHTML = message;
+    // document.querySelector('.message').innerHTML = message;
   }).catch(function(reason) {
     console.log(reason);
   });
