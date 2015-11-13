@@ -54,8 +54,7 @@ class MiniBus {
    * @param {Function} replyListener Callback function for the reply
    */
   addReplyListener(url, msgId, replyListener) {
-    let replyId = url + msgId;
-    _this._replyCallbacks[replyId] = replyListener;
+    this._replyCallbacks[url + msgId] = replyListener;
   }
 
   /**
@@ -64,8 +63,15 @@ class MiniBus {
    * @param {number} msgId  Message ID that is returned from the postMessage
    */
   removeReplyListener(url, msgId) {
-    let replyId = url + msgId;
-    delete _this._replyCallbacks[replyId];
+    delete this._replyCallbacks[url + msgId];
+  }
+
+  /**
+   * Remove all existent listeners for the URL
+   * @param  {URL} url Address registered
+   */
+  removeAllListenersOf(url) {
+    delete this._subscriptions[url];
   }
 
   /**

@@ -1,32 +1,70 @@
+import SandboxRegistry from '../sandbox/SandboxRegistry';
 import MiniBus from '../bus/MiniBus';
 
 /**
- * Implements the Sandbox interface to protect all external code;
+ * @author micaelpedrosa@gmail.com
+ * Base class to implement external sandbox component
  */
-class SandboxBase extends MiniBus {
-
-  constructor(messageBus) {
-    super(messageBus);
+class Sandbox extends MiniBus {
+  constructor() {
+    super();
   }
 
   /**
-   * To download and deploy a new component in the sandbox passing as input parameters the url from where the components is downloaded, the componentURL address previously allocated to the component and its configuration.
-   * @param  {URL.URL}        componentDownloadURL      Sourcecode Component address url
-   * @param  {URL.URL}        componentURL              Component address url;
-   * @param  {Object}         configuration             Configuration object;
+   * Deploy an instance of the component into the sandbox.
+   * @param  {string} componentSourceCode Component source code (Hyperty, ProtoStub, etc)
+   * @param  {URL} componentURL Hyperty, ProtoStub, or any other component address.
+   * @param  {Config} configuration Config parameters of the component
+   * @return {Promise<string>} return deployed if successful, or any other string with an error
    */
   deployComponent(componentSourceCode, componentURL, configuration) {
+    let _this = this;
 
+    return new Promise((resolve, reject) => {
+      //TODO: message format is not properly defined yet
+      let deployMessage = {
+        header: { type: 'CREATE', from: SandboxRegistry.ExternalDeployAddress, to: SandboxRegistry.InternalDeployAddress },
+        body: { url: componentURL, sourceCode: componentSourceCode, config: configuration }
+      };
+
+      //send message into the sandbox internals and wait for reply
+      _this.postMessage(deployMessage, (reply) => {
+        if (reply.body.code === 'ok') {
+          //is this response complaint with the spec?
+          resolve('deployed');
+        } else {
+          reject(reply.body.desc);
+        }
+      });
+    });
   }
 
   /**
-   * To remove a component from the sandbox passing as input parameters its URL.
-   * @param  {URL.URL}        componentURL              Component address url;
+   * Remove the instance of a previously deployed component.
+   * @param  {URL} componentURL Hyperty, ProtoStub, or any other component address.
+   * @return {Promise<string>} return undeployed if successful, or any other string with an error
    */
   removeComponent(componentURL) {
+    let _this = this;
 
+    return new Promise((resolve, reject) => {
+      //TODO: message format is not properly defined yet
+      let removeMessage = {
+        header: { type: 'REMOVE', from: SandboxRegistry.ExternalDeployAddress, to: SandboxRegistry.InternalDeployAddress },
+        body: { url: componentURL }
+      };
+
+      //send message into the sandbox internals and wait for reply
+      _this.postMessage(removeMessage, (reply) => {
+        if (reply.body.code === 'ok') {
+          //is this response complaint with the spec?
+          resolve('undeployed');
+        } else {
+          reject(reply.body.desc);
+        }
+      });
+    });
   }
-
 }
 
-export default SandboxBase;
+export default Sandbox;

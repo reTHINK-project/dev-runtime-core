@@ -1,44 +1,39 @@
 import MiniBus from '../../src/bus/MiniBus';
+import Sandbox from '../../src/sandbox/Sandbox';
+import SandboxRegistry from '../../src/sandbox/SandboxRegistry';
 
-// Mockup code, for tests;
-class SandboxBrowser extends MiniBus {
+// Mockup code for testing
+class SandboxBrowser extends Sandbox {
 
   constructor() {
     super();
-    console.log('Sandbox Browser');
-  }
-
-  deployComponent(sourceCode, componentURL, configuration) {
-
     let _this = this;
+    console.log('AppSandboxBrowser');
 
-    let minibus = new MiniBus();
-    minibus._onPostMessage = function(msg) {
-      console.log('POST MESSAGE REPLAY: ', msg);
+    //simulate sandbox frontier
+    _this._bus = new MiniBus();
+    _this._bus._onPostMessage = function(msg) {
+      console.log('SandboxBrowser._onPostMessage -> external: ', JSON.stringify(msg));
+
+      //redirect messages to the external part of the sandbox
       _this._onMessage(msg);
     };
 
-    _this.minibus = minibus;
-
-    // TODO: Evaluate the code;
-    eval(sourceCode);
-
-    // Instatiate the VertxProtoStub;
-    let vertxProtoStub = new VertxProtoStub(componentURL, minibus, configuration);
-
-    window.vertx = vertxProtoStub;
-
-    return new Promise(function(resolve, reject) {
-
-      resolve('deployed');
-    });
-
+    _this._sbr = new SandboxRegistry(_this._bus);
+    _this._sbr._create = (url, sourceCode, config) => {
+      console.log('SandboxRegistry._create ', url, config);
+      eval(sourceCode);
+      window.vertx = new VertxProtoStub(url, _this._bus, config);
+      return window.vertx;
+    };
   }
 
   _onPostMessage(msg) {
     let _this = this;
-    console.log('_onPostMessage: ', JSON.stringify(msg));
-    _this.minibus._onMessage(msg);
+    console.log('SandboxBrowser._onPostMessage -> internal: ', JSON.stringify(msg));
+
+    //redirect messages to the internal part of the sandbox
+    _this._bus._onMessage(msg);
   }
 
 }
