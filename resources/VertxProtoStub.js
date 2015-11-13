@@ -42,8 +42,6 @@ var VertxProtoStub = (function () {
     bus.addListener('*', function (msg) {
       var _this = _this2;
 
-      console.log('send :', msg);
-
       _this._open(function () {
         _this._sock.send(JSON.stringify(msg));
       });
@@ -206,7 +204,6 @@ var VertxProtoStub = (function () {
               _this._sessionCallback(msg);
             }
           } else {
-            console.log('recieve message:', msg);
             _this._bus.postMessage(msg);
           }
         };

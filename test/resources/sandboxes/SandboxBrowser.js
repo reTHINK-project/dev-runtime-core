@@ -1,7 +1,9 @@
-// Mockup code, for tests;
-class SandboxBrowser {
+import MiniBus from '../../../src/bus/MiniBus';
+
+class SandboxBrowser extends MiniBus {
 
   constructor() {
+    super();
     console.log('Sandbox Browser');
   }
 

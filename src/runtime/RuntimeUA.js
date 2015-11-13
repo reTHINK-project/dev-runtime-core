@@ -37,13 +37,13 @@ class RuntimeUA {
 
     // Instantiate the Registry Module
     // TODO: fix the first parameter should not be a message bus;
-    _this.registry = new Registry(null, hypertyRuntimeURL, appSandbox);
+    _this.registry = new Registry(hypertyRuntimeURL, appSandbox);
 
     // Instantiate the Message Bus
     _this.messageBus = new MessageBus(_this.registry);
 
     // Register messageBus on Registry
-    _this.registry.registerMessageBus(_this.messageBus);
+    _this.registry.messageBus = _this.messageBus;
 
     _this.registry.addEventListener('runtime:loadStub', function(domainURL) {
 
@@ -182,8 +182,9 @@ class RuntimeUA {
       // TODO: the request Module should be changed,
       // because at this moment it is incompatible with nodejs;
       // Probably we need to pass a factory like we do for sandboxes;
+      console.log('------------------ Hyperty ------------------------');
       console.info('Get hyperty descriptor for :', hypertyDescriptorURL);
-      return _this.getHypertyDescriptor(hypertyDescriptorURL).then(function(hypertyDescriptor) {
+      _this.getHypertyDescriptor(hypertyDescriptorURL).then(function(hypertyDescriptor) {
         // at this point, we have completed "step 2 and 3" as shown in https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md
         console.info('1: return hyperty descriptor', hypertyDescriptor);
 
@@ -289,11 +290,15 @@ class RuntimeUA {
         });
 
         // we have completed step 20 of https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
+        let hyperty = {
+          runtimeHypertyURL: _hypertyURL,
+          status: 'Deployed'
+        };
 
-        resolve('Hyperty ' + _hypertyDescriptor.classname + ' is deployed');
+        resolve(hyperty);
 
         // we have completed step 21 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
-
+        console.log('------------------ END ------------------------');
       })
       .catch(errorReason);
 
@@ -389,15 +394,16 @@ class RuntimeUA {
       };
 
       // Discover Protocol Stub
+      console.info('------------------- ProtoStub ---------------------------\n');
       console.info('Discover or Create a new ProtoStub for domain: ', domain);
-      return _this.registry.discoverProtostub(domain).then(function(descriptor) {
+      _this.registry.discoverProtostub(domain).then(function(descriptor) {
         // Is registed?
         console.info('1. Proto Stub Discovered: ', descriptor);
         _stubDescriptor = descriptor;
 
         // we have completed step 2 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
-        resolve('Successful');
+        return _stubDescriptor;
       }, function(reason) {
         // is not registed?
         console.info('1. Proto Stub not found:', reason);
@@ -467,7 +473,7 @@ class RuntimeUA {
         _runtimeProtoStubURL = runtimeProtoStubURL;
 
         // Deploy Component step xxx
-        return _stubSandbox.deployComponent(_protoStubSourceCode, _runtimeProtoStubURL, _stubDescriptor.configuration);
+        return _stubSandbox.deployComponent(_protoStubSourceCode, runtimeProtoStubURL, _stubDescriptor.configuration);
       })
       .then(function(result) {
         console.info('8: return deploy component for sandbox status');
@@ -475,21 +481,25 @@ class RuntimeUA {
         // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
         // Add the message bus listener
-        console.log(_runtimeProtoStubURL);
         _this.messageBus.addListener(_runtimeProtoStubURL, function(msg) {
-          console.log('RUNTIMUA:', msg, _stubSandbox);
           _stubSandbox.postMessage(msg);
         });
 
         _stubSandbox.addListener('*', function(msg) {
-          console.log('Sandbox response: ', msg);
           _this.messageBus.postMessage(msg);
         });
 
         // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
         // Load Stub function resolved with success;
-        resolve('Stub  ' + _stubDescriptor.classname + '  successfully loaded');
+        let stub = {
+          runtimeProtoStubURL: _runtimeProtoStubURL,
+          status: 'Deployed'
+        };
+
+        resolve(stub);
+        console.info('------------------- END ---------------------------\n');
+
       })
       .catch(errorReason);
 

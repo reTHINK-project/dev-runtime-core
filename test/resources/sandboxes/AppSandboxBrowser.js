@@ -1,6 +1,9 @@
-class AppSandboxBrowser {
+import MiniBus from '../../../src/bus/MiniBus';
+
+class AppSandboxBrowser extends MiniBus {
 
   constructor() {
+    super();
     console.log('App Sandbox Browser');
   }
 

@@ -13,7 +13,7 @@ class Registry extends EventEmitter {
   * @param  {AppSandbox}          appSandbox            appSandbox
   * @param  {DomainURL}           remoteRegistry        remoteRegistry
   */
-  constructor(msgbus, runtimeURL, appSandbox, remoteRegistry) {
+  constructor(runtimeURL, appSandbox, remoteRegistry) {
 
     super();
 
@@ -75,46 +75,25 @@ class Registry extends EventEmitter {
   }
 
   /**
-  * Register the messageBus, so the registry can make calls to messageBus
+  * return the messageBus in this Registry
   * @param {MessageBus}           messageBus
   */
-  registerMessageBus(messageBus) {
+  get messageBus() {
     let _this = this;
-    _this.messageBus = messageBus;
+    return _this._messageBus;
+  }
 
-    let url = _this.registryURL;
+  /**
+  * Set the messageBus in this Registry
+  * @param {MessageBus}           messageBus
+  */
+  set messageBus(messageBus) {
+    let _this = this;
+    _this._messageBus = messageBus;
 
     // Install AddressAllocation
-    let addressAllocation = new AddressAllocation(url, messageBus);
+    let addressAllocation = new AddressAllocation(_this.registryURL, messageBus);
     _this.addressAllocation = addressAllocation;
-
-  }
-
-  /**
-  * Register the runtimeUA, so the registry can make calls to runtimeUA
-  * @param {RuntimeUA}           runtimeUA
-  */
-  registerRuntimeUA(runtimeUA) {
-    let _this = this;
-    _this.runtimeUA = runtimeUA;
-  }
-
-  /**
-  * Return the runtimeUA in this Registry
-  * @param {RuntimeUA}           runtimeUA
-  */
-  discoverRuntimeUA() {
-    let _this = this;
-    return _this.runtimeUA;
-  }
-
-  /**
-  * Return the messageBus in this Registry
-  * @param {MessageBus}           messageBus
-  */
-  discoverMessageBus() {
-    let _this = this;
-    return _this.messageBus;
   }
 
   /**
@@ -145,7 +124,7 @@ class Registry extends EventEmitter {
 
     var promise = new Promise(function(resolve, reject) {
 
-      if (_this.messageBus === undefined) {
+      if (_this._messageBus === undefined) {
         reject('MessageBus not found on registerStub');
       } else {
         //call check if the protostub exist
@@ -153,7 +132,7 @@ class Registry extends EventEmitter {
         }).then(function() {
 
           // addListener with the callback to execute when receive a message from the address-allocation
-          let item = _this.messageBus.addListener(_this.registryURL, (msg) => {
+          let item = _this._messageBus.addListener(_this.registryURL, (msg) => {
             let transaction = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readwrite');
             let storeValue = transaction.objectStore(_this.DB_STORE_HYPERTY);
             let url = msg.body.hypertyRuntime;
@@ -184,7 +163,7 @@ class Registry extends EventEmitter {
 
             adderessList.forEach(function(address) {
 
-              _this.messageBus.addListener(address + '/status', (msg) => {
+              _this._messageBus.addListener(address + '/status', (msg) => {
                 console.log('Message addListener for : ', address + '/status -> '  + msg);
               });
 
@@ -293,7 +272,7 @@ class Registry extends EventEmitter {
 
     var promise = new Promise(function(resolve,reject) {
 
-      if (_this.messageBus === undefined) {
+      if (_this._messageBus === undefined) {
         reject('MessageBus not found on registerStub');
       }
 
@@ -301,8 +280,13 @@ class Registry extends EventEmitter {
       let objectStore = transaction.objectStore(_this.DB_STORE_STUB);
 
       //TODO implement a unique number for the protostubURL
-      runtimeProtoStubURL = domainURL + '/protostub/' + Math.floor((Math.random() * 10000) + 1);
-      objectStore.put({domainURL: domainURL, protostubURL: runtimeProtoStubURL, sandbox: sandBox});
+      let domain = domainURL;
+      if (!domainURL.indexOf('msg-node.')) {
+        domain = domainURL.substring(domainURL.indexOf('.') + 1);
+      }
+
+      runtimeProtoStubURL = 'msg-node.' + domain + '/protostub/' + Math.floor((Math.random() * 10000) + 1);
+      objectStore.put({domainURL: domain, protostubURL: runtimeProtoStubURL});
 
       //check if messageBus is registered in registry or not
       transaction.onerror = function(event) {
@@ -312,7 +296,7 @@ class Registry extends EventEmitter {
       transaction.oncomplete = function(event) {
         resolve(runtimeProtoStubURL);
 
-        _this.messageBus.addListener(runtimeProtoStubURL + '/status', (msg) => {
+        _this._messageBus.addListener(runtimeProtoStubURL + '/status', (msg) => {
           if (msg.header.resource === msg.header.to + '/status') {
             console.log('RuntimeProtostubURL/status message: ', msg.body.value);
           }
@@ -523,6 +507,10 @@ class Registry extends EventEmitter {
       let transaction = _this.db.transaction(_this.DB_STORE_STUB, 'readonly');
       let objectStore = transaction.objectStore(_this.DB_STORE_STUB);
 
+      if (!domainUrl.indexOf('msg-node.')) {
+        domainUrl = domainUrl.substring(domainUrl.indexOf('.') + 1);
+      }
+
       let request  = objectStore.get(domainUrl);
 
       _this.addEventListener('runtime:stubLoaded', function(domainUrl) {
@@ -536,16 +524,6 @@ class Registry extends EventEmitter {
           resolve(matching.protostubURL);
         } else {
           _this.trigger('runtime:loadStub', domainUrl);
-
-          //TODO delete later. Function to simulate a loadStub response
-          /*setTimeout(function() {
-            _this.registerStub(domainUrl + '/sanbbox', domainUrl).then(function() {
-              resolve(domainUrl);
-            });
-          }, 250);
-          */
-
-          //reject('DomainUrl ' + domainUrl + ' not found');
         }
       };
 
