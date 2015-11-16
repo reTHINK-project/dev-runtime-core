@@ -2,17 +2,73 @@
 <html>
   <head>
     <title>Demo of Hyperty and Protostubs</title>
+
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.3/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.3/js/materialize.min.js"></script>
   </head>
   <body>
-    <h1>Examples</h1>
+    <div>
 
-    <section class="hyperty">
-      <h3>Runtime Hyperty URL <span class="status"></span></h3>
-      <label class="runtime-hyperty-url"></label>
-    </section>
+      <h1>Examples</h1>
+      <div class="row">
 
-    <!-- <h2>To send a message we need to do</h2>
-    <pre class="message"></pre> -->
+        <section class="hyperties">
+
+          <div class="hyperty col s12 m6 HelloHyperty">
+            <h3><span class="name"></span> - <span class="status"></span></h3>
+
+            <ul class="list collection">
+            </ul>
+
+            <form class="form">
+              <blockquote class="runtime-hyperty-url col s12"></blockquote>
+
+              <div class="input-field col s12">
+                <input placeholder="Connect to Hyperty URL" id="hypertyURLTo1" type="text" class="validate toHyperty">
+                <label for="hypertyURLTo1">Connect to Hyperty URL</label>
+              </div>
+
+              <div class="input-field col s12">
+                <textarea id="message1" class="materialize-textarea messageHyperty"></textarea>
+                <label for="message1">Message</label>
+              </div>
+
+              <button class="send waves-effect waves-light btn">Send</button>
+            </form>
+
+          </div>
+
+          <div class="hyperty col s12 m6 WorldHyperty">
+            <h3><span class="name"></span> - <span class="status"></span></h3>
+
+            <ul class="list collection">
+            </ul>
+
+            <form class="form">
+              <blockquote class="runtime-hyperty-url col s12"></blockquote>
+
+              <div class="input-field col s12">
+                <input placeholder="Connect to Hyperty URL" id="hypertyURLTo2" type="text" class="validate toHyperty">
+                <label for="hypertyURLTo2">Connect to Hyperty URL</label>
+              </div>
+
+              <div class="input-field col s12">
+                <textarea id="message2" class="materialize-textarea messageHyperty"></textarea>
+                <label for="message2">Message</label>
+              </div>
+
+              <button class="send waves-effect waves-light btn">Send</button>
+            </form>
+          </div>
+
+        </section>
+      </div>
+    </div>
 
     <script src="../vendor/system.js"></script>
     <script src="../config.js"></script>

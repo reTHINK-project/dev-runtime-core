@@ -4,52 +4,121 @@ import SandboxFactory from '../resources/sandboxes/SandboxFactory';
 
 var sandboxFactory = new SandboxFactory();
 
-var r = new RuntimeUA(sandboxFactory);
-
-window.runtime = r;
+var runtime = new RuntimeUA(sandboxFactory);
 
 indexedDB.deleteDatabase('registry-DB');
 
-setTimeout(function() {
+var hypertiesList = ['hyperty-catalogue://ua.pt/HelloHyperty', 'hyperty-catalogue://ua.pt/WorldHyperty'];
 
-  // Load First Hyperty
-  r.loadHyperty('hyperty-catalogue://ua.pt/HelloHyperty').then(function(result) {
-    document.querySelector('.runtime-hyperty-url').innerHTML = result.runtimeHypertyURL;
-    document.querySelector('.status').innerHTML = result.status;
+function errorMessage(reason) {
+  console.log(reason);
+}
 
-    var messageObject = {
-      header: {
-        to:'<destination hyperty runtime url>',
-        from: result.runtimeHypertyURL,
-        type: 'MESSAGE'
-      },
-      body:{
-        value: '<message to send>'
-      }
-    };
+function deployedHyperties(hyperty, result) {
 
-    var message = 'runtime.messageBus.postMessage(' + JSON.stringify(messageObject) + ')';
+  var hypertyName = hyperty.substr(hyperty.lastIndexOf('/') + 1);
+  var hypertyEl = document.querySelector('.' + hypertyName);
 
-    // document.querySelector('.message').innerHTML = message;
-  }).catch(function(reason) {
-    console.log(reason);
+  hypertyEl.querySelector('.status').innerHTML = result.status;
+  hypertyEl.querySelector('.name').innerHTML = hypertyName;
+  hypertyEl.querySelector('.runtime-hyperty-url').innerHTML = result.runtimeHypertyURL;
+  hypertyEl.querySelector('.form').setAttribute('data-url', result.runtimeHypertyURL);
+  hypertyEl.querySelector('.send').addEventListener('click', function(e) {
+
+    var target = e.target;
+    var form = target.parentElement;
+    var fromHyperty = form.getAttribute('data-url');
+    var toHyperty = form.querySelector('.toHyperty').value;
+    var messageHypert = form.querySelector('.messageHyperty').value;
+
+    if (fromHyperty && toHyperty && messageHypert) {
+      sendMessage(fromHyperty, toHyperty, messageHypert);
+    }
+
+    form.reset();
+
+    e.preventDefault();
   });
 
-  // Load Second Hyperty
-  // r.loadHyperty('hyperty-catalogue://ua.pt/WorldHyperty').then(function(result) {
-  //   console.log(result);
-  // }).catch(function(reason) {
-  //   console.log(reason);
-  // });
+  runtime.messageBus.addListener(result.runtimeHypertyURL, newMessageRecived);
 
-  // This load stub is not necessary, because for domain ua.pt the loadHyperty
-  // create a stub for the same domain;
-  // r.loadStub('ua.pt').then(function(result) {
-  //   console.log(result);
-  // }).catch(function(reason) {
-  //   console.log(reason);
-  // });
+}
 
-}, 2000);
+function newMessageRecived(msg) {
+
+  var fromHyperty = msg.header.from;
+  var toHyperty = msg.header.to;
+
+  var elTo = document.querySelector('form[data-url="' + toHyperty + '"]');
+  var listTo = elTo.parentElement.querySelector('.list');
+
+  var itemTo = document.createElement('li');
+  itemTo.setAttribute('class', 'collection-item avatar right-align');
+  itemTo.innerHTML = '<i class="material-icons circle green">call_received</i><label class="name title">' + fromHyperty + '</label><p class="message">' + msg.body.value.replace(/\n/g, '<br>') + '</p>';
+
+  listTo.appendChild(itemTo);
+
+  var elFrom = document.querySelector('form[data-url="' + fromHyperty + '"]');
+  if (elFrom) {
+    var listFrom = elFrom.parentElement.querySelector('.list');
+    var itemFrom = document.createElement('li');
+    itemFrom.setAttribute('class', 'collection-item avatar');
+    itemFrom.innerHTML = '<i class="material-icons circle yellow">call_made</i><label class="name title">' + toHyperty + '</label><p class="message">' + msg.body.value.replace(/\n/g, '<br>') + '</p>';
+
+    listFrom.appendChild(itemFrom);
+  }
+
+}
+
+function sendMessage(from, to, message) {
+
+  var messageObject = {
+    header: {
+      to: to,
+      from: from,
+      type: 'MESSAGE'
+    },
+    body:{
+      value: message
+    }
+  };
+
+  console.log('Send Message:', messageObject);
+
+  runtime.messageBus.postMessage(messageObject);
+}
+
+function loadHyperties() {
+
+  var time = 1;
+
+  hypertiesList.forEach(function(hyperty) {
+
+    setTimeout(function() {
+
+      // Load First Hyperty
+      runtime.loadHyperty(hyperty).then(function(result) {
+        deployedHyperties(hyperty, result);
+      }).catch(function(reason) {
+        errorMessage(reason);
+      });
+
+      // This load stub is not necessary, because for domain ua.pt the loadHyperty
+      // create a stub for the same domain;
+      // r.loadStub('ua.pt').then(function(result) {
+      //   console.log(result);
+      // }).catch(function(reason) {
+      //   console.log(reason);
+      // });
+
+    }, (1000 * time));
+
+    time++;
+
+  });
+
+}
+
+loadHyperties();
 
 // END Testing code;
