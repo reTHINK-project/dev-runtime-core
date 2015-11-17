@@ -58,16 +58,6 @@ function newMessageRecived(msg) {
 
   listTo.appendChild(itemTo);
 
-  var elFrom = document.querySelector('form[data-url="' + fromHyperty + '"]');
-  if (elFrom) {
-    var listFrom = elFrom.parentElement.querySelector('.list');
-    var itemFrom = document.createElement('li');
-    itemFrom.setAttribute('class', 'collection-item avatar');
-    itemFrom.innerHTML = '<i class="material-icons circle yellow">call_made</i><label class="name title">' + toHyperty + '</label><p class="message">' + msg.body.value.replace(/\n/g, '<br>') + '</p>';
-
-    listFrom.appendChild(itemFrom);
-  }
-
 }
 
 function sendMessage(from, to, message) {
@@ -83,7 +73,15 @@ function sendMessage(from, to, message) {
     }
   };
 
-  console.log('Send Message:', messageObject);
+  var form = document.querySelector('form[data-url="' + from + '"]');
+  if (form) {
+    var listFrom = form.parentElement.querySelector('.list');
+    var itemFrom = document.createElement('li');
+    itemFrom.setAttribute('class', 'collection-item avatar');
+    itemFrom.innerHTML = '<i class="material-icons circle yellow">call_made</i><label class="name title">' + to + '</label><p class="message">' + messageObject.body.value.replace(/\n/g, '<br>') + '</p>';
+
+    listFrom.appendChild(itemFrom);
+  }
 
   runtime.messageBus.postMessage(messageObject);
 }

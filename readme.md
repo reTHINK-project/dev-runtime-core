@@ -3,13 +3,23 @@ Runtime-Core
 
 [Release 0.1.0](release_notes_0.1.0.md)
 
+
+[Example](#example)
+
 ### Setup Environment
 
-On the first time you are cloning this repository, you need to run the command `npm run init-setup`;
+On the first time you are cloning this repository, you need to run the command:
+```
+npm run init-setup
+```
 
 After running successfully this command you will have 2 folders (node_modules and vendor), these folders are excluded from the commit process, and are only for development.
 
-if you already have the project configured on your machine, you only need run the command `npm install` to add new dependencies;
+if you already have the project configured on your machine, you only need run the next command to add new dependencies:
+```
+npm install
+jspm install
+```
 
 if you have some trouble with the environment, you can open an issue;
 
@@ -17,7 +27,7 @@ if you have some trouble with the environment, you can open an issue;
 
 JavaScript code should be written in ES6. There are direct dependencies from nodejs and npm, these can be installed separately or in conjunction with [nvm](https://github.com/creationix/nvm)
 
-#### dependencies:
+#### Dependencies
 
 -	nodejs
 -	npm
@@ -113,3 +123,19 @@ To run karma tests is mandatory to run **live-server** because of the mock-up's 
 ```
 live-server --port=4000
 ```
+
+### <a id="example">Example</a>
+
+This repository have a folder with an working example of runtime-core and we can do:
+ - send message between local hyperties (2 hyperties);
+ - send message between remote hyperties through the vertx;
+
+-----
+
+To run the demo on example folder:
+ - you need **live-server** running.
+ ```
+ live-server --port=4000
+ ```
+ - in your browser access to http://localhost:4000.
+ - for communication between hyperties in two distinct browsers, you need, run locally [dev-msg-node-vertx](https://github.com/reTHINK-project/dev-msg-node-vertx#java)
