@@ -17,9 +17,6 @@ class Registry extends EventEmitter {
 
     super();
 
-    // NOTE if the database structure is changed it might cause errors, run the following command
-    // indexedDB.deleteDatabase('registry-DB'); this will delete the database, with the old structure
-
     // how some functions receive the parameters for example:
     // new Registry(msgbus, 'hyperty-runtime://sp1/123', appSandbox, remoteRegistry);
     // registry.registerStub(sandbox, 'sp1');
@@ -36,41 +33,10 @@ class Registry extends EventEmitter {
     _this.runtimeURL = runtimeURL;
     _this.remoteRegistry = remoteRegistry;
 
-    // Database configurations;
-    _this.db = {};
-    _this.DB_NAME = 'registry-DB';
-    _this.DB_VERSION = 1;
-    _this.DB_STORE_HYPERTY = 'hyperty-list';
-    _this.DB_STORE_STUB = 'protostub-list';
-
-    let request = indexedDB.open(_this.DB_NAME, _this.DB_VERSION);
-
-    request.onsuccess = function(event) {
-      _this.db = this.result;
-    };
-
-    request.onerror = function(event) {
-      console.error('Request open IndexedDB error:', event.target.errorCode);
-    };
-
-    request.onupgradeneeded = function(event) {
-      let objectStore = event.currentTarget.result.createObjectStore(
-        _this.DB_STORE_HYPERTY, {keyPath: 'hyperty'});
-      objectStore.createIndex('pepURL', 'pepURL', {unique: false});
-      objectStore.createIndex('identity', 'identity', {unique: false});
-      objectStore.createIndex('sandbox', 'sandbox', {unique: false});
-
-      //populate with the runtimeURL provided
-      objectStore.put({hyperty: 'test', pepURL: null,
-                      identity: 'testID' });
-
-      let stubStore = event.currentTarget.result.createObjectStore(
-        _this.DB_STORE_STUB, {keyPath: 'domainURL'});
-      stubStore.createIndex('protostubURL', 'protostubURL', {unique: false});
-      stubStore.createIndex('sandbox', 'sandbox', {unique: false});
-
-      stubStore.put({domainURL: 'testStub', protostubURL: 'testStubURL'});
-    };
+    _this.hypertyiesList = {};
+    _this.protostubsList = {};
+    _this.sandboxesList = {};
+    _this.pepList = {};
 
   }
 
@@ -133,25 +99,15 @@ class Registry extends EventEmitter {
 
           // addListener with the callback to execute when receive a message from the address-allocation
           let item = _this._messageBus.addListener(_this.registryURL, (msg) => {
-            let transaction = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readwrite');
-            let storeValue = transaction.objectStore(_this.DB_STORE_HYPERTY);
             let url = msg.body.hypertyRuntime;
 
-            storeValue.put({hyperty: url, pepURL: null,
-              identity: url + '/identity', sandbox: sandbox});
+            _this.hypertiesList[url] = {identity: url + '/identity'};
+            _this.sandboxesList[url] = sandbox;
 
             //TODO register this hyperty in the Global Registry
 
-            transaction.oncomplete = function(event) {
-              //add to the listener in messageBus
-              // resolve(url);
-              item.remove();
-            };
+            item.remove();
 
-            transaction.onerror = function(event) {
-              // reject('Error on register hyperty');
-              item.remove();
-            };
           });
 
           // TODO: should be implemented with addresses poll
@@ -191,36 +147,16 @@ class Registry extends EventEmitter {
   */
   unregisterHyperty(url) {
     let _this = this;
-    let transaction = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readwrite');
 
     var promise = new Promise(function(resolve,reject) {
-      let objectStore = transaction.objectStore(_this.DB_STORE_HYPERTY);
-      let request = objectStore.get(url);
 
-      request.onerror = function(event) {
-        reject('Error on delete Hyperty');
-      };
+      let request = _this.hypertiesList[url];
 
-      request.onsuccess = function(event) {
-
-        let data = request.result;
-        if (data === undefined) {
-          reject('Error hyperty not found');
-        } else {
-
-          var request2 = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readwrite').
-          objectStore(_this.DB_STORE_HYPERTY).delete(url);
-
-          request2.onsuccess = function(event) {
-            resolve('Hyperty delete with success');
-          };
-
-          request2.onerror = function(event) {
-            console.error('Error deleting an Hyperty');
-            reject('Error deleting an Hyperty');
-          };
-        }
-      };
+      if (request === undefined) {
+        reject('Hyperty not found');
+      } else {
+        resolve('Hyperty successfully deleted');
+      }
     });
 
     return promise;
@@ -237,24 +173,13 @@ class Registry extends EventEmitter {
 
     var promise = new Promise(function(resolve,reject) {
 
-      let transaction = _this.db.transaction(_this.DB_STORE_STUB, 'readonly');
-      let objectStore = transaction.objectStore(_this.DB_STORE_STUB);
+      let request = _this.protostubsList[url];
 
-      let request = objectStore.get(url);
-
-      request.onerror = function(event) {
+      if (request === undefined) {
         reject('requestUpdate couldn\' get the ProtostubURL');
-        console.error('hyperty not found');
-      };
-
-      request.onsuccess = function(event) {
-        let data = request.result;
-        if (data !== undefined) {
-          resolve(data.protostubURL);
-        } else {
-          reject('No protostubURL was found');
-        }
-      };
+      } else {
+        resolve(request);
+      }
     });
 
     return promise;
@@ -272,12 +197,10 @@ class Registry extends EventEmitter {
 
     var promise = new Promise(function(resolve,reject) {
 
+      //check if messageBus is registered in registry or not
       if (_this._messageBus === undefined) {
         reject('MessageBus not found on registerStub');
       }
-
-      let transaction = _this.db.transaction(_this.DB_STORE_STUB, 'readwrite');
-      let objectStore = transaction.objectStore(_this.DB_STORE_STUB);
 
       //TODO implement a unique number for the protostubURL
       let domain = domainURL;
@@ -286,22 +209,17 @@ class Registry extends EventEmitter {
       }
 
       runtimeProtoStubURL = 'msg-node.' + domain + '/protostub/' + Math.floor((Math.random() * 10000) + 1);
-      objectStore.put({domainURL: domain, protostubURL: runtimeProtoStubURL});
 
-      //check if messageBus is registered in registry or not
-      transaction.onerror = function(event) {
-        reject('Error on registerProtostub');
-      };
+      _this.protostubsList[domain] = runtimeProtoStubURL;
+      _this.sandboxesList[runtimeProtoStubURL] = sandBox;
 
-      transaction.oncomplete = function(event) {
-        resolve(runtimeProtoStubURL);
+      resolve(runtimeProtoStubURL);
 
-        _this._messageBus.addListener(runtimeProtoStubURL + '/status', (msg) => {
-          if (msg.header.resource === msg.header.to + '/status') {
-            console.log('RuntimeProtostubURL/status message: ', msg.body.value);
-          }
-        });
-      };
+      _this._messageBus.addListener(runtimeProtoStubURL + '/status', (msg) => {
+        if (msg.header.resource === msg.header.to + '/status') {
+          console.log('RuntimeProtostubURL/status message: ', msg.body.value);
+        }
+      });
     });
 
     return promise;
@@ -317,32 +235,14 @@ class Registry extends EventEmitter {
 
     var promise = new Promise(function(resolve,reject) {
 
-      let objectStore = _this.db.transaction(_this.DB_STORE_STUB, 'readwrite').objectStore(_this.DB_STORE_STUB);
-      let request = objectStore.get(hypertyRuntimeURL);
+      let data = _this.protostubsList[hypertyRuntimeURL];
 
-      request.onerror = function(event) {
-        reject('Error on unregisterStub');
-      };
-
-      request.onsuccess = function(event) {
-        let data = request.result;
-
-        if (data === undefined) {
-          reject('Error on unregisterStub: Hyperty not found');
-        } else {
-
-          var request2 = _this.db.transaction(_this.DB_STORE_STUB, 'readwrite').
-            objectStore(_this.DB_STORE_STUB).delete(hypertyRuntimeURL);
-
-          request2.onerror = function(event) {
-            reject('Error on unregisterStub: error on database');
-          };
-
-          request2.onsuccess = function(event) {
-            resolve('ProtostubURL removed');
-          };
-        }
-      };
+      if (data === undefined) {
+        reject('Error on unregisterStub: Hyperty not found');
+      } else {
+        delete _this.protostubsList[hypertyRuntimeURL];
+        resolve('ProtostubURL removed');
+      }
     });
 
     return promise;
@@ -356,38 +256,11 @@ class Registry extends EventEmitter {
   */
   registerPEP(postMessage, hyperty) {
     let _this = this;
-    var hypertypepURL;
 
     var promise = new Promise(function(resolve,reject) {
-
-      let objectStore = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readwrite').objectStore(_this.DB_STORE_HYPERTY);
-      let request = objectStore.get(hyperty);
-
-      request.onerror = function(event) {
-        console.error('URL not found');
-        reject('Error on registerPEP');
-      };
-
-      request.onsuccess = function(event) {
-        hypertypepURL = hyperty + '/pep';
-        let data = request.result;
-
-        if (data === undefined) {
-          reject('Error on registerPEP');
-        } else {
-
-          data.pepURL = hypertypepURL;
-
-          let requestUpdate = objectStore.put(data);
-          requestUpdate.onerror = function(event) {
-            reject('Error on update registerPEP');
-          };
-
-          requestUpdate.onsuccess = function(event) {
-            resolve(hypertypepURL);
-          };
-        }
-      };
+      //TODO check what parameter in the postMessage the pep is.
+      _this.pep[hyperty] = postMessage;
+      resolve('Pep registered with success');
     });
 
     return promise;
@@ -399,36 +272,16 @@ class Registry extends EventEmitter {
   */
   unregisterPEP(HypertyRuntimeURL) {
     let _this = this;
-    var hypertypepURL;
 
     var promise = new Promise(function(resolve,reject) {
 
-      let objectStore = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readwrite').objectStore(_this.DB_STORE_HYPERTY);
-      let request = objectStore.get(HypertyRuntimeURL);
+      let result = _this.pepList[HypertyRuntimeURL];
 
-      request.onerror = function(event) {
-        reject('Error on unregisterPEP');
-      };
-
-      request.onsuccess = function(event) {
-        let data = request.result;
-
-        if (data === undefined) {
-          reject('Error on unregisterPEP: hyperty not found');
-        } else {
-
-          data.pepURL = null;
-
-          let requestUpdate = objectStore.put(data);
-          requestUpdate.onerror = function(event) {
-            reject('Error on unregisterPEP: error on update dabatase');
-          };
-
-          requestUpdate.onsuccess = function(event) {
-            resolve(' PEP sucessfully deleted');
-          };
-        }
-      };
+      if (result === undefined) {
+        reject('Pep Not found.');
+      } else {
+        resolve('Pepe successfully removed.');
+      }
     });
 
     return promise;
@@ -450,41 +303,16 @@ class Registry extends EventEmitter {
   getSandbox(url) {
     if (!url) throw new Error('Parameter url needed');
     let _this = this;
-
-    //This function check in both DB_STORE_STUB and DB_STORE_HYPERTY
     var promise = new Promise(function(resolve,reject) {
 
-      let objectStore = _this.db.transaction(_this.DB_STORE_HYPERTY, 'readonly').objectStore(_this.DB_STORE_HYPERTY);
-      let request = objectStore.get(url);
+      let request = _this.sandboxesList[url];
 
-      request.onerror = function(event) {
-        reject('requestUpdate couldn\'t get the sandbox');
-      };
-
-      request.onsuccess = function(event) {
-        let data = request.result;
-        if (data !== undefined) {
-          resolve(data.sandbox);
-        } else {
-          let stubStore = _this.db.transaction(_this.DB_STORE_STUB, 'readonly').objectStore(_this.DB_STORE_STUB);
-          let stubRequest = stubStore.get(url);
-
-          stubRequest.onerror = function(event) {
-            return reject('requestUpdate couldn\'t get the sandbox');
-          };
-
-          stubRequest.onsuccess = function(event) {
-            let data = stubRequest.result;
-            if (data !== undefined) {
-              return resolve(data.sandbox);
-            } else {
-              return reject('No sandbox was found');
-            }
-          };
-        }
-      };
+      if (request === undefined) {
+        reject('Sandbox not found');
+      } else {
+        resolve(request);
+      }
     });
-
     return promise;
   }
 
@@ -504,32 +332,22 @@ class Registry extends EventEmitter {
 
     let promise = new Promise((resolve, reject) => {
 
-      let transaction = _this.db.transaction(_this.DB_STORE_STUB, 'readonly');
-      let objectStore = transaction.objectStore(_this.DB_STORE_STUB);
-
       if (!domainUrl.indexOf('msg-node.')) {
         domainUrl = domainUrl.substring(domainUrl.indexOf('.') + 1);
       }
 
-      let request  = objectStore.get(domainUrl);
+      let request  = _this.protostubsList[domainUrl];
 
       _this.addEventListener('runtime:stubLoaded', function(domainUrl) {
         resolve(domainUrl);
       });
 
-      request.onsuccess = function(event) {
-        let matching = request.result;
+      if (request !== undefined) {
+        resolve(request);
+      } else {
+        _this.trigger('runtime:loadStub', domainUrl);
+      }
 
-        if (matching !== undefined) {
-          resolve(matching.protostubURL);
-        } else {
-          _this.trigger('runtime:loadStub', domainUrl);
-        }
-      };
-
-      request.onerror = function(event) {
-        reject('The url ' + url + ' doesn\'t exist: error on dababase');
-      };
     });
     return promise;
   }
