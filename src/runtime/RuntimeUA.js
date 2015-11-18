@@ -327,7 +327,7 @@ class RuntimeUA {
         type: '',
         messageSchema: '',
         configuration: {
-          url: 'ws://localhost:9090/ws',
+          url: 'ws://185.17.229.116:80/ws',
           runtimeURL: _this.hypertyRuntimeURL
         },
         policies: '',
