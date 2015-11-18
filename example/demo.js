@@ -78,7 +78,7 @@ function sendMessage(from, to, message) {
     var listFrom = form.parentElement.querySelector('.list');
     var itemFrom = document.createElement('li');
     itemFrom.setAttribute('class', 'collection-item avatar');
-    itemFrom.innerHTML = '<i class="material-icons circle yellow">call_made</i><label class="name title">' + to + '</label><p class="message">' + messageObject.body.value.replace(/\n/g, '<br>') + '</p>';
+    itemFrom.innerHTML = '<i class="material-icons circle yellow">call_made</i><label class="name title">' + from + '</label><p class="message">' + messageObject.body.value.replace(/\n/g, '<br>') + '</p>';
 
     listFrom.appendChild(itemFrom);
   }
