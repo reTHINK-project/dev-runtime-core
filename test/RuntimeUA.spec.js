@@ -110,53 +110,6 @@ describe('RuntimeUA', function() {
 
   });
 
-  describe('getHypertyDescriptor(hypertyURL)', function() {
-
-    let runtime = new RuntimeUA(sandboxFactory);
-
-    it('should get hyperty descriptor', function(done) {
-
-      //
-      // guid, id, description, kind, catalogueURL,
-      // sourceCode, dataObject, type, messageSchema,
-      // policies, constraints, configuration,
-      // hypertyCapabilities, protocolCapabilities
-      //
-      let descriptorValidation = [
-        'guid', 'id', 'classname', 'description', 'kind', 'catalogueURL',
-        'sourceCode', 'dataObject', 'type', 'messageSchema',
-        'configuration', 'policies', 'constraints', 'hypertyCapabilities',
-        'protocolCapabilities'
-      ];
-
-      // TODO: Check the hyperty descriptor response and compare
-      // with what is defined in the specification;
-      let hypertyDescriptorURL = 'hyperty-catalogue://sp1/HelloHyperty';
-      expect(runtime.getHypertyDescriptor(hypertyDescriptorURL).then(function(hypertyDescriptor) {
-        _hypertyDescriptor = hypertyDescriptor;
-        return _hypertyDescriptor;
-      }))
-      .to.be.fulfilled
-      .and.eventually.to.have.all.keys(descriptorValidation)
-      .and.notify(done);
-
-    });
-
-  });
-
-  describe('getHypertySourceCode(hypertySourceCodeURL)', function() {
-
-    let runtime = new RuntimeUA(sandboxFactory);
-
-    it('should get hyperty source code', function(done) {
-
-      let hypertySourceCodeURL = _hypertyDescriptor.sourceCode;
-      expect(runtime.getHypertySourceCode(hypertySourceCodeURL))
-      .to.be.fulfilled.and.notify(done);
-
-    });
-  });
-
   describe('loadHyperty(hypertyDescriptorURL)', function() {
 
     let runtime = new RuntimeUA(sandboxFactory);
@@ -191,53 +144,6 @@ describe('RuntimeUA', function() {
 
     });
 
-  });
-
-  describe('getStubDescriptor(domainURL)', function() {
-
-    let runtime = new RuntimeUA(sandboxFactory);
-
-    it('should get Stub descriptor', function(done) {
-
-      //
-      // guid, id, description, kind, catalogueURL,
-      // sourceCode, dataObject, type, messageSchema,
-      // policies, constraints, configuration,
-      // hypertyCapabilities, protocolCapabilities
-      //
-      let descriptorValidation = [
-        'guid', 'id', 'classname', 'description', 'kind', 'catalogueURL',
-        'sourceCode', 'dataObject', 'type', 'messageSchema',
-        'configuration', 'policies', 'constraints', 'hypertyCapabilities',
-        'protocolCapabilities'
-      ];
-
-      // TODO: Check the hyperty descriptor response and compare
-      // with what is defined in the specification;
-      let domainURL = 'sp1.pt';
-      expect(runtime.getStubDescriptor(domainURL).then(function(stubDescriptor) {
-        _stubDescriptor = stubDescriptor;
-        return _stubDescriptor;
-      }))
-      .to.be.fulfilled
-      .and.eventually.to.have.all.keys(descriptorValidation)
-      .and.notify(done);
-
-    });
-
-  });
-
-  describe('getStubSourceCode(stubSourceCodeURL)', function() {
-
-    let runtime = new RuntimeUA(sandboxFactory);
-
-    it('should get hyperty source code', function(done) {
-
-      let stubSourceCodeURL = _stubDescriptor.sourceCode;
-      expect(runtime.getStubSourceCode(stubSourceCodeURL))
-      .to.be.fulfilled.and.notify(done);
-
-    });
   });
 
   describe('loadStub(sp-domain)', function() {

@@ -4,6 +4,8 @@ import IdentityModule from '../identity/IdentityModule';
 import PolicyEngine from '../policy/PolicyEngine';
 import MessageBus from '../bus/MessageBus';
 
+import runtimeCatalogue from './RuntimeCatalogue';
+
 /**
 * Runtime User Agent Interface
 */
@@ -21,8 +23,11 @@ class RuntimeUA {
     // for the request you can use the module request in utils;
     // the response is like: hyperty-runtime://sp1/123
 
-    let hypertyRuntimeURL = 'runtime://sp1/' + Math.floor((Math.random() * 10000) + 1);
-    _this.hypertyRuntimeURL = hypertyRuntimeURL;
+    let runtimeURL = 'runtime://sp1/' + Math.floor((Math.random() * 10000) + 1);
+    _this.runtimeURL = runtimeURL;
+
+    // TODO: check if runtime catalogue need the runtimeURL;
+    runtimeCatalogue.runtimeURL = runtimeURL;
 
     // Use the sandbox factory to create an AppSandbox;
     // In the future can be decided by policyEngine if we need
@@ -36,8 +41,7 @@ class RuntimeUA {
     _this.policyEngine = new PolicyEngine();
 
     // Instantiate the Registry Module
-    // TODO: fix the first parameter should not be a message bus;
-    _this.registry = new Registry(hypertyRuntimeURL, appSandbox);
+    _this.registry = new Registry(runtimeURL, appSandbox);
 
     // Instantiate the Message Bus
     _this.messageBus = new MessageBus(_this.registry);
@@ -59,85 +63,6 @@ class RuntimeUA {
     sandboxFactory.messageBus = _this.messageBus;
 
   }
-
-  //
-  //  GETTER methods for class attributes
-  //
-  /**
-  * Get HypertyDescriptor
-  */
-  getHypertyDescriptor(hypertyURL) {
-
-    let _this = this;
-
-    return new Promise(function(resolve, reject) {
-
-      //hyperty-catalogue://sp1/HelloHyperty
-      let hypertyName = hypertyURL.substr(hypertyURL.lastIndexOf('/') + 1);
-
-      let hypertyDescriptor = {
-        guid: 'guid',
-        id: 'idHyperty',
-        classname: hypertyName,
-        description: 'description of ' + hypertyName,
-        kind: 'hyperty',
-        catalogueURL: '....',
-        sourceCode: '../resources/' + hypertyName + '.ES5.js',
-        dataObject: '',
-        type: '',
-        messageSchema: '',
-        configuration: '',
-        policies: '',
-        constraints: '',
-        hypertyCapabilities: '',
-        protocolCapabilities: ''
-      };
-
-      resolve(hypertyDescriptor);
-
-    });
-
-  }
-
-  /**
-  * Get hypertySourceCode
-  */
-  getHypertySourceCode(hypertySourceCodeURL) {
-    let _this = this;
-
-    return new Promise(function(resolve, reject) {
-
-      // TODO: implementation
-      // Simulate getting hypertySourceCode
-      let xhr = new XMLHttpRequest();
-
-      xhr.onreadystatechange = function(event) {
-        let xhr = event.currentTarget;
-        if (xhr.readyState === 4) {
-          if (xhr.status === 200) {
-            resolve(xhr.responseText);
-          } else {
-            reject(xhr.responseText);
-          }
-        }
-      };
-
-      xhr.open('GET', hypertySourceCodeURL, true);
-      xhr.send();
-
-    });
-
-  }
-
-  /**
-  * Get hypertyRuntimeURL
-  */
-
-  getHypertyRuntimeURL() {
-    return _hypertyRuntimeURL;
-  }
-
-  // DONE with GETTER methods
 
   /**
   * Accomodate interoperability in H2H and proto on the fly for newly discovered devices in M2M
@@ -184,7 +109,7 @@ class RuntimeUA {
       // Probably we need to pass a factory like we do for sandboxes;
       console.log('------------------ Hyperty ------------------------');
       console.info('Get hyperty descriptor for :', hypertyDescriptorURL);
-      _this.getHypertyDescriptor(hypertyDescriptorURL).then(function(hypertyDescriptor) {
+      runtimeCatalogue.getHypertyDescriptor(hypertyDescriptorURL).then(function(hypertyDescriptor) {
         // at this point, we have completed "step 2 and 3" as shown in https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md
         console.info('1: return hyperty descriptor', hypertyDescriptor);
 
@@ -195,7 +120,7 @@ class RuntimeUA {
         let hypertySourceCodeUrl = hypertyDescriptor.sourceCode;
 
         // Get the hyperty source code
-        return _this.getHypertySourceCode(hypertySourceCodeUrl);
+        return runtimeCatalogue.getHypertySourceCode(hypertySourceCodeUrl);
       })
       .then(function(hypertySourceCode) {
         console.info('2: return hyperty source code');
@@ -307,71 +232,6 @@ class RuntimeUA {
   }
 
   /**
-  * Get StubDescriptor
-  */
-  getStubDescriptor(domainURL) {
-
-    let _this = this;
-
-    return new Promise(function(resolve, reject) {
-
-      let stubDescriptor = {
-        guid: 'guid',
-        id: 'idProtoStub',
-        classname: 'VertxProtoStub',
-        description: 'description of ProtoStub',
-        kind: 'hyperty',
-        catalogueURL: '....',
-        sourceCode: '../resources/VertxProtoStub.js',
-        dataObject: '',
-        type: '',
-        messageSchema: '',
-        configuration: {
-          url: 'ws://185.17.229.116:80/ws',
-          runtimeURL: _this.hypertyRuntimeURL
-        },
-        policies: '',
-        constraints: '',
-        hypertyCapabilities: '',
-        protocolCapabilities: ''
-      };
-
-      resolve(stubDescriptor);
-
-    });
-
-  }
-
-  /**
-  * Get protostubSourceCode
-  */
-  getStubSourceCode(stubSourceCodeURL) {
-    let _this = this;
-
-    return new Promise(function(resolve, reject) {
-
-      // TODO: implementation
-      // Simulate getting hypertySourceCode
-      let xhr = new XMLHttpRequest();
-
-      xhr.onreadystatechange = function(event) {
-        let xhr = event.currentTarget;
-        if (xhr.readyState === 4) {
-          if (xhr.status === 200) {
-            resolve(xhr.responseText);
-          } else {
-            reject(xhr.responseText);
-          }
-        }
-      };
-      xhr.open('GET', stubSourceCodeURL, true);
-      xhr.send();
-
-    });
-
-  }
-
-  /**
   * Deploy Stub from Catalogue URL or domain url
   * @param  {URL.URL}     domain          domain
   */
@@ -411,7 +271,7 @@ class RuntimeUA {
         // we have completed step 3 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
         // we need to get ProtoStub descriptor step 4 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-        return _this.getStubDescriptor(domain);
+        return runtimeCatalogue.getStubDescriptor(domain);
       })
       .then(function(descriptor) {
 
@@ -424,7 +284,7 @@ class RuntimeUA {
         let componentDownloadURL = descriptor.sourceCode;
 
         // we need to get ProtoStub Source code from descriptor - step 6 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-        return _this.getStubSourceCode(componentDownloadURL);
+        return runtimeCatalogue.getStubSourceCode(componentDownloadURL);
       })
       .then(function(protoStubSourceCode) {
         console.info('3. return the ProtoStub Source Code: ');
