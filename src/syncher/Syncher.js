@@ -1,127 +1,137 @@
-import SyncObject from './SyncObject';
-import {ChangeType, ObjectType} from './SyncObject';
+import DataObjectReporter from './DataObjectReporter';
+import DataObjectObserver from './DataObjectObserver';
 
-export default
 /**
- * Syncher
+ * @author micaelpedrosa@gmail.com
+ * Client API Syncronization system.
  */
-class Syncher {
+class SyncherManager {
   /* private
-    _postMessage: function(changeMsg);
+  _owner: URL
+  _bus: MiniBus
 
-    _owner: HypertyURL
-    _objs: <resURL: SyncObject>
-    }>
+  _subURL: URL
+
+  _reporters: <url: DataObjectReporter>
+  _observers: <url: DataObjectObserver>
+
+  ----event handlers----
+  _onResponseHandlers: [(event) => void]
   */
 
-  constructor(owner, postMessage) {
-    if (!owner || !postMessage) {
-      throw 'Provide mandatory fields';
-    }
+ constructor(owner, bus, config) {
+   let _this = this;
 
-    let _this = this;
+   _this._owner = owner;
+   _this._bus = bus;
 
-    _this._owner = owner;
-    _this._postMessage = postMessage;
+   _this._subURL = runtimeURL + '/sm';
 
-    _this._objs = {};
-  }
+   _this._reporters = {};
+   _this._observers = {};
 
-  postMessage(message) {
-    let _this = this;
+   _this._onResponseHandlers = [];
 
-    let syncObj = _this._objs[message.body.resource];
-    if (syncObj) {
-      _this._changeObject(syncObj, message);
-    } else {
-      //TODO: _this._postMessage(replyMsg)
-      console.log('Object not found!');
-    }
-  }
+   bus.addListener(owner, (msg) => {
+     console.log('Syncher-RCV: ', msg);
+     switch (msg.type) {
+       case 'response': _this._onResponse(msg); break;
+       case 'update': _this._onChange(msg); break;
+       case 'add': _this._onChange(msg); break;
+       case 'remove': _this._onChange(msg); break;
+     }
+   });
+ }
 
-  /**
-   * Hyperty instance uses this function to provide the object to be changed by the (observer) syncher according to messages received. The Hyperty instance has previsouly used the Object.observe javascript api to set as an observer of this object
-   * @param  {Message.Message} receivedMessage receivedMessage
-   */
-  createAsObserver(message) {
-    let _this = this;
+ get owner() { return this._owner; }
 
-    if (_this._objs.hasOwnProperty(message.body.resource)) {
-      throw 'Already available object: ' + resourceURL;
-    }
+ get reporters() { return this._reporters; }
 
-    let syncObj = new SyncObject(message.body.resource, message.body.schema, message.header.from, message.body.value);
+ get observers() { return this._observers; }
 
-    _this._objs[syncObj.url] = syncObj;
-    return syncObj;
-  }
+ /**
+  * Request a DataObjectReporter creation. The URL will be be requested by the allocation mechanism.
+  * @param  {Schema} schema Schema of the object
+  * @param  {HypertyURL[]} List of hyperties to send the create
+  * @param  {HyperyURL | [HyperyURL]} invitations Hyperties that will be invited to observe.
+  * @param  {JSON} initialData Object initial data
+  * @return {Promise<DataObjectReporter>} Return Promise to a new Reporter. The reporter can be accepted or rejected by the PEP
+  */
+ create(schema, observers, initialData) {
+   let _this = this;
 
-  createAsReporter(resourceURL, schemaURL, initialData) {
-    let _this = this;
+   //TODO: what to do with schema?
 
-    if (_this._objs.hasOwnProperty(resourceURL)) {
-      throw 'Already available object: ' + resourceURL;
-    }
+   let requestMsg = {
+     type: 'create', from: _this._owner, to: _this._subURL,
+     body: {schema: schema}
+   };
 
-    let syncObj = new SyncObject(resourceURL, schemaURL, _this._owner, initialData);
-    syncObj.observe((event) => {
-      _this._onChange(event);
-    });
+   return new Promise((resolve, reject) => {
+     //request create to the Allocation system? Can be rejected by the PolicyEngine.
+     _this._bus.postMessage(requestMsg, (reply) => {
+       console.log('create-response: ', reply);
+       if (reply.body.code === 'ok') {
+         let objUrl = reply.body.url;
 
-    _this._objs[syncObj.url] = syncObj;
-    return syncObj;
-  }
+         //reporter creation accepted
+         let newObj = new DataObjectReporter(objUrl, schema, _this._bus, 'on', initialData);
+         _this._reporters[objUrl] = newObj;
+         resolve(newObj);
+       } else {
+         //reporter creation rejected
+         reject(reply.body.desc);
+       }
+     });
+   });
+ }
 
-  _changeObject(syncObj, msg) {
-    let path = msg.body.attrib;
-    let value = msg.body.value;
-    let findResult = syncObj.findBefore(path);
+ /**
+  * Request a subscription to an existent object.
+  * @param  {ObjectURL} url Address of the existent object.
+  * @return {Promise<DataObjectObserver>} Return Promise to a new Observer.
+  */
+ subscribe(url) {
+   let _this = this;
 
-    if (msg.header.type == ChangeType.UPDATE) {
-      findResult.obj[findResult.last] = value;
-    } else {
-      if (msg.header.type == ChangeType.ADD) {
-        if (msg.body.oType == ObjectType.OBJECT) {
-          findResult.obj[findResult.last] = value;
-        } else {
-          //ARRAY
-          let arr = findResult.obj;
-          let index = findResult.last;
-          Array.prototype.splice.apply(arr, [index, 0].concat(value));
-        }
-      } else {
-        //REMOVE
-        if (msg.body.oType == ObjectType.OBJECT) {
-          delete findResult.obj[findResult.last];
-        } else {
-          //ARRAY
-          let arr = findResult.obj;
-          let index = findResult.last;
-          arr.splice(index, value);
-        }
-      }
-    }
-  }
+   //TODO: validate if subscription already exists ?
+   let subscribeMsg = {
+     type: 'subscribe', from: _this._owner, to: url,
+     body: {}
+   };
 
-  _onChange(event) {
-    let _this = this;
+   return new Promise((resolve, reject) => {
+     //request subscription
+     _this._bus.postMessage(subscribeMsg, (reply) => {
+       console.log('subscribe-response: ', reply);
+       if (reply.body.code === 'ok') {
+         //subscription accepted
+         let newObj = new DataObjectObserver(_this._owner, url, reply.body.schema, 'on', reply.body.value);
+         _this._observers[url] = newObj;
+         resolve(newObj);
+       } else {
+         //subscription rejected
+         reject(reply.body.desc);
+       }
+     });
+   });
+ }
 
-    let objData = _this._objs[event.obj.url];
+ onResponse(callback) {
+   this._onResponseHandlers.push(callback);
+ }
 
-    let msg = {
-      header: {
-        type: event.cType,
-        from: _this._owner
-      },
-      body: {
-        resource: event.obj.url,
-        oType: event.objType,
-        attrib: event.field,
-        value: event.data
-      }
-    };
-
-    //send delta message...
-    _this._postMessage(msg);
-  }
+_onResponse(msg) {
+  let _this = this;
 }
+
+ _onChange(msg) {
+   let _this = this;
+
+   let observer = _this._observers[msg.from];
+   observer._changeObject(msg);
+ }
+
+}
+
+export default SyncherManager;

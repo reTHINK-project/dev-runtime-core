@@ -18,10 +18,8 @@ class HelloHyperty {
     var _this = this;
 
     _this.bus.postMessage({
-      header: {
-        from: _this.hypertyURL,
-        to: 'hyperty-runtime://sp1/WorldHyperty'
-      },
+      from: _this.hypertyURL,
+      to: 'hyperty-runtime://sp1/WorldHyperty',
       body: {
         value: 'Hello from world hyperty instance'
       }

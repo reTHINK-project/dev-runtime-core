@@ -129,7 +129,7 @@ class RuntimeCatalogue {
         type: '',
         messageSchema: '',
         configuration: {
-          url: 'ws://185.17.229.116:80/ws',
+          url: 'ws://localhost:9090/ws',
           runtimeURL: _this._runtimeURL
         },
         policies: '',

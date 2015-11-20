@@ -148,7 +148,7 @@ System.config({
       "process": "github:jspm/nodelibs-process@0.1.2"
     },
     "npm:babelify@6.3.0": {
-      "babel-core": "npm:babel-core@5.8.24",
+      "babel-core": "npm:babel-core@5.8.34",
       "object-assign": "npm:object-assign@3.0.0",
       "path": "github:jspm/nodelibs-path@0.1.0",
       "stream": "github:jspm/nodelibs-stream@0.1.0",
@@ -454,11 +454,6 @@ System.config({
       "buffer": "github:jspm/nodelibs-buffer@0.1.0",
       "fs": "github:jspm/nodelibs-fs@0.1.2",
       "path": "github:jspm/nodelibs-path@0.1.0"
-    },
-    "npm:core-js@1.1.4": {
-      "fs": "github:jspm/nodelibs-fs@0.1.2",
-      "process": "github:jspm/nodelibs-process@0.1.2",
-      "systemjs-json": "github:systemjs/plugin-json@0.1.0"
     },
     "npm:core-js@1.2.6": {
       "fs": "github:jspm/nodelibs-fs@0.1.2",
@@ -879,7 +874,7 @@ System.config({
       "chokidar": "npm:chokidar@1.0.5",
       "colors": "npm:colors@1.1.2",
       "connect": "npm:connect@3.4.0",
-      "core-js": "npm:core-js@1.1.4",
+      "core-js": "npm:core-js@1.2.6",
       "crypto": "github:jspm/nodelibs-crypto@0.1.0",
       "di": "npm:di@0.0.1",
       "dom-serialize": "npm:dom-serialize@2.2.0",

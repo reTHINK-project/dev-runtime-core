@@ -23,13 +23,13 @@ class Sandbox extends MiniBus {
     return new Promise((resolve, reject) => {
       //TODO: message format is not properly defined yet
       let deployMessage = {
-        header: { type: 'CREATE', from: SandboxRegistry.ExternalDeployAddress, to: SandboxRegistry.InternalDeployAddress },
+        type: 'create', from: SandboxRegistry.ExternalDeployAddress, to: SandboxRegistry.InternalDeployAddress,
         body: { url: componentURL, sourceCode: componentSourceCode, config: configuration }
       };
 
       //send message into the sandbox internals and wait for reply
       _this.postMessage(deployMessage, (reply) => {
-        if (reply.body.code === 'ok') {
+        if (reply.body.code === 200) {
           //is this response complaint with the spec?
           resolve('deployed');
         } else {
@@ -50,13 +50,13 @@ class Sandbox extends MiniBus {
     return new Promise((resolve, reject) => {
       //TODO: message format is not properly defined yet
       let removeMessage = {
-        header: { type: 'REMOVE', from: SandboxRegistry.ExternalDeployAddress, to: SandboxRegistry.InternalDeployAddress },
+        type: 'delete', from: SandboxRegistry.ExternalDeployAddress, to: SandboxRegistry.InternalDeployAddress,
         body: { url: componentURL }
       };
 
       //send message into the sandbox internals and wait for reply
       _this.postMessage(removeMessage, (reply) => {
-        if (reply.body.code === 'ok') {
+        if (reply.body.code === 200) {
           //is this response complaint with the spec?
           resolve('undeployed');
         } else {

@@ -1,64 +1,28 @@
-export var ChangeType = {UPDATE: 'update', ADD: 'add', REMOVE: 'remove'};
-export var ObjectType = {OBJECT: 'object', ARRAY: 'array'};
-export var FilterType = {START: 'start', EXACT: 'exact'};
-
-export default class SyncObject {
+class SyncObject {
   /* private
-    _name: string
-    _owner: string
-    _url: string
-
-    _schema: any
     _data: any;
-
     _observers: ((event: ChangeEvent) => void)[]
-    _filters: {<filter>: {type: <start, exact>, callback: <function>} }
   */
 
-  constructor(url, schema, owner, data) {
+  constructor(initialData) {
     let _this = this;
-
-    _this._url = url;
-    _this._schema = schema;
-    _this._owner = owner;
 
     _this._observers = [];
     _this._filters = {};
 
-    if (data) {
-      _this._data = data;
+    if (initialData) {
+      _this._data = initialData;
     } else {
       _this._data = {};
     }
 
-    _this._internalObserve(new Path(), _this.data);
+    _this._internalObserve(new Path(), _this._data);
   }
-
-  get url() { return this._url; }
-
-  get owner() { return this._owner; }
-
-  get schema() { return this._schema; }
 
   get data() { return this._data; }
 
   observe(callback) {
     this._observers.push(callback);
-  }
-
-  observeFilter(filter, callback) {
-    let key = filter;
-    let filterObj = {
-      type: FilterType.EXACT,
-      callback: callback
-    };
-
-    if (filter.indexOf('*') == filter.length - 1) {
-      filterObj.type = FilterType.START;
-      key = filter.substr(0, filter.length - 1);
-    }
-
-    this._filters[key] = filterObj;
   }
 
   find(path) {
@@ -86,24 +50,7 @@ export default class SyncObject {
   }
 
   _fireEvent(event) {
-    let _this = this;
-
-    Object.keys(_this._filters).forEach((key) => {
-      let filter = _this._filters[key];
-      if (filter.type == FilterType.START) {
-        //if starts with filter...
-        if (event.field.indexOf(key) === 0) {
-          filter.callback(event);
-        }
-      } else if (filter.type == FilterType.EXACT) {
-        //exact match
-        if (event.field == key) {
-          filter.callback(event);
-        }
-      }
-    });
-
-    _this._observers.forEach((callback) => {
+    this._observers.forEach((callback) => {
       callback(event);
     });
   }
@@ -125,7 +72,6 @@ export default class SyncObject {
       };
 
       if (obj.constructor === Object) {
-        //console.log('OBSERVE-OBJECT: <<' + _this._name + '>>' + path);
         Object.observe(obj, handler);
         for (let prop in obj) {
           if (_this._isObservable(obj[prop])) {
@@ -133,7 +79,6 @@ export default class SyncObject {
           }
         }
       } else if (obj.constructor === Array) {
-        //console.log('OBSERVE-ARRAY: <<' + _this._name + '>>' + path);
         Array.observe(obj, handler);
         for (let prop in obj) {
           if (_this._isObservable(obj[prop])) {
@@ -166,9 +111,8 @@ export default class SyncObject {
           let removeValues = changes[i].removed;
 
           this._fireEvent({
-            obj: this,
             cType: ChangeType.REMOVE,
-            objType: objType,
+            oType: objType,
             field: field.toString(),
             data: removeSize
           });
@@ -184,9 +128,8 @@ export default class SyncObject {
         if (addSize !== 0) {
           let addValues = obj.slice(idx, idx + addSize);
           this._fireEvent({
-            obj: this,
             cType: ChangeType.ADD,
-            objType: objType,
+            oType: objType,
             field: field.toString(),
             data: deepClone(addValues)
           });
@@ -210,9 +153,8 @@ export default class SyncObject {
         let newValue = obj[changes[i].name];
         if (changes[i].type === 'update') {
           this._fireEvent({
-            obj: this,
             cType: ChangeType.UPDATE,
-            objType: objType,
+            oType: objType,
             field: field.toString(),
             data: deepClone(newValue)
           });
@@ -220,9 +162,8 @@ export default class SyncObject {
 
         if (changes[i].type === 'add') {
           this._fireEvent({
-            obj: this,
             cType: ChangeType.ADD,
-            objType: objType,
+            oType: objType,
             field: field.toString(),
             data: deepClone(newValue)
           });
@@ -231,9 +172,8 @@ export default class SyncObject {
 
         if (changes[i].type === 'delete') {
           this._fireEvent({
-            obj: this,
             cType: ChangeType.REMOVE,
-            objType: objType,
+            oType: objType,
             field: field.toString()
           });
         }
@@ -241,11 +181,6 @@ export default class SyncObject {
       }
     }
   }
-}
-
-function deepClone(obj) {
-  //TODO: simple but inefficient JSON deep clone...
-  return JSON.parse(JSON.stringify(obj));
 }
 
 //dynamic path for Array index...
@@ -321,3 +256,12 @@ class ArrayIndex {
     return this.idx.toString();
   }
 }
+
+export function deepClone(obj) {
+  //TODO: simple but inefficient JSON deep clone...
+  return JSON.parse(JSON.stringify(obj));
+}
+
+export var ChangeType = {UPDATE: 'update', ADD: 'add', REMOVE: 'remove'};
+export var ObjectType = {OBJECT: 'object', ARRAY: 'array'};
+export default SyncObject;

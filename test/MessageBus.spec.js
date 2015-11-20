@@ -20,13 +20,13 @@ describe('MessageBus', function() {
     });
 
     msgBus.postMessage({
-      header: {from: 'hyper-1', to: 'hyper-2'},
+      from: 'hyper-1', to: 'hyper-2',
       body: {value: 'x'}
     });
 
     setTimeout(() => {
       expect(msgResult).to.eql({
-        header: {id: 1, from: 'hyper-1', to: 'hyper-2'},
+        id: 1, from: 'hyper-1', to: 'hyper-2',
         body: {value: 'x'}
       });
 
@@ -52,13 +52,13 @@ describe('MessageBus', function() {
     });
 
     msgBus.postMessage({
-      header: {from: 'hyper-1', to: 'hyper-2/other'},
+      from: 'hyper-1', to: 'hyper-2/other',
       body: {value: 'x'}
     });
 
     setTimeout(() => {
       expect(msgResult).to.eql({
-        header: {id: 1, from: 'hyper-1', to: 'hyper-2/other'},
+        id: 1, from: 'hyper-1', to: 'hyper-2/other',
         body: {value: 'x'}
       });
 

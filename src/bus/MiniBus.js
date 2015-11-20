@@ -9,8 +9,8 @@ class MiniBus {
   _msgId: number;
   _subscriptions: <url: MsgListener[]>
 
-  _replyTimeOut: number
-  _replyCallbacks: <url+id: (msg) => void>
+  _responseTimeOut: number
+  _responseCallbacks: <url+id: (msg) => void>
   */
 
   constructor() {
@@ -18,16 +18,16 @@ class MiniBus {
     _this._msgId = 0;
     _this._subscriptions = {};
 
-    _this._replyTimeOut = 3000; //default to 3s
-    _this._replyCallbacks = {};
+    _this._responseTimeOut = 3000; //default to 3s
+    _this._responseCallbacks = {};
 
     _this._registerExternalListener();
   }
 
   /**
-  * Register listener to receive message when "msg.header.to === url".
+  * Register listener to receive message when "msg.to === url".
   * Special url "*" for default listener is accepted to intercept all messages.
-  * @param {URL} url Address to intercept, tha is in the message "header.to"
+  * @param {URL} url Address to intercept, tha is in the message "to"
   * @param {Listener} listener listener
   * @return {MsgListener} instance of MsgListener
   */
@@ -46,24 +46,24 @@ class MiniBus {
   }
 
   /**
-   * Manually add a reply listener. Only one listener per message ID should exist.
+   * Manually add a response listener. Only one listener per message ID should exist.
    * ATENTION, there is no timeout for this listener.
-   * The listener should be removed with a removeReplyListener, failing to do this will result in a unreleased memory problem.
-   * @param {URL} url Origin address of the message sent, "msg.header.from".
+   * The listener should be removed with a removeResponseListener, failing to do this will result in a unreleased memory problem.
+   * @param {URL} url Origin address of the message sent, "msg.from".
    * @param {number} msgId Message ID that is returned from the postMessage.
-   * @param {Function} replyListener Callback function for the reply
+   * @param {Function} responseListener Callback function for the response
    */
-  addReplyListener(url, msgId, replyListener) {
-    this._replyCallbacks[url + msgId] = replyListener;
+  addResponseListener(url, msgId, responseListener) {
+    this._responseCallbacks[url + msgId] = responseListener;
   }
 
   /**
-   * Remove the reply listener.
-   * @param {URL} url Origin address of the message sent, "msg.header.from".
+   * Remove the response listener.
+   * @param {URL} url Origin address of the message sent, "msg.from".
    * @param {number} msgId  Message ID that is returned from the postMessage
    */
-  removeReplyListener(url, msgId) {
-    delete this._replyCallbacks[url + msgId];
+  removeResponseListener(url, msgId) {
+    delete this._responseCallbacks[url + msgId];
   }
 
   /**
@@ -76,46 +76,46 @@ class MiniBus {
 
   /**
   * Send messages to local listeners, or if not exists to external listeners.
-  * It's has an optional mechanism for automatic management of reply handlers.
-  * The reply handler will be unregistered after receiving the reply, or after reply timeout (default to 3s).
+  * It's has an optional mechanism for automatic management of response handlers.
+  * The response handler will be unregistered after receiving the response, or after response timeout (default to 3s).
   * @param  {Message} msg Message to send. Message ID is automatically added to the message.
-  * @param  {Function} replyCallback Optional parameter, if the developer what's automatic reply management.
-  * @return {number} Returns the message ID, in case it should be needed for manual management of the reply handler.
+  * @param  {Function} responseCallback Optional parameter, if the developer what's automatic response management.
+  * @return {number} Returns the message ID, in case it should be needed for manual management of the response handler.
   */
-  postMessage(msg, replyCallback) {
+  postMessage(msg, responseCallback) {
     let _this = this;
 
     //TODO: how do we manage message ID's? Should it be a global runtime counter, or per URL address?
     //Global counter will not work, because there will be multiple MiniBus instances!
     //Per URL, can be a lot of data to maintain!
     //Maybe a counter per MiniBus instance. This is the assumed solution for now.
-    if (!msg.header.id) {
+    if (!msg.id) {
       _this._msgId++;
-      msg.header.id = _this._msgId;
+      msg.id = _this._msgId;
     }
 
-    //automatic management of reply handlers
-    if (replyCallback) {
-      let replyId = msg.header.from + msg.header.id;
-      _this._replyCallbacks[replyId] = replyCallback;
+    //automatic management of response handlers
+    if (responseCallback) {
+      let responseId = msg.from + msg.id;
+      _this._responseCallbacks[responseId] = responseCallback;
 
       setTimeout(() => {
-        let replyFun = _this._replyCallbacks[replyId];
-        delete _this._replyCallbacks[replyId];
+        let responseFun = _this._responseCallbacks[responseId];
+        delete _this._responseCallbacks[responseId];
 
-        if (replyFun) {
+        if (responseFun) {
           let errorMsg = {
-            header: {id: msg.header.id, type: 'reply'},
-            body: {code: 'error', desc: 'Reply timeout!'}
+            id: msg.id, type: 'response',
+            body: {code: 'error', desc: 'Response timeout!'}
           };
 
-          replyFun(errorMsg);
+          responseFun(errorMsg);
         }
-      }, _this._replyTimeOut);
+      }, _this._responseTimeOut);
     }
 
-    if (!_this._onReply(msg)) {
-      let itemList = _this._subscriptions[msg.header.to];
+    if (!_this._onResponse(msg)) {
+      let itemList = _this._subscriptions[msg.to];
       if (itemList) {
         //do not publish on default address, because of loopback cycle
         _this._publishOn(itemList, msg);
@@ -125,7 +125,7 @@ class MiniBus {
       }
     }
 
-    return msg.header.id;
+    return msg.id;
   }
 
   /**
@@ -163,16 +163,16 @@ class MiniBus {
     });
   }
 
-  _onReply(msg) {
+  _onResponse(msg) {
     let _this = this;
 
-    if (msg.header.type === 'reply') {
-      let replyId = msg.header.to + msg.header.id;
-      let replyFun = _this._replyCallbacks[replyId];
-      delete _this._replyCallbacks[replyId];
+    if (msg.type === 'response') {
+      let responseId = msg.to + msg.id;
+      let responseFun = _this._responseCallbacks[responseId];
+      delete _this._responseCallbacks[responseId];
 
-      if (replyFun) {
-        replyFun(msg);
+      if (responseFun) {
+        responseFun(msg);
         return true;
       }
     }
@@ -184,8 +184,8 @@ class MiniBus {
   _onMessage(msg) {
     let _this = this;
 
-    if (!_this._onReply(msg)) {
-      let itemList = _this._subscriptions[msg.header.to];
+    if (!_this._onResponse(msg)) {
+      let itemList = _this._subscriptions[msg.to];
       if (itemList) {
         _this._publishOn(itemList, msg);
       } else {

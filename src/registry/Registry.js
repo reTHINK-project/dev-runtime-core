@@ -216,7 +216,7 @@ class Registry extends EventEmitter {
       resolve(runtimeProtoStubURL);
 
       _this._messageBus.addListener(runtimeProtoStubURL + '/status', (msg) => {
-        if (msg.header.resource === msg.header.to + '/status') {
+        if (msg.resource === msg.to + '/status') {
           console.log('RuntimeProtostubURL/status message: ', msg.body.value);
         }
       });

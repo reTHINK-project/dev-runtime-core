@@ -12,11 +12,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var VertxProtoStub = (function () {
   /* private
     _continuousOpen: boolean
-     _runtimeProtoStubURL: string
+      _runtimeProtoStubURL: string
     _bus: MiniBus
     _msgCallback: (Message) => void
     _config: { url, runtimeURL }
-     _sock: (WebSocket | SockJS)
+      _sock: (WebSocket | SockJS)
   */
 
   /**
@@ -28,9 +28,9 @@ var VertxProtoStub = (function () {
    */
 
   function VertxProtoStub(runtimeProtoStubURL, bus, config) {
-    var _this2 = this;
-
     _classCallCheck(this, VertxProtoStub);
+
+    var _this = this;
 
     this._id = 0;
     this._continuousOpen = true;
@@ -40,13 +40,17 @@ var VertxProtoStub = (function () {
     this._config = config;
 
     bus.addListener('*', function (msg) {
-      var _this = _this2;
-
       _this._open(function () {
         _this._sock.send(JSON.stringify(msg));
       });
     });
   }
+
+  /**
+  * Callback used to send messages
+  * @callback PostMessage
+  * @param {Message} msg - Message to send
+  */
 
   /**
    * Get the configuration for this ProtoStub
@@ -90,21 +94,19 @@ var VertxProtoStub = (function () {
 
       _this._id++;
       var msg = {
-        header: {
-          id: _this._id,
-          type: 'open',
-          from: _this._config.runtimeURL,
-          to: 'mn:/session',
-          tokenID: '??'
-        }
+        id: _this._id,
+        type: 'open',
+        from: _this._config.runtimeURL,
+        to: 'mn:/session',
+        tokenID: '??'
       };
 
       //register and wait for open reply...
       var hasResponse = false;
       _this._sessionCallback = function (reply) {
-        if (reply.header.type === 'reply' & reply.header.id === msg.header.id) {
+        if (reply.type === 'response' & reply.id === msg.id) {
           hasResponse = true;
-          if (reply.body.code === 'ok') {
+          if (reply.body.code === 200) {
             _this._sendStatus('connected');
             callback();
           } else {
@@ -128,13 +130,11 @@ var VertxProtoStub = (function () {
 
       _this._id++;
       var msg = {
-        header: {
-          id: _this._id,
-          type: 'close',
-          from: _this._config.runtimeURL,
-          to: 'mn:/session',
-          tokenID: '??'
-        }
+        id: _this._id,
+        type: 'close',
+        from: _this._config.runtimeURL,
+        to: 'mn:/session',
+        tokenID: '??'
       };
 
       _this._sock.send(JSON.stringify(msg));
@@ -145,11 +145,9 @@ var VertxProtoStub = (function () {
       var _this = this;
 
       var msg = {
-        header: {
-          type: 'update',
-          from: _this._runtimeProtoStubURL,
-          to: _this._runtimeProtoStubURL + '/status'
-        },
+        type: 'update',
+        from: _this._runtimeProtoStubURL,
+        to: _this._runtimeProtoStubURL + '/status',
         body: {
           value: value
         }
@@ -199,7 +197,7 @@ var VertxProtoStub = (function () {
 
         _this._sock.onmessage = function (e) {
           var msg = JSON.parse(e.data);
-          if (msg.header.from === 'mn:/session') {
+          if (msg.from === 'mn:/session') {
             if (_this._sessionCallback) {
               _this._sessionCallback(msg);
             }
@@ -260,12 +258,6 @@ var VertxProtoStub = (function () {
 })();
 
 exports['default'] = VertxProtoStub;
-
-/**
-* Callback used to send messages
-* @callback PostMessage
-* @param {Message} msg - Message to send
-*/
 module.exports = exports['default'];
 
 },{}]},{},[1])(1)

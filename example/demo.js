@@ -46,8 +46,8 @@ function deployedHyperties(hyperty, result) {
 
 function newMessageRecived(msg) {
 
-  var fromHyperty = msg.header.from;
-  var toHyperty = msg.header.to;
+  var fromHyperty = msg.from;
+  var toHyperty = msg.to;
 
   var elTo = document.querySelector('form[data-url="' + toHyperty + '"]');
   var listTo = elTo.parentElement.querySelector('.list');
@@ -63,11 +63,9 @@ function newMessageRecived(msg) {
 function sendMessage(from, to, message) {
 
   var messageObject = {
-    header: {
-      to: to,
-      from: from,
-      type: 'MESSAGE'
-    },
+    to: to,
+    from: from,
+    type: 'message',
     body:{
       value: message
     }

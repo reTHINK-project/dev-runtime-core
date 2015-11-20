@@ -15,49 +15,49 @@ class SandboxRegistry {
 
     bus.addListener(SandboxRegistry.InternalDeployAddress, (msg) => {
       //console.log('SandboxRegistry-RCV: ', msg);
-      let replyMsg = {
-        header: { id: msg.header.id, type: 'reply', from: SandboxRegistry.InternalDeployAddress, to: SandboxRegistry.ExternalDeployAddress }
+      let responseMsg = {
+        id: msg.id, type: 'response', from: SandboxRegistry.InternalDeployAddress, to: SandboxRegistry.ExternalDeployAddress
       };
 
-      switch (msg.header.type) {
-        case 'CREATE': _this._onDeploy(replyMsg, msg.body.url, msg.body.sourceCode, msg.body.config); break;
-        case 'REMOVE': _this._onRemove(replyMsg, msg.body.url); break;
+      switch (msg.type) {
+        case 'create': _this._onDeploy(responseMsg, msg.body.url, msg.body.sourceCode, msg.body.config); break;
+        case 'delete': _this._onRemove(responseMsg, msg.body.url); break;
       }
     });
   }
 
   get components() { return this._components; }
 
-  _onDeploy(replyMsg, url, sourceCode, config) {
+  _onDeploy(responseMsg, url, sourceCode, config) {
     let _this = this;
 
     if (!_this._components.hasOwnProperty(url)) {
       try {
         _this._components[url] = _this._create(url, sourceCode, config);
-        replyMsg.body = { code: 'ok' };
+        responseMsg.body = { code: 200 };
       } catch (error) {
-        replyMsg.body = { code: 'error', desc: error };
+        responseMsg.body = { code: 500, desc: error };
       }
     } else {
-      replyMsg.body = { code: 'error', desc: 'Instance ' + url + ' already exist!' };
+      responseMsg.body = { code: 500, desc: 'Instance ' + url + ' already exist!' };
     }
 
-    _this._bus.postMessage(replyMsg);
+    _this._bus.postMessage(responseMsg);
   }
 
-  _onRemove(replyMsg, url) {
+  _onRemove(responseMsg, url) {
     let _this = this;
 
     if (_this._components.hasOwnProperty(url)) {
       //remove component from the pool and all listeners
       delete _this._components[url];
       _this._bus.removeAllListenersOf(url);
-      replyMsg.body = { code: 'ok' };
+      responseMsg.body = { code: 200 };
     } else {
-      replyMsg.body = { code: 'error', desc: 'Instance ' + url + ' doesn\'t exist!' };
+      responseMsg.body = { code: 500, desc: 'Instance ' + url + ' doesn\'t exist!' };
     }
 
-    _this._bus.postMessage(replyMsg);
+    _this._bus.postMessage(responseMsg);
   }
 
   /**
