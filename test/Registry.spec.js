@@ -93,27 +93,27 @@ getRegistry.then(function(registry) {
       });
     });
 
-    describe('registerPEP(postMessage, hyperty)', function(done) {
+    describe('registerPEP(postMessage, hyperty)', function() {
 
-      it('should register PEP', function() {
+      it('should register PEP', function(done) {
         let postMessage = {};
-        let hyperty = 'test';
+        let hyperty = 'hyperty-catalogue://sp1.pt/HelloHyperty';
 
         expect(registry.registerPEP(postMessage, hyperty).then(function(response) {
           return response;
-        })).to.be.fulfilled.and.eventually.equal('test/pep');
+        })).to.be.fulfilled.and.eventually.equal('PEP registered with success').and.notify(done);
 
       });
     });
 
-    describe('unregisterPEP(HypertyRuntimeURL)', function(done) {
+    describe('unregisterPEP(HypertyRuntimeURL)', function() {
 
-      it('should unregister PEP', function() {
-        let HypertyRuntimeURL = 'test';
+      it('should unregister PEP', function(done) {
+        let HypertyRuntimeURL = 'hyperty-catalogue://sp1.pt/HelloHyperty';
 
         expect(registry.unregisterPEP(HypertyRuntimeURL).then(function(response) {
           return response;
-        })).to.be.fulfilled.and.eventually.equal(' PEP sucessfully deleted');
+        })).to.be.fulfilled.and.eventually.equal('PEP successfully removed.').and.notify(done);
 
       });
     });

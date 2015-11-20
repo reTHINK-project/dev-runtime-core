@@ -25,95 +25,85 @@ import SandboxFactory from './resources/sandboxes/SandboxFactory';
 describe('RuntimeUA', function() {
 
   // Only for testing
-  let runtimeURL = 'hyperty-runtime://sp1/protostub/123';
-
+  let runtimeURL = 'runtime://sp1/123';
   let sandboxFactory = new SandboxFactory();
+  let runtime = new RuntimeUA(sandboxFactory);
 
   let _stubDescriptor;
   let _hypertyDescriptor;
-
-  let runtimeCatalogue = new RuntimeCatalogue();
-
-  // Mockup the registry and messageBus
-  let registry = {
-    registerHyperty: function() {
-      return new Promise(function(resolve, reject) {
-        resolve();
-      });
-    },
-    discoverProtostub: function() {
-      return new Promise(function(resolve, reject) {
-        let stubDescriptor = {
-          guid: 'guid',
-          id: 'idProtoStub',
-          classname: 'VertxProtoStub',
-          description: 'description of ProtoStub',
-          kind: 'hyperty',
-          catalogueURL: '....',
-          sourceCode: '../resources/VertxProtoStub.js',
-          dataObject: '',
-          type: '',
-          messageSchema: '',
-          configuration: {
-            url: 'ws://localhost:9090/ws',
-            runtimeURL: _this.hypertyRuntimeURL
-          },
-          policies: '',
-          constraints: '',
-          hypertyCapabilities: '',
-          protocolCapabilities: ''
-        };
-        resolve(stubDescriptor);
-      });
-    },
-    registerStub: function() {
-      return new Promise(function(resolve, reject) {
-        resolve();
-      });
-    },
-    getSandbox: function() {
-      return new Promise(function(resolve, reject) {
-        resolve(sandboxFactory.createSandbox());
-      });
-    },
-    getAppSandbox: function() {
-      return new Promise(function(resolve, reject) {
-        resolve(sandboxFactory.createAppSandbox());
-      });
-    }
-  };
-
-  let messageBus = {
-    addListener: function() {
-      return new Promise(function(resolve, reject) {
-        resolve();
-      });
-    }
-  };
 
   before(function() {
 
     // Mockup the source code request
     let mockup = {
-      mock:function() {
-        console.log('asdasdsadsa');
+      activate:function() {
+        console.log('activated');
       }
     };
 
-    let tes = sinon.stub(runtimeCatalogue, '_makeExternalRequest');
-    tes.returns(new Promise(function(resolve, reject) {
+    sinon.stub(runtime.runtimeCatalogue, '_makeExternalRequest')
+    .returns(new Promise(function(resolve, reject) {
       resolve(mockup);
+    }));
+
+    sinon.stub(runtime.registry, 'registerHyperty')
+    .returns(new Promise(function(resolve, reject) {
+      resolve('hyperty://sp1.pt/9c8c1949-e08e-4554-b201-bab201bdb21d');
+    }));
+
+    sinon.stub(runtime.registry, 'discoverProtostub')
+    .returns(new Promise(function(resolve, reject) {
+      let stubDescriptor = {
+        guid: 'guid',
+        id: 'idProtoStub',
+        classname: 'VertxProtoStub',
+        description: 'description of ProtoStub',
+        kind: 'hyperty',
+        catalogueURL: '....',
+        sourceCode: '../resources/VertxProtoStub.js',
+        dataObject: '',
+        type: '',
+        messageSchema: '',
+        configuration: {
+          url: 'ws://localhost:9090/ws',
+          runtimeURL: runtimeURL
+        },
+        policies: '',
+        constraints: '',
+        hypertyCapabilities: '',
+        protocolCapabilities: ''
+      };
+
+      resolve(stubDescriptor);
+    }));
+
+    sinon.stub(runtime.registry, 'registerStub')
+    .returns(new Promise(function(resolve, reject) {
+      resolve('msg-node.sp1.pt/protostub/8541');
+    }));
+
+    sinon.stub(runtime.registry, 'getSandbox')
+    .returns(new Promise(function(resolve, reject) {
+      resolve(sandboxFactory.createSandbox());
+    }));
+
+    sinon.stub(runtime.registry, 'getAppSandbox')
+    .returns(new Promise(function(resolve, reject) {
+      resolve(sandboxFactory.createAppSandbox());
+    }));
+
+    sinon.stub(runtime.messageBus, 'addListener')
+    .returns(new Promise(function(resolve, reject) {
+      resolve();
     }));
 
   });
 
   after(function() {
-    runtimeCatalogue._makeExternalRequest.restore();
+    runtime.runtimeCatalogue._makeExternalRequest.restore();
   });
 
   describe('constructor()', function() {
-
-    let runtime = new RuntimeUA(sandboxFactory);
 
     it('depends of the Registry', function() {
       expect(runtime.registry).to.be.instanceof(Registry);
@@ -139,20 +129,19 @@ describe('RuntimeUA', function() {
 
   describe('loadHyperty(hypertyDescriptorURL)', function() {
 
-    let runtime = new RuntimeUA(sandboxFactory);
-    runtime.registry = registry;
-    runtime.messageBus = messageBus;
-
-    let hypertyDescriptorURL = 'hyperty-catalogue://sp1.pt/HelloHyperty';
-    let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL);
-
     it('should throw when given no arguments', function(done) {
+      let hypertyDescriptorURL = 'hyperty-catalogue://sp1.pt/HelloHyperty';
+      let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL);
+
       expect(loadHyperty)
       .to.be.fulfilled
       .and.notify(done);
     });
 
     it('should be a Promise', function(done) {
+
+      let hypertyDescriptorURL = 'hyperty-catalogue://sp1.pt/HelloHyperty';
+      let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL);
 
       expect(loadHyperty)
       .to.be.fulfilled
@@ -162,6 +151,9 @@ describe('RuntimeUA', function() {
     });
 
     it('should be deployed', function(done) {
+
+      let hypertyDescriptorURL = 'hyperty-catalogue://sp1.pt/HelloHyperty';
+      let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL);
 
       let hypertyResolved = ['runtimeHypertyURL', 'status'];
 
@@ -175,27 +167,29 @@ describe('RuntimeUA', function() {
 
   describe('loadStub(sp-domain)', function() {
 
-    let runtime = new RuntimeUA(sandboxFactory);
-    runtime.registry = registry;
-    runtime.messageBus = messageBus;
-
-    let spDomain = 'ptinovacao.pt';
-    let loadStubPromise = runtime.loadStub(spDomain);
-
     it('should throw when given no arguments', function(done) {
+      let spDomain = 'sp1.pt';
+      let loadStubPromise = runtime.loadStub(spDomain);
+
       expect(loadStubPromise)
       .to.be.fulfilled
       .and.notify(done);
     });
 
     it('should be a Promise', function(done) {
+      let spDomain = 'sp1.pt';
+      let loadStubPromise = runtime.loadStub(spDomain);
+
       expect(loadStubPromise).to.be.fulfilled
       .to.be.instanceof(Promise)
       .and.notify(done);
     });
 
     it('should be deployed', function(done) {
+      let spDomain = 'sp1.pt';
+      let loadStubPromise = runtime.loadStub(spDomain);
       let stubResolved = ['runtimeProtoStubURL', 'status'];
+
       expect(loadStubPromise).to.be.fulfilled
       .and.eventually.to.have.all.keys(stubResolved)
       .and.notify(done);

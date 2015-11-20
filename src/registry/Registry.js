@@ -259,8 +259,8 @@ class Registry extends EventEmitter {
 
     var promise = new Promise(function(resolve,reject) {
       //TODO check what parameter in the postMessage the pep is.
-      _this.pep[hyperty] = postMessage;
-      resolve('Pep registered with success');
+      _this.pepList[hyperty] = postMessage;
+      resolve('PEP registered with success');
     });
 
     return promise;
@@ -280,7 +280,7 @@ class Registry extends EventEmitter {
       if (result === undefined) {
         reject('Pep Not found.');
       } else {
-        resolve('Pepe successfully removed.');
+        resolve('PEP successfully removed.');
       }
     });
 
