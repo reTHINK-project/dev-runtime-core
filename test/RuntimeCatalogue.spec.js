@@ -8,13 +8,15 @@ let expect = chai.expect;
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
 
-import runtimeCatalogue from '../src/runtime/RuntimeCatalogue';
+import RuntimeCatalogue from '../src/runtime/RuntimeCatalogue';
 
 // Testing runtimeUA;
 describe('Runtime Catalogue', function() {
 
   let _hypertyDescriptor;
   let _stubDescriptor;
+
+  let runtimeCatalogue = new RuntimeCatalogue();
 
   before(function() {
 

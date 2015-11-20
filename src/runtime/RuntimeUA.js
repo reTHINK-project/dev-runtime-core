@@ -4,7 +4,7 @@ import IdentityModule from '../identity/IdentityModule';
 import PolicyEngine from '../policy/PolicyEngine';
 import MessageBus from '../bus/MessageBus';
 
-import runtimeCatalogue from './RuntimeCatalogue';
+import RuntimeCatalogue from './RuntimeCatalogue';
 
 /**
 * Runtime User Agent Interface
@@ -19,6 +19,8 @@ class RuntimeUA {
 
     _this.sandboxFactory = sandboxFactory;
 
+    _this.runtimeCatalogue = new RuntimeCatalogue();
+
     // TODO: post and return registry/hypertyRuntimeInstance to and from Back-end Service
     // for the request you can use the module request in utils;
     // the response is like: hyperty-runtime://sp1/123
@@ -27,7 +29,7 @@ class RuntimeUA {
     _this.runtimeURL = runtimeURL;
 
     // TODO: check if runtime catalogue need the runtimeURL;
-    runtimeCatalogue.runtimeURL = runtimeURL;
+    _this.runtimeCatalogue.runtimeURL = runtimeURL;
 
     // Use the sandbox factory to create an AppSandbox;
     // In the future can be decided by policyEngine if we need
@@ -109,7 +111,7 @@ class RuntimeUA {
       // Probably we need to pass a factory like we do for sandboxes;
       console.log('------------------ Hyperty ------------------------');
       console.info('Get hyperty descriptor for :', hypertyDescriptorURL);
-      runtimeCatalogue.getHypertyDescriptor(hypertyDescriptorURL).then(function(hypertyDescriptor) {
+      _this.runtimeCatalogue.getHypertyDescriptor(hypertyDescriptorURL).then(function(hypertyDescriptor) {
         // at this point, we have completed "step 2 and 3" as shown in https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md
         console.info('1: return hyperty descriptor', hypertyDescriptor);
 
@@ -120,7 +122,7 @@ class RuntimeUA {
         let hypertySourceCodeUrl = hypertyDescriptor.sourceCode;
 
         // Get the hyperty source code
-        return runtimeCatalogue.getHypertySourceCode(hypertySourceCodeUrl);
+        return _this.runtimeCatalogue.getHypertySourceCode(hypertySourceCodeUrl);
       })
       .then(function(hypertySourceCode) {
         console.info('2: return hyperty source code');
@@ -271,7 +273,7 @@ class RuntimeUA {
         // we have completed step 3 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
         // we need to get ProtoStub descriptor step 4 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-        return runtimeCatalogue.getStubDescriptor(domain);
+        return _this.runtimeCatalogue.getStubDescriptor(domain);
       })
       .then(function(descriptor) {
 
@@ -284,7 +286,7 @@ class RuntimeUA {
         let componentDownloadURL = descriptor.sourceCode;
 
         // we need to get ProtoStub Source code from descriptor - step 6 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-        return runtimeCatalogue.getStubSourceCode(componentDownloadURL);
+        return _this.runtimeCatalogue.getStubSourceCode(componentDownloadURL);
       })
       .then(function(protoStubSourceCode) {
         console.info('3. return the ProtoStub Source Code: ');

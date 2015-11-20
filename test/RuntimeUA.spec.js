@@ -1,12 +1,17 @@
 import chai from 'chai';
+import sinon from 'sinon';
 import chaiAsPromised from 'chai-as-promised';
+import sinonChai from 'sinon-chai';
 
 let expect = chai.expect;
 
 chai.use(chaiAsPromised);
+chai.use(sinonChai);
 
 // Testing Module
 import RuntimeUA from '../src/runtime/RuntimeUA';
+
+import RuntimeCatalogue from '../src/runtime/RuntimeCatalogue';
 
 // Main dependecies
 import Registry from '../src/registry/Registry';
@@ -26,6 +31,8 @@ describe('RuntimeUA', function() {
 
   let _stubDescriptor;
   let _hypertyDescriptor;
+
+  let runtimeCatalogue = new RuntimeCatalogue();
 
   // Mockup the registry and messageBus
   let registry = {
@@ -83,6 +90,26 @@ describe('RuntimeUA', function() {
       });
     }
   };
+
+  before(function() {
+
+    // Mockup the source code request
+    let mockup = {
+      mock:function() {
+        console.log('asdasdsadsa');
+      }
+    };
+
+    let tes = sinon.stub(runtimeCatalogue, '_makeExternalRequest');
+    tes.returns(new Promise(function(resolve, reject) {
+      resolve(mockup);
+    }));
+
+  });
+
+  after(function() {
+    runtimeCatalogue._makeExternalRequest.restore();
+  });
 
   describe('constructor()', function() {
 

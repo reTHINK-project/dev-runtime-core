@@ -164,4 +164,4 @@ class RuntimeCatalogue {
 
 }
 
-export default new RuntimeCatalogue();
+export default RuntimeCatalogue;
