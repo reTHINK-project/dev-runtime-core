@@ -36,6 +36,8 @@ class SyncherManager {
      console.log('Syncher-RCV: ', msg);
      switch (msg.type) {
        case 'response': _this._onResponse(msg); break;
+       case 'forward': _this._onForward(msg); break;
+       case 'create': _this._onCreate(msg); break;
        case 'update': _this._onChange(msg); break;
        case 'add': _this._onChange(msg); break;
        case 'remove': _this._onChange(msg); break;
@@ -92,18 +94,18 @@ class SyncherManager {
   */
  subscribe(url) {
    let _this = this;
+   let objSubscriptorURL = url + '/sm';
 
    //TODO: validate if subscription already exists ?
    let subscribeMsg = {
-     type: 'subscribe', from: _this._owner, to: url,
-     body: {}
+     type: 'subscribe', from: _this._owner, to: objSubscriptorURL
    };
 
    return new Promise((resolve, reject) => {
      //request subscription
      _this._bus.postMessage(subscribeMsg, (reply) => {
        console.log('subscribe-response: ', reply);
-       if (reply.body.code === 'ok') {
+       if (reply.body.code === 200) {
          //subscription accepted
          let newObj = new DataObjectObserver(_this._owner, url, reply.body.schema, 'on', reply.body.value);
          _this._observers[url] = newObj;
@@ -120,9 +122,26 @@ class SyncherManager {
    this._onResponseHandlers.push(callback);
  }
 
-_onResponse(msg) {
-  let _this = this;
-}
+ _onResponse(msg) {
+   let _this = this;
+
+   //TODO: process create reponses!
+ }
+
+ _onForward(msg) {
+   let _this = this;
+
+   let reporter = _this._reporters[msg.body.to];
+   reporter._onForward(msg);
+ }
+
+ _onCreate(msg) {
+   let _this = this;
+
+   let objURL = msg.body.resource;
+   let newObj = new DataObjectObserver(_this._owner, objURL, msg.body.schema, 'on', msg.body.value);
+   _this._observers[objURL] = newObj;
+ }
 
  _onChange(msg) {
    let _this = this;
