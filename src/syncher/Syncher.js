@@ -25,7 +25,7 @@ class SyncherManager {
    _this._owner = owner;
    _this._bus = bus;
 
-   _this._subURL = runtimeURL + '/sm';
+   _this._subURL = config.runtimeURL + '/sm';
 
    _this._reporters = {};
    _this._observers = {};
@@ -53,7 +53,6 @@ class SyncherManager {
   * Request a DataObjectReporter creation. The URL will be be requested by the allocation mechanism.
   * @param  {Schema} schema Schema of the object
   * @param  {HypertyURL[]} List of hyperties to send the create
-  * @param  {HyperyURL | [HyperyURL]} invitations Hyperties that will be invited to observe.
   * @param  {JSON} initialData Object initial data
   * @return {Promise<DataObjectReporter>} Return Promise to a new Reporter. The reporter can be accepted or rejected by the PEP
   */
@@ -64,15 +63,15 @@ class SyncherManager {
 
    let requestMsg = {
      type: 'create', from: _this._owner, to: _this._subURL,
-     body: {schema: schema}
+     body: {schema: schema, value: initialData, authorise: observers}
    };
 
    return new Promise((resolve, reject) => {
      //request create to the Allocation system? Can be rejected by the PolicyEngine.
      _this._bus.postMessage(requestMsg, (reply) => {
        console.log('create-response: ', reply);
-       if (reply.body.code === 'ok') {
-         let objUrl = reply.body.url;
+       if (reply.body.code === 200) {
+         let objUrl = reply.body.resource;
 
          //reporter creation accepted
          let newObj = new DataObjectReporter(objUrl, schema, _this._bus, 'on', initialData);
