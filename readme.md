@@ -133,9 +133,9 @@ This repository have a folder with an working example of runtime-core and we can
 -----
 
 To run the demo on example folder:
- - you need **live-server** running.
+ - you need **live-server** running in the root folder.
  ```
  live-server --port=4000
  ```
- - in your browser access to http://localhost:4000.
+ - in your browser access to http://localhost:4000/example.
  - for communication between hyperties in two distinct browsers, you need, run locally [dev-msg-node-vertx](https://github.com/reTHINK-project/dev-msg-node-vertx#java)

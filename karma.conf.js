@@ -13,6 +13,10 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
+      'node_modules/array.observe/array-observe.js',
+      'node_modules/babel-polyfill/dist/polyfill.js',
+      'node_modules/indexeddbshim/dist/indexeddbshim.js',
+      'node_modules/object.observe/dist/object-observe.js',
       'src/**/*.js',
       'test/**/*.spec.js'
     ],
@@ -61,7 +65,7 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['Chrome'],
+    browsers: ['PhantomJS2'],
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
