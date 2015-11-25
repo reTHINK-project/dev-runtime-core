@@ -33,9 +33,11 @@ class IdentityModule {
 
   /**
   * In relation with a classical Relying Party: Login
-  * @return {Promise}          Promise          IDToken
+  * @param  {Identifier}      identifier      identifier
+  * @param  {Scope}           scope           scope
+  * @return {Promise}         Promise         IDToken
   */
-  loginWithRP() {
+  loginWithRP(identifier, scope) {
 
     /*
       When calling this function, if everything is fine, a small pop-up will open requesting a login with a google account. After the login is made, the pop-up will close and the function will return the ID token.
@@ -113,9 +115,15 @@ class IdentityModule {
       //this will open a window with the URL which will open a page sent by google for the user to insert the credentials
       // when the google validates the credentials then send a access token
       let win = window.open(_url, 'openIDrequest', 'width=800, height=600');
-      let pollTimer   =   window.setInterval(function() {
+      let pollTimer = window.setInterval(function() {
         try {
           //console.log(win.document.URL);
+
+          if (win.closed) {
+            reject('Some error occured.');
+            clearInterval(pollTimer);
+          }
+
           if (win.document.URL.indexOf(REDIRECT) != -1) {
             window.clearInterval(pollTimer);
             let url =   win.document.URL;
