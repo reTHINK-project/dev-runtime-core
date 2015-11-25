@@ -47,7 +47,7 @@ class PolicyEngine {
       _this.idModule.loginWithRP('google identity', 'scope').then(function(value) {
 
         // add the token to the message received
-        message.tokenID = JSON.stringify(value);
+        message.body.assertedIdentity = JSON.stringify(value);
         resolve(message);
       }, function(error) {
         reject(error);
