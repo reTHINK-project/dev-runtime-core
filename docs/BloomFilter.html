@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: bus/MessageBus.js</title>
+    <title>JSDoc: Class: BloomFilter</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,54 +17,136 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: bus/MessageBus.js</h1>
+    <h1 class="page-title">Class: BloomFilter</h1>
 
     
 
 
 
+
+<section>
+
+<header>
     
-    <section>
-        <article>
-            <pre class="prettyprint source linenums"><code>import MiniBus from './MiniBus';
-/**
-* Message BUS Interface is an extension of the MiniBus
-* It doesn't support the default '*' listener, instead it uses the registry.resolve(..)
-*/
-class MessageBus extends MiniBus {
-  /* private
-  _registry: Registry
-  */
+        <h2>BloomFilter</h2>
+        
+            <div class="class-description">Implements a Bloom filter.</div>
+        
+    
+</header>
 
-  //TODO: future optimization
-  //1. message batch processing with setInterval
-  //2. resolve default gateway/protostub with register.resolve
+<article>
+    <div class="container-overview">
+    
+        
 
-  constructor(registry) {
-    super();
-    this._registry = registry;
-  }
+    
+    <h2>Constructor</h2>
+    
 
-  _onPostMessage(msg) {
-    let _this = this;
+    <h4 class="name" id="BloomFilter"><span class="type-signature"></span>new BloomFilter<span class="signature">()</span><span class="type-signature"></span></h4>
 
-    //resolve external protostub...
-    _this._registry.resolve(msg.to).then((protoStubURL) => {
+    
 
-      let itemList = _this._subscriptions[protoStubURL];
-      if (itemList) {
-        _this._publishOn(itemList, msg);
-      }
-    }).catch(function(e) {
-      console.log('PROTO-STUB-ERROR: ', e);
-    });
-  }
-}
 
-export default MessageBus;
-</code></pre>
-        </article>
-    </section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-author">Author:</dt>
+    <dd class="tag-author">
+        <ul>
+            <li>Jason Davies; adapted and extended by beierle@tu-berlin.de</li>
+        </ul>
+    </dd>
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="graphconnector_BloomFilter.js.html">graphconnector/BloomFilter.js</a>, <a href="graphconnector_BloomFilter.js.html#line38">line 38</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+     
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
 
 
 

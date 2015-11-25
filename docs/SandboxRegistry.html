@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Class: SyncherManager</title>
+    <title>JSDoc: Class: SandboxRegistry</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Class: SyncherManager</h1>
+    <h1 class="page-title">Class: SandboxRegistry</h1>
 
     
 
@@ -28,7 +28,7 @@
 
 <header>
     
-        <h2>SyncherManager</h2>
+        <h2>SandboxRegistry</h2>
         
     
 </header>
@@ -40,7 +40,7 @@
 
     
 
-    <h4 class="name" id="SyncherManager"><span class="type-signature"></span>new SyncherManager<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="SandboxRegistry"><span class="type-signature"></span>new SandboxRegistry<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
@@ -80,7 +80,7 @@
     <dt class="tag-author">Author:</dt>
     <dd class="tag-author">
         <ul>
-            <li>micaelpedrosa@gmail.comClient API Syncronization system.</li>
+            <li>micaelpedrosa@gmail.comBase class to implement internal deploy manager of components.</li>
         </ul>
     </dd>
     
@@ -94,7 +94,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="syncher_Syncher.js.html">syncher/Syncher.js</a>, <a href="syncher_Syncher.js.html#line8">line 8</a>
+        <a href="sandbox_SandboxRegistry.js.html">sandbox/SandboxRegistry.js</a>, <a href="sandbox_SandboxRegistry.js.html#line8">line 8</a>
     </li></ul></dd>
     
 
@@ -143,213 +143,14 @@
 
     
 
-    <h4 class="name" id="create"><span class="type-signature"></span>create<span class="signature">(schema, List, initialData)</span><span class="type-signature"> &rarr; {Promise.&lt;DataObjectReporter>}</span></h4>
+    <h4 class="name" id="_create"><span class="type-signature"></span>_create<span class="signature">(url, sourceCode, config)</span><span class="type-signature"> &rarr; {Object}</span></h4>
 
     
 
 
 
 <div class="description">
-    Request a DataObjectReporter creation. The URL will be be requested by the allocation mechanism.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>schema</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Schema</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Schema of the object</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>List</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;HypertyURL></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">of hyperties to send the create</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>initialData</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">JSON</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Object initial data</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="syncher_Syncher.js.html">syncher/Syncher.js</a>, <a href="syncher_Syncher.js.html#line61">line 61</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    Return Promise to a new Reporter. The reporter can be accepted or rejected by the PEP
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Promise.&lt;DataObjectReporter></span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id="subscribe"><span class="type-signature"></span>subscribe<span class="signature">(url)</span><span class="type-signature"> &rarr; {Promise.&lt;DataObjectObserver>}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Request a subscription to an existent object.
+    This method should be implemented by the internal sandbox code.
 </div>
 
 
@@ -391,7 +192,7 @@
             <td class="type">
             
                 
-<span class="param-type">ObjectURL</span>
+<span class="param-type">ComponentURL</span>
 
 
             
@@ -401,7 +202,53 @@
 
             
 
-            <td class="description last">Address of the existent object.</td>
+            <td class="description last">URL used for the instance</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>sourceCode</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Code of the component</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>config</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Config</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Configuration parameters</td>
         </tr>
 
     
@@ -442,7 +289,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="syncher_Syncher.js.html">syncher/Syncher.js</a>, <a href="syncher_Syncher.js.html#line95">line 95</a>
+        <a href="sandbox_SandboxRegistry.js.html">sandbox/SandboxRegistry.js</a>, <a href="sandbox_SandboxRegistry.js.html#line116">line 116</a>
     </li></ul></dd>
     
 
@@ -469,7 +316,7 @@
 
         
 <div class="param-desc">
-    Return Promise to a new Observer.
+    Returns instance of the component or throw an error "throw 'error message'"
 </div>
 
 
@@ -480,7 +327,7 @@
     </dt>
     <dd>
         
-<span class="param-type">Promise.&lt;DataObjectObserver></span>
+<span class="param-type">Object</span>
 
 
     </dd>

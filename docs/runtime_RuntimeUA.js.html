@@ -39,13 +39,13 @@ import RuntimeCatalogue from './RuntimeCatalogue';
  * @author Vitor Silva [vitor-t-silva@telecom.pt]
  * @version 0.2.0
  *
- * @property {sandboxFactory} _sandboxFactory - Specific implementation of sandbox;
- * @property {RuntimeCatalogue} _runtimeCatalogue - Catalogue of components can be installed;
- * @property {runtimeURL} _runtimeURL - This identify the core runtime, should be unique;
- * @property {IdentityModule} _identityModule - Identity Module;
- * @property {PolicyEngine} _policyEngine - Policy Engine Module;
- * @property {Registry} _registry - Registry Module;
- * @property {MessageBus} _messageBus - Message Bus is used like a router to redirect the messages from one component to other(s)
+ * @property {sandboxFactory} sandboxFactory - Specific implementation of sandbox;
+ * @property {RuntimeCatalogue} runtimeCatalogue - Catalogue of components can be installed;
+ * @property {runtimeURL} runtimeURL - This identify the core runtime, should be unique;
+ * @property {IdentityModule} identityModule - Identity Module;
+ * @property {PolicyEngine} policyEngine - Policy Engine Module;
+ * @property {Registry} registry - Registry Module;
+ * @property {MessageBus} messageBus - Message Bus is used like a router to redirect the messages from one component to other(s)
  */
 class RuntimeUA {
 
@@ -59,18 +59,18 @@ class RuntimeUA {
 
     let _this = this;
 
-    _this._sandboxFactory = sandboxFactory;
+    _this.sandboxFactory = sandboxFactory;
 
-    _this._runtimeCatalogue = new RuntimeCatalogue();
+    _this.runtimeCatalogue = new RuntimeCatalogue();
 
     // TODO: post and return registry/hypertyRuntimeInstance to and from Back-end Service
     // the response is like: runtime://sp1/123
 
     let runtimeURL = 'runtime://sp1/' + Math.floor((Math.random() * 10000) + 1);
-    _this._runtimeURL = runtimeURL;
+    _this.runtimeURL = runtimeURL;
 
     // TODO: check if runtime catalogue need the runtimeURL;
-    _this._runtimeCatalogue.runtimeURL = runtimeURL;
+    _this.runtimeCatalogue.runtimeURL = runtimeURL;
 
     // Use the sandbox factory to create an AppSandbox;
     // In the future can be decided by policyEngine if we need
@@ -78,24 +78,24 @@ class RuntimeUA {
     let appSandbox = sandboxFactory.createAppSandbox();
 
     // Instantiate the identity Module
-    _this._identityModule = new IdentityModule();
+    _this.identityModule = new IdentityModule();
 
     // Instantiate the Policy Engine
-    _this._policyEngine = new PolicyEngine();
+    _this.policyEngine = new PolicyEngine();
 
     // Instantiate the Registry Module
-    _this._registry = new Registry(runtimeURL, appSandbox);
+    _this.registry = new Registry(runtimeURL, appSandbox);
 
     // Instantiate the Message Bus
-    _this._messageBus = new MessageBus(_this._registry);
+    _this.messageBus = new MessageBus(_this.registry);
 
     // Register messageBus on Registry
-    _this._registry.messageBus = _this._messageBus;
+    _this.registry.messageBus = _this.messageBus;
 
-    _this._registry.addEventListener('runtime:loadStub', function(domainURL) {
+    _this.registry.addEventListener('runtime:loadStub', function(domainURL) {
 
       _this.loadStub(domainURL).then(function(result) {
-        _this._registry.trigger('runtime:stubLoaded', domainURL);
+        _this.registry.trigger('runtime:stubLoaded', domainURL);
       }).catch(function(reason) {
         console.error(reason);
       });
@@ -103,7 +103,7 @@ class RuntimeUA {
 
     // Use sandbox factory to use specific methods
     // and set the message bus to the factory
-    sandboxFactory.messageBus = _this._messageBus;
+    sandboxFactory.messageBus = _this.messageBus;
   }
 
   /**
@@ -151,7 +151,7 @@ class RuntimeUA {
       // Probably we need to pass a factory like we do for sandboxes;
       console.log('------------------ Hyperty ------------------------');
       console.info('Get hyperty descriptor for :', hypertyDescriptorURL);
-      _this._runtimeCatalogue.getHypertyDescriptor(hypertyDescriptorURL).then(function(hypertyDescriptor) {
+      _this.runtimeCatalogue.getHypertyDescriptor(hypertyDescriptorURL).then(function(hypertyDescriptor) {
         // at this point, we have completed "step 2 and 3" as shown in https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md
         console.info('1: return hyperty descriptor', hypertyDescriptor);
 
@@ -162,7 +162,7 @@ class RuntimeUA {
         let hypertySourceCodeUrl = hypertyDescriptor.sourceCode;
 
         // Get the hyperty source code
-        return _this._runtimeCatalogue.getHypertySourceCode(hypertySourceCodeUrl);
+        return _this.runtimeCatalogue.getHypertySourceCode(hypertySourceCodeUrl);
       })
       .then(function(hypertySourceCode) {
         console.info('2: return hyperty source code');
@@ -199,13 +199,13 @@ class RuntimeUA {
         if (inSameSandbox) {
 
           // this don't need be a Promise;
-          sandbox = _this._registry.getAppSandbox();
+          sandbox = _this.registry.getAppSandbox();
 
           // we have completed step 11 here.
         } else {
 
           // getSandbox, this will return a promise;
-          sandbox = _this._registry.getSandbox(domain);
+          sandbox = _this.registry.getSandbox(domain);
         }
 
         // this will return the sandbox or one promise to getSandbox;
@@ -222,7 +222,7 @@ class RuntimeUA {
         // check if the sandbox is registed for this hyperty descriptor url;
         // Make Steps xxx --- xxx
         // Instantiate the Sandbox
-        return _this._sandboxFactory.createSandbox();
+        return _this.sandboxFactory.createSandbox();
       })
       .then(function(sandbox) {
         console.info('5: return sandbox and register');
@@ -230,7 +230,7 @@ class RuntimeUA {
         _hypertySandbox = sandbox;
 
         // Register hyperty
-        return _this._registry.registerHyperty(sandbox, hypertyDescriptorURL);
+        return _this.registry.registerHyperty(sandbox, hypertyDescriptorURL);
       })
       .then(function(hypertyURL) {
         console.info('6: Hyperty url, after register hyperty', hypertyURL);
@@ -248,12 +248,12 @@ class RuntimeUA {
         // we have completed step 19 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
 
         // Add the message bus listener to the appSandbox or hypertSandbox;
-        _this._messageBus.addListener(_hypertyURL, function(msg) {
+        _this.messageBus.addListener(_hypertyURL, function(msg) {
           _hypertySandbox.postMessage(msg);
         });
 
         _hypertySandbox.addListener('*', function(msg) {
-          _this._messageBus.postMessage(msg);
+          _this.messageBus.postMessage(msg);
         });
 
         // we have completed step 20 of https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
@@ -298,7 +298,7 @@ class RuntimeUA {
       // Discover Protocol Stub
       console.info('------------------- ProtoStub ---------------------------\n');
       console.info('Discover or Create a new ProtoStub for domain: ', domain);
-      _this._registry.discoverProtostub(domain).then(function(descriptor) {
+      _this.registry.discoverProtostub(domain).then(function(descriptor) {
         // Is registed?
         console.info('1. Proto Stub Discovered: ', descriptor);
         _stubDescriptor = descriptor;
@@ -313,7 +313,7 @@ class RuntimeUA {
         // we have completed step 3 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
         // we need to get ProtoStub descriptor step 4 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-        return _this._runtimeCatalogue.getStubDescriptor(domain);
+        return _this.runtimeCatalogue.getStubDescriptor(domain);
       })
       .then(function(descriptor) {
 
@@ -326,7 +326,7 @@ class RuntimeUA {
         let componentDownloadURL = descriptor.sourceCode;
 
         // we need to get ProtoStub Source code from descriptor - step 6 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-        return _this._runtimeCatalogue.getStubSourceCode(componentDownloadURL);
+        return _this.runtimeCatalogue.getStubSourceCode(componentDownloadURL);
       })
       .then(function(protoStubSourceCode) {
         console.info('3. return the ProtoStub Source Code: ');
@@ -340,7 +340,7 @@ class RuntimeUA {
         return policy;
       }).then(function(policy) {
         // this will return the sandbox or one promise to getSandbox;
-        return _this._registry.getSandbox(domain);
+        return _this.registry.getSandbox(domain);
 
       }).then(function(stubSandbox) {
 
@@ -356,7 +356,7 @@ class RuntimeUA {
         // check if the sandbox is registed for this stub descriptor url;
         // Make Steps xxx --- xxx
         // Instantiate the Sandbox
-        return _this._sandboxFactory.createSandbox();
+        return _this.sandboxFactory.createSandbox();
       })
       .then(function(sandbox) {
         console.info('6. return the sandbox instance and the register', sandbox);
@@ -364,7 +364,7 @@ class RuntimeUA {
         _stubSandbox = sandbox;
 
         // we need register stub on registry - step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-        return _this._registry.registerStub(_stubSandbox, domain);
+        return _this.registry.registerStub(_stubSandbox, domain);
       })
       .then(function(runtimeProtoStubURL) {
 
@@ -383,12 +383,12 @@ class RuntimeUA {
         // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
         // Add the message bus listener
-        _this._messageBus.addListener(_runtimeProtoStubURL, function(msg) {
+        _this.messageBus.addListener(_runtimeProtoStubURL, function(msg) {
           _stubSandbox.postMessage(msg);
         });
 
         _stubSandbox.addListener('*', function(msg) {
-          _this._messageBus.postMessage(msg);
+          _this.messageBus.postMessage(msg);
         });
 
         // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
@@ -430,13 +430,13 @@ export default RuntimeUA;
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-utils.html">utils</a></li></ul><h3>Classes</h3><ul><li><a href="AddressAllocation.html">AddressAllocation</a></li><li><a href="EventEmitter.html">EventEmitter</a></li><li><a href="IdentityModule.html">IdentityModule</a></li><li><a href="MessageBus.html">MessageBus</a></li><li><a href="MiniBus.html">MiniBus</a></li><li><a href="Pipeline.html">Pipeline</a></li><li><a href="PolicyEngine.html">PolicyEngine</a></li><li><a href="ProtoStub.html">ProtoStub</a></li><li><a href="QoSUA.html">QoSUA</a></li><li><a href="Registry.html">Registry</a></li><li><a href="RuntimeUA.html">RuntimeUA</a></li><li><a href="Sandbox.html">Sandbox</a></li><li><a href="SyncherManager.html">SyncherManager</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-utils.html">utils</a></li></ul><h3>Classes</h3><ul><li><a href="AddressAllocation.html">AddressAllocation</a></li><li><a href="BloomFilter.html">BloomFilter</a></li><li><a href="EventEmitter.html">EventEmitter</a></li><li><a href="GraphConnector.html">GraphConnector</a></li><li><a href="GraphConnectorContactData.html">GraphConnectorContactData</a></li><li><a href="IdentityModule.html">IdentityModule</a></li><li><a href="MessageBus.html">MessageBus</a></li><li><a href="MiniBus.html">MiniBus</a></li><li><a href="Pipeline.html">Pipeline</a></li><li><a href="PolicyEngine.html">PolicyEngine</a></li><li><a href="ProtoStub.html">ProtoStub</a></li><li><a href="QoSUA.html">QoSUA</a></li><li><a href="Registry.html">Registry</a></li><li><a href="RuntimeUA.html">RuntimeUA</a></li><li><a href="Sandbox.html">Sandbox</a></li><li><a href="SandboxRegistry.html">SandboxRegistry</a></li><li><a href="SyncherManager.html">SyncherManager</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Tue Nov 24 2015 16:47:08 GMT+0000 (WET)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Wed Nov 25 2015 15:05:48 GMT+0100 (Mitteleuropäische Zeit)
 </footer>
 
 <script> prettyPrint(); </script>

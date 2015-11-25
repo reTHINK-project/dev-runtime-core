@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: graphconnector/GraphConnector.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: graphconnector/GraphConnector.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import GraphConnectorContactData from './GraphConnectorContactData';
+import BloomFilter from './BloomFilter';
+
+/**
+* The Graph Connector contains the contact list/address book.
+* @author beierle@tu-berlin.de
+*/
+class GraphConnector {
+
+  // TODO: data format GUID
+  // TODO: key / GUID generation
+  // TODO: import / export methods
+  // TODO: communication with global registry
+
+  /**
+   * Constructs a new and empty Graph Connector.
+   */
+  constructor() {
+    this.contacts = [];
+    this.lastCalculationnBloomFilter1Hop = new Date(0).toISOString();
+  }
+
+  /**
+   * Generates a GUID and returns a passphrase from which the GUID can be re-created later.
+   * @returns  {array}    passphrase      A list of words.
+   */
+  generateGUID() {
+    // TODO
+  }
+
+  /**
+   * Generates a public/private key pair from a given passphrase.
+   * @param  {array}     passphrase     A list of words.
+   */
+  useGUID() {
+    // TODO
+  }
+
+  /**
+   * Add a contact to the Graph Connector.
+   * @param  {GUID}     guid          GUID of the new contact.
+   * @param  {string}   firstName     First name of the new contact.
+   * @param  {string}   lastname      Last name of the new contact.
+   */
+  addContact(guid, firstName, lastName) {
+
+    // TODO: what if two contacts have the same GUID?
+    // TODO: reject invalid GUIDs
+
+    this.contacts.push(new GraphConnectorContactData(guid, firstName, lastName));
+  }
+
+  /**
+   * Remove a contact from the Graph Connector.
+   * @param  {GUID}     guid      GUID of the user to be removed.
+   */
+  removeContact(guid) {
+    // remove from contacts
+    for (let i = 0; i &lt; this.contacts.length; i++) {
+      if (this.contacts[i].guid == guid) {
+        this.contacts.splice(i, 1);
+      }
+    }
+
+    // re-calculate BF1hop
+    this.calculateBloomFilter1Hop();
+  }
+
+  /**
+   * Calculates the Bloom filter containing all non-private contacts.
+   */
+  calculateBloomFilter1Hop() {
+    let bf = new BloomFilter(
+      431328,   // number of bits to allocate. With 30000 entries, we have a false positive rate of 0.1 %.
+      10        // number of hash functions.
+    );
+    for (let i = 0; i &lt; this.contacts.length; i++) {
+      if (!this.contacts[i].privateContact) {
+        bf.add(this.contacts[i].guid);
+      }
+    }
+    this.contactsBloomFilter1Hop = bf;
+    this.lastCalculationnBloomFilter1Hop = new Date().toISOString();
+  }
+
+  /**
+   * Gets contacts by name.
+   * @param  {string}   name    First or last name to look for in the contact list.
+   * @returns  {array}   matchingContacts       Contacts matching the given name. The format is: Contacts&lt;GraphConnectorContactData>.
+   */
+  getContact(name) {
+    // TODO: optimize, e.g., find misspelled people
+    let rtnArray = [];
+    for (let i = 0; i &lt; this.contacts.length; i++) {
+      if (this.contacts[i].firstName == name || this.contacts[i].lastName == name) {
+        rtnArray.push(this.contacts[i]);
+      }
+    }
+    return rtnArray;
+  }
+
+  /**
+   * Checks, if the given GUID is known and returns a list of contacs that are direct connections as well as a list of contacts that (most likely) know the given contact.
+   * @param  {GUID}     guid      GUID of the contact to look for.
+   * @returns  {array}    relatedContacts     List of related direct contacts and of related friends-of-friends contacts.The format is: RelatedContacts&lt;Direct&lt;GraphConnectorContactData>,FoF&lt;GraphConnectorContactData>>.
+   */
+  checkGUID(guid) {
+    let directContactsArray = [];
+    let fofContactsArray = [];
+    for (let i = 0; i &lt; this.contacts.length; i++) {
+      if (this.contacts[i].guid == guid) {
+        directContactsArray.push(this.contacts[i]);
+      }
+      let bf1hop = this.contacts[i].contactsBloomFilter1Hop;
+      if (bf1hop !== undefined) {
+        if (bf1hop.test(guid)) {
+          fofContactsArray.push(this.contacts[i]);
+        }
+      }
+    }
+    let rtnArray = [];
+    rtnArray.push(directContactsArray, fofContactsArray);
+    return rtnArray;
+  }
+
+  // TODO: exportGraphData(?){}
+  // TODO: importGraphData(?){}
+
+}
+
+export default GraphConnector;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-utils.html">utils</a></li></ul><h3>Classes</h3><ul><li><a href="AddressAllocation.html">AddressAllocation</a></li><li><a href="BloomFilter.html">BloomFilter</a></li><li><a href="EventEmitter.html">EventEmitter</a></li><li><a href="GraphConnector.html">GraphConnector</a></li><li><a href="GraphConnectorContactData.html">GraphConnectorContactData</a></li><li><a href="IdentityModule.html">IdentityModule</a></li><li><a href="MessageBus.html">MessageBus</a></li><li><a href="MiniBus.html">MiniBus</a></li><li><a href="Pipeline.html">Pipeline</a></li><li><a href="PolicyEngine.html">PolicyEngine</a></li><li><a href="ProtoStub.html">ProtoStub</a></li><li><a href="QoSUA.html">QoSUA</a></li><li><a href="Registry.html">Registry</a></li><li><a href="RuntimeUA.html">RuntimeUA</a></li><li><a href="Sandbox.html">Sandbox</a></li><li><a href="SandboxRegistry.html">SandboxRegistry</a></li><li><a href="SyncherManager.html">SyncherManager</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Wed Nov 25 2015 15:05:48 GMT+0100 (Mitteleuropäische Zeit)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
