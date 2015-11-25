@@ -1,4 +1,4 @@
-import MessageFactory from '../../resources/MessageFactory';
+// import MessageFactory from '../../resources/MessageFactory';
 
 /**
  * Class will ask to the message node for addresses
@@ -17,9 +17,9 @@ class AddressAllocation {
   constructor(url, bus) {
     let _this = this;
 
-    let messageFactory = new MessageFactory();
-
-    _this._messageFactory = messageFactory;
+    // let messageFactory = new MessageFactory();
+    //
+    // _this._messageFactory = messageFactory;
     _this._url = url;
     _this._bus = bus;
   }
@@ -38,7 +38,8 @@ class AddressAllocation {
    */
   create(domain, number) {
     let _this = this;
-    let messageFactory = _this._messageFactory;
+
+    // let messageFactory = _this._messageFactory;
 
     let msg = {
       type: 'create', from: _this._url, to: 'domain://msg-node.' + domain + '/hyperty-address-allocation',

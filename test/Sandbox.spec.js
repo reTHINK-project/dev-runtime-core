@@ -1,6 +1,5 @@
 import SandboxRegistry from '../src/sandbox/SandboxRegistry';
 import Sandbox from '../src/sandbox/Sandbox';
-import MessageFactory from '../resources/MessageFactory';
 
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
@@ -9,32 +8,24 @@ let expect = chai.expect;
 chai.use(chaiAsPromised);
 
 describe('Sandbox', function() {
-
   it('deploy and undeploy', function(done) {
     let deploySend;
 
-    let messageFactory = new MessageFactory();
-
     let sb = new Sandbox();
     sb._onPostMessage = (msg) => {
-
       console.log(msg);
-
-      if (msg.type === 'create') {
-        expect(msg).to.have.property('id');
-        expect(msg).to.have.property('from', 'sandbox://external');
-        expect(msg).to.have.property('to', 'sandbox://internal');
-        expect(msg).to.have.property('type', 'create');
-        expect(msg).to.have.property('contextId');
-        expect(msg).to.have.property('signature');
-        expect(msg).to.have.property('body');
+      if (msg.id === 1) {
+        expect(msg).to.eql({
+          id: 1, type: 'create', from: 'sandbox://external', to: 'sandbox://internal',
+          body: { url: 'hyperty://fake-url', sourceCode: '<source code>', config: {init: '<init>'} }
+        });
       }
 
-      if (msg.type  === 'delete') {
-        // expect(msg).to.eql({
-        //   id: 2, type: 'delete', from: 'sandbox://external', to: 'sandbox://internal',
-        //   body: { url: 'hyperty://fake-url' }
-        // });
+      if (msg.id  === 2) {
+        expect(msg).to.eql({
+          id: 2, type: 'delete', from: 'sandbox://external', to: 'sandbox://internal',
+          body: { url: 'hyperty://fake-url' }
+        });
       }
 
       deploySend(msg);
@@ -47,20 +38,15 @@ describe('Sandbox', function() {
       },
 
       postMessage: (msg) => {
-
-        expect(msg).to.have.property('id');
-        expect(msg).to.have.property('from', 'sandbox://internal');
-        expect(msg).to.have.property('to', 'sandbox://external');
-        expect(msg).to.have.property('type', 'response');
-        expect(msg).to.have.property('contextId');
-        expect(msg).to.have.property('signature');
-        expect(msg).to.have.property('body').eql({code: 200, description: 'OK'});
+        expect(msg).to.eql({
+          id: msg.id, type: 'response', from: 'sandbox://internal', to: 'sandbox://external',
+          body: { code: 200 }
+        });
 
         sb._onMessage(msg);
       },
 
       removeAllListenersOf: (url) => {
-        console.log('MSG:', url);
         expect(url).to.eql('hyperty://fake-url');
       }
     };
@@ -77,11 +63,10 @@ describe('Sandbox', function() {
       expect(deployReply).to.eql('deployed');
       expect(sbr.components).to.eql({'hyperty://fake-url': '<instance>'});
 
-      // return sb.removeComponent('hyperty://fake-url').then((unDeployReply) => {
-      //   expect(unDeployReply).to.eql('undeployed');
-      //   expect(sbr.components).to.eql({});
-      // });
-
+      return sb.removeComponent('hyperty://fake-url').then((unDeployReply) => {
+        expect(unDeployReply).to.eql('undeployed');
+        expect(sbr.components).to.eql({});
+      });
     })).notify(done);
   });
 
