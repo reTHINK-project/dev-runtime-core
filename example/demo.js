@@ -1,8 +1,10 @@
 import {RuntimeUA, Sandbox} from '../src/runtime-core';
 
 import SandboxFactory from '../resources/sandboxes/SandboxFactory';
+import MessageFactory from '../../resources/MessageFactory';
 
 var sandboxFactory = new SandboxFactory();
+var messageFactory = new MessageFactory();
 
 var runtime = new RuntimeUA(sandboxFactory);
 
@@ -62,14 +64,7 @@ function newMessageRecived(msg) {
 
 function sendMessage(from, to, message) {
 
-  var messageObject = {
-    to: to,
-    from: from,
-    type: 'message',
-    body:{
-      value: message
-    }
-  };
+  var messageObject = messageFactory.createMessageRequest(from, to, 'contextID Message', message);
 
   var form = document.querySelector('form[data-url="' + from + '"]');
   if (form) {

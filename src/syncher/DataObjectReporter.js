@@ -1,5 +1,5 @@
 import SyncObject from './SyncObject';
-import {deepClone} from './SyncObject';
+import {deepClone} from '../utils/utils.js';
 
 class DataObjectReporter /* implements SyncStatus */ {
   /* private

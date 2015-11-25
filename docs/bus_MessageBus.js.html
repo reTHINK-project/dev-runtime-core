@@ -26,88 +26,34 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>export default
+            <pre class="prettyprint source linenums"><code>import MiniBus from './MiniBus';
 /**
-* Message BUS Interface
+* Message BUS Interface is an extension of the MiniBus
+* It doesn't support the default '*' listener, instead it uses the registry.resolve(..)
 */
-class MessageBus {
+class MessageBus extends MiniBus {
   /* private
   _registry: Registry
-
-  _subscriptions: &lt;string: MsgListener[]>
-  _interceptors: &lt;string: MsgListener[]>
   */
+
+  //TODO: future optimization
+  //1. message batch processing with setInterval
+  //2. resolve default gateway/protostub with register.resolve
 
   constructor(registry) {
-    let _this = this;
-
-    _this._registry = registry;
-    _this._subscriptions = {};
-    _this._interceptors = {};
-
+    super();
+    this._registry = registry;
   }
 
-  /**
-  * To add "listener" functions to be called when routing messages published on a certain "resource" or send to a certain url. Messages are routed to input parameter "redirectTo" in case listener is not in the Core Runtime. This function is only accessible by internal Core Components. To remove the listener just call remove() function from returned object.
-  * @param {URL.URL} url      url
-  * @param {Listener} listener listener
-  * @param {URL.URL} redirectTo   redirectTo
-  */
-  addListener(url, listener, redirectTo) {
-    //TODO: include code for target redirection...
+  _onPostMessage(msg) {
     let _this = this;
 
-    let item = new MsgListener(_this._subscriptions, url, listener);
-    let itemList = _this._subscriptions[url];
-    if (!itemList) {
-      itemList = [];
-      _this._subscriptions[url] = itemList;
-    }
+    //resolve external protostub...
+    _this._registry.resolve(msg.to).then((protoStubURL) => {
 
-    itemList.push(item);
-    return item;
-  }
-
-  /**
-  * To add an interceptor (eg a Policy Enforcer) which "listener" function is called when routing messages published on "interceptedURL" or send to the "interceptedURL". To avoid infinite cycles messages originated with from "interceptorURL" are not intercepted. To remove the interceptor just call remove() function from returned object. This function is only accessible by internal Core Components.
-  * @param {URL.URL} interceptedURL interceptedURL
-  * @param {Listener} listener       listener
-  * @param {URL.URL} interceptorURL interceptorURL
-  * @return {Interceptor}                 Interceptor
-  */
-  addInterceptor(interceptedURL, listener, interceptorURL) {
-    //TODO: include code for interceptorURL...
-    let _this = this;
-
-    let item = new MsgListener(_this._interceptors, interceptedURL, listener);
-    let itemList = _this._interceptors[interceptedURL];
-    if (!itemList) {
-      itemList = [];
-      _this._interceptors[interceptedURL] = itemList;
-    }
-
-    itemList.push(item);
-    return item;
-  }
-
-  /**
-  * To send messages. This function is accessible outside the Core runtime
-  * @param  {Message.Message} msg msg
-  */
-  postMessage(msg) {
-    let _this = this;
-
-    //verify interceptedURL
-    //TODO: intercept URL is checked to exit? or into the "onMessage"?
-    //if(msg.header.to)
-
-    //resolve protostub URL
-    _this._registry.resolve(msg.header.to).then((protoStubURL) => {
       let itemList = _this._subscriptions[protoStubURL];
       if (itemList) {
-        itemList.forEach((sub) => {
-          sub._callback(msg);
-        });
+        _this._publishOn(itemList, msg);
       }
     }).catch(function(e) {
       console.log('PROTO-STUB-ERROR: ', e);
@@ -115,33 +61,7 @@ class MessageBus {
   }
 }
 
-class MsgListener {
-  /* private
-  _subscriptions: &lt;string: MsgListener[]>;
-  _url: string;
-  _callback: (msg) => void;
-  */
-
-  constructor(subscriptions, url, callback) {
-    let _this = this;
-
-    _this._subscriptions = subscriptions;
-    _this._url = url;
-    _this._callback = callback;
-  }
-
-  get url() { return this._url; }
-
-  remove() {
-    let _this = this;
-
-    let subs = _this._subscriptions[_this._url];
-    if (subs) {
-      let index = subs.indexOf(_this);
-      subs.splice(index, 1);
-    }
-  }
-}
+export default MessageBus;
 </code></pre>
         </article>
     </section>
@@ -152,13 +72,13 @@ class MsgListener {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="IdentityModule.html">IdentityModule</a></li><li><a href="MessageBus.html">MessageBus</a></li><li><a href="PolicyEngine.html">PolicyEngine</a></li><li><a href="ProtoStub.html">ProtoStub</a></li><li><a href="QoSUA.html">QoSUA</a></li><li><a href="Registry.html">Registry</a></li><li><a href="Request.html">Request</a></li><li><a href="RuntimeUA.html">RuntimeUA</a></li><li><a href="Sandbox.html">Sandbox</a></li><li><a href="Syncher.html">Syncher</a></li><li><a href="VertxProtoStub.html">VertxProtoStub</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-utils.html">utils</a></li></ul><h3>Classes</h3><ul><li><a href="AddressAllocation.html">AddressAllocation</a></li><li><a href="EventEmitter.html">EventEmitter</a></li><li><a href="IdentityModule.html">IdentityModule</a></li><li><a href="MessageBus.html">MessageBus</a></li><li><a href="MiniBus.html">MiniBus</a></li><li><a href="Pipeline.html">Pipeline</a></li><li><a href="PolicyEngine.html">PolicyEngine</a></li><li><a href="ProtoStub.html">ProtoStub</a></li><li><a href="QoSUA.html">QoSUA</a></li><li><a href="Registry.html">Registry</a></li><li><a href="RuntimeUA.html">RuntimeUA</a></li><li><a href="Sandbox.html">Sandbox</a></li><li><a href="SyncherManager.html">SyncherManager</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0-dev</a> on Wed Oct 14 2015 10:38:59 GMT+0100 (WEST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Tue Nov 24 2015 16:47:08 GMT+0000 (WET)
 </footer>
 
 <script> prettyPrint(); </script>

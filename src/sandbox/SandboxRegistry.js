@@ -2,6 +2,9 @@
  * @author micaelpedrosa@gmail.com
  * Base class to implement internal deploy manager of components.
  */
+
+import MessageFactory from '../../resources/MessageFactory';
+
 class SandboxRegistry {
   /* private
   _components: <url: instance>
@@ -13,49 +16,85 @@ class SandboxRegistry {
     _this._bus = bus;
     _this._components = {};
 
+    // Add Message Factory
+    let messageFactory = new MessageFactory();
+    _this.messageFactory = messageFactory;
+
     bus.addListener(SandboxRegistry.InternalDeployAddress, (msg) => {
       //console.log('SandboxRegistry-RCV: ', msg);
-      let responseMsg = {
-        id: msg.id, type: 'response', from: SandboxRegistry.InternalDeployAddress, to: SandboxRegistry.ExternalDeployAddress
-      };
+      // let responseMsg = {
+      //   id: msg.id, type: 'response', from: SandboxRegistry.InternalDeployAddress, to: SandboxRegistry.ExternalDeployAddress
+      // };
 
       switch (msg.type) {
-        case 'create': _this._onDeploy(responseMsg, msg.body.url, msg.body.sourceCode, msg.body.config); break;
-        case 'delete': _this._onRemove(responseMsg, msg.body.url); break;
+        case 'create': _this._onDeploy(msg); break;
+        case 'delete': _this._onRemove(msg); break;
       }
     });
   }
 
   get components() { return this._components; }
 
-  _onDeploy(responseMsg, url, sourceCode, config) {
-    let _this = this;
+  _responseMsg(msg, code, value) {
 
-    if (!_this._components.hasOwnProperty(url)) {
+    let _this = this;
+    let messageFactory = _this.messageFactory;
+
+    // let responseMsg = {
+    //   id: msg.id, type: 'response', from: SandboxRegistry.InternalDeployAddress, to: SandboxRegistry.ExternalDeployAddress
+    // };
+
+    // Chanege the origin message, because the response;
+    msg.from = SandboxRegistry.InternalDeployAddress;
+    msg.to = SandboxRegistry.ExternalDeployAddress;
+
+    return messageFactory.createResponse(msg, code, value);
+  }
+
+  _onDeploy(msg) {
+    let _this = this;
+    let config = msg.body.value.config;
+    let componentURL = msg.body.value.url;
+    let sourceCode = msg.body.value.sourceCode;
+    let responseCode;
+    let responseDesc;
+
+    if (!_this._components.hasOwnProperty(componentURL)) {
       try {
-        _this._components[url] = _this._create(url, sourceCode, config);
-        responseMsg.body = { code: 200 };
+        _this._components[componentURL] = _this._create(componentURL, sourceCode, config);
+        responseCode = 200;
       } catch (error) {
-        responseMsg.body = { code: 500, desc: error };
+        responseCode = 500;
+        responseDesc = error;
       }
     } else {
-      responseMsg.body = { code: 500, desc: 'Instance ' + url + ' already exist!' };
+      responseCode = 500;
+      responseDesc = 'Instance ' + componentURL + ' already exist!';
     }
+
+    // Create response message with MessageFactory
+    let responseMsg = _this._responseMsg(msg, responseCode, responseDesc);
 
     _this._bus.postMessage(responseMsg);
   }
 
-  _onRemove(responseMsg, url) {
+  _onRemove(msg) {
     let _this = this;
+    let componentURL = msg.body.value.url;
+    let responseCode;
+    let responseDesc;
 
-    if (_this._components.hasOwnProperty(url)) {
+    if (_this._components.hasOwnProperty(componentURL)) {
       //remove component from the pool and all listeners
-      delete _this._components[url];
-      _this._bus.removeAllListenersOf(url);
-      responseMsg.body = { code: 200 };
+      delete _this._components[componentURL];
+      _this._bus.removeAllListenersOf(componentURL);
+      responseCode = 200;
     } else {
-      responseMsg.body = { code: 500, desc: 'Instance ' + url + ' doesn\'t exist!' };
+      responseCode = 500;
+      responseDesc = 'Instance ' + componentURL + ' doesn\'t exist!';
     }
+
+    responseMsg = _this._responseMsg(msg, responseCode, responseDesc);
 
     _this._bus.postMessage(responseMsg);
   }

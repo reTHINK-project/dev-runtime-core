@@ -30,8 +30,6 @@
     
         <h2>Sandbox</h2>
         
-            <div class="class-description">Implements the Sandbox interface to protect all external code;</div>
-        
     
 </header>
 
@@ -41,74 +39,19 @@
         
 
     
-    <h2>Constructor</h2>
-    
 
-    <h4 class="name" id="Sandbox"><span class="type-signature"></span>new Sandbox<span class="signature">(messageBus)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="Sandbox"><span class="type-signature"></span>new Sandbox<span class="signature">()</span><span class="type-signature"></span></h4>
 
     
 
 
 
-<div class="description">
-    Constructor to instantiate a sandbox passing as input parameter the Message Bus instance that the sandbox will use to send messages to components outside the sandbox.
-</div>
 
 
 
 
 
 
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>messageBus</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">msgbus</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">Describe the message bus to be used;</td>
-        </tr>
-
-    
-    </tbody>
-</table>
 
 
 
@@ -134,6 +77,14 @@
     
 
     
+    <dt class="tag-author">Author:</dt>
+    <dd class="tag-author">
+        <ul>
+            <li>micaelpedrosa@gmail.com
+Base class to implement external sandbox component</li>
+        </ul>
+    </dd>
+    
 
     
 
@@ -144,7 +95,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_Sandbox.js.html">utils/Sandbox.js</a>, <a href="utils_Sandbox.js.html#line4">line 4</a>
+        <a href="sandbox_Sandbox.js.html">sandbox/Sandbox.js</a>, <a href="sandbox_Sandbox.js.html#line9">line 9</a>
     </li></ul></dd>
     
 
@@ -193,14 +144,14 @@
 
     
 
-    <h4 class="name" id="deployComponent"><span class="type-signature"></span>deployComponent<span class="signature">(componentDownloadURL, componentURL, configuration)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="deployComponent"><span class="type-signature"></span>deployComponent<span class="signature">(componentSourceCode, componentURL, configuration)</span><span class="type-signature"> &rarr; {Promise.&lt;string>}</span></h4>
 
     
 
 
 
 <div class="description">
-    To download and deploy a new component in the sandbox passing as input parameters the url from where the components is downloaded, the componentURL address previously allocated to the component and its configuration.
+    Deploy an instance of the component into the sandbox.
 </div>
 
 
@@ -236,13 +187,13 @@
 
         <tr>
             
-                <td class="name"><code>componentDownloadURL</code></td>
+                <td class="name"><code>componentSourceCode</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">URL.URL</span>
+<span class="param-type">string</span>
 
 
             
@@ -252,7 +203,7 @@
 
             
 
-            <td class="description last">Sourcecode Component address url</td>
+            <td class="description last">Component source code (Hyperty, ProtoStub, etc)</td>
         </tr>
 
     
@@ -265,7 +216,7 @@
             <td class="type">
             
                 
-<span class="param-type">URL.URL</span>
+<span class="param-type">URL</span>
 
 
             
@@ -275,7 +226,7 @@
 
             
 
-            <td class="description last">Component address url;</td>
+            <td class="description last">Hyperty, ProtoStub, or any other component address.</td>
         </tr>
 
     
@@ -288,7 +239,7 @@
             <td class="type">
             
                 
-<span class="param-type">Object</span>
+<span class="param-type">Config</span>
 
 
             
@@ -298,7 +249,7 @@
 
             
 
-            <td class="description last">Configuration object;</td>
+            <td class="description last">Config parameters of the component</td>
         </tr>
 
     
@@ -339,7 +290,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_Sandbox.js.html">utils/Sandbox.js</a>, <a href="utils_Sandbox.js.html#line35">line 35</a>
+        <a href="sandbox_Sandbox.js.html">sandbox/Sandbox.js</a>, <a href="sandbox_Sandbox.js.html#line29">line 29</a>
     </li></ul></dd>
     
 
@@ -362,6 +313,28 @@
 
 
 
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    return deployed if successful, or any other string with an error
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;string></span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -370,14 +343,14 @@
 
     
 
-    <h4 class="name" id="removeComponent"><span class="type-signature"></span>removeComponent<span class="signature">(componentURL)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="removeComponent"><span class="type-signature"></span>removeComponent<span class="signature">(componentURL)</span><span class="type-signature"> &rarr; {Promise.&lt;string>}</span></h4>
 
     
 
 
 
 <div class="description">
-    To remove a component from the sandbox passing as input parameters its URL.
+    Remove the instance of a previously deployed component.
 </div>
 
 
@@ -419,7 +392,7 @@
             <td class="type">
             
                 
-<span class="param-type">URL.URL</span>
+<span class="param-type">URL</span>
 
 
             
@@ -429,7 +402,7 @@
 
             
 
-            <td class="description last">Component address url;</td>
+            <td class="description last">Hyperty, ProtoStub, or any other component address.</td>
         </tr>
 
     
@@ -470,7 +443,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_Sandbox.js.html">utils/Sandbox.js</a>, <a href="utils_Sandbox.js.html#line67">line 67</a>
+        <a href="sandbox_Sandbox.js.html">sandbox/Sandbox.js</a>, <a href="sandbox_Sandbox.js.html#line61">line 61</a>
     </li></ul></dd>
     
 
@@ -493,6 +466,28 @@
 
 
 
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    return undeployed if successful, or any other string with an error
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;string></span>
+
+
+    </dd>
+</dl>
+
+    
 
 
 
@@ -512,13 +507,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="IdentityModule.html">IdentityModule</a></li><li><a href="MessageBus.html">MessageBus</a></li><li><a href="PolicyEngine.html">PolicyEngine</a></li><li><a href="ProtoStub.html">ProtoStub</a></li><li><a href="QoSUA.html">QoSUA</a></li><li><a href="Registry.html">Registry</a></li><li><a href="Request.html">Request</a></li><li><a href="RuntimeUA.html">RuntimeUA</a></li><li><a href="Sandbox.html">Sandbox</a></li><li><a href="Syncher.html">Syncher</a></li><li><a href="VertxProtoStub.html">VertxProtoStub</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-utils.html">utils</a></li></ul><h3>Classes</h3><ul><li><a href="AddressAllocation.html">AddressAllocation</a></li><li><a href="EventEmitter.html">EventEmitter</a></li><li><a href="IdentityModule.html">IdentityModule</a></li><li><a href="MessageBus.html">MessageBus</a></li><li><a href="MiniBus.html">MiniBus</a></li><li><a href="Pipeline.html">Pipeline</a></li><li><a href="PolicyEngine.html">PolicyEngine</a></li><li><a href="ProtoStub.html">ProtoStub</a></li><li><a href="QoSUA.html">QoSUA</a></li><li><a href="Registry.html">Registry</a></li><li><a href="RuntimeUA.html">RuntimeUA</a></li><li><a href="Sandbox.html">Sandbox</a></li><li><a href="SyncherManager.html">SyncherManager</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0-dev</a> on Wed Oct 14 2015 10:38:59 GMT+0100 (WEST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Tue Nov 24 2015 16:47:08 GMT+0000 (WET)
 </footer>
 
 <script> prettyPrint(); </script>

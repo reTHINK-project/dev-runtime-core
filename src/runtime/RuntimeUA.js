@@ -7,10 +7,24 @@ import MessageBus from '../bus/MessageBus';
 import RuntimeCatalogue from './RuntimeCatalogue';
 
 /**
-* Runtime User Agent Interface
-*/
+ * Runtime User Agent Interface will process all the dependecies of the core runtime;
+ * @author Vitor Silva [vitor-t-silva@telecom.pt]
+ * @version 0.2.0
+ *
+ * @property {sandboxFactory} sandboxFactory - Specific implementation of sandbox;
+ * @property {RuntimeCatalogue} runtimeCatalogue - Catalogue of components can be installed;
+ * @property {runtimeURL} runtimeURL - This identify the core runtime, should be unique;
+ * @property {IdentityModule} identityModule - Identity Module;
+ * @property {PolicyEngine} policyEngine - Policy Engine Module;
+ * @property {Registry} registry - Registry Module;
+ * @property {MessageBus} messageBus - Message Bus is used like a router to redirect the messages from one component to other(s)
+ */
 class RuntimeUA {
 
+  /**
+   * Create a new instance of Runtime User Agent
+   * @param {sandboxFactory} sandboxFactory - Specific implementation for the environment where the core runtime will run;
+   */
   constructor(sandboxFactory) {
 
     if (!sandboxFactory) throw new Error('The sandbox factory is a needed parameter');
@@ -22,8 +36,7 @@ class RuntimeUA {
     _this.runtimeCatalogue = new RuntimeCatalogue();
 
     // TODO: post and return registry/hypertyRuntimeInstance to and from Back-end Service
-    // for the request you can use the module request in utils;
-    // the response is like: hyperty-runtime://sp1/123
+    // the response is like: runtime://sp1/123
 
     let runtimeURL = 'runtime://sp1/' + Math.floor((Math.random() * 10000) + 1);
     _this.runtimeURL = runtimeURL;
@@ -63,7 +76,6 @@ class RuntimeUA {
     // Use sandbox factory to use specific methods
     // and set the message bus to the factory
     sandboxFactory.messageBus = _this.messageBus;
-
   }
 
   /**

@@ -1,3 +1,5 @@
+import {deepClone} from '../utils/utils.js';
+
 class SyncObject {
   /* private
     _data: any;
@@ -255,11 +257,6 @@ class ArrayIndex {
   toString() {
     return this.idx.toString();
   }
-}
-
-export function deepClone(obj) {
-  //TODO: simple but inefficient JSON deep clone...
-  return JSON.parse(JSON.stringify(obj));
 }
 
 export var ChangeType = {UPDATE: 'update', ADD: 'add', REMOVE: 'remove'};

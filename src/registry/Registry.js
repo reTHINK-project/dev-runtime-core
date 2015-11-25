@@ -1,6 +1,8 @@
 import EventEmitter from '../utils/EventEmitter';
 import AddressAllocation from './AddressAllocation';
 
+import {divideURL} from '../utils/utils.js';
+
 /**
 * Runtime Registry Interface
 */
@@ -81,12 +83,11 @@ class Registry extends EventEmitter {
 
     //assuming descriptor come in this format, the service-provider-domain url is retrieved by a split instruction
     //hyperty-catalogue://<service-provider-domain>/<catalogue-object-identifier>
-    let descriptorSplit = descriptor.split('/');
-    let hypertyURL = descriptorSplit[2];
+    let domainUrl = divideURL(descriptor).domain;
 
     //TODO Call get Identity and set Identity to Identity Module
     //for simplicity added an identity
-    let hypertyIdentity = hypertyURL + '/identity';
+    let hypertyIdentity = domainUrl + '/identity';
 
     var promise = new Promise(function(resolve, reject) {
 
@@ -94,7 +95,7 @@ class Registry extends EventEmitter {
         reject('MessageBus not found on registerStub');
       } else {
         //call check if the protostub exist
-        return _this.resolve('hyperty-runtime://' + hypertyURL).then(function() {
+        return _this.resolve('hyperty-runtime://' + domainUrl).then(function() {
         }).then(function() {
 
           // addListener with the callback to execute when receive a message from the address-allocation
@@ -327,8 +328,7 @@ class Registry extends EventEmitter {
 
     //split the url to find the domainURL. deals with the url for example as:
     //"hyperty-runtime://sp1/protostub/123",
-    let urlSplit = url.split('/');
-    let domainUrl = urlSplit[2];
+    let domainUrl = divideURL(url).domain;
 
     let promise = new Promise((resolve, reject) => {
 

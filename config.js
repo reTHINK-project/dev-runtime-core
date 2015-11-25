@@ -21,7 +21,6 @@ System.config({
     "browserify": "npm:browserify@11.1.0",
     "core-js": "npm:core-js@1.2.6",
     "karma-browserify": "npm:karma-browserify@4.3.0",
-    "mutationobserver-shim": "npm:mutationobserver-shim@0.3.1",
     "github:jspm/nodelibs-assert@0.1.0": {
       "assert": "npm:assert@1.3.0"
     },

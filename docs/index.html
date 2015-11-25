@@ -43,13 +43,15 @@
 
 
     <section>
-        <article><h2>Runtime-Core</h2><h3>Setup Environment</h3><p>On the first time you are cloning this repository, you need to run the command <code>npm run init-setup</code>;</p>
-<p>After running successfully this command you will have 2 folders (node_modules and vendor), these folders are excluded from the commit process, and are only for development.</p>
-<p>if you already have the project configured on your machine, you only need run the command <code>npm install</code> to add new dependencies;</p>
-<p>if you have some trouble with the environment, you can open an issue;</p>
-<h3>Javascript Environment</h3><p>JavaScript code should be written in ES6.
-There are direct dependencies from nodejs and npm, these can be installed separately or in conjunction with <a href="https://github.com/creationix/nvm">nvm</a></p>
-<h4>dependencies:</h4><ul>
+        <article><h2>Runtime-Core</h2><p><a href="release_notes_0.1.0.md">Release 0.1.0</a></p>
+<p><a href="#example">Example</a></p>
+<h3>Setup Environment</h3><p>On the first time you are cloning this repository, you need to run the command:</p>
+<pre class="prettyprint source"><code>npm run init-setup</code></pre><p>After running successfully this command you will have 2 folders (node_modules and vendor), these folders are excluded from the commit process, and are only for development.</p>
+<p>if you already have the project configured on your machine, you only need run the next command to add new dependencies:</p>
+<pre class="prettyprint source"><code>npm install
+jspm install</code></pre><p>if you have some trouble with the environment, you can open an issue;</p>
+<h3>Javascript Environment</h3><p>JavaScript code should be written in ES6. There are direct dependencies from nodejs and npm, these can be installed separately or in conjunction with <a href="https://github.com/creationix/nvm">nvm</a></p>
+<h4>Dependencies</h4><ul>
 <li>nodejs</li>
 <li>npm</li>
 <li>karma - Make the communication between unit test tool and jenkins. See more on <a href="http://karma-runner.github.io/0.13/index.html">karma</a></li>
@@ -64,12 +66,45 @@ There are direct dependencies from nodejs and npm, these can be installed separa
 </ul>
 <p>All IDE's and Text Editors can handle these tools.</p>
 <h4>Documentation</h4><p>To generates api documentation you can run <code>gulp doc</code></p>
-<h3>Unit Testing</h3><p>Unit testing can be launched manually with <strong>karma start</strong>.
-It's advisable to use <a href="https://github.com/Automattic/expect.js">expect.js</a> instead of assert.</p>
-<h4>Note</h4><p>This repository is ready to start working on development of runtime-core.
-The code will go to the <strong>src</strong> folder.
-The unit tests will be on <strong>test</strong> folder, following the name standard <component>.spec.js</p>
-<p>The npm module <strong>live-server</strong> can be used for development tests, but it's not mandatory: <a href="https://www.npmjs.com/package/live-server">live-server</a></p></article>
+<h3>Unit Testing</h3><p>Unit testing can be launched manually with <strong>karma start</strong>.</p>
+<p><del>It's advisable to use <a href="https://github.com/Automattic/expect.js">expect.js</a> instead of assert.</del></p>
+<p>After investigate and testing the <a href="https://github.com/Automattic/expect.js">expect.js</a> it don't support some features for ES6, because this tool hasn't activity at some time, that is why, it is recomended use the <a href="http://chaijs.com/">chaijs</a> it is more versatile and have expect.js (but updated) and others tools that can be useful;</p>
+<hr>
+<h3>How to include this runtime-core code into others parts of reTHINK Project;</h3><p>How to include this repository in other software parts, like <a href="https://github.com/reTHINK-project/dev-runtime-browser">dev-runtime-browser</a> or <a href="https://github.com/reTHINK-project/dev-runtime-node">dev-runtime-node</a> - for example;</p>
+<h4>browser project</h4><p>example: <a href="https://github.com/reTHINK-project/dev-runtime-browser">dev-runtime-browser</a></p>
+<p>Verify these use cases: 1. if you will create a new repository, you can use this template, and can configure your development environment; 2. if you already have an respository cloned;</p>
+<p>for both cases you just have run the command:</p>
+<pre class="prettyprint source"><code>jspm install runtime-core=github:reTHINK-project/dev-runtime-core.git.</code></pre><p>and on javascript code you need import the script like other modules;</p>
+<pre class="prettyprint source"><code>import {RuntimeUA, Sandbox} from 'runtime-core';
+
+console.log('Runtime: ', RuntimeUA);
+console.log('Sandbox: ', Sandbox);</code></pre><h4>nodejs</h4><p><a href="https://github.com/reTHINK-project/dev-runtime-node">dev-runtime-node</a></p>
+<pre class="prettyprint source"><code>npm install git+ssh://git@github.com/reTHINK-project/dev-runtime-core.git --save</code></pre><p>after this you can require the runtime-core like other modules on node;</p>
+<pre class="prettyprint source"><code>var RuntimeUA = require('runtime-core').RuntimeUA;
+
+var runtime = new RuntimeUA();</code></pre><p>if you found some issues, please submit them into the respective repository;</p>
+<hr>
+<h3>Karma</h3><p>if you have some problems starting the karma tests, try running this commands for the following order:</p>
+<ol>
+<li><code>npm uninstall karma karma-browserify karma-mocha karma-mocha-reporter karma-chrome-launcher -g</code></li>
+<li><code>npm install karma-cli -g</code></li>
+<li><code>npm install</code></li>
+<li><code>jspm update</code></li>
+</ol>
+<h4>Note</h4><p>This repository is ready to start working on development of runtime-core. The code will go to the <strong>src</strong> folder. The unit tests will be on <strong>test</strong> folder, following the name standard <component>.spec.js</p>
+<p>To run karma tests is mandatory to run <strong>live-server</strong> because of the mock-up's dependencies:</p>
+<pre class="prettyprint source"><code>live-server --port=4000</code></pre><h3><a id="example">Example</a></h3><p>This repository have a folder with an working example of runtime-core and we can do:</p>
+<ul>
+<li>send message between local hyperties (2 hyperties);</li>
+<li>send message between remote hyperties through the vertx;</li>
+</ul>
+<hr>
+<p>To run the demo on example folder:</p>
+<ul>
+<li>you need <strong>live-server</strong> running.<pre class="prettyprint source"><code>live-server --port=4000</code></pre></li>
+<li>in your browser access to http://localhost:4000.</li>
+<li>for communication between hyperties in two distinct browsers, you need, run locally <a href="https://github.com/reTHINK-project/dev-msg-node-vertx#java">dev-msg-node-vertx</a></li>
+</ul></article>
     </section>
 
 
@@ -80,13 +115,13 @@ The unit tests will be on <strong>test</strong> folder, following the name stand
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="IdentityModule.html">IdentityModule</a></li><li><a href="MessageBus.html">MessageBus</a></li><li><a href="PolicyEngine.html">PolicyEngine</a></li><li><a href="ProtoStub.html">ProtoStub</a></li><li><a href="QoSUA.html">QoSUA</a></li><li><a href="Registry.html">Registry</a></li><li><a href="Request.html">Request</a></li><li><a href="RuntimeUA.html">RuntimeUA</a></li><li><a href="Sandbox.html">Sandbox</a></li><li><a href="Syncher.html">Syncher</a></li><li><a href="VertxProtoStub.html">VertxProtoStub</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-utils.html">utils</a></li></ul><h3>Classes</h3><ul><li><a href="AddressAllocation.html">AddressAllocation</a></li><li><a href="EventEmitter.html">EventEmitter</a></li><li><a href="IdentityModule.html">IdentityModule</a></li><li><a href="MessageBus.html">MessageBus</a></li><li><a href="MiniBus.html">MiniBus</a></li><li><a href="Pipeline.html">Pipeline</a></li><li><a href="PolicyEngine.html">PolicyEngine</a></li><li><a href="ProtoStub.html">ProtoStub</a></li><li><a href="QoSUA.html">QoSUA</a></li><li><a href="Registry.html">Registry</a></li><li><a href="RuntimeUA.html">RuntimeUA</a></li><li><a href="Sandbox.html">Sandbox</a></li><li><a href="SyncherManager.html">SyncherManager</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0-dev</a> on Wed Oct 14 2015 10:38:59 GMT+0100 (WEST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Tue Nov 24 2015 16:47:08 GMT+0000 (WET)
 </footer>
 
 <script> prettyPrint(); </script>
