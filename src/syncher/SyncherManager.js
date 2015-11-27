@@ -1,4 +1,4 @@
-import {divideURL} from '../../utils/utils.js';
+import {divideURL} from '../utils/utils.js';
 
 /**
  * @author micaelpedrosa@gmail.com

@@ -72,5 +72,8 @@
   },
   "directories": {
     "test": "test"
+  },
+  "dependencies": {
+    "service-framework": "rethink-project/dev-service-framework#develop"
   }
 }

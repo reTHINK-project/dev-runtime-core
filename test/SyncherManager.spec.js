@@ -1,7 +1,5 @@
-import Syncher from '../src/syncher/Syncher';
-import DataObjectReporter from '../src/syncher/DataObjectReporter';
-import DataObjectObserver from '../src/syncher/DataObjectObserver';
-import SyncherManager from '../src/syncher/internal/SyncherManager';
+import {Syncher, DataObjectReporter, DataObjectObserver} from 'service-framework';
+import SyncherManager from '../src/syncher/SyncherManager';
 
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
