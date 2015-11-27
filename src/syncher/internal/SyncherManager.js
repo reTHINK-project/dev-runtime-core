@@ -1,3 +1,5 @@
+import {divideURL} from '../../utils/utils.js';
+
 /**
  * @author micaelpedrosa@gmail.com
  * Core Syncronization system.
@@ -113,8 +115,12 @@ class SyncherManager {
       //forward to Hyperty owner
       let forwardMsg = {
         type: 'forward', from: _this._url, to: subscription.owner,
-        body: { type: msg.type, from: msg.from, to: objURL, body: msg.body }
+        body: { type: msg.type, from: msg.from, to: objURL }
       };
+
+      if (msg.body) {
+        forwardMsg.body.body = msg.body;
+      }
 
       _this._bus.postMessage(forwardMsg, (reply) => {
         console.log('forward-reply: ', reply);
@@ -135,11 +141,9 @@ class SyncherManager {
 
   _addSubscription(objURL, hypertyUrl) {
     let _this = this;
+    let div = divideURL(hypertyUrl);
 
-    //TODO: get the domain
-    let domainURL = '<domain of hypertyURL>';
-
-    _this._registry.getSandbox(domainURL).then((sandbox) => {
+    _this._registry.getSandbox(div.domain).then((sandbox) => {
       let sub = _this._bus.addListener(objURL + '/changes', (msg) => {
         sandbox.postMessage(msg);
       });

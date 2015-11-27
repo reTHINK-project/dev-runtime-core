@@ -17,21 +17,22 @@ class DataObjectReporter /* implements SyncStatus */ {
   _onSubscriptionHandler: (event) => void
   */
 
-  constructor(url, schema, bus, initialStatus, initialData) {
+  constructor(owner, url, schema, bus, initialStatus, initialData) {
     let _this = this;
 
     _this._version = 0;
+    _this._owner = owner;
     _this._url = url;
     _this._schema = schema;
     _this._bus = bus;
+
+    _this._subscriptions = {};
 
     _this._status = initialStatus;
     _this._syncObj = new SyncObject(initialData);
     _this._syncObj.observe((event) => {
       _this._onChange(event);
     });
-
-    _this._subscriptions = {};
   }
 
   get version() { return this._version; }
@@ -63,6 +64,8 @@ class DataObjectReporter /* implements SyncStatus */ {
   }
 
   _onForward(msg) {
+    let _this = this;
+
     console.log('DataObjectReporter-RCV: ', msg);
     switch (msg.body.type) {
       case 'subscribe': _this._onSubscribe(msg); break;
@@ -98,7 +101,9 @@ class DataObjectReporter /* implements SyncStatus */ {
       }
     };
 
-    _this._onSubscriptionHandler(event);
+    if (_this._onSubscriptionHandler) {
+      _this._onSubscriptionHandler(event);
+    }
   }
 
   _onUnSubscribe(msg) {
@@ -114,7 +119,9 @@ class DataObjectReporter /* implements SyncStatus */ {
       object: sub
     };
 
-    _this._onSubscriptionHandler(event);
+    if (_this._onSubscriptionHandler) {
+      _this._onSubscriptionHandler(event);
+    }
   }
 
   //send delta messages to subscriptions

@@ -16,7 +16,8 @@ class SyncherManager {
   _observers: <url: DataObjectObserver>
 
   ----event handlers----
-  _onResponseHandlers: [(event) => void]
+  _onResponseHandler: (event) => void
+  _onNotificationHandler: (event) => void
   */
 
  constructor(owner, bus, config) {
@@ -30,17 +31,12 @@ class SyncherManager {
    _this._reporters = {};
    _this._observers = {};
 
-   _this._onResponseHandlers = [];
-
    bus.addListener(owner, (msg) => {
      console.log('Syncher-RCV: ', msg);
      switch (msg.type) {
        case 'response': _this._onResponse(msg); break;
        case 'forward': _this._onForward(msg); break;
        case 'create': _this._onCreate(msg); break;
-       case 'update': _this._onChange(msg); break;
-       case 'add': _this._onChange(msg); break;
-       case 'remove': _this._onChange(msg); break;
      }
    });
  }
@@ -76,7 +72,7 @@ class SyncherManager {
          let objUrl = reply.body.resource;
 
          //reporter creation accepted
-         let newObj = new DataObjectReporter(objUrl, schema, _this._bus, 'on', initialData);
+         let newObj = new DataObjectReporter(_this._owner, objUrl, schema, _this._bus, 'on', initialData);
          _this._reporters[objUrl] = newObj;
          resolve(newObj);
        } else {
@@ -89,12 +85,12 @@ class SyncherManager {
 
  /**
   * Request a subscription to an existent object.
-  * @param  {ObjectURL} url Address of the existent object.
+  * @param  {ObjectURL} objURL Address of the existent object.
   * @return {Promise<DataObjectObserver>} Return Promise to a new Observer.
   */
- subscribe(url) {
+ subscribe(objURL) {
    let _this = this;
-   let objSubscriptorURL = url + '/sm';
+   let objSubscriptorURL = objURL + '/subscription';
 
    //TODO: validate if subscription already exists ?
    let subscribeMsg = {
@@ -107,8 +103,7 @@ class SyncherManager {
        console.log('subscribe-response: ', reply);
        if (reply.body.code === 200) {
          //subscription accepted
-         let newObj = new DataObjectObserver(_this._owner, url, reply.body.schema, 'on', reply.body.value);
-         _this._observers[url] = newObj;
+         let newObj = _this._addObserver(objURL, reply.body.schema, reply.body.value);
          resolve(newObj);
        } else {
          //subscription rejected
@@ -119,13 +114,23 @@ class SyncherManager {
  }
 
  onResponse(callback) {
-   this._onResponseHandlers.push(callback);
+   this._onResponseHandler = callback;
+ }
+
+ onNotification(callback) {
+   this._onNotificationHandler = callback;
  }
 
  _onResponse(msg) {
    let _this = this;
 
-   //TODO: process create reponses!
+   //TODO: process notification reponses!
+ }
+
+ _onNotification(msg) {
+   let _this = this;
+
+   //TODO: process (create, delete) notifications!
  }
 
  _onForward(msg) {
@@ -138,16 +143,23 @@ class SyncherManager {
  _onCreate(msg) {
    let _this = this;
 
-   let objURL = msg.body.resource;
-   let newObj = new DataObjectObserver(_this._owner, objURL, msg.body.schema, 'on', msg.body.value);
-   _this._observers[objURL] = newObj;
+   //TODO: fire notification event (only create observer if accepted ? )
+   _this._addObserver(msg.body.resource, msg.body.schema, msg.body.value);
  }
 
- _onChange(msg) {
+ _addObserver(objURL, schemaURL, initialData) {
    let _this = this;
 
-   let observer = _this._observers[msg.from];
-   observer._changeObject(msg);
+   let newObj = new DataObjectObserver(_this._owner, objURL, schemaURL, 'on', initialData);
+   _this._observers[objURL] = newObj;
+
+   //add changes listener
+   _this._bus.addListener(objURL + '/changes', (msg) => {
+     console.log(objURL + '/changes-RCV: ', msg);
+     newObj._changeObject(msg);
+   });
+
+   return newObj;
  }
 
 }
