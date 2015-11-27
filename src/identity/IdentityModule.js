@@ -61,7 +61,7 @@ class IdentityModule {
     let VALIDURL   =   'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=';
     let USERINFURL =   'https://www.googleapis.com/oauth2/v1/userinfo?access_token=';
     let OAUTHURL   =   'https://accounts.google.com/o/oauth2/auth?';
-    let SCOPE      =   'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email';
+    let SCOPE      =   'email%20profile';
     let CLIENTID   =   '808329566012-tqr8qoh111942gd2kg007t0s8f277roi.apps.googleusercontent.com';
     let REDIRECT   =    'http://127.0.0.1:8080/';
 
@@ -90,6 +90,28 @@ class IdentityModule {
 
     return new Promise(function(resolve, reject) {
 
+      //function to validate the access token received during the authentication
+      function validateToken(token) {
+        let req = new XMLHttpRequest();
+        req.open('GET', VALIDURL + token, true);
+
+        req.onreadystatechange = function(e) {
+          if (req.readyState == 4) {
+            if (req.status == 200) {
+              //console.log('validateToken ', e);
+
+              getIDToken(token);
+            } else if (req.status == 400) {
+              reject('There was an error processing the token');
+            } else {
+              reject('something else other than 200 was returned');
+            }
+          }
+        };
+        req.send();
+
+      }
+
       //function to exchange the access token with an ID Token containing the information
       function getIDToken(token) {
         let req = new XMLHttpRequest();
@@ -98,7 +120,7 @@ class IdentityModule {
         req.onreadystatechange = function(e) {
           if (req.readyState == 4) {
             if (req.status == 200) {
-              //console.log('getUserInfo ', JSON.parse(req.responseText));
+              console.log('getUserInfo ', req);
               tokenID = JSON.parse(req.responseText);
               resolve(tokenID);
             } else if (req.status == 400) {
@@ -111,7 +133,6 @@ class IdentityModule {
         req.send();
       }
 
-      // Body...
       //this will open a window with the URL which will open a page sent by google for the user to insert the credentials
       // when the google validates the credentials then send a access token
       let win = window.open(_url, 'openIDrequest', 'width=800, height=600');
@@ -132,9 +153,8 @@ class IdentityModule {
             expiresIn = gup(url, 'expires_in');
             win.close();
 
-            //after receiving the access token, and before exchange the access token for a ID token, google requires
-            // to validate first the token.
-            getIDToken(acToken);
+            //after receiving the access token, google requires to validate first the token to prevent confused deputy problem.
+            validateToken(acToken);
 
           }
         } catch (e) {
