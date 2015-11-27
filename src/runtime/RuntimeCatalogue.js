@@ -23,13 +23,10 @@ class RuntimeCatalogue {
   }
 
   _makeExternalRequest(url) {
-
-    let _this = this;
-
     return new Promise(function(resolve, reject) {
 
       // TODO: implementation
-      // Simulate getting hypertySourceCode through the XMLHttpRequest
+      // Simulate getting hypertySourcePackage through the XMLHttpRequest
       // but in node this should be overrided to other method to make a
       // ajax request;
       // i think we can use a factory like we used in for the sandboxes,
@@ -55,51 +52,51 @@ class RuntimeCatalogue {
   }
 
   /**
-  * Get HypertyDescriptor
-  */
+   * Get HypertyDescriptor
+   * @param hypertyURL - e.g. http://localhost:8080/.well-known/hyperty/MyHyperty
+   * @returns {Promise}
+   */
   getHypertyDescriptor(hypertyURL) {
 
     let _this = this;
 
     return new Promise(function(resolve, reject) {
 
-      //hyperty-catalogue://sp1/HelloHyperty
-      let hypertyName = hypertyURL.substr(hypertyURL.lastIndexOf('/') + 1);
+      _makeExternalRequest(hypertyURL).then(function(result) {
+        result = JSON.parse(result);
 
-      let hypertyDescriptor = {
-        guid: 'guid',
-        id: 'idHyperty',
-        classname: hypertyName,
-        description: 'description of ' + hypertyName,
-        kind: 'hyperty',
-        catalogueURL: '....',
-        sourceCode: '../resources/' + hypertyName + '.ES5.js',
-        dataObject: '',
-        type: '',
-        messageSchema: '',
-        configuration: '',
-        policies: '',
-        constraints: '',
-        hypertyCapabilities: '',
-        protocolCapabilities: ''
-      };
-
-      resolve(hypertyDescriptor);
-
+        if (result["ERROR"]) {
+          // TODO handle error properly
+          reject(result);
+        } else {
+          resolve(result);
+        }
+      });
     });
-
   }
 
   /**
-  * Get hypertySourceCode
-  */
-  getHypertySourceCode(hypertySourceCodeURL) {
+   * Get hypertySourcePackage
+   * @param hypertySourcePackageURL - e.g. http://localhost:8080/.well-known/hyperty/MyHyperty/sourcePackage
+   * @returns {Promise}
+   */
+  getHypertySourcePackage(hypertySourcePackageURL) {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
 
-      _this._makeExternalRequest(hypertySourceCodeURL).then(function(result) {
-        resolve(result);
+      _this._makeExternalRequest(hypertySourcePackageURL).then(function(result) {
+
+        if (result["ERROR"]) {
+          // TODO handle error properly
+          reject(result);
+        } else {
+          // assuming source package as object is wanted
+          result = JSON.parse(result);
+          // raw form: {"sourcePackage":"{...}"} so we have to parse again
+          sourcePackage = JSON.parse(result["sourcePackage"]);
+          resolve(sourcePackage);
+        }
       }).catch(function(reason) {
         reject(reason);
       });

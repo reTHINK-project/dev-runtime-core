@@ -110,7 +110,7 @@ class RuntimeUA {
       let _hypertyURL;
       let _hypertySandbox;
       let _hypertyDescriptor;
-      let _hypertySourceCode;
+      let _hypertySourcePackage;
 
       let errorReason = function(reason) {
         console.error(reason);
@@ -131,17 +131,26 @@ class RuntimeUA {
         // catalogue.rethink.eu/.well-known/..........
         _hypertyDescriptor = hypertyDescriptor;
 
-        let hypertySourceCodeUrl = hypertyDescriptor.sourceCode;
+        let hypertySourcePackageURL = hypertyDescriptor.sourcePackageURL;
 
-        // Get the hyperty source code
-        return _this.runtimeCatalogue.getHypertySourceCode(hypertySourceCodeUrl);
+        if (hypertySourcePackageURL.isEqual("/sourcePackage")) {
+          // assuming this is the default value if sourcePackage is provided by hyperty
+          // in that case, we can return source package directy without sending another request
+          hypertySourcePackageURL = hypertyDescriptorURL + "/sourcePackage";
+          return hypertyDescriptor.sourcePackage;
+        } else {
+          // Get the hyperty source package
+          return _this.runtimeCatalogue.getHypertySourcePackage(hypertySourcePackageURL);
+        }
+
+
       })
-      .then(function(hypertySourceCode) {
-        console.info('2: return hyperty source code');
+      .then(function(hypertySourcePackage) {
+        console.info('2: return hyperty source package');
 
         // at this point, we have completed "step 4 and 5" as shown in https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md
 
-        _hypertySourceCode = hypertySourceCode;
+        _hypertySourcePackage = hypertySourcePackage;
 
         //
         // steps 6 -- 9 are skipped.
@@ -212,7 +221,7 @@ class RuntimeUA {
         _hypertyURL = hypertyURL;
 
         // We will deploy the component - step 17 of https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
-        return _hypertySandbox.deployComponent(_hypertySourceCode, _hypertyURL, _hypertyDescriptor.configuration);
+        return _hypertySandbox.deployComponent(_hypertySourcePackage, _hypertyURL, _hypertyDescriptor.configuration);
       })
       .then(function(deployComponentStatus) {
         console.info('7: Deploy component status for hyperty: ', _hypertyURL);
