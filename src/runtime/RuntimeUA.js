@@ -136,7 +136,6 @@ class RuntimeUA {
         if (hypertySourcePackageURL.isEqual("/sourcePackage")) {
           // assuming this is the default value if sourcePackage is provided by hyperty
           // in that case, we can return source package directy without sending another request
-          hypertySourcePackageURL = hypertyDescriptorURL + "/sourcePackage";
           return hypertyDescriptor.sourcePackage;
         } else {
           // Get the hyperty source package
@@ -269,7 +268,7 @@ class RuntimeUA {
       let _stubSandbox;
       let _stubDescriptor;
       let _runtimeProtoStubURL;
-      let _protoStubSourceCode;
+      let _protoStubSourcePackage;
 
       let errorReason = function(reason) {
         console.error(reason);
@@ -304,17 +303,23 @@ class RuntimeUA {
 
         _stubDescriptor = descriptor;
 
-        let componentDownloadURL = descriptor.sourceCode;
+        let componentDownloadURL = descriptor.sourcePackageURL;
 
-        // we need to get ProtoStub Source code from descriptor - step 6 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-        return _this.runtimeCatalogue.getStubSourceCode(componentDownloadURL);
+        if (componentDownloadURL.isEqual("/sourcePackage")) {
+          // assuming this is the default value if sourcePackage is provided by protostub
+          // in that case, we can return source package directy without sending another request
+          return descriptor.sourcePackage;
+        } else {
+          // Get the protostub source package
+          return _this.runtimeCatalogue.getStubSourcePackage(componentDownloadURL);
+        }
       })
-      .then(function(protoStubSourceCode) {
-        console.info('3. return the ProtoStub Source Code: ');
+      .then(function(protoStubSourcePackage) {
+        console.info('3. return the ProtoStub Source Package: ');
 
         // we have completed step 7 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
-        _protoStubSourceCode = protoStubSourceCode;
+        _protoStubSourcePackage = protoStubSourcePackage;
 
         // TODO: Check on PEP (policy Engine) if we need the sandbox and check if the Sandbox Factory have the context sandbox;
         let policy = true;
@@ -356,7 +361,7 @@ class RuntimeUA {
         _runtimeProtoStubURL = runtimeProtoStubURL;
 
         // Deploy Component step xxx
-        return _stubSandbox.deployComponent(_protoStubSourceCode, runtimeProtoStubURL, _stubDescriptor.configuration);
+        return _stubSandbox.deployComponent(_protoStubSourcePackage, runtimeProtoStubURL, _stubDescriptor.configuration);
       })
       .then(function(result) {
         console.info('8: return deploy component for sandbox status');

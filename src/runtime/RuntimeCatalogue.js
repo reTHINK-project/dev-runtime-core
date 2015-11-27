@@ -57,9 +57,6 @@ class RuntimeCatalogue {
    * @returns {Promise}
    */
   getHypertyDescriptor(hypertyURL) {
-
-    let _this = this;
-
     return new Promise(function(resolve, reject) {
 
       _makeExternalRequest(hypertyURL).then(function(result) {
@@ -106,50 +103,38 @@ class RuntimeCatalogue {
   }
 
   /**
-  * Get StubDescriptor
-  */
-  getStubDescriptor(domainURL) {
+   * Get StubDescriptor
+   * @param stubURL - e.g. http://localhost:8080/.well-known/protostub/MyProtostub
+   * @returns {Promise}
+   */
+  getStubDescriptor(stubURL) {
+    return new Promise(function (resolve, reject) {
 
-    let _this = this;
+      _makeExternalRequest(stubURL).then(function (result) {
+        result = JSON.parse(result);
 
-    return new Promise(function(resolve, reject) {
-
-      let stubDescriptor = {
-        guid: 'guid',
-        id: 'idProtoStub',
-        classname: 'VertxProtoStub',
-        description: 'description of ProtoStub',
-        kind: 'hyperty',
-        catalogueURL: '....',
-        sourceCode: '../resources/VertxProtoStub.js',
-        dataObject: '',
-        type: '',
-        messageSchema: '',
-        configuration: {
-          url: 'ws://localhost:9090/ws',
-          runtimeURL: _this._runtimeURL
-        },
-        policies: '',
-        constraints: '',
-        hypertyCapabilities: '',
-        protocolCapabilities: ''
-      };
-
-      resolve(stubDescriptor);
-
+        if (result["ERROR"]) {
+          // TODO handle error properly
+          reject(result);
+        } else {
+          resolve(result);
+        }
+      });
     });
 
   }
 
   /**
-  * Get protostubSourceCode
-  */
-  getStubSourceCode(stubSourceCodeURL) {
+   * Get protostubSourcePackage
+   * @param stubSourcePackageURL - e.g. http://localhost:8080/.well-known/protostub/MyProtostub/sourcePackage
+   * @returns {Promise}
+   */
+  getStubSourcePackage(stubSourcePackageURL) {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
 
-      _this._makeExternalRequest(stubSourceCodeURL).then(function(result) {
+      _this._makeExternalRequest(stubSourcePackageURL).then(function(result) {
         resolve(result);
       }).catch(function(reason) {
         reject(reason);
