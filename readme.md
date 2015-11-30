@@ -21,6 +21,18 @@ npm install
 jspm install
 ```
 
+----
+**Private Repository Note**
+
+if you have problems with the `npm install` command, like "access was forbidden", "404 not found", and have the service framework module reference, it is an authentication problem;
+
+you may need following the steps present on [Github Help](https://help.github.com/articles/generating-ssh-keys/). and select operation system you are using.
+
+This could happen because it is a private module and need your GitHub authentication to allow cloning the repository.
+
+----
+**Issues**
+
 if you have some trouble with the environment, you can open an issue;
 
 ### Javascript Environment
