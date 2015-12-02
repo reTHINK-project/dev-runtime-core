@@ -23,6 +23,8 @@ class RuntimeCatalogue {
   }
 
   _makeExternalRequest(url) {
+    console.log("_makeExternalRequest", url);
+
     return new Promise(function(resolve, reject) {
 
       // TODO: implementation
@@ -36,6 +38,7 @@ class RuntimeCatalogue {
       xhr.onreadystatechange = function(event) {
         let xhr = event.currentTarget;
         if (xhr.readyState === 4) {
+          console.log("got response:", xhr);
           if (xhr.status === 200) {
             resolve(xhr.responseText);
           } else {
@@ -57,9 +60,11 @@ class RuntimeCatalogue {
    * @returns {Promise}
    */
   getHypertyDescriptor(hypertyURL) {
+    let _this = this;
+    console.log("getHypertyDescriptor", hypertyURL);
     return new Promise(function(resolve, reject) {
 
-      _makeExternalRequest(hypertyURL).then(function(result) {
+      _this._makeExternalRequest(hypertyURL).then(function(result) {
         result = JSON.parse(result);
 
         if (result["ERROR"]) {
