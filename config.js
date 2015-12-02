@@ -20,12 +20,14 @@ System.config({
     "babelify": "npm:babelify@6.3.0",
     "browserify": "npm:browserify@11.1.0",
     "core-js": "npm:core-js@1.2.6",
+    "deep-eql": "npm:deep-eql@0.1.3",
     "karma-browserify": "npm:karma-browserify@4.3.0",
+    "service-framework": "github:reTHINK-project/dev-service-framework@develop",
     "github:jspm/nodelibs-assert@0.1.0": {
       "assert": "npm:assert@1.3.0"
     },
     "github:jspm/nodelibs-buffer@0.1.0": {
-      "buffer": "npm:buffer@3.5.0"
+      "buffer": "npm:buffer@3.5.2"
     },
     "github:jspm/nodelibs-constants@0.1.0": {
       "constants-browserify": "npm:constants-browserify@0.0.1"
@@ -377,6 +379,11 @@ System.config({
       "ieee754": "npm:ieee754@1.1.6",
       "is-array": "npm:is-array@1.0.1"
     },
+    "npm:buffer@3.5.2": {
+      "base64-js": "npm:base64-js@0.0.8",
+      "ieee754": "npm:ieee754@1.1.6",
+      "is-array": "npm:is-array@1.0.1"
+    },
     "npm:bufferutil@1.0.1": {
       "bindings": "npm:bindings@1.2.1",
       "nan": "npm:nan@1.6.2"
@@ -539,6 +546,10 @@ System.config({
       "process": "github:jspm/nodelibs-process@0.1.2",
       "tty": "github:jspm/nodelibs-tty@0.1.0",
       "util": "github:jspm/nodelibs-util@0.1.0"
+    },
+    "npm:deep-eql@0.1.3": {
+      "buffer": "github:jspm/nodelibs-buffer@0.1.0",
+      "type-detect": "npm:type-detect@0.1.1"
     },
     "npm:depd@1.0.1": {
       "buffer": "github:jspm/nodelibs-buffer@0.1.0",

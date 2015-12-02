@@ -1,10 +1,8 @@
 import {RuntimeUA, Sandbox} from '../src/runtime-core';
 
 import SandboxFactory from '../resources/sandboxes/SandboxFactory';
-// import MessageFactory from '../../resources/MessageFactory';
 
 var sandboxFactory = new SandboxFactory();
-var messageFactory = new MessageFactory();
 
 var runtime = new RuntimeUA(sandboxFactory);
 

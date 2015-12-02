@@ -64,6 +64,9 @@
     "directories": {
       "packages": "vendor"
     },
+    "dependencies": {
+      "service-framework": "github:reTHINK-project/dev-service-framework@develop"
+    },
     "devDependencies": {
       "babel": "npm:babel-core@^5.8.24",
       "babel-runtime": "npm:babel-runtime@^5.8.24",
@@ -72,5 +75,8 @@
   },
   "directories": {
     "test": "test"
+  },
+  "dependencies": {
+    "service-framework": "rethink-project/dev-service-framework#develop"
   }
 }
