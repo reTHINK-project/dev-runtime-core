@@ -133,10 +133,10 @@ class RuntimeUA {
 
         let hypertySourcePackageURL = hypertyDescriptor.sourcePackageURL;
 
-        if (hypertySourcePackageURL.isEqual("/sourcePackage")) {
+        if (hypertySourcePackageURL == "/sourcePackage") {
           // assuming this is the default value if sourcePackage is provided by hyperty
           // in that case, we can return source package directy without sending another request
-          return hypertyDescriptor.sourcePackage;
+          return JSON.parse(hypertyDescriptor.sourcePackage);
         } else {
           // Get the hyperty source package
           return _this.runtimeCatalogue.getHypertySourcePackage(hypertySourcePackageURL);
@@ -145,7 +145,7 @@ class RuntimeUA {
 
       })
       .then(function(hypertySourcePackage) {
-        console.info('2: return hyperty source package');
+        console.info('2: return hyperty source package', hypertySourcePackage);
 
         // at this point, we have completed "step 4 and 5" as shown in https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md
 
@@ -163,7 +163,7 @@ class RuntimeUA {
         return policy;
       })
       .then(function(policyResult) {
-        console.info('3: return policy engine result');
+        console.info('3: return policy engine result', policyResult);
 
         // we have completed step 6 to 9 of https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
         //
