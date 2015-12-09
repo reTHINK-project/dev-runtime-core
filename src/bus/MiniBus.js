@@ -89,7 +89,7 @@ class MiniBus {
     //Global counter will not work, because there will be multiple MiniBus instances!
     //Per URL, can be a lot of data to maintain!
     //Maybe a counter per MiniBus instance. This is the assumed solution for now.
-    if (!msg.id) {
+    if (!msg.id || msg.id === 0) {
       _this._msgId++;
       msg.id = _this._msgId;
     }

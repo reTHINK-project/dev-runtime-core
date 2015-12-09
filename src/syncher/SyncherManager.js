@@ -1,4 +1,4 @@
-import {divideURL} from '../utils/utils.js';
+import {divideURL, deepClone} from '../utils/utils.js';
 
 /**
  * @author micaelpedrosa@gmail.com
@@ -10,7 +10,7 @@ class SyncherManager {
   _bus: MiniBus
   _registry: Registry
 
-  _subscriptions: {ObjectURL: {sm: MsgListener, owner: HypertyURL, schema: Schema, <HypertyURL: MsgListener>}}
+  _subscriptions: { ObjectURL: { owner: HypertyURL, schema: Schema, sl: MsgListener, cl: MsgListener, subs: [HypertyURL] } }
   */
 
   constructor(runtimeURL, bus, registry) {
@@ -44,11 +44,26 @@ class SyncherManager {
     //TODO: get address from address allocator ?
     let objURL = 'resource://obj1';
     let objSubscriptorURL = objURL + '/subscription';
+    let objChangeURL = objURL + '/changes';
 
     //TODO: register objectURL so that it can be discovered in the network
 
+    //register change listener
+    let changeListener = _this._bus.addListener(objChangeURL, (msg) => {
+      console.log(objChangeURL + '-RCV: ', msg);
+      _this._subscriptions[objURL].subs.forEach((hypertyUrl) => {
+        let changeMsg = deepClone(msg);
+        changeMsg.id = 0;
+        changeMsg.to = hypertyUrl;
+
+        //forward to hyperty observer
+        console.log(hypertyUrl + '-SEND: ', changeMsg);
+        _this._bus.postMessage(changeMsg);
+      });
+    });
+
     //15. add subscription listener
-    let sm = _this._bus.addListener(objSubscriptorURL, (msg) => {
+    let subscriptorListener = _this._bus.addListener(objSubscriptorURL, (msg) => {
       console.log(objSubscriptorURL + '-RCV: ', msg);
       switch (msg.type) {
         case 'subscribe': _this._onSubscribe(objURL, msg); break;
@@ -56,9 +71,7 @@ class SyncherManager {
       }
     });
 
-    _this._subscriptions[objURL] = {};
-    _this._subscriptions[objURL].sm = sm;
-    _this._subscriptions[objURL].owner = owner;
+    _this._subscriptions[objURL] = { owner: owner, sl: subscriptorListener, cl: changeListener, subs: [] };
 
     //all ok, send response
     _this._bus.postMessage({
@@ -86,6 +99,7 @@ class SyncherManager {
     delete _this._subscriptions[objURL];
     _this._bus.removeAllListenersOf(objURL);
     _this._bus.removeAllListenersOf(objURL + '/subscription');
+    _this._bus.removeAllListenersOf(objURL + '/changes');
 
     //TODO: destroy object in the registry?
   }
@@ -126,7 +140,9 @@ class SyncherManager {
         console.log('forward-reply: ', reply);
         if (reply.body.code === 200) {
           //subscription accepted
-          _this._addSubscription(objURL, hypertyUrl);
+
+          //TODO: verify if already exists
+          _this._subscriptions[objURL].subs.push(hypertyUrl);
         }
 
         //send subscribe-response
@@ -139,27 +155,13 @@ class SyncherManager {
 
   }
 
-  _addSubscription(objURL, hypertyUrl) {
-    let _this = this;
-    let div = divideURL(hypertyUrl);
-
-    _this._registry.getSandbox(div.domain).then((sandbox) => {
-      let sub = _this._bus.addListener(objURL + '/changes', (msg) => {
-        sandbox.postMessage(msg);
-      });
-
-      _this._subscriptions[objURL][hypertyUrl] = sub;
-    });
-  }
-
   _onUnSubscribe(objURL, msg) {
     let _this = this;
     let hypertyUrl = msg.from;
 
-    //remove subscription and listener
-    let sub = _this._subscriptions[objURL][hypertyUrl];
-    delete _this._subscriptions[objURL][hypertyUrl];
-    sub.remove();
+    let subs = _this._subscriptions[objURL].subs;
+    let index = subs.indexOf(hypertyUrl);
+    subs.splice(index, 1);
 
     //TODO: send un-subscribe message to Syncher? (depends on the operation mode)
   }
