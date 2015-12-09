@@ -1,5 +1,7 @@
 import RuntimeUACore from './runtime/RuntimeUA';
 import SandboxBase from './sandbox/Sandbox';
+import MiniBus from './bus/MiniBus';
+import SandboxRegistry from './sandbox/SandboxRegistry';
 
-export var RuntimeUA = RuntimeUACore;
-export var Sandbox = SandboxBase;
+export { RuntimeUACore as RuntimeUA, SandboxBase as Sandbox, 
+    MiniBus, SandboxRegistry };
