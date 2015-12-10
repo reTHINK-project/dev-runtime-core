@@ -23,12 +23,13 @@ class RuntimeCatalogue {
   }
 
   _makeExternalRequest(url) {
-    console.log("_makeExternalRequest", url);
+
+    let _this = this;
 
     return new Promise(function(resolve, reject) {
 
       // TODO: implementation
-      // Simulate getting hypertySourcePackage through the XMLHttpRequest
+      // Simulate getting hypertySourceCode through the XMLHttpRequest
       // but in node this should be overrided to other method to make a
       // ajax request;
       // i think we can use a factory like we used in for the sandboxes,
@@ -38,7 +39,6 @@ class RuntimeCatalogue {
       xhr.onreadystatechange = function(event) {
         let xhr = event.currentTarget;
         if (xhr.readyState === 4) {
-          console.log("got response:", xhr);
           if (xhr.status === 200) {
             resolve(xhr.responseText);
           } else {
@@ -55,50 +55,51 @@ class RuntimeCatalogue {
   }
 
   /**
-   * Get HypertyDescriptor
-   * @param hypertyURL - e.g. http://localhost:8080/.well-known/hyperty/MyHyperty
-   * @returns {Promise}
-   */
+  * Get HypertyDescriptor
+  */
   getHypertyDescriptor(hypertyURL) {
+
     let _this = this;
-    console.log("getHypertyDescriptor", hypertyURL);
+
     return new Promise(function(resolve, reject) {
 
-      _this._makeExternalRequest(hypertyURL).then(function(result) {
-        result = JSON.parse(result);
+      //hyperty-catalogue://sp1/HelloHyperty
+      let hypertyName = hypertyURL.substr(hypertyURL.lastIndexOf('/') + 1);
 
-        if (result["ERROR"]) {
-          // TODO handle error properly
-          reject(result);
-        } else {
-          resolve(result);
-        }
-      });
+      let hypertyDescriptor = {
+        guid: 'guid',
+        id: 'idHyperty',
+        classname: hypertyName,
+        description: 'description of ' + hypertyName,
+        kind: 'hyperty',
+        catalogueURL: '....',
+        sourceCode: '../resources/' + hypertyName + '.ES5.js',
+        dataObject: '',
+        type: '',
+        messageSchema: '',
+        configuration: '',
+        policies: '',
+        constraints: '',
+        hypertyCapabilities: '',
+        protocolCapabilities: ''
+      };
+
+      resolve(hypertyDescriptor);
+
     });
+
   }
 
   /**
-   * Get hypertySourcePackage
-   * @param hypertySourcePackageURL - e.g. http://localhost:8080/.well-known/hyperty/MyHyperty/sourcePackage
-   * @returns {Promise}
-   */
-  getHypertySourcePackage(hypertySourcePackageURL) {
+  * Get hypertySourceCode
+  */
+  getHypertySourceCode(hypertySourceCodeURL) {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
 
-      _this._makeExternalRequest(hypertySourcePackageURL).then(function(result) {
-
-        if (result["ERROR"]) {
-          // TODO handle error properly
-          reject(result);
-        } else {
-          // assuming source package as object is wanted
-          result = JSON.parse(result);
-          // raw form: {"sourcePackage":"{...}"} so we have to parse again
-          sourcePackage = JSON.parse(result["sourcePackage"]);
-          resolve(sourcePackage);
-        }
+      _this._makeExternalRequest(hypertySourceCodeURL).then(function(result) {
+        resolve(result);
       }).catch(function(reason) {
         reject(reason);
       });
@@ -108,38 +109,50 @@ class RuntimeCatalogue {
   }
 
   /**
-   * Get StubDescriptor
-   * @param stubURL - e.g. http://localhost:8080/.well-known/protostub/MyProtostub
-   * @returns {Promise}
-   */
-  getStubDescriptor(stubURL) {
-    return new Promise(function (resolve, reject) {
+  * Get StubDescriptor
+  */
+  getStubDescriptor(domainURL) {
 
-      _makeExternalRequest(stubURL).then(function (result) {
-        result = JSON.parse(result);
+    let _this = this;
 
-        if (result["ERROR"]) {
-          // TODO handle error properly
-          reject(result);
-        } else {
-          resolve(result);
-        }
-      });
+    return new Promise(function(resolve, reject) {
+
+      let stubDescriptor = {
+        guid: 'guid',
+        id: 'idProtoStub',
+        classname: 'VertxProtoStub',
+        description: 'description of ProtoStub',
+        kind: 'hyperty',
+        catalogueURL: '....',
+        sourceCode: '../resources/VertxProtoStub.js',
+        dataObject: '',
+        type: '',
+        messageSchema: '',
+        configuration: {
+          url: 'ws://localhost:9090/ws',
+          runtimeURL: _this._runtimeURL
+        },
+        policies: '',
+        constraints: '',
+        hypertyCapabilities: '',
+        protocolCapabilities: ''
+      };
+
+      resolve(stubDescriptor);
+
     });
 
   }
 
   /**
-   * Get protostubSourcePackage
-   * @param stubSourcePackageURL - e.g. http://localhost:8080/.well-known/protostub/MyProtostub/sourcePackage
-   * @returns {Promise}
-   */
-  getStubSourcePackage(stubSourcePackageURL) {
+  * Get protostubSourceCode
+  */
+  getStubSourceCode(stubSourceCodeURL) {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
 
-      _this._makeExternalRequest(stubSourcePackageURL).then(function(result) {
+      _this._makeExternalRequest(stubSourceCodeURL).then(function(result) {
         resolve(result);
       }).catch(function(reason) {
         reject(reason);

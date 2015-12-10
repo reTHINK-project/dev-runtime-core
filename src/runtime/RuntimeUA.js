@@ -110,7 +110,7 @@ class RuntimeUA {
       let _hypertyURL;
       let _hypertySandbox;
       let _hypertyDescriptor;
-      let _hypertySourcePackage;
+      let _hypertySourceCode;
 
       let errorReason = function(reason) {
         console.error(reason);
@@ -131,25 +131,17 @@ class RuntimeUA {
         // catalogue.rethink.eu/.well-known/..........
         _hypertyDescriptor = hypertyDescriptor;
 
-        let hypertySourcePackageURL = hypertyDescriptor.sourcePackageURL;
+        let hypertySourceCodeUrl = hypertyDescriptor.sourceCode;
 
-        if (hypertySourcePackageURL == "/sourcePackage") {
-          // assuming this is the default value if sourcePackage is provided by hyperty
-          // in that case, we can return source package directy without sending another request
-          return JSON.parse(hypertyDescriptor.sourcePackage);
-        } else {
-          // Get the hyperty source package
-          return _this.runtimeCatalogue.getHypertySourcePackage(hypertySourcePackageURL);
-        }
-
-
+        // Get the hyperty source code
+        return _this.runtimeCatalogue.getHypertySourceCode(hypertySourceCodeUrl);
       })
-      .then(function(hypertySourcePackage) {
-        console.info('2: return hyperty source package', hypertySourcePackage);
+      .then(function(hypertySourceCode) {
+        console.info('2: return hyperty source code');
 
         // at this point, we have completed "step 4 and 5" as shown in https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md
 
-        _hypertySourcePackage = hypertySourcePackage;
+        _hypertySourceCode = hypertySourceCode;
 
         //
         // steps 6 -- 9 are skipped.
@@ -163,7 +155,7 @@ class RuntimeUA {
         return policy;
       })
       .then(function(policyResult) {
-        console.info('3: return policy engine result', policyResult);
+        console.info('3: return policy engine result');
 
         // we have completed step 6 to 9 of https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
         //
@@ -220,7 +212,7 @@ class RuntimeUA {
         _hypertyURL = hypertyURL;
 
         // We will deploy the component - step 17 of https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
-        return _hypertySandbox.deployComponent(_hypertySourcePackage, _hypertyURL, _hypertyDescriptor.configuration);
+        return _hypertySandbox.deployComponent(_hypertySourceCode, _hypertyURL, _hypertyDescriptor.configuration);
       })
       .then(function(deployComponentStatus) {
         console.info('7: Deploy component status for hyperty: ', _hypertyURL);
@@ -268,7 +260,7 @@ class RuntimeUA {
       let _stubSandbox;
       let _stubDescriptor;
       let _runtimeProtoStubURL;
-      let _protoStubSourcePackage;
+      let _protoStubSourceCode;
 
       let errorReason = function(reason) {
         console.error(reason);
@@ -303,23 +295,17 @@ class RuntimeUA {
 
         _stubDescriptor = descriptor;
 
-        let componentDownloadURL = descriptor.sourcePackageURL;
+        let componentDownloadURL = descriptor.sourceCode;
 
-        if (componentDownloadURL.isEqual("/sourcePackage")) {
-          // assuming this is the default value if sourcePackage is provided by protostub
-          // in that case, we can return source package directy without sending another request
-          return descriptor.sourcePackage;
-        } else {
-          // Get the protostub source package
-          return _this.runtimeCatalogue.getStubSourcePackage(componentDownloadURL);
-        }
+        // we need to get ProtoStub Source code from descriptor - step 6 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+        return _this.runtimeCatalogue.getStubSourceCode(componentDownloadURL);
       })
-      .then(function(protoStubSourcePackage) {
-        console.info('3. return the ProtoStub Source Package: ');
+      .then(function(protoStubSourceCode) {
+        console.info('3. return the ProtoStub Source Code: ');
 
         // we have completed step 7 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
-        _protoStubSourcePackage = protoStubSourcePackage;
+        _protoStubSourceCode = protoStubSourceCode;
 
         // TODO: Check on PEP (policy Engine) if we need the sandbox and check if the Sandbox Factory have the context sandbox;
         let policy = true;
@@ -361,7 +347,7 @@ class RuntimeUA {
         _runtimeProtoStubURL = runtimeProtoStubURL;
 
         // Deploy Component step xxx
-        return _stubSandbox.deployComponent(_protoStubSourcePackage, runtimeProtoStubURL, _stubDescriptor.configuration);
+        return _stubSandbox.deployComponent(_protoStubSourceCode, runtimeProtoStubURL, _stubDescriptor.configuration);
       })
       .then(function(result) {
         console.info('8: return deploy component for sandbox status');
