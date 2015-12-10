@@ -19,20 +19,31 @@ describe('SyncherManager', function() {
   let hyperURL1 = 'hyperty://h1.domain/h1';
   let hyperURL2 = 'hyperty://h2.domain/h2';
 
+  //fake object allocator -> always return the same URL
+  let allocator = {
+    create: (domain, number) => {
+      return new Promise((resolve, reject) => {
+        resolve([objURL]);
+      });
+    }
+  };
+
   it('reporter observer integration', function(done) {
     let seq = 0;
 
     let bus = new MiniBus();
-    let sm = new SyncherManager(runtimeURL, bus, { });
+    let sm = new SyncherManager(runtimeURL, bus, { }, allocator);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
       console.log('on-create-notify: ', notifyEvent);
+      notifyEvent.ack();
+
       sync2.subscribe(notifyEvent.url).then((doo) => {
         console.log('on-subscribe-reply');
         doo.onChange('*', (changeEvent) => {
           console.log('on-change: ', changeEvent);
-          expect(changeEvent).to.eql({ cType: 'add', oType: 'object', field: 'test', data: 'test' });
+          expect(changeEvent).to.eql({ cType: 'add', oType: 'object', field: 'test', data: ['a', 'b', 'c'] });
           done();
         });
       });
@@ -47,7 +58,7 @@ describe('SyncherManager', function() {
         //we may have some problems in the time sequence here.
         //change-msg can reach the observer first
         subscribeEvent.accept();
-        dor.data.test = 'test';
+        dor.data.test = ['a', 'b', 'c'];
       });
     });
   });
@@ -55,9 +66,7 @@ describe('SyncherManager', function() {
   it('create reporter', function(done) {
     let seq = 0;
 
-    let syncListener;
     let smListener;
-
     let createReplyCallback;
 
     let bus = {
@@ -89,33 +98,29 @@ describe('SyncherManager', function() {
         if (seq === 3) {
           expect(msg).to.eql({
             id: 3, type: 'create', from: hyperURL1, to: hyperURL2,
-            body: { code: 200, schema: schemaURL, resource: objURL, value: { x: 10, y: 10 } }
+            body: { schema: schemaURL, resource: objURL, value: { x: 10, y: 10 } }
           });
 
-          syncListener(msg);
+          done();
         }
       },
 
       addListener: (url, callback) => {
         console.log('1-addListener: ', url);
-        if (url === hyperURL2) {
-          syncListener = callback;
-        }
-
         if (url === 'hyperty-runtime://fake-runtime/sm') {
           smListener = callback;
         }
       }
     };
 
-    let sm = new SyncherManager(runtimeURL, bus, { });
+    let sm = new SyncherManager(runtimeURL, bus, { }, allocator);
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
 
-    expect(sync1.create(schemaURL, [hyperURL2], { x: 10, y: 10 }).then((dor) => {
+    sync1.create(schemaURL, [hyperURL2], { x: 10, y: 10 }).then((dor) => {
       expect(sync1.reporters).to.have.any.keys(objURL);
       expect(dor.status).to.eql('on');
       expect(dor.data).to.eql({ x: 10, y: 10 });
-    })).notify(done);
+    });
   });
 
   it('create and subscribe (with pub/sub mode)', function(done) {
@@ -130,15 +135,6 @@ describe('SyncherManager', function() {
     let createReplyCallback;
     let subscribeReplyCallback;
     let forwardReplyCallback;
-
-    let registry = {
-      getSandbox: (domainURL) => {
-        console.log('getSandbox: ', domainURL);
-        return new Promise((resolve, reject) => {
-          resolve({});
-        });
-      }
-    };
 
     let bus = {
       postMessage: (msg, replyCallback) => {
@@ -226,7 +222,7 @@ describe('SyncherManager', function() {
       }
     };
 
-    let sm = new SyncherManager(runtimeURL, bus, registry);
+    let sm = new SyncherManager(runtimeURL, bus, { }, allocator);
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
 

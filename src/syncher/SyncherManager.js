@@ -9,15 +9,20 @@ class SyncherManager {
   _url: URL
   _bus: MiniBus
   _registry: Registry
+  _allocator: ObjectAllocation
 
   _subscriptions: { ObjectURL: { owner: HypertyURL, schema: Schema, sl: MsgListener, cl: MsgListener, subs: [HypertyURL] } }
   */
 
-  constructor(runtimeURL, bus, registry) {
+  constructor(runtimeURL, bus, registry, allocator) {
     let _this = this;
+
+    //TODO: this should not be hardcoded!
+    _this._domain = 'ua.pt';
 
     _this._bus = bus;
     _this._registry = registry;
+    _this._allocator = allocator;
 
     //TODO: these should be saved in persistence engine?
     _this._url = runtimeURL + '/sm';
@@ -41,52 +46,59 @@ class SyncherManager {
     //TODO: 5-7 authorizeObjectCreation(owner, obj ???? )
     //TODO: other optional steps
 
-    //TODO: get address from address allocator ?
-    let objURL = 'resource://obj1';
-    let objSubscriptorURL = objURL + '/subscription';
+    _this._allocator.create(_this._domain, 1).then((allocated) => {
+      //TODO: get address from address allocator ?
+      let objURL = allocated[0];
+      let objSubscriptorURL = objURL + '/subscription';
 
-    //TODO: register objectURL so that it can be discovered in the network
+      //TODO: register objectURL so that it can be discovered in the network
 
-    //register change listener
-    let changeListener = _this._bus.addListener(objURL, (msg) => {
-      console.log(objURL + '-RCV: ', msg);
-      _this._subscriptions[objURL].subs.forEach((hypertyUrl) => {
-        let changeMsg = deepClone(msg);
-        changeMsg.id = 0;
-        changeMsg.from = objURL;
-        changeMsg.to = hypertyUrl;
+      //register change listener
+      let changeListener = _this._bus.addListener(objURL, (msg) => {
+        console.log(objURL + '-RCV: ', msg);
+        _this._subscriptions[objURL].subs.forEach((hypertyUrl) => {
+          let changeMsg = deepClone(msg);
+          changeMsg.id = 0;
+          changeMsg.from = objURL;
+          changeMsg.to = hypertyUrl;
 
-        //forward to hyperty observer
-        _this._bus.postMessage(changeMsg);
-      });
-    });
-
-    //15. add subscription listener
-    let subscriptorListener = _this._bus.addListener(objSubscriptorURL, (msg) => {
-      console.log(objSubscriptorURL + '-RCV: ', msg);
-      switch (msg.type) {
-        case 'subscribe': _this._onSubscribe(objURL, msg); break;
-        case 'unsubscribe': _this._onUnSubscribe(objURL, msg); break;
-      }
-    });
-
-    _this._subscriptions[objURL] = { owner: owner, sl: subscriptorListener, cl: changeListener, subs: [] };
-
-    //all ok, send response
-    _this._bus.postMessage({
-      id: msg.id, type: 'response', from: msg.to, to: owner,
-      body: {code: 200, resource: objURL}
-    });
-
-    //19. send create to all observers, responses will be deliver to the Hyperty owner?
-    //TODO: maybe it's better the msg.from === objSubscriptorURL. So that it can receive the responses?
-    setTimeout(() => {
-      //schedule for next cycle needed, because the Reporter should be available.
-      msg.body.authorise.forEach((hypertyURL) => {
-        _this._bus.postMessage({
-          type: 'create', from: owner, to: hypertyURL,
-          body: { schema: msg.body.schema, resource: objURL, value: msg.body.value }
+          //forward to hyperty observer
+          _this._bus.postMessage(changeMsg);
         });
+      });
+
+      //15. add subscription listener
+      let subscriptorListener = _this._bus.addListener(objSubscriptorURL, (msg) => {
+        console.log(objSubscriptorURL + '-RCV: ', msg);
+        switch (msg.type) {
+          case 'subscribe': _this._onSubscribe(objURL, msg); break;
+          case 'unsubscribe': _this._onUnSubscribe(objURL, msg); break;
+        }
+      });
+
+      _this._subscriptions[objURL] = { owner: owner, sl: subscriptorListener, cl: changeListener, subs: [] };
+
+      //all ok, send response
+      _this._bus.postMessage({
+        id: msg.id, type: 'response', from: msg.to, to: owner,
+        body: { code: 200, resource: objURL }
+      });
+
+      //19. send create to all observers, responses will be deliver to the Hyperty owner?
+      setTimeout(() => {
+        //schedule for next cycle needed, because the Reporter should be available.
+        msg.body.authorise.forEach((hypertyURL) => {
+          _this._bus.postMessage({
+            type: 'create', from: owner, to: hypertyURL,
+            body: { schema: msg.body.schema, resource: objURL, value: msg.body.value }
+          });
+        });
+      });
+
+    }).catch((reason) => {
+      _this._bus.postMessage({
+        id: msg.id, type: 'response', from: msg.to, to: owner,
+        body: { code: 500, desc: reason }
       });
     });
   }
@@ -141,8 +153,6 @@ class SyncherManager {
         console.log('forward-reply: ', reply);
         if (reply.body.code === 200) {
           //subscription accepted
-
-          //TODO: verify if already exists
           _this._subscriptions[objURL].subs.push(hypertyUrl);
         }
 
