@@ -44,20 +44,19 @@ class SyncherManager {
     //TODO: get address from address allocator ?
     let objURL = 'resource://obj1';
     let objSubscriptorURL = objURL + '/subscription';
-    let objChangeURL = objURL + '/changes';
 
     //TODO: register objectURL so that it can be discovered in the network
 
     //register change listener
-    let changeListener = _this._bus.addListener(objChangeURL, (msg) => {
-      console.log(objChangeURL + '-RCV: ', msg);
+    let changeListener = _this._bus.addListener(objURL, (msg) => {
+      console.log(objURL + '-RCV: ', msg);
       _this._subscriptions[objURL].subs.forEach((hypertyUrl) => {
         let changeMsg = deepClone(msg);
         changeMsg.id = 0;
+        changeMsg.from = objURL;
         changeMsg.to = hypertyUrl;
 
         //forward to hyperty observer
-        console.log(hypertyUrl + '-SEND: ', changeMsg);
         _this._bus.postMessage(changeMsg);
       });
     });
@@ -81,10 +80,13 @@ class SyncherManager {
 
     //19. send create to all observers, responses will be deliver to the Hyperty owner?
     //TODO: maybe it's better the msg.from === objSubscriptorURL. So that it can receive the responses?
-    msg.body.authorise.forEach((hypertyURL) => {
-      _this._bus.postMessage({
-        type: 'create', from: owner, to: hypertyURL,
-        body: { code: 200, schema: msg.body.schema, resource: objURL, value: msg.body.value }
+    setTimeout(() => {
+      //schedule for next cycle needed, because the Reporter should be available.
+      msg.body.authorise.forEach((hypertyURL) => {
+        _this._bus.postMessage({
+          type: 'create', from: owner, to: hypertyURL,
+          body: { schema: msg.body.schema, resource: objURL, value: msg.body.value }
+        });
       });
     });
   }
@@ -99,7 +101,6 @@ class SyncherManager {
     delete _this._subscriptions[objURL];
     _this._bus.removeAllListenersOf(objURL);
     _this._bus.removeAllListenersOf(objURL + '/subscription');
-    _this._bus.removeAllListenersOf(objURL + '/changes');
 
     //TODO: destroy object in the registry?
   }
