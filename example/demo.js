@@ -5,6 +5,7 @@ import SandboxFactory from '../resources/sandboxes/SandboxFactory';
 var sandboxFactory = new SandboxFactory();
 
 var runtime = new RuntimeUA(sandboxFactory);
+window.runtime = runtime;
 
 indexedDB.deleteDatabase('registry-DB');
 

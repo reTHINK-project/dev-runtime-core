@@ -77,7 +77,9 @@ class RuntimeCatalogue {
         dataObject: '',
         type: '',
         messageSchema: '',
-        configuration: '',
+        configuration: {
+          runtimeURL: _this._runtimeURL
+        },
         policies: '',
         constraints: '',
         hypertyCapabilities: '',

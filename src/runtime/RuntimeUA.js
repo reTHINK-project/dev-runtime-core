@@ -6,6 +6,8 @@ import MessageBus from '../bus/MessageBus';
 
 import RuntimeCatalogue from './RuntimeCatalogue';
 
+import SyncherManager from '../syncher/SyncherManager';
+
 /**
  * Runtime User Agent Interface will process all the dependecies of the core runtime;
  * @author Vitor Silva [vitor-t-silva@telecom.pt]
@@ -38,7 +40,7 @@ class RuntimeUA {
     // TODO: post and return registry/hypertyRuntimeInstance to and from Back-end Service
     // the response is like: runtime://sp1/123
 
-    let runtimeURL = 'runtime://sp1/' + Math.floor((Math.random() * 10000) + 1);
+    let runtimeURL = 'runtime://ua.pt/' + Math.floor((Math.random() * 10000) + 1);
     _this.runtimeURL = runtimeURL;
 
     // TODO: check if runtime catalogue need the runtimeURL;
@@ -76,6 +78,9 @@ class RuntimeUA {
     // Use sandbox factory to use specific methods
     // and set the message bus to the factory
     sandboxFactory.messageBus = _this.messageBus;
+
+    // Instanciate the SyncherManager;
+    _this.syncherManager = new SyncherManager(_this.runtimeURL, _this.messageBus, { });
   }
 
   /**
@@ -222,10 +227,6 @@ class RuntimeUA {
         // Add the message bus listener to the appSandbox or hypertSandbox;
         _this.messageBus.addListener(_hypertyURL, function(msg) {
           _hypertySandbox.postMessage(msg);
-        });
-
-        _hypertySandbox.addListener('*', function(msg) {
-          _this.messageBus.postMessage(msg);
         });
 
         // we have completed step 20 of https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.

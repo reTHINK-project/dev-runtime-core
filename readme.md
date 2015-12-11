@@ -30,6 +30,15 @@ you may need following the steps present on [Github Help](https://help.github.co
 
 This could happen because it is a private module and need your GitHub authentication to allow cloning the repository.
 
+**Instalation through jspm**
+
+We need configure jspm config using github tokens, for that, following this (based on issue [3](https://github.com/reTHINK-project/dev-runtime-browser/issues/3)):
+
+  1. [Here](https://github.com/settings/tokens), generate token with public_repo permission enabled
+  2. Save the token generated;
+  3. Execute the command ```jspm registry config github``` and you'll be asked for the credentials;
+  4. Now you can execute command ```jspm install -y and the runtime-core``` or ```jspm install runtime-core=github:reTHINK-project/dev-runtime-core``` or only ```jspm install```;
+
 ----
 **Issues**
 

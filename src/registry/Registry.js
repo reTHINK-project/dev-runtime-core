@@ -35,7 +35,7 @@ class Registry extends EventEmitter {
     _this.runtimeURL = runtimeURL;
     _this.remoteRegistry = remoteRegistry;
 
-    _this.hypertyiesList = {};
+    _this.hypertiesList = {};
     _this.protostubsList = {};
     _this.sandboxesList = {};
     _this.pepList = {};
@@ -96,27 +96,37 @@ class Registry extends EventEmitter {
       } else {
         //call check if the protostub exist
         return _this.resolve('hyperty-runtime://' + domainUrl).then(function() {
-        }).then(function() {
 
-          // addListener with the callback to execute when receive a message from the address-allocation
-          let item = _this._messageBus.addListener(_this.registryURL, (msg) => {
-            let url = msg.body.hypertyRuntime;
+          if (_this.hypertiesList.hasOwnProperty(domainUrl)) {
+            _this.hypertiesList[domainUrl] = {identity: hypertyIdentity};
+          }
 
-            _this.hypertiesList[url] = {identity: url + '/identity'};
-            _this.sandboxesList[url] = sandbox;
+          if (!_this.sandboxesList.hasOwnProperty(domainUrl)) {
+            _this.sandboxesList[domainUrl] = sandbox;
+            sandbox.addListener('*', function(msg) {
+              _this._messageBus.postMessage(msg);
+            });
 
-            //TODO register this hyperty in the Global Registry
+          }
 
-            item.remove();
-
-          });
+          // // addListener with the callback to execute when receive a message from the address-allocation
+          // let item = _this._messageBus.addListener(_this.registryURL, (msg) => {
+          //   let url = msg.body.hypertyRuntime;
+          //
+          //   _this.hypertiesList[domainUrl] = {identity: url + '/identity'};
+          //   _this.sandboxesList[domainUrl] = sandbox;
+          //
+          //   //TODO register this hyperty in the Global Registry
+          //
+          //   item.remove();
+          //
+          // });
 
           // TODO: should be implemented with addresses poll
           // In this case we will request and return only one
           // address
           let numberOfAddresses = 1;
-          let addressDomain = 'ua.pt';
-          _this.addressAllocation.create(addressDomain, numberOfAddresses).then(function(adderessList) {
+          _this.addressAllocation.create(domainUrl, numberOfAddresses).then(function(adderessList) {
 
             adderessList.forEach(function(address) {
 
@@ -192,7 +202,7 @@ class Registry extends EventEmitter {
    * @param  {DomainURL}     DomainURL service provider domain
    * @return {RuntimeProtoStubURL}
    */
-  registerStub(sandBox, domainURL) {
+  registerStub(sandbox, domainURL) {
     let _this = this;
     var runtimeProtoStubURL;
 
@@ -204,15 +214,14 @@ class Registry extends EventEmitter {
       }
 
       //TODO implement a unique number for the protostubURL
-      let domain = domainURL;
       if (!domainURL.indexOf('msg-node.')) {
-        domain = domainURL.substring(domainURL.indexOf('.') + 1);
+        domainURL = domainURL.substring(domainURL.indexOf('.') + 1);
       }
 
-      runtimeProtoStubURL = 'msg-node.' + domain + '/protostub/' + Math.floor((Math.random() * 10000) + 1);
+      runtimeProtoStubURL = 'msg-node.' + domainURL + '/protostub/' + Math.floor((Math.random() * 10000) + 1);
 
-      _this.protostubsList[domain] = runtimeProtoStubURL;
-      _this.sandboxesList[runtimeProtoStubURL] = sandBox;
+      _this.protostubsList[domainURL] = runtimeProtoStubURL;
+      _this.sandboxesList[runtimeProtoStubURL] = sandbox;
 
       resolve(runtimeProtoStubURL);
 
