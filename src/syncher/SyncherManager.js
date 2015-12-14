@@ -1,4 +1,5 @@
-import {divideURL, deepClone} from '../utils/utils.js';
+import {divideURL, deepClone} from '../utils/utils';
+import ObjectAllocation from './ObjectAllocation';
 
 /**
  * @author micaelpedrosa@gmail.com
@@ -22,11 +23,17 @@ class SyncherManager {
 
     _this._bus = bus;
     _this._registry = registry;
-    _this._allocator = allocator;
 
     //TODO: these should be saved in persistence engine?
     _this._url = runtimeURL + '/sm';
+    _this._objectURL = runtimeURL + '/object-allocation';
     _this._subscriptions = {};
+
+    if (allocator) {
+      _this._allocator = allocator;
+    } else {
+      _this._allocator = new ObjectAllocation(_this._objectURL, bus);
+    }
 
     bus.addListener(_this._url, (msg) => {
       console.log('SyncherManager-RCV: ', msg);

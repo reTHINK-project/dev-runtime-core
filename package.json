@@ -67,7 +67,7 @@
       "packages": "vendor"
     },
     "dependencies": {
-      "service-framework": "github:reTHINK-project/dev-service-framework@develop"
+      "service-framework": "github:rethink-project/dev-service-framework@develop"
     },
     "devDependencies": {
       "babel": "npm:babel-core@^5.8.24",
