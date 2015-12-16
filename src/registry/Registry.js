@@ -220,8 +220,13 @@ class Registry extends EventEmitter {
 
       runtimeProtoStubURL = 'msg-node.' + domainURL + '/protostub/' + Math.floor((Math.random() * 10000) + 1);
 
+      // TODO: Optimize this
       _this.protostubsList[domainURL] = runtimeProtoStubURL;
       _this.sandboxesList[runtimeProtoStubURL] = sandbox;
+
+      sandbox.addListener('*', function(msg) {
+        _this._messageBus.postMessage(msg);
+      });
 
       resolve(runtimeProtoStubURL);
 

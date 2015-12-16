@@ -28,24 +28,23 @@ var pkg = require('./package.json');
 
 gulp.task('dist', function() {
 
-  var bundler = browserify('./src/runtime-core.js', {
-    standalone: 'runtime-core', debug: false}).transform(babel);
-
-  function rebundle() {
-    bundler.bundle()
-      .on('error', function(err) {
-        console.error(err);
-        this.emit('end');
-      })
-      .pipe(source('runtime-core.js'))
-      .pipe(buffer())
-      .pipe(uglify())
-      .pipe(insert.prepend('// Runtime User Agent \n\n// version: {{version}}\n\n'))
-      .pipe(replace('{{version}}', pkg.version))
-      .pipe(gulp.dest('./dist'));
-  }
-
-  rebundle();
+  return browserify({
+    entries: ['./src/runtime-core.js'],
+    standalone: 'runtime-core',
+    debug: false
+  })
+  .transform(babel)
+  .bundle()
+  .on('error', function(err) {
+    console.error(err);
+    this.emit('end');
+  })
+  .pipe(source('runtime-core.js'))
+  .pipe(buffer())
+  .pipe(uglify())
+  .pipe(insert.prepend('// Runtime User Agent \n\n// version: {{version}}\n\n'))
+  .pipe(replace('{{version}}', pkg.version))
+  .pipe(gulp.dest('./dist'));
 
 });
 
@@ -57,7 +56,7 @@ gulp.task('build', function() {
   }).transform(babel);
 
   function rebundle() {
-    bundler.bundle()
+    return bundler.bundle()
       .on('error', function(err) {
         console.error(err);
         this.emit('end');
@@ -66,7 +65,7 @@ gulp.task('build', function() {
       .pipe(gulp.dest('./dist'));
   }
 
-  rebundle();
+  return rebundle();
 
 });
 
@@ -97,7 +96,7 @@ gulp.task('compile', function() {
   }).transform(babel);
 
   function rebundle() {
-    bundler.bundle()
+    return bundler.bundle()
       .on('error', function(err) {
         console.error(err);
         this.emit('end');
@@ -108,7 +107,7 @@ gulp.task('compile', function() {
       .pipe(gulp.dest(path));
   }
 
-  rebundle();
+  return rebundle();
 
 });
 

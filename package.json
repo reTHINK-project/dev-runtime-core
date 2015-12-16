@@ -26,6 +26,9 @@
   "bugs": {
     "url": "https://github.com/reTHINK-project/dev-runtime-core/issues"
   },
+  files: [
+    "dist"
+  ],
   "homepage": "https://rethink-project.eu/",
   "devDependencies": {
     "array.observe": "0.0.1",

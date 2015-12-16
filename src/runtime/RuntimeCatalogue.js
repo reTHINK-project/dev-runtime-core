@@ -2,6 +2,8 @@ class RuntimeCatalogue {
 
   constructor() {
     console.log('runtime catalogue');
+
+    let _this = this;
   }
 
   set runtimeURL(runtimeURL) {
@@ -73,13 +75,10 @@ class RuntimeCatalogue {
         description: 'description of ' + hypertyName,
         kind: 'hyperty',
         catalogueURL: '....',
-        sourceCode: '../resources/' + hypertyName + '.ES5.js',
+        sourcePackageURL: '../resources/' + hypertyName + '-sourcePackageURL.json',
         dataObject: '',
         type: '',
         messageSchema: '',
-        configuration: {
-          runtimeURL: _this._runtimeURL
-        },
         policies: '',
         constraints: '',
         hypertyCapabilities: '',
@@ -95,13 +94,24 @@ class RuntimeCatalogue {
   /**
   * Get hypertySourceCode
   */
-  getHypertySourceCode(hypertySourceCodeURL) {
+  getHypertySourcePackage(hypertyPackage) {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
 
-      _this._makeExternalRequest(hypertySourceCodeURL).then(function(result) {
-        resolve(result);
+      _this._makeExternalRequest(hypertyPackage).then(function(result) {
+
+        try {
+
+          let sourcePackage = JSON.parse(result);
+          let sourceCode = window.atob(sourcePackage.sourceCode);
+          sourcePackage.sourceCode = sourceCode;
+
+          resolve(sourcePackage);
+        } catch (e) {
+          reject(e);
+        }
+
       }).catch(function(reason) {
         reject(reason);
       });
@@ -126,13 +136,12 @@ class RuntimeCatalogue {
         description: 'description of ProtoStub',
         kind: 'hyperty',
         catalogueURL: '....',
-        sourceCode: '../resources/VertxProtoStub.js',
+        sourcePackageURL: '../resources/Vertx-sourcePackageURL.json',
         dataObject: '',
         type: '',
         messageSchema: '',
         configuration: {
-          url: 'ws://localhost:9090/ws',
-          runtimeURL: _this._runtimeURL
+          url: 'ws://localhost:9090/ws'
         },
         policies: '',
         constraints: '',
@@ -149,14 +158,24 @@ class RuntimeCatalogue {
   /**
   * Get protostubSourceCode
   */
-  getStubSourceCode(stubSourceCodeURL) {
+  getStubSourcePackage(sourcePackageURL) {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
 
-      _this._makeExternalRequest(stubSourceCodeURL).then(function(result) {
-        resolve(result);
+      _this._makeExternalRequest(sourcePackageURL).then(function(result) {
+
+        try {
+          let sourcePackage = JSON.parse(result);
+          let sourceCode = window.atob(sourcePackage.sourceCode);
+          sourcePackage.sourceCode = sourceCode;
+
+          resolve(sourcePackage);
+        } catch (e) {
+          reject(e);
+        }
       }).catch(function(reason) {
+        console.error(reason);
         reject(reason);
       });
 

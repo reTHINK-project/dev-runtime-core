@@ -115,7 +115,7 @@ class RuntimeUA {
       let _hypertyURL;
       let _hypertySandbox;
       let _hypertyDescriptor;
-      let _hypertySourceCode;
+      let _hypertySourcePackage;
 
       let errorReason = function(reason) {
         console.error(reason);
@@ -136,17 +136,17 @@ class RuntimeUA {
         // catalogue.rethink.eu/.well-known/..........
         _hypertyDescriptor = hypertyDescriptor;
 
-        let hypertySourceCodeUrl = hypertyDescriptor.sourceCode;
+        let sourcePackageURL = hypertyDescriptor.sourcePackageURL;
 
         // Get the hyperty source code
-        return _this.runtimeCatalogue.getHypertySourceCode(hypertySourceCodeUrl);
+        return _this.runtimeCatalogue.getHypertySourcePackage(sourcePackageURL);
       })
-      .then(function(hypertySourceCode) {
+      .then(function(sourcePackage) {
         console.info('2: return hyperty source code');
 
         // at this point, we have completed "step 4 and 5" as shown in https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md
 
-        _hypertySourceCode = hypertySourceCode;
+        _hypertySourcePackage = sourcePackage;
 
         //
         // steps 6 -- 9 are skipped.
@@ -194,7 +194,7 @@ class RuntimeUA {
         // we have completed step 14 here.
         return sandbox;
       }, function(reason) {
-        console.info('4.1: try to register a new sandbox', reason);
+        console.error('4.1: try to register a new sandbox', reason);
 
         // check if the sandbox is registed for this hyperty descriptor url;
         // Make Steps xxx --- xxx
@@ -216,11 +216,15 @@ class RuntimeUA {
 
         _hypertyURL = hypertyURL;
 
+        // Extend original hyperty configuration;
+        let configuration = Object.assign({}, _hypertyDescriptor.configuration);
+        configuration.runtimeURL = _this.runtimeURL;
+
         // We will deploy the component - step 17 of https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
-        return _hypertySandbox.deployComponent(_hypertySourceCode, _hypertyURL, _hypertyDescriptor.configuration);
+        return _hypertySandbox.deployComponent(_hypertySourcePackage.sourceCode, _hypertyURL, configuration);
       })
       .then(function(deployComponentStatus) {
-        console.info('7: Deploy component status for hyperty: ', _hypertyURL);
+        console.info('7: Deploy component status for hyperty: ', deployComponentStatus);
 
         // we have completed step 19 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
 
@@ -232,7 +236,7 @@ class RuntimeUA {
         // we have completed step 20 of https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
         let hyperty = {
           runtimeHypertyURL: _hypertyURL,
-          status: 'Deployed'
+          status: deployComponentStatus
         };
 
         resolve(hyperty);
@@ -261,7 +265,7 @@ class RuntimeUA {
       let _stubSandbox;
       let _stubDescriptor;
       let _runtimeProtoStubURL;
-      let _protoStubSourceCode;
+      let _stubSourcePackage;
 
       let errorReason = function(reason) {
         console.error(reason);
@@ -288,34 +292,37 @@ class RuntimeUA {
         // we need to get ProtoStub descriptor step 4 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
         return _this.runtimeCatalogue.getStubDescriptor(domain);
       })
-      .then(function(descriptor) {
+      .then(function(stubDescriptor) {
 
-        console.info('2. return the ProtoStub descriptor:', descriptor);
+        console.info('2. return the ProtoStub descriptor:', stubDescriptor);
 
         // we have completed step 5 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
-        _stubDescriptor = descriptor;
+        _stubDescriptor = stubDescriptor;
 
-        let componentDownloadURL = descriptor.sourceCode;
+        let sourcePackageURL = stubDescriptor.sourcePackageURL;
+
+        console.log(stubDescriptor.sourcePackageURL);
 
         // we need to get ProtoStub Source code from descriptor - step 6 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-        return _this.runtimeCatalogue.getStubSourceCode(componentDownloadURL);
+        return _this.runtimeCatalogue.getStubSourcePackage(sourcePackageURL);
       })
-      .then(function(protoStubSourceCode) {
-        console.info('3. return the ProtoStub Source Code: ');
+      .then(function(stubSourcePackage) {
+        console.info('3. return the ProtoStub Source Code: ', stubSourcePackage);
 
         // we have completed step 7 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
-        _protoStubSourceCode = protoStubSourceCode;
+        _stubSourcePackage = stubSourcePackage;
 
         // TODO: Check on PEP (policy Engine) if we need the sandbox and check if the Sandbox Factory have the context sandbox;
         let policy = true;
         return policy;
-      }).then(function(policy) {
+      })
+      .then(function(policy) {
         // this will return the sandbox or one promise to getSandbox;
         return _this.registry.getSandbox(domain);
-
-      }).then(function(stubSandbox) {
+      })
+      .then(function(stubSandbox) {
 
         console.info('4. if the sandbox is registered then return the sandbox', stubSandbox);
 
@@ -347,11 +354,17 @@ class RuntimeUA {
 
         _runtimeProtoStubURL = runtimeProtoStubURL;
 
+        // Extend original hyperty configuration;
+        let configuration = Object.assign({}, _stubDescriptor.configuration);
+        configuration.runtimeURL = _this.runtimeURL;
+
+        console.log(_stubSourcePackage);
+
         // Deploy Component step xxx
-        return _stubSandbox.deployComponent(_protoStubSourceCode, runtimeProtoStubURL, _stubDescriptor.configuration);
+        return _stubSandbox.deployComponent(_stubSourcePackage.sourceCode, runtimeProtoStubURL, configuration);
       })
-      .then(function(result) {
-        console.info('8: return deploy component for sandbox status');
+      .then(function(deployComponentStatus) {
+        console.info('8: return deploy component for sandbox status: ', deployComponentStatus);
 
         // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
@@ -360,16 +373,12 @@ class RuntimeUA {
           _stubSandbox.postMessage(msg);
         });
 
-        _stubSandbox.addListener('*', function(msg) {
-          _this.messageBus.postMessage(msg);
-        });
-
         // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
         // Load Stub function resolved with success;
         let stub = {
           runtimeProtoStubURL: _runtimeProtoStubURL,
-          status: 'Deployed'
+          status: deployComponentStatus
         };
 
         resolve(stub);

@@ -1,4 +1,4 @@
-import {RuntimeUA, Sandbox} from '../src/runtime-core';
+import {RuntimeUA, Sandbox} from '../dist/runtime-core';
 
 import SandboxFactory from '../resources/sandboxes/SandboxFactory';
 
@@ -7,9 +7,9 @@ var sandboxFactory = new SandboxFactory();
 var runtime = new RuntimeUA(sandboxFactory);
 window.runtime = runtime;
 
-indexedDB.deleteDatabase('registry-DB');
+var hypertiesList = ['http://ua.pt/HelloHyperty', 'http://ua.pt/WorldHyperty'];
 
-var hypertiesList = ['hyperty-catalogue://ua.pt/HelloHyperty', 'hyperty-catalogue://ua.pt/WorldHyperty'];
+// var hypertiesList = ['http://localhost:4000/HelloHyperty', 'http://localhost:4000/WorldHyperty'];
 
 function errorMessage(reason) {
   console.log(reason);
