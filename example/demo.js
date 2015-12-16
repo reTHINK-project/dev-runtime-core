@@ -1,4 +1,4 @@
-import {RuntimeUA, Sandbox} from '../dist/runtime-core';
+import {RuntimeUA, Sandbox} from '../src/runtime-core';
 
 import SandboxFactory from '../resources/sandboxes/SandboxFactory';
 

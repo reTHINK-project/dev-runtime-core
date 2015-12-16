@@ -36,14 +36,15 @@ describe('RuntimeUA', function() {
 
     // Mockup the source code request
     let mockup = {
-      activate:function() {
-        console.log('activated');
-      }
+      encoding: 'UTF-8',
+      sourceCodeClasname: 'HellosHyperty',
+      sourceCode: '',
+      signature: ''
     };
 
-    sinon.stub(runtime.runtimeCatalogue, '_makeExternalRequest')
-    .returns(new Promise(function(resolve, reject) {
-      resolve(mockup);
+    let tes = sinon.stub(runtime.runtimeCatalogue, '_makeExternalRequest');
+    tes.returns(new Promise(function(resolve, reject) {
+      resolve(JSON.stringify(mockup));
     }));
 
     sinon.stub(runtime.registry, 'registerHyperty')
@@ -60,13 +61,12 @@ describe('RuntimeUA', function() {
         description: 'description of ProtoStub',
         kind: 'hyperty',
         catalogueURL: '....',
-        sourceCode: '../resources/VertxProtoStub.js',
+        sourcePackageURL: '../resources/Vertx-sourcePackageURL.json',
         dataObject: '',
         type: '',
         messageSchema: '',
         configuration: {
-          url: 'ws://localhost:9090/ws',
-          runtimeURL: runtimeURL
+          url: 'ws://localhost:9090/ws'
         },
         policies: '',
         constraints: '',

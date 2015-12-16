@@ -5,6 +5,7 @@ import sinonChai from 'sinon-chai';
 
 let expect = chai.expect;
 
+chai.config.truncateThreshold = 0;
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
 
@@ -22,14 +23,15 @@ describe('Runtime Catalogue', function() {
 
     // Mockup the source code request
     let mockup = {
-      mock:function() {
-        console.log('asdasdsadsa');
-      }
+      encoding: 'UTF-8',
+      sourceCodeClasname: 'HellosHyperty',
+      sourceCode: '',
+      signature: ''
     };
 
     let tes = sinon.stub(runtimeCatalogue, '_makeExternalRequest');
     tes.returns(new Promise(function(resolve, reject) {
-      resolve(mockup);
+      resolve(JSON.stringify(mockup));
     }));
 
   });
@@ -56,8 +58,8 @@ describe('Runtime Catalogue', function() {
     //
     let descriptorValidation = [
       'guid', 'id', 'classname', 'description', 'kind', 'catalogueURL',
-      'sourceCode', 'dataObject', 'type', 'messageSchema',
-      'configuration', 'policies', 'constraints', 'hypertyCapabilities',
+      'sourcePackageURL', 'dataObject', 'type', 'messageSchema',
+      'policies', 'constraints', 'hypertyCapabilities',
       'protocolCapabilities'
     ];
 
@@ -76,8 +78,8 @@ describe('Runtime Catalogue', function() {
 
   it('should get hyperty source code', function(done) {
 
-    let hypertySourceCodeURL = _hypertyDescriptor.sourceCode;
-    expect(runtimeCatalogue.getHypertySourceCode(hypertySourceCodeURL))
+    let sourcePackageURL = _hypertyDescriptor.sourcePackageURL;
+    expect(runtimeCatalogue.getHypertySourcePackage(sourcePackageURL))
     .to.be.fulfilled.and.notify(done);
 
   });
@@ -92,7 +94,7 @@ describe('Runtime Catalogue', function() {
     //
     let descriptorValidation = [
       'guid', 'id', 'classname', 'description', 'kind', 'catalogueURL',
-      'sourceCode', 'dataObject', 'type', 'messageSchema',
+      'sourcePackageURL', 'dataObject', 'type', 'messageSchema',
       'configuration', 'policies', 'constraints', 'hypertyCapabilities',
       'protocolCapabilities'
     ];
@@ -107,15 +109,15 @@ describe('Runtime Catalogue', function() {
     .to.be.fulfilled
     .and.eventually.to.have.all.keys(descriptorValidation)
     .and.eventually.with.deep.property('configuration')
-    .that.to.have.all.keys('url', 'runtimeURL')
+    .that.to.have.all.keys('url')
     .and.notify(done);
 
   });
 
   it('should get stub source code', function(done) {
 
-    let stubSourceCodeURL = _stubDescriptor.sourceCode;
-    expect(runtimeCatalogue.getStubSourceCode(stubSourceCodeURL))
+    let sourcePackageURL = _stubDescriptor.sourcePackageURL;
+    expect(runtimeCatalogue.getStubSourcePackage(sourcePackageURL))
     .to.be.fulfilled.and.notify(done);
 
   });
