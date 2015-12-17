@@ -1,3 +1,5 @@
+import Pipeline from './Pipeline';
+
 /**
 * @author micaelpedrosa@gmail.com
 * Minimal interface and implementation to send and receive messages. It can be reused in many type of components.
@@ -11,6 +13,8 @@ class MiniBus {
 
   _responseTimeOut: number
   _responseCallbacks: <url+id: (msg) => void>
+
+  _pipeline: Pipeline
   */
 
   constructor() {
@@ -21,8 +25,14 @@ class MiniBus {
     _this._responseTimeOut = 3000; //default to 3s
     _this._responseCallbacks = {};
 
+    _this._pipeline = new Pipeline((error) => {
+      console.log('PIPELINE-ERROR: ', JSON.stringify(error));
+    });
+
     _this._registerExternalListener();
   }
+
+  get pipeline() { return this._pipeline; }
 
   /**
   * Register listener to receive message when "msg.to === url".
@@ -82,50 +92,53 @@ class MiniBus {
   * @param  {Function} responseCallback Optional parameter, if the developer what's automatic response management.
   * @return {number} Returns the message ID, in case it should be needed for manual management of the response handler.
   */
-  postMessage(msg, responseCallback) {
+  postMessage(inMsg, responseCallback) {
     let _this = this;
 
     //TODO: how do we manage message ID's? Should it be a global runtime counter, or per URL address?
     //Global counter will not work, because there will be multiple MiniBus instances!
     //Per URL, can be a lot of data to maintain!
     //Maybe a counter per MiniBus instance. This is the assumed solution for now.
-    if (!msg.id || msg.id === 0) {
+    if (!inMsg.id || inMsg.id === 0) {
       _this._msgId++;
-      msg.id = _this._msgId;
+      inMsg.id = _this._msgId;
     }
 
-    //automatic management of response handlers
-    if (responseCallback) {
-      let responseId = msg.from + msg.id;
-      _this._responseCallbacks[responseId] = responseCallback;
+    _this._pipeline.process(inMsg, (msg) => {
 
-      setTimeout(() => {
-        let responseFun = _this._responseCallbacks[responseId];
-        delete _this._responseCallbacks[responseId];
+      //automatic management of response handlers
+      if (responseCallback) {
+        let responseId = msg.from + msg.id;
+        _this._responseCallbacks[responseId] = responseCallback;
 
-        if (responseFun) {
-          let errorMsg = {
-            id: msg.id, type: 'response',
-            body: {code: 'error', desc: 'Response timeout!'}
-          };
+        setTimeout(() => {
+          let responseFun = _this._responseCallbacks[responseId];
+          delete _this._responseCallbacks[responseId];
 
-          responseFun(errorMsg);
-        }
-      }, _this._responseTimeOut);
-    }
+          if (responseFun) {
+            let errorMsg = {
+              id: msg.id, type: 'response',
+              body: {code: 'error', desc: 'Response timeout!'}
+            };
 
-    if (!_this._onResponse(msg)) {
-      let itemList = _this._subscriptions[msg.to];
-      if (itemList) {
-        //do not publish on default address, because of loopback cycle
-        _this._publishOn(itemList, msg);
-      } else {
-        //if there is no listener, send to external interface
-        _this._onPostMessage(msg);
+            responseFun(errorMsg);
+          }
+        }, _this._responseTimeOut);
       }
-    }
 
-    return msg.id;
+      if (!_this._onResponse(msg)) {
+        let itemList = _this._subscriptions[msg.to];
+        if (itemList) {
+          //do not publish on default address, because of loopback cycle
+          _this._publishOn(itemList, msg);
+        } else {
+          //if there is no listener, send to external interface
+          _this._onPostMessage(msg);
+        }
+      }
+    });
+
+    return inMsg.id;
   }
 
   /**
