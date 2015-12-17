@@ -14,7 +14,7 @@ class IdentityModule {
   * USER'S OWN IDENTITY
   */
   constructor() {
-
+    let _this = this;
   }
 
   /**
@@ -38,6 +38,7 @@ class IdentityModule {
   * @return {Promise}         Promise         IDToken
   */
   loginWithRP(identifier, scope) {
+    let _this = this;
 
     /*
       When calling this function, if everything is fine, a small pop-up will open requesting a login with a google account. After the login is made, the pop-up will close and the function will return the ID token.
@@ -63,7 +64,7 @@ class IdentityModule {
     let OAUTHURL   =   'https://accounts.google.com/o/oauth2/auth?';
     let SCOPE      =   'email%20profile';
     let CLIENTID   =   '808329566012-tqr8qoh111942gd2kg007t0s8f277roi.apps.googleusercontent.com';
-    let REDIRECT   =    'http://127.0.0.1:8080/';
+    let REDIRECT   =    document.URL; //'http://127.0.0.1:8080/';
 
     //let REDIRECT   =   document.URL.substring(0, document.URL.length - 1); //remove the '#' character
     let LOGOUT     =   'http://accounts.google.com/Logout';
@@ -89,6 +90,11 @@ class IdentityModule {
     }
 
     return new Promise(function(resolve, reject) {
+
+      if (_this.token !== undefined) {
+        //TODO verify whether the token is still valid or not.
+        return resolve(_this.token);
+      }
 
       //function to validate the access token received during the authentication
       function validateToken(token) {
@@ -122,6 +128,7 @@ class IdentityModule {
             if (req.status == 200) {
               console.log('getUserInfo ', req);
               tokenID = JSON.parse(req.responseText);
+              _this.token = tokenID;
               resolve(tokenID);
             } else if (req.status == 400) {
               reject('There was an error processing the token');
