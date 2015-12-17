@@ -79,4 +79,21 @@ describe('MiniBus', function() {
     });
   });
 
+  it('pipeline msg change', function(done) {
+    let mBus = new MiniBus();
+    mBus.pipeline.handlers = [
+      function(ctx) {
+        ctx.msg.token = '12345678';
+        ctx.next();
+      }
+    ];
+
+    mBus.addListener('hyper-2', (msg) => {
+      expect(msg).to.eql({ id: 1, type: 'ping', token: '12345678', from: 'hyper-1', to: 'hyper-2' });
+      done();
+    });
+
+    mBus.postMessage({ type: 'ping', from: 'hyper-1', to: 'hyper-2' });
+  });
+
 });

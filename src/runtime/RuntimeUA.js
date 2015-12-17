@@ -62,6 +62,19 @@ class RuntimeUA {
 
     // Instantiate the Message Bus
     _this.messageBus = new MessageBus(_this.registry);
+    _this.messageBus.pipeline.handlers = [
+
+      // Policy message authorise
+      function(ctx) {
+        _this.policyEngine.authorise(ctx.msg).then(function(changedMgs) {
+          ctx.msg = changedMgs;
+          ctx.next();
+        }).catch(function(reason) {
+          console.error(reason);
+          ctx.fail(reason);
+        });
+      }
+    ];
 
     // Register messageBus on Registry
     _this.registry.messageBus = _this.messageBus;

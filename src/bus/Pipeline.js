@@ -19,11 +19,9 @@ class Pipeline {
   process(msg, onDeliver) {
     let _this = this;
 
-    let iter = new Iterator(_this.handlers);
-    let ctx = new PipeContext(_this, iter, msg, onDeliver);
-
-    if (iter.hasNext) {
-      iter.next(ctx);
+    if (_this.handlers.length > 0) {
+      let iter = new Iterator(_this.handlers);
+      iter.next(new PipeContext(_this, iter, msg, onDeliver));
     } else {
       onDeliver(msg);
     }
@@ -53,6 +51,7 @@ class PipeContext {
   get pipeline() { return this._pipeline; }
 
   get msg() { return this._msg; }
+  set msg(inMsg) { this._msg = inMsg; }
 
   next() {
     let _this = this;
