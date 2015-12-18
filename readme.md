@@ -159,4 +159,4 @@ To run the demo on example folder:
  live-server --port=4000
  ```
  - in your browser access to http://localhost:4000/example.
- - for communication between hyperties in two distinct browsers, you need, run locally [dev-msg-node-vertx](https://github.com/reTHINK-project/dev-msg-node-vertx#java)
+ - for communication between hyperties in two distinct browsers, you need, run locally [dev-msg-node-vertx](https://github.com/reTHINK-project/dev-msg-node-vertx/tree/dev-0.2#unit-testing)

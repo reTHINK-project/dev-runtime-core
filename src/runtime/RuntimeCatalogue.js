@@ -141,7 +141,7 @@ class RuntimeCatalogue {
         type: '',
         messageSchema: '',
         configuration: {
-          url: 'ws://localhost:9090/ws'
+          url: 'wss://msg-node.ua.pt:9090/ws'
         },
         policies: '',
         constraints: '',

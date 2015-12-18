@@ -2,7 +2,7 @@
   "name": "runtime-core",
   "version": "0.2.0",
   "description": "core runtime development",
-  "main": "dist/runtime-core.js",
+  "main": "src/runtime-core.js",
   "scripts": {
     "init-setup": "npm init && npm install -g jspm karma-cli gulp-cli && npm install && jspm init && node setup.js",
     "test": "karma start"
