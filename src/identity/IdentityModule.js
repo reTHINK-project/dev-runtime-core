@@ -1,3 +1,5 @@
+import hello from 'hellojs';
+
 /**
 * IdentityModule
 *
@@ -15,6 +17,7 @@ class IdentityModule {
   */
   constructor() {
     let _this = this;
+    _this._hello = hello;
   }
 
   /**
@@ -58,7 +61,11 @@ class IdentityModule {
     	3º Add the URI  in the authorized redirect URI section.
       4º change the REDIRECT parameter bellow with the pretended URI
 
+      identityModule._hello.init({google: "808329566012-tqr8qoh111942gd2kg007t0s8f277roi.apps.googleusercontent.com"});
+      identityModule._hello("google").login();
+
     */
+
     let VALIDURL   =   'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=';
     let USERINFURL =   'https://www.googleapis.com/oauth2/v1/userinfo?access_token=';
     let OAUTHURL   =   'https://accounts.google.com/o/oauth2/auth?';
@@ -126,7 +133,7 @@ class IdentityModule {
         req.onreadystatechange = function(e) {
           if (req.readyState == 4) {
             if (req.status == 200) {
-              console.log('getUserInfo ', req);
+              //console.log('getUserInfo ', req);
               tokenID = JSON.parse(req.responseText);
               _this.token = tokenID;
               resolve(tokenID);
@@ -140,9 +147,19 @@ class IdentityModule {
         req.send();
       }
 
+      hello.init({google: '808329566012-tqr8qoh111942gd2kg007t0s8f277roi.apps.googleusercontent.com'});
+      hello('google').login().then(function(token) {
+        //console.log('cenas');
+        //console.log('validated: ',token.authResponse.access_token);
+        validateToken(token.authResponse.access_token);
+      }, function(error) {
+        console.log('errorValidating ', error);
+        reject(error);
+      });
+
       //this will open a window with the URL which will open a page sent by google for the user to insert the credentials
       // when the google validates the credentials then send a access token
-      let win = window.open(_url, 'openIDrequest', 'width=800, height=600');
+      /*let win = window.open(_url, 'openIDrequest', 'width=800, height=600');
       let pollTimer = window.setInterval(function() {
         try {
           //console.log(win.document.URL);
@@ -167,7 +184,7 @@ class IdentityModule {
         } catch (e) {
           //console.log(e);
         }
-      }, 500);
+      }, 500);*/
     });
   }
 

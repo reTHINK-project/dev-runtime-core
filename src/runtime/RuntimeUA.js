@@ -54,11 +54,11 @@ class RuntimeUA {
     // Instantiate the identity Module
     _this.identityModule = new IdentityModule();
 
-    // Instantiate the Policy Engine
-    _this.policyEngine = new PolicyEngine();
-
     // Instantiate the Registry Module
     _this.registry = new Registry(runtimeURL, appSandbox);
+
+    // Instantiate the Policy Engine
+    _this.policyEngine = new PolicyEngine(_this.identityModule, _this.registry);
 
     // Instantiate the Message Bus
     _this.messageBus = new MessageBus(_this.registry);
