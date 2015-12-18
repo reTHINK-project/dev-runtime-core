@@ -18,6 +18,7 @@ class IdentityModule {
   constructor() {
     let _this = this;
     _this._hello = hello;
+    _this.identities = [];
   }
 
   /**
@@ -32,6 +33,15 @@ class IdentityModule {
   */
   registerWithRP() {
     // Body...
+  }
+
+  /**
+  * Find and return all available identities that can be associated to the Hyperty Instance
+  * @return {Array<Identities>}         Array         Identities
+  */
+  getIdentities() {
+    let _this = this;
+    return _this.identities;
   }
 
   /**
@@ -136,6 +146,13 @@ class IdentityModule {
               //console.log('getUserInfo ', req);
               tokenID = JSON.parse(req.responseText);
               _this.token = tokenID;
+              let email = tokenID.email;
+
+              //contruct the identityURL to be defined as in specification
+              // model: user://<idpdomain>/<user-identifier>
+              let identityURL = 'user://' + email.substring(email.indexOf('@') + 1, email.length) + '/' + email.substring(0, email.indexOf('@'));
+
+              _this.identities.push(identityURL);
               resolve(tokenID);
             } else if (req.status == 400) {
               reject('There was an error processing the token');
@@ -148,7 +165,7 @@ class IdentityModule {
       }
 
       hello.init({google: '808329566012-tqr8qoh111942gd2kg007t0s8f277roi.apps.googleusercontent.com'});
-      hello('google').login().then(function(token) {
+      hello('google').login({scope: 'email'}).then(function(token) {
         //console.log('cenas');
         //console.log('validated: ',token.authResponse.access_token);
         validateToken(token.authResponse.access_token);

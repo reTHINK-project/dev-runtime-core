@@ -15,7 +15,7 @@ class Registry extends EventEmitter {
   * @param  {AppSandbox}          appSandbox            appSandbox
   * @param  {DomainURL}           remoteRegistry        remoteRegistry
   */
-  constructor(runtimeURL, appSandbox, remoteRegistry) {
+  constructor(runtimeURL, appSandbox, identityModule, remoteRegistry) {
 
     super();
 
@@ -34,6 +34,7 @@ class Registry extends EventEmitter {
     _this.appSandbox = appSandbox;
     _this.runtimeURL = runtimeURL;
     _this.remoteRegistry = remoteRegistry;
+    _this.idModule = identityModule;
 
     _this.hypertiesList = {};
     _this.protostubsList = {};
@@ -109,19 +110,6 @@ class Registry extends EventEmitter {
 
           }
 
-          // // addListener with the callback to execute when receive a message from the address-allocation
-          // let item = _this._messageBus.addListener(_this.registryURL, (msg) => {
-          //   let url = msg.body.hypertyRuntime;
-          //
-          //   _this.hypertiesList[domainUrl] = {identity: url + '/identity'};
-          //   _this.sandboxesList[domainUrl] = sandbox;
-          //
-          //   //TODO register this hyperty in the Global Registry
-          //
-          //   item.remove();
-          //
-          // });
-
           // TODO: should be implemented with addresses poll
           // In this case we will request and return only one
           // address
@@ -136,16 +124,33 @@ class Registry extends EventEmitter {
 
             });
 
-            resolve(adderessList[0]);
+            let identities = _this.idModule.getIdentities();
 
-          }).catch(function(reason) {
-            console.log('Address Reason: ', reason);
-            reject(reason);
+            //message to register within the domain registry
+            let msg = {
+              id: 99, type: 'CREATE', from: _this.registryURL, to: 'domain://registry.ua.pt/', body: {user: identities[0],  hypertyDescriptorURL: descriptor, hypertyURL: adderessList[0]}
+            };
+
+            /* // message format to look for hyperties
+            let msg = {
+              id: 98, type: 'READ', from: _this.registryURL, to: 'domain://registry.ua.pt/', body: { user: 'user://google.com/test'}
+            };*/
+            /*  TODO implement when the domain registry is 100% functional
+            console.log(msg);
+            _this._messageBus.postMessage(msg, (reply) => {
+              console.log('===> RegisterHyperty Reply: ', reply);
+            });*/
+
+            resolve(adderessList[0]);
           });
 
-          //TODO call the post message with create hypertyRegistration msg
-
+        }).catch(function(reason) {
+          console.log('Address Reason: ', reason);
+          reject(reason);
         });
+
+        //TODO call the post message with create hypertyRegistration msg
+
       }
     });
 
@@ -346,7 +351,7 @@ class Registry extends EventEmitter {
 
     let promise = new Promise((resolve, reject) => {
 
-      if (!domainUrl.indexOf('msg-node.')) {
+      if (!domainUrl.indexOf('msg-node.') || !domainUrl.indexOf('registry.')) {
         domainUrl = domainUrl.substring(domainUrl.indexOf('.') + 1);
       }
 
