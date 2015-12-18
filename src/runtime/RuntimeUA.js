@@ -55,7 +55,7 @@ class RuntimeUA {
     _this.identityModule = new IdentityModule();
 
     // Instantiate the Registry Module
-    _this.registry = new Registry(runtimeURL, appSandbox, identityModule);
+    _this.registry = new Registry(runtimeURL, appSandbox, _this.identityModule);
 
     // Instantiate the Policy Engine
     _this.policyEngine = new PolicyEngine(_this.identityModule, _this.registry);

@@ -23,7 +23,7 @@ System.config({
     "deep-eql": "npm:deep-eql@0.1.3",
     "hellojs": "npm:hellojs@1.9.8",
     "karma-browserify": "npm:karma-browserify@4.3.0",
-    "service-framework": "github:reTHINK-project/dev-service-framework@develop",
+    "service-framework": "github:rethink-project/dev-service-framework@develop",
     "github:jspm/nodelibs-assert@0.1.0": {
       "assert": "npm:assert@1.3.0"
     },
@@ -99,7 +99,7 @@ System.config({
     "github:jspm/nodelibs-zlib@0.1.0": {
       "browserify-zlib": "npm:browserify-zlib@0.1.4"
     },
-    "github:reTHINK-project/dev-service-framework@develop": {
+    "github:rethink-project/dev-service-framework@develop": {
       "array.observe": "npm:array.observe@0.0.1",
       "babel-polyfill": "npm:babel-polyfill@6.3.14",
       "indexeddbshim": "npm:indexeddbshim@2.2.1",

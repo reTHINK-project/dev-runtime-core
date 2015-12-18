@@ -7,7 +7,7 @@ var sandboxFactory = new SandboxFactory();
 var runtime = new RuntimeUA(sandboxFactory);
 window.runtime = runtime;
 
-var hypertiesList = ['http://ua.pt/HelloHyperty', 'http://ua.pt/WorldHyperty'];
+var hypertiesList = ['http://ua.pt/HelloHyperty'];
 
 function errorMessage(reason) {
   console.log(reason);
@@ -19,19 +19,15 @@ loginBtn.addEventListener('click', function(e) {
 });
 
 function userLoged(result) {
-  console.log('result: ', result);
+  console.log('Your credentials: ', result);
+
+  loadHyperties();
 
   var hypertyHolder = document.querySelector('.hyperties');
   hypertyHolder.className = hypertyHolder.className.replace('hide', '');
-
-  loadHyperties();
 }
 
 // var hypertiesList = ['http://localhost:4000/HelloHyperty', 'http://localhost:4000/WorldHyperty'];
-
-function errorMessage(reason) {
-  console.log(reason);
-}
 
 function deployedHyperties(hyperty, result) {
 
@@ -133,5 +129,4 @@ function loadHyperties() {
   });
 
 }
-
 // END Testing code;
