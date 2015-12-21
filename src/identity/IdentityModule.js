@@ -17,7 +17,7 @@ class IdentityModule {
   */
   constructor() {
     let _this = this;
-    _this._hello = hello;
+    //to store items with this format: {identity: identityURL, token: tokenID}
     _this.identities = [];
   }
 
@@ -78,33 +78,12 @@ class IdentityModule {
 
     let VALIDURL   =   'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=';
     let USERINFURL =   'https://www.googleapis.com/oauth2/v1/userinfo?access_token=';
-    let OAUTHURL   =   'https://accounts.google.com/o/oauth2/auth?';
-    let SCOPE      =   'email%20profile';
-    let CLIENTID   =   '808329566012-tqr8qoh111942gd2kg007t0s8f277roi.apps.googleusercontent.com';
-    let REDIRECT   =    document.URL; //'http://127.0.0.1:8080/';
-
-    //let REDIRECT   =   document.URL.substring(0, document.URL.length - 1); //remove the '#' character
-    let LOGOUT     =   'http://accounts.google.com/Logout';
-    let TYPE       =   'token';
-    let _url        =   OAUTHURL + 'scope=' + SCOPE + '&client_id=' + CLIENTID + '&redirect_uri=' + REDIRECT + '&response_type=' + TYPE;
     let acToken;
     let tokenType;
     let expiresIn;
     let user;
     let tokenID;
     let loggedIn = false;
-
-    //function to parse the query string in the given URL to obatin certain values
-    function gup(url, name) {
-      name = name.replace(/[\[]/, '\\\[').replace(/[\]]/, '\\\]');
-      let regexS = '[\\#&]' + name + '=([^&#]*)';
-      let regex = new RegExp(regexS);
-      let results = regex.exec(url);
-      if (results === null)
-      return '';
-      else
-      return results[1];
-    }
 
     return new Promise(function(resolve, reject) {
 
@@ -121,7 +100,6 @@ class IdentityModule {
         req.onreadystatechange = function(e) {
           if (req.readyState == 4) {
             if (req.status == 200) {
-              //console.log('validateToken ', e);
 
               getIDToken(token);
             } else if (req.status == 400) {
@@ -143,7 +121,6 @@ class IdentityModule {
         req.onreadystatechange = function(e) {
           if (req.readyState == 4) {
             if (req.status == 200) {
-              //console.log('getUserInfo ', req);
               tokenID = JSON.parse(req.responseText);
               _this.token = tokenID;
               let email = tokenID.email;
@@ -152,7 +129,9 @@ class IdentityModule {
               // model: user://<idpdomain>/<user-identifier>
               let identityURL = 'user://' + email.substring(email.indexOf('@') + 1, email.length) + '/' + email.substring(0, email.indexOf('@'));
 
-              _this.identities.push(identityURL);
+              let identityBundle = {identity: identityURL, token: tokenID};
+
+              _this.identities.push(identityBundle);
               resolve(tokenID);
             } else if (req.status == 400) {
               reject('There was an error processing the token');
@@ -166,7 +145,6 @@ class IdentityModule {
 
       hello.init({google: '808329566012-tqr8qoh111942gd2kg007t0s8f277roi.apps.googleusercontent.com'});
       hello('google').login({scope: 'email'}).then(function(token) {
-        //console.log('cenas');
         //console.log('validated: ',token.authResponse.access_token);
         validateToken(token.authResponse.access_token);
       }, function(error) {
@@ -174,34 +152,6 @@ class IdentityModule {
         reject(error);
       });
 
-      //this will open a window with the URL which will open a page sent by google for the user to insert the credentials
-      // when the google validates the credentials then send a access token
-      /*let win = window.open(_url, 'openIDrequest', 'width=800, height=600');
-      let pollTimer = window.setInterval(function() {
-        try {
-          //console.log(win.document.URL);
-
-          if (win.closed) {
-            reject('Some error occured.');
-            clearInterval(pollTimer);
-          }
-
-          if (win.document.URL.indexOf(REDIRECT) != -1) {
-            window.clearInterval(pollTimer);
-            let url =   win.document.URL;
-            acToken =   gup(url, 'access_token');
-            tokenType = gup(url, 'token_type');
-            expiresIn = gup(url, 'expires_in');
-            win.close();
-
-            //after receiving the access token, google requires to validate first the token to prevent confused deputy problem.
-            validateToken(acToken);
-
-          }
-        } catch (e) {
-          //console.log(e);
-        }
-      }, 500);*/
     });
   }
 

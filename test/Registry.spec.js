@@ -12,16 +12,22 @@ import SandboxBase from '../src/sandbox/Sandbox';
 import MessageBus from '../src/bus/MessageBus';
 
 // Testing Registry
-// some simple tests to test functions
-//TODO improve later the expected result from the protosub, where the result is random.
 
-let runtimeURL = 'hyperty-runtime://sp1/123';
+let runtimeURL = 'hyperty-runtime://ua.pt/123';
 
 let sandboxFactory = new SandboxFactory();
 let appSandbox = sandboxFactory.createAppSandbox();
+let identityModule = {
+  getIdentities: () => {
+    let identities = [];
+    let identityBundle = {identity: 'user://gmail.com/openidtest10', token: 'idToken'};
+    identities.push(identityBundle);
+    return identities;
+  }
+};
 
 let getRegistry = new Promise(function(resolve, reject) {
-  var registry = new Registry(runtimeURL, appSandbox);
+  var registry = new Registry(runtimeURL, appSandbox, identityModule);
   resolve(registry);
 });
 
@@ -45,50 +51,38 @@ getRegistry.then(function(registry) {
       });
     });
 
-    describe('registerStub(sandBox, domainURL)', function(done) {
+    describe('registerStub(sandBox, domainURL)', function() {
 
-      it('should register a stub', function() {
-        let sandBox = new SandboxBase('sp1');
-        let domainURL = 'sp1';
+      it('should register a stub', function(done) {
+        let sandBox = new SandboxBase('ua.pt');
+        let domainURL = 'ua.pt';
 
-        expect(registry.registerStub(sandBox, domainURL).then(function(response) {
-          return response;
-        })).to.be.fulfilled.and.eventually.to.not.be.null;
+        expect(registry.registerStub(sandBox, domainURL).then(function(done) {
+          return done;
+        })).to.be.fulfilled.and.eventually.to.contain('msg-node.ua.pt/protostub/').and.notify(done);
 
       });
     });
 
-    describe('discoverProtostub(url)', function(done) {
+    describe('discoverProtostub(url)', function() {
 
-      it('should discover a ProtocolStub', function() {
-        let url = 'sp1';
+      it('should discover a ProtocolStub', function(done) {
+        let url = 'ua.pt';
 
         expect(registry.discoverProtostub(url).then(function(response) {
           return response;
-        })).to.be.fulfilled.and.eventually.to.not.be.null;
+        })).to.be.fulfilled.and.eventually.to.contain('msg-node.ua.pt/protostub/').and.notify(done);
       });
     });
 
-    describe('getSandbox(url)', function(done) {
+    describe('getSandbox(url)', function() {
 
-      it('should get a sandbox from the url', function() {
-        let url = 'sp1';
+      it('should get a sandbox from the url', function(done) {
+        let url = 'ua.pt';
 
         expect(registry.getSandbox(url).then(function(response) {
           return response;
-        })).to.be.fulfilled.and.eventually.to.not.be.null;
-
-      });
-    });
-
-    describe('unregisterStub(url)', function(done) {
-
-      it('should unregister a ProtocolStub', function() {
-        let url = 'sp1';
-
-        expect(registry.unregisterStub(url).then(function(response) {
-          return response;
-        })).to.be.fulfilled.and.eventually.equal('ProtostubURL removed');
+        })).to.be.fulfilled.and.eventually.to.not.be.null.and.notify(done);
 
       });
     });
@@ -97,7 +91,7 @@ getRegistry.then(function(registry) {
 
       it('should register PEP', function(done) {
         let postMessage = {};
-        let hyperty = 'hyperty-catalogue://sp1.pt/HelloHyperty';
+        let hyperty = 'hyperty-catalogue://ua.pt/HelloHyperty';
 
         expect(registry.registerPEP(postMessage, hyperty).then(function(response) {
           return response;
@@ -109,7 +103,7 @@ getRegistry.then(function(registry) {
     describe('unregisterPEP(HypertyRuntimeURL)', function() {
 
       it('should unregister PEP', function(done) {
-        let HypertyRuntimeURL = 'hyperty-catalogue://sp1.pt/HelloHyperty';
+        let HypertyRuntimeURL = 'hyperty-catalogue://ua.pt/HelloHyperty';
 
         expect(registry.unregisterPEP(HypertyRuntimeURL).then(function(response) {
           return response;
@@ -118,31 +112,62 @@ getRegistry.then(function(registry) {
       });
     });
 
-    describe('registerHyperty(sandbox, descriptor)', function(done) {
+    describe('registerHyperty(sandbox, descriptor)', function() {
 
-      it('should register an Hyperty', function() {
-        let sandbox = new SandboxBase('sp1');
-        let descriptor = 'hyperty-catalogue://sp1/<catalogue-object-identifier>';
+      it('should register an Hyperty', function(done) {
+        let sandbox = new SandboxBase('ua.pt');
+        let descriptor = 'hyperty-catalogue://ua.pt/<catalogue-object-identifier>';
+
+        let protoStub = registry.discoverProtostub('ua.pt');
+        registry.messageBus.addListener('domain://msg-node.ua.pt/hyperty-address-allocation', (msg) => {
+          message = {id: 1, type: 'response', from: 'domain://msg-node.ua.pt/hyperty-address-allocation', to: msg.from,
+          body: {code: 200, allocated: ['hyperty-instance://ua.pt/1']}};
+
+          registry.messageBus.postMessage(message, (reply) => {
+            console.log('Reply: ', reply);
+          });
+        });
 
         expect(registry.registerHyperty(sandbox, descriptor).then(function(response) {
           return response;
-        })).to.be.fulfilled.and.eventually.to.not.be.null;
+        })).to.be.fulfilled.and.eventually.equal('hyperty-instance://ua.pt/1').and.notify(done);
 
       });
     });
 
-    describe('resolve(url)', function(done) {
+    describe('resolve(url)', function() {
 
-      it('should return a protostub url', function() {
-        let url = 'hyperty-runtime://sp1/protostub/123';
+      it('should return a protostub url', function(done) {
+        let url = 'hyperty-runtime://ua.pt/protostub/123';
 
         expect(registry.resolve(url).then(function(response) {
           return response;
-        })).to.be.fulfilled.and.eventually.to.not.be.null;
+        })).to.be.fulfilled.and.eventually.to.contain('msg-node.ua.pt/protostub/').and.notify(done);
 
       });
     });
 
+    describe('unregisterStub(url)', function() {
+
+      it('should unregister a ProtocolStub', function(done) {
+        let url = 'ua.pt';
+
+        expect(registry.unregisterStub(url).then(function(response) {
+          return response;
+        })).to.be.fulfilled.and.eventually.equal('ProtostubURL removed').and.notify(done);
+
+      });
+    });
+
+    describe('unregisterHyperty(url)', function() {
+      it('should unregister an Hyperty', function(done) {
+        let url = 'hyperty-instance://ua.pt/1';
+
+        expect(registry.unregisterHyperty(url).then(function(response) {
+          return response;
+        })).to.be.fulfilled.and.eventually.equal('Hyperty successfully deleted').and.notify(done);
+      });
+    });
   });
 
 });

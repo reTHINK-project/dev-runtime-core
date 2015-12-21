@@ -53,7 +53,9 @@ class PolicyEngine {
         /*let hypertyIdentity = _this.registry.getHypertyIdentity(message.body.hypertyURL);
         //this step assume the hypertyIdentity will be google */
         _this.idModule.loginWithRP('google identity', 'scope').then(function(value) {
-          message.body.assertedIdentity = JSON.stringify(value);
+          let assertedID = _this.idModule.getIdentities();
+          message.body.assertedIdentity = assertedID[0].identity;
+          message.body.idToken = JSON.stringify(value);
           message.body.authorised = true;
           resolve(message);
         }, function(error) {
