@@ -79,15 +79,25 @@ class Registry extends EventEmitter {
   /**
   * Function to query the Domain registry, with an user email.
   */
-  getUserInfo(email) {
+  getUserHyperty(email) {
     let _this = this;
     let identityURL = 'user://' + email.substring(email.indexOf('@') + 1, email.length) + '/' + email.substring(0, email.indexOf('@'));
 
     let msg = {
       id: 98, type: 'READ', from: _this.registryURL, to: 'domain://registry.ua.pt/', body: { user: identityURL}
     };
-    _this._messageBus.postMessage(msg, (reply) => {
-      console.log('===> RegisterHyperty Reply: ', reply);
+    return new Promise(function(resolve, reject) {
+
+      _this._messageBus.postMessage(msg, (reply) => {
+
+        let hypertyURL = reply.body.last;
+
+        //TODO remove later, fix the problem of bad URL format received in the message
+        let fixedHypertyURL = 'hyperty:/' + hypertyURL.substring(hypertyURL.indexOf(':') + 1, hypertyURL.length);
+
+        console.log('===> RegisterHyperty Reply: ', fixedHypertyURL);
+        resolve(fixedHypertyURL);
+      });
     });
   }
 
