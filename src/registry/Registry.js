@@ -92,11 +92,21 @@ class Registry extends EventEmitter {
 
         let hypertyURL = reply.body.last;
 
+        if (hypertyURL === undefined) {
+          return reject('User Hyperty not found');
+        }
+
         //TODO remove later, fix the problem of bad URL format received in the message
         let fixedHypertyURL = 'hyperty:/' + hypertyURL.substring(hypertyURL.indexOf(':') + 1, hypertyURL.length);
 
-        console.log('===> RegisterHyperty Reply: ', fixedHypertyURL);
-        resolve(fixedHypertyURL);
+        let idPackage = {
+          id: email,
+          descriptor: reply.body.hyperties[hypertyURL].descriptor,
+          hypertyURL: fixedHypertyURL
+        };
+
+        console.log('===> RegisterHyperty messageBundle: ', idPackage);
+        resolve(idPackage);
       });
     });
   }
