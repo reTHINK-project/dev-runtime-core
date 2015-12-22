@@ -6,21 +6,23 @@ class GraphConnectorContactData {
 
   /**
    * Constructs a new object representing information about one contact.
-   * @param  {GUID}     guid        The GUID of the new contact.
+   * @param  {String}     guid        The GUID of the new contact.
    * @param  {String}   firstName   The first name of the new contact.
    * @param  {String}   lastName    The last name of the new contact.
    */
     constructor(guid, firstName, lastName) {
       this._guid = guid;
+      this._userIDs = [];
       this._firstName = firstName;
       this._lastName = lastName;
       this._privateContact = false;
       this._lastSyncBloomFilter1Hop = new Date(0).toISOString();
+      this._residenceLocation;
     }
 
     /**
      * Returns the GUID.
-     * @returns  {GUID}     guid        GUID of the contact.
+     * @returns  {String}     GUID        GUID of the contact.
      */
     get guid() {
       return this._guid;
@@ -28,10 +30,26 @@ class GraphConnectorContactData {
 
     /**
      * Sets the GUID.
-     * @param  {GUID}     guid        GUID of the contat.
+     * @param  {String}     GUID        GUID of the contat.
      */
     set guid(guid) {
       this._guid = guid;
+    }
+
+    /**
+     * Returns the user IDs.
+     * @returns  {List<String>}     userIDs        UserIDs of the contact.
+     */
+    get userIDs() {
+      return this._userIDs;
+    }
+
+    /**
+     * Sets the userIDs.
+     * @param  {List<String>}     userIDs        UserIDs of the contat.
+     */
+    set userIDs(userIDs) {
+      this._userIDs = userIDs;
     }
 
     /**
@@ -62,7 +80,7 @@ class GraphConnectorContactData {
      * Sets the last name.
      * @param  {String}     lastName        Last name of the contat.
      */
-    set firstName(lastName) {
+    set lastName(lastName) {
       this._lastName = lastName;
     }
 
@@ -96,6 +114,22 @@ class GraphConnectorContactData {
      */
     set contactsBloomFilter1Hop(bf) {
       this._contactsBloomFilter1Hop = bf;
+    }
+
+    /**
+     * Returns the geohash of the residence location.
+     * @returns  {String}     geohash        Geohash of the residence location.
+     */
+    get residenceLocation() {
+      return this._residenceLocation;
+    }
+
+    /**
+     * Sets the geohash of the residence location.
+     * @param  {String}     geohash        Geohash of the residence location.
+     */
+    set residenceLocation(geohash) {
+      this._residenceLocation = geohash;
     }
 
 }

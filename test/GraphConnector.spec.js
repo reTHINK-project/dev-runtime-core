@@ -6,6 +6,8 @@ let expect = chai.expect;
 import BloomFilter from '../src/graphconnector/BloomFilter';
 import GraphConnector from '../src/graphconnector/GraphConnector';
 import GraphConnectorContactData from '../src/graphconnector/GraphConnectorContactData';
+import bip39 from 'bip39';
+import jsrsasign from 'jsrsasign';
 
 describe('Graph Connector', function() {
 
@@ -176,6 +178,40 @@ describe('Graph Connector', function() {
 
     });
 
+  });
+
+  describe('GUID', function() {
+    var graphConnector1 = new GraphConnector();
+    var graphConnector2 = new GraphConnector();
+
+    it('GUID generation', function() {
+
+      this.timeout(10000);
+
+      let mnemonic1 = graphConnector1.generateGUID();
+      let res = mnemonic1.split(' ');
+
+      expect(res.length).to.equal(16);
+
+    });
+
+    it('GUID re-generation', function() {
+
+      this.timeout(20000);
+
+      // create mnemonic and sign Global Regsitry record
+      let mnemonic1 = graphConnector1.generateGUID();
+      let jwt1 = graphConnector1.signGlobalRegistryRecord();
+
+      // re-create keys from mnemonic and check signature
+      let mnenomic2 = graphConnector2.useGUID(mnemonic1);
+      let publicKey2 = graphConnector2.globalRegistryRecord.publicKeyPEM;
+      let publicKeyObject2 = jsrsasign.KEYUTIL.getKey(publicKey2);
+      let isValid = KJUR.jws.JWS.verify(jwt1, publicKeyObject2, ['ES256']);
+
+      expect(isValid).to.equal(true);
+
+    });
   });
 
 });
