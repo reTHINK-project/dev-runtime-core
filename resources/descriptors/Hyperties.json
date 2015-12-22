@@ -1,0 +1,34 @@
+{
+  "HelloHyperty": {
+    "guid": "guid",
+    "id": "HelloHyperty",
+    "classname": "activate",
+    "description": "description of Hello Hyperty",
+    "kind": "hyperty",
+    "catalogueURL": "....",
+    "sourcePackageURL": "../resources/descriptors/HelloHyperty-sourcePackageURL.json",
+    "dataObject": "",
+    "type": "",
+    "messageSchema": "",
+    "policies": "",
+    "constraints": "",
+    "hypertyCapabilities": "",
+    "protocolCapabilities": ""
+  },
+  "WorldHyperty": {
+    "guid": "guid",
+    "id": "WorldHyperty",
+    "classname": "activate",
+    "description": "description of World Hyperty",
+    "kind": "hyperty",
+    "catalogueURL": "....",
+    "sourcePackageURL": "../resources/descriptors/WorldHyperty-sourcePackageURL.json",
+    "dataObject": "",
+    "type": "",
+    "messageSchema": "",
+    "policies": "",
+    "constraints": "",
+    "hypertyCapabilities": "",
+    "protocolCapabilities": ""
+  }
+}

@@ -2,10 +2,11 @@
   "name": "runtime-core",
   "version": "0.2.0",
   "description": "core runtime development",
-  "main": "src/runtime-core.js",
+  "main": "dist/",
   "scripts": {
     "init-setup": "npm init && npm install -g jspm karma-cli gulp-cli && npm install && jspm init && node setup.js",
-    "test": "karma start"
+    "test": "karma start",
+    "start": "live-server --no-browser --port=8080"
   },
   "repository": {
     "type": "git",
@@ -38,6 +39,7 @@
     "browserify": "^11.2.0",
     "chai": "^3.3.0",
     "chai-as-promised": "^5.1.0",
+    "del": "^2.2.0",
     "expect.js": "^0.3.1",
     "gulp": "^3.9.0",
     "gulp-bump": "^1.0.0",
@@ -48,6 +50,7 @@
     "gulp-uglify": "^1.4.2",
     "gulp-watch": "^4.3.5",
     "indexeddbshim": "^2.2.1",
+    "js-base64": "^2.1.9",
     "jsdoc": "git+https://github.com/jsdoc3/jsdoc.git",
     "jspm": "^0.16.10",
     "karma": "^0.13.10",
@@ -60,7 +63,9 @@
     "object.observe": "^0.2.6",
     "sinon": "^1.17.2",
     "sinon-chai": "^2.8.0",
+    "through2": "^2.0.0",
     "vinyl-buffer": "^1.0.0",
+    "vinyl-paths": "^2.1.0",
     "vinyl-source-stream": "^1.1.0",
     "watchify": "^3.4.0",
     "yargs": "^3.30.0"

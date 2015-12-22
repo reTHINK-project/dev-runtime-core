@@ -1,0 +1,21 @@
+{
+  "ua.pt":{
+    "guid":"guid",
+    "id":"VertxProtoStub",
+    "classname":"activate",
+    "description":"description of ProtoStub",
+    "kind":"Protostub",
+    "catalogueURL":"....",
+    "sourcePackageURL":"../resources/descriptors/VertxProtoStub-sourcePackageURL.json",
+    "dataObject":"",
+    "type":"",
+    "messageSchema":"",
+    "configuration": {
+      "url":"wss://msg-node.ua.pt:9090/ws"
+    },
+    "policies": "",
+    "constraints":"",
+    "hypertyCapabilities":"",
+    "protocolCapabilities":""
+  }
+}

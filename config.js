@@ -21,6 +21,7 @@ System.config({
     "browserify": "npm:browserify@11.1.0",
     "core-js": "npm:core-js@1.2.6",
     "deep-eql": "npm:deep-eql@0.1.3",
+    "handlebars": "github:components/handlebars.js@4.0.5",
     "hellojs": "npm:hellojs@1.9.8",
     "karma-browserify": "npm:karma-browserify@4.3.0",
     "service-framework": "github:rethink-project/dev-service-framework@develop",
@@ -223,7 +224,7 @@ System.config({
     },
     "npm:braces@1.8.1": {
       "expand-range": "npm:expand-range@1.8.1",
-      "lazy-cache": "npm:lazy-cache@0.2.3",
+      "lazy-cache": "npm:lazy-cache@0.2.7",
       "preserve": "npm:preserve@0.2.0",
       "repeat-element": "npm:repeat-element@1.1.2"
     },
@@ -962,6 +963,9 @@ System.config({
       "isarray": "npm:isarray@0.0.1",
       "stream-splicer": "npm:stream-splicer@1.3.2"
     },
+    "npm:lazy-cache@0.2.7": {
+      "process": "github:jspm/nodelibs-process@0.1.2"
+    },
     "npm:levn@0.2.5": {
       "prelude-ls": "npm:prelude-ls@1.1.2",
       "type-check": "npm:type-check@0.3.1"
@@ -1113,7 +1117,7 @@ System.config({
       "minimist": "npm:minimist@0.0.10",
       "path": "github:jspm/nodelibs-path@0.1.0",
       "process": "github:jspm/nodelibs-process@0.1.2",
-      "wordwrap": "npm:wordwrap@0.0.3"
+      "wordwrap": "npm:wordwrap@0.0.2"
     },
     "npm:optionator@0.5.0": {
       "deep-is": "npm:deep-is@0.1.3",
@@ -1122,7 +1126,7 @@ System.config({
       "prelude-ls": "npm:prelude-ls@1.1.2",
       "process": "github:jspm/nodelibs-process@0.1.2",
       "type-check": "npm:type-check@0.3.1",
-      "wordwrap": "npm:wordwrap@0.0.3"
+      "wordwrap": "npm:wordwrap@0.0.2"
     },
     "npm:options@0.0.6": {
       "fs": "github:jspm/nodelibs-fs@0.1.2"

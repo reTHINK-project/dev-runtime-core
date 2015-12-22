@@ -1,9 +1,18 @@
 class RuntimeCatalogue {
 
   constructor() {
-    console.log('runtime catalogue');
-
     let _this = this;
+
+    // TODO: Remove the code is only for development fase without the Server backend catalogue;
+    // Mockup load the base of descriptors
+    _this._makeExternalRequest('../resources/descriptors/Hyperties.json').then(function(result) {
+      _this.Hyperties = JSON.parse(result);
+    });
+
+    _this._makeExternalRequest('../resources/descriptors/ProtoStubs.json').then(function(result) {
+      _this.ProtoStubs = JSON.parse(result);
+    });
+
   }
 
   set runtimeURL(runtimeURL) {
@@ -65,26 +74,8 @@ class RuntimeCatalogue {
 
     return new Promise(function(resolve, reject) {
 
-      //hyperty-catalogue://sp1/HelloHyperty
       let hypertyName = hypertyURL.substr(hypertyURL.lastIndexOf('/') + 1);
-
-      let hypertyDescriptor = {
-        guid: 'guid',
-        id: 'idHyperty',
-        classname: hypertyName,
-        description: 'description of ' + hypertyName,
-        kind: 'hyperty',
-        catalogueURL: '....',
-        sourcePackageURL: '../resources/' + hypertyName + '-sourcePackageURL.json',
-        dataObject: '',
-        type: '',
-        messageSchema: '',
-        policies: '',
-        constraints: '',
-        hypertyCapabilities: '',
-        protocolCapabilities: ''
-      };
-
+      let hypertyDescriptor = _this.Hyperties[hypertyName];
       resolve(hypertyDescriptor);
 
     });
@@ -129,26 +120,7 @@ class RuntimeCatalogue {
 
     return new Promise(function(resolve, reject) {
 
-      let stubDescriptor = {
-        guid: 'guid',
-        id: 'idProtoStub',
-        classname: 'VertxProtoStub',
-        description: 'description of ProtoStub',
-        kind: 'hyperty',
-        catalogueURL: '....',
-        sourcePackageURL: '../resources/Vertx-sourcePackageURL.json',
-        dataObject: '',
-        type: '',
-        messageSchema: '',
-        configuration: {
-          url: 'wss://msg-node.ua.pt:9090/ws'
-        },
-        policies: '',
-        constraints: '',
-        hypertyCapabilities: '',
-        protocolCapabilities: ''
-      };
-
+      let stubDescriptor = _this.ProtoStubs[domainURL];
       resolve(stubDescriptor);
 
     });

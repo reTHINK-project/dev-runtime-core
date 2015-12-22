@@ -1,4 +1,4 @@
-import RegistryDataModel from './RegistryDataModel'
+import RegistryDataModel from './RegistryDataModel';
 
 /**
 *   @author: Gil Dias (gil.dias@tecnico.ulisboa.pt)

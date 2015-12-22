@@ -30,6 +30,9 @@ you may need following the steps present on [Github Help](https://help.github.co
 
 This could happen because it is a private module and need your GitHub authentication to allow cloning the repository.
 
+If you have some troubles with authentication on windows using the Git Shell, you can try [caching your GitHub password](https://help.github.com/articles/caching-your-github-password-in-git/#platform-windows).
+This should avoid the constant prompt for username and password;
+
 **Instalation through jspm**
 
 We need configure jspm config using github tokens, for that, following this (based on issue [3](https://github.com/reTHINK-project/dev-runtime-browser/issues/3)):
@@ -156,7 +159,7 @@ This repository have a folder with an working example of runtime-core and we can
 To run the demo on example folder:
  - you need **live-server** running in the root folder.
  ```
- live-server --port=4000
+ npm start
  ```
- - in your browser access to http://localhost:4000/example.
+ - in your browser access to http://127.0.0.1:8080/example.
  - for communication between hyperties in two distinct browsers, you need, run locally [dev-msg-node-vertx](https://github.com/reTHINK-project/dev-msg-node-vertx/tree/dev-0.2#unit-testing)

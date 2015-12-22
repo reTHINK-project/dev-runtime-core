@@ -1,83 +1,198 @@
-import {RuntimeUA, Sandbox} from '../src/runtime-core';
+import {addLoader, removeLoader, documentReady, errorMessage} from './support';
 
+import {RuntimeUA, Sandbox} from '../src/runtime-core';
 import SandboxFactory from '../resources/sandboxes/SandboxFactory';
 
-var sandboxFactory = new SandboxFactory();
+let sandboxFactory = new SandboxFactory();
+let avatar = 'https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/photo.jpg';
+let runtime = new RuntimeUA(sandboxFactory);
 
-var runtime = new RuntimeUA(sandboxFactory);
-window.runtime = runtime;
-
-var hypertiesList = ['http://ua.pt/HelloHyperty'];
-
-function errorMessage(reason) {
-  console.log(reason);
+// Check if the document is ready
+if (document.readyState === 'complete') {
+  documentReady();
+} else {
+  window.addEventListener('onload', documentReady, false);
+  document.addEventListener('DOMContentLoaded', documentReady, false);
 }
 
-var loginBtn = document.querySelector('.login');
+let loginBtn = document.querySelector('.login');
 loginBtn.addEventListener('click', function(e) {
-  runtime.identityModule.loginWithRP().then(userLoged).catch(errorMessage);
+
+  let loginPanel = document.querySelector('.login-panel');
+  let content = loginPanel.querySelector('.card-content');
+  addLoader(content);
+
+  runtime.identityModule.loginWithRP().then(function(result) {
+    removeLoader(content);
+    userLoged(result);
+  }).catch(errorMessage);
+
+  let btn = $(e.currentTarget);
+  btn.addClass('hide');
+
 });
 
 function userLoged(result) {
-  console.log('Your credentials: ', result);
 
-  loadHyperties();
+  let hypertyHolder = $('.hyperties');
+  hypertyHolder.removeClass('hide');
 
-  var hypertyHolder = document.querySelector('.hyperties');
-  hypertyHolder.className = hypertyHolder.className.replace('hide', '');
+  let cardHolder = $('.card-content');
+  let html = '<div class="row"><div class="col s12"><span class="card-title">Logged</span></div><div class="col s2"><img alt="" class="circle responsive-img" src=' + result.picture + ' ></div><div class="col s8"><p><b>id:</b> ' + result.id + '</p><p><b>email:</b> ' + result.email + '</p><p><b>name:</b> ' + result.name + '</p><p><b>locale:</b> ' + result.locale + '</p></div>';
+
+  cardHolder.html(html);
+
+  console.log(result);
+
+  let hyperty = 'http://ua.pt/HelloHyperty';
+
+  // Load First Hyperty
+  runtime.loadHyperty(hyperty).then(hypertyDeployed).catch(function(reason) {
+    errorMessage(reason);
+  });
+
 }
 
-// var hypertiesList = ['http://localhost:4000/HelloHyperty', 'http://localhost:4000/WorldHyperty'];
+function hypertyDeployed(result) {
 
-function deployedHyperties(hyperty, result) {
+  let loginPanel = $('.login-panel');
+  let cardAction = loginPanel.find('.card-action');
+  let hypertyInfo = '<span class="white-text"><p><b>hypertyURL:</b> ' + result.runtimeHypertyURL + '</br><b>status:</b> ' + result.status + '</p></span>';
 
-  var hypertyName = hyperty.substr(hyperty.lastIndexOf('/') + 1);
-  var hypertyEl = document.querySelector('.' + hypertyName);
+  loginPanel.attr('data-url', result.runtimeHypertyURL);
+  cardAction.append(hypertyInfo);
 
-  hypertyEl.querySelector('.status').innerHTML = result.status;
-  hypertyEl.querySelector('.name').innerHTML = hypertyName;
-  hypertyEl.querySelector('.runtime-hyperty-url').innerHTML = result.runtimeHypertyURL;
-  hypertyEl.querySelector('.form').setAttribute('data-url', result.runtimeHypertyURL);
-  hypertyEl.querySelector('.send').addEventListener('click', function(e) {
+  // Prepare to discover email:
+  discoverEmail();
 
-    var target = e.target;
-    var form = target.parentElement;
-    var fromHyperty = form.getAttribute('data-url');
-    var toHyperty = form.querySelector('.toHyperty').value;
-    var messageHypert = form.querySelector('.messageHyperty').value;
+  // Prepare the chat
+  let messageChat = $('.hyperty-chat');
+  messageChat.removeClass('hide');
 
-    if (fromHyperty && toHyperty && messageHypert) {
-      sendMessage(fromHyperty, toHyperty, messageHypert);
+  runtime.messageBus.addListener(result.runtimeHypertyURL, newMessageRecived);
+}
+
+function discoverEmail() {
+
+  let section = $('.discover');
+  let searchForm = section.find('.form');
+  let searchBtn = searchForm.find('.search');
+  let inputField = searchForm.find('.friend-email');
+
+  section.removeClass('hide');
+
+  searchForm.on('submit', function(event) {
+    event.preventDefault();
+
+    let collection = section.find('.collection');
+    let collectionItem = '<li class="collection-item"><div class="preloader-wrapper small active"><div class="spinner-layer spinner-blue-only"><div class="circle-clipper left"><div class="circle"></div></div><div class="gap-patch"><div class="circle"></div></div><div class="circle-clipper right"><div class="circle"></div></div></div></div></li>';
+
+    collection.removeClass('hide');
+    collection.addClass('center-align');
+    collection.html(collectionItem);
+
+    let email = inputField.val();
+    console.log(email);
+    runtime.registry.getUserHyperty(email).then(emailDiscovered).catch(emailDiscoveredError);
+
+  });
+}
+
+function emailDiscovered(result) {
+  // Email Discovered:  Object {id: "openidtest10@gmail.com", descriptor: "http://ua.pt/HelloHyperty", hypertyURL: "hyperty://ua.pt/27d080c8-22ef-445f-9f9a-f2c750fc6d5a"}
+
+  console.log('Email Discovered: ', result);
+
+  let loginPanel = $('.login-panel');
+  let section = $('.discover');
+  let collection = section.find('.collection');
+  let collectionItem = '<li class="collection-item avatar"><img src="' + avatar + '" alt="" class="circle"><span class="title">' + result.id + '</span><p>' + result.descriptor + '<br>' + result.hypertyURL + '</p><a href="#!" class="message-btn secondary-content"><i class="material-icons">message</i></a></li>';
+
+  collection.removeClass('center-align');
+  collection.append(collectionItem);
+
+  let messageChatBtn = collection.find('.message-btn');
+  messageChatBtn.on('click', function(event) {
+    event.preventDefault();
+    openChat(result);
+  });
+
+}
+
+function emailDiscoveredError(result) {
+
+  // result = {
+  //   id: 'openidtest10@gmail.com',
+  //   descriptor: 'http://ua.pt/HelloHyperty',
+  //   hypertyURL: 'hyperty://ua.pt/27d080c8-22ef-445f-9f9a-f2c750fc6d5a'
+  // };
+  //
+  // emailDiscovered(result);
+
+  console.error('Email Discovered Error: ', result);
+
+  let section = $('.discover');
+  let collection = section.find('.collection');
+
+  let collectionItem = '<li class="collection-item orange lighten-3"><i class="material-icons left circle">error_outline</i>' + result + '</li>';
+
+  collection.removeClass('center-align');
+  collection.removeClass('hide');
+  collection.html(collectionItem);
+}
+
+function openChat(result) {
+
+  let messagesChat = $('.messages');
+  let messageForm = messagesChat.find('.form');
+  let loginPanel = $('.login-panel');
+  let fromUser = loginPanel.attr('data-url');
+  let toUserEl = messagesChat.find('.runtime-hyperty-url');
+  let sendBtn = messagesChat.find('.send');
+  let toUser = result.hypertyURL;
+
+  toUserEl.html(toUser);
+
+  messageForm.on('submit', function(e) {
+
+    let messageText = messagesChat.find('.message-text').val();
+
+    if (messageText) {
+      sendMessage(fromUser, toUser, messageText);
     }
 
-    form.reset();
+    messageForm[0].reset();
 
     e.preventDefault();
   });
 
-  runtime.messageBus.addListener(result.runtimeHypertyURL, newMessageRecived);
+  messagesChat.removeClass('hide');
 
 }
 
 function newMessageRecived(msg) {
 
-  var fromHyperty = msg.from;
-  var toHyperty = msg.to;
+  // Object {to: "hyperty://ua.pt/71552726-ae61-411a-bab0-41843b26b56f", from: "hyperty://ua.pt/586f5f0a-aa98-4d23-b864-a6efd3ccdd74", type: "message", body: Object, id: 2}
+  processMessage(msg, 'in');
 
-  var elTo = document.querySelector('form[data-url="' + toHyperty + '"]');
-  var listTo = elTo.parentElement.querySelector('.list');
+}
 
-  var itemTo = document.createElement('li');
-  itemTo.setAttribute('class', 'collection-item avatar right-align');
-  itemTo.innerHTML = '<i class="material-icons circle green">call_received</i><label class="name title">' + fromHyperty + '</label><p class="message">' + msg.body.value.replace(/\n/g, '<br>') + '</p>';
+function processMessage(msg, type) {
 
-  listTo.appendChild(itemTo);
+  let side = 'right-align';
+  if (type === 'out') {
+    side = 'left-align';
+  }
 
+  let messageCollection = $('.hyperty-chat .collection');
+  let messageItem = '<li class="collection-item avatar ' + side + '"><img src="' + avatar + '" alt="" class="circle"><span class="title">' + msg.from + '</span><span class="text left">' + msg.body.value.replace(/\n/g, '<br>') + '</span></li>';
+
+  messageCollection.append(messageItem);
 }
 
 function sendMessage(from, to, message) {
 
-  var messageObject = {
+  let msg = {
     to: to,
     from: from,
     type: 'message',
@@ -86,47 +201,6 @@ function sendMessage(from, to, message) {
     }
   };
 
-  var form = document.querySelector('form[data-url="' + from + '"]');
-  if (form) {
-    var listFrom = form.parentElement.querySelector('.list');
-    var itemFrom = document.createElement('li');
-    itemFrom.setAttribute('class', 'collection-item avatar');
-    itemFrom.innerHTML = '<i class="material-icons circle yellow">call_made</i><label class="name title">' + from + '</label><p class="message">' + messageObject.body.value.replace(/\n/g, '<br>') + '</p>';
-
-    listFrom.appendChild(itemFrom);
-  }
-
-  runtime.messageBus.postMessage(messageObject);
+  processMessage(msg, 'out');
+  runtime.messageBus.postMessage(msg);
 }
-
-function loadHyperties() {
-
-  var time = 1;
-
-  hypertiesList.forEach(function(hyperty) {
-
-    setTimeout(function() {
-
-      // Load First Hyperty
-      runtime.loadHyperty(hyperty).then(function(result) {
-        deployedHyperties(hyperty, result);
-      }).catch(function(reason) {
-        errorMessage(reason);
-      });
-
-      // This load stub is not necessary, because for domain ua.pt the loadHyperty
-      // create a stub for the same domain;
-      // r.loadStub('ua.pt').then(function(result) {
-      //   console.log(result);
-      // }).catch(function(reason) {
-      //   console.log(reason);
-      // });
-
-    }, (1000 * time));
-
-    time++;
-
-  });
-
-}
-// END Testing code;
