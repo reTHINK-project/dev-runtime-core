@@ -1,6 +1,6 @@
 import {addLoader, removeLoader, documentReady, errorMessage} from './support';
 
-import {RuntimeUA, Sandbox} from '../src/runtime-core';
+import RuntimeUA from '../src/runtime-core';
 import SandboxFactory from '../resources/sandboxes/SandboxFactory';
 
 let sandboxFactory = new SandboxFactory();
@@ -106,8 +106,9 @@ function emailDiscovered(result) {
   let loginPanel = $('.login-panel');
   let section = $('.discover');
   let collection = section.find('.collection');
-  let collectionItem = '<li class="collection-item avatar"><img src="' + avatar + '" alt="" class="circle"><span class="title">' + result.id + '</span><p>' + result.descriptor + '<br>' + result.hypertyURL + '</p><a href="#!" class="message-btn secondary-content"><i class="material-icons">message</i></a></li>';
+  let collectionItem = '<li class="collection-item avatar"><img src="' + avatar + '" alt="" class="circle"><span class="title">' + result.id + '</span><p>' + result.descriptor + '<br>' + result.hypertyURL + '</p><a href="#!" class="message-btn"><i class="material-icons left">message</i>Send Message</a></li>';
 
+  collection.empty();
   collection.removeClass('center-align');
   collection.append(collectionItem);
 
@@ -136,9 +137,10 @@ function emailDiscoveredError(result) {
 
   let collectionItem = '<li class="collection-item orange lighten-3"><i class="material-icons left circle">error_outline</i>' + result + '</li>';
 
+  collection.empty();
   collection.removeClass('center-align');
   collection.removeClass('hide');
-  collection.html(collectionItem);
+  collection.append(collectionItem);
 }
 
 function openChat(result) {

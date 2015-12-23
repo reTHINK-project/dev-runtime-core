@@ -22,7 +22,7 @@ System.config({
     "core-js": "npm:core-js@1.2.6",
     "deep-eql": "npm:deep-eql@0.1.3",
     "handlebars": "github:components/handlebars.js@4.0.5",
-    "hellojs": "npm:hellojs@1.9.8",
+    "hellojs": "npm:hellojs@1.9.9",
     "karma-browserify": "npm:karma-browserify@4.3.0",
     "service-framework": "github:rethink-project/dev-service-framework@develop",
     "github:jspm/nodelibs-assert@0.1.0": {
@@ -817,7 +817,7 @@ System.config({
     "npm:hash.js@1.0.3": {
       "inherits": "npm:inherits@2.0.1"
     },
-    "npm:hellojs@1.9.8": {
+    "npm:hellojs@1.9.9": {
       "buffer": "github:jspm/nodelibs-buffer@0.1.0",
       "http": "github:jspm/nodelibs-http@1.7.1",
       "process": "github:jspm/nodelibs-process@0.1.2",

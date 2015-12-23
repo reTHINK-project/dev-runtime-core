@@ -46,13 +46,13 @@ class RuntimeUA {
     // TODO: check if runtime catalogue need the runtimeURL;
     _this.runtimeCatalogue.runtimeURL = runtimeURL;
 
+    // Instantiate the identity Module
+    _this.identityModule = new IdentityModule();
+
     // Use the sandbox factory to create an AppSandbox;
     // In the future can be decided by policyEngine if we need
     // create a AppSandbox or not;
     let appSandbox = sandboxFactory.createAppSandbox();
-
-    // Instantiate the identity Module
-    _this.identityModule = new IdentityModule();
 
     // Instantiate the Registry Module
     _this.registry = new Registry(runtimeURL, appSandbox, _this.identityModule);
@@ -76,6 +76,11 @@ class RuntimeUA {
       }
     ];
 
+    // Add to App Sandbox the listener;
+    appSandbox.addListener('*', function(msg) {
+      _this.messageBus.postMessage(msg);
+    });
+
     // Register messageBus on Registry
     _this.registry.messageBus = _this.messageBus;
 
@@ -94,6 +99,7 @@ class RuntimeUA {
 
     // Instanciate the SyncherManager;
     _this.syncherManager = new SyncherManager(_this.runtimeURL, _this.messageBus, { });
+
   }
 
   /**
@@ -212,7 +218,13 @@ class RuntimeUA {
         // check if the sandbox is registed for this hyperty descriptor url;
         // Make Steps xxx --- xxx
         // Instantiate the Sandbox
-        return _this.sandboxFactory.createSandbox();
+        let sandbox = _this.sandboxFactory.createSandbox();
+
+        sandbox.addListener('*', function(msg) {
+          _this.messageBus.postMessage(msg);
+        });
+
+        return sandbox;
       })
       .then(function(sandbox) {
         console.info('5: return sandbox and register');
@@ -349,7 +361,12 @@ class RuntimeUA {
         // check if the sandbox is registed for this stub descriptor url;
         // Make Steps xxx --- xxx
         // Instantiate the Sandbox
-        return _this.sandboxFactory.createSandbox();
+        let sandbox = _this.sandboxFactory.createSandbox();
+        sandbox.addListener('*', function(msg) {
+          _this.messageBus.postMessage(msg);
+        });
+
+        return sandbox;
       })
       .then(function(sandbox) {
         console.info('6. return the sandbox instance and the register', sandbox);

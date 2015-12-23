@@ -1,3 +1,2 @@
 import RuntimeUA from './runtime/RuntimeUA';
-
-export {RuntimeUA};
+export default RuntimeUA;

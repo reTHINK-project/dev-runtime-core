@@ -275,9 +275,9 @@ class Registry extends EventEmitter {
       _this.protostubsList[domainURL] = runtimeProtoStubURL;
       _this.sandboxesList[domainURL] = sandbox;
 
-      sandbox.addListener('*', function(msg) {
-        _this._messageBus.postMessage(msg);
-      });
+      // sandbox.addListener('*', function(msg) {
+      //   _this._messageBus.postMessage(msg);
+      // });
 
       resolve(runtimeProtoStubURL);
 

@@ -24,15 +24,16 @@ var uglify = require('gulp-uglify');
 var bump = require('gulp-bump');
 var argv = require('yargs').argv;
 var del = require('del');
+var concat = require('gulp-concat');
 
 var pkg = require('./package.json');
 
-gulp.task('dist', function() {
+gulp.task('runtime', function() {
 
   return browserify({
     entries: ['./src/runtime-core.js'],
     standalone: 'runtime-core',
-    debug: false
+    debug: true
   })
   .transform(babel)
   .bundle()
@@ -53,8 +54,8 @@ gulp.task('minibus', function() {
 
   return browserify({
     entries: ['./src/minibus.js'],
-    standalone: 'minibus',
-    debug: false
+    standalone: 'MiniBus',
+    debug: true
   })
   .transform(babel)
   .bundle()
@@ -76,7 +77,7 @@ gulp.task('sandbox', function() {
   return browserify({
     entries: ['./src/sandbox.js'],
     standalone: 'sandbox',
-    debug: false
+    debug: true
   })
   .transform(babel)
   .bundle()
@@ -93,26 +94,7 @@ gulp.task('sandbox', function() {
 
 });
 
-gulp.task('build', function() {
-
-  var bundler = browserify('./src/runtime-core.js', {
-    standalone: 'runtime-core',
-    debug: true
-  }).transform(babel);
-
-  function rebundle() {
-    return bundler.bundle()
-      .on('error', function(err) {
-        console.error(err);
-        this.emit('end');
-      })
-      .pipe(source('runtime-core.js'))
-      .pipe(gulp.dest('./dist'));
-  }
-
-  return rebundle();
-
-});
+gulp.task('dist', ['runtime', 'minibus', 'sandbox']);
 
 /**
  * Compile on specific file from ES6 to ES5
