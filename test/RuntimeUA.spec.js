@@ -29,18 +29,84 @@ describe('RuntimeUA', function() {
   let sandboxFactory = new SandboxFactory();
   let runtime = new RuntimeUA(sandboxFactory);
 
-  let _stubDescriptor;
-  let _hypertyDescriptor;
-
   before(function() {
+
+    let Hyperties = {
+      HelloHyperty: {
+        guid:'guid',
+        id:'HelloHyperty',
+        classname:'activate',
+        description:'description of Hello Hyperty',
+        kind:'hyperty',
+        catalogueURL:'....',
+        sourcePackageURL:'../resources/descriptors/HelloHyperty-sourcePackageURL.json',
+        dataObject:'',
+        type:'',
+        messageSchema:'',
+        policies:'',
+        constraints:'',
+        hypertyCapabilities:'',
+        protocolCapabilities:''
+      },
+      WorldHyperty:{
+        guid:'guid',
+        id:'WorldHyperty',
+        classname:'activate',
+        description:'description of World Hyperty',
+        kind:'hyperty',
+        catalogueURL:'....',
+        sourcePackageURL:'../resources/descriptors/WorldHyperty-sourcePackageURL.json',
+        dataObject:'',
+        type:'',
+        messageSchema:'',
+        policies:'',
+        constraints:'',
+        hypertyCapabilities:'',
+        protocolCapabilities:''
+      }
+    };
+
+    let ProtoStubs = {
+      'sp.domain': {
+        guid: 'guid',
+        id: 'VertxProtoStub',
+        classname: 'activate',
+        description: 'description of ProtoStub',
+        kind: 'Protostub',
+        catalogueURL: '....',
+        sourcePackageURL: '../resources/descriptors/VertxProtoStub-sourcePackageURL.json',
+        dataObject: '',
+        type: '',
+        messageSchema: '',
+        configuration: {
+          url: 'wss://msg-node.ua.pt:9090/ws'
+        },
+        policies: '',
+        constraints: '',
+        hypertyCapabilities: '',
+        protocolCapabilities: ''
+      }
+    };
 
     // Mockup the source code request
     let mockup = {
       encoding: 'UTF-8',
-      sourceCodeClasname: 'HellosHyperty',
+      sourceCodeClasname: 'HelloHyperty',
       sourceCode: '',
       signature: ''
     };
+
+    let mockupHypertyDescriptor = sinon.stub(runtime.runtimeCatalogue, 'mockupHypertyDescriptor');
+    mockupHypertyDescriptor.returns(new Promise(function(resolve, reject) {
+      runtime.runtimeCatalogue.Hyperties = Hyperties;
+      resolve(Hyperties);
+    }));
+
+    let mockupStubDescriptor = sinon.stub(runtime.runtimeCatalogue, 'mockupStubDescriptor');
+    mockupStubDescriptor.returns(new Promise(function(resolve, reject) {
+      runtime.runtimeCatalogue.ProtoStubs = ProtoStubs;
+      resolve(ProtoStubs);
+    }));
 
     let tes = sinon.stub(runtime.runtimeCatalogue, '_makeExternalRequest');
     tes.returns(new Promise(function(resolve, reject) {
@@ -49,37 +115,19 @@ describe('RuntimeUA', function() {
 
     sinon.stub(runtime.registry, 'registerHyperty')
     .returns(new Promise(function(resolve, reject) {
-      resolve('hyperty://sp1.pt/9c8c1949-e08e-4554-b201-bab201bdb21d');
+      resolve('hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d');
     }));
 
     sinon.stub(runtime.registry, 'discoverProtostub')
     .returns(new Promise(function(resolve, reject) {
-      let stubDescriptor = {
-        guid: 'guid',
-        id: 'idProtoStub',
-        classname: 'VertxProtoStub',
-        description: 'description of ProtoStub',
-        kind: 'hyperty',
-        catalogueURL: '....',
-        sourcePackageURL: '../resources/Vertx-sourcePackageURL.json',
-        dataObject: '',
-        type: '',
-        messageSchema: '',
-        configuration: {
-          url: 'ws://localhost:9090/ws'
-        },
-        policies: '',
-        constraints: '',
-        hypertyCapabilities: '',
-        protocolCapabilities: ''
-      };
+      let stubDescriptor = ProtoStubs['sp.domain'];
 
       resolve(stubDescriptor);
     }));
 
     sinon.stub(runtime.registry, 'registerStub')
     .returns(new Promise(function(resolve, reject) {
-      resolve('msg-node.sp1.pt/protostub/8541');
+      resolve('msg-node.sp.domain/protostub/8541');
     }));
 
     sinon.stub(runtime.registry, 'getSandbox')
@@ -130,7 +178,7 @@ describe('RuntimeUA', function() {
   describe('loadHyperty(hypertyDescriptorURL)', function() {
 
     it('should throw when given no arguments', function(done) {
-      let hypertyDescriptorURL = 'hyperty-catalogue://sp1.pt/HelloHyperty';
+      let hypertyDescriptorURL = 'hyperty-catalogue://sp.domain/HelloHyperty';
       let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL);
 
       expect(loadHyperty)
@@ -140,7 +188,7 @@ describe('RuntimeUA', function() {
 
     it('should be a Promise', function(done) {
 
-      let hypertyDescriptorURL = 'hyperty-catalogue://sp1.pt/HelloHyperty';
+      let hypertyDescriptorURL = 'hyperty-catalogue://sp.domain/HelloHyperty';
       let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL);
 
       expect(loadHyperty)
@@ -152,7 +200,7 @@ describe('RuntimeUA', function() {
 
     it('should be deployed', function(done) {
 
-      let hypertyDescriptorURL = 'hyperty-catalogue://sp1.pt/HelloHyperty';
+      let hypertyDescriptorURL = 'hyperty-catalogue://sp.domain/HelloHyperty';
       let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL);
 
       let hypertyResolved = ['runtimeHypertyURL', 'status'];
@@ -168,7 +216,7 @@ describe('RuntimeUA', function() {
   describe('loadStub(sp-domain)', function() {
 
     it('should throw when given no arguments', function(done) {
-      let spDomain = 'sp1.pt';
+      let spDomain = 'sp.domain';
       let loadStubPromise = runtime.loadStub(spDomain);
 
       expect(loadStubPromise)
@@ -177,7 +225,7 @@ describe('RuntimeUA', function() {
     });
 
     it('should be a Promise', function(done) {
-      let spDomain = 'sp1.pt';
+      let spDomain = 'sp.domain';
       let loadStubPromise = runtime.loadStub(spDomain);
 
       expect(loadStubPromise).to.be.fulfilled
@@ -186,7 +234,7 @@ describe('RuntimeUA', function() {
     });
 
     it('should be deployed', function(done) {
-      let spDomain = 'sp1.pt';
+      let spDomain = 'sp.domain';
       let loadStubPromise = runtime.loadStub(spDomain);
       let stubResolved = ['runtimeProtoStubURL', 'status'];
 

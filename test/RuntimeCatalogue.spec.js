@@ -21,13 +21,82 @@ describe('Runtime Catalogue', function() {
 
   before(function() {
 
+    let Hyperties = {
+      HelloHyperty: {
+        guid:'guid',
+        id:'HelloHyperty',
+        classname:'activate',
+        description:'description of Hello Hyperty',
+        kind:'hyperty',
+        catalogueURL:'....',
+        sourcePackageURL:'../resources/descriptors/HelloHyperty-sourcePackageURL.json',
+        dataObject:'',
+        type:'',
+        messageSchema:'',
+        policies:'',
+        constraints:'',
+        hypertyCapabilities:'',
+        protocolCapabilities:''
+      },
+      WorldHyperty:{
+        guid:'guid',
+        id:'WorldHyperty',
+        classname:'activate',
+        description:'description of World Hyperty',
+        kind:'hyperty',
+        catalogueURL:'....',
+        sourcePackageURL:'../resources/descriptors/WorldHyperty-sourcePackageURL.json',
+        dataObject:'',
+        type:'',
+        messageSchema:'',
+        policies:'',
+        constraints:'',
+        hypertyCapabilities:'',
+        protocolCapabilities:''
+      }
+    };
+
+    let ProtoStubs = {
+      'sp.domain': {
+        guid: 'guid',
+        id: 'VertxProtoStub',
+        classname: 'activate',
+        description: 'description of ProtoStub',
+        kind: 'Protostub',
+        catalogueURL: '....',
+        sourcePackageURL: '../resources/descriptors/VertxProtoStub-sourcePackageURL.json',
+        dataObject: '',
+        type: '',
+        messageSchema: '',
+        configuration: {
+          url: 'wss://msg-node.ua.pt:9090/ws'
+        },
+        policies: '',
+        constraints: '',
+        hypertyCapabilities: '',
+        protocolCapabilities: ''
+      }
+    };
+
     // Mockup the source code request
     let mockup = {
       encoding: 'UTF-8',
-      sourceCodeClasname: 'HellosHyperty',
+      sourceCodeClasname: 'HelloHyperty',
       sourceCode: '',
       signature: ''
     };
+
+    let mockupHypertyDescriptor = sinon.stub(runtimeCatalogue, 'mockupHypertyDescriptor');
+    mockupHypertyDescriptor.returns(new Promise(function(resolve, reject) {
+      runtimeCatalogue.Hyperties = Hyperties;
+      resolve(Hyperties);
+    }));
+
+    let mockupStubDescriptor = sinon.stub(runtimeCatalogue, 'mockupStubDescriptor');
+    mockupStubDescriptor.returns(new Promise(function(resolve, reject) {
+      runtimeCatalogue.ProtoStubs = ProtoStubs;
+      resolve(ProtoStubs);
+    }));
 
     let tes = sinon.stub(runtimeCatalogue, '_makeExternalRequest');
     tes.returns(new Promise(function(resolve, reject) {
@@ -101,8 +170,9 @@ describe('Runtime Catalogue', function() {
 
     // TODO: Check the hyperty descriptor response and compare
     // with what is defined in the specification;
-    let domainURL = 'sp1.pt';
+    let domainURL = 'sp.domain';
     expect(runtimeCatalogue.getStubDescriptor(domainURL).then(function(stubDescriptor) {
+      console.log('stubDescriptor: ', stubDescriptor);
       _stubDescriptor = stubDescriptor;
       return _stubDescriptor;
     }))

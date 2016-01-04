@@ -1,8 +1,9 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 
-let expect = chai.expect;
+chai.config.truncateThreshold = 0;
 
+let expect = chai.expect;
 chai.use(chaiAsPromised);
 
 // Main dependecies
@@ -120,7 +121,7 @@ getRegistry.then(function(registry) {
 
         let protoStub = registry.discoverProtostub('ua.pt');
         registry.messageBus.addListener('domain://msg-node.ua.pt/hyperty-address-allocation', (msg) => {
-          message = {id: 1, type: 'response', from: 'domain://msg-node.ua.pt/hyperty-address-allocation', to: msg.from,
+          let message = {id: 1, type: 'response', from: 'domain://msg-node.ua.pt/hyperty-address-allocation', to: msg.from,
           body: {code: 200, allocated: ['hyperty-instance://ua.pt/1']}};
 
           registry.messageBus.postMessage(message, (reply) => {
@@ -128,9 +129,7 @@ getRegistry.then(function(registry) {
           });
         });
 
-        expect(registry.registerHyperty(sandbox, descriptor).then(function(response) {
-          return response;
-        })).to.be.fulfilled.and.eventually.equal('hyperty-instance://ua.pt/1').and.notify(done);
+        expect(registry.registerHyperty(sandbox, descriptor)).to.be.fulfilled.and.eventually.equal('hyperty-instance://ua.pt/1').and.notify(done);
 
       });
     });

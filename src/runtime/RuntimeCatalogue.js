@@ -3,16 +3,28 @@ class RuntimeCatalogue {
   constructor() {
     let _this = this;
 
+    _this.mockupHypertyDescriptor();
+    _this.mockupStubDescriptor();
+  }
+
+  mockupHypertyDescriptor() {
+    let _this = this;
+
     // TODO: Remove the code is only for development fase without the Server backend catalogue;
     // Mockup load the base of descriptors
     _this._makeExternalRequest('../resources/descriptors/Hyperties.json').then(function(result) {
       _this.Hyperties = JSON.parse(result);
     });
+  }
 
+  mockupStubDescriptor() {
+    let _this = this;
+
+    // TODO: Remove the code is only for development fase without the Server backend catalogue;
+    // Mockup load the base of descriptors
     _this._makeExternalRequest('../resources/descriptors/ProtoStubs.json').then(function(result) {
       _this.ProtoStubs = JSON.parse(result);
     });
-
   }
 
   set runtimeURL(runtimeURL) {
