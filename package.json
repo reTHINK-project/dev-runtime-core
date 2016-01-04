@@ -83,8 +83,12 @@
       "packages": "vendor"
     },
     "dependencies": {
+      "bip39": "npm:bip39@^2.2.0",
+      "bitcoinjs-lib": "npm:bitcoinjs-lib@^2.1.4",
       "hellojs": "npm:hellojs@^1.9.8",
-      "service-framework": "github:rethink-project/dev-service-framework@develop"
+      "jsrsasign": "npm:jsrsasign@^5.0.5",
+      "service-framework": "github:rethink-project/dev-service-framework@develop",
+      "sjcl": "npm:sjcl@1.0.3"
     },
     "devDependencies": {
       "babel": "npm:babel-core@^5.8.24",
@@ -94,6 +98,10 @@
   },
   "dependencies": {
     "hellojs": "^1.9.8",
-    "service-framework": "rethink-project/dev-service-framework#develop"
+    "bip39": "^2.2.0",
+    "bitcoinjs-lib": "^2.1.4",
+    "jsrsasign": "^5.0.5",
+    "service-framework": "rethink-project/dev-service-framework#develop",
+    "sjcl": "^1.0.3"
   }
 }
