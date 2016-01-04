@@ -1,3 +1,6 @@
+// jshint browser:true, jquery: true
+'use strict';
+
 import {addLoader, removeLoader, documentReady, errorMessage} from './support';
 
 import RuntimeUA from '../src/runtime-core';
@@ -76,7 +79,6 @@ function discoverEmail() {
 
   let section = $('.discover');
   let searchForm = section.find('.form');
-  let searchBtn = searchForm.find('.search');
   let inputField = searchForm.find('.friend-email');
 
   section.removeClass('hide');
@@ -103,7 +105,6 @@ function emailDiscovered(result) {
 
   console.log('Email Discovered: ', result);
 
-  let loginPanel = $('.login-panel');
   let section = $('.discover');
   let collection = section.find('.collection');
   let collectionItem = '<li class="collection-item avatar"><img src="' + avatar + '" alt="" class="circle"><span class="title">' + result.id + '</span><p>' + result.descriptor + '<br>' + result.hypertyURL + '</p><a href="#!" class="message-btn"><i class="material-icons left">message</i>Send Message</a></li>';
@@ -150,7 +151,6 @@ function openChat(result) {
   let loginPanel = $('.login-panel');
   let fromUser = loginPanel.attr('data-url');
   let toUserEl = messagesChat.find('.runtime-hyperty-url');
-  let sendBtn = messagesChat.find('.send');
   let toUser = result.hypertyURL;
 
   toUserEl.html(toUser);

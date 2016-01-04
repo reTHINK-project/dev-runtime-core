@@ -1,33 +1,37 @@
-import {RuntimeUA, Sandbox} from '../src/runtime-core';
+// jshint browser:true, jquery: true
+
+'use strict';
+
+import RuntimeUA from '../src/runtime-core';
 
 import SandboxFactory from '../resources/sandboxes/SandboxFactory';
 
-var sandboxFactory = new SandboxFactory();
+let sandboxFactory = new SandboxFactory();
 
-var runtime = new RuntimeUA(sandboxFactory);
+let runtime = new RuntimeUA(sandboxFactory);
 window.runtime = runtime;
 
-var hypertiesList = ['http://ua.pt/HelloHyperty', 'http://ua.pt/WorldHyperty'];
+let hypertiesList = ['http://ua.pt/HelloHyperty', 'http://ua.pt/WorldHyperty'];
 
 function errorMessage(reason) {
   console.log(reason);
 }
 
-var loginBtn = document.querySelector('.login');
-loginBtn.addEventListener('click', function(e) {
+let loginBtn = document.querySelector('.login');
+loginBtn.addEventListener('click', function() {
   runtime.identityModule.loginWithRP().then(userLoged).catch(errorMessage);
 });
 
 function userLoged(result) {
   console.log('result: ', result);
 
-  var hypertyHolder = document.querySelector('.hyperties');
+  let hypertyHolder = document.querySelector('.hyperties');
   hypertyHolder.className = hypertyHolder.className.replace('hide', '');
 
   loadHyperties();
 }
 
-// var hypertiesList = ['http://localhost:4000/HelloHyperty', 'http://localhost:4000/WorldHyperty'];
+// let hypertiesList = ['http://localhost:4000/HelloHyperty', 'http://localhost:4000/WorldHyperty'];
 
 function errorMessage(reason) {
   console.log(reason);
@@ -35,8 +39,8 @@ function errorMessage(reason) {
 
 function deployedHyperties(hyperty, result) {
 
-  var hypertyName = hyperty.substr(hyperty.lastIndexOf('/') + 1);
-  var hypertyEl = document.querySelector('.' + hypertyName);
+  let hypertyName = hyperty.substr(hyperty.lastIndexOf('/') + 1);
+  let hypertyEl = document.querySelector('.' + hypertyName);
 
   hypertyEl.querySelector('.status').innerHTML = result.status;
   hypertyEl.querySelector('.name').innerHTML = hypertyName;
@@ -44,11 +48,11 @@ function deployedHyperties(hyperty, result) {
   hypertyEl.querySelector('.form').setAttribute('data-url', result.runtimeHypertyURL);
   hypertyEl.querySelector('.send').addEventListener('click', function(e) {
 
-    var target = e.target;
-    var form = target.parentElement;
-    var fromHyperty = form.getAttribute('data-url');
-    var toHyperty = form.querySelector('.toHyperty').value;
-    var messageHypert = form.querySelector('.messageHyperty').value;
+    let target = e.target;
+    let form = target.parentElement;
+    let fromHyperty = form.getAttribute('data-url');
+    let toHyperty = form.querySelector('.toHyperty').value;
+    let messageHypert = form.querySelector('.messageHyperty').value;
 
     if (fromHyperty && toHyperty && messageHypert) {
       sendMessage(fromHyperty, toHyperty, messageHypert);
@@ -65,13 +69,13 @@ function deployedHyperties(hyperty, result) {
 
 function newMessageRecived(msg) {
 
-  var fromHyperty = msg.from;
-  var toHyperty = msg.to;
+  let fromHyperty = msg.from;
+  let toHyperty = msg.to;
 
-  var elTo = document.querySelector('form[data-url="' + toHyperty + '"]');
-  var listTo = elTo.parentElement.querySelector('.list');
+  let elTo = document.querySelector('form[data-url="' + toHyperty + '"]');
+  let listTo = elTo.parentElement.querySelector('.list');
 
-  var itemTo = document.createElement('li');
+  let itemTo = document.createElement('li');
   itemTo.setAttribute('class', 'collection-item avatar right-align');
   itemTo.innerHTML = '<i class="material-icons circle green">call_received</i><label class="name title">' + fromHyperty + '</label><p class="message">' + msg.body.value.replace(/\n/g, '<br>') + '</p>';
 
@@ -81,7 +85,7 @@ function newMessageRecived(msg) {
 
 function sendMessage(from, to, message) {
 
-  var messageObject = {
+  let messageObject = {
     to: to,
     from: from,
     type: 'message',
@@ -90,10 +94,10 @@ function sendMessage(from, to, message) {
     }
   };
 
-  var form = document.querySelector('form[data-url="' + from + '"]');
+  let form = document.querySelector('form[data-url="' + from + '"]');
   if (form) {
-    var listFrom = form.parentElement.querySelector('.list');
-    var itemFrom = document.createElement('li');
+    let listFrom = form.parentElement.querySelector('.list');
+    let itemFrom = document.createElement('li');
     itemFrom.setAttribute('class', 'collection-item avatar');
     itemFrom.innerHTML = '<i class="material-icons circle yellow">call_made</i><label class="name title">' + from + '</label><p class="message">' + messageObject.body.value.replace(/\n/g, '<br>') + '</p>';
 
@@ -105,7 +109,7 @@ function sendMessage(from, to, message) {
 
 function loadHyperties() {
 
-  var time = 1;
+  let time = 1;
 
   hypertiesList.forEach(function(hyperty) {
 

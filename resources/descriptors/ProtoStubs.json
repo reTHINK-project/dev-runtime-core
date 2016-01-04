@@ -11,7 +11,8 @@
     "type":"",
     "messageSchema":"",
     "configuration": {
-      "url":"wss://msg-node.ua.pt:9090/ws"
+      "_comment": "ws://citysdk.tagus.ist.utl.pt:9000/ws-wss://msg-node.ua.pt:9090/ws",
+      "url": "wss://msg-node.ua.pt:9090/ws"
     },
     "policies": "",
     "constraints":"",
