@@ -1,3 +1,5 @@
+// jshint varstmt:false
+
 var gulp = require('gulp');
 var exec = require('child_process').exec;
 
@@ -5,7 +7,7 @@ var exec = require('child_process').exec;
 gulp.task('doc', function(done) {
 
   console.log('Generating documentation...');
-  exec('node_modules/.bin/jsdoc -R readme.md -d docs src/*', function(err, stdout, stderr) {
+  exec('node_modules/.bin/jsdoc -R readme.md -d docs src/*', function(err) {
     if (err) return done(err);
     console.log('Documentation generated in "docs" directory');
     done();
@@ -23,16 +25,14 @@ var insert = require('gulp-insert');
 var uglify = require('gulp-uglify');
 var bump = require('gulp-bump');
 var argv = require('yargs').argv;
-var del = require('del');
-var concat = require('gulp-concat');
 
 var pkg = require('./package.json');
 
 gulp.task('runtime', function() {
 
   return browserify({
-    entries: ['./src/runtime-core.js'],
-    standalone: 'runtime-core',
+    entries: ['./src/runtimeUA.js'],
+    standalone: 'runtimeUA',
     debug: true
   })
   .transform(babel)
@@ -41,7 +41,7 @@ gulp.task('runtime', function() {
     console.error(err);
     this.emit('end');
   })
-  .pipe(source('runtime-core.js'))
+  .pipe(source('runtimeUA.js'))
   .pipe(buffer())
   .pipe(uglify())
   .pipe(insert.prepend('// Runtime User Agent \n\n// version: {{version}}\n\n'))
@@ -141,9 +141,8 @@ gulp.task('compile', function() {
 var through = require('through2');
 var Base64 = require('js-base64').Base64;
 var fs = require('fs');
-var vinylPaths = require('vinyl-paths');
 
-function encode(filename, descriptor) {
+function encode(filename) {
 
   var sourcePackage = fs.readFileSync('resources/descriptors/' + filename + '-sourcePackageURL.json', 'utf8');
   var json = JSON.parse(sourcePackage);
@@ -156,8 +155,6 @@ function encode(filename, descriptor) {
     if (file.isStream()) {
       return cb(new Error('Streaming not supported'));
     }
-
-    var descriptorObject = fs.readFileSync('resources/descriptors/' + descriptor + '.json', 'utf8');
 
     var encoded = Base64.encode(file.contents);
     json.sourceCode = encoded;
@@ -183,7 +180,6 @@ gulp.task('watch', function() {
 
     var filename = event.path;
     var splitIndex = filename.lastIndexOf('/') + 1;
-    path = filename.substr(0, splitIndex);
     filename = filename.substr(splitIndex).replace('.js', '');
 
     var descriptorName = 'Hyperties';
@@ -203,7 +199,7 @@ gulp.task('watch', function() {
       .pipe(source('bundle.js'))
       .pipe(gulp.dest('resources/'))
       .pipe(buffer())
-      .pipe(encode(filename, descriptorName))
+      .pipe(encode(filename))
       .pipe(source(filename + '-sourcePackageURL.json'))
       .pipe(gulp.dest('resources/descriptors/'));
   });

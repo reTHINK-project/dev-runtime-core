@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: qos-ua/QoSUA.js</title>
+    <title>JSDoc: Source: registry/RegistryDataModel.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: qos-ua/QoSUA.js</h1>
+    <h1 class="page-title">Source: registry/RegistryDataModel.js</h1>
 
     
 
@@ -27,25 +27,42 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/**
- * QoS User Agent Interface
- */
-class QoSUA {
+*   @author: Gil Dias (gil.dias@tecnico.ulisboa.pt)
+*   Registry Data Model includes all Objects to be handled by the Registry functionality including
+*/
+class RegistryDataModel {
 
-  /**
-   * Get Connectivity Statistics data
-   */
-  getCurrentConnectivityStatistics()  {
-    // Body...
+  constructor(id, url, descriptor, startingTime, lastModified, status, stubs, stubsConfiguration) {
+    let _this = this;
+
+    _this._id = id;
+    _this._url = url;
+    _this._descriptor = descriptor;
+    _this._startingTime = startingTime;
+    _this._lastModified = lastModified;
+    _this._status = status;
+    _this._stubs = stubs;
+    _this._stubsConfiguration = stubsConfiguration;
   }
 
-  /**
-   * Sends Connectivity Statistics data to QoS Broker
-   */
-  sendConnectivityStatisticsToBroker() {
-    // Body
+  get id() {
+    let _this = this;
+    return _this._id;
+  }
+
+  get url() {
+    let _this = this;
+    return _this._url;
+  }
+
+  get descriptor() {
+    let _this = this;
+    return _this._descriptor;
   }
 
 }
+
+export default RegistryDataModel;
 </code></pre>
         </article>
     </section>

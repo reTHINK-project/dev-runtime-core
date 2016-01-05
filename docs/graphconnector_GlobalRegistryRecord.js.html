@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: qos-ua/QoSUA.js</title>
+    <title>JSDoc: Source: graphconnector/GlobalRegistryRecord.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: qos-ua/QoSUA.js</h1>
+    <h1 class="page-title">Source: graphconnector/GlobalRegistryRecord.js</h1>
 
     
 
@@ -27,25 +27,49 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>/**
- * QoS User Agent Interface
- */
-class QoSUA {
+* Represents the user's information for the global registry.
+* @author beierle@tu-berlin.de
+*/
+class GlobalRegistryRecord {
 
   /**
-   * Get Connectivity Statistics data
+   * Constructs a new empty object.
    */
-  getCurrentConnectivityStatistics()  {
-    // Body...
-  }
+    constructor() {
+      this.guid;
+      this.salt;
+      this.userIDs = [];
+      this.lastUpdate;
+      this.timeout;
+      this.publicKeyPEM;
+      this.active;
+      this.revoked;
+    }
 
   /**
-   * Sends Connectivity Statistics data to QoS Broker
+   * Constructs a new object representing information about one contact.
+   * @returns {Object}  object  A JavaScript Object with all fields for the Global Registry Record.
    */
-  sendConnectivityStatisticsToBroker() {
-    // Body
-  }
+    getRecord() {
+
+      // TODO: give error if fields are missing
+
+      let record = new Object();
+      record.guid = this.guid;
+      record.salt = this.salt;
+      record.userIDs = this.userIds;
+      record.lastUpdate = this.lastUpdate;
+      record.timeout = this.timeout;
+      record.publicKey = this.publicKeyPEM;
+      record.active = this.active;
+      record.revoked = this.revoked;
+
+      return record;
+    }
 
 }
+
+export default GlobalRegistryRecord;
 </code></pre>
         </article>
     </section>

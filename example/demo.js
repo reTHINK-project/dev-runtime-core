@@ -1,8 +1,5 @@
 // jshint browser:true, jquery: true
-
-'use strict';
-
-import RuntimeUA from '../src/runtime-core';
+import RuntimeUA from '../src/runtimeUA';
 
 import SandboxFactory from '../resources/sandboxes/SandboxFactory';
 

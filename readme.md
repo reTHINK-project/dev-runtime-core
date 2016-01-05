@@ -91,21 +91,26 @@ How to include this repository in other software parts, like [dev-runtime-browse
 
 example: [dev-runtime-browser](https://github.com/reTHINK-project/dev-runtime-browser)
 
-Verify these use cases: 1. if you will create a new repository, you can use this template, and can configure your development environment; 2. if you already have an respository cloned;
+Verify these use cases:
+1. if you will create a new repository, you can use this template, and can configure your development environment;
+2. if you already have an respository cloned;
 
 for both cases you just have run the command:
 
 ```
-jspm install runtime-core=github:reTHINK-project/dev-runtime-core.git.
+jspm install runtime-core=github:rethink-project/dev-runtime-core@dev-0.2
 ```
 
 and on javascript code you need import the script like other modules;
 
 ```
-import {RuntimeUA, Sandbox} from 'runtime-core';
+import RuntimeUA from 'runtime-core/dist/runtimeUA';
+import {Sandbox, SandboxRegistry} from 'runtime-core/dist/sandbox'
+import MiniBus from 'runtime-core/dist/minibus';
 
 console.log('Runtime: ', RuntimeUA);
-console.log('Sandbox: ', Sandbox);
+console.log('Sandbox: ', Sandbox, SandboxRegistry);
+console.log('MiniBus: ', MiniBus);
 
 ```
 
@@ -114,13 +119,13 @@ console.log('Sandbox: ', Sandbox);
 [dev-runtime-node](https://github.com/reTHINK-project/dev-runtime-node)
 
 ```
-npm install git+ssh://git@github.com/reTHINK-project/dev-runtime-core.git --save
+npm install github:rethink-project/dev-runtime-core#dev-0.2 --save
 ```
 
 after this you can require the runtime-core like other modules on node;
 
 ```
-var RuntimeUA = require('runtime-core').RuntimeUA;
+var RuntimeUA = require('runtime-core').runtimeUA;
 
 var runtime = new RuntimeUA();
 

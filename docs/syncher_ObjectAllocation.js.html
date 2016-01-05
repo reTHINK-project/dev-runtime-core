@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: qos-ua/QoSUA.js</title>
+    <title>JSDoc: Source: syncher/ObjectAllocation.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: qos-ua/QoSUA.js</h1>
+    <h1 class="page-title">Source: syncher/ObjectAllocation.js</h1>
 
     
 
@@ -26,26 +26,57 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>/**
- * QoS User Agent Interface
- */
-class QoSUA {
+            <pre class="prettyprint source linenums"><code>class ObjectAllocation {
+  /* private
+  _url: URL
+  _bus: MiniBus
+  */
 
   /**
-   * Get Connectivity Statistics data
+   * Create an Object Allocation
+   * @param  {URL.URL}      url - url from who is sending the message
+   * @param  {MiniBus}      bus - MiniBus used for address allocation
    */
-  getCurrentConnectivityStatistics()  {
-    // Body...
+  constructor(url, bus) {
+    let _this = this;
+
+    _this._url = url;
+    _this._bus = bus;
   }
 
   /**
-   * Sends Connectivity Statistics data to QoS Broker
+   * get the URL value
+   * @return {string} The url value;
    */
-  sendConnectivityStatisticsToBroker() {
-    // Body
-  }
+  get url() { return this._url; }
 
+  /**
+   * Ask for creation of a number of Object addresses, to the domain message node.
+   * @param  {Domain} domain - Domain of the message node.
+   * @param  {number} number - Number of addresses to request
+   * @returns {Promise&lt;ObjectURL>}  A list of ObjectURL's
+   */
+  create(domain, number) {
+    let _this = this;
+
+    let msg = {
+      type: 'create', from: _this._url, to: 'domain://msg-node.' + domain + '/object-address-allocation',
+      body: { number: number }
+    };
+
+    return new Promise((resolve, reject) => {
+      _this._bus.postMessage(msg, (reply) => {
+        if (reply.body.code === 200) {
+          resolve(reply.body.allocated);
+        } else {
+          reject(reply.body.desc);
+        }
+      });
+    });
+  }
 }
+
+export default ObjectAllocation;
 </code></pre>
         </article>
     </section>

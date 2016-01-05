@@ -26,7 +26,9 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>/**
+            <pre class="prettyprint source linenums"><code>import hello from 'hellojs';
+
+/**
 * IdentityModule
 *
 * Initial specification: D4.1
@@ -42,7 +44,9 @@ class IdentityModule {
   * USER'S OWN IDENTITY
   */
   constructor() {
-
+    let _this = this;
+    //to store items with this format: {identity: identityURL, token: tokenID}
+    _this.identities = [];
   }
 
   /**
@@ -60,10 +64,22 @@ class IdentityModule {
   }
 
   /**
-  * In relation with a classical Relying Party: Login
-  * @return {Promise}          Promise          IDToken
+  * Find and return all available identities that can be associated to the Hyperty Instance
+  * @return {Array&lt;Identities>}         Array         Identities
   */
-  loginWithRP() {
+  getIdentities() {
+    let _this = this;
+    return _this.identities;
+  }
+
+  /**
+  * In relation with a classical Relying Party: Login
+  * @param  {Identifier}      identifier      identifier
+  * @param  {Scope}           scope           scope
+  * @return {Promise}         Promise         IDToken
+  */
+  loginWithRP(identifier, scope) {
+    let _this = this;
 
     /*
       When calling this function, if everything is fine, a small pop-up will open requesting a login with a google account. After the login is made, the pop-up will close and the function will return the ID token.
@@ -83,18 +99,13 @@ class IdentityModule {
     	3º Add the URI  in the authorized redirect URI section.
       4º change the REDIRECT parameter bellow with the pretended URI
 
+      identityModule._hello.init({google: "808329566012-tqr8qoh111942gd2kg007t0s8f277roi.apps.googleusercontent.com"});
+      identityModule._hello("google").login();
+
     */
+
     let VALIDURL   =   'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=';
     let USERINFURL =   'https://www.googleapis.com/oauth2/v1/userinfo?access_token=';
-    let OAUTHURL   =   'https://accounts.google.com/o/oauth2/auth?';
-    let SCOPE      =   'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email';
-    let CLIENTID   =   '808329566012-tqr8qoh111942gd2kg007t0s8f277roi.apps.googleusercontent.com';
-    let REDIRECT   =    'http://127.0.0.1:8080/';
-
-    //let REDIRECT   =   document.URL.substring(0, document.URL.length - 1); //remove the '#' character
-    let LOGOUT     =   'http://accounts.google.com/Logout';
-    let TYPE       =   'token';
-    let _url        =   OAUTHURL + 'scope=' + SCOPE + '&amp;client_id=' + CLIENTID + '&amp;redirect_uri=' + REDIRECT + '&amp;response_type=' + TYPE;
     let acToken;
     let tokenType;
     let expiresIn;
@@ -102,19 +113,33 @@ class IdentityModule {
     let tokenID;
     let loggedIn = false;
 
-    //function to parse the query string in the given URL to obatin certain values
-    function gup(url, name) {
-      name = name.replace(/[\[]/, '\\\[').replace(/[\]]/, '\\\]');
-      let regexS = '[\\#&amp;]' + name + '=([^&amp;#]*)';
-      let regex = new RegExp(regexS);
-      let results = regex.exec(url);
-      if (results === null)
-      return '';
-      else
-      return results[1];
-    }
-
     return new Promise(function(resolve, reject) {
+
+      if (_this.token !== undefined) {
+        //TODO verify whether the token is still valid or not.
+        return resolve(_this.token);
+      }
+
+      //function to validate the access token received during the authentication
+      function validateToken(token) {
+        let req = new XMLHttpRequest();
+        req.open('GET', VALIDURL + token, true);
+
+        req.onreadystatechange = function(e) {
+          if (req.readyState == 4) {
+            if (req.status == 200) {
+
+              getIDToken(token);
+            } else if (req.status == 400) {
+              reject('There was an error processing the token');
+            } else {
+              reject('something else other than 200 was returned');
+            }
+          }
+        };
+        req.send();
+
+      }
 
       //function to exchange the access token with an ID Token containing the information
       function getIDToken(token) {
@@ -124,8 +149,17 @@ class IdentityModule {
         req.onreadystatechange = function(e) {
           if (req.readyState == 4) {
             if (req.status == 200) {
-              //console.log('getUserInfo ', JSON.parse(req.responseText));
               tokenID = JSON.parse(req.responseText);
+              _this.token = tokenID;
+              let email = tokenID.email;
+
+              //contruct the identityURL to be defined as in specification
+              // model: user://&lt;idpdomain>/&lt;user-identifier>
+              let identityURL = 'user://' + email.substring(email.indexOf('@') + 1, email.length) + '/' + email.substring(0, email.indexOf('@'));
+
+              let identityBundle = {identity: identityURL, token: tokenID};
+
+              _this.identities.push(identityBundle);
               resolve(tokenID);
             } else if (req.status == 400) {
               reject('There was an error processing the token');
@@ -137,30 +171,15 @@ class IdentityModule {
         req.send();
       }
 
-      // Body...
-      //this will open a window with the URL which will open a page sent by google for the user to insert the credentials
-      // when the google validates the credentials then send a access token
-      let win = window.open(_url, 'openIDrequest', 'width=800, height=600');
-      let pollTimer   =   window.setInterval(function() {
-        try {
-          //console.log(win.document.URL);
-          if (win.document.URL.indexOf(REDIRECT) != -1) {
-            window.clearInterval(pollTimer);
-            let url =   win.document.URL;
-            acToken =   gup(url, 'access_token');
-            tokenType = gup(url, 'token_type');
-            expiresIn = gup(url, 'expires_in');
-            win.close();
+      hello.init({google: '808329566012-tqr8qoh111942gd2kg007t0s8f277roi.apps.googleusercontent.com'});
+      hello('google').login({scope: 'email'}).then(function(token) {
+        //console.log('validated: ',token.authResponse.access_token);
+        validateToken(token.authResponse.access_token);
+      }, function(error) {
+        console.log('errorValidating ', error);
+        reject(error);
+      });
 
-            //after receiving the access token, and before exchange the access token for a ID token, google requires
-            // to validate first the token.
-            getIDToken(acToken);
-
-          }
-        } catch (e) {
-          //console.log(e);
-        }
-      }, 500);
     });
   }
 
@@ -215,13 +234,13 @@ export default IdentityModule;
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-utils.html">utils</a></li></ul><h3>Classes</h3><ul><li><a href="AddressAllocation.html">AddressAllocation</a></li><li><a href="BloomFilter.html">BloomFilter</a></li><li><a href="EventEmitter.html">EventEmitter</a></li><li><a href="GraphConnector.html">GraphConnector</a></li><li><a href="GraphConnectorContactData.html">GraphConnectorContactData</a></li><li><a href="IdentityModule.html">IdentityModule</a></li><li><a href="MessageBus.html">MessageBus</a></li><li><a href="MiniBus.html">MiniBus</a></li><li><a href="Pipeline.html">Pipeline</a></li><li><a href="PolicyEngine.html">PolicyEngine</a></li><li><a href="ProtoStub.html">ProtoStub</a></li><li><a href="QoSUA.html">QoSUA</a></li><li><a href="Registry.html">Registry</a></li><li><a href="RuntimeUA.html">RuntimeUA</a></li><li><a href="Sandbox.html">Sandbox</a></li><li><a href="SandboxRegistry.html">SandboxRegistry</a></li><li><a href="SyncherManager.html">SyncherManager</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-utils.html">utils</a></li></ul><h3>Classes</h3><ul><li><a href="AddressAllocation.html">AddressAllocation</a></li><li><a href="BloomFilter.html">BloomFilter</a></li><li><a href="EventEmitter.html">EventEmitter</a></li><li><a href="GlobalRegistryRecord.html">GlobalRegistryRecord</a></li><li><a href="GraphConnector.html">GraphConnector</a></li><li><a href="GraphConnectorContactData.html">GraphConnectorContactData</a></li><li><a href="HypertyInstance.html">HypertyInstance</a></li><li><a href="IdentityModule.html">IdentityModule</a></li><li><a href="MessageBus.html">MessageBus</a></li><li><a href="MiniBus.html">MiniBus</a></li><li><a href="ObjectAllocation.html">ObjectAllocation</a></li><li><a href="Pipeline.html">Pipeline</a></li><li><a href="PolicyEngine.html">PolicyEngine</a></li><li><a href="ProtoStub.html">ProtoStub</a></li><li><a href="QoSUA.html">QoSUA</a></li><li><a href="Registry.html">Registry</a></li><li><a href="RegistryDataModel.html">RegistryDataModel</a></li><li><a href="RuntimeUA.html">RuntimeUA</a></li><li><a href="Sandbox.html">Sandbox</a></li><li><a href="SandboxRegistry.html">SandboxRegistry</a></li><li><a href="SyncherManager.html">SyncherManager</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Wed Nov 25 2015 15:05:48 GMT+0100 (Mitteleuropäische Zeit)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.0-dev</a> on Tue Jan 05 2016 11:58:26 GMT+0000 (WET)
 </footer>
 
 <script> prettyPrint(); </script>

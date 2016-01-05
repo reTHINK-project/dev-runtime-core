@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Module: utils</title>
+    <title>JSDoc: Class: ObjectAllocation</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Module: utils</h1>
+    <h1 class="page-title">Class: ObjectAllocation</h1>
 
     
 
@@ -28,8 +28,7 @@
 
 <header>
     
-        
-            
+        <h2>ObjectAllocation</h2>
         
     
 </header>
@@ -38,262 +37,17 @@
     <div class="container-overview">
     
         
-            <div class="description">Support module with some functions will be useful</div>
-        
-
-        
-            
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
 
     
 
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_utils.js.html">utils/utils.js</a>, <a href="utils_utils.js.html#line1">line 1</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-    
-    </div>
-
-    
-
-    
-
-    
-
-     
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        
-            
-
-    
-
-    <h4 class="name" id=".deepClone"><span class="type-signature">(static) </span>deepClone<span class="signature">(obj)</span><span class="type-signature"> &rarr; {Object}</span></h4>
+    <h4 class="name" id="ObjectAllocation"><span class="type-signature"></span>new ObjectAllocation<span class="signature">(url, bus)</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    Make a COPY of the original data
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>obj</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">object to be cloned</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_utils.js.html">utils/utils.js</a>, <a href="utils_utils.js.html#line39">line 39</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Object</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-        
-            
-
-    
-
-    <h4 class="name" id=".divideURL"><span class="type-signature">(static) </span>divideURL<span class="signature">(url)</span><span class="type-signature"> &rarr; {divideURL}</span></h4>
-
-    
-
-
-
-<div class="description">
-    Divide an url in type, domain and identity
+    Create an Object Allocation
 </div>
 
 
@@ -345,7 +99,30 @@
 
             
 
-            <td class="description last">url address</td>
+            <td class="description last">url from who is sending the message</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>bus</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="MiniBus.html">MiniBus</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">MiniBus used for address allocation</td>
         </tr>
 
     
@@ -386,7 +163,245 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_utils.js.html">utils/utils.js</a>, <a href="utils_utils.js.html#line19">line 19</a>
+        <a href="syncher_ObjectAllocation.js.html">syncher/ObjectAllocation.js</a>, <a href="syncher_ObjectAllocation.js.html#line12">line 12</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+     
+
+    
+
+    
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id="url"><span class="type-signature"></span>url<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    get the URL value
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="syncher_ObjectAllocation.js.html">syncher/ObjectAllocation.js</a>, <a href="syncher_ObjectAllocation.js.html#line23">line 23</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id="create"><span class="type-signature"></span>create<span class="signature">(domain, number)</span><span class="type-signature"> &rarr; {Promise.&lt;ObjectURL>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Ask for creation of a number of Object addresses, to the domain message node.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>domain</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Domain</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Domain of the message node.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>number</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Number of addresses to request</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="syncher_ObjectAllocation.js.html">syncher/ObjectAllocation.js</a>, <a href="syncher_ObjectAllocation.js.html#line31">line 31</a>
     </li></ul></dd>
     
 
@@ -413,7 +428,7 @@
 
         
 <div class="param-desc">
-    the result of divideURL
+    A list of ObjectURL's
 </div>
 
 
@@ -424,7 +439,7 @@
     </dt>
     <dd>
         
-<span class="param-type">divideURL</span>
+<span class="param-type">Promise.&lt;ObjectURL></span>
 
 
     </dd>
@@ -437,176 +452,6 @@
         
     
 
-    
-        <h3 class="subsection-title">Type Definitions</h3>
-
-        
-                
-<h4 class="name" id="~divideURL">divideURL</h4>
-
-
-
-
-
-
-    <h5>Type:</h5>
-    <ul>
-        <li>
-            
-<span class="param-type">Object</span>
-
-
-        </li>
-    </ul>
-
-
-
-
-
-    <h5 class="subsection-title">Properties:</h5>
-
-    
-
-<table class="props">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>type</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The type of URL</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>domain</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The domain of URL</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>identity</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">The identity of URL</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="utils_utils.js.html">utils/utils.js</a>, <a href="utils_utils.js.html#line6">line 6</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-            
     
 
     

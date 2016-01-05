@@ -102,7 +102,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="graphconnector_GraphConnector.js.html">graphconnector/GraphConnector.js</a>, <a href="graphconnector_GraphConnector.js.html#line8">line 8</a>
+        <a href="graphconnector_GraphConnector.js.html">graphconnector/GraphConnector.js</a>, <a href="graphconnector_GraphConnector.js.html#line13">line 13</a>
     </li></ul></dd>
     
 
@@ -145,6 +145,160 @@
 
     
         <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id="_createKeys"><span class="type-signature"></span>_createKeys<span class="signature">(mnemonic, salt)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Creates the keys from mnemonic and salt. Also sets public key, guid, and salt for globalRegistryRecord.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>mnemonic</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A string with 15 words.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>salt</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">String</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">A word.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="graphconnector_GraphConnector.js.html">graphconnector/GraphConnector.js</a>, <a href="graphconnector_GraphConnector.js.html#line83">line 83</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         
             
@@ -297,7 +451,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="graphconnector_GraphConnector.js.html">graphconnector/GraphConnector.js</a>, <a href="graphconnector_GraphConnector.js.html#line45">line 45</a>
+        <a href="graphconnector_GraphConnector.js.html">graphconnector/GraphConnector.js</a>, <a href="graphconnector_GraphConnector.js.html#line141">line 141</a>
     </li></ul></dd>
     
 
@@ -379,7 +533,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="graphconnector_GraphConnector.js.html">graphconnector/GraphConnector.js</a>, <a href="graphconnector_GraphConnector.js.html#line72">line 72</a>
+        <a href="graphconnector_GraphConnector.js.html">graphconnector/GraphConnector.js</a>, <a href="graphconnector_GraphConnector.js.html#line168">line 168</a>
     </li></ul></dd>
     
 
@@ -510,7 +664,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="graphconnector_GraphConnector.js.html">graphconnector/GraphConnector.js</a>, <a href="graphconnector_GraphConnector.js.html#line107">line 107</a>
+        <a href="graphconnector_GraphConnector.js.html">graphconnector/GraphConnector.js</a>, <a href="graphconnector_GraphConnector.js.html#line203">line 203</a>
     </li></ul></dd>
     
 
@@ -563,14 +717,14 @@
 
     
 
-    <h4 class="name" id="generateGUID"><span class="type-signature"></span>generateGUID<span class="signature">()</span><span class="type-signature"> &rarr; {array}</span></h4>
+    <h4 class="name" id="generateGUID"><span class="type-signature"></span>generateGUID<span class="signature">()</span><span class="type-signature"> &rarr; {String}</span></h4>
 
     
 
 
 
 <div class="description">
-    Generates a GUID and returns a passphrase from which the GUID can be re-created later.
+    Generates a GUID and returns a mnemonic from which the GUID can be re-created later.
 </div>
 
 
@@ -614,7 +768,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="graphconnector_GraphConnector.js.html">graphconnector/GraphConnector.js</a>, <a href="graphconnector_GraphConnector.js.html#line27">line 27</a>
+        <a href="graphconnector_GraphConnector.js.html">graphconnector/GraphConnector.js</a>, <a href="graphconnector_GraphConnector.js.html#line37">line 37</a>
     </li></ul></dd>
     
 
@@ -641,7 +795,7 @@
 
         
 <div class="param-desc">
-    passphrase      A list of words.
+    mnemonic      A string with 16 words.
 </div>
 
 
@@ -652,7 +806,7 @@
     </dt>
     <dd>
         
-<span class="param-type">array</span>
+<span class="param-type">String</span>
 
 
     </dd>
@@ -767,7 +921,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="graphconnector_GraphConnector.js.html">graphconnector/GraphConnector.js</a>, <a href="graphconnector_GraphConnector.js.html#line91">line 91</a>
+        <a href="graphconnector_GraphConnector.js.html">graphconnector/GraphConnector.js</a>, <a href="graphconnector_GraphConnector.js.html#line187">line 187</a>
     </li></ul></dd>
     
 
@@ -920,7 +1074,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="graphconnector_GraphConnector.js.html">graphconnector/GraphConnector.js</a>, <a href="graphconnector_GraphConnector.js.html#line57">line 57</a>
+        <a href="graphconnector_GraphConnector.js.html">graphconnector/GraphConnector.js</a>, <a href="graphconnector_GraphConnector.js.html#line153">line 153</a>
     </li></ul></dd>
     
 
@@ -951,14 +1105,119 @@
 
     
 
-    <h4 class="name" id="useGUID"><span class="type-signature"></span>useGUID<span class="signature">(passphrase)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="signGlobalRegistryRecord"><span class="type-signature"></span>signGlobalRegistryRecord<span class="signature">()</span><span class="type-signature"> &rarr; {String}</span></h4>
 
     
 
 
 
 <div class="description">
-    Generates a public/private key pair from a given passphrase.
+    SignGenerates a public/private key pair from a given mnemonic.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="graphconnector_GraphConnector.js.html">graphconnector/GraphConnector.js</a>, <a href="graphconnector_GraphConnector.js.html#line127">line 127</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    JWT     JSON Web Token ready to commit to Global Registry.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">String</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="useGUID"><span class="type-signature"></span>useGUID<span class="signature">(mnemonicAndSalt)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Generates a public/private key pair from a given mnemonic (16 words).
+Expects a string containing 16 words seperated by single spaces.
 </div>
 
 
@@ -994,13 +1253,13 @@
 
         <tr>
             
-                <td class="name"><code>passphrase</code></td>
+                <td class="name"><code>mnemonicAndSalt</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">array</span>
+<span class="param-type">String</span>
 
 
             
@@ -1010,7 +1269,7 @@
 
             
 
-            <td class="description last">A list of words.</td>
+            <td class="description last">A string of 16 words.</td>
         </tr>
 
     
@@ -1051,7 +1310,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="graphconnector_GraphConnector.js.html">graphconnector/GraphConnector.js</a>, <a href="graphconnector_GraphConnector.js.html#line35">line 35</a>
+        <a href="graphconnector_GraphConnector.js.html">graphconnector/GraphConnector.js</a>, <a href="graphconnector_GraphConnector.js.html#line68">line 68</a>
     </li></ul></dd>
     
 
@@ -1093,13 +1352,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-utils.html">utils</a></li></ul><h3>Classes</h3><ul><li><a href="AddressAllocation.html">AddressAllocation</a></li><li><a href="BloomFilter.html">BloomFilter</a></li><li><a href="EventEmitter.html">EventEmitter</a></li><li><a href="GraphConnector.html">GraphConnector</a></li><li><a href="GraphConnectorContactData.html">GraphConnectorContactData</a></li><li><a href="IdentityModule.html">IdentityModule</a></li><li><a href="MessageBus.html">MessageBus</a></li><li><a href="MiniBus.html">MiniBus</a></li><li><a href="Pipeline.html">Pipeline</a></li><li><a href="PolicyEngine.html">PolicyEngine</a></li><li><a href="ProtoStub.html">ProtoStub</a></li><li><a href="QoSUA.html">QoSUA</a></li><li><a href="Registry.html">Registry</a></li><li><a href="RuntimeUA.html">RuntimeUA</a></li><li><a href="Sandbox.html">Sandbox</a></li><li><a href="SandboxRegistry.html">SandboxRegistry</a></li><li><a href="SyncherManager.html">SyncherManager</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-utils.html">utils</a></li></ul><h3>Classes</h3><ul><li><a href="AddressAllocation.html">AddressAllocation</a></li><li><a href="BloomFilter.html">BloomFilter</a></li><li><a href="EventEmitter.html">EventEmitter</a></li><li><a href="GlobalRegistryRecord.html">GlobalRegistryRecord</a></li><li><a href="GraphConnector.html">GraphConnector</a></li><li><a href="GraphConnectorContactData.html">GraphConnectorContactData</a></li><li><a href="HypertyInstance.html">HypertyInstance</a></li><li><a href="IdentityModule.html">IdentityModule</a></li><li><a href="MessageBus.html">MessageBus</a></li><li><a href="MiniBus.html">MiniBus</a></li><li><a href="ObjectAllocation.html">ObjectAllocation</a></li><li><a href="Pipeline.html">Pipeline</a></li><li><a href="PolicyEngine.html">PolicyEngine</a></li><li><a href="ProtoStub.html">ProtoStub</a></li><li><a href="QoSUA.html">QoSUA</a></li><li><a href="Registry.html">Registry</a></li><li><a href="RegistryDataModel.html">RegistryDataModel</a></li><li><a href="RuntimeUA.html">RuntimeUA</a></li><li><a href="Sandbox.html">Sandbox</a></li><li><a href="SandboxRegistry.html">SandboxRegistry</a></li><li><a href="SyncherManager.html">SyncherManager</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Wed Nov 25 2015 15:05:48 GMT+0100 (Mitteleuropäische Zeit)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.0-dev</a> on Tue Jan 05 2016 11:58:26 GMT+0000 (WET)
 </footer>
 
 <script> prettyPrint(); </script>

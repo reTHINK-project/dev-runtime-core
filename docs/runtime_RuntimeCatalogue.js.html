@@ -29,7 +29,30 @@
             <pre class="prettyprint source linenums"><code>class RuntimeCatalogue {
 
   constructor() {
-    console.log('runtime catalogue');
+    let _this = this;
+
+    _this.mockupHypertyDescriptor();
+    _this.mockupStubDescriptor();
+  }
+
+  mockupHypertyDescriptor() {
+    let _this = this;
+
+    // TODO: Remove the code is only for development fase without the Server backend catalogue;
+    // Mockup load the base of descriptors
+    _this._makeExternalRequest('../resources/descriptors/Hyperties.json').then(function(result) {
+      _this.Hyperties = JSON.parse(result);
+    });
+  }
+
+  mockupStubDescriptor() {
+    let _this = this;
+
+    // TODO: Remove the code is only for development fase without the Server backend catalogue;
+    // Mockup load the base of descriptors
+    _this._makeExternalRequest('../resources/descriptors/ProtoStubs.json').then(function(result) {
+      _this.ProtoStubs = JSON.parse(result);
+    });
   }
 
   set runtimeURL(runtimeURL) {
@@ -51,8 +74,6 @@
   }
 
   _makeExternalRequest(url) {
-
-    let _this = this;
 
     return new Promise(function(resolve, reject) {
 
@@ -91,27 +112,8 @@
 
     return new Promise(function(resolve, reject) {
 
-      //hyperty-catalogue://sp1/HelloHyperty
       let hypertyName = hypertyURL.substr(hypertyURL.lastIndexOf('/') + 1);
-
-      let hypertyDescriptor = {
-        guid: 'guid',
-        id: 'idHyperty',
-        classname: hypertyName,
-        description: 'description of ' + hypertyName,
-        kind: 'hyperty',
-        catalogueURL: '....',
-        sourceCode: '../resources/' + hypertyName + '.ES5.js',
-        dataObject: '',
-        type: '',
-        messageSchema: '',
-        configuration: '',
-        policies: '',
-        constraints: '',
-        hypertyCapabilities: '',
-        protocolCapabilities: ''
-      };
-
+      let hypertyDescriptor = _this.Hyperties[hypertyName];
       resolve(hypertyDescriptor);
 
     });
@@ -121,13 +123,24 @@
   /**
   * Get hypertySourceCode
   */
-  getHypertySourceCode(hypertySourceCodeURL) {
+  getHypertySourcePackage(hypertyPackage) {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
 
-      _this._makeExternalRequest(hypertySourceCodeURL).then(function(result) {
-        resolve(result);
+      _this._makeExternalRequest(hypertyPackage).then(function(result) {
+
+        try {
+
+          let sourcePackage = JSON.parse(result);
+          let sourceCode = window.atob(sourcePackage.sourceCode);
+          sourcePackage.sourceCode = sourceCode;
+
+          resolve(sourcePackage);
+        } catch (e) {
+          reject(e);
+        }
+
       }).catch(function(reason) {
         reject(reason);
       });
@@ -145,27 +158,7 @@
 
     return new Promise(function(resolve, reject) {
 
-      let stubDescriptor = {
-        guid: 'guid',
-        id: 'idProtoStub',
-        classname: 'VertxProtoStub',
-        description: 'description of ProtoStub',
-        kind: 'hyperty',
-        catalogueURL: '....',
-        sourceCode: '../resources/VertxProtoStub.js',
-        dataObject: '',
-        type: '',
-        messageSchema: '',
-        configuration: {
-          url: 'ws://localhost:9090/ws',
-          runtimeURL: _this._runtimeURL
-        },
-        policies: '',
-        constraints: '',
-        hypertyCapabilities: '',
-        protocolCapabilities: ''
-      };
-
+      let stubDescriptor = _this.ProtoStubs[domainURL];
       resolve(stubDescriptor);
 
     });
@@ -175,14 +168,24 @@
   /**
   * Get protostubSourceCode
   */
-  getStubSourceCode(stubSourceCodeURL) {
+  getStubSourcePackage(sourcePackageURL) {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
 
-      _this._makeExternalRequest(stubSourceCodeURL).then(function(result) {
-        resolve(result);
+      _this._makeExternalRequest(sourcePackageURL).then(function(result) {
+
+        try {
+          let sourcePackage = JSON.parse(result);
+          let sourceCode = window.atob(sourcePackage.sourceCode);
+          sourcePackage.sourceCode = sourceCode;
+
+          resolve(sourcePackage);
+        } catch (e) {
+          reject(e);
+        }
       }).catch(function(reason) {
+        console.error(reason);
         reject(reason);
       });
 
@@ -203,13 +206,13 @@ export default RuntimeCatalogue;
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-utils.html">utils</a></li></ul><h3>Classes</h3><ul><li><a href="AddressAllocation.html">AddressAllocation</a></li><li><a href="BloomFilter.html">BloomFilter</a></li><li><a href="EventEmitter.html">EventEmitter</a></li><li><a href="GraphConnector.html">GraphConnector</a></li><li><a href="GraphConnectorContactData.html">GraphConnectorContactData</a></li><li><a href="IdentityModule.html">IdentityModule</a></li><li><a href="MessageBus.html">MessageBus</a></li><li><a href="MiniBus.html">MiniBus</a></li><li><a href="Pipeline.html">Pipeline</a></li><li><a href="PolicyEngine.html">PolicyEngine</a></li><li><a href="ProtoStub.html">ProtoStub</a></li><li><a href="QoSUA.html">QoSUA</a></li><li><a href="Registry.html">Registry</a></li><li><a href="RuntimeUA.html">RuntimeUA</a></li><li><a href="Sandbox.html">Sandbox</a></li><li><a href="SandboxRegistry.html">SandboxRegistry</a></li><li><a href="SyncherManager.html">SyncherManager</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-utils.html">utils</a></li></ul><h3>Classes</h3><ul><li><a href="AddressAllocation.html">AddressAllocation</a></li><li><a href="BloomFilter.html">BloomFilter</a></li><li><a href="EventEmitter.html">EventEmitter</a></li><li><a href="GlobalRegistryRecord.html">GlobalRegistryRecord</a></li><li><a href="GraphConnector.html">GraphConnector</a></li><li><a href="GraphConnectorContactData.html">GraphConnectorContactData</a></li><li><a href="HypertyInstance.html">HypertyInstance</a></li><li><a href="IdentityModule.html">IdentityModule</a></li><li><a href="MessageBus.html">MessageBus</a></li><li><a href="MiniBus.html">MiniBus</a></li><li><a href="ObjectAllocation.html">ObjectAllocation</a></li><li><a href="Pipeline.html">Pipeline</a></li><li><a href="PolicyEngine.html">PolicyEngine</a></li><li><a href="ProtoStub.html">ProtoStub</a></li><li><a href="QoSUA.html">QoSUA</a></li><li><a href="Registry.html">Registry</a></li><li><a href="RegistryDataModel.html">RegistryDataModel</a></li><li><a href="RuntimeUA.html">RuntimeUA</a></li><li><a href="Sandbox.html">Sandbox</a></li><li><a href="SandboxRegistry.html">SandboxRegistry</a></li><li><a href="SyncherManager.html">SyncherManager</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Wed Nov 25 2015 15:05:48 GMT+0100 (Mitteleuropäische Zeit)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.0-dev</a> on Tue Jan 05 2016 11:58:26 GMT+0000 (WET)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -80,7 +80,10 @@
     <dt class="tag-author">Author:</dt>
     <dd class="tag-author">
         <ul>
-            <li>micaelpedrosa@gmail.comMinimal interface and implementation to send and receive messages. It can be reused in many type of components.Components that need a message system should receive this class as a dependency or extend it.Extensions should implement the following private methods: _onPostMessage and _registerExternalListener</li>
+            <li>micaelpedrosa@gmail.com
+Minimal interface and implementation to send and receive messages. It can be reused in many type of components.
+Components that need a message system should receive this class as a dependency or extend it.
+Extensions should implement the following private methods: _onPostMessage and _registerExternalListener</li>
         </ul>
     </dd>
     
@@ -94,7 +97,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="bus_MiniBus.js.html">bus/MiniBus.js</a>, <a href="bus_MiniBus.js.html#line7">line 7</a>
+        <a href="bus_MiniBus.js.html">bus/MiniBus.js</a>, <a href="bus_MiniBus.js.html#line9">line 9</a>
     </li></ul></dd>
     
 
@@ -150,7 +153,8 @@
 
 
 <div class="description">
-    Not public available, used by the class extension implementation, to process messages from the public "postMessage" without a registered listener.Used to send the message to an external interface, like a WebWorker, IFrame, etc.
+    Not public available, used by the class extension implementation, to process messages from the public "postMessage" without a registered listener.
+Used to send the message to an external interface, like a WebWorker, IFrame, etc.
 </div>
 
 
@@ -243,7 +247,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="bus_MiniBus.js.html">bus/MiniBus.js</a>, <a href="bus_MiniBus.js.html#line206">line 206</a>
+        <a href="bus_MiniBus.js.html">bus/MiniBus.js</a>, <a href="bus_MiniBus.js.html#line219">line 219</a>
     </li></ul></dd>
     
 
@@ -281,7 +285,10 @@
 
 
 <div class="description">
-    Not public available, used by the class extension implementation, to process all messages that enter the MiniBus from an external interface, like a WebWorker, IFrame, etc.This method is called one time in the constructor to register external listeners.The implementation will probably call the "_onMessage" method to publish in the local listeners.DO NOT call "postMessage", there is a danger that the message enters in a cycle!
+    Not public available, used by the class extension implementation, to process all messages that enter the MiniBus from an external interface, like a WebWorker, IFrame, etc.
+This method is called one time in the constructor to register external listeners.
+The implementation will probably call the "_onMessage" method to publish in the local listeners.
+DO NOT call "postMessage", there is a danger that the message enters in a cycle!
 </div>
 
 
@@ -325,7 +332,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="bus_MiniBus.js.html">bus/MiniBus.js</a>, <a href="bus_MiniBus.js.html#line214">line 214</a>
+        <a href="bus_MiniBus.js.html">bus/MiniBus.js</a>, <a href="bus_MiniBus.js.html#line227">line 227</a>
     </li></ul></dd>
     
 
@@ -363,7 +370,8 @@
 
 
 <div class="description">
-    Register listener to receive message when "msg.to === url".Special url "*" for default listener is accepted to intercept all messages.
+    Register listener to receive message when "msg.to === url".
+Special url "*" for default listener is accepted to intercept all messages.
 </div>
 
 
@@ -479,7 +487,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="bus_MiniBus.js.html">bus/MiniBus.js</a>, <a href="bus_MiniBus.js.html#line34">line 34</a>
+        <a href="bus_MiniBus.js.html">bus/MiniBus.js</a>, <a href="bus_MiniBus.js.html#line44">line 44</a>
     </li></ul></dd>
     
 
@@ -539,7 +547,9 @@
 
 
 <div class="description">
-    Manually add a response listener. Only one listener per message ID should exist.ATENTION, there is no timeout for this listener.The listener should be removed with a removeResponseListener, failing to do this will result in a unreleased memory problem.
+    Manually add a response listener. Only one listener per message ID should exist.
+ATENTION, there is no timeout for this listener.
+The listener should be removed with a removeResponseListener, failing to do this will result in a unreleased memory problem.
 </div>
 
 
@@ -678,7 +688,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="bus_MiniBus.js.html">bus/MiniBus.js</a>, <a href="bus_MiniBus.js.html#line56">line 56</a>
+        <a href="bus_MiniBus.js.html">bus/MiniBus.js</a>, <a href="bus_MiniBus.js.html#line66">line 66</a>
     </li></ul></dd>
     
 
@@ -855,7 +865,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="bus_MiniBus.js.html">bus/MiniBus.js</a>, <a href="bus_MiniBus.js.html#line138">line 138</a>
+        <a href="bus_MiniBus.js.html">bus/MiniBus.js</a>, <a href="bus_MiniBus.js.html#line151">line 151</a>
     </li></ul></dd>
     
 
@@ -915,7 +925,9 @@
 
 
 <div class="description">
-    Send messages to local listeners, or if not exists to external listeners.It's has an optional mechanism for automatic management of response handlers.The response handler will be unregistered after receiving the response, or after response timeout (default to 3s).
+    Send messages to local listeners, or if not exists to external listeners.
+It's has an optional mechanism for automatic management of response handlers.
+The response handler will be unregistered after receiving the response, or after response timeout (default to 3s).
 </div>
 
 
@@ -1031,7 +1043,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="bus_MiniBus.js.html">bus/MiniBus.js</a>, <a href="bus_MiniBus.js.html#line85">line 85</a>
+        <a href="bus_MiniBus.js.html">bus/MiniBus.js</a>, <a href="bus_MiniBus.js.html#line95">line 95</a>
     </li></ul></dd>
     
 
@@ -1184,7 +1196,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="bus_MiniBus.js.html">bus/MiniBus.js</a>, <a href="bus_MiniBus.js.html#line73">line 73</a>
+        <a href="bus_MiniBus.js.html">bus/MiniBus.js</a>, <a href="bus_MiniBus.js.html#line83">line 83</a>
     </li></ul></dd>
     
 
@@ -1338,7 +1350,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="bus_MiniBus.js.html">bus/MiniBus.js</a>, <a href="bus_MiniBus.js.html#line65">line 65</a>
+        <a href="bus_MiniBus.js.html">bus/MiniBus.js</a>, <a href="bus_MiniBus.js.html#line75">line 75</a>
     </li></ul></dd>
     
 
@@ -1380,13 +1392,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-utils.html">utils</a></li></ul><h3>Classes</h3><ul><li><a href="AddressAllocation.html">AddressAllocation</a></li><li><a href="BloomFilter.html">BloomFilter</a></li><li><a href="EventEmitter.html">EventEmitter</a></li><li><a href="GraphConnector.html">GraphConnector</a></li><li><a href="GraphConnectorContactData.html">GraphConnectorContactData</a></li><li><a href="IdentityModule.html">IdentityModule</a></li><li><a href="MessageBus.html">MessageBus</a></li><li><a href="MiniBus.html">MiniBus</a></li><li><a href="Pipeline.html">Pipeline</a></li><li><a href="PolicyEngine.html">PolicyEngine</a></li><li><a href="ProtoStub.html">ProtoStub</a></li><li><a href="QoSUA.html">QoSUA</a></li><li><a href="Registry.html">Registry</a></li><li><a href="RuntimeUA.html">RuntimeUA</a></li><li><a href="Sandbox.html">Sandbox</a></li><li><a href="SandboxRegistry.html">SandboxRegistry</a></li><li><a href="SyncherManager.html">SyncherManager</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-utils.html">utils</a></li></ul><h3>Classes</h3><ul><li><a href="AddressAllocation.html">AddressAllocation</a></li><li><a href="BloomFilter.html">BloomFilter</a></li><li><a href="EventEmitter.html">EventEmitter</a></li><li><a href="GlobalRegistryRecord.html">GlobalRegistryRecord</a></li><li><a href="GraphConnector.html">GraphConnector</a></li><li><a href="GraphConnectorContactData.html">GraphConnectorContactData</a></li><li><a href="HypertyInstance.html">HypertyInstance</a></li><li><a href="IdentityModule.html">IdentityModule</a></li><li><a href="MessageBus.html">MessageBus</a></li><li><a href="MiniBus.html">MiniBus</a></li><li><a href="ObjectAllocation.html">ObjectAllocation</a></li><li><a href="Pipeline.html">Pipeline</a></li><li><a href="PolicyEngine.html">PolicyEngine</a></li><li><a href="ProtoStub.html">ProtoStub</a></li><li><a href="QoSUA.html">QoSUA</a></li><li><a href="Registry.html">Registry</a></li><li><a href="RegistryDataModel.html">RegistryDataModel</a></li><li><a href="RuntimeUA.html">RuntimeUA</a></li><li><a href="Sandbox.html">Sandbox</a></li><li><a href="SandboxRegistry.html">SandboxRegistry</a></li><li><a href="SyncherManager.html">SyncherManager</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Wed Nov 25 2015 15:05:48 GMT+0100 (Mitteleuropäische Zeit)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.0-dev</a> on Tue Jan 05 2016 11:58:26 GMT+0000 (WET)
 </footer>
 
 <script> prettyPrint(); </script>

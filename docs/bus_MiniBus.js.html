@@ -26,7 +26,9 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>/**
+            <pre class="prettyprint source linenums"><code>import Pipeline from './Pipeline';
+
+/**
 * @author micaelpedrosa@gmail.com
 * Minimal interface and implementation to send and receive messages. It can be reused in many type of components.
 * Components that need a message system should receive this class as a dependency or extend it.
@@ -39,6 +41,8 @@ class MiniBus {
 
   _responseTimeOut: number
   _responseCallbacks: &lt;url+id: (msg) => void>
+
+  _pipeline: Pipeline
   */
 
   constructor() {
@@ -49,8 +53,14 @@ class MiniBus {
     _this._responseTimeOut = 3000; //default to 3s
     _this._responseCallbacks = {};
 
+    _this._pipeline = new Pipeline((error) => {
+      console.log('PIPELINE-ERROR: ', JSON.stringify(error));
+    });
+
     _this._registerExternalListener();
   }
+
+  get pipeline() { return this._pipeline; }
 
   /**
   * Register listener to receive message when "msg.to === url".
@@ -110,50 +120,53 @@ class MiniBus {
   * @param  {Function} responseCallback Optional parameter, if the developer what's automatic response management.
   * @return {number} Returns the message ID, in case it should be needed for manual management of the response handler.
   */
-  postMessage(msg, responseCallback) {
+  postMessage(inMsg, responseCallback) {
     let _this = this;
 
     //TODO: how do we manage message ID's? Should it be a global runtime counter, or per URL address?
     //Global counter will not work, because there will be multiple MiniBus instances!
     //Per URL, can be a lot of data to maintain!
     //Maybe a counter per MiniBus instance. This is the assumed solution for now.
-    if (!msg.id) {
+    if (!inMsg.id || inMsg.id === 0) {
       _this._msgId++;
-      msg.id = _this._msgId;
+      inMsg.id = _this._msgId;
     }
 
-    //automatic management of response handlers
-    if (responseCallback) {
-      let responseId = msg.from + msg.id;
-      _this._responseCallbacks[responseId] = responseCallback;
+    _this._pipeline.process(inMsg, (msg) => {
 
-      setTimeout(() => {
-        let responseFun = _this._responseCallbacks[responseId];
-        delete _this._responseCallbacks[responseId];
+      //automatic management of response handlers
+      if (responseCallback) {
+        let responseId = msg.from + msg.id;
+        _this._responseCallbacks[responseId] = responseCallback;
 
-        if (responseFun) {
-          let errorMsg = {
-            id: msg.id, type: 'response',
-            body: {code: 'error', desc: 'Response timeout!'}
-          };
+        setTimeout(() => {
+          let responseFun = _this._responseCallbacks[responseId];
+          delete _this._responseCallbacks[responseId];
 
-          responseFun(errorMsg);
-        }
-      }, _this._responseTimeOut);
-    }
+          if (responseFun) {
+            let errorMsg = {
+              id: msg.id, type: 'response',
+              body: {code: 'error', desc: 'Response timeout!'}
+            };
 
-    if (!_this._onResponse(msg)) {
-      let itemList = _this._subscriptions[msg.to];
-      if (itemList) {
-        //do not publish on default address, because of loopback cycle
-        _this._publishOn(itemList, msg);
-      } else {
-        //if there is no listener, send to external interface
-        _this._onPostMessage(msg);
+            responseFun(errorMsg);
+          }
+        }, _this._responseTimeOut);
       }
-    }
 
-    return msg.id;
+      if (!_this._onResponse(msg)) {
+        let itemList = _this._subscriptions[msg.to];
+        if (itemList) {
+          //do not publish on default address, because of loopback cycle
+          _this._publishOn(itemList, msg);
+        } else {
+          //if there is no listener, send to external interface
+          _this._onPostMessage(msg);
+        }
+      }
+    });
+
+    return inMsg.id;
   }
 
   /**
@@ -287,13 +300,13 @@ export default MiniBus;
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-utils.html">utils</a></li></ul><h3>Classes</h3><ul><li><a href="AddressAllocation.html">AddressAllocation</a></li><li><a href="BloomFilter.html">BloomFilter</a></li><li><a href="EventEmitter.html">EventEmitter</a></li><li><a href="GraphConnector.html">GraphConnector</a></li><li><a href="GraphConnectorContactData.html">GraphConnectorContactData</a></li><li><a href="IdentityModule.html">IdentityModule</a></li><li><a href="MessageBus.html">MessageBus</a></li><li><a href="MiniBus.html">MiniBus</a></li><li><a href="Pipeline.html">Pipeline</a></li><li><a href="PolicyEngine.html">PolicyEngine</a></li><li><a href="ProtoStub.html">ProtoStub</a></li><li><a href="QoSUA.html">QoSUA</a></li><li><a href="Registry.html">Registry</a></li><li><a href="RuntimeUA.html">RuntimeUA</a></li><li><a href="Sandbox.html">Sandbox</a></li><li><a href="SandboxRegistry.html">SandboxRegistry</a></li><li><a href="SyncherManager.html">SyncherManager</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-utils.html">utils</a></li></ul><h3>Classes</h3><ul><li><a href="AddressAllocation.html">AddressAllocation</a></li><li><a href="BloomFilter.html">BloomFilter</a></li><li><a href="EventEmitter.html">EventEmitter</a></li><li><a href="GlobalRegistryRecord.html">GlobalRegistryRecord</a></li><li><a href="GraphConnector.html">GraphConnector</a></li><li><a href="GraphConnectorContactData.html">GraphConnectorContactData</a></li><li><a href="HypertyInstance.html">HypertyInstance</a></li><li><a href="IdentityModule.html">IdentityModule</a></li><li><a href="MessageBus.html">MessageBus</a></li><li><a href="MiniBus.html">MiniBus</a></li><li><a href="ObjectAllocation.html">ObjectAllocation</a></li><li><a href="Pipeline.html">Pipeline</a></li><li><a href="PolicyEngine.html">PolicyEngine</a></li><li><a href="ProtoStub.html">ProtoStub</a></li><li><a href="QoSUA.html">QoSUA</a></li><li><a href="Registry.html">Registry</a></li><li><a href="RegistryDataModel.html">RegistryDataModel</a></li><li><a href="RuntimeUA.html">RuntimeUA</a></li><li><a href="Sandbox.html">Sandbox</a></li><li><a href="SandboxRegistry.html">SandboxRegistry</a></li><li><a href="SyncherManager.html">SyncherManager</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Wed Nov 25 2015 15:05:48 GMT+0100 (Mitteleuropäische Zeit)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.0-dev</a> on Tue Jan 05 2016 11:58:26 GMT+0000 (WET)
 </footer>
 
 <script> prettyPrint(); </script>

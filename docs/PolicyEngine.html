@@ -30,7 +30,8 @@
     
         <h2>PolicyEngine</h2>
         
-            <div class="class-description">Core Policy Engine (PDP/PEP) Interface</div>
+            <div class="class-description">Core Policy Engine (PDP/PEP) Interface
+According to: https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/runtime-apis.md#core-policy-engine-pdppep-interface</div>
         
     
 </header>
@@ -44,18 +45,84 @@
     <h2>Constructor</h2>
     
 
-    <h4 class="name" id="PolicyEngine"><span class="type-signature"></span>new PolicyEngine<span class="signature">()</span><span class="type-signature"></span></h4>
+    <h4 class="name" id="PolicyEngine"><span class="type-signature"></span>new PolicyEngine<span class="signature">(IdentityModule, Registry)</span><span class="type-signature"></span></h4>
 
     
 
 
 
+<div class="description">
+    To initialise the Policy Engine
+</div>
 
 
 
 
 
 
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>IdentityModule</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">identityModule      identityModule</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>Registry</code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">runtimeRegistry     runtimeRegistry</td>
+        </tr>
+
+    
+    </tbody>
+</table>
 
 
 
@@ -91,7 +158,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="policy_PolicyEngine.js.html">policy/PolicyEngine.js</a>, <a href="policy_PolicyEngine.js.html#line4">line 4</a>
+        <a href="policy_PolicyEngine.js.html">policy/PolicyEngine.js</a>, <a href="policy_PolicyEngine.js.html#line5">line 5</a>
     </li></ul></dd>
     
 
@@ -148,6 +215,8 @@
 
 <div class="description">
     To add policies to be enforced for a certain deployed Hyperty Instance
+Example of an hyperty: hyperty-instance://tecnico.pt/e1b8fb0b-95e2-4f44-aa18-b40984741196
+Example of a policy: {subject: 'message.header.from', target: 'blacklist', action: 'deny'}
 </div>
 
 
@@ -263,7 +332,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="policy_PolicyEngine.js.html">policy/PolicyEngine.js</a>, <a href="policy_PolicyEngine.js.html#line11">line 11</a>
+        <a href="policy_PolicyEngine.js.html">policy/PolicyEngine.js</a>, <a href="policy_PolicyEngine.js.html#line29">line 29</a>
     </li></ul></dd>
     
 
@@ -394,7 +463,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="policy_PolicyEngine.js.html">policy/PolicyEngine.js</a>, <a href="policy_PolicyEngine.js.html#line28">line 28</a>
+        <a href="policy_PolicyEngine.js.html">policy/PolicyEngine.js</a>, <a href="policy_PolicyEngine.js.html#line48">line 48</a>
     </li></ul></dd>
     
 
@@ -547,7 +616,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="policy_PolicyEngine.js.html">policy/PolicyEngine.js</a>, <a href="policy_PolicyEngine.js.html#line19">line 19</a>
+        <a href="policy_PolicyEngine.js.html">policy/PolicyEngine.js</a>, <a href="policy_PolicyEngine.js.html#line38">line 38</a>
     </li></ul></dd>
     
 
@@ -589,13 +658,13 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-utils.html">utils</a></li></ul><h3>Classes</h3><ul><li><a href="AddressAllocation.html">AddressAllocation</a></li><li><a href="BloomFilter.html">BloomFilter</a></li><li><a href="EventEmitter.html">EventEmitter</a></li><li><a href="GraphConnector.html">GraphConnector</a></li><li><a href="GraphConnectorContactData.html">GraphConnectorContactData</a></li><li><a href="IdentityModule.html">IdentityModule</a></li><li><a href="MessageBus.html">MessageBus</a></li><li><a href="MiniBus.html">MiniBus</a></li><li><a href="Pipeline.html">Pipeline</a></li><li><a href="PolicyEngine.html">PolicyEngine</a></li><li><a href="ProtoStub.html">ProtoStub</a></li><li><a href="QoSUA.html">QoSUA</a></li><li><a href="Registry.html">Registry</a></li><li><a href="RuntimeUA.html">RuntimeUA</a></li><li><a href="Sandbox.html">Sandbox</a></li><li><a href="SandboxRegistry.html">SandboxRegistry</a></li><li><a href="SyncherManager.html">SyncherManager</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-utils.html">utils</a></li></ul><h3>Classes</h3><ul><li><a href="AddressAllocation.html">AddressAllocation</a></li><li><a href="BloomFilter.html">BloomFilter</a></li><li><a href="EventEmitter.html">EventEmitter</a></li><li><a href="GlobalRegistryRecord.html">GlobalRegistryRecord</a></li><li><a href="GraphConnector.html">GraphConnector</a></li><li><a href="GraphConnectorContactData.html">GraphConnectorContactData</a></li><li><a href="HypertyInstance.html">HypertyInstance</a></li><li><a href="IdentityModule.html">IdentityModule</a></li><li><a href="MessageBus.html">MessageBus</a></li><li><a href="MiniBus.html">MiniBus</a></li><li><a href="ObjectAllocation.html">ObjectAllocation</a></li><li><a href="Pipeline.html">Pipeline</a></li><li><a href="PolicyEngine.html">PolicyEngine</a></li><li><a href="ProtoStub.html">ProtoStub</a></li><li><a href="QoSUA.html">QoSUA</a></li><li><a href="Registry.html">Registry</a></li><li><a href="RegistryDataModel.html">RegistryDataModel</a></li><li><a href="RuntimeUA.html">RuntimeUA</a></li><li><a href="Sandbox.html">Sandbox</a></li><li><a href="SandboxRegistry.html">SandboxRegistry</a></li><li><a href="SyncherManager.html">SyncherManager</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Wed Nov 25 2015 15:05:48 GMT+0100 (Mitteleuropäische Zeit)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.0-dev</a> on Tue Jan 05 2016 11:58:26 GMT+0000 (WET)
 </footer>
 
 <script> prettyPrint(); </script>

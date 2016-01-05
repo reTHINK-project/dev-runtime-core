@@ -6,8 +6,8 @@ class PolicyEngine {
 
   /**
   * To initialise the Policy Engine
-  * @param  {Identity Module}      identityModule      identityModule
-  * @param  {Runtime Registry}    runtimeRegistry     runtimeRegistry
+  * @param  IdentityModule      identityModule      identityModule
+  * @param  Registry    runtimeRegistry     runtimeRegistry
   */
   constructor(identityModule, runtimeRegistry) {
     let _this = this;

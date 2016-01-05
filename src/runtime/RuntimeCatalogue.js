@@ -47,8 +47,6 @@ class RuntimeCatalogue {
 
   _makeExternalRequest(url) {
 
-    let _this = this;
-
     return new Promise(function(resolve, reject) {
 
       // TODO: implementation

@@ -1,9 +1,8 @@
 // jshint browser:true, jquery: true
-'use strict';
 
 import {addLoader, removeLoader, documentReady, errorMessage} from './support';
 
-import RuntimeUA from '../src/runtime-core';
+import RuntimeUA from '../src/runtimeUA';
 import SandboxFactory from '../resources/sandboxes/SandboxFactory';
 
 let sandboxFactory = new SandboxFactory();

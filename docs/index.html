@@ -49,7 +49,24 @@
 <pre class="prettyprint source"><code>npm run init-setup</code></pre><p>After running successfully this command you will have 2 folders (node_modules and vendor), these folders are excluded from the commit process, and are only for development.</p>
 <p>if you already have the project configured on your machine, you only need run the next command to add new dependencies:</p>
 <pre class="prettyprint source"><code>npm install
-jspm install</code></pre><p>if you have some trouble with the environment, you can open an issue;</p>
+jspm install</code></pre><hr>
+<p><strong>Private Repository Note</strong></p>
+<p>if you have problems with the <code>npm install</code> command, like &quot;access was forbidden&quot;, &quot;404 not found&quot;, and have the service framework module reference, it is an authentication problem;</p>
+<p>you may need following the steps present on <a href="https://help.github.com/articles/generating-ssh-keys/">Github Help</a>. and select operation system you are using.</p>
+<p>This could happen because it is a private module and need your GitHub authentication to allow cloning the repository.</p>
+<p>If you have some troubles with authentication on windows using the Git Shell, you can try <a href="https://help.github.com/articles/caching-your-github-password-in-git/#platform-windows">caching your GitHub password</a>.
+This should avoid the constant prompt for username and password;</p>
+<p><strong>Instalation through jspm</strong></p>
+<p>We need configure jspm config using github tokens, for that, following this (based on issue <a href="https://github.com/reTHINK-project/dev-runtime-browser/issues/3">3</a>):</p>
+<ol>
+<li><a href="https://github.com/settings/tokens">Here</a>, generate token with public_repo permission enabled</li>
+<li>Save the token generated;</li>
+<li>Execute the command <code>jspm registry config github</code> and you'll be asked for the credentials;</li>
+<li>Now you can execute command <code>jspm install -y and the runtime-core</code> or <code>jspm install runtime-core=github:reTHINK-project/dev-runtime-core</code> or only <code>jspm install</code>;</li>
+</ol>
+<hr>
+<p><strong>Issues</strong></p>
+<p>if you have some trouble with the environment, you can open an issue;</p>
 <h3>Javascript Environment</h3><p>JavaScript code should be written in ES6. There are direct dependencies from nodejs and npm, these can be installed separately or in conjunction with <a href="https://github.com/creationix/nvm">nvm</a></p>
 <h4>Dependencies</h4><ul>
 <li>nodejs</li>
@@ -72,10 +89,16 @@ jspm install</code></pre><p>if you have some trouble with the environment, you c
 <hr>
 <h3>How to include this runtime-core code into others parts of reTHINK Project;</h3><p>How to include this repository in other software parts, like <a href="https://github.com/reTHINK-project/dev-runtime-browser">dev-runtime-browser</a> or <a href="https://github.com/reTHINK-project/dev-runtime-node">dev-runtime-node</a> - for example;</p>
 <h4>browser project</h4><p>example: <a href="https://github.com/reTHINK-project/dev-runtime-browser">dev-runtime-browser</a></p>
-<p>Verify these use cases: 1. if you will create a new repository, you can use this template, and can configure your development environment; 2. if you already have an respository cloned;</p>
+<p>Verify these use cases:</p>
+<ol>
+<li>if you will create a new repository, you can use this template, and can configure your development environment;</li>
+<li>if you already have an respository cloned;</li>
+</ol>
 <p>for both cases you just have run the command:</p>
 <pre class="prettyprint source"><code>jspm install runtime-core=github:reTHINK-project/dev-runtime-core.git.</code></pre><p>and on javascript code you need import the script like other modules;</p>
-<pre class="prettyprint source"><code>import {RuntimeUA, Sandbox} from 'runtime-core';
+<pre class="prettyprint source"><code>import RuntimeUA from 'runtime-core/dist/runtime-core';
+import {Sandbox} from 'runtime-core/dist/sandbox'
+import {MiniBus} from 'runtime-core/dist/minibus';
 
 console.log('Runtime: ', RuntimeUA);
 console.log('Sandbox: ', Sandbox);</code></pre><h4>nodejs</h4><p><a href="https://github.com/reTHINK-project/dev-runtime-node">dev-runtime-node</a></p>
@@ -101,9 +124,9 @@ var runtime = new RuntimeUA();</code></pre><p>if you found some issues, please s
 <hr>
 <p>To run the demo on example folder:</p>
 <ul>
-<li>you need <strong>live-server</strong> running.<pre class="prettyprint source"><code>live-server --port=4000</code></pre></li>
-<li>in your browser access to http://localhost:4000.</li>
-<li>for communication between hyperties in two distinct browsers, you need, run locally <a href="https://github.com/reTHINK-project/dev-msg-node-vertx#java">dev-msg-node-vertx</a></li>
+<li>you need <strong>live-server</strong> running in the root folder.<pre class="prettyprint source"><code>npm start</code></pre></li>
+<li>in your browser access to http://127.0.0.1:8080/example.</li>
+<li>for communication between hyperties in two distinct browsers, you need, run locally <a href="https://github.com/reTHINK-project/dev-msg-node-vertx/tree/dev-0.2#unit-testing">dev-msg-node-vertx</a></li>
 </ul></article>
     </section>
 
@@ -115,13 +138,13 @@ var runtime = new RuntimeUA();</code></pre><p>if you found some issues, please s
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-utils.html">utils</a></li></ul><h3>Classes</h3><ul><li><a href="AddressAllocation.html">AddressAllocation</a></li><li><a href="BloomFilter.html">BloomFilter</a></li><li><a href="EventEmitter.html">EventEmitter</a></li><li><a href="GraphConnector.html">GraphConnector</a></li><li><a href="GraphConnectorContactData.html">GraphConnectorContactData</a></li><li><a href="IdentityModule.html">IdentityModule</a></li><li><a href="MessageBus.html">MessageBus</a></li><li><a href="MiniBus.html">MiniBus</a></li><li><a href="Pipeline.html">Pipeline</a></li><li><a href="PolicyEngine.html">PolicyEngine</a></li><li><a href="ProtoStub.html">ProtoStub</a></li><li><a href="QoSUA.html">QoSUA</a></li><li><a href="Registry.html">Registry</a></li><li><a href="RuntimeUA.html">RuntimeUA</a></li><li><a href="Sandbox.html">Sandbox</a></li><li><a href="SandboxRegistry.html">SandboxRegistry</a></li><li><a href="SyncherManager.html">SyncherManager</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-utils.html">utils</a></li></ul><h3>Classes</h3><ul><li><a href="AddressAllocation.html">AddressAllocation</a></li><li><a href="BloomFilter.html">BloomFilter</a></li><li><a href="EventEmitter.html">EventEmitter</a></li><li><a href="GlobalRegistryRecord.html">GlobalRegistryRecord</a></li><li><a href="GraphConnector.html">GraphConnector</a></li><li><a href="GraphConnectorContactData.html">GraphConnectorContactData</a></li><li><a href="HypertyInstance.html">HypertyInstance</a></li><li><a href="IdentityModule.html">IdentityModule</a></li><li><a href="MessageBus.html">MessageBus</a></li><li><a href="MiniBus.html">MiniBus</a></li><li><a href="ObjectAllocation.html">ObjectAllocation</a></li><li><a href="Pipeline.html">Pipeline</a></li><li><a href="PolicyEngine.html">PolicyEngine</a></li><li><a href="ProtoStub.html">ProtoStub</a></li><li><a href="QoSUA.html">QoSUA</a></li><li><a href="Registry.html">Registry</a></li><li><a href="RegistryDataModel.html">RegistryDataModel</a></li><li><a href="RuntimeUA.html">RuntimeUA</a></li><li><a href="Sandbox.html">Sandbox</a></li><li><a href="SandboxRegistry.html">SandboxRegistry</a></li><li><a href="SyncherManager.html">SyncherManager</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Wed Nov 25 2015 15:05:48 GMT+0100 (Mitteleuropäische Zeit)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.0-dev</a> on Tue Jan 05 2016 11:58:26 GMT+0000 (WET)
 </footer>
 
 <script> prettyPrint(); </script>

@@ -2,7 +2,7 @@
   "name": "runtime-core",
   "version": "0.2.0",
   "description": "core runtime development",
-  "main": "./dist/runtime-core.js",
+  "main": "./dist/runtimeUA.js",
   "directories": {
     "test": "test"
   },

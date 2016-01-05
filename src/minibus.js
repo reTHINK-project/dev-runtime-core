@@ -1,2 +1,2 @@
 import MiniBus from './bus/MiniBus';
-export {MiniBus};
+export default MiniBus;

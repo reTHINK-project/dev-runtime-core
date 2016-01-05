@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Source: qos-ua/QoSUA.js</title>
+    <title>JSDoc: Source: registry/HypertyInstance.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Source: qos-ua/QoSUA.js</h1>
+    <h1 class="page-title">Source: registry/HypertyInstance.js</h1>
 
     
 
@@ -26,26 +26,41 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>/**
- * QoS User Agent Interface
- */
-class QoSUA {
+            <pre class="prettyprint source linenums"><code>import RegistryDataModel from './RegistryDataModel';
 
-  /**
-   * Get Connectivity Statistics data
-   */
-  getCurrentConnectivityStatistics()  {
-    // Body...
+/**
+*   @author: Gil Dias (gil.dias@tecnico.ulisboa.pt)
+*   HypertyInstance Data Model used to model instances of Hyperties running in devices and servers.
+*/
+class HypertyInstance extends RegistryDataModel {
+
+  constructor(id, url, descriptor, hypertyURL, user, guid, runtime, context) {
+    super(id, url, descriptor);
+    let _this = this;
+    _this._hypertyURL = hypertyURL;
+    _this._user = user;
+    _this._guid = guid;
+    _this._runtime = runtime;
+    _this._context = context;
   }
 
-  /**
-   * Sends Connectivity Statistics data to QoS Broker
-   */
-  sendConnectivityStatisticsToBroker() {
-    // Body
+  set user(identity) {
+    let _this = this;
+    _this.user = identity;
   }
 
+  get user() {
+    let _this = this;
+    return _this._user;
+  }
+
+  get hypertyURL() {
+    let _this = this;
+    return _this._hypertyURL;
+  }
 }
+
+export default HypertyInstance;
 </code></pre>
         </article>
     </section>
