@@ -12,4 +12,5 @@ npm-debug.log
 vendor
 build
 node_modules
+resources/bundle.js
 *.komodoproject

@@ -21,7 +21,7 @@ let loginBtn = document.querySelector('.login');
 loginBtn.addEventListener('click', function(e) {
 
   let loginPanel = document.querySelector('.login-panel');
-  let content = loginPanel.querySelector('.card-content');
+  let content = loginPanel.querySelector('.card-action');
   addLoader(content);
 
   runtime.identityModule.loginWithRP().then(function(result) {
