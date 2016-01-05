@@ -116,7 +116,7 @@ class GraphConnector {
     // generate GUID
     let iterations = 10000;
     let guidBitArray = sjcl.misc.pbkdf2(this.globalRegistryRecord.publicKeyPEM, salt, iterations);
-    let guid = sjcl.codec.base64.fromBits(guidBitArray);
+    let guid = sjcl.codec.base64url.fromBits(guidBitArray);
     this.globalRegistryRecord.guid = guid;
   }
 
