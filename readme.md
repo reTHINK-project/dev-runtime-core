@@ -153,18 +153,23 @@ To run karma tests is mandatory to run **live-server** because of the mock-up's 
 live-server --port=4000
 ```
 
+### <a id="Tasks">Tasks</a>
+
+In this repository, we have some tasks which can help you.
+If you need change some resource file, like an Hyperty, you need run task watch first, to encode the Hyperty file changes in a base64 file and add it to the descriptor folder in the respective place;
+
+in your command line run:
+```
+gulp watch
+```
+
+this is temporary until the dev-catalogue is ready;
+
 ### <a id="example">Example</a>
 
-This repository have a folder with an working example of runtime-core and we can do:
- - send message between local hyperties (2 hyperties);
- - send message between remote hyperties through the vertx;
-
------
+This repository have a folder with an working example of Hyperty Connector and we can send message and make a WebRTC call between remote hyperties through the vertx;
 
 To run the demo on example folder:
- - you need **live-server** running in the root folder.
- ```
- npm start
- ```
- - in your browser access to http://127.0.0.1:8080/example.
- - for communication between hyperties in two distinct browsers, you need, run locally [dev-msg-node-vertx](https://github.com/reTHINK-project/dev-msg-node-vertx/tree/dev-0.2#unit-testing)
+ - this example have a dependecy from [dev-msg-node-vertx](https://github.com/reTHINK-project/dev-msg-node-vertx/tree/dev-0.2#unit-testing) and [dev-registry-domain](https://github.com/reTHINK-project/dev-registry-domain#dev-registry-domain) for communication between hyperties in two distinct browsers or tabs. **At this moment you need run locally [dev-msg-node-vertx](https://github.com/reTHINK-project/dev-msg-node-vertx/tree/dev-0.2#unit-testing) and [dev-registry-domain](https://github.com/reTHINK-project/dev-registry-domain#dev-registry-domain)**
+ - you need, in the root folder, run command: ``` npm start ```
+ - in your browser, access to https://127.0.0.1:8080/example

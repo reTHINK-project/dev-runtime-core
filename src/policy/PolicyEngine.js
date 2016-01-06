@@ -49,21 +49,32 @@ class PolicyEngine {
     let _this = this;
     console.log(_this.policiesTable);
     return new Promise(function(resolve, reject) {
-      if (_this.checkPolicies(message) == 'allow') {
-        /*let hypertyIdentity = _this.registry.getHypertyIdentity(message.body.hypertyURL);
-        //this step assume the hypertyIdentity will be google */
-        _this.idModule.loginWithRP('google identity', 'scope').then(function(value) {
-          let assertedID = _this.idModule.getIdentities();
-          message.body.assertedIdentity = assertedID[0].identity;
-          message.body.idToken = JSON.stringify(value);
-          message.body.authorised = true;
-          resolve(message);
-        }, function(error) {
-          reject(error);
-        });
-      } else {
-        resolve(false);
-      }
+
+      // TODO: Optimize and improve this code;
+      // if (_this.checkPolicies(message) == 'allow') {
+
+      // let hypertyIdentity = _this.registry.getHypertyIdentity(message.body.hypertyURL);
+      // this step assume the hypertyIdentity will be google
+
+      _this.idModule.loginWithRP('google identity', 'scope').then(function(value) {
+        let assertedID = _this.idModule.getIdentities();
+
+        // Check if the message have an body or not
+        if (!message.hasOwnProperty('body')) {
+          message.body = {};
+        }
+
+        message.body.assertedIdentity = assertedID[0].identity;
+        message.body.idToken = JSON.stringify(value);
+        message.body.authorised = true;
+        resolve(message);
+      }, function(error) {
+        reject(error);
+      });
+
+      // } else {
+      //   resolve(false);
+      // }
     });
   }
 
