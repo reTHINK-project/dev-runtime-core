@@ -2,6 +2,9 @@
  * @author micaelpedrosa@gmail.com
  * Base class to implement internal deploy manager of components.
  */
+
+// import MessageFactory from '../../resources/MessageFactory';
+
 class SandboxRegistry {
   /* private
   _components: <url: instance>
@@ -13,51 +16,94 @@ class SandboxRegistry {
     _this._bus = bus;
     _this._components = {};
 
+    // Add Message Factory
+    // let messageFactory = new MessageFactory();
+    // _this.messageFactory = messageFactory;
+
     bus.addListener(SandboxRegistry.InternalDeployAddress, (msg) => {
       //console.log('SandboxRegistry-RCV: ', msg);
-      let replyMsg = {
-        header: { id: msg.header.id, type: 'reply', from: SandboxRegistry.InternalDeployAddress, to: SandboxRegistry.ExternalDeployAddress }
-      };
+      // let responseMsg = {
+      //   id: msg.id, type: 'response', from: SandboxRegistry.InternalDeployAddress, to: SandboxRegistry.ExternalDeployAddress
+      // };
 
-      switch (msg.header.type) {
-        case 'CREATE': _this._onDeploy(replyMsg, msg.body.url, msg.body.sourceCode, msg.body.config); break;
-        case 'REMOVE': _this._onRemove(replyMsg, msg.body.url); break;
+      switch (msg.type) {
+        case 'create': _this._onDeploy(msg); break;
+        case 'delete': _this._onRemove(msg); break;
       }
     });
   }
 
   get components() { return this._components; }
 
-  _onDeploy(replyMsg, url, sourceCode, config) {
+  _responseMsg(msg, code, value) {
+
     let _this = this;
 
-    if (!_this._components.hasOwnProperty(url)) {
-      try {
-        _this._components[url] = _this._create(url, sourceCode, config);
-        replyMsg.body = { code: 'ok' };
-      } catch (error) {
-        replyMsg.body = { code: 'error', desc: error };
-      }
-    } else {
-      replyMsg.body = { code: 'error', desc: 'Instance ' + url + ' already exist!' };
-    }
+    // let messageFactory = _this.messageFactory;
 
-    _this._bus.postMessage(replyMsg);
+    let responseMsg = {
+      id: msg.id, type: 'response', from: SandboxRegistry.InternalDeployAddress, to: SandboxRegistry.ExternalDeployAddress
+    };
+
+    // Chanege the origin message, because the response;
+    // msg.from = SandboxRegistry.InternalDeployAddress;
+    // msg.to = SandboxRegistry.ExternalDeployAddress;
+
+    let body = {};
+    if (code) body.code = code;
+    if (value) body.desc = value;
+
+    responseMsg.body = body;
+
+    // return messageFactory.createResponse(msg, code, value);
+    return responseMsg;
   }
 
-  _onRemove(replyMsg, url) {
+  _onDeploy(msg) {
     let _this = this;
+    let config = msg.body.config;
+    let componentURL = msg.body.url;
+    let sourceCode = msg.body.sourceCode;
+    let responseCode;
+    let responseDesc;
 
-    if (_this._components.hasOwnProperty(url)) {
-      //remove component from the pool and all listeners
-      delete _this._components[url];
-      _this._bus.removeAllListenersOf(url);
-      replyMsg.body = { code: 'ok' };
+    if (!_this._components.hasOwnProperty(componentURL)) {
+      try {
+        _this._components[componentURL] = _this._create(componentURL, sourceCode, config);
+        responseCode = 200;
+      } catch (error) {
+        responseCode = 500;
+        responseDesc = error;
+      }
     } else {
-      replyMsg.body = { code: 'error', desc: 'Instance ' + url + ' doesn\'t exist!' };
+      responseCode = 500;
+      responseDesc = 'Instance ' + componentURL + ' already exist!';
     }
 
-    _this._bus.postMessage(replyMsg);
+    // Create response message with MessageFactory
+    let responseMsg = _this._responseMsg(msg, responseCode, responseDesc);
+    _this._bus.postMessage(responseMsg);
+  }
+
+  _onRemove(msg) {
+    let _this = this;
+    let componentURL = msg.body.url;
+    let responseCode;
+    let responseDesc;
+
+    if (_this._components.hasOwnProperty(componentURL)) {
+      //remove component from the pool and all listeners
+      delete _this._components[componentURL];
+      _this._bus.removeAllListenersOf(componentURL);
+      responseCode = 200;
+    } else {
+      responseCode = 500;
+      responseDesc = 'Instance ' + componentURL + ' doesn\'t exist!';
+    }
+
+    let responseMsg = _this._responseMsg(msg, responseCode, responseDesc);
+
+    _this._bus.postMessage(responseMsg);
   }
 
   /**

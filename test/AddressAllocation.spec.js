@@ -11,12 +11,12 @@ describe('AddressAllocation', function() {
     let bus = {
       postMessage: (msg, replyCallback) => {
         expect(msg).to.eql({
-          header: {type: 'create', from: 'local://fake.url', to: 'domain://msg-node.ua.pt/hyperty-address-allocation'},
+          type: 'create', from: 'local://fake.url', to: 'domain://msg-node.ua.pt/hyperty-address-allocation',
           body: {number: 2}
         });
 
         replyCallback({
-          header: {id: 1, type: 'reply', from: 'domain://msg-node.ua.pt/hyperty-address-allocation', to: 'local://fake.url'},
+          id: 1, type: 'response', from: 'domain://msg-node.ua.pt/hyperty-address-allocation', to: 'local://fake.url',
           body: {code: 'ok', allocated: ['hyperty-instance://ua.pt/1', 'hyperty-instance://ua.pt/2']}
         });
       }

@@ -1,3 +1,5 @@
+// jshint varstmt:false
+
 var gulp = require('gulp');
 var exec = require('child_process').exec;
 
@@ -5,7 +7,7 @@ var exec = require('child_process').exec;
 gulp.task('doc', function(done) {
 
   console.log('Generating documentation...');
-  exec('node_modules/.bin/jsdoc -R readme.md -d docs src/*', function(err, stdout, stderr) {
+  exec('node_modules/.bin/jsdoc -R readme.md -d docs src/*', function(err) {
     if (err) return done(err);
     console.log('Documentation generated in "docs" directory');
     done();
@@ -26,49 +28,73 @@ var argv = require('yargs').argv;
 
 var pkg = require('./package.json');
 
-gulp.task('dist', function() {
+gulp.task('runtime', function() {
 
-  var bundler = browserify('./src/runtime-core.js', {
-    standalone: 'runtime-core', debug: false}).transform(babel);
-
-  function rebundle() {
-    bundler.bundle()
-      .on('error', function(err) {
-        console.error(err);
-        this.emit('end');
-      })
-      .pipe(source('runtime-core.js'))
-      .pipe(buffer())
-      .pipe(uglify())
-      .pipe(insert.prepend('// Runtime User Agent \n\n// version: {{version}}\n\n'))
-      .pipe(replace('{{version}}', pkg.version))
-      .pipe(gulp.dest('./dist'));
-  }
-
-  rebundle();
-
-});
-
-gulp.task('build', function() {
-
-  var bundler = browserify('./src/runtime-core.js', {
-    standalone: 'runtime-core',
+  return browserify({
+    entries: ['./src/runtimeUA.js'],
+    standalone: 'runtimeUA',
     debug: true
-  }).transform(babel);
-
-  function rebundle() {
-    bundler.bundle()
-      .on('error', function(err) {
-        console.error(err);
-        this.emit('end');
-      })
-      .pipe(source('runtime-core.js'))
-      .pipe(gulp.dest('./dist'));
-  }
-
-  rebundle();
+  })
+  .transform(babel)
+  .bundle()
+  .on('error', function(err) {
+    console.error(err);
+    this.emit('end');
+  })
+  .pipe(source('runtimeUA.js'))
+  .pipe(buffer())
+  .pipe(uglify())
+  .pipe(insert.prepend('// Runtime User Agent \n\n// version: {{version}}\n\n'))
+  .pipe(replace('{{version}}', pkg.version))
+  .pipe(gulp.dest('./dist'));
 
 });
+
+gulp.task('minibus', function() {
+
+  return browserify({
+    entries: ['./src/minibus.js'],
+    standalone: 'MiniBus',
+    debug: true
+  })
+  .transform(babel)
+  .bundle()
+  .on('error', function(err) {
+    console.error(err);
+    this.emit('end');
+  })
+  .pipe(source('minibus.js'))
+  .pipe(buffer())
+  .pipe(uglify())
+  .pipe(insert.prepend('// Runtime User Agent \n\n// version: {{version}}\n\n'))
+  .pipe(replace('{{version}}', pkg.version))
+  .pipe(gulp.dest('./dist'));
+
+});
+
+gulp.task('sandbox', function() {
+
+  return browserify({
+    entries: ['./src/sandbox.js'],
+    standalone: 'sandbox',
+    debug: true
+  })
+  .transform(babel)
+  .bundle()
+  .on('error', function(err) {
+    console.error(err);
+    this.emit('end');
+  })
+  .pipe(source('sandbox.js'))
+  .pipe(buffer())
+  .pipe(uglify())
+  .pipe(insert.prepend('// Runtime User Agent \n\n// version: {{version}}\n\n'))
+  .pipe(replace('{{version}}', pkg.version))
+  .pipe(gulp.dest('./dist'));
+
+});
+
+gulp.task('dist', ['runtime', 'minibus', 'sandbox']);
 
 /**
  * Compile on specific file from ES6 to ES5
@@ -92,12 +118,12 @@ gulp.task('compile', function() {
   console.log('Converting ' + filename + ' on ' + path + ' to ES5');
 
   var bundler = browserify(path + filename, {
-    standalone: filename,
-    debug: false
+    standalone: 'activate',
+    debug: true
   }).transform(babel);
 
   function rebundle() {
-    bundler.bundle()
+    return bundler.bundle()
       .on('error', function(err) {
         console.error(err);
         this.emit('end');
@@ -108,18 +134,79 @@ gulp.task('compile', function() {
       .pipe(gulp.dest(path));
   }
 
-  rebundle();
+  return rebundle();
 
 });
+
+var through = require('through2');
+var Base64 = require('js-base64').Base64;
+var fs = require('fs');
+
+function encode(filename) {
+
+  var sourcePackage = fs.readFileSync('resources/descriptors/' + filename + '-sourcePackageURL.json', 'utf8');
+  var json = JSON.parse(sourcePackage);
+
+  return through.obj(function(file, enc, cb) {
+
+    if (file.isNull()) {
+      return cb(null, file);
+    }
+    if (file.isStream()) {
+      return cb(new Error('Streaming not supported'));
+    }
+
+    var encoded = Base64.encode(file.contents);
+    json.sourceCode = encoded;
+    json.sourceCodeClassName = filename;
+    json.encoding = 'Base64';
+    json.signature = '';
+
+    sourcePackage = new Buffer(JSON.stringify(json, null));
+    cb(null, sourcePackage);
+
+  });
+
+}
 
 gulp.task('watch', function() {
-  var watcher = gulp.watch('src/**/*.js', ['build']);
+
+  var watcher = gulp.watch(['resources/*Hyperty.js', 'resources/*ProtoStub.js']);
   watcher.on('change', function(event) {
+
+    if (event.type === 'deleted') return;
+
     console.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
+
+    var filename = event.path;
+    var splitIndex = filename.lastIndexOf('/') + 1;
+    filename = filename.substr(splitIndex).replace('.js', '');
+
+    var descriptorName = 'Hyperties';
+    if (filename.indexOf('Hyperty') === -1) {
+      descriptorName = 'ProtoStubs';
+    }
+
+    var bundler = browserify({
+      entries: ['resources/' + filename + '.js'],
+      standalone: 'activate',
+      debug: false
+    }).transform(babel);
+
+    console.log(descriptorName);
+
+    bundler.bundle()
+      .pipe(source('bundle.js'))
+      .pipe(gulp.dest('resources/'))
+      .pipe(buffer())
+      .pipe(encode(filename))
+      .pipe(source(filename + '-sourcePackageURL.json'))
+      .pipe(gulp.dest('resources/descriptors/'));
   });
+
 });
 
-gulp.task('default', ['watch']);
+gulp.task('encode', ['watch']);
 
 /**
  * Bumping version number and tagging the repository with it.
@@ -161,4 +248,34 @@ gulp.task('test', function(done) {
     configFile: __dirname + '/karma.conf.js',
     singleRun: true
   }, done).start();
+});
+
+var git = require('gulp-git');
+var prompt = require('gulp-prompt');
+
+// Run git add
+gulp.task('add', ['test'], function() {
+  return gulp.src('./')
+    .pipe(git.add());
+});
+
+// Run git commit
+gulp.task('commit', ['test'], function() {
+  var message;
+  gulp.src('./', {buffer:false})
+  .pipe(prompt.prompt({
+    type: 'input',
+    name: 'commit',
+    message: 'Please enter commit message...'
+  }, function(res) {
+      message = res.commit;
+    }))
+    .pipe(git.commit(message));
+});
+
+// Run git push
+gulp.task('push', ['test'], function() {
+  git.push('origin', 'master', function(err) {
+    if (err) throw err;
+  });
 });

@@ -4,11 +4,29 @@ import IdentityModule from '../identity/IdentityModule';
 import PolicyEngine from '../policy/PolicyEngine';
 import MessageBus from '../bus/MessageBus';
 
+import RuntimeCatalogue from './RuntimeCatalogue';
+
+import SyncherManager from '../syncher/SyncherManager';
+
 /**
-* Runtime User Agent Interface
-*/
+ * Runtime User Agent Interface will process all the dependecies of the core runtime;
+ * @author Vitor Silva [vitor-t-silva@telecom.pt]
+ * @version 0.2.0
+ *
+ * @property {sandboxFactory} sandboxFactory - Specific implementation of sandbox;
+ * @property {RuntimeCatalogue} runtimeCatalogue - Catalogue of components can be installed;
+ * @property {runtimeURL} runtimeURL - This identify the core runtime, should be unique;
+ * @property {IdentityModule} identityModule - Identity Module;
+ * @property {PolicyEngine} policyEngine - Policy Engine Module;
+ * @property {Registry} registry - Registry Module;
+ * @property {MessageBus} messageBus - Message Bus is used like a router to redirect the messages from one component to other(s)
+ */
 class RuntimeUA {
 
+  /**
+   * Create a new instance of Runtime User Agent
+   * @param {sandboxFactory} sandboxFactory - Specific implementation for the environment where the core runtime will run;
+   */
   constructor(sandboxFactory) {
 
     if (!sandboxFactory) throw new Error('The sandbox factory is a needed parameter');
@@ -17,30 +35,51 @@ class RuntimeUA {
 
     _this.sandboxFactory = sandboxFactory;
 
-    // TODO: post and return registry/hypertyRuntimeInstance to and from Back-end Service
-    // for the request you can use the module request in utils;
-    // the response is like: hyperty-runtime://sp1/123
+    _this.runtimeCatalogue = new RuntimeCatalogue();
 
-    let hypertyRuntimeURL = 'runtime://sp1/' + Math.floor((Math.random() * 10000) + 1);
-    _this.hypertyRuntimeURL = hypertyRuntimeURL;
+    // TODO: post and return registry/hypertyRuntimeInstance to and from Back-end Service
+    // the response is like: runtime://sp1/123
+
+    let runtimeURL = 'runtime://ua.pt/' + Math.floor((Math.random() * 10000) + 1);
+    _this.runtimeURL = runtimeURL;
+
+    // TODO: check if runtime catalogue need the runtimeURL;
+    _this.runtimeCatalogue.runtimeURL = runtimeURL;
+
+    // Instantiate the identity Module
+    _this.identityModule = new IdentityModule();
 
     // Use the sandbox factory to create an AppSandbox;
     // In the future can be decided by policyEngine if we need
     // create a AppSandbox or not;
     let appSandbox = sandboxFactory.createAppSandbox();
 
-    // Instantiate the identity Module
-    _this.identityModule = new IdentityModule();
+    // Instantiate the Registry Module
+    _this.registry = new Registry(runtimeURL, appSandbox, _this.identityModule);
 
     // Instantiate the Policy Engine
-    _this.policyEngine = new PolicyEngine();
-
-    // Instantiate the Registry Module
-    // TODO: fix the first parameter should not be a message bus;
-    _this.registry = new Registry(hypertyRuntimeURL, appSandbox);
+    _this.policyEngine = new PolicyEngine(_this.identityModule, _this.registry);
 
     // Instantiate the Message Bus
     _this.messageBus = new MessageBus(_this.registry);
+    _this.messageBus.pipeline.handlers = [
+
+      // Policy message authorise
+      function(ctx) {
+        _this.policyEngine.authorise(ctx.msg).then(function(changedMgs) {
+          ctx.msg = changedMgs;
+          ctx.next();
+        }).catch(function(reason) {
+          console.error(reason);
+          ctx.fail(reason);
+        });
+      }
+    ];
+
+    // Add to App Sandbox the listener;
+    appSandbox.addListener('*', function(msg) {
+      _this.messageBus.postMessage(msg);
+    });
 
     // Register messageBus on Registry
     _this.registry.messageBus = _this.messageBus;
@@ -58,86 +97,10 @@ class RuntimeUA {
     // and set the message bus to the factory
     sandboxFactory.messageBus = _this.messageBus;
 
-  }
-
-  //
-  //  GETTER methods for class attributes
-  //
-  /**
-  * Get HypertyDescriptor
-  */
-  getHypertyDescriptor(hypertyURL) {
-
-    let _this = this;
-
-    return new Promise(function(resolve, reject) {
-
-      //hyperty-catalogue://sp1/HelloHyperty
-      let hypertyName = hypertyURL.substr(hypertyURL.lastIndexOf('/') + 1);
-
-      let hypertyDescriptor = {
-        guid: 'guid',
-        id: 'idHyperty',
-        classname: hypertyName,
-        description: 'description of ' + hypertyName,
-        kind: 'hyperty',
-        catalogueURL: '....',
-        sourceCode: '../resources/' + hypertyName + '.ES5.js',
-        dataObject: '',
-        type: '',
-        messageSchema: '',
-        configuration: '',
-        policies: '',
-        constraints: '',
-        hypertyCapabilities: '',
-        protocolCapabilities: ''
-      };
-
-      resolve(hypertyDescriptor);
-
-    });
+    // Instanciate the SyncherManager;
+    _this.syncherManager = new SyncherManager(_this.runtimeURL, _this.messageBus, { });
 
   }
-
-  /**
-  * Get hypertySourceCode
-  */
-  getHypertySourceCode(hypertySourceCodeURL) {
-    let _this = this;
-
-    return new Promise(function(resolve, reject) {
-
-      // TODO: implementation
-      // Simulate getting hypertySourceCode
-      let xhr = new XMLHttpRequest();
-
-      xhr.onreadystatechange = function(event) {
-        let xhr = event.currentTarget;
-        if (xhr.readyState === 4) {
-          if (xhr.status === 200) {
-            resolve(xhr.responseText);
-          } else {
-            reject(xhr.responseText);
-          }
-        }
-      };
-
-      xhr.open('GET', hypertySourceCodeURL, true);
-      xhr.send();
-
-    });
-
-  }
-
-  /**
-  * Get hypertyRuntimeURL
-  */
-
-  getHypertyRuntimeURL() {
-    return _hypertyRuntimeURL;
-  }
-
-  // DONE with GETTER methods
 
   /**
   * Accomodate interoperability in H2H and proto on the fly for newly discovered devices in M2M
@@ -171,7 +134,7 @@ class RuntimeUA {
       let _hypertyURL;
       let _hypertySandbox;
       let _hypertyDescriptor;
-      let _hypertySourceCode;
+      let _hypertySourcePackage;
 
       let errorReason = function(reason) {
         console.error(reason);
@@ -182,9 +145,9 @@ class RuntimeUA {
       // TODO: the request Module should be changed,
       // because at this moment it is incompatible with nodejs;
       // Probably we need to pass a factory like we do for sandboxes;
-      console.log('------------------ Hyperty ------------------------');
+      console.info('------------------ Hyperty ------------------------');
       console.info('Get hyperty descriptor for :', hypertyDescriptorURL);
-      _this.getHypertyDescriptor(hypertyDescriptorURL).then(function(hypertyDescriptor) {
+      _this.runtimeCatalogue.getHypertyDescriptor(hypertyDescriptorURL).then(function(hypertyDescriptor) {
         // at this point, we have completed "step 2 and 3" as shown in https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md
         console.info('1: return hyperty descriptor', hypertyDescriptor);
 
@@ -192,17 +155,17 @@ class RuntimeUA {
         // catalogue.rethink.eu/.well-known/..........
         _hypertyDescriptor = hypertyDescriptor;
 
-        let hypertySourceCodeUrl = hypertyDescriptor.sourceCode;
+        let sourcePackageURL = hypertyDescriptor.sourcePackageURL;
 
         // Get the hyperty source code
-        return _this.getHypertySourceCode(hypertySourceCodeUrl);
+        return _this.runtimeCatalogue.getHypertySourcePackage(sourcePackageURL);
       })
-      .then(function(hypertySourceCode) {
+      .then(function(sourcePackage) {
         console.info('2: return hyperty source code');
 
         // at this point, we have completed "step 4 and 5" as shown in https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md
 
-        _hypertySourceCode = hypertySourceCode;
+        _hypertySourcePackage = sourcePackage;
 
         //
         // steps 6 -- 9 are skipped.
@@ -250,12 +213,18 @@ class RuntimeUA {
         // we have completed step 14 here.
         return sandbox;
       }, function(reason) {
-        console.info('4.1: try to register a new sandbox', reason);
+        console.error('4.1: try to register a new sandbox', reason);
 
         // check if the sandbox is registed for this hyperty descriptor url;
         // Make Steps xxx --- xxx
         // Instantiate the Sandbox
-        return _this.sandboxFactory.createSandbox();
+        let sandbox = _this.sandboxFactory.createSandbox();
+
+        sandbox.addListener('*', function(msg) {
+          _this.messageBus.postMessage(msg);
+        });
+
+        return sandbox;
       })
       .then(function(sandbox) {
         console.info('5: return sandbox and register');
@@ -272,11 +241,15 @@ class RuntimeUA {
 
         _hypertyURL = hypertyURL;
 
+        // Extend original hyperty configuration;
+        let configuration = Object.assign({}, _hypertyDescriptor.configuration);
+        configuration.runtimeURL = _this.runtimeURL;
+
         // We will deploy the component - step 17 of https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
-        return _hypertySandbox.deployComponent(_hypertySourceCode, _hypertyURL, _hypertyDescriptor.configuration);
+        return _hypertySandbox.deployComponent(_hypertySourcePackage.sourceCode, _hypertyURL, configuration);
       })
       .then(function(deployComponentStatus) {
-        console.info('7: Deploy component status for hyperty: ', _hypertyURL);
+        console.info('7: Deploy component status for hyperty: ', deployComponentStatus);
 
         // we have completed step 19 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
 
@@ -285,14 +258,10 @@ class RuntimeUA {
           _hypertySandbox.postMessage(msg);
         });
 
-        _hypertySandbox.addListener('*', function(msg) {
-          _this.messageBus.postMessage(msg);
-        });
-
         // we have completed step 20 of https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
         let hyperty = {
           runtimeHypertyURL: _hypertyURL,
-          status: 'Deployed'
+          status: deployComponentStatus
         };
 
         resolve(hyperty);
@@ -301,71 +270,6 @@ class RuntimeUA {
         console.log('------------------ END ------------------------');
       })
       .catch(errorReason);
-
-    });
-
-  }
-
-  /**
-  * Get StubDescriptor
-  */
-  getStubDescriptor(domainURL) {
-
-    let _this = this;
-
-    return new Promise(function(resolve, reject) {
-
-      let stubDescriptor = {
-        guid: 'guid',
-        id: 'idProtoStub',
-        classname: 'VertxProtoStub',
-        description: 'description of ProtoStub',
-        kind: 'hyperty',
-        catalogueURL: '....',
-        sourceCode: '../resources/VertxProtoStub.js',
-        dataObject: '',
-        type: '',
-        messageSchema: '',
-        configuration: {
-          url: 'ws://185.17.229.116:80/ws',
-          runtimeURL: _this.hypertyRuntimeURL
-        },
-        policies: '',
-        constraints: '',
-        hypertyCapabilities: '',
-        protocolCapabilities: ''
-      };
-
-      resolve(stubDescriptor);
-
-    });
-
-  }
-
-  /**
-  * Get protostubSourceCode
-  */
-  getStubSourceCode(stubSourceCodeURL) {
-    let _this = this;
-
-    return new Promise(function(resolve, reject) {
-
-      // TODO: implementation
-      // Simulate getting hypertySourceCode
-      let xhr = new XMLHttpRequest();
-
-      xhr.onreadystatechange = function(event) {
-        let xhr = event.currentTarget;
-        if (xhr.readyState === 4) {
-          if (xhr.status === 200) {
-            resolve(xhr.responseText);
-          } else {
-            reject(xhr.responseText);
-          }
-        }
-      };
-      xhr.open('GET', stubSourceCodeURL, true);
-      xhr.send();
 
     });
 
@@ -386,7 +290,7 @@ class RuntimeUA {
       let _stubSandbox;
       let _stubDescriptor;
       let _runtimeProtoStubURL;
-      let _protoStubSourceCode;
+      let _stubSourcePackage;
 
       let errorReason = function(reason) {
         console.error(reason);
@@ -411,36 +315,39 @@ class RuntimeUA {
         // we have completed step 3 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
         // we need to get ProtoStub descriptor step 4 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-        return _this.getStubDescriptor(domain);
+        return _this.runtimeCatalogue.getStubDescriptor(domain);
       })
-      .then(function(descriptor) {
+      .then(function(stubDescriptor) {
 
-        console.info('2. return the ProtoStub descriptor:', descriptor);
+        console.info('2. return the ProtoStub descriptor:', stubDescriptor);
 
         // we have completed step 5 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
-        _stubDescriptor = descriptor;
+        _stubDescriptor = stubDescriptor;
 
-        let componentDownloadURL = descriptor.sourceCode;
+        let sourcePackageURL = stubDescriptor.sourcePackageURL;
+
+        console.log(stubDescriptor.sourcePackageURL);
 
         // we need to get ProtoStub Source code from descriptor - step 6 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-        return _this.getStubSourceCode(componentDownloadURL);
+        return _this.runtimeCatalogue.getStubSourcePackage(sourcePackageURL);
       })
-      .then(function(protoStubSourceCode) {
-        console.info('3. return the ProtoStub Source Code: ');
+      .then(function(stubSourcePackage) {
+        console.info('3. return the ProtoStub Source Code: ', stubSourcePackage);
 
         // we have completed step 7 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
-        _protoStubSourceCode = protoStubSourceCode;
+        _stubSourcePackage = stubSourcePackage;
 
         // TODO: Check on PEP (policy Engine) if we need the sandbox and check if the Sandbox Factory have the context sandbox;
         let policy = true;
         return policy;
-      }).then(function(policy) {
+      })
+      .then(function(policy) {
         // this will return the sandbox or one promise to getSandbox;
         return _this.registry.getSandbox(domain);
-
-      }).then(function(stubSandbox) {
+      })
+      .then(function(stubSandbox) {
 
         console.info('4. if the sandbox is registered then return the sandbox', stubSandbox);
 
@@ -454,7 +361,12 @@ class RuntimeUA {
         // check if the sandbox is registed for this stub descriptor url;
         // Make Steps xxx --- xxx
         // Instantiate the Sandbox
-        return _this.sandboxFactory.createSandbox();
+        let sandbox = _this.sandboxFactory.createSandbox();
+        sandbox.addListener('*', function(msg) {
+          _this.messageBus.postMessage(msg);
+        });
+
+        return sandbox;
       })
       .then(function(sandbox) {
         console.info('6. return the sandbox instance and the register', sandbox);
@@ -472,11 +384,17 @@ class RuntimeUA {
 
         _runtimeProtoStubURL = runtimeProtoStubURL;
 
+        // Extend original hyperty configuration;
+        let configuration = Object.assign({}, _stubDescriptor.configuration);
+        configuration.runtimeURL = _this.runtimeURL;
+
+        console.log(_stubSourcePackage);
+
         // Deploy Component step xxx
-        return _stubSandbox.deployComponent(_protoStubSourceCode, runtimeProtoStubURL, _stubDescriptor.configuration);
+        return _stubSandbox.deployComponent(_stubSourcePackage.sourceCode, runtimeProtoStubURL, configuration);
       })
-      .then(function(result) {
-        console.info('8: return deploy component for sandbox status');
+      .then(function(deployComponentStatus) {
+        console.info('8: return deploy component for sandbox status: ', deployComponentStatus);
 
         // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
@@ -485,16 +403,12 @@ class RuntimeUA {
           _stubSandbox.postMessage(msg);
         });
 
-        _stubSandbox.addListener('*', function(msg) {
-          _this.messageBus.postMessage(msg);
-        });
-
         // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
         // Load Stub function resolved with success;
         let stub = {
           runtimeProtoStubURL: _runtimeProtoStubURL,
-          status: 'Deployed'
+          status: deployComponentStatus
         };
 
         resolve(stub);

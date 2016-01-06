@@ -28,16 +28,35 @@
         <article>
             <pre class="prettyprint source linenums"><code>/**
  * Core Policy Engine (PDP/PEP) Interface
+ * According to: https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/runtime-apis.md#core-policy-engine-pdppep-interface
  */
 class PolicyEngine {
 
   /**
+  * To initialise the Policy Engine
+  * @param  IdentityModule      identityModule      identityModule
+  * @param  Registry    runtimeRegistry     runtimeRegistry
+  */
+  constructor(identityModule, runtimeRegistry) {
+    let _this = this;
+    _this.idModule = identityModule;
+    _this.registry = runtimeRegistry;
+    _this.policiesTable = new Object();
+    /* assumes the Policy Engine has the blacklist */
+    _this.blacklist = [];
+    /* _this.blacklist.push('Alice');*/
+  }
+
+  /**
    * To add policies to be enforced for a certain deployed Hyperty Instance
+   * Example of an hyperty: hyperty-instance://tecnico.pt/e1b8fb0b-95e2-4f44-aa18-b40984741196
+   * Example of a policy: {subject: 'message.header.from', target: 'blacklist', action: 'deny'}
    * @param {URL.HypertyURL}     hyperty  hyperty
    * @param {HypertyPolicyList}  policies policies
    */
   addPolicies(hyperty, policies) {
-    // Body...
+    let _this = this;
+    _this.policiesTable[hyperty] = policies;
   }
 
   /**
@@ -45,7 +64,8 @@ class PolicyEngine {
    * @param  {URL.HypertyURL}  hyperty       hyperty
    */
   removePolicies(hyperty) {
-    // Body...
+    let _this = this;
+    delete _this.policiesTable[hyperty];
   }
 
   /**
@@ -54,9 +74,58 @@ class PolicyEngine {
    * @return {AuthorisationResponse}                 AuthorisationResponse
    */
   authorise(message) {
-    // Body...
+    let _this = this;
+    console.log(_this.policiesTable);
+    return new Promise(function(resolve, reject) {
+      if (_this.checkPolicies(message) == 'allow') {
+        /*let hypertyIdentity = _this.registry.getHypertyIdentity(message.body.hypertyURL);
+        //this step assume the hypertyIdentity will be google */
+        _this.idModule.loginWithRP('google identity', 'scope').then(function(value) {
+          let assertedID = _this.idModule.getIdentities();
+          message.body.assertedIdentity = assertedID[0].identity;
+          message.body.idToken = JSON.stringify(value);
+          message.body.authorised = true;
+          resolve(message);
+        }, function(error) {
+          reject(error);
+        });
+      } else {
+        resolve(false);
+      }
+    });
   }
 
+  checkPolicies(message) {
+    let _this = this;
+    var _results = ['allow']; /* by default, all messages are allowed */
+    var _policies = _this.policiesTable[message.body.hypertyURL];
+    if (_policies != undefined) { /* if there are applicable policies, checks them */
+      var _numPolicies = _policies.length;
+
+      for (var i = 0; i &lt; _numPolicies; i++) {
+        var _policy = _policies[i];
+        console.log(_policy);
+        if (_policy.target == 'blacklist') {
+          if (_this.blacklist.indexOf(eval(_policy.subject)) > -1) {
+            console.log('Is in blacklist!');
+            _results.push(_policy.action);
+          }
+        }
+        if (_policy.target == 'whitelist') {
+          if (_this.whitelist.indexOf(eval(_policy.subject)) > -1) {
+            console.log('Is in whitelist!');
+            _results.push(_policy.action);
+          }
+        }
+      }
+    }
+    console.log(_results);
+    if (_results.indexOf('deny') > -1) { /* if one policy evaluates to 'deny', the result is 'deny' */
+      return 'deny';
+    } else {
+      return 'allow';
+    }
+  }
 }
 
 export default PolicyEngine;
@@ -70,13 +139,13 @@ export default PolicyEngine;
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="IdentityModule.html">IdentityModule</a></li><li><a href="MessageBus.html">MessageBus</a></li><li><a href="PolicyEngine.html">PolicyEngine</a></li><li><a href="ProtoStub.html">ProtoStub</a></li><li><a href="QoSUA.html">QoSUA</a></li><li><a href="Registry.html">Registry</a></li><li><a href="Request.html">Request</a></li><li><a href="RuntimeUA.html">RuntimeUA</a></li><li><a href="Sandbox.html">Sandbox</a></li><li><a href="Syncher.html">Syncher</a></li><li><a href="VertxProtoStub.html">VertxProtoStub</a></li></ul><h3><a href="global.html">Global</a></h3>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-utils.html">utils</a></li></ul><h3>Classes</h3><ul><li><a href="AddressAllocation.html">AddressAllocation</a></li><li><a href="BloomFilter.html">BloomFilter</a></li><li><a href="EventEmitter.html">EventEmitter</a></li><li><a href="GlobalRegistryRecord.html">GlobalRegistryRecord</a></li><li><a href="GraphConnector.html">GraphConnector</a></li><li><a href="GraphConnectorContactData.html">GraphConnectorContactData</a></li><li><a href="HypertyInstance.html">HypertyInstance</a></li><li><a href="IdentityModule.html">IdentityModule</a></li><li><a href="MessageBus.html">MessageBus</a></li><li><a href="MiniBus.html">MiniBus</a></li><li><a href="ObjectAllocation.html">ObjectAllocation</a></li><li><a href="Pipeline.html">Pipeline</a></li><li><a href="PolicyEngine.html">PolicyEngine</a></li><li><a href="ProtoStub.html">ProtoStub</a></li><li><a href="QoSUA.html">QoSUA</a></li><li><a href="Registry.html">Registry</a></li><li><a href="RegistryDataModel.html">RegistryDataModel</a></li><li><a href="RuntimeUA.html">RuntimeUA</a></li><li><a href="Sandbox.html">Sandbox</a></li><li><a href="SandboxRegistry.html">SandboxRegistry</a></li><li><a href="SyncherManager.html">SyncherManager</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0-dev</a> on Wed Oct 14 2015 10:38:59 GMT+0100 (WEST)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.0-dev</a> on Tue Jan 05 2016 11:58:26 GMT+0000 (WET)
 </footer>
 
 <script> prettyPrint(); </script>

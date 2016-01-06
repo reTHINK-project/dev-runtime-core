@@ -1,70 +1,97 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Demo of Hyperty and Protostubs</title>
+<head>
+  <title>Demo of Hyperty and Protostubs</title>
 
-    <!-- Compiled and minified CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.3/css/materialize.min.css">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!-- Compiled and minified CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.3/css/materialize.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-    <!-- Compiled and minified JavaScript -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.3/js/materialize.min.js"></script>
-  </head>
-  <body>
-    <div>
+  <!-- Compiled and minified JavaScript -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.3/js/materialize.min.js"></script>
 
-      <h1>Examples</h1>
-      <div class="row">
+</head>
+<body>
 
-        <section class="hyperties">
+  <div class="progress"><div class="indeterminate"></div></div>
 
-          <div class="hyperty col s12 m6 HelloHyperty">
-            <h3><span class="name"></span> - <span class="status"></span></h3>
+  <div class="container hide">
+    <div class="row">
 
-            <ul class="list collection">
-            </ul>
+      <div class="row login-panel">
+        <div class="col s12">
+          <div class="card blue-grey darken-1">
+            <div class="card-content not-logged white-text">
+              <span class="card-title">Login</span>
+              <p>So that an application can use Google's OAuth 2.0 authentication system for user login.
+                Two test accounts was been created to set the project in the Google Developers with
+                this credentials:</p>
 
-            <form class="form">
-              <blockquote class="runtime-hyperty-url col s12"></blockquote>
-
-              <div class="input-field col s12">
-                <input placeholder="Connect to Hyperty URL" id="hypertyURLTo1" type="text" class="validate toHyperty">
-                <label for="hypertyURLTo1">Connect to Hyperty URL</label>
+                <span class="row">
+                  <span class="col s6">
+                    <h5>1º Account</h5>
+                    <p><b>username:</b> openidtest10@gmail.com</p>
+                    <p><b>password:</b> testOpenID10</p>
+                  </span>
+                  <span class="col s6">
+                    <h5>2º Account</h5>
+                    <p><b>username:</b> openidtest20@gmail.com</p>
+                    <p><b>password:</b> testOpenID20</p>
+                  </span>
+                </span>
               </div>
-
-              <div class="input-field col s12">
-                <textarea id="message1" class="materialize-textarea messageHyperty"></textarea>
-                <label for="message1">Message</label>
+              <div class="card-action">
+                <button class="login waves-effect waves-light btn">Login</button>
               </div>
-
-              <button class="send waves-effect waves-light btn">Send</button>
-            </form>
-
+            </div>
           </div>
+        </div>
 
-          <div class="hyperty col s12 m6 WorldHyperty">
-            <h3><span class="name"></span> - <span class="status"></span></h3>
+        <section class="discover hide">
 
-            <ul class="list collection">
-            </ul>
+          <form class="form row">
 
-            <form class="form">
-              <blockquote class="runtime-hyperty-url col s12"></blockquote>
+            <div class="input-field col s8">
+              <input placeholder="your friend's email" id="email" required aria-required="true" type="email" class="friend-email validate">
+              <label for="email" style="width: 100%;" data-error="the email format should be like user@domain.pt">search by email</label>
+            </div>
 
-              <div class="input-field col s12">
-                <input placeholder="Connect to Hyperty URL" id="hypertyURLTo2" type="text" class="validate toHyperty">
-                <label for="hypertyURLTo2">Connect to Hyperty URL</label>
-              </div>
+            <div class="input-field col s4">
+              <button class="search waves-effect waves-light btn" type="submit"><i class="material-icons left">search</i>Search</button>
+            </div>
+          </form>
 
-              <div class="input-field col s12">
-                <textarea id="message2" class="materialize-textarea messageHyperty"></textarea>
-                <label for="message2">Message</label>
-              </div>
+          <div class="loader"></div>
 
-              <button class="send waves-effect waves-light btn">Send</button>
-            </form>
-          </div>
+          <ul class="collection hide">
+          </ul>
+
+        </section>
+
+        <section class="hyperty-chat hide">
+          <h3>Hyperty Chat</h3>
+
+          <ul class="collection">
+          </ul>
+
+        </section>
+
+        <section id="messages" class="messages hide">
+
+          <form class="form row">
+
+            <blockquote class="runtime-hyperty-url col s12"></blockquote>
+
+            <div class="input-field col s12">
+              <textarea id="message" required aria-required="true" type="text" class="materialize-textarea validate message-text"></textarea>
+              <label for="message">Message</label>
+            </div>
+
+            <id class="col s12">
+              <button class="send waves-effect waves-light btn" type="submit">Send</button>
+            </div>
+          </form>
 
         </section>
       </div>
@@ -74,4 +101,4 @@
     <script src="../config.js"></script>
     <script>System.import("../example/demo");</script>
   </body>
-</html>
+  </html>

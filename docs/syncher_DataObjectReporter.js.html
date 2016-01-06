@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: syncher/DataObjectReporter.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: syncher/DataObjectReporter.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import SyncSubscription from './SyncSubscription';
+import SyncObject from './SyncObject';
+import {deepClone} from '../utils/utils.js';
+
+/**
+ * DataObjectReporter
+ */
+class DataObjectReporter /* implements SyncStatus */ {
+  /* private
+  _version: number
+
+  _url: ObjectURL
+  _schema: Schema
+  _bus: MiniBus
+  _status: on | paused
+
+  _syncObj: SyncData
+  _subscriptions: &lt;hypertyUrl: SyncSubscription>
+
+  ----event handlers----
+  _onSubscriptionHandlers: [(event) => void]
+  */
+
+  constructor(url, schema, bus, initialStatus, initialData) {
+    let _this = this;
+
+    _this._version = 0;
+    _this._url = url;
+    _this._schema = schema;
+    _this._bus = bus;
+
+    _this._status = initialStatus;
+    _this._syncObj = new SyncObject(initialData);
+    _this._syncObj.observe((event) => {
+      _this._onChange(event);
+    });
+
+    _this._subscriptions = {};
+    _this._onSubscriptionHandlers = [];
+
+    bus.addListener(url, (msg) => {
+      console.log('DataObjectReporter-RCV: ', msg);
+      switch (msg.type) {
+        case 'subscribe': _this._onSubscribe(msg); break;
+        case 'unsubscribe': _this._onUnSubscribe(msg); break;
+      }
+    });
+  }
+
+  get version() { return this._version; }
+
+  get url() { return this._url; }
+
+  get schema() { return this._schema; }
+
+  get status() { return this._status; }
+
+  get data() { return this._syncObj.data; }
+
+  get subscriptions() { return this._subscriptions; }
+
+  pause() {
+    Object.keys(_this._subscriptions).forEach((key) => {
+      let sub = _this._subscriptions[key];
+      sub.pause();
+    });
+  }
+
+  resume() {
+    Object.keys(_this._subscriptions).forEach((key) => {
+      let sub = _this._subscriptions[key];
+      sub.resume();
+    });
+  }
+
+  stop() {
+    Object.keys(_this._subscriptions).forEach((key) => {
+      let sub = _this._subscriptions[key];
+      sub.stop();
+    });
+  }
+
+  onSubscription(callback) {
+    this._onSubscriptionHandlers.push(callback);
+  }
+
+  _onSubscribe(msg) {
+    let _this = this;
+
+    //TODO: validate if subscription already exists ?
+    let hypertyUrl = msg.from;
+
+    let event = {
+      type: msg.type,
+      url: hypertyUrl,
+
+      accept: () => {
+        //create new subscription
+        let newObj = new SyncSubscription(_this, hypertyUrl, 'on');
+        _this._subscriptions[hypertyUrl] = newObj;
+
+        //send ok reply message
+        let acceptMsg = {
+          id: msg.id, type: 'response', from: _this._url, to: hypertyUrl,
+          body: {code: 'ok', schema: _this._schema, version: _this._version, value: deepClone(_this.data)}
+        };
+
+        _this._bus.postMessage(acceptMsg);
+        return newObj;
+      },
+
+      reject: (reason) => {
+        //send reject reply message
+        let rejectMsg = {
+          id: msg.id, type: 'response', from: _this._url, to: hypertyUrl,
+          body: {code: 'reject', desc: reason}
+        };
+
+        _this._bus.postMessage(rejectMsg);
+      }
+    };
+
+    _this._onSubscriptionHandlers.forEach((handler) => {
+      handler(event);
+    });
+  }
+
+  _onUnSubscribe(msg) {
+    let _this = this;
+
+    let hypertyUrl = msg.from;
+    let sub = _this._subscriptions[hypertyUrl];
+    delete _this._subscriptions[hypertyUrl];
+
+    let event = {
+      type: msg.type,
+      url: hypertyUrl,
+      object: sub
+    };
+
+    _this._onSubscriptionHandlers.forEach((handler) => {
+      handler(event);
+    });
+  }
+
+  //send delta messages to subscriptions
+  _onChange(event) {
+    let _this = this;
+
+    _this._version++;
+    Object.keys(_this._subscriptions).forEach((key) => {
+      let sub = _this._subscriptions[key];
+      if (sub.status === 'on') {
+
+        //TODO: send version, update version on the SyncSubscription?
+        //will we need confirmation from the receiver?
+        let changeMsg;
+        if (sub._version + 1 === _this._version) {
+          sub._version++;
+          changeMsg = {
+            type: event.cType, from: _this._url, to: key,
+            body: {version: _this._version, oType: event.oType, attrib: event.field, value: event.data}
+          };
+        } else {
+          //TODO: how to handle unsynchronized versions?
+          console.log('unsynchronized versions');
+        }
+
+        _this._bus.postMessage(changeMsg);
+      }
+    });
+  }
+}
+
+export default DataObjectReporter;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-utils.html">utils</a></li></ul><h3>Classes</h3><ul><li><a href="AddressAllocation.html">AddressAllocation</a></li><li><a href="DataObjectReporter.html">DataObjectReporter</a></li><li><a href="EventEmitter.html">EventEmitter</a></li><li><a href="IdentityModule.html">IdentityModule</a></li><li><a href="MessageBus.html">MessageBus</a></li><li><a href="MiniBus.html">MiniBus</a></li><li><a href="Pipeline.html">Pipeline</a></li><li><a href="PolicyEngine.html">PolicyEngine</a></li><li><a href="ProtoStub.html">ProtoStub</a></li><li><a href="QoSUA.html">QoSUA</a></li><li><a href="Registry.html">Registry</a></li><li><a href="RuntimeUA.html">RuntimeUA</a></li><li><a href="Sandbox.html">Sandbox</a></li><li><a href="SyncherManager.html">SyncherManager</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Tue Nov 24 2015 16:08:50 GMT+0000 (WET)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

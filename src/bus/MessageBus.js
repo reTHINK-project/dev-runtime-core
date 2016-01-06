@@ -21,7 +21,7 @@ class MessageBus extends MiniBus {
     let _this = this;
 
     //resolve external protostub...
-    _this._registry.resolve(msg.header.to).then((protoStubURL) => {
+    _this._registry.resolve(msg.to).then((protoStubURL) => {
 
       let itemList = _this._subscriptions[protoStubURL];
       if (itemList) {

@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Class: ObjectAllocation</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Class: ObjectAllocation</h1>
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>ObjectAllocation</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+
+    
+
+    <h4 class="name" id="ObjectAllocation"><span class="type-signature"></span>new ObjectAllocation<span class="signature">(url, bus)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    Create an Object Allocation
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>url</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">URL.URL</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">url from who is sending the message</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>bus</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="MiniBus.html">MiniBus</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">MiniBus used for address allocation</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="syncher_ObjectAllocation.js.html">syncher/ObjectAllocation.js</a>, <a href="syncher_ObjectAllocation.js.html#line12">line 12</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    </div>
+
+    
+
+    
+
+    
+
+     
+
+    
+
+    
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id="url"><span class="type-signature"></span>url<span class="type-signature"></span></h4>
+
+
+
+
+<div class="description">
+    get the URL value
+</div>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="syncher_ObjectAllocation.js.html">syncher/ObjectAllocation.js</a>, <a href="syncher_ObjectAllocation.js.html#line23">line 23</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+        
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id="create"><span class="type-signature"></span>create<span class="signature">(domain, number)</span><span class="type-signature"> &rarr; {Promise.&lt;ObjectURL>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    Ask for creation of a number of Object addresses, to the domain message node.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>domain</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Domain</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Domain of the message node.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>number</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">Number of addresses to request</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="syncher_ObjectAllocation.js.html">syncher/ObjectAllocation.js</a>, <a href="syncher_ObjectAllocation.js.html#line31">line 31</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    A list of ObjectURL's
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise.&lt;ObjectURL></span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-utils.html">utils</a></li></ul><h3>Classes</h3><ul><li><a href="AddressAllocation.html">AddressAllocation</a></li><li><a href="BloomFilter.html">BloomFilter</a></li><li><a href="EventEmitter.html">EventEmitter</a></li><li><a href="GlobalRegistryRecord.html">GlobalRegistryRecord</a></li><li><a href="GraphConnector.html">GraphConnector</a></li><li><a href="GraphConnectorContactData.html">GraphConnectorContactData</a></li><li><a href="HypertyInstance.html">HypertyInstance</a></li><li><a href="IdentityModule.html">IdentityModule</a></li><li><a href="MessageBus.html">MessageBus</a></li><li><a href="MiniBus.html">MiniBus</a></li><li><a href="ObjectAllocation.html">ObjectAllocation</a></li><li><a href="Pipeline.html">Pipeline</a></li><li><a href="PolicyEngine.html">PolicyEngine</a></li><li><a href="ProtoStub.html">ProtoStub</a></li><li><a href="QoSUA.html">QoSUA</a></li><li><a href="Registry.html">Registry</a></li><li><a href="RegistryDataModel.html">RegistryDataModel</a></li><li><a href="RuntimeUA.html">RuntimeUA</a></li><li><a href="Sandbox.html">Sandbox</a></li><li><a href="SandboxRegistry.html">SandboxRegistry</a></li><li><a href="SyncherManager.html">SyncherManager</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.0-dev</a> on Tue Jan 05 2016 11:58:26 GMT+0000 (WET)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

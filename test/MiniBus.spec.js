@@ -12,7 +12,7 @@ describe('MiniBus', function() {
     });
 
     mBus.postMessage({
-      header: {type: 'test', from: 'hyper-1', to: 'hyper-2'},
+      type: 'test', from: 'hyper-1', to: 'hyper-2',
       body: {value: 'x'}
     });
 
@@ -20,7 +20,7 @@ describe('MiniBus', function() {
 
     setTimeout(() => {
       expect(msgResult).to.eql({
-        header: {id: 1, type: 'test', from: 'hyper-1', to: 'hyper-2'},
+        id: 1, type: 'test', from: 'hyper-1', to: 'hyper-2',
         body: {value: 'x'}
       });
 
@@ -28,14 +28,14 @@ describe('MiniBus', function() {
       expect(mBus._subscriptions).to.eql({});
 
       mBus.postMessage({
-        header: {type: 'test', from: 'hyper-3', to: 'hyper-2'},
+        type: 'test', from: 'hyper-3', to: 'hyper-2',
         body: {value: 'y'}
       });
 
       setTimeout(() => {
         //should stay the same since the listener is off
         expect(msgResult).to.eql({
-          header: {id: 1, type: 'test', from: 'hyper-1', to: 'hyper-2'},
+          id: 1, type: 'test', from: 'hyper-1', to: 'hyper-2',
           body: {value: 'x'}
         });
 
@@ -44,7 +44,7 @@ describe('MiniBus', function() {
     });
   });
 
-  it('send and reply', function(done) {
+  it('send and response', function(done) {
     this.timeout(4000);
     let msgResult = {};
 
@@ -55,28 +55,45 @@ describe('MiniBus', function() {
 
     mBus.addListener('hyper-2', (msg) => {
       expect(msg).to.eql({
-        header: {id: 1, type: 'test', from: 'hyper-1', to: 'hyper-2'},
+        id: 1, type: 'test', from: 'hyper-1', to: 'hyper-2',
         body: {value: 'x'}
       });
 
       mBus.postMessage({
-        header: {id: 1, type: 'reply', from: 'hyper-2', to: 'hyper-1'},
+        id: 1, type: 'response', from: 'hyper-2', to: 'hyper-1',
         body: {value: 'y'}
       });
     });
 
     mBus.postMessage({
-      header: {type: 'test', from: 'hyper-1', to: 'hyper-2'},
+      type: 'test', from: 'hyper-1', to: 'hyper-2',
       body: {value: 'x'}
-    }, (reply) => {
-      expect(reply).to.eql({
-        header: {id: 1, type: 'reply', from: 'hyper-2', to: 'hyper-1'},
+    }, (response) => {
+      expect(response).to.eql({
+        id: 1, type: 'response', from: 'hyper-2', to: 'hyper-1',
         body: {value: 'y'}
       });
 
       expect(msgResult).to.be.empty();
       done();
     });
+  });
+
+  it('pipeline msg change', function(done) {
+    let mBus = new MiniBus();
+    mBus.pipeline.handlers = [
+      function(ctx) {
+        ctx.msg.token = '12345678';
+        ctx.next();
+      }
+    ];
+
+    mBus.addListener('hyper-2', (msg) => {
+      expect(msg).to.eql({ id: 1, type: 'ping', token: '12345678', from: 'hyper-1', to: 'hyper-2' });
+      done();
+    });
+
+    mBus.postMessage({ type: 'ping', from: 'hyper-1', to: 'hyper-2' });
   });
 
 });

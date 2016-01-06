@@ -1,4 +1,4 @@
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.VertxProtoStub = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.activate = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -6,6 +6,8 @@ Object.defineProperty(exports, '__esModule', {
 });
 
 var _createClass = (function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ('value' in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+
+exports['default'] = activate;
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError('Cannot call a class as a function'); } }
 
@@ -17,6 +19,7 @@ var VertxProtoStub = (function () {
     _msgCallback: (Message) => void
     _config: { url, runtimeURL }
      _sock: (WebSocket | SockJS)
+    _reOpen: boolean
   */
 
   /**
@@ -28,9 +31,9 @@ var VertxProtoStub = (function () {
    */
 
   function VertxProtoStub(runtimeProtoStubURL, bus, config) {
-    var _this2 = this;
-
     _classCallCheck(this, VertxProtoStub);
+
+    var _this = this;
 
     this._id = 0;
     this._continuousOpen = true;
@@ -39,9 +42,10 @@ var VertxProtoStub = (function () {
     this._bus = bus;
     this._config = config;
 
-    bus.addListener('*', function (msg) {
-      var _this = _this2;
+    this._runtimeSessionURL = config.runtimeURL;
+    this._reOpen = false;
 
+    bus.addListener('*', function (msg) {
       _this._open(function () {
         _this._sock.send(JSON.stringify(msg));
       });
@@ -64,7 +68,6 @@ var VertxProtoStub = (function () {
     value: function connect() {
       var _this = this;
 
-      //TODO: get updated tokenID?
       _this._continuousOpen = true;
       _this._open(function () {});
     }
@@ -90,21 +93,25 @@ var VertxProtoStub = (function () {
 
       _this._id++;
       var msg = {
-        header: {
-          id: _this._id,
-          type: 'open',
-          from: _this._config.runtimeURL,
-          to: 'mn:/session',
-          tokenID: '??'
-        }
+        id: _this._id, type: 'open', from: _this._runtimeSessionURL, to: 'mn:/session'
       };
+
+      if (_this._reOpen) {
+        msg.type = 're-open';
+      }
 
       //register and wait for open reply...
       var hasResponse = false;
       _this._sessionCallback = function (reply) {
-        if (reply.header.type === 'reply' & reply.header.id === msg.header.id) {
+        if (reply.type === 'response' & reply.id === msg.id) {
           hasResponse = true;
-          if (reply.body.code === 'ok') {
+          if (reply.body.code === 200) {
+            if (reply.body.runtimeToken) {
+              //setup runtimeSession
+              _this._reOpen = true;
+              _this._runtimeSessionURL = _this._config.runtimeURL + '/' + reply.body.runtimeToken;
+            }
+
             _this._sendStatus('connected');
             callback();
           } else {
@@ -128,14 +135,12 @@ var VertxProtoStub = (function () {
 
       _this._id++;
       var msg = {
-        header: {
-          id: _this._id,
-          type: 'close',
-          from: _this._config.runtimeURL,
-          to: 'mn:/session',
-          tokenID: '??'
-        }
+        id: _this._id, type: 'close', from: _this._runtimeSessionURL, to: 'mn:/session'
       };
+
+      //invalidate runtimeSession
+      _this._reOpen = false;
+      _this._runtimeSessionURL = _this._config._runtimeURL;
 
       _this._sock.send(JSON.stringify(msg));
     }
@@ -145,11 +150,9 @@ var VertxProtoStub = (function () {
       var _this = this;
 
       var msg = {
-        header: {
-          type: 'update',
-          from: _this._runtimeProtoStubURL,
-          to: _this._runtimeProtoStubURL + '/status'
-        },
+        type: 'update',
+        from: _this._runtimeProtoStubURL,
+        to: _this._runtimeProtoStubURL + '/status',
         body: {
           value: value
         }
@@ -199,7 +202,7 @@ var VertxProtoStub = (function () {
 
         _this._sock.onmessage = function (e) {
           var msg = JSON.parse(e.data);
-          if (msg.header.from === 'mn:/session') {
+          if (msg.from === 'mn:/session') {
             if (_this._sessionCallback) {
               _this._sessionCallback(msg);
             }
@@ -208,42 +211,42 @@ var VertxProtoStub = (function () {
           }
         };
 
-        _this._sock.onclose = function (e) {
+        _this._sock.onclose = function (event) {
           var reason = undefined;
 
           //See https://tools.ietf.org/html/rfc6455#section-7.4
-          if (event.code == 1000) {
+          if (event.code === 1000) {
             reason = 'Normal closure, meaning that the purpose for which the connection was established has been fulfilled.';
-          } else if (event.code == 1001) {
+          } else if (event.code === 1001) {
             reason = 'An endpoint is \'going away\', such as a server going down or a browser having navigated away from a page.';
-          } else if (event.code == 1002) {
+          } else if (event.code === 1002) {
             reason = 'An endpoint is terminating the connection due to a protocol error';
-          } else if (event.code == 1003) {
+          } else if (event.code === 1003) {
             reason = 'An endpoint is terminating the connection because it has received a type of data it cannot accept (e.g., an endpoint that understands only text data MAY send this if it receives a binary message).';
-          } else if (event.code == 1004) {
+          } else if (event.code === 1004) {
             reason = 'Reserved. The specific meaning might be defined in the future.';
-          } else if (event.code == 1005) {
+          } else if (event.code === 1005) {
             reason = 'No status code was actually present.';
-          } else if (event.code == 1006) {
+          } else if (event.code === 1006) {
             reason = 'The connection was closed abnormally, e.g., without sending or receiving a Close control frame';
-          } else if (event.code == 1007) {
+          } else if (event.code === 1007) {
             reason = 'An endpoint is terminating the connection because it has received data within a message that was not consistent with the type of the message (e.g., non-UTF-8 [http://tools.ietf.org/html/rfc3629] data within a text message).';
-          } else if (event.code == 1008) {
+          } else if (event.code === 1008) {
             reason = 'An endpoint is terminating the connection because it has received a message that "violates its policy". This reason is given either if there is no other sutible reason, or if there is a need to hide specific details about the policy.';
-          } else if (event.code == 1009) {
+          } else if (event.code === 1009) {
             reason = 'An endpoint is terminating the connection because it has received a message that is too big for it to process.';
-          } else if (event.code == 1010) {
+          } else if (event.code === 1010) {
             reason = 'An endpoint (client) is terminating the connection because it has expected the server to negotiate one or more extension, but the server didn\'t return them in the response message of the WebSocket handshake. <br /> Specifically, the extensions that are needed are: ' + event.reason;
-          } else if (event.code == 1011) {
+          } else if (event.code === 1011) {
             reason = 'A server is terminating the connection because it encountered an unexpected condition that prevented it from fulfilling the request.';
-          } else if (event.code == 1015) {
+          } else if (event.code === 1015) {
             reason = 'The connection was closed due to a failure to perform a TLS handshake (e.g., the server certificate can\'t be verified).';
           } else {
             reason = 'Unknown reason';
           }
 
-          _this._sendStatus('disconnected', reason);
           delete _this._sock;
+          _this._sendStatus('disconnected', reason);
         };
       } else {
         _this._waitReady(callback);
@@ -254,12 +257,22 @@ var VertxProtoStub = (function () {
     get: function get() {
       return this._config;
     }
+  }, {
+    key: 'runtimeSession',
+    get: function get() {
+      return this._runtimeSessionURL;
+    }
   }]);
 
   return VertxProtoStub;
 })();
 
-exports['default'] = VertxProtoStub;
+function activate(url, bus, config) {
+  return {
+    name: 'VertxProtoStub',
+    instance: new VertxProtoStub(url, bus, config)
+  };
+}
 
 /**
 * Callback used to send messages

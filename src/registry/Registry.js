@@ -1,5 +1,8 @@
 import EventEmitter from '../utils/EventEmitter';
 import AddressAllocation from './AddressAllocation';
+import HypertyInstance from './HypertyInstance';
+
+import {divideURL} from '../utils/utils.js';
 
 /**
 * Runtime Registry Interface
@@ -13,12 +16,12 @@ class Registry extends EventEmitter {
   * @param  {AppSandbox}          appSandbox            appSandbox
   * @param  {DomainURL}           remoteRegistry        remoteRegistry
   */
-  constructor(runtimeURL, appSandbox, remoteRegistry) {
+  constructor(runtimeURL, appSandbox, identityModule, remoteRegistry) {
 
     super();
 
     // how some functions receive the parameters for example:
-    // new Registry(msgbus, 'hyperty-runtime://sp1/123', appSandbox, remoteRegistry);
+    // new Registry('hyperty-runtime://sp1/123', appSandbox, idModule, remoteRegistry);
     // registry.registerStub(sandbox, 'sp1');
     // registry.registerHyperty(sandBox, 'hyperty-runtime://sp1/123');
     // registry.resolve('hyperty-runtime://sp1/123');
@@ -32,8 +35,11 @@ class Registry extends EventEmitter {
     _this.appSandbox = appSandbox;
     _this.runtimeURL = runtimeURL;
     _this.remoteRegistry = remoteRegistry;
+    _this.idModule = identityModule;
+    _this.identifier = Math.floor((Math.random() * 10000) + 1);
 
-    _this.hypertyiesList = {};
+    _this.hypertiesListToRemove = {};
+    _this.hypertiesList = [];
     _this.protostubsList = {};
     _this.sandboxesList = {};
     _this.pepList = {};
@@ -71,6 +77,41 @@ class Registry extends EventEmitter {
   }
 
   /**
+  * Function to query the Domain registry, with an user email.
+  */
+  getUserHyperty(email) {
+    let _this = this;
+    let identityURL = 'user://' + email.substring(email.indexOf('@') + 1, email.length) + '/' + email.substring(0, email.indexOf('@'));
+
+    let msg = {
+      id: 98, type: 'READ', from: _this.registryURL, to: 'domain://registry.ua.pt/', body: { user: identityURL}
+    };
+    return new Promise(function(resolve, reject) {
+
+      _this._messageBus.postMessage(msg, (reply) => {
+
+        let hypertyURL = reply.body.last;
+
+        if (hypertyURL === undefined) {
+          return reject('User Hyperty not found');
+        }
+
+        //TODO remove later, fix the problem of bad URL format received in the message
+        let fixedHypertyURL = 'hyperty:/' + hypertyURL.substring(hypertyURL.indexOf(':') + 1, hypertyURL.length);
+
+        let idPackage = {
+          id: email,
+          descriptor: reply.body.hyperties[hypertyURL].descriptor,
+          hypertyURL: fixedHypertyURL
+        };
+
+        console.log('===> RegisterHyperty messageBundle: ', idPackage);
+        resolve(idPackage);
+      });
+    });
+  }
+
+  /**
   * To register a new Hyperty in the runtime which returns the HypertyURL allocated to the new Hyperty.
   * @param  {Sandbox}             sandbox               sandbox
   * @param  {HypertyCatalogueURL} HypertyCatalogueURL   descriptor
@@ -81,12 +122,9 @@ class Registry extends EventEmitter {
 
     //assuming descriptor come in this format, the service-provider-domain url is retrieved by a split instruction
     //hyperty-catalogue://<service-provider-domain>/<catalogue-object-identifier>
-    let descriptorSplit = descriptor.split('/');
-    let hypertyURL = descriptorSplit[2];
+    let domainUrl = divideURL(descriptor).domain;
 
-    //TODO Call get Identity and set Identity to Identity Module
-    //for simplicity added an identity
-    let hypertyIdentity = hypertyURL + '/identity';
+    let identities = _this.idModule.getIdentities();
 
     var promise = new Promise(function(resolve, reject) {
 
@@ -94,28 +132,28 @@ class Registry extends EventEmitter {
         reject('MessageBus not found on registerStub');
       } else {
         //call check if the protostub exist
-        return _this.resolve('hyperty-runtime://' + hypertyURL).then(function() {
-        }).then(function() {
+        return _this.resolve('hyperty-runtime://' + domainUrl).then(function() {
 
-          // addListener with the callback to execute when receive a message from the address-allocation
-          let item = _this._messageBus.addListener(_this.registryURL, (msg) => {
-            let url = msg.body.hypertyRuntime;
+          /*
+          if (_this.hypertiesListToRemove.hasOwnProperty(domainUrl)) {
+            console.log('entrou?');
+            _this.hypertiesListToRemove[domainUrl] = {identity: identities[0].identity};
+          }
 
-            _this.hypertiesList[url] = {identity: url + '/identity'};
-            _this.sandboxesList[url] = sandbox;
+          if (!_this.sandboxesList.hasOwnProperty(domainUrl)) {
+            _this.sandboxesList[domainUrl] = sandbox;
+            sandbox.addListener('*', function(msg) {
+              _this._messageBus.postMessage(msg);
+            });
 
-            //TODO register this hyperty in the Global Registry
-
-            item.remove();
-
-          });
+          }
+          */
 
           // TODO: should be implemented with addresses poll
           // In this case we will request and return only one
           // address
           let numberOfAddresses = 1;
-          let addressDomain = 'ua.pt';
-          _this.addressAllocation.create(addressDomain, numberOfAddresses).then(function(adderessList) {
+          _this.addressAllocation.create(domainUrl, numberOfAddresses).then(function(adderessList) {
 
             adderessList.forEach(function(address) {
 
@@ -125,16 +163,28 @@ class Registry extends EventEmitter {
 
             });
 
-            resolve(adderessList[0]);
+            let hyperty = new HypertyInstance(_this.identifier, _this.registryURL,
+            descriptor, adderessList[0], identities[0].identity);
 
-          }).catch(function(reason) {
-            console.log('Address Reason: ', reason);
-            reject(reason);
+            _this.hypertiesList.push(hyperty);
+
+            //message to register the new hyperty, within the domain registry
+            let msg = {
+              id: 99, type: 'CREATE', from: _this.registryURL, to: 'domain://registry.ua.pt/', body: {user: identities[0].identity,  hypertyDescriptorURL: descriptor, hypertyURL: adderessList[0]}
+            };
+
+            _this._messageBus.postMessage(msg, (reply) => {
+              console.log('===> RegisterHyperty Reply: ', reply);
+            });
+
+            resolve(adderessList[0]);
           });
 
-          //TODO call the post message with create hypertyRegistration msg
-
+        }).catch(function(reason) {
+          console.log('Address Reason: ', reason);
+          reject(reason);
         });
+
       }
     });
 
@@ -150,11 +200,23 @@ class Registry extends EventEmitter {
 
     var promise = new Promise(function(resolve,reject) {
 
-      let request = _this.hypertiesList[url];
+      let found = false;
+      let index = 0;
 
-      if (request === undefined) {
+      for	(index = 0; index < _this.hypertiesList.length; index++) {
+        let hyperty = _this.hypertiesList[index];
+        if (hyperty !== undefined) {
+          if (hyperty.hypertyURL === url) {
+            found = true;
+            break;
+          }
+        }
+      }
+
+      if (found === false) {
         reject('Hyperty not found');
       } else {
+        delete _this.hypertiesList[index];
         resolve('Hyperty successfully deleted');
       }
     });
@@ -191,7 +253,7 @@ class Registry extends EventEmitter {
    * @param  {DomainURL}     DomainURL service provider domain
    * @return {RuntimeProtoStubURL}
    */
-  registerStub(sandBox, domainURL) {
+  registerStub(sandbox, domainURL) {
     let _this = this;
     var runtimeProtoStubURL;
 
@@ -203,20 +265,24 @@ class Registry extends EventEmitter {
       }
 
       //TODO implement a unique number for the protostubURL
-      let domain = domainURL;
       if (!domainURL.indexOf('msg-node.')) {
-        domain = domainURL.substring(domainURL.indexOf('.') + 1);
+        domainURL = domainURL.substring(domainURL.indexOf('.') + 1);
       }
 
-      runtimeProtoStubURL = 'msg-node.' + domain + '/protostub/' + Math.floor((Math.random() * 10000) + 1);
+      runtimeProtoStubURL = 'msg-node.' + domainURL + '/protostub/' + Math.floor((Math.random() * 10000) + 1);
 
-      _this.protostubsList[domain] = runtimeProtoStubURL;
-      _this.sandboxesList[runtimeProtoStubURL] = sandBox;
+      // TODO: Optimize this
+      _this.protostubsList[domainURL] = runtimeProtoStubURL;
+      _this.sandboxesList[domainURL] = sandbox;
+
+      // sandbox.addListener('*', function(msg) {
+      //   _this._messageBus.postMessage(msg);
+      // });
 
       resolve(runtimeProtoStubURL);
 
       _this._messageBus.addListener(runtimeProtoStubURL + '/status', (msg) => {
-        if (msg.header.resource === msg.header.to + '/status') {
+        if (msg.resource === msg.to + '/status') {
           console.log('RuntimeProtostubURL/status message: ', msg.body.value);
         }
       });
@@ -259,8 +325,8 @@ class Registry extends EventEmitter {
 
     var promise = new Promise(function(resolve,reject) {
       //TODO check what parameter in the postMessage the pep is.
-      _this.pep[hyperty] = postMessage;
-      resolve('Pep registered with success');
+      _this.pepList[hyperty] = postMessage;
+      resolve('PEP registered with success');
     });
 
     return promise;
@@ -280,7 +346,7 @@ class Registry extends EventEmitter {
       if (result === undefined) {
         reject('Pep Not found.');
       } else {
-        resolve('Pepe successfully removed.');
+        resolve('PEP successfully removed.');
       }
     });
 
@@ -327,12 +393,11 @@ class Registry extends EventEmitter {
 
     //split the url to find the domainURL. deals with the url for example as:
     //"hyperty-runtime://sp1/protostub/123",
-    let urlSplit = url.split('/');
-    let domainUrl = urlSplit[2];
+    let domainUrl = divideURL(url).domain;
 
     let promise = new Promise((resolve, reject) => {
 
-      if (!domainUrl.indexOf('msg-node.')) {
+      if (!domainUrl.indexOf('msg-node.') || !domainUrl.indexOf('registry.')) {
         domainUrl = domainUrl.substring(domainUrl.indexOf('.') + 1);
       }
 

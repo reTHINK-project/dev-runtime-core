@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: runtime/RuntimeCatalogue.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: runtime/RuntimeCatalogue.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>class RuntimeCatalogue {
+
+  constructor() {
+    let _this = this;
+
+    _this.mockupHypertyDescriptor();
+    _this.mockupStubDescriptor();
+  }
+
+  mockupHypertyDescriptor() {
+    let _this = this;
+
+    // TODO: Remove the code is only for development fase without the Server backend catalogue;
+    // Mockup load the base of descriptors
+    _this._makeExternalRequest('../resources/descriptors/Hyperties.json').then(function(result) {
+      _this.Hyperties = JSON.parse(result);
+    });
+  }
+
+  mockupStubDescriptor() {
+    let _this = this;
+
+    // TODO: Remove the code is only for development fase without the Server backend catalogue;
+    // Mockup load the base of descriptors
+    _this._makeExternalRequest('../resources/descriptors/ProtoStubs.json').then(function(result) {
+      _this.ProtoStubs = JSON.parse(result);
+    });
+  }
+
+  set runtimeURL(runtimeURL) {
+    let _this = this;
+    _this._runtimeURL = runtimeURL;
+  }
+
+  get runtimeURL() {
+    let _this = this;
+    return _this._runtimeURL;
+  }
+
+  /**
+  * Get hypertyRuntimeURL
+  */
+  getHypertyRuntimeURL() {
+    // TODO: check if this is real needed;
+    return _hypertyRuntimeURL;
+  }
+
+  _makeExternalRequest(url) {
+
+    return new Promise(function(resolve, reject) {
+
+      // TODO: implementation
+      // Simulate getting hypertySourceCode through the XMLHttpRequest
+      // but in node this should be overrided to other method to make a
+      // ajax request;
+      // i think we can use a factory like we used in for the sandboxes,
+      // an sandboxFactory;
+      let xhr = new XMLHttpRequest();
+
+      xhr.onreadystatechange = function(event) {
+        let xhr = event.currentTarget;
+        if (xhr.readyState === 4) {
+          if (xhr.status === 200) {
+            resolve(xhr.responseText);
+          } else {
+            reject(xhr.responseText);
+          }
+        }
+      };
+
+      xhr.open('GET', url, true);
+      xhr.send();
+
+    });
+
+  }
+
+  /**
+  * Get HypertyDescriptor
+  */
+  getHypertyDescriptor(hypertyURL) {
+
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+
+      let hypertyName = hypertyURL.substr(hypertyURL.lastIndexOf('/') + 1);
+      let hypertyDescriptor = _this.Hyperties[hypertyName];
+      resolve(hypertyDescriptor);
+
+    });
+
+  }
+
+  /**
+  * Get hypertySourceCode
+  */
+  getHypertySourcePackage(hypertyPackage) {
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+
+      _this._makeExternalRequest(hypertyPackage).then(function(result) {
+
+        try {
+
+          let sourcePackage = JSON.parse(result);
+          let sourceCode = window.atob(sourcePackage.sourceCode);
+          sourcePackage.sourceCode = sourceCode;
+
+          resolve(sourcePackage);
+        } catch (e) {
+          reject(e);
+        }
+
+      }).catch(function(reason) {
+        reject(reason);
+      });
+
+    });
+
+  }
+
+  /**
+  * Get StubDescriptor
+  */
+  getStubDescriptor(domainURL) {
+
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+
+      let stubDescriptor = _this.ProtoStubs[domainURL];
+      resolve(stubDescriptor);
+
+    });
+
+  }
+
+  /**
+  * Get protostubSourceCode
+  */
+  getStubSourcePackage(sourcePackageURL) {
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+
+      _this._makeExternalRequest(sourcePackageURL).then(function(result) {
+
+        try {
+          let sourcePackage = JSON.parse(result);
+          let sourceCode = window.atob(sourcePackage.sourceCode);
+          sourcePackage.sourceCode = sourceCode;
+
+          resolve(sourcePackage);
+        } catch (e) {
+          reject(e);
+        }
+      }).catch(function(reason) {
+        console.error(reason);
+        reject(reason);
+      });
+
+    });
+
+  }
+
+}
+
+export default RuntimeCatalogue;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-utils.html">utils</a></li></ul><h3>Classes</h3><ul><li><a href="AddressAllocation.html">AddressAllocation</a></li><li><a href="BloomFilter.html">BloomFilter</a></li><li><a href="EventEmitter.html">EventEmitter</a></li><li><a href="GlobalRegistryRecord.html">GlobalRegistryRecord</a></li><li><a href="GraphConnector.html">GraphConnector</a></li><li><a href="GraphConnectorContactData.html">GraphConnectorContactData</a></li><li><a href="HypertyInstance.html">HypertyInstance</a></li><li><a href="IdentityModule.html">IdentityModule</a></li><li><a href="MessageBus.html">MessageBus</a></li><li><a href="MiniBus.html">MiniBus</a></li><li><a href="ObjectAllocation.html">ObjectAllocation</a></li><li><a href="Pipeline.html">Pipeline</a></li><li><a href="PolicyEngine.html">PolicyEngine</a></li><li><a href="ProtoStub.html">ProtoStub</a></li><li><a href="QoSUA.html">QoSUA</a></li><li><a href="Registry.html">Registry</a></li><li><a href="RegistryDataModel.html">RegistryDataModel</a></li><li><a href="RuntimeUA.html">RuntimeUA</a></li><li><a href="Sandbox.html">Sandbox</a></li><li><a href="SandboxRegistry.html">SandboxRegistry</a></li><li><a href="SyncherManager.html">SyncherManager</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.0-dev</a> on Tue Jan 05 2016 11:58:26 GMT+0000 (WET)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

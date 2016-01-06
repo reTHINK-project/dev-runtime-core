@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: sandbox/SandboxRegistry.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: sandbox/SandboxRegistry.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @author micaelpedrosa@gmail.com
+ * Base class to implement internal deploy manager of components.
+ */
+
+// import MessageFactory from '../../resources/MessageFactory';
+
+class SandboxRegistry {
+  /* private
+  _components: &lt;url: instance>
+  */
+
+  constructor(bus) {
+    let _this = this;
+
+    _this._bus = bus;
+    _this._components = {};
+
+    // Add Message Factory
+    // let messageFactory = new MessageFactory();
+    // _this.messageFactory = messageFactory;
+
+    bus.addListener(SandboxRegistry.InternalDeployAddress, (msg) => {
+      //console.log('SandboxRegistry-RCV: ', msg);
+      // let responseMsg = {
+      //   id: msg.id, type: 'response', from: SandboxRegistry.InternalDeployAddress, to: SandboxRegistry.ExternalDeployAddress
+      // };
+
+      switch (msg.type) {
+        case 'create': _this._onDeploy(msg); break;
+        case 'delete': _this._onRemove(msg); break;
+      }
+    });
+  }
+
+  get components() { return this._components; }
+
+  _responseMsg(msg, code, value) {
+
+    let _this = this;
+
+    // let messageFactory = _this.messageFactory;
+
+    let responseMsg = {
+      id: msg.id, type: 'response', from: SandboxRegistry.InternalDeployAddress, to: SandboxRegistry.ExternalDeployAddress
+    };
+
+    // Chanege the origin message, because the response;
+    // msg.from = SandboxRegistry.InternalDeployAddress;
+    // msg.to = SandboxRegistry.ExternalDeployAddress;
+
+    let body = {};
+    if (code) body.code = code;
+    if (value) body.desc = value;
+
+    responseMsg.body = body;
+
+    // return messageFactory.createResponse(msg, code, value);
+    return responseMsg;
+  }
+
+  _onDeploy(msg) {
+    let _this = this;
+    let config = msg.body.config;
+    let componentURL = msg.body.url;
+    let sourceCode = msg.body.sourceCode;
+    let responseCode;
+    let responseDesc;
+
+    if (!_this._components.hasOwnProperty(componentURL)) {
+      try {
+        _this._components[componentURL] = _this._create(componentURL, sourceCode, config);
+        responseCode = 200;
+      } catch (error) {
+        responseCode = 500;
+        responseDesc = error;
+      }
+    } else {
+      responseCode = 500;
+      responseDesc = 'Instance ' + componentURL + ' already exist!';
+    }
+
+    // Create response message with MessageFactory
+    let responseMsg = _this._responseMsg(msg, responseCode, responseDesc);
+    _this._bus.postMessage(responseMsg);
+  }
+
+  _onRemove(msg) {
+    let _this = this;
+    let componentURL = msg.body.url;
+    let responseCode;
+    let responseDesc;
+
+    if (_this._components.hasOwnProperty(componentURL)) {
+      //remove component from the pool and all listeners
+      delete _this._components[componentURL];
+      _this._bus.removeAllListenersOf(componentURL);
+      responseCode = 200;
+    } else {
+      responseCode = 500;
+      responseDesc = 'Instance ' + componentURL + ' doesn\'t exist!';
+    }
+
+    let responseMsg = _this._responseMsg(msg, responseCode, responseDesc);
+
+    _this._bus.postMessage(responseMsg);
+  }
+
+  /**
+   * This method should be implemented by the internal sandbox code.
+   * @param  {ComponentURL} url URL used for the instance
+   * @param  {string} sourceCode Code of the component
+   * @param  {Config} config Configuration parameters
+   * @return {Object} Returns instance of the component or throw an error "throw 'error message'"
+   */
+  _create(url, sourceCode, config) {
+    //implementation specific
+    /* example code:
+      eval(sourceCode);
+      return activate(url, _this._bus, config);
+    */
+  }
+}
+
+SandboxRegistry.ExternalDeployAddress = 'sandbox://external';
+SandboxRegistry.InternalDeployAddress = 'sandbox://internal';
+
+export default SandboxRegistry;
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-utils.html">utils</a></li></ul><h3>Classes</h3><ul><li><a href="AddressAllocation.html">AddressAllocation</a></li><li><a href="BloomFilter.html">BloomFilter</a></li><li><a href="EventEmitter.html">EventEmitter</a></li><li><a href="GlobalRegistryRecord.html">GlobalRegistryRecord</a></li><li><a href="GraphConnector.html">GraphConnector</a></li><li><a href="GraphConnectorContactData.html">GraphConnectorContactData</a></li><li><a href="HypertyInstance.html">HypertyInstance</a></li><li><a href="IdentityModule.html">IdentityModule</a></li><li><a href="MessageBus.html">MessageBus</a></li><li><a href="MiniBus.html">MiniBus</a></li><li><a href="ObjectAllocation.html">ObjectAllocation</a></li><li><a href="Pipeline.html">Pipeline</a></li><li><a href="PolicyEngine.html">PolicyEngine</a></li><li><a href="ProtoStub.html">ProtoStub</a></li><li><a href="QoSUA.html">QoSUA</a></li><li><a href="Registry.html">Registry</a></li><li><a href="RegistryDataModel.html">RegistryDataModel</a></li><li><a href="RuntimeUA.html">RuntimeUA</a></li><li><a href="Sandbox.html">Sandbox</a></li><li><a href="SandboxRegistry.html">SandboxRegistry</a></li><li><a href="SyncherManager.html">SyncherManager</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.0-dev</a> on Tue Jan 05 2016 11:58:26 GMT+0000 (WET)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

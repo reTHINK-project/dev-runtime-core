@@ -13,16 +13,17 @@ describe('Sandbox', function() {
 
     let sb = new Sandbox();
     sb._onPostMessage = (msg) => {
-      if (msg.header.id === 1) {
+      console.log(msg);
+      if (msg.id === 1) {
         expect(msg).to.eql({
-          header: { id: 1, type: 'CREATE', from: 'sandbox://external', to: 'sandbox://internal' },
+          id: 1, type: 'create', from: 'sandbox://external', to: 'sandbox://internal',
           body: { url: 'hyperty://fake-url', sourceCode: '<source code>', config: {init: '<init>'} }
         });
       }
 
-      if (msg.header.id  === 2) {
+      if (msg.id  === 2) {
         expect(msg).to.eql({
-          header: { id: 2, type: 'REMOVE', from: 'sandbox://external', to: 'sandbox://internal' },
+          id: 2, type: 'delete', from: 'sandbox://external', to: 'sandbox://internal',
           body: { url: 'hyperty://fake-url' }
         });
       }
@@ -38,8 +39,8 @@ describe('Sandbox', function() {
 
       postMessage: (msg) => {
         expect(msg).to.eql({
-          header: { id: msg.header.id, type: 'reply', from: 'sandbox://internal', to: 'sandbox://external' },
-          body: { code: 'ok' }
+          id: msg.id, type: 'response', from: 'sandbox://internal', to: 'sandbox://external',
+          body: { code: 200 }
         });
 
         sb._onMessage(msg);

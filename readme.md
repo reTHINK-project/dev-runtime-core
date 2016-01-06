@@ -21,6 +21,30 @@ npm install
 jspm install
 ```
 
+----
+**Private Repository Note**
+
+if you have problems with the `npm install` command, like "access was forbidden", "404 not found", and have the service framework module reference, it is an authentication problem;
+
+you may need following the steps present on [Github Help](https://help.github.com/articles/generating-ssh-keys/). and select operation system you are using.
+
+This could happen because it is a private module and need your GitHub authentication to allow cloning the repository.
+
+If you have some troubles with authentication on windows using the Git Shell, you can try [caching your GitHub password](https://help.github.com/articles/caching-your-github-password-in-git/#platform-windows).
+This should avoid the constant prompt for username and password;
+
+**Instalation through jspm**
+
+We need configure jspm config using github tokens, for that, following this (based on issue [3](https://github.com/reTHINK-project/dev-runtime-browser/issues/3)):
+
+  1. [Here](https://github.com/settings/tokens), generate token with public_repo permission enabled
+  2. Save the token generated;
+  3. Execute the command ```jspm registry config github``` and you'll be asked for the credentials;
+  4. Now you can execute command ```jspm install -y and the runtime-core``` or ```jspm install runtime-core=github:reTHINK-project/dev-runtime-core``` or only ```jspm install```;
+
+----
+**Issues**
+
 if you have some trouble with the environment, you can open an issue;
 
 ### Javascript Environment
@@ -67,21 +91,26 @@ How to include this repository in other software parts, like [dev-runtime-browse
 
 example: [dev-runtime-browser](https://github.com/reTHINK-project/dev-runtime-browser)
 
-Verify these use cases: 1. if you will create a new repository, you can use this template, and can configure your development environment; 2. if you already have an respository cloned;
+Verify these use cases:
+1. if you will create a new repository, you can use this template, and can configure your development environment;
+2. if you already have an respository cloned;
 
 for both cases you just have run the command:
 
 ```
-jspm install runtime-core=github:reTHINK-project/dev-runtime-core.git.
+jspm install runtime-core=github:rethink-project/dev-runtime-core@dev-0.2
 ```
 
 and on javascript code you need import the script like other modules;
 
 ```
-import {RuntimeUA, Sandbox} from 'runtime-core';
+import RuntimeUA from 'runtime-core/dist/runtimeUA';
+import {Sandbox, SandboxRegistry} from 'runtime-core/dist/sandbox'
+import MiniBus from 'runtime-core/dist/minibus';
 
 console.log('Runtime: ', RuntimeUA);
-console.log('Sandbox: ', Sandbox);
+console.log('Sandbox: ', Sandbox, SandboxRegistry);
+console.log('MiniBus: ', MiniBus);
 
 ```
 
@@ -90,13 +119,13 @@ console.log('Sandbox: ', Sandbox);
 [dev-runtime-node](https://github.com/reTHINK-project/dev-runtime-node)
 
 ```
-npm install git+ssh://git@github.com/reTHINK-project/dev-runtime-core.git --save
+npm install github:rethink-project/dev-runtime-core#dev-0.2 --save
 ```
 
 after this you can require the runtime-core like other modules on node;
 
 ```
-var RuntimeUA = require('runtime-core').RuntimeUA;
+var RuntimeUA = require('runtime-core').runtimeUA;
 
 var runtime = new RuntimeUA();
 
@@ -124,18 +153,23 @@ To run karma tests is mandatory to run **live-server** because of the mock-up's 
 live-server --port=4000
 ```
 
+### <a id="Tasks">Tasks</a>
+
+In this repository, we have some tasks which can help you.
+If you need change some resource file, like an Hyperty, you need run task watch first, to encode the Hyperty file changes in a base64 file and add it to the descriptor folder in the respective place;
+
+in your command line run:
+```
+gulp watch
+```
+
+this is temporary until the dev-catalogue is ready;
+
 ### <a id="example">Example</a>
 
-This repository have a folder with an working example of runtime-core and we can do:
- - send message between local hyperties (2 hyperties);
- - send message between remote hyperties through the vertx;
-
------
+This repository have a folder with an working example of Hyperty Connector and we can send message and make a WebRTC call between remote hyperties through the vertx;
 
 To run the demo on example folder:
- - you need **live-server** running in the root folder.
- ```
- live-server --port=4000
- ```
- - in your browser access to http://localhost:4000/example.
- - for communication between hyperties in two distinct browsers, you need, run locally [dev-msg-node-vertx](https://github.com/reTHINK-project/dev-msg-node-vertx#java)
+ - this example have a dependecy from [dev-msg-node-vertx](https://github.com/reTHINK-project/dev-msg-node-vertx/tree/dev-0.2#unit-testing) and [dev-registry-domain](https://github.com/reTHINK-project/dev-registry-domain#dev-registry-domain) for communication between hyperties in two distinct browsers or tabs. **At this moment you need run locally [dev-msg-node-vertx](https://github.com/reTHINK-project/dev-msg-node-vertx/tree/dev-0.2#unit-testing) and [dev-registry-domain](https://github.com/reTHINK-project/dev-registry-domain#dev-registry-domain)**
+ - you need, in the root folder, run command: ``` npm start ```
+ - in your browser, access to https://127.0.0.1:8080/example
