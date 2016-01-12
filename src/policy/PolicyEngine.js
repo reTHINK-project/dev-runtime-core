@@ -47,7 +47,7 @@ class PolicyEngine {
    */
   authorise(message) {
     let _this = this;
-    console.log(_this.policiesTable);
+
     return new Promise(function(resolve, reject) {
 
       // TODO: Optimize and improve this code;
@@ -64,9 +64,18 @@ class PolicyEngine {
           message.body = {};
         }
 
-        message.body.assertedIdentity = assertedID[0].identity;
-        message.body.idToken = JSON.stringify(value);
-        message.body.authorised = true;
+        //TODO dumb/insecure way to verify the direction of the message, improvement required later
+        if (!message.body.hasOwnProperty('assertedIdentity')) {
+
+          message.body.assertedIdentity = assertedID[0].identity;
+          message.body.idToken = JSON.stringify(value);
+          message.body.authorised = true;
+
+          console.log('Message: ', message);
+
+        } else {
+          //TODO validate the received message identity
+        }
         resolve(message);
       }, function(error) {
         reject(error);

@@ -1,6 +1,7 @@
 import EventEmitter from '../utils/EventEmitter';
 import AddressAllocation from './AddressAllocation';
 import HypertyInstance from './HypertyInstance';
+import HypertyDiscovery from './HypertyDiscovery';
 
 import {divideURL} from '../utils/utils.js';
 
@@ -66,6 +67,10 @@ class Registry extends EventEmitter {
     // Install AddressAllocation
     let addressAllocation = new AddressAllocation(_this.registryURL, messageBus);
     _this.addressAllocation = addressAllocation;
+
+    // Initiate hypertyDiscovery
+    let hypertyDiscovery = new HypertyDiscovery(_this._messageBus, _this.runtimeURL);
+    _this.hypertyDiscovery = hypertyDiscovery;
   }
 
   /**
