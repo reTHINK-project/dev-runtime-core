@@ -5,6 +5,7 @@ import bitcoin from 'bitcoinjs-lib';
 import bip39 from 'bip39';
 import sjcl from 'sjcl';
 import jsrsasign from 'jsrsasign';
+import base64url from 'base64-url';
 
 /**
 * The Graph Connector contains the contact list/address book.
@@ -127,8 +128,10 @@ class GraphConnector {
   signGlobalRegistryRecord() {
 
     let record = this.globalRegistryRecord.getRecord();
+    let recordString = JSON.stringify(record);
+    let recordStringBase64 = base64url.encode(recordString);
 
-    let jwt = KJUR.jws.JWS.sign(null, {alg: 'ES256'}, record, this._prvKey);
+    let jwt = KJUR.jws.JWS.sign(null, {alg: 'ES256'}, {data: recordStringBase64}, this._prvKey);
     return jwt;
   }
 

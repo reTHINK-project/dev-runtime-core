@@ -18,6 +18,7 @@ System.config({
     "babel": "npm:babel-core@5.8.34",
     "babel-runtime": "npm:babel-runtime@5.8.34",
     "babelify": "npm:babelify@6.3.0",
+    "base64-url": "npm:base64-url@1.2.1",
     "bip39": "npm:bip39@2.2.0",
     "bitcoinjs-lib": "npm:bitcoinjs-lib@2.1.4",
     "browserify": "npm:browserify@11.1.0",
@@ -181,6 +182,9 @@ System.config({
       "path": "github:jspm/nodelibs-path@0.1.0",
       "stream": "github:jspm/nodelibs-stream@0.1.0",
       "util": "github:jspm/nodelibs-util@0.1.0"
+    },
+    "npm:base64-url@1.2.1": {
+      "buffer": "github:jspm/nodelibs-buffer@0.1.0"
     },
     "npm:base64id@0.1.0": {
       "buffer": "github:jspm/nodelibs-buffer@0.1.0",
