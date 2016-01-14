@@ -121,7 +121,7 @@ class RuntimeUA {
 
   /**
   * Deploy Hyperty from Catalogue URL
-  * @param  {URL.URL}    hyperty hypertyInstance url;
+  * @param  {URL.HypertyCatalogueURL}    hyperty hypertyDescriptor url;
   */
   loadHyperty(hypertyDescriptorURL) {
 
