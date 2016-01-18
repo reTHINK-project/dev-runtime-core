@@ -42,8 +42,10 @@ class Registry extends EventEmitter {
     _this.hypertiesListToRemove = {};
     _this.hypertiesList = [];
     _this.protostubsList = {};
-    _this.sandboxesList = {};
+    _this.sandboxesList = {stub: {}, hyperty: {} };
     _this.pepList = {};
+
+    _this.sandboxesList.stub[runtimeURL] = appSandbox;
 
   }
 
@@ -67,10 +69,6 @@ class Registry extends EventEmitter {
     // Install AddressAllocation
     let addressAllocation = new AddressAllocation(_this.registryURL, messageBus);
     _this.addressAllocation = addressAllocation;
-
-    // Initiate hypertyDiscovery
-    let hypertyDiscovery = new HypertyDiscovery(_this._messageBus, _this.runtimeURL);
-    _this.hypertyDiscovery = hypertyDiscovery;
   }
 
   /**
@@ -153,6 +151,8 @@ class Registry extends EventEmitter {
 
           }
           */
+
+          _this.sandboxesList.hyperty[domainUrl] = sandbox;
 
           // TODO: should be implemented with addresses poll
           // In this case we will request and return only one
@@ -278,7 +278,7 @@ class Registry extends EventEmitter {
 
       // TODO: Optimize this
       _this.protostubsList[domainURL] = runtimeProtoStubURL;
-      _this.sandboxesList[domainURL] = sandbox;
+      _this.sandboxesList.stub[domainURL] = sandbox;
 
       // sandbox.addListener('*', function(msg) {
       //   _this._messageBus.postMessage(msg);
@@ -376,10 +376,16 @@ class Registry extends EventEmitter {
     let _this = this;
     var promise = new Promise(function(resolve,reject) {
 
-      let request = _this.sandboxesList[url];
+      let request = _this.sandboxesList.stub[url];
 
       if (request === undefined) {
-        reject('Sandbox not found');
+        request = _this.sandboxesList.hyperty[url];
+
+        if (request === undefined) {
+          reject('Sandbox not found');
+        } else {
+          resolve(request);
+        }
       } else {
         resolve(request);
       }
