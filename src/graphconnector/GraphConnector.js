@@ -26,14 +26,15 @@ class GraphConnector {
     this.globalRegistryRecord = new GlobalRegistryRecord();
     this._prvKey;
 
-    this.domainUserIDs = [];
+    this.groups = [];
+    this.residenceLocation;
     this.firstName;
     this.lastName;
   }
 
   /**
    * Generates a GUID and returns a mnemonic from which the GUID can be re-created later.
-   * @returns  {String}    mnemonic      A string with 16 words.
+   * @returns  {string}    mnemonic      A string with 16 words.
    */
   generateGUID() {
 
@@ -64,7 +65,7 @@ class GraphConnector {
   /**
    * Generates a public/private key pair from a given mnemonic (16 words).
    * Expects a string containing 16 words seperated by single spaces.
-   * @param  {String}     mnemonicAndSalt     A string of 16 words.
+   * @param  {string}     mnemonicAndSalt     A string of 16 words.
    */
   useGUID(mnemonicAndSalt) {
     // TODO: check if format is correct and if all words are from bip39 english wordlist
@@ -78,8 +79,8 @@ class GraphConnector {
 
   /**
    * Creates the keys from mnemonic and salt. Also sets public key, guid, and salt for globalRegistryRecord.
-   * @param  {String}     mnemonic     A string with 15 words.
-   * @param  {String}     salt         A word.
+   * @param  {string}     mnemonic     A string with 15 words.
+   * @param  {string}     salt         A word.
    */
   _createKeys(mnemonic, saltWord) {
 
@@ -123,7 +124,7 @@ class GraphConnector {
 
   /**
    * SignGenerates a public/private key pair from a given mnemonic.
-   * @returns  {String}     JWT     JSON Web Token ready to commit to Global Registry.
+   * @returns  {string}     JWT     JSON Web Token ready to commit to Global Registry.
    */
   signGlobalRegistryRecord() {
 
@@ -136,8 +137,37 @@ class GraphConnector {
   }
 
   /**
+   * Adds a UserID for the user.
+   * @param  {string}     userID          The UserID for a Domain Registry to add for the user.
+   */
+  addUserID(userID) {
+    // check if already inside
+    let found = false;
+    for (let i = 0; i < this.globalRegistryRecord.userIDs.length; i++) {
+      if (this.globalRegistryRecord.userIDs == userID) {
+        found = true;
+      }
+    }
+    if (!found) {
+      this.globalRegistryRecord.userIDs.push(userID);
+    }
+  }
+
+  /**
+   * Removes a UserID for the user.
+   * @param  {string}     userID          The UserID to remove.
+   */
+  removeUserID(userID) {
+    for (let i = 0; i < this.globalRegistryRecord.userIDs.length; i++) {
+      if (this.globalRegistryRecord.userIDs == userID) {
+        this.globalRegistryRecord.userIDs.splice(i, 1);
+      }
+    }
+  }
+
+  /**
    * Add a contact to the Graph Connector.
-   * @param  {GUID}     guid          GUID of the new contact.
+   * @param  {string}   guid          GUID of the new contact.
    * @param  {string}   firstName     First name of the new contact.
    * @param  {string}   lastname      Last name of the new contact.
    */
@@ -151,7 +181,7 @@ class GraphConnector {
 
   /**
    * Remove a contact from the Graph Connector.
-   * @param  {GUID}     guid      GUID of the user to be removed.
+   * @param  {string}     guid      GUID of the user to be removed.
    */
   removeContact(guid) {
     // remove from contacts
@@ -200,7 +230,7 @@ class GraphConnector {
 
   /**
    * Checks, if the given GUID is known and returns a list of contacs that are direct connections as well as a list of contacts that (most likely) know the given contact.
-   * @param  {GUID}     guid      GUID of the contact to look for.
+   * @param  {string}     guid      GUID of the contact to look for.
    * @returns  {array}    relatedContacts     List of related direct contacts and of related friends-of-friends contacts.The format is: RelatedContacts<Direct<GraphConnectorContactData>,FoF<GraphConnectorContactData>>.
    */
   checkGUID(guid) {
