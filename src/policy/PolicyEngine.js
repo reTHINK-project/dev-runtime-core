@@ -71,7 +71,7 @@ class PolicyEngine {
           message.body.idToken = JSON.stringify(value);
           message.body.authorised = true;
 
-          console.log('Message: ', message);
+          //console.log('Message: ', message);
 
         } else {
           //TODO validate the received message identity

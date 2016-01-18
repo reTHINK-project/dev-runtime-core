@@ -17,7 +17,7 @@ class HypertyDiscovery {
     _this.messageBus = msgBus;
 
     let dividedURL = divideURL(runtimeURL);
-    _this.discoveryURL = 'domain://registry.' + dividedURL.domain + '/hyperty-instance/user';
+    _this.discoveryURL = 'domain://registry.' + dividedURL.domain;
     _this.domainRegistryListener();
 
   }
@@ -45,7 +45,7 @@ class HypertyDiscovery {
 
         // message to query domain registry, asking for a user hyperty.
         let message = {
-          id: 98, type: 'READ', from: _this.discoveryURL, to: 'domain://registry.ua.pt/', body: { user: identity}
+          id: 98, type: 'READ', from: msg.from, to: 'domain://registry.ua.pt/', body: { user: identity}
         };
 
         _this.messageBus.postMessage(message, function(reply) {
@@ -64,7 +64,8 @@ class HypertyDiscovery {
             message = {id: id, type: 'RESPONSE', from: _this.discoveryURL,
                             to: destination, body: { code: 200,
                             hypertyInstances: {hypertyInstance:
-                            {url: fixedHypertyURL, user: identity}}}};
+                            {url: fixedHypertyURL, user: identity,
+                             descriptor: reply.body.hyperties[hypertyURL].descriptor}}}};
           }
 
           _this.messageBus.postMessage(message, function(reply) {
