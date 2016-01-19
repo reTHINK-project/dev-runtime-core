@@ -40,6 +40,8 @@ class SyncherManager {
       switch (msg.type) {
         case 'create': _this._onCreate(msg); break;
         case 'delete': _this._onDelete(msg); break;
+        case 'subscribe': _this._onLocalSubscribe(msg); break;
+        case 'unsubscribe': _this._onLocalUnSubscribe(msg); break;
       }
     });
   }
@@ -61,7 +63,7 @@ class SyncherManager {
       //TODO: register objectURL so that it can be discovered in the network
 
       //register change listener
-      let changeListener = _this._bus.addListener(objURL, (msg) => {
+      /*let changeListener = _this._bus.addListener(objURL, (msg) => {
         console.log(objURL + '-RCV: ', msg);
         _this._subscriptions[objURL].subs.forEach((hypertyUrl) => {
           let changeMsg = deepClone(msg);
@@ -72,18 +74,18 @@ class SyncherManager {
           //forward to hyperty observer
           _this._bus.postMessage(changeMsg);
         });
-      });
+      });*/
 
       //15. add subscription listener
       let subscriptorListener = _this._bus.addListener(objSubscriptorURL, (msg) => {
         console.log(objSubscriptorURL + '-RCV: ', msg);
         switch (msg.type) {
-          case 'subscribe': _this._onSubscribe(objURL, msg); break;
-          case 'unsubscribe': _this._onUnSubscribe(objURL, msg); break;
+          case 'subscribe': _this._onRemoteSubscribe(objURL, msg); break;
+          case 'unsubscribe': _this._onRemoteUnSubscribe(objURL, msg); break;
         }
       });
 
-      _this._subscriptions[objURL] = { owner: owner, sl: subscriptorListener, cl: changeListener, subs: [] };
+      _this._subscriptions[objURL] = { owner: owner, sl: subscriptorListener, /*cl: changeListener,*/ subs: [] };
 
       //all ok, send response
       _this._bus.postMessage({
@@ -124,7 +126,7 @@ class SyncherManager {
     //TODO: destroy object in the registry?
   }
 
-  _onSubscribe(objURL, msg) {
+  _onRemoteSubscribe(objURL, msg) {
     let _this = this;
     let hypertyUrl = msg.from;
 
@@ -159,7 +161,8 @@ class SyncherManager {
       _this._bus.postMessage(forwardMsg, (reply) => {
         console.log('forward-reply: ', reply);
         if (reply.body.code === 200) {
-          //subscription accepted
+          //subscription accepted (add forward and subscription)
+          _this._bus.addForward(objURL, hypertyUrl);
           _this._subscriptions[objURL].subs.push(hypertyUrl);
         }
 
@@ -173,7 +176,7 @@ class SyncherManager {
 
   }
 
-  _onUnSubscribe(objURL, msg) {
+  _onRemoteUnSubscribe(objURL, msg) {
     let _this = this;
     let hypertyUrl = msg.from;
 
@@ -183,6 +186,43 @@ class SyncherManager {
 
     //TODO: send un-subscribe message to Syncher? (depends on the operation mode)
   }
+
+  _onLocalSubscribe(msg) {
+    let _this = this;
+
+    let domain = divideURL(msg.from).domain;
+    let objURL = msg.body.resource;
+    let objURLSubscription = objURL + '/subscription';
+
+    //1. subscribe msg for the domain node
+    let nodeSubscribeMsg = {
+      type: 'subscribe', from: _this._url, to: 'domain://msg-node.' + domain + '/sm',
+      body: msg.body
+    };
+
+    //2. subscribe in msg-node
+    _this._bus.postMessage(nodeSubscribeMsg, (reply) => {
+      console.log('node-subscribe-response: ', reply);
+      if (reply.body.code === 200) {
+        //listener accepted (add forward and subscribe to reporter)
+        _this._bus.addForward(objURL, msg.from);
+        _this._bus.postMessage({
+          id: msg.id, type: 'subscribe', from: msg.from, to: objURLSubscription
+        });
+      } else {
+        //listener rejected
+        _this._bus.postMessage({
+          id: msg.id, type: 'response', from: msg.to, to: msg.from,
+          body: reply.body
+        });
+      }
+    });
+  }
+
+  _onLocalUnSubscribe(msg) {
+
+  }
+
 }
 
 export default SyncherManager;
