@@ -234,6 +234,12 @@ class RuntimeCatalogue {
         } catch (e) {
              console.log("parsing sourcePackage failed. already parsed? -> ", sp);
         }
+
+        // check encoding
+        if (sp["encoding"] === "base64") {
+            sp["sourceCode"] = atob(sp["sourceCode"]);
+        }
+
         let sourcePackage = factory.createSourcePackage(sp["sourceCode"], sp["sourceCodeClassname"]);
         if (sp["encoding"])
             sourcePackage.encoding = sp["encoding"];
