@@ -142,10 +142,10 @@ var through = require('through2');
 var Base64 = require('js-base64').Base64;
 var fs = require('fs');
 
-function encode(filename) {
+function encode(filename, descriptorName) {
 
-  var sourcePackage = fs.readFileSync('resources/descriptors/' + filename + '-sourcePackageURL.json', 'utf8');
-  var json = JSON.parse(sourcePackage);
+  var descriptor = fs.readFileSync('resources/descriptors/' + descriptorName + '.json', 'utf8');
+  var json = JSON.parse(descriptor);
 
   return through.obj(function(file, enc, cb) {
 
@@ -157,13 +157,19 @@ function encode(filename) {
     }
 
     var encoded = Base64.encode(file.contents);
-    json.sourceCode = encoded;
-    json.sourceCodeClassName = filename;
-    json.encoding = 'Base64';
-    json.signature = '';
+    var value = 'default';
 
-    sourcePackage = new Buffer(JSON.stringify(json, null));
-    cb(null, sourcePackage);
+    if (json.hasOwnProperty(filename)) {
+      value = filename;
+    }
+
+    json[value].sourcePackage.sourceCode = encoded;
+    json[value].sourcePackage.sourceCodeClassname = filename;
+    json[value].sourcePackage.encoding = 'Base64';
+    json[value].sourcePackage.signature = '';
+
+    var newDescriptor = new Buffer(JSON.stringify(json, null));
+    cb(null, newDescriptor);
 
   });
 
@@ -199,8 +205,8 @@ gulp.task('watch', function() {
       .pipe(source('bundle.js'))
       .pipe(gulp.dest('resources/'))
       .pipe(buffer())
-      .pipe(encode(filename))
-      .pipe(source(filename + '-sourcePackageURL.json'))
+      .pipe(encode(filename, descriptorName))
+      .pipe(source(descriptorName + '.json'))
       .pipe(gulp.dest('resources/descriptors/'));
   });
 

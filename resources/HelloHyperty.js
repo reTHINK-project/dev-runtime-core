@@ -15,7 +15,7 @@ class HelloHyperty {
 
   sendMessage() {
 
-    var _this = this;
+    let _this = this;
 
     _this.bus.postMessage({
       from: _this.hypertyURL,
@@ -32,8 +32,8 @@ class HelloHyperty {
 export default function activate(hypertyURL, bus, configuration) {
 
   return {
-    hypertyName: 'HelloHyperty',
-    hypertyCode: new HelloHyperty(hypertyURL, bus, configuration)
+    name: 'HelloHyperty',
+    instance: new HelloHyperty(hypertyURL, bus, configuration)
   };
 
 }

@@ -7,7 +7,11 @@ import SandboxFactory from '../resources/sandboxes/SandboxFactory';
 
 let sandboxFactory = new SandboxFactory();
 let avatar = 'https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/photo.jpg';
-let runtime = new RuntimeUA(sandboxFactory);
+
+// You can change this at your own domain
+let domain = 'localhost:8090';
+
+let runtime = new RuntimeUA(sandboxFactory, domain);
 
 // Check if the document is ready
 if (document.readyState === 'complete') {
@@ -46,7 +50,15 @@ function userLoged(result) {
 
   console.log(result);
 
-  let hyperty = 'http://ua.pt/HelloHyperty';
+  // let protocolStub = 'hyperty-catalogue://' + domain + '/.well-known/protocolstub/VertxProtoStub';
+  //
+  // runtime.loadStub(protocolStub).then(function(result) {
+  //   console.log(result);
+  // }).catch(function(reason) {
+  //   errorMessage(reason);
+  // });
+
+  let hyperty = 'hyperty-catalogue://' + domain + '/.well-known/hyperty/HelloHyperty';
 
   // Load First Hyperty
   runtime.loadHyperty(hyperty).then(hypertyDeployed).catch(function(reason) {

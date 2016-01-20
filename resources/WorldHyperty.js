@@ -33,8 +33,8 @@ class WorldHyperty {
 export default function activate(hypertyURL, bus, configuration) {
 
   return {
-    hypertyName: 'WorldHyperty',
-    hypertyCode: new WorldHyperty(hypertyURL, bus, configuration)
+    name: 'WorldHyperty',
+    instance: new WorldHyperty(hypertyURL, bus, configuration)
   };
 
 }

@@ -38,4 +38,16 @@ class ProtoStub {
 
 }
 
-export default ProtoStub;
+/**
+ * To activate this protocol stub, using the same method for all protostub.
+ * @param  {URL.RuntimeURL}                            runtimeProtoStubURL runtimeProtoSubURL
+ * @param  {Message.Message}                           busPostMessage     configuration
+ * @param  {ProtoStubDescriptor.ConfigurationDataList} configuration      configuration
+ * @return {Object} Object with name and instance of ProtoStub
+ */
+export default function activate(url, bus, config) {
+  return {
+    name: 'ProtoStub',
+    instance: new ProtoStub(url, bus, config)
+  };
+}

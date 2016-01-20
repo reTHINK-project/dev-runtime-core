@@ -1,169 +1,265 @@
+import {divideURL} from '../utils/utils';
+import {CatalogueFactory} from 'service-framework';
+import {HypertyDescriptor, ProtocolStubDescriptor, SourcePackage} from 'service-framework';
+
 class RuntimeCatalogue {
 
-  constructor() {
-    let _this = this;
+    constructor() {
+        // console.log('runtime catalogue');
+        let _this = this;
+        _this._factory = new CatalogueFactory(false, undefined);
+    }
 
-    _this.mockupHypertyDescriptor();
-    _this.mockupStubDescriptor();
-  }
+    set runtimeURL(runtimeURL) {
+        let _this = this;
+        _this._runtimeURL = runtimeURL;
+    }
 
-  mockupHypertyDescriptor() {
-    let _this = this;
+    get runtimeURL() {
+        let _this = this;
+        return _this._runtimeURL;
+    }
 
-    // TODO: Remove the code is only for development fase without the Server backend catalogue;
-    // Mockup load the base of descriptors
-    _this._makeExternalRequest('../resources/descriptors/Hyperties.json').then(function(result) {
-      _this.Hyperties = JSON.parse(result);
-    });
-  }
+    /**
+     * Get hypertyRuntimeURL
+     */
+    getHypertyRuntimeURL() {
+        // TODO: check if this is real needed;
+        return _hypertyRuntimeURL;
+    }
 
-  mockupStubDescriptor() {
-    let _this = this;
+    /**
+     * make a http request to a given URL.
+     * @param url
+     * @returns {Promise}
+     * @private
+     */
+    _makeExternalRequest(url) {
+        // console.log("_makeExternalRequest", url);
 
-    // TODO: Remove the code is only for development fase without the Server backend catalogue;
-    // Mockup load the base of descriptors
-    _this._makeExternalRequest('../resources/descriptors/ProtoStubs.json').then(function(result) {
-      _this.ProtoStubs = JSON.parse(result);
-    });
-  }
+        // TODO: make this request compatible with nodejs
+        // at this moment, XMLHttpRequest only is compatible with browser implementation
+        // nodejs doesn't support;
+        return new Promise(function (resolve, reject) {
+            let protocolmap = {
+                "hyperty-catalogue://": "http://"
+            };
 
-  set runtimeURL(runtimeURL) {
-    let _this = this;
-    _this._runtimeURL = runtimeURL;
-  }
+            let foundProtocol = false;
+            for (var protocol in protocolmap) {
+                if (url.slice(0, protocol.length) == protocol) {
+                    // console.log("exchanging " + protocol + " with " + protocolmap[protocol]);
+                    url = protocolmap[protocol] + url.slice(protocol.length, url.length);
+                    foundProtocol = true;
+                    break;
+                }
+            }
 
-  get runtimeURL() {
-    let _this = this;
-    return _this._runtimeURL;
-  }
+            if (!foundProtocol) {
+                reject("Invalid protocol of url: " + url);
+                return;
+            }
 
-  /**
-  * Get hypertyRuntimeURL
-  */
-  getHypertyRuntimeURL() {
-    // TODO: check if this is real needed;
-    return _hypertyRuntimeURL;
-  }
+            let xhr = new XMLHttpRequest();
 
-  _makeExternalRequest(url) {
+            // console.log(url);
 
-    return new Promise(function(resolve, reject) {
+            xhr.open('GET', url, true);
 
-      // TODO: implementation
-      // Simulate getting hypertySourceCode through the XMLHttpRequest
-      // but in node this should be overrided to other method to make a
-      // ajax request;
-      // i think we can use a factory like we used in for the sandboxes,
-      // an sandboxFactory;
-      let xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function (event) {
+                let xhr = event.currentTarget;
+                if (xhr.readyState === 4) {
+                    // console.log("got response:", xhr);
+                    if (xhr.status === 200) {
+                        resolve(xhr.responseText);
+                    } else {
+                        // console.log("rejecting promise because of response code: 200 != ", xhr.status);
+                        reject(xhr.responseText);
+                    }
+                }
+            };
 
-      xhr.onreadystatechange = function(event) {
-        let xhr = event.currentTarget;
-        if (xhr.readyState === 4) {
-          if (xhr.status === 200) {
-            resolve(xhr.responseText);
-          } else {
-            reject(xhr.responseText);
+
+            xhr.send();
+
+        });
+
+    }
+
+    /**
+     * Get HypertyDescriptor
+     * @param hypertyURL - e.g. mydomain.com/.well-known/hyperty/MyHyperty
+     * @returns {Promise}
+     */
+    getHypertyDescriptor(hypertyURL) {
+        let _this = this;
+        // console.log("getHypertyDescriptor", hypertyURL);
+
+        return new Promise(function (resolve, reject) {
+
+            // request the json
+            _this._makeExternalRequest(hypertyURL).then(function (result) {
+                result = JSON.parse(result);
+
+
+                if (result["ERROR"]) {
+                    // TODO handle error properly
+                    reject(result);
+                } else {
+                    // console.log("creating hyperty descriptor based on: ", result);
+
+                    // create the descriptor
+                    let hyperty = _this._factory.createHypertyDescriptorObject(
+                        result["objectName"],
+                        result["description"],
+                        result["language"],
+                        result["sourcePackageURL"],
+                        result["type"],
+                        result["dataObjects"]
+                    );
+
+                    // console.log("created hyperty descriptor object:", hyperty);
+
+                    // parse and attach sourcePackage
+                    let sourcePackage = result["sourcePackage"];
+                    if (sourcePackage) {
+                        // console.log("hyperty has sourcePackage:", sourcePackage);
+                        hyperty.sourcePackage = _this._createSourcePackage(_this._factory, sourcePackage);
+                    }
+
+                    resolve(hyperty);
+                }
+            });
+        });
+    }
+
+    /**
+     * Get source Package from a URL
+     * @param sourcePackageURL - e.g. mydomain.com/.well-known/hyperty/MyHyperty/sourcePackage
+     * @returns {Promise}
+     */
+    getSourcePackageFromURL(sourcePackageURL) {
+        let _this = this;
+
+        // console.log("getting sourcePackage from:", sourcePackageURL);
+
+        return new Promise(function (resolve, reject) {
+
+            if (sourcePackageURL == "/sourcePackage") {
+                reject("sourcePackage is already contained in descriptor, please use it directly");
+                return;
+            }
+
+            _this._makeExternalRequest(sourcePackageURL).then(function (result) {
+                // console.log("got raw sourcePackage:", result);
+                if (result["ERROR"]) {
+                    // TODO handle error properly
+                    reject(result);
+                } else {
+                    result = JSON.parse(result);
+
+                    let sourcePackage = result["sourcePackage"];
+                    if (sourcePackage) {
+
+                        sourcePackage = _this._createSourcePackage(_this._factory, sourcePackage);
+                        resolve(sourcePackage);
+                    } else {
+                        reject("no source package");
+                    }
+
+
+                }
+            }).catch(function (reason) {
+                reject(reason);
+            });
+
+        });
+
+    }
+
+    /**
+     * Get StubDescriptor
+     * @param stubURL - e.g. mydomain.com/.well-known/protostub/MyProtostub
+     * @returns {Promise}
+     */
+    getStubDescriptor(stubURL) {
+        let _this = this;
+
+        // console.log("getting stub descriptor from: " + stubURL);
+        return new Promise(function (resolve, reject) {
+
+          let dividedURL = divideURL(stubURL);
+          let domain = dividedURL.domain;
+          let protoStub = dividedURL.identity;
+
+          if (!domain) {
+            domain = stubURL;
           }
-        }
-      };
 
-      xhr.open('GET', url, true);
-      xhr.send();
+          if (!protoStub) {
+            protoStub = 'default';
+          } else {
+            protoStub = protoStub.substring(protoStub.lastIndexOf('/') + 1);
+          }
 
-    });
+            let url = 'hyperty-catalogue://' + domain + '/.well-known/protocolstub/' + protoStub;
 
-  }
+            _this._makeExternalRequest(url).then(function (result) {
+                // console.log("makeExternalRequest returned: ", result);
 
-  /**
-  * Get HypertyDescriptor
-  */
-  getHypertyDescriptor(hypertyURL) {
+                result = JSON.parse(result);
+                // console.log("parsed result: ", result);
 
-    let _this = this;
+                if (result["ERROR"]) {
+                    // TODO handle error properly
+                    reject(result);
+                } else {
+                    // console.log("creating stub descriptor based on: ", result);
 
-    return new Promise(function(resolve, reject) {
+                    // create the descriptor
+                    let stub = _this._factory.createProtoStubDescriptorObject(
+                        result["objectName"],
+                        result["description"],
+                        result["language"],
+                        result["sourcePackageURL"],
+                        result["messageSchemas"],
+                        result["configuration"],
+                        result["constraints"]
+                    );
 
-      let hypertyName = hypertyURL.substr(hypertyURL.lastIndexOf('/') + 1);
-      let hypertyDescriptor = _this.Hyperties[hypertyName];
-      resolve(hypertyDescriptor);
+                    // parse and attach the sourcePackage
+                    let sourcePackage = result["sourcePackage"];
+                    if (sourcePackage) {
+                        sourcePackage = _this._createSourcePackage(_this._factory, sourcePackage);
+                        stub.sourcePackage = sourcePackage;
+                    }
+                    resolve(stub);
+                }
+            });
+        });
 
-    });
+    }
 
-  }
-
-  /**
-  * Get hypertySourceCode
-  */
-  getHypertySourcePackage(hypertyPackage) {
-    let _this = this;
-
-    return new Promise(function(resolve, reject) {
-
-      _this._makeExternalRequest(hypertyPackage).then(function(result) {
-
+    _createSourcePackage(factory, sp) {
+        // console.log("creating sourcePackage. factory:", factory, ", raw package:", sp);
         try {
-
-          let sourcePackage = JSON.parse(result);
-          let sourceCode = window.atob(sourcePackage.sourceCode);
-          sourcePackage.sourceCode = sourceCode;
-
-          resolve(sourcePackage);
+            sp = JSON.parse(sp);
         } catch (e) {
-          reject(e);
+            // console.log("parsing sourcePackage failed. already parsed? -> ", sp);
         }
 
-      }).catch(function(reason) {
-        reject(reason);
-      });
+        let sourcePackage = factory.createSourcePackage(sp["sourceCode"], sp["sourceCodeClassname"]);
 
-    });
+        // console.log("created sourcePackage:", sourcePackage);
 
-  }
+        if (sp["encoding"])
+            sourcePackage.encoding = sp["encoding"];
 
-  /**
-  * Get StubDescriptor
-  */
-  getStubDescriptor(domainURL) {
+        if (sp["signature"])
+            sourcePackage.signature = sp["signature"];
 
-    let _this = this;
-
-    return new Promise(function(resolve, reject) {
-
-      let stubDescriptor = _this.ProtoStubs[domainURL];
-      resolve(stubDescriptor);
-
-    });
-
-  }
-
-  /**
-  * Get protostubSourceCode
-  */
-  getStubSourcePackage(sourcePackageURL) {
-    let _this = this;
-
-    return new Promise(function(resolve, reject) {
-
-      _this._makeExternalRequest(sourcePackageURL).then(function(result) {
-
-        try {
-          let sourcePackage = JSON.parse(result);
-          let sourceCode = window.atob(sourcePackage.sourceCode);
-          sourcePackage.sourceCode = sourceCode;
-
-          resolve(sourcePackage);
-        } catch (e) {
-          reject(e);
-        }
-      }).catch(function(reason) {
-        console.error(reason);
-        reject(reason);
-      });
-
-    });
-
-  }
+        return sourcePackage;
+    }
 
 }
 

@@ -10,5 +10,6 @@
   "varstmt": true,
   "lastsemic": true,
   "phantom": true,
-  "browserify": true
+  "browserify": true,
+  "mocha": true
 }

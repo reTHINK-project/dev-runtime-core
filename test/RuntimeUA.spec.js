@@ -11,7 +11,7 @@ chai.use(sinonChai);
 // Testing Module
 import RuntimeUA from '../src/runtime/RuntimeUA';
 
-import RuntimeCatalogue from '../src/runtime/RuntimeCatalogue';
+import RuntimeCatalogue from '../src/runtime/RuntimeCatalogue-Local';
 
 // Main dependecies
 import Registry from '../src/registry/Registry';
@@ -25,75 +25,87 @@ import SandboxFactory from './resources/sandboxes/SandboxFactory';
 describe('RuntimeUA', function() {
 
   // Only for testing
-  let runtimeURL = 'runtime://sp1/123';
+  let runtimeURL = 'runtime://sp.domain/123';
   let sandboxFactory = new SandboxFactory();
-  let runtime = new RuntimeUA(sandboxFactory);
+  let runtime = new RuntimeUA(sandboxFactory, 'sp.domain');
 
   before(function() {
 
     let Hyperties = {
       HelloHyperty: {
-        guid:'guid',
-        id:'HelloHyperty',
-        classname:'activate',
-        description:'description of Hello Hyperty',
-        kind:'hyperty',
-        catalogueURL:'....',
-        sourcePackageURL:'../resources/descriptors/HelloHyperty-sourcePackageURL.json',
-        dataObject:'',
-        type:'',
-        messageSchema:'',
-        policies:'',
+        cguid:'1',
+        type:'0',
+        version:'0.1',
+        description: 'description of Hello Hyperty',
+        objectName:'HelloHyperty',
+        sourcePackageURL: '/sourcePackage',
+        sourcePackage: {
+          sourceCode: '',
+          sourceCodeClassname: 'HelloHyperty',
+          encoding: 'UTF-8',
+          signature: ''
+        },
+        language:'Javascript ECMA5',
+        signature: '',
+        messageSchemas:'',
+        configuration:'',
         constraints:'',
-        hypertyCapabilities:'',
-        protocolCapabilities:''
+        hypertyCapabilities: '',
+        protocolCapabilities: '',
+        policies: '',
+        dataObjects:[]
       },
       WorldHyperty:{
-        guid:'guid',
-        id:'WorldHyperty',
-        classname:'activate',
-        description:'description of World Hyperty',
-        kind:'hyperty',
-        catalogueURL:'....',
-        sourcePackageURL:'../resources/descriptors/WorldHyperty-sourcePackageURL.json',
-        dataObject:'',
-        type:'',
-        messageSchema:'',
-        policies:'',
+        cguid:'2',
+        type:'0',
+        version:'0.1',
+        description: 'description of World Hyperty',
+        objectName:'WorldHyperty',
+        sourcePackageURL: '/sourcePackage',
+        sourcePackage: {
+          sourceCode: '',
+          sourceCodeClassname: 'WorldHyperty',
+          encoding: 'UTF-8',
+          signature: ''
+        },
+        language:'Javascript ECMA5',
+        signature: '',
+        messageSchemas:'',
+        configuration:'',
         constraints:'',
-        hypertyCapabilities:'',
-        protocolCapabilities:''
+        hypertyCapabilities: '',
+        protocolCapabilities: '',
+        policies: '',
+        dataObjects:[]
       }
     };
 
     let ProtoStubs = {
-      'sp.domain': {
-        guid: 'guid',
-        id: 'VertxProtoStub',
-        classname: 'activate',
-        description: 'description of ProtoStub',
-        kind: 'Protostub',
-        catalogueURL: '....',
-        sourcePackageURL: '../resources/descriptors/VertxProtoStub-sourcePackageURL.json',
-        dataObject: '',
-        type: '',
-        messageSchema: '',
-        configuration: {
-          url: 'wss://msg-node.ua.pt:9090/ws'
+      default: {
+        cguid: '1',
+        type: '0',
+        version: '0.1',
+        description: 'description of VertxProtoStub',
+        objectName: 'VertxProtoStub',
+        sourcePackageURL: '/sourcePackage',
+        sourcePackage: {
+          sourceCode: '',
+          sourceCodeClassname: 'VertxProtoStub',
+          encoding: 'Base64',
+          signature: ''
         },
-        policies: '',
+        language: 'Javascript ECMA5',
+        signature: '',
+        messageSchemas: '',
+        configuration: {
+          url: 'wss://127.0.0.1:9090/ws'
+        },
         constraints: '',
         hypertyCapabilities: '',
-        protocolCapabilities: ''
+        protocolCapabilities: '',
+        policies: '',
+        dataObjects: []
       }
-    };
-
-    // Mockup the source code request
-    let mockup = {
-      encoding: 'UTF-8',
-      sourceCodeClasname: 'HelloHyperty',
-      sourceCode: '',
-      signature: ''
     };
 
     let mockupHypertyDescriptor = sinon.stub(runtime.runtimeCatalogue, 'mockupHypertyDescriptor');
@@ -120,8 +132,7 @@ describe('RuntimeUA', function() {
 
     sinon.stub(runtime.registry, 'discoverProtostub')
     .returns(new Promise(function(resolve, reject) {
-      let stubDescriptor = ProtoStubs['sp.domain'];
-
+      let stubDescriptor = ProtoStubs['default'];
       resolve(stubDescriptor);
     }));
 
@@ -219,9 +230,13 @@ describe('RuntimeUA', function() {
       let spDomain = 'sp.domain';
       let loadStubPromise = runtime.loadStub(spDomain);
 
-      expect(loadStubPromise)
-      .to.be.fulfilled
-      .and.notify(done);
+      loadStubPromise.then(function(a) {
+        console.log(a);
+      }).catch(function(reason) {
+        console.error(reason);
+      });
+
+      expect(loadStubPromise).to.be.fulfilled.and.notify(done);
     });
 
     it('should be a Promise', function(done) {

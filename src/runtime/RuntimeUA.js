@@ -4,9 +4,11 @@ import IdentityModule from '../identity/IdentityModule';
 import PolicyEngine from '../policy/PolicyEngine';
 import MessageBus from '../bus/MessageBus';
 
-import RuntimeCatalogue from './RuntimeCatalogue';
+import RuntimeCatalogue from './RuntimeCatalogue-Local';
 
 import SyncherManager from '../syncher/SyncherManager';
+
+import {divideURL} from '../utils/utils';
 
 /**
  * Runtime User Agent Interface will process all the dependecies of the core runtime;
@@ -26,10 +28,12 @@ class RuntimeUA {
   /**
    * Create a new instance of Runtime User Agent
    * @param {sandboxFactory} sandboxFactory - Specific implementation for the environment where the core runtime will run;
+   * @param {domain} domainURL - specify the domain base for the runtime;
    */
-  constructor(sandboxFactory) {
+  constructor(sandboxFactory, domain) {
 
     if (!sandboxFactory) throw new Error('The sandbox factory is a needed parameter');
+    if (!domain) throw new Error('You need the domain of runtime');
 
     let _this = this;
 
@@ -40,8 +44,9 @@ class RuntimeUA {
     // TODO: post and return registry/hypertyRuntimeInstance to and from Back-end Service
     // the response is like: runtime://sp1/123
 
-    let runtimeURL = 'runtime://ua.pt/' + Math.floor((Math.random() * 10000) + 1);
+    let runtimeURL = 'runtime://' + domain + '/' + Math.floor((Math.random() * 10000) + 1);
     _this.runtimeURL = runtimeURL;
+    _this.domain = domain;
 
     // TODO: check if runtime catalogue need the runtimeURL;
     _this.runtimeCatalogue.runtimeURL = runtimeURL;
@@ -86,7 +91,7 @@ class RuntimeUA {
 
     _this.registry.addEventListener('runtime:loadStub', function(domainURL) {
 
-      _this.loadStub(domainURL).then(function(result) {
+      _this.loadStub(domainURL).then(function() {
         _this.registry.trigger('runtime:stubLoaded', domainURL);
       }).catch(function(reason) {
         console.error(reason);
@@ -157,8 +162,12 @@ class RuntimeUA {
 
         let sourcePackageURL = hypertyDescriptor.sourcePackageURL;
 
+        if (sourcePackageURL === '/sourcePackage') {
+          return hypertyDescriptor.sourcePackage;
+        }
+
         // Get the hyperty source code
-        return _this.runtimeCatalogue.getHypertySourcePackage(sourcePackageURL);
+        return _this.runtimeCatalogue.getSourcePackageFromURL(sourcePackageURL);
       })
       .then(function(sourcePackage) {
         console.info('2: return hyperty source code');
@@ -179,7 +188,7 @@ class RuntimeUA {
         return policy;
       })
       .then(function(policyResult) {
-        console.info('3: return policy engine result');
+        console.info('3: return policy engine result: ', policyResult);
 
         // we have completed step 6 to 9 of https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
         //
@@ -199,6 +208,8 @@ class RuntimeUA {
 
           // we have completed step 11 here.
         } else {
+
+          let domain = divideURL(hypertyDescriptorURL).domain;
 
           // getSandbox, this will return a promise;
           sandbox = _this.registry.getSandbox(domain);
@@ -279,13 +290,19 @@ class RuntimeUA {
   * Deploy Stub from Catalogue URL or domain url
   * @param  {URL.URL}     domain          domain
   */
-  loadStub(domain) {
+  loadStub(protostubURL) {
 
     let _this = this;
 
-    if (!domain) throw new Error('domain parameter is needed');
+    if (!protostubURL) throw new Error('domain parameter is needed');
 
     return new Promise(function(resolve, reject) {
+
+      let domain = divideURL(protostubURL).domain;
+
+      if (!domain) {
+        domain = protostubURL;
+      }
 
       let _stubSandbox;
       let _stubDescriptor;
@@ -315,7 +332,7 @@ class RuntimeUA {
         // we have completed step 3 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
         // we need to get ProtoStub descriptor step 4 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-        return _this.runtimeCatalogue.getStubDescriptor(domain);
+        return _this.runtimeCatalogue.getStubDescriptor(protostubURL);
       })
       .then(function(stubDescriptor) {
 
@@ -327,10 +344,12 @@ class RuntimeUA {
 
         let sourcePackageURL = stubDescriptor.sourcePackageURL;
 
-        console.log(stubDescriptor.sourcePackageURL);
+        if (sourcePackageURL === '/sourcePackage') {
+          return stubDescriptor.sourcePackage;
+        }
 
         // we need to get ProtoStub Source code from descriptor - step 6 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-        return _this.runtimeCatalogue.getStubSourcePackage(sourcePackageURL);
+        return _this.runtimeCatalogue.getSourcePackageFromURL(sourcePackageURL);
       })
       .then(function(stubSourcePackage) {
         console.info('3. return the ProtoStub Source Code: ', stubSourcePackage);
@@ -356,7 +375,7 @@ class RuntimeUA {
         _stubSandbox = stubSandbox;
         return stubSandbox;
       }, function(reason) {
-        console.info('5. Sandbox was not found, creating a new one');
+        console.info('5. Sandbox was not found, creating a new one', reason);
 
         // check if the sandbox is registed for this stub descriptor url;
         // Make Steps xxx --- xxx
@@ -369,7 +388,7 @@ class RuntimeUA {
         return sandbox;
       })
       .then(function(sandbox) {
-        console.info('6. return the sandbox instance and the register', sandbox);
+        console.info('6. return the sandbox instance and register', sandbox, 'to domain ', domain);
 
         _stubSandbox = sandbox;
 
@@ -384,11 +403,12 @@ class RuntimeUA {
 
         _runtimeProtoStubURL = runtimeProtoStubURL;
 
+        console.log(_stubDescriptor);
+
         // Extend original hyperty configuration;
         let configuration = Object.assign({}, _stubDescriptor.configuration);
         configuration.runtimeURL = _this.runtimeURL;
-
-        console.log(_stubSourcePackage);
+        configuration.url = 'wss://msg-node.localhost:9090/ws';
 
         // Deploy Component step xxx
         return _stubSandbox.deployComponent(_stubSourcePackage.sourceCode, runtimeProtoStubURL, configuration);

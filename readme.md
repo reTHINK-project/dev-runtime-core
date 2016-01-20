@@ -3,8 +3,9 @@ Runtime-Core
 
 [Release 0.1.0](release_notes_0.1.0.md)
 
-
 [Example](#example)
+
+[Notes](#notes)
 
 ### Setup Environment
 
@@ -173,3 +174,8 @@ To run the demo on example folder:
  - this example have a dependecy from [dev-msg-node-vertx](https://github.com/reTHINK-project/dev-msg-node-vertx/tree/dev-0.2#unit-testing) and [dev-registry-domain](https://github.com/reTHINK-project/dev-registry-domain#dev-registry-domain) for communication between hyperties in two distinct browsers or tabs. **At this moment you need run locally [dev-msg-node-vertx](https://github.com/reTHINK-project/dev-msg-node-vertx/tree/dev-0.2#unit-testing) and [dev-registry-domain](https://github.com/reTHINK-project/dev-registry-domain#dev-registry-domain)**
  - you need, in the root folder, run command: ``` npm start ```
  - in your browser, access to https://127.0.0.1:8080/example
+
+
+### <a ide="notes">Notes</a>
+
+It was done an version of RuntimeCatalogue for local instances, based on the RuntimeCatalogue, and is activated by default;
