@@ -42,7 +42,9 @@ class RuntimeCatalogue {
         // nodejs doesn't support;
         return new Promise(function (resolve, reject) {
             let protocolmap = {
-                "hyperty-catalogue://": "http://"
+                "hyperty-catalogue://": "https://",
+                "https://": "https://",
+                "http://": "http://"
             };
 
             let foundProtocol = false;
@@ -141,33 +143,18 @@ class RuntimeCatalogue {
     getSourcePackageFromURL(sourcePackageURL) {
         let _this = this;
 
-        // console.log("getting sourcePackage from:", sourcePackageURL);
+         //console.log("getting sourcePackage from:", sourcePackageURL);
 
         return new Promise(function (resolve, reject) {
-
-            if (sourcePackageURL == "/sourcePackage") {
-                reject("sourcePackage is already contained in descriptor, please use it directly");
-                return;
-            }
-
             _this._makeExternalRequest(sourcePackageURL).then(function (result) {
-                // console.log("got raw sourcePackage:", result);
+                 //console.log("got raw sourcePackage:", result);
                 if (result["ERROR"]) {
                     // TODO handle error properly
                     reject(result);
                 } else {
                     result = JSON.parse(result);
-
-                    let sourcePackage = result["sourcePackage"];
-                    if (sourcePackage) {
-
-                        sourcePackage = _this._createSourcePackage(_this._factory, sourcePackage);
-                        resolve(sourcePackage);
-                    } else {
-                        reject("no source package");
-                    }
-
-
+                    let sourcePackage = _this._createSourcePackage(_this._factory, result);
+                    resolve(sourcePackage);
                 }
             }).catch(function (reason) {
                 reject(reason);
@@ -241,17 +228,13 @@ class RuntimeCatalogue {
     }
 
     _createSourcePackage(factory, sp) {
-        // console.log("creating sourcePackage. factory:", factory, ", raw package:", sp);
+         //console.log("creating sourcePackage. factory:", factory, ", raw package:", sp);
         try {
             sp = JSON.parse(sp);
         } catch (e) {
-            // console.log("parsing sourcePackage failed. already parsed? -> ", sp);
+             console.log("parsing sourcePackage failed. already parsed? -> ", sp);
         }
-
         let sourcePackage = factory.createSourcePackage(sp["sourceCode"], sp["sourceCodeClassname"]);
-
-        // console.log("created sourcePackage:", sourcePackage);
-
         if (sp["encoding"])
             sourcePackage.encoding = sp["encoding"];
 
