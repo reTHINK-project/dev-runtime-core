@@ -112,6 +112,7 @@ class RuntimeCatalogue {
 
                     // create the descriptor
                     let hyperty = _this._factory.createHypertyDescriptorObject(
+                        result["cguid"],
                         result["objectName"],
                         result["description"],
                         result["language"],
@@ -130,6 +131,112 @@ class RuntimeCatalogue {
                     }
 
                     resolve(hyperty);
+                }
+            });
+        });
+    }
+
+    /**
+     * Get RuntimeDescriptor
+     * @param runtimeURL - e.g. mydomain.com/.well-known/runtime/MyRuntime
+     * @returns {Promise}
+     */
+    getRuntimeDescriptor(runtimeURL) {
+        let _this = this;
+        // console.log("getRuntimeDescriptor", runtimeURL);
+
+        return new Promise(function (resolve, reject) {
+
+            // request the json
+            _this._makeExternalRequest(runtimeURL).then(function (result) {
+                result = JSON.parse(result);
+
+
+                if (result["ERROR"]) {
+                    // TODO handle error properly
+                    reject(result);
+                } else {
+
+                    // parse capabilities first
+                    try {
+                        result["hypertyCapabilities"] = JSON.parse(result["hypertyCapabilities"]);
+                        result["protocolCapabilities"] = JSON.parse(result["protocolCapabilities"]);
+                    } catch (e) {
+                        // already json object
+                    }
+                    console.log("creating runtime descriptor based on: ", result);
+
+
+                    // create the descriptor
+                    let runtime = _this._factory.createHypertyRuntimeDescriptorObject(
+                        result["cguid"],
+                        result["objectName"],
+                        result["description"],
+                        result["language"],
+                        result["sourcePackageURL"],
+                        result["type"],
+                        result["hypertyCapabilities"],
+                        result["protocolCapabilities"]
+                    );
+
+                    console.log("created runtime descriptor object:", runtime);
+
+                    // parse and attach sourcePackage
+                    let sourcePackage = result["sourcePackage"];
+                    if (sourcePackage) {
+                        // console.log("runtime has sourcePackage:", sourcePackage);
+                        runtime.sourcePackage = _this._createSourcePackage(_this._factory, sourcePackage);
+                    }
+
+                    resolve(runtime);
+                }
+            });
+        });
+    }
+
+    /**
+     * Get DataSchemaDescriptor
+     * @param dataSchemaURL - e.g. mydomain.com/.well-known/dataschema/MyDataSchema
+     * @returns {Promise}
+     */
+    getDataSchemaDescriptor(dataSchemaURL) {
+        let _this = this;
+        // console.log("getDataSchemaDescriptor", dataSchemaURL);
+
+        return new Promise(function (resolve, reject) {
+
+            // request the json
+            _this._makeExternalRequest(dataSchemaURL).then(function (result) {
+                result = JSON.parse(result);
+
+
+                if (result["ERROR"]) {
+                    // TODO handle error properly
+                    reject(result);
+                } else {
+                    console.log("creating dataSchema based on: ", result);
+
+                    // FIXME: accessControlPolicy field not needed?
+                    // create the descriptor
+                    let dataSchema = _this._factory.createDataObjectSchema(
+                        result["cguid"],
+                        result["type"],
+                        result["objectName"],
+                        result["description"],
+                        result["language"],
+                        result["sourcePackageURL"]
+                    );
+
+                    console.log("created dataSchema descriptor object:", dataSchema);
+
+                    // parse and attach sourcePackage
+                    let sourcePackage = result["sourcePackage"];
+                    if (sourcePackage) {
+                        // console.log("dataSchema has sourcePackage:", sourcePackage);
+                        dataSchema.sourcePackage = _this._createSourcePackage(_this._factory, sourcePackage);
+                    }
+
+                    resolve(dataSchema);
                 }
             });
         });
@@ -205,6 +312,7 @@ class RuntimeCatalogue {
 
                     // create the descriptor
                     let stub = _this._factory.createProtoStubDescriptorObject(
+                        result["cguid"],
                         result["objectName"],
                         result["description"],
                         result["language"],
