@@ -1,4 +1,4 @@
-import {divideURL, deepClone} from '../utils/utils';
+import { divideURL } from '../utils/utils';
 import ObjectAllocation from './ObjectAllocation';
 
 /**
@@ -12,14 +12,11 @@ class SyncherManager {
   _registry: Registry
   _allocator: ObjectAllocation
 
-  _subscriptions: { ObjectURL: { owner: HypertyURL, schema: Schema, sl: MsgListener, cl: MsgListener, subs: [HypertyURL] } }
+  _subscriptions: { ObjectURL: { owner: HypertyURL, schema: Schema, sl: MsgListener, cl: [MsgListener], subs: [HypertyURL] } }
   */
 
   constructor(runtimeURL, bus, registry, allocator) {
     let _this = this;
-
-    //TODO: this should not be hardcoded!
-    _this._domain = 'ua.pt';
 
     _this._bus = bus;
     _this._registry = registry;
@@ -51,30 +48,19 @@ class SyncherManager {
   _onCreate(msg) {
     let _this = this;
     let owner = msg.from;
+    let domain = divideURL(msg.from).domain;
 
     //TODO: 5-7 authorizeObjectCreation(owner, obj ???? )
     //TODO: other optional steps
 
-    _this._allocator.create(_this._domain, 1).then((allocated) => {
+    //TODO: get schema from catalogue -> (scheme, children)
+    let scheme = 'resource';
+    let children = ['1', '2'];
+
+    _this._allocator.create(domain, scheme, children, 1).then((allocated) => {
       //TODO: get address from address allocator ?
       let objURL = allocated[0];
       let objSubscriptorURL = objURL + '/subscription';
-
-      //TODO: register objectURL so that it can be discovered in the network
-
-      //register change listener
-      /*let changeListener = _this._bus.addListener(objURL, (msg) => {
-        console.log(objURL + '-RCV: ', msg);
-        _this._subscriptions[objURL].subs.forEach((hypertyUrl) => {
-          let changeMsg = deepClone(msg);
-          changeMsg.id = 0;
-          changeMsg.from = objURL;
-          changeMsg.to = hypertyUrl;
-
-          //forward to hyperty observer
-          _this._bus.postMessage(changeMsg);
-        });
-      });*/
 
       //15. add subscription listener
       let subscriptorListener = _this._bus.addListener(objSubscriptorURL, (msg) => {
@@ -85,7 +71,21 @@ class SyncherManager {
         }
       });
 
-      _this._subscriptions[objURL] = { owner: owner, sl: subscriptorListener, /*cl: changeListener,*/ subs: [] };
+      let objSubscription = { owner: owner, sl: subscriptorListener, cl: [], subs: [] };
+      _this._subscriptions[objURL] = objSubscription;
+
+      //add children listeners...
+      let childBaseURL = objURL + '/children/';
+      children.forEach((child) => {
+        let childURL = childBaseURL + child;
+        let childListener = _this._bus.addListener(childURL, (msg) => {
+
+          //TODO: what todo here? Process child creations?
+          console.log('SyncherManager-' + childURL + '-RCV: ', msg);
+        });
+
+        objSubscription.cl.push(childListener);
+      });
 
       //all ok, send response
       _this._bus.postMessage({
@@ -194,10 +194,14 @@ class SyncherManager {
     let objURL = msg.body.resource;
     let objURLSubscription = objURL + '/subscription';
 
+    //TODO: children from schema? Where do I get this?
+    let children = ['1', '2'];
+    let childBaseURL = objURL + '/children/';
+
     //1. subscribe msg for the domain node
     let nodeSubscribeMsg = {
       type: 'subscribe', from: _this._url, to: 'domain://msg-node.' + domain + '/sm',
-      body: msg.body
+      body: { resource: msg.body.resource, children: children }
     };
 
     //2. subscribe in msg-node
@@ -206,6 +210,12 @@ class SyncherManager {
       if (reply.body.code === 200) {
         //listener accepted (add forward and subscribe to reporter)
         _this._bus.addForward(objURL, msg.from);
+
+        //add forward for children
+        children.forEach((child) => {
+          _this._bus.addForward(childBaseURL + child, msg.from);
+        });
+
         _this._bus.postMessage({
           id: msg.id, type: 'subscribe', from: msg.from, to: objURLSubscription
         });
