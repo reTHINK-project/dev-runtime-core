@@ -757,8 +757,11 @@ describe('SyncherManager', function() {
       sync2.subscribe(notifyEvent.url).then((doo) => {
         console.log('on-subscribe-reply');
         doo.addChild('1', 'my message').then((doc) => {
-          console.log('on-addChild-reply');
-          done();
+          console.log('on-local-addChild');
+          doc.onResponse((event) => {
+            console.log('on-remote-addChild-reply', event);
+            done();
+          });
         });
       });
     });
@@ -767,6 +770,10 @@ describe('SyncherManager', function() {
     sync1.create(schemaURL, [hyperURL2], { x: 10, y: 10 }).then((dor) => {
       console.log('on-create-reply');
       dor.onSubscription((subscribeEvent) => {
+        dor.onAddChild((event) => {
+          console.log('on-remote-addChild', event);
+        });
+
         console.log('on-subscribe: ', subscribeEvent);
         subscribeEvent.accept();
       });
