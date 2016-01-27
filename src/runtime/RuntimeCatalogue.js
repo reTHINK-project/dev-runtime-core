@@ -348,7 +348,7 @@ class RuntimeCatalogue {
             sp["sourceCode"] = atob(sp["sourceCode"]);
         }
 
-        let sourcePackage = factory.createSourcePackage(sp["sourceCode"], sp["sourceCodeClassname"]);
+        let sourcePackage = factory.createSourcePackage(sp["sourceCodeClassname"], sp["sourceCode"]);
         if (sp["encoding"])
             sourcePackage.encoding = sp["encoding"];
 
