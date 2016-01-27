@@ -306,7 +306,7 @@ class RuntimeCatalogue {
             result.language,
             result.sourcePackageURL,
             result.messageSchemas,
-            result.configuration,
+            JSON.stringify(result.configuration),
             result.constraints
           );
 
