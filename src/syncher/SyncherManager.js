@@ -55,7 +55,7 @@ class SyncherManager {
 
     //TODO: get schema from catalogue -> (scheme, children)
     let scheme = 'resource';
-    let children = ['1', '2'];
+    let children = ['children1', 'children2'];
 
     _this._allocator.create(domain, scheme, children, 1).then((allocated) => {
       //TODO: get address from address allocator ?
@@ -195,7 +195,7 @@ class SyncherManager {
     let objURLSubscription = objURL + '/subscription';
 
     //TODO: children from schema? Where do I get this?
-    let children = ['1', '2'];
+    let children = ['children1', 'children2'];
     let childBaseURL = objURL + '/children/';
 
     //1. subscribe msg for the domain node

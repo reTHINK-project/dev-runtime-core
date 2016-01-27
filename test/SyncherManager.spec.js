@@ -42,7 +42,7 @@ describe('SyncherManager', function() {
       console.log('_onPostMessage: ', msg);
       expect(msg).to.eql({
         id: 4, type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.h2.domain/sm',
-        body: { resource: objURL, children: ['1', '2'] }
+        body: { resource: objURL, children: ['children1', 'children2'] }
       });
 
       //simulate msg-node response
@@ -211,7 +211,7 @@ describe('SyncherManager', function() {
           expect(replyCallback).to.be.an.instanceof(Function);
           expect(msg).to.eql({
             id: 4, type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.h2.domain/sm',
-            body: { resource: objURL, children: ['1', '2'] }
+            body: { resource: objURL, children: ['children1', 'children2'] }
           });
 
           //simulate msg-node response
@@ -708,7 +708,7 @@ describe('SyncherManager', function() {
     });
   });
 
-  it('reporter addChild', function(done) {
+  it('reporter addChildren', function(done) {
     let bus = new MiniBus();
 
     bus.addForward = (from, to) => {
@@ -726,14 +726,14 @@ describe('SyncherManager', function() {
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
     sync1.create(schemaURL, [], { x: 10, y: 10 }).then((dor) => {
       console.log('on-create-reply');
-      dor.addChild('1', 'my message').then((doc) => {
-        console.log('on-addChild-reply', doc);
+      dor.addChildren('children1', 'my message').then((doc) => {
+        console.log('on-addChildren-reply', doc);
         done();
       });
     });
   });
 
-  it('observer addChild', function(done) {
+  it('observer addChildren', function(done) {
     let bus = new MiniBus();
     bus.addForward = (from, to) => {
       console.log('6-addForward: ', from, to);
@@ -756,10 +756,11 @@ describe('SyncherManager', function() {
 
       sync2.subscribe(notifyEvent.url).then((doo) => {
         console.log('on-subscribe-reply');
-        doo.addChild('1', 'my message').then((doc) => {
-          console.log('on-local-addChild');
+        doo.addChildren('children1', { message: 'Hello World!' }).then((doc) => {
+          console.log('on-local-addChildren');
           doc.onResponse((event) => {
-            console.log('on-remote-addChild-reply', event);
+            console.log('on-remote-addChildren-reply', event);
+            expect(event).to.eql({ type: 'response', url: hyperURL1, code: 200 });
             done();
           });
         });
@@ -770,11 +771,56 @@ describe('SyncherManager', function() {
     sync1.create(schemaURL, [hyperURL2], { x: 10, y: 10 }).then((dor) => {
       console.log('on-create-reply');
       dor.onSubscription((subscribeEvent) => {
-        dor.onAddChild((event) => {
-          console.log('on-remote-addChild', event);
+        dor.onAddChildren((event) => {
+          console.log('on-remote-addChildren', event);
+          expect(event).to.eql({ type: 'create', from: hyperURL2, url: 'resource://obj1/children/children1', childId: hyperURL2 + '#1', value: { message: 'Hello World!' } });
         });
 
         console.log('on-subscribe: ', subscribeEvent);
+        subscribeEvent.accept();
+      });
+    });
+  });
+
+  it('children deltas generate and process', function(done) {
+    let bus = new MiniBus();
+    bus.addForward = (from, to) => {
+      console.log('7-addForward: ', from, to);
+      expect(to).to.eql(hyperURL2);
+    };
+    bus._onPostMessage = (msg) => {
+      console.log('7-_onPostMessage: ', msg);
+      bus.postMessage({
+        id: 4, type: 'response', from: 'domain://msg-node.h2.domain/sm', to: 'hyperty-runtime://fake-runtime/sm',
+        body: { code: 200 }
+      });
+    };
+
+    new SyncherManager(runtimeURL, bus, { }, allocator);
+
+    let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
+    sync2.onNotification((notifyEvent) => {
+      notifyEvent.ack();
+
+      sync2.subscribe(notifyEvent.url).then((doo) => {
+        doo.addChildren('children1', { message: 'Hello Micael!' }).then((doc) => {
+          doc.data.message = 'Hello Luis!';
+        });
+      });
+    });
+
+    let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
+    sync1.create(schemaURL, [hyperURL2], { x: 10, y: 10 }).then((dor) => {
+      dor.onSubscription((subscribeEvent) => {
+        dor.onAddChildren((event) => {
+          let children1 = dor.children[event.childId];
+          children1.onChange((changeEvent) => {
+            expect(changeEvent).to.eql({ cType: 'update', oType: 'object', field: 'message', data: 'Hello Luis!' });
+            expect(children1.data).to.eql({ message: 'Hello Luis!' });
+            done();
+          });
+        });
+
         subscribeEvent.accept();
       });
     });
