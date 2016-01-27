@@ -142,7 +142,6 @@ class RuntimeUA {
       let _hypertySourcePackage;
 
       let errorReason = function(reason) {
-        console.error(reason);
         reject(reason);
       };
 
@@ -408,7 +407,6 @@ class RuntimeUA {
         // Extend original hyperty configuration;
         let configuration = Object.assign({}, _stubDescriptor.configuration);
         configuration.runtimeURL = _this.runtimeURL;
-        configuration.url = 'wss://msg-node.localhost:9090/ws';
 
         // Deploy Component step xxx
         return _stubSandbox.deployComponent(_stubSourcePackage.sourceCode, runtimeProtoStubURL, configuration);
