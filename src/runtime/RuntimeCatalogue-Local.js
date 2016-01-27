@@ -198,6 +198,7 @@ class RuntimeCatalogue {
 
           // create the descriptor
           let hyperty = _this._factory.createHypertyDescriptorObject(
+            result.cguid,
             result.objectName,
             result.description,
             result.language,
@@ -299,6 +300,7 @@ class RuntimeCatalogue {
 
           // create the descriptor
           let stub = _this._factory.createProtoStubDescriptorObject(
+            result.cguid,
             result.objectName,
             result.description,
             result.language,
@@ -331,7 +333,7 @@ class RuntimeCatalogue {
         console.log('parsing sourcePackage failed. already parsed? -> ', sp);
       }
 
-      let sourcePackage = factory.createSourcePackage(sp.sourceCode, sp.sourceCodeClassname);
+      let sourcePackage = factory.createSourcePackage(sp.sourceCodeClassname, sp.sourceCode);
 
       if (sp.hasOwnProperty('encoding'))
       sourcePackage.encoding = sp.encoding;

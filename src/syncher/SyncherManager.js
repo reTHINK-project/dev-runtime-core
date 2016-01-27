@@ -18,9 +18,6 @@ class SyncherManager {
   constructor(runtimeURL, bus, registry, allocator) {
     let _this = this;
 
-    //TODO: this should not be hardcoded!
-    _this._domain = 'ua.pt';
-
     _this._bus = bus;
     _this._registry = registry;
 
@@ -28,6 +25,9 @@ class SyncherManager {
     _this._url = runtimeURL + '/sm';
     _this._objectURL = runtimeURL + '/object-allocation';
     _this._subscriptions = {};
+
+    //TODO: this should not be hardcoded!
+    _this._domain = divideURL(runtimeURL).domain;
 
     if (allocator) {
       _this._allocator = allocator;
@@ -52,8 +52,9 @@ class SyncherManager {
 
     //TODO: 5-7 authorizeObjectCreation(owner, obj ???? )
     //TODO: other optional steps
+    let domain = divideURL(msg.from).domain;
 
-    _this._allocator.create(_this._domain, 1).then((allocated) => {
+    _this._allocator.create(domain, 1).then((allocated) => {
       //TODO: get address from address allocator ?
       let objURL = allocated[0];
       let objSubscriptorURL = objURL + '/subscription';

@@ -2,16 +2,50 @@
 
 var gulp = require('gulp');
 var exec = require('child_process').exec;
+var jsdoc = require('gulp-jsdoc3');
+var pandoc = require('gulp-pandoc');
 
 // Gulp task to generate development documentation;
 gulp.task('doc', function(done) {
 
-  console.log('Generating documentation...');
-  exec('node_modules/.bin/jsdoc -R readme.md -d docs src/*', function(err) {
-    if (err) return done(err);
-    console.log('Documentation generated in "docs" directory');
+  var config = require('./jsdocConfig.json');
+
+  gulp.src(['readme.md', './src/**/*.js'], {read: false})
+      .pipe(jsdoc(config, done));
+
+});
+
+gulp.task('api', ['doc'], function() {
+
+  return gulp.src('docs/jsdoc/*.html')
+    .pipe(pandoc({
+      from: 'html',
+      to: 'markdown',
+      ext: '.md',
+      args: ['--smart']
+    }))
+    .pipe(gulp.dest('docs/api/'));
+});
+
+gulp.task('docx', ['api'], function(done) {
+
+  var source = argv.source;
+  var file = argv.file;
+  if (!source) source = 'docs/jsdoc';
+  if (!file) file = 'runtime-core';
+  var dir = 'docs/';
+  var filename = dir + file + '.docx';
+
+  // pandoc docs/*.html -o test.docx
+  try {
+    exec('pandoc ' + source + '/*.html -o ' + filename, function(err) {
+      if (err) return done(err);
+      done();
+    });
+  } catch (e) {
+    console.log('Need install pandoc');
     done();
-  });
+  }
 
 });
 
@@ -24,11 +58,15 @@ var replace = require('gulp-replace');
 var insert = require('gulp-insert');
 var uglify = require('gulp-uglify');
 var bump = require('gulp-bump');
+var gulpif = require('gulp-if');
 var argv = require('yargs').argv;
 
 var pkg = require('./package.json');
 
 gulp.task('runtime', function() {
+
+  var compact = argv.compact;
+  if (!compact) compact = true;
 
   return browserify({
     entries: ['./src/runtimeUA.js'],
@@ -43,14 +81,17 @@ gulp.task('runtime', function() {
   })
   .pipe(source('runtimeUA.js'))
   .pipe(buffer())
-  .pipe(uglify())
-  .pipe(insert.prepend('// Runtime User Agent \n\n// version: {{version}}\n\n'))
-  .pipe(replace('{{version}}', pkg.version))
+  .pipe(gulpif(compact, uglify()))
+  .pipe(gulpif(compact, insert.prepend('// Runtime User Agent \n\n// version: {{version}}\n\n')))
+  .pipe(gulpif(compact, replace('{{version}}', pkg.version)))
   .pipe(gulp.dest('./dist'));
 
 });
 
 gulp.task('minibus', function() {
+
+  var compact = argv.compact;
+  if (!compact) compact = true;
 
   return browserify({
     entries: ['./src/minibus.js'],
@@ -65,14 +106,17 @@ gulp.task('minibus', function() {
   })
   .pipe(source('minibus.js'))
   .pipe(buffer())
-  .pipe(uglify())
-  .pipe(insert.prepend('// Runtime User Agent \n\n// version: {{version}}\n\n'))
-  .pipe(replace('{{version}}', pkg.version))
+  .pipe(gulpif(compact, uglify()))
+  .pipe(gulpif(compact, insert.prepend('// Runtime User Agent \n\n// version: {{version}}\n\n')))
+  .pipe(gulpif(compact, replace('{{version}}', pkg.version)))
   .pipe(gulp.dest('./dist'));
 
 });
 
 gulp.task('sandbox', function() {
+
+  var compact = argv.compact;
+  if (!compact) compact = true;
 
   return browserify({
     entries: ['./src/sandbox.js'],
@@ -87,20 +131,25 @@ gulp.task('sandbox', function() {
   })
   .pipe(source('sandbox.js'))
   .pipe(buffer())
-  .pipe(uglify())
-  .pipe(insert.prepend('// Runtime User Agent \n\n// version: {{version}}\n\n'))
-  .pipe(replace('{{version}}', pkg.version))
+  .pipe(gulpif(compact, uglify()))
+  .pipe(gulpif(compact, insert.prepend('// Runtime User Agent \n\n// version: {{version}}\n\n')))
+  .pipe(gulpif(compact, replace('{{version}}', pkg.version)))
   .pipe(gulp.dest('./dist'));
 
 });
 
+/**
+ * Make 3 distriution files
+ * By default the compact mode is true;
+ * How to use: gulp dist --compact false | true;
+ */
 gulp.task('dist', ['runtime', 'minibus', 'sandbox']);
 
 /**
  * Compile on specific file from ES6 to ES5
  * @param  {string} 'compile' task name
  *
- * How to use: gulp compile --file 'path/to/file';
+ * How to use: gulp compile --file=path/to/file;
  */
 gulp.task('compile', function() {
 
@@ -142,7 +191,7 @@ var through = require('through2');
 var Base64 = require('js-base64').Base64;
 var fs = require('fs');
 
-function encode(filename, descriptorName) {
+function encode(filename, descriptorName, configuration, isDefault) {
 
   var descriptor = fs.readFileSync('resources/descriptors/' + descriptorName + '.json', 'utf8');
   var json = JSON.parse(descriptor);
@@ -159,10 +208,20 @@ function encode(filename, descriptorName) {
     var encoded = Base64.encode(file.contents);
     var value = 'default';
 
-    if (json.hasOwnProperty(filename)) {
+    if (isDefault) {
+      if (json.hasOwnProperty(filename)) {
+        value = filename;
+      }
+    } else {
+      var newObject = JSON.parse(JSON.stringify(json['default']));
+      json[filename] = newObject;
       value = filename;
     }
 
+    console.log(value);
+
+    json[value].objectName = filename;
+    json[value].configuration = configuration;
     json[value].sourcePackage.sourceCode = encoded;
     json[value].sourcePackage.sourceCodeClassname = filename;
     json[value].sourcePackage.encoding = 'Base64';
@@ -175,44 +234,93 @@ function encode(filename, descriptorName) {
 
 }
 
+function resource(file, configuration, isDefault) {
+
+  var filename = file;
+  var splitIndex = filename.lastIndexOf('/') + 1;
+  filename = filename.substr(splitIndex).replace('.js', '');
+
+  var descriptorName = 'Hyperties';
+  if (filename.indexOf('Hyperty') === -1) {
+    descriptorName = 'ProtoStubs';
+  }
+
+  return browserify({
+    entries: ['resources/' + filename + '.js'],
+    standalone: 'activate',
+    debug: false
+  })
+  .transform(babel)
+  .bundle()
+  .pipe(source('bundle.js'))
+  .pipe(gulp.dest('resources/'))
+  .pipe(buffer())
+  .pipe(encode(filename, descriptorName, configuration, isDefault))
+  .pipe(source(descriptorName + '.json'))
+  .pipe(gulp.dest('resources/descriptors/'));
+
+}
+
 gulp.task('watch', function() {
 
   var watcher = gulp.watch(['resources/*Hyperty.js', 'resources/*ProtoStub.js']);
   watcher.on('change', function(event) {
 
     if (event.type === 'deleted') return;
-
     console.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
+    resource(event.path);
 
-    var filename = event.path;
-    var splitIndex = filename.lastIndexOf('/') + 1;
-    filename = filename.substr(splitIndex).replace('.js', '');
-
-    var descriptorName = 'Hyperties';
-    if (filename.indexOf('Hyperty') === -1) {
-      descriptorName = 'ProtoStubs';
-    }
-
-    var bundler = browserify({
-      entries: ['resources/' + filename + '.js'],
-      standalone: 'activate',
-      debug: false
-    }).transform(babel);
-
-    console.log(descriptorName);
-
-    bundler.bundle()
-      .pipe(source('bundle.js'))
-      .pipe(gulp.dest('resources/'))
-      .pipe(buffer())
-      .pipe(encode(filename, descriptorName))
-      .pipe(source(descriptorName + '.json'))
-      .pipe(gulp.dest('resources/descriptors/'));
   });
 
 });
 
-gulp.task('encode', ['watch']);
+gulp.task('encode', function(done) {
+
+  gulp.src('./', {buffer:false})
+  .pipe(prompt.prompt([{
+    type: 'input',
+    name: 'file',
+    message: 'Patho to file to be converted? (resources/<ProtoStub.js>)'
+  },
+  {
+    type: 'input',
+    name: 'configuration',
+    message: 'Configuration file like an object or url to ProtoStub have on configuration: (ws://msg-node.localhost:9090)'
+  },
+  {
+    type: 'radio',
+    name: 'defaultFile',
+    message: 'This will be a default file to be loaded? (yes/no)',
+    choices: ['yes', 'no']
+  }], function(res) {
+
+    fs.access(res.file, fs.R_OK | fs.W_OK, function(err) {
+      if (err) done(new Error('No such file or directory'));
+      return;
+    });
+
+    var configuration;
+    if (typeof res.configuration === 'object') {
+      configuration = res.configuration;
+    } else if (typeof res.configuration === 'string') {
+      configuration = {};
+      configuration.url = res.configuration;
+    }
+
+    var isDefault = true;
+    if (res.defaultFile === 'no') {
+      isDefault = false;
+    }
+
+    if (res.file) {
+      resource(res.file, configuration, isDefault);
+    }
+  })
+);
+
+});
+
+//gulp.task('encode', ['watch']);
 
 /**
  * Bumping version number and tagging the repository with it.

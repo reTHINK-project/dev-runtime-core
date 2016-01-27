@@ -20,5 +20,5 @@ export function documentReady() {
 }
 
 export function errorMessage(reason) {
-  console.log(reason);
+  console.error(reason);
 }
