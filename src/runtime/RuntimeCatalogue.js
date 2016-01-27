@@ -117,7 +117,7 @@ class RuntimeCatalogue {
                         result["description"],
                         result["language"],
                         result["sourcePackageURL"],
-                        result["type"],
+                        result["type"] || result["hypertyType"],
                         result["dataObjects"]
                     );
 
@@ -174,7 +174,7 @@ class RuntimeCatalogue {
                         result["description"],
                         result["language"],
                         result["sourcePackageURL"],
-                        result["type"],
+                        result["type"] || result["runtimeType"],
                         result["hypertyCapabilities"],
                         result["protocolCapabilities"]
                     );
