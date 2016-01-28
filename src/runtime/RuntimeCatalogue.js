@@ -117,7 +117,7 @@ class RuntimeCatalogue {
                         result["description"],
                         result["language"],
                         result["sourcePackageURL"],
-                        result["type"],
+                        result["type"] || result["hypertyType"],
                         result["dataObjects"]
                     );
 
@@ -174,7 +174,7 @@ class RuntimeCatalogue {
                         result["description"],
                         result["language"],
                         result["sourcePackageURL"],
-                        result["type"],
+                        result["type"] || result["runtimeType"],
                         result["hypertyCapabilities"],
                         result["protocolCapabilities"]
                     );
@@ -348,7 +348,7 @@ class RuntimeCatalogue {
             sp["sourceCode"] = atob(sp["sourceCode"]);
         }
 
-        let sourcePackage = factory.createSourcePackage(sp["sourceCode"], sp["sourceCodeClassname"]);
+        let sourcePackage = factory.createSourcePackage(sp["sourceCodeClassname"], sp["sourceCode"]);
         if (sp["encoding"])
             sourcePackage.encoding = sp["encoding"];
 

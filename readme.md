@@ -1,11 +1,10 @@
 Runtime-Core
 ------------
 
-[Release 0.1.0](release_notes_0.1.0.md)
-
-[Example](#example)
-
-[Notes](#notes)
+ - [Release 0.1.0](release_notes_0.1.0.md)
+ - [Example](#example)
+ - [Tasks](#tasks)
+ - [Notes](#notes)
 
 ### Setup Environment
 
@@ -153,19 +152,62 @@ To run karma tests is mandatory to run **live-server** because of the mock-up's 
 ```
 live-server --port=4000
 ```
-
+---
 ### <a id="Tasks">Tasks</a>
 
+ - [Documentation](#documentation)
+ - [Dist](#dist)
+ - [Build](#build)
+ - [Encode](#encode)
+
+##### Documentation
+
+Generate all documentation associated to runtime core;
+
+ - if you run **gulp doc** the documentation based on jsdoc3 will be generated on folder docs/jsdoc and you can interact;
+```
+gulp doc
+```
+
+ - if you run **gulp api** the documentation is generate based on docs/jsdoc/*.html files, and converted to markdown;
+```
+gulp api
+```
+
+ - if you run **gulp docx** should be generated an .docx file, but **this process should be optimized**, is not working very well;
+```
+gulp docx
+```
+
+##### Dist
+
+To distribute the runtime-core, you can make a distribution file.
+
+
+Run the command:
+```
+// compact true | false;
+gulp dist --compact=false
+```
+
+##### Build
+
+To distribute the runtime-core, but with the source code maps, and to detect where is some error.
+
+Run the command:
+```
+gulp build
+```
+
+##### Encode
+
 In this repository, we have some tasks which can help you.
-If you need change some resource file, like an Hyperty, you need run task watch first, to encode the Hyperty file changes in a base64 file and add it to the descriptor folder in the respective place;
+If you need change some resource file, like an Hyperty or ProtoStub, and load it to the Hyperties.json or ProtoStubs.json, run the following command, and answer to the questions;
 
-in your command line run:
 ```
-gulp watch
+gulp compile --file=path/to/file;
 ```
-
-this is temporary until the dev-catalogue is ready;
-
+---
 ### <a id="example">Example</a>
 
 This repository have a folder with an working example of Hyperty Connector and we can send message and make a WebRTC call between remote hyperties through the vertx;
@@ -175,7 +217,7 @@ To run the demo on example folder:
  - you need, in the root folder, run command: ``` npm start ```
  - in your browser, access to https://127.0.0.1:8080/example
 
-
+---
 ### <a ide="notes">Notes</a>
 
 It was done an version of RuntimeCatalogue for local instances, based on the RuntimeCatalogue, and is activated by default;

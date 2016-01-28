@@ -2,6 +2,8 @@
 
 import {addLoader, removeLoader, documentReady, errorMessage} from './support';
 
+import {MessageFactory} from 'service-framework';
+
 import RuntimeUA from '../src/runtimeUA';
 import SandboxFactory from '../resources/sandboxes/SandboxFactory';
 
@@ -9,7 +11,7 @@ let sandboxFactory = new SandboxFactory();
 let avatar = 'https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/photo.jpg';
 
 // You can change this at your own domain
-let domain = 'localhost:8090';
+let domain = 'localhost';
 
 let runtime = new RuntimeUA(sandboxFactory, domain);
 
@@ -185,16 +187,15 @@ function openChat(result) {
 
 function newMessageRecived(msg) {
 
-  // Object {to: "hyperty://ua.pt/71552726-ae61-411a-bab0-41843b26b56f", from: "hyperty://ua.pt/586f5f0a-aa98-4d23-b864-a6efd3ccdd74", type: "message", body: Object, id: 2}
   processMessage(msg, 'in');
 
 }
 
 function processMessage(msg, type) {
 
-  let side = 'right-align';
+  let side = 'right';
   if (type === 'out') {
-    side = 'left-align';
+    side = 'left';
   }
 
   let messageCollection = $('.hyperty-chat .collection');
@@ -205,14 +206,10 @@ function processMessage(msg, type) {
 
 function sendMessage(from, to, message) {
 
-  let msg = {
-    to: to,
-    from: from,
-    type: 'message',
-    body:{
-      value: message
-    }
-  };
+  let msgFactory = new MessageFactory();
+
+  //from, to, contextId, idToken, accessToken, resource, signature, schema,assertedIdentity, value, policy
+  let msg = msgFactory.createMessageRequest(from, to, '', '', '', '', '', '', '', message);
 
   processMessage(msg, 'out');
   runtime.messageBus.postMessage(msg);

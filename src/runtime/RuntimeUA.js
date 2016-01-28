@@ -8,7 +8,7 @@ import RuntimeCatalogue from './RuntimeCatalogue-Local';
 
 import SyncherManager from '../syncher/SyncherManager';
 
-import {divideURL} from '../utils/utils';
+import {divideURL, emptyObject} from '../utils/utils';
 
 /**
  * Runtime User Agent Interface will process all the dependecies of the core runtime;
@@ -142,7 +142,6 @@ class RuntimeUA {
       let _hypertySourcePackage;
 
       let errorReason = function(reason) {
-        console.error(reason);
         reject(reason);
       };
 
@@ -252,8 +251,13 @@ class RuntimeUA {
 
         _hypertyURL = hypertyURL;
 
+        console.log(_hypertyDescriptor);
+
         // Extend original hyperty configuration;
-        let configuration = Object.assign({}, _hypertyDescriptor.configuration);
+        let configuration = {};
+        if (!emptyObject(_hypertyDescriptor.configuration)) {
+          configuration = Object.assign({}, JSON.parse(_hypertyDescriptor.configuration));
+        }
         configuration.runtimeURL = _this.runtimeURL;
 
         // We will deploy the component - step 17 of https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
@@ -406,9 +410,8 @@ class RuntimeUA {
         console.log(_stubDescriptor);
 
         // Extend original hyperty configuration;
-        let configuration = Object.assign({}, _stubDescriptor.configuration);
+        let configuration = Object.assign({}, JSON.parse(_stubDescriptor.configuration));
         configuration.runtimeURL = _this.runtimeURL;
-        configuration.url = 'wss://msg-node.localhost:9090/ws';
 
         // Deploy Component step xxx
         return _stubSandbox.deployComponent(_stubSourcePackage.sourceCode, runtimeProtoStubURL, configuration);
