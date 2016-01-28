@@ -369,6 +369,8 @@ class Registry extends EventEmitter {
   */
   getSandbox(url) {
     if (!url) throw new Error('Parameter url needed');
+    console.log('getSandbox: ' + url);
+
     let _this = this;
     return new Promise(function(resolve,reject) {
 
@@ -378,7 +380,9 @@ class Registry extends EventEmitter {
         request = _this.sandboxesList.hyperty[url];
 
         if (request === undefined) {
-          reject('Sandbox not found');
+          //HACK: return's AppSandbox when nothing is faound!
+          resolve(_this.appSandbox);
+          //reject('Sandbox not found');
         } else {
           resolve(request);
         }
