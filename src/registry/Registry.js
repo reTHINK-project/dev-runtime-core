@@ -384,6 +384,7 @@ class Registry extends EventEmitter {
         request = _this.sandboxesList.hyperty[url];
 
         if (request === undefined) {
+          //HACK: return's AppSandbox when nothing is faound!
           resolve(_this.appSandbox);
           //reject('Sandbox not found');
         } else {

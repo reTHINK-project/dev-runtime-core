@@ -118,7 +118,7 @@ class MiniBus {
           if (responseFun) {
             let errorMsg = {
               id: msg.id, type: 'response',
-              body: {code: 408, desc: 'Response timeout!'}
+              body: { code: 408, desc: 'Response timeout!', value: inMsg }
             };
 
             responseFun(errorMsg);
