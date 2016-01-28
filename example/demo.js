@@ -2,7 +2,7 @@
 
 import {addLoader, removeLoader, documentReady, errorMessage} from './support';
 
-import {MessageFactory} from 'service-framework';
+// import {MessageFactory} from 'service-framework';
 
 import RuntimeUA from '../src/runtimeUA';
 import SandboxFactory from '../resources/sandboxes/SandboxFactory';
@@ -206,11 +206,16 @@ function processMessage(msg, type) {
 
 function sendMessage(from, to, message) {
 
-  let msgFactory = new MessageFactory();
-
-  //from, to, contextId, idToken, accessToken, resource, signature, schema,assertedIdentity, value, policy
-  let msg = msgFactory.createMessageRequest(from, to, '', '', '', '', '', '', '', message);
+  let msg = {
+    from: from,
+    to: to,
+    type: 'message',
+    body: {
+      value: message
+    }
+  };
 
   processMessage(msg, 'out');
+
   runtime.messageBus.postMessage(msg);
 }
