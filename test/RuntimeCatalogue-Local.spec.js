@@ -137,8 +137,27 @@ describe('Runtime Catalogue', function() {
     // sourceCode, dataObject, type, messageSchemal,
     // policies, constraints, configuration,
     // hypertyCapabilities, protocolCapabilities
-    //
-    let descriptorValidation = ['_guid', '_hypertyType', '_type', '_description', '_objectName', '_sourcePackageURL', '_sourcePackage', '_language', '_signature', '_messageSchema', '_configurationDataList', '_runtimeConstraintList', '_policies', '_dataObjects'];
+    // {
+    //   _guid: '1',
+    //   _type: 'hyperty',
+    //   _objectName: 'HelloHyperty',
+    //   _description: 'description of Hello Hyperty',
+    //   _language: 'Javascript ECMA5',
+    //   _sourcePackageURL: '/sourcePackage',
+    //   _signature: null,
+    //   _sourcePackage:
+    //    { _sourceCode: '',
+    //      _sourceCodeClassname: 'HelloHyperty',
+    //      _encoding: 'UTF-8',
+    //      _signature: null },
+    //   _configuration: {},
+    //   _constraints: {},
+    //   _policies: {},
+    //   _messageSchema: null,
+    //   _hypertyType: '0',
+    //   _dataObjects: []
+    // }
+    let descriptorValidation = ['_guid', '_type', '_objectName', '_description', '_language', '_sourcePackageURL', '_signature', '_sourcePackage', '_configuration', '_constraints','_policies', '_messageSchema',  '_hypertyType', '_dataObjects'];
 
     // TODO: Check the hyperty descriptor response and compare
     // with what is defined in the specification;
@@ -175,7 +194,7 @@ describe('Runtime Catalogue', function() {
     // policies, constraints, configuration,
     // hypertyCapabilities, protocolCapabilities
     //
-    let descriptorValidation = ['_guid', '_type', '_description', '_objectName', '_sourcePackageURL', '_sourcePackage', '_language', '_signature', '_messageSchemas', '_configurationList', '_constraintsList'];
+    let descriptorValidation = ['_guid', '_type', '_description', '_objectName', '_sourcePackageURL', '_sourcePackage', '_language', '_signature', '_messageSchemas', '_configuration', '_constraints'];
 
     // TODO: Check the hyperty descriptor response and compare
     // with what is defined in the specification;
@@ -183,14 +202,15 @@ describe('Runtime Catalogue', function() {
     expect(runtimeCatalogue.getStubDescriptor(domainURL).then(function(stubDescriptor) {
       console.log('stubDescriptor: ', stubDescriptor);
       _stubDescriptor = stubDescriptor;
+      _stubDescriptor.configuration = JSON.parse(stubDescriptor.configuration);
       return _stubDescriptor;
     }).catch(function(reason) {
       throw new Error(reason);
     }))
     .to.be.fulfilled
     .and.eventually.to.have.all.keys(descriptorValidation)
-    .and.eventually.with.deep.property('_configurationList')
-    .that.to.have.all.keys('url')
+    .and.eventually.with.deep.property('_configuration')
+    .that.to.have.any.keys('url')
     .and.notify(done);
 
   });

@@ -100,13 +100,10 @@ class Registry extends EventEmitter {
           return reject('User Hyperty not found');
         }
 
-        //TODO remove later, fix the problem of bad URL format received in the message
-        let fixedHypertyURL = 'hyperty:/' + hypertyURL.substring(hypertyURL.indexOf(':') + 1, hypertyURL.length);
-
         let idPackage = {
           id: email,
           descriptor: reply.body.hyperties[hypertyURL].descriptor,
-          hypertyURL: fixedHypertyURL
+          hypertyURL: hypertyURL
         };
 
         console.log('===> RegisterHyperty messageBundle: ', idPackage);
@@ -369,6 +366,8 @@ class Registry extends EventEmitter {
   */
   getSandbox(url) {
     if (!url) throw new Error('Parameter url needed');
+    console.log('getSandbox: ' + url);
+
     let _this = this;
     return new Promise(function(resolve,reject) {
 
@@ -378,7 +377,9 @@ class Registry extends EventEmitter {
         request = _this.sandboxesList.hyperty[url];
 
         if (request === undefined) {
-          reject('Sandbox not found');
+          //HACK: return's AppSandbox when nothing is faound!
+          resolve(_this.appSandbox);
+          //reject('Sandbox not found');
         } else {
           resolve(request);
         }

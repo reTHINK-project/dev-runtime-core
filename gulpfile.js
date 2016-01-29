@@ -71,9 +71,9 @@ gulp.task('runtime', function() {
   return browserify({
     entries: ['./src/runtimeUA.js'],
     standalone: 'runtimeUA',
-    debug: true
+    debug: false
   })
-  .transform(babel)
+  .transform(babel, {compact: false, optional: 'runtime'})
   .bundle()
   .on('error', function(err) {
     console.error(err);
@@ -218,8 +218,7 @@ function encode(filename, descriptorName, configuration, isDefault) {
       value = filename;
     }
 
-    console.log(value);
-
+    json[value].description = 'Description of ' + filename;
     json[value].objectName = filename;
     json[value].configuration = configuration;
     json[value].sourcePackage.sourceCode = encoded;
@@ -227,7 +226,8 @@ function encode(filename, descriptorName, configuration, isDefault) {
     json[value].sourcePackage.encoding = 'Base64';
     json[value].sourcePackage.signature = '';
 
-    var newDescriptor = new Buffer(JSON.stringify(json, null));
+    var newDescriptor = new Buffer(JSON.stringify(json, null, 2));
+    console.log(value);
     cb(null, newDescriptor);
 
   });
@@ -280,12 +280,21 @@ gulp.task('encode', function(done) {
   .pipe(prompt.prompt([{
     type: 'input',
     name: 'file',
-    message: 'Patho to file to be converted? (resources/<ProtoStub.js>)'
+    message: 'File to be converted? (resources/<ProtoStub.js or Hyperty.js>)'
   },
   {
     type: 'input',
     name: 'configuration',
-    message: 'Configuration file like an object or url to ProtoStub have on configuration: (ws://msg-node.localhost:9090)'
+    message: 'ProtoStub Configuration, use something like:\n{"url": "wss://msg-node.localhost:9090/ws"}\nConfiguration:',
+    validate: function(value) {
+      try {
+        JSON.parse(value);
+        return true;
+      } catch (e) {
+        console.error('Check your configuration JSON\nShould be something like:\n{"url": "wss://msg-node.localhost:9090/ws"}');
+        return false;
+      }
+    }
   },
   {
     type: 'radio',
@@ -299,13 +308,7 @@ gulp.task('encode', function(done) {
       return;
     });
 
-    var configuration;
-    if (typeof res.configuration === 'object') {
-      configuration = res.configuration;
-    } else if (typeof res.configuration === 'string') {
-      configuration = {};
-      configuration.url = res.configuration;
-    }
+    var configuration = JSON.parse(res.configuration);
 
     var isDefault = true;
     if (res.defaultFile === 'no') {

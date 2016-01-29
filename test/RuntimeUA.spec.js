@@ -133,6 +133,7 @@ describe('RuntimeUA', function() {
     sinon.stub(runtime.registry, 'discoverProtostub')
     .returns(new Promise(function(resolve, reject) {
       let stubDescriptor = ProtoStubs['default'];
+      stubDescriptor.configuration = JSON.stringify(stubDescriptor.configuration);
       resolve(stubDescriptor);
     }));
 

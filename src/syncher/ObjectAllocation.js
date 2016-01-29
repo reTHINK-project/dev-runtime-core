@@ -28,12 +28,12 @@ class ObjectAllocation {
    * @param  {number} number - Number of addresses to request
    * @returns {Promise<ObjectURL>}  A list of ObjectURL's
    */
-  create(domain, number) {
+  create(domain, scheme, children, number) {
     let _this = this;
 
     let msg = {
       type: 'create', from: _this._url, to: 'domain://msg-node.' + domain + '/object-address-allocation',
-      body: { number: number }
+      body: { urlScheme: scheme, resourceChildren: children, number: number }
     };
 
     return new Promise((resolve, reject) => {

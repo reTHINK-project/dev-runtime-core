@@ -32,6 +32,15 @@ export function divideURL(url) {
 }
 
 /**
+ * Check if an Object is empty
+ * @param  {Object} object Object to be checked
+ * @return {Boolean}       status of Object, empty or not (true|false);
+ */
+export function emptyObject(object) {
+  return Object.keys(object).length > 0 ? false : true;
+}
+
+/**
  * Make a COPY of the original data
  * @param  {Object}  obj - object to be cloned
  * @return {Object}
