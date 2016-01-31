@@ -9,7 +9,7 @@ chai.use(chaiAsPromised);
 // Main dependecies
 import Registry from '../src/registry/Registry';
 import SandboxFactory from '../resources/sandboxes/SandboxFactory';
-import SandboxBase from '../src/sandbox/Sandbox';
+import Sandbox from '../src/sandbox/Sandbox';
 import MessageBus from '../src/bus/MessageBus';
 
 // Testing Registry
@@ -18,6 +18,7 @@ let runtimeURL = 'hyperty-runtime://ua.pt/123';
 
 let sandboxFactory = new SandboxFactory();
 let appSandbox = sandboxFactory.createAppSandbox();
+let protostubURL = 'url';
 let identityModule = {
   getIdentities: () => {
     let identities = [];
@@ -27,8 +28,8 @@ let identityModule = {
   }
 };
 
-let getRegistry = new Promise(function(resolve, reject) {
-  var registry = new Registry(runtimeURL, appSandbox, identityModule);
+let getRegistry = new Promise(function(resolve) {
+  let registry = new Registry(runtimeURL, appSandbox, identityModule);
   resolve(registry);
 });
 
@@ -48,14 +49,14 @@ getRegistry.then(function(registry) {
     describe('getAppSandbox()', function() {
       it('return AppSandbox()', function() {
         let sandbox = registry.getAppSandbox();
-        expect(sandbox).to.not.be.null;
+        expect(sandbox).to.be.instanceof(Sandbox);
       });
     });
 
     describe('registerStub(sandBox, domainURL)', function() {
 
       it('should register a stub', function(done) {
-        let sandBox = new SandboxBase('ua.pt');
+        let sandBox = new Sandbox('ua.pt');
         let domainURL = 'ua.pt';
 
         expect(registry.registerStub(sandBox, domainURL).then(function(done) {
@@ -71,20 +72,9 @@ getRegistry.then(function(registry) {
         let url = 'ua.pt';
 
         expect(registry.discoverProtostub(url).then(function(response) {
+          protostubURL = response;
           return response;
         })).to.be.fulfilled.and.eventually.to.contain('msg-node.ua.pt/protostub/').and.notify(done);
-      });
-    });
-
-    describe('getSandbox(url)', function() {
-
-      it('should get a sandbox from the url', function(done) {
-        let url = 'ua.pt';
-
-        expect(registry.getSandbox(url).then(function(response) {
-          return response;
-        })).to.be.fulfilled.and.eventually.to.not.be.null.and.notify(done);
-
       });
     });
 
@@ -116,10 +106,9 @@ getRegistry.then(function(registry) {
     describe('registerHyperty(sandbox, descriptor)', function() {
 
       it('should register an Hyperty', function(done) {
-        let sandbox = new SandboxBase('ua.pt');
+        let sandbox = new Sandbox('ua.pt');
         let descriptor = 'hyperty-catalogue://ua.pt/<catalogue-object-identifier>';
 
-        let protoStub = registry.discoverProtostub('ua.pt');
         registry.messageBus.addListener('domain://msg-node.ua.pt/hyperty-address-allocation', (msg) => {
           let message = {id: 1, type: 'response', from: 'domain://msg-node.ua.pt/hyperty-address-allocation', to: msg.from,
           body: {code: 200, allocated: ['hyperty-instance://ua.pt/1']}};
@@ -132,6 +121,42 @@ getRegistry.then(function(registry) {
         expect(registry.registerHyperty(sandbox, descriptor)).to.be.fulfilled.and.eventually.equal('hyperty-instance://ua.pt/1').and.notify(done);
 
       });
+    });
+
+    describe('getSandbox(url)', function() {
+
+      it('should get a sandbox from a domain', function(done) {
+        let domain = 'ua.pt';
+
+        expect(registry.getSandbox(domain).then(function(response) {
+          return response;
+        })).to.be.fulfilled.and.eventually.to.be.instanceof(Sandbox).and.notify(done);
+
+      });
+
+      it('should get a sandbox from an hypertyIstance', function(done) {
+        let hypertyInstance = 'hyperty-instance://ua.pt/1';
+
+        expect(registry.getSandbox(hypertyInstance).then(function(response) {
+          return response;
+        })).to.be.fulfilled.and.eventually.to.be.instanceof(Sandbox).and.notify(done);
+      });
+
+      it('should get a sandbox from a domain from an url', function(done) {
+        let url = 'hyperty://ua.pt/well-knownAddress/';
+
+        expect(registry.getSandbox(url).then(function(response) {
+          return response;
+        })).to.be.fulfilled.and.eventually.to.be.instanceof(Sandbox).and.notify(done);
+      });
+
+      it('should get a sandbox from a protostubURL', function(done) {
+
+        expect(registry.getSandbox(protostubURL).then(function(response) {
+          return response;
+        })).to.be.fulfilled.and.eventually.to.be.instanceof(Sandbox).and.notify(done);
+      });
+
     });
 
     describe('resolve(url)', function() {
