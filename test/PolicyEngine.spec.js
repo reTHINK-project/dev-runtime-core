@@ -46,7 +46,7 @@ describe('PolicyEngine', function() {
     let expectedMessage = {id: 123, type:'READ', from:'hyperty://ua.pt/asdf',
                           to:'domain://registry.ua.pt/hyperty-instance/user',
                           body: {assertedIdentity: 'user://gmail.com/openidtest10',
-                                 idToken:  '{"id":"identity"}',
+                                 idToken:  {id:'identity'},
                                  authorised: true}};
 
     it('should add an assertedIdentity in the message body', function(done) {
