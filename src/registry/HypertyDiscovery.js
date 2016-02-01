@@ -17,9 +17,9 @@ class HypertyDiscovery {
     _this.messageBus = msgBus;
 
     let dividedURL = divideURL(runtimeURL);
+    _this.domain = dividedURL.domain;
     _this.discoveryURL = 'domain://registry.' + dividedURL.domain;
     _this.domainRegistryListener();
-
   }
 
   /**
@@ -31,21 +31,22 @@ class HypertyDiscovery {
     let _this = this;
 
     /* Format of the message intended to receive, to work properly
-    let message = {id: 123, type:'READ', from:'hyperty://ua.pt/asdf',
-     to:'domain://registry.ua.pt/hyperty-instance/user', body: {user:
+    let message = {type:'READ', from:'hyperty://ua.pt/asdf',
+     to:'domain://registry.localhost', body: {user:
       'user://gmail.com/openidtest10'}};
     */
 
     _this.messageBus.addListener(_this.discoveryURL, function(msg) {
 
       if (msg.type === 'READ' &&  msg.body.hasOwnProperty('user')) {
+
         let identity = msg.body.user;
         let destination = msg.from;
         let id = msg.id;
 
         // message to query domain registry, asking for a user hyperty.
         let message = {
-          id: 98, type: 'READ', from: msg.from, to: 'domain://registry.ua.pt/', body: { user: identity}
+          type: 'READ', from: msg.from, to: 'domain://registry.' + _this.domain + '/', body: { user: identity}
         };
 
         _this.messageBus.postMessage(message, function(reply) {
@@ -54,18 +55,17 @@ class HypertyDiscovery {
 
           //if no hyperty was found
           if (hypertyURL === undefined) {
-            message = {id: id, type: 'RESPONSE', from: _this.discoveryURL,
+            message = {id: id, type: 'response', from: _this.discoveryURL,
                             to: destination, body: { code: 200,
                             hypertyInstances: 'not found'}};
           } else {
 
-            message = {id: id, type: 'RESPONSE', from: _this.discoveryURL,
+            message = {id: id, type: 'response', from: _this.discoveryURL,
                             to: destination, body: { code: 200,
                             hypertyInstances: {hypertyInstance:
                             {url: hypertyURL, user: identity,
                              descriptor: reply.body.hyperties[hypertyURL].descriptor}}}};
           }
-
           _this.messageBus.postMessage(message, function(reply) {
             //console.log('final Reply HypertyDiscovery: ', reply);
           });
