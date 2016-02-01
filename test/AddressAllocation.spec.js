@@ -17,14 +17,14 @@ describe('AddressAllocation', function() {
 
         replyCallback({
           id: 1, type: 'response', from: 'domain://msg-node.ua.pt/hyperty-address-allocation', to: 'local://fake.url',
-          body: {code: 'ok', allocated: ['hyperty-instance://ua.pt/1', 'hyperty-instance://ua.pt/2']}
+          body: {code: 200, allocated: ['hyperty://ua.pt/1', 'hyperty://ua.pt/2']}
         });
       }
     };
 
     let aa = new AddressAllocation('local://fake.url', bus);
     expect(aa.create('ua.pt', 2).then((list) => {
-      expect(list).to.eql(['hyperty-instance://ua.pt/1', 'hyperty-instance://ua.pt/2']);
+      expect(list).to.eql(['hyperty://ua.pt/1', 'hyperty://ua.pt/2']);
     })).notify(done);
   });
 });

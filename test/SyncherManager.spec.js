@@ -110,7 +110,7 @@ describe('SyncherManager', function() {
         if (seq === 2) {
           expect(msg).to.eql({
             id: 1, type: 'response', from: 'hyperty-runtime://fake-runtime/sm', to: hyperURL1,
-            body: { code: 200, resource: objURL }
+            body: { code: 200, resource: objURL, children: ['children1', 'children2'] }
           });
 
           createReplyCallback(msg);
@@ -188,7 +188,7 @@ describe('SyncherManager', function() {
         if (seq === 2) {
           expect(msg).to.eql({
             id: 1, type: 'response', from: 'hyperty-runtime://fake-runtime/sm', to: hyperURL1,
-            body: { code: 200, resource: objURL }
+            body: { code: 200, resource: objURL, children: ['children1', 'children2'] }
           });
 
           createReplyCallback(msg);
@@ -256,7 +256,7 @@ describe('SyncherManager', function() {
         if (seq === 8) {
           expect(msg).to.eql({
             id: 3, type: 'response', from: 'resource://obj1/subscription', to: hyperURL2,
-            body: { code: 200, schema: schemaURL, version: 0, value: { x: 10, y: 10 } }
+            body: { code: 200, schema: schemaURL, children: ['children1', 'children2'], version: 0, value: { x: 10, y: 10 } }
           });
 
           subscribeReplyCallback(msg);
@@ -465,7 +465,7 @@ describe('SyncherManager', function() {
     };
 
     //BEGIN: skip message system (already tested in previous units) and manually create a reporter and subscription, this should not be done in real code.
-    let reporter = new DataObjectReporter(hyperURL1, objURL, schemaURL, bus, 'on');
+    let reporter = new DataObjectReporter(hyperURL1, objURL, schemaURL, bus, 'on', {}, []);
     reporter.subscriptions[hyperURL2] = { status: 'on' };
 
     let sync = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
@@ -500,7 +500,7 @@ describe('SyncherManager', function() {
     let compacted = false;
 
     let sync = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
-    let observer = new DataObjectObserver(hyperURL1, objURL, schemaURL, bus, 'on');
+    let observer = new DataObjectObserver(hyperURL1, objURL, schemaURL, bus, 'on', {}, []);
     sync.observers[objURL] = observer;
 
     observer.onChange('*', (event) => {

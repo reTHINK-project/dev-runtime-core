@@ -56,7 +56,7 @@ class SyncherManager {
     //TODO: 5-7 authorizeObjectCreation(owner, obj ???? )
     //TODO: other optional steps
 
-    //TODO: get schema from catalogue -> (scheme, children)
+    //TODO: get schema from catalogue and parse -> (scheme, children)
     let scheme = 'resource';
     let children = ['children1', 'children2'];
 
@@ -74,7 +74,7 @@ class SyncherManager {
         }
       });
 
-      let objSubscription = { owner: owner, sl: subscriptorListener, cl: [], subs: [] };
+      let objSubscription = { owner: owner, children: children, sl: subscriptorListener, cl: [], subs: [] };
       _this._subscriptions[objURL] = objSubscription;
 
       //add children listeners...
@@ -93,7 +93,7 @@ class SyncherManager {
       //all ok, send response
       _this._bus.postMessage({
         id: msg.id, type: 'response', from: msg.to, to: owner,
-        body: { code: 200, resource: objURL }
+        body: { code: 200, resource: objURL, children: children }
       });
 
       //19. send create to all observers, responses will be deliver to the Hyperty owner?
@@ -136,7 +136,7 @@ class SyncherManager {
     let subscription = _this._subscriptions[objURL];
 
     //27. validate if subscription already exists?
-    if (subscription[hypertyUrl]) {
+    if (subscription.subs.indexOf(hypertyUrl) !== -1) {
       let errorMsg = {
         id: msg.id, type: 'response', from: msg.to, to: hypertyUrl,
         body: {code: 500, desc: 'Subscription for (' + objURL + ' : ' +  hypertyUrl + ') already exists!'}
@@ -166,7 +166,8 @@ class SyncherManager {
         if (reply.body.code === 200) {
           //subscription accepted (add forward and subscription)
           _this._bus.addForward(objURL, hypertyUrl);
-          _this._subscriptions[objURL].subs.push(hypertyUrl);
+          subscription.subs.push(hypertyUrl);
+          reply.body.children = subscription.children;
         }
 
         //send subscribe-response
