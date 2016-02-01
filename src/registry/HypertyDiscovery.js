@@ -58,13 +58,11 @@ class HypertyDiscovery {
                             to: destination, body: { code: 200,
                             hypertyInstances: 'not found'}};
           } else {
-            //TODO remove later, fix the problem of bad URL format received in the message
-            let fixedHypertyURL = 'hyperty:/' + hypertyURL.substring(hypertyURL.indexOf(':') + 1, hypertyURL.length);
 
             message = {id: id, type: 'RESPONSE', from: _this.discoveryURL,
                             to: destination, body: { code: 200,
                             hypertyInstances: {hypertyInstance:
-                            {url: fixedHypertyURL, user: identity,
+                            {url: hypertyURL, user: identity,
                              descriptor: reply.body.hyperties[hypertyURL].descriptor}}}};
           }
 

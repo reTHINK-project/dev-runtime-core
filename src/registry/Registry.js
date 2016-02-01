@@ -41,12 +41,11 @@ class Registry extends EventEmitter {
     _this.hypertiesListToRemove = {};
     _this.hypertiesList = [];
     _this.protostubsList = {};
-    _this.sandboxesList = {stub: {}, hyperty: {} };
+    _this.sandboxesList = {stub: {}, hyperty: {}, domain: {} };
     _this.pepList = {};
 
-    _this.sandboxesList.stub[runtimeURL] = appSandbox;
     _this._domain = divideURL(_this.registryURL).domain;
-
+    _this.sandboxesList.domain[_this._domain] = appSandbox;
   }
 
   /**
@@ -100,12 +99,10 @@ class Registry extends EventEmitter {
           return reject('User Hyperty not found');
         }
 
-        let fixedHypertyURL = 'hyperty:' + hypertyURL.substring(hypertyURL.indexOf(':') + 1, hypertyURL.length);
-
         let idPackage = {
           id: email,
           descriptor: reply.body.hyperties[hypertyURL].descriptor,
-          hypertyURL: fixedHypertyURL
+          hypertyURL: hypertyURL
         };
 
         console.log('===> RegisterHyperty messageBundle: ', idPackage);
@@ -139,23 +136,6 @@ class Registry extends EventEmitter {
 
           _this.registryDomain = domainUrl;
 
-          /*
-          if (_this.hypertiesListToRemove.hasOwnProperty(domainUrl)) {
-            console.log('entrou?');
-            _this.hypertiesListToRemove[domainUrl] = {identity: identities[0].identity};
-          }
-
-          if (!_this.sandboxesList.hasOwnProperty(domainUrl)) {
-            _this.sandboxesList[domainUrl] = sandbox;
-            sandbox.addListener('*', function(msg) {
-              _this._messageBus.postMessage(msg);
-            });
-
-          }
-          */
-
-          _this.sandboxesList.hyperty[domainUrl] = sandbox;
-
           // TODO: should be implemented with addresses poll
           // In this case we will request and return only one
           // address
@@ -174,6 +154,7 @@ class Registry extends EventEmitter {
             descriptor, adderessList[0], identities[0].identity);
 
             _this.hypertiesList.push(hyperty);
+            _this.sandboxesList.hyperty[adderessList[0]] = sandbox;
 
             //message to register the new hyperty, within the domain registry
             let msg = {
@@ -277,7 +258,7 @@ class Registry extends EventEmitter {
 
       // TODO: Optimize this
       _this.protostubsList[domainURL] = runtimeProtoStubURL;
-      _this.sandboxesList.stub[domainURL] = sandbox;
+      _this.sandboxesList.stub[runtimeProtoStubURL] = sandbox;
 
       // sandbox.addListener('*', function(msg) {
       //   _this._messageBus.postMessage(msg);
@@ -373,15 +354,30 @@ class Registry extends EventEmitter {
     let _this = this;
     return new Promise(function(resolve,reject) {
 
+      //check if it is a protostub url
       let request = _this.sandboxesList.stub[url];
 
       if (request === undefined) {
+        //if not, check if it is a hyperty instance url
         request = _this.sandboxesList.hyperty[url];
 
         if (request === undefined) {
-          //HACK: return's AppSandbox when nothing is faound!
-          resolve(_this.appSandbox);
-          //reject('Sandbox not found');
+          //if not, check if it is a specific url
+          request = _this.sandboxesList.domain[url];
+
+          if (request === undefined) {
+            //if not, check if the domain in the url, is registred.
+            let dividedURL = divideURL(url);
+            request = _this.sandboxesList.domain[dividedURL.domain];
+
+            if (request === undefined) {
+              reject('Sandbox not found');
+            } else {
+              resolve(request);
+            }
+          } else {
+            resolve(request);
+          }
         } else {
           resolve(request);
         }

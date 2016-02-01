@@ -83,13 +83,14 @@ class IdentityModule {
     let expiresIn;
     let user;
     let tokenID;
+    let infoToken;
     let loggedIn = false;
 
     return new Promise(function(resolve, reject) {
 
-      if (_this.token !== undefined) {
+      if (_this.infoToken !== undefined) {
         //TODO verify whether the token is still valid or not.
-        return resolve(_this.token);
+        return resolve(_this.infoToken);
       }
 
       //function to validate the access token received during the authentication
@@ -100,8 +101,7 @@ class IdentityModule {
         req.onreadystatechange = function(e) {
           if (req.readyState == 4) {
             if (req.status == 200) {
-
-              getIDToken(token);
+              getInfoToken(token);
             } else if (req.status == 400) {
               reject('There was an error processing the token');
             } else {
@@ -114,26 +114,49 @@ class IdentityModule {
       }
 
       //function to exchange the access token with an ID Token containing the information
-      function getIDToken(token) {
+      function getInfoToken(token) {
         let req = new XMLHttpRequest();
         req.open('GET', USERINFURL + token, true);
 
         req.onreadystatechange = function(e) {
-          if (req.readyState == 4) {
-            if (req.status == 200) {
-              tokenID = JSON.parse(req.responseText);
-              _this.token = tokenID;
-              let email = tokenID.email;
+          if (req.readyState === 4) {
+            if (req.status === 200) {
+              infoToken = JSON.parse(req.responseText);
+              _this.infoToken = infoToken;
+              let email = infoToken.email;
 
               //contruct the identityURL to be defined as in specification
               // model: user://<idpdomain>/<user-identifier>
               let identityURL = 'user://' + email.substring(email.indexOf('@') + 1, email.length) + '/' + email.substring(0, email.indexOf('@'));
 
-              let identityBundle = {identity: identityURL, token: tokenID};
+              //TODO remove later the 'token' field key
+              let identityBundle = {identity: identityURL, token: infoToken, accessToken: token, idToken: {}, infoToken: infoToken};
 
+              getIDToken(token, identityBundle);
+            } else if (req.status === 400) {
+              reject('There was an error processing the token');
+            } else {
+              reject('something else other than 200 was returned');
+            }
+          }
+        };
+        req.send();
+      }
+
+      function getIDToken(token, identityBundle) {
+        let req = new XMLHttpRequest();
+        req.open('GET', VALIDURL + token, true);
+
+        req.onreadystatechange = function(e) {
+          if (req.readyState === 4) {
+            if (req.status === 200) {
+              tokenID = JSON.parse(req.responseText);
+
+              identityBundle.idToken = tokenID;
               _this.identities.push(identityBundle);
-              resolve(tokenID);
-            } else if (req.status == 400) {
+              resolve(identityBundle.token);
+
+            } else if (req.status === 400) {
               reject('There was an error processing the token');
             } else {
               reject('something else other than 200 was returned');
@@ -145,7 +168,7 @@ class IdentityModule {
 
       hello.init({google: '808329566012-tqr8qoh111942gd2kg007t0s8f277roi.apps.googleusercontent.com'});
       hello('google').login({scope: 'email'}).then(function(token) {
-        //console.log('validated: ',token.authResponse.access_token);
+
         validateToken(token.authResponse.access_token);
       }, function(error) {
         console.log('errorValidating ', error);

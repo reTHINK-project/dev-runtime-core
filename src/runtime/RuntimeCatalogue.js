@@ -220,7 +220,6 @@ class RuntimeCatalogue {
                     // create the descriptor
                     let dataSchema = _this._factory.createDataObjectSchema(
                         result["cguid"],
-                        result["type"],
                         result["objectName"],
                         result["description"],
                         result["language"],

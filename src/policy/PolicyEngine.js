@@ -68,7 +68,7 @@ class PolicyEngine {
         if (!message.body.hasOwnProperty('assertedIdentity')) {
 
           message.body.assertedIdentity = assertedID[0].identity;
-          message.body.idToken = JSON.stringify(value);
+          message.body.idToken = value;
           message.body.authorised = true;
 
           //console.log('Message: ', message);
