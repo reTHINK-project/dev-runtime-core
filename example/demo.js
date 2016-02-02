@@ -14,6 +14,7 @@ let avatar = 'https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAA
 let domain = 'localhost';
 
 let runtime = new RuntimeUA(sandboxFactory, domain);
+window.runtime = runtime;
 
 // Check if the document is ready
 if (document.readyState === 'complete') {

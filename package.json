@@ -88,7 +88,7 @@
       "bitcoinjs-lib": "npm:bitcoinjs-lib@^2.1.4",
       "hellojs": "npm:hellojs@^1.9.8",
       "jsrsasign": "npm:jsrsasign@^5.0.5",
-      "service-framework": "github:rethink-project/dev-service-framework",
+      "service-framework": "github:rethink-project/dev-service-framework@develop",
       "sjcl": "npm:sjcl@1.0.3"
     },
     "devDependencies": {
@@ -102,7 +102,7 @@
     "bip39": "^2.2.0",
     "bitcoinjs-lib": "^2.1.4",
     "jsrsasign": "^5.0.5",
-    "service-framework": "file:..\\dev-service-framework",
+    "service-framework": "github:rethink-project/dev-service-framework#develop",
     "sjcl": "^1.0.3",
     "base64-url": "^1.2.1"
   }
