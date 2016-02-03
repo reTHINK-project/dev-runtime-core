@@ -98,12 +98,13 @@
     }
   },
   "dependencies": {
-    "hellojs": "^1.9.8",
+    "base64-url": "^1.2.1",
     "bip39": "^2.2.0",
     "bitcoinjs-lib": "^2.1.4",
+    "hellojs": "^1.9.8",
     "jsrsasign": "^5.0.5",
     "service-framework": "github:rethink-project/dev-service-framework#develop",
     "sjcl": "^1.0.3",
-    "base64-url": "^1.2.1"
+    "universal-localstorage": "^1.0.2"
   }
 }
