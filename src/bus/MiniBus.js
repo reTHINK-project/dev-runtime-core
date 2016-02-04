@@ -22,7 +22,7 @@ class MiniBus {
     _this._msgId = 0;
     _this._subscriptions = {};
 
-    _this._responseTimeOut = 3000; //default to 3s
+    _this._responseTimeOut = 5000; //default to 3s
     _this._responseCallbacks = {};
 
     _this._pipeline = new Pipeline((error) => {
@@ -182,7 +182,11 @@ class MiniBus {
     if (msg.type === 'response') {
       let responseId = msg.to + msg.id;
       let responseFun = _this._responseCallbacks[responseId];
-      delete _this._responseCallbacks[responseId];
+
+      //if it's a provisional response, don't delete response listener
+      if (msg.body.code >= 200) {
+        delete _this._responseCallbacks[responseId];
+      }
 
       if (responseFun) {
         responseFun(msg);

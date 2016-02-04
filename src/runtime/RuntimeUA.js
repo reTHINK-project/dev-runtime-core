@@ -103,7 +103,7 @@ class RuntimeUA {
     sandboxFactory.messageBus = _this.messageBus;
 
     // Instanciate the SyncherManager;
-    _this.syncherManager = new SyncherManager(_this.runtimeURL, _this.messageBus, { });
+    _this.syncherManager = new SyncherManager(_this.runtimeURL, _this.messageBus, { }, _this.runtimeCatalogue);
 
   }
 

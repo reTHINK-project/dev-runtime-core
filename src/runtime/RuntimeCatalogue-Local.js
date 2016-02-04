@@ -376,6 +376,9 @@ class RuntimeCatalogue {
         if (sourcePackage) {
           // console.log('dataSchema has sourcePackage:', sourcePackage);
           dataSchema.sourcePackage = _this._createSourcePackage(_this._factory, sourcePackage);
+          if (typeof dataSchema.sourcePackage.sourceCode === 'string') {
+            dataSchema.sourcePackage.sourceCode = JSON.parse(dataSchema.sourcePackage.sourceCode);
+          }
         }
 
         resolve(dataSchema);
@@ -389,6 +392,12 @@ class RuntimeCatalogue {
       sp = JSON.parse(sp);
     } catch (e) {
       console.log('parsing sourcePackage failed. already parsed? -> ', sp);
+    }
+
+    // check encoding
+    if (sp.encoding === 'base64') {
+      sp.sourceCode = atob(sp.sourceCode);
+      sp.encoding = 'UTF-8';
     }
 
     let sourcePackage = factory.createSourcePackage(sp.sourceCodeClassname, sp.sourceCode);
