@@ -77,14 +77,28 @@ class RuntimeCatalogue {
 
             if (nodeRequest) {
                 // request should be the same for http & https
+
+                // get url without protocol
                 let hostAndPath = url.slice(usedProtocol.length, url.length);
+
+                // get host (+ port)
                 let host = hostAndPath.slice(0, hostAndPath.indexOf("/"));
+
+                // get path
                 let path = hostAndPath.slice(host.length, hostAndPath.length);
+
+                // if host has port, extract port and remove it from host
+                let port;
+                if (host.indexOf(":") !== -1) {
+                    port = host.slice(host.indexOf(":") + 1, host.length);
+                    host = host.slice(0, host.indexOf(":"));
+                }
 
                 // FIXME: remove rejectUnauthorized when catalogue is using valid certificates
                 // FIXME: add error handling
                 nodeRequest.get({
                     host: host,
+                    port: port,
                     path: path,
                     rejectUnauthorized: false
                 }, function (response) {
