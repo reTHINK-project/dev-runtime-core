@@ -4,9 +4,11 @@ import {HypertyDescriptor, ProtocolStubDescriptor, SourcePackage} from 'service-
 
 class RuntimeCatalogue {
 
-    constructor() {
+    constructor(nodeHttp, nodeHttps) {
         // console.log('runtime catalogue');
         let _this = this;
+        _this._nodeHttp = nodeHttp;
+        _this._nodeHttps = nodeHttps;
         _this._factory = new CatalogueFactory(false, undefined);
     }
 
@@ -34,7 +36,7 @@ class RuntimeCatalogue {
      * @returns {Promise}
      * @private
      */
-    _makeExternalRequest(url) {
+    _makeExternalRequest(url, nodeHttp, nodeHttps) {
         // console.log("_makeExternalRequest", url);
 
         // TODO: make this request compatible with nodejs
@@ -47,11 +49,14 @@ class RuntimeCatalogue {
                 "http://": "http://"
             };
 
+            let usedProtocol;
+
             let foundProtocol = false;
             for (var protocol in protocolmap) {
                 if (url.slice(0, protocol.length) == protocol) {
                     // console.log("exchanging " + protocol + " with " + protocolmap[protocol]);
                     url = protocolmap[protocol] + url.slice(protocol.length, url.length);
+                    usedProtocol = protocolmap[protocol];
                     foundProtocol = true;
                     break;
                 }
@@ -62,28 +67,58 @@ class RuntimeCatalogue {
                 return;
             }
 
-            let xhr = new XMLHttpRequest();
+            // nodejs specific http implementations for http & https
+            let nodeRequest;
+            if (nodeHttp && usedProtocol === "http://") {
+                nodeRequest = nodeHttp;
+            } else if (nodeHttps && usedProtocol === "https://") {
+                nodeRequest = nodeHttps;
+            }
 
-            // console.log(url);
+            if (nodeRequest) {
+                // request should be the same for http & https
+                let hostAndPath = url.slice(usedProtocol.length, url.length);
+                let host = hostAndPath.slice(0, hostAndPath.indexOf("/"));
+                let path = hostAndPath.slice(host.length, hostAndPath.length);
 
-            xhr.open('GET', url, true);
-
-            xhr.onreadystatechange = function (event) {
-                let xhr = event.currentTarget;
-                if (xhr.readyState === 4) {
-                    // console.log("got response:", xhr);
-                    if (xhr.status === 200) {
-                        resolve(xhr.responseText);
-                    } else {
-                        // console.log("rejecting promise because of response code: 200 != ", xhr.status);
-                        reject(xhr.responseText);
+                // FIXME: remove rejectUnauthorized when catalogue is using valid certificates
+                // FIXME: add error handling
+                nodeRequest.get({
+                    host: host,
+                    path: path,
+                    rejectUnauthorized: false
+                }, function (response) {
+                    var body = "";
+                    response.on("data", function(d) {
+                        body += d;
+                    });
+                    response.on("end", function() {
+                        resolve(body);
+                    });
+                });
+            } else if (typeof XMLHttpRequest !== 'undefined') {
+                // generic request
+                let xhr = new XMLHttpRequest();
+                // console.log(url);
+                xhr.open('GET', url, true);
+                xhr.onreadystatechange = function (event) {
+                    let xhr = event.currentTarget;
+                    if (xhr.readyState === 4) {
+                        // console.log("got response:", xhr);
+                        if (xhr.status === 200) {
+                            resolve(xhr.responseText);
+                        } else {
+                            // console.log("rejecting promise because of response code: 200 != ", xhr.status);
+                            reject(xhr.responseText);
+                        }
                     }
-                }
-            };
+                };
 
 
-            xhr.send();
-
+                xhr.send();
+            } else {
+                reject("no suitable implementation to send request for protocol '" + usedProtocol + "'.");
+            }
         });
 
     }
@@ -100,7 +135,7 @@ class RuntimeCatalogue {
         return new Promise(function (resolve, reject) {
 
             // request the json
-            _this._makeExternalRequest(hypertyURL).then(function (result) {
+            _this._makeExternalRequest(hypertyURL, _this._nodeHttp, _this._nodeHttps).then(function (result) {
                 result = JSON.parse(result);
 
 
@@ -148,7 +183,7 @@ class RuntimeCatalogue {
         return new Promise(function (resolve, reject) {
 
             // request the json
-            _this._makeExternalRequest(runtimeURL).then(function (result) {
+            _this._makeExternalRequest(runtimeURL, _this._nodeHttp, _this._nodeHttps).then(function (result) {
                 result = JSON.parse(result);
 
 
@@ -206,7 +241,7 @@ class RuntimeCatalogue {
         return new Promise(function (resolve, reject) {
 
             // request the json
-            _this._makeExternalRequest(dataSchemaURL).then(function (result) {
+            _this._makeExternalRequest(dataSchemaURL, _this._nodeHttp, _this._nodeHttps).then(function (result) {
                 result = JSON.parse(result);
 
 
@@ -252,7 +287,7 @@ class RuntimeCatalogue {
          //console.log("getting sourcePackage from:", sourcePackageURL);
 
         return new Promise(function (resolve, reject) {
-            _this._makeExternalRequest(sourcePackageURL).then(function (result) {
+            _this._makeExternalRequest(sourcePackageURL, _this._nodeHttp, _this._nodeHttps).then(function (result) {
                  //console.log("got raw sourcePackage:", result);
                 if (result["ERROR"]) {
                     // TODO handle error properly
@@ -297,7 +332,7 @@ class RuntimeCatalogue {
 
             let url = 'hyperty-catalogue://' + domain + '/.well-known/protocolstub/' + protoStub;
 
-            _this._makeExternalRequest(url).then(function (result) {
+            _this._makeExternalRequest(url, _this._nodeHttp, _this._nodeHttps).then(function (result) {
                 // console.log("makeExternalRequest returned: ", result);
 
                 result = JSON.parse(result);
