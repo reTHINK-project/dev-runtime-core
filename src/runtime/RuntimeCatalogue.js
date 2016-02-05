@@ -383,6 +383,29 @@ class RuntimeCatalogue {
 
     }
 
+    /**
+     * Returns the sourceCode of a given descriptor
+     * @param descriptor - Catalogue Object that was retrieved using e.g. getHypertyDescriptor()
+     * @returns {Promise}
+     */
+    getSourceCodeFromDescriptor(descriptor) {
+        let _this = this;
+        return new Promise(function (resolve, reject) {
+            if (descriptor.sourcePackage) {
+                console.log("descriptor has sourcePackage");
+                console.log("returning sourceCode:", descriptor.sourcePackage.sourceCode);
+                resolve(descriptor.sourcePackage.sourceCode);
+            } else {
+                console.log("descriptor has no sourcePackage, getting it...");
+                let sourcePackage = _this.getSourcePackageFromURL(descriptor.sourcePackageURL).then(function (sourcePackage) {
+                    console.log("got sourcePackage:", sourcePackage);
+                    console.log("returning sourceCode:", sourcePackage.sourceCode);
+                    resolve(sourcePackage.sourceCode);
+                });
+            }
+        });
+    }
+
     _createSourcePackage(factory, sp) {
          //console.log("creating sourcePackage. factory:", factory, ", raw package:", sp);
         try {
