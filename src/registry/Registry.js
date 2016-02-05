@@ -69,8 +69,6 @@ class Registry extends EventEmitter {
     // Install AddressAllocation
     let addressAllocation = new AddressAllocation(_this.registryURL, messageBus);
     _this.addressAllocation = addressAllocation;
-    let hypertyDiscovery = new HypertyDiscovery(messageBus, _this.registryURL);
-    _this.hypertyDiscovery = hypertyDiscovery;
   }
 
   /**

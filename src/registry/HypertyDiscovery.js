@@ -12,65 +12,47 @@ class HypertyDiscovery {
   * @param  {MessageBus}          msgbus                msgbus
   * @param  {RuntimeURL}          runtimeURL            runtimeURL
   */
-  constructor(msgBus, runtimeURL) {
+  constructor(domain, msgBus) {
     let _this = this;
     _this.messageBus = msgBus;
 
-    let dividedURL = divideURL(runtimeURL);
-    _this.domain = dividedURL.domain;
-    _this.discoveryURL = 'domain://registry.' + dividedURL.domain;
-    _this.domainRegistryListener();
+    _this.domain = domain;
+    _this.discoveryURL = 'hyperty://' + domain + '/hypertyDisovery';
   }
 
   /**
-  * function to listen for requests about users registered in domain registry, and
-  * return the identity if found.
-  * @return {HypertyURL}          HypertyURL
+  * function to request about users registered in domain registry, and
+  * return the hyperty instance if found.
+  * @param  {email}              email
+  * @return {Promise}          Promise
   */
-  domainRegistryListener() {
+  discoverHypertyPerUser(email) {
     let _this = this;
+    let identityURL = 'user://' + email.substring(email.indexOf('@') + 1, email.length) + '/' + email.substring(0, email.indexOf('@'));
 
-    /* Format of the message intended to receive, to work properly
-    let message = {type:'READ', from:'hyperty://ua.pt/asdf',
-     to:'domain://registry.localhost', body: {user:
-      'user://gmail.com/openidtest10'}};
-    */
+    // message to query domain registry, asking for a user hyperty.
+    let message = {
+      type: 'READ', from: _this.discoveryURL, to: 'domain://registry.' + _this.domain + '/', body: { user: identityURL}
+    };
 
-    _this.messageBus.addListener(_this.discoveryURL, function(msg) {
+    return new Promise(function(resolve, reject) {
 
-      if (msg.type === 'READ' &&  msg.body.hasOwnProperty('user')) {
+      _this.messageBus.postMessage(message, (reply) => {
 
-        let identity = msg.body.user;
-        let destination = msg.from;
-        let id = msg.id;
+        let hypertyURL = reply.body.last;
 
-        // message to query domain registry, asking for a user hyperty.
-        let message = {
-          type: 'READ', from: msg.from, to: 'domain://registry.' + _this.domain + '/', body: { user: identity}
+        if (hypertyURL === undefined) {
+          return reject('User Hyperty not found');
+        }
+
+        let idPackage = {
+          id: email,
+          descriptor: reply.body.hyperties[hypertyURL].descriptor,
+          hypertyURL: hypertyURL
         };
 
-        _this.messageBus.postMessage(message, function(reply) {
-          let hypertyURL = reply.body.last;
-          let message;
-
-          //if no hyperty was found
-          if (hypertyURL === undefined) {
-            message = {id: id, type: 'response', from: _this.discoveryURL,
-                            to: destination, body: { code: 200,
-                            hypertyInstances: 'not found'}};
-          } else {
-
-            message = {id: id, type: 'response', from: _this.discoveryURL,
-                            to: destination, body: { code: 200,
-                            hypertyInstances: {hypertyInstance:
-                            {url: hypertyURL, user: identity,
-                             descriptor: reply.body.hyperties[hypertyURL].descriptor}}}};
-          }
-          _this.messageBus.postMessage(message, function(reply) {
-            //console.log('final Reply HypertyDiscovery: ', reply);
-          });
-        });
-      }
+        resolve(idPackage);
+      });
     });
   }
 
