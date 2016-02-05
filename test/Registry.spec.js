@@ -20,11 +20,11 @@ let sandboxFactory = new SandboxFactory();
 let appSandbox = sandboxFactory.createAppSandbox();
 let protostubURL = 'url';
 let identityModule = {
-  getIdentities: () => {
-    let identities = [];
-    let identityBundle = {identity: 'user://gmail.com/openidtest10', token: 'idToken'};
-    identities.push(identityBundle);
-    return identities;
+  loginWithRP: () => {
+    let identityBundle = {email: 'openidtest10@gmail.com', token: 'idToken'};
+    return new Promise(function(resolve, reject) {
+      resolve(identityBundle);
+    });
   }
 };
 

@@ -125,56 +125,61 @@ class Registry extends EventEmitter {
     //hyperty-catalogue://<service-provider-domain>/<catalogue-object-identifier>
     let domainUrl = divideURL(descriptor).domain;
 
-    let identities = _this.idModule.getIdentities();
-
     return new Promise(function(resolve, reject) {
 
-      if (_this._messageBus === undefined) {
-        reject('MessageBus not found on registerStub');
-      } else {
-        //call check if the protostub exist
-        _this.resolve('hyperty-runtime://' + domainUrl).then(function() {
+      _this.idModule.loginWithRP('google', 'me').then(function(result) {
+        let email = result.email;
+        let identityURL = 'user://' + email.substring(email.indexOf('@') + 1, email.length) + '/' + email.substring(0, email.indexOf('@'));
 
-          _this.registryDomain = domainUrl;
+        if (_this._messageBus === undefined) {
+          reject('MessageBus not found on registerStub');
+        } else {
+          //call check if the protostub exist
+          _this.resolve('hyperty-runtime://' + domainUrl).then(function() {
 
-          // TODO: should be implemented with addresses poll
-          // In this case we will request and return only one
-          // address
-          let numberOfAddresses = 1;
-          _this.addressAllocation.create(domainUrl, numberOfAddresses).then(function(adderessList) {
+            _this.registryDomain = domainUrl;
 
-            adderessList.forEach(function(address) {
+            // TODO: should be implemented with addresses poll
+            // In this case we will request and return only one
+            // address
+            let numberOfAddresses = 1;
+            _this.addressAllocation.create(domainUrl, numberOfAddresses).then(function(adderessList) {
 
-              _this._messageBus.addListener(address + '/status', (msg) => {
-                console.log('Message addListener for : ', address + '/status -> '  + msg);
+              adderessList.forEach(function(address) {
+
+                _this._messageBus.addListener(address + '/status', (msg) => {
+                  console.log('Message addListener for : ', address + '/status -> '  + msg);
+                });
+
               });
 
+              let hyperty = new HypertyInstance(_this.identifier, _this.registryURL,
+              descriptor, adderessList[0], identityURL);
+
+              _this.hypertiesList.push(hyperty);
+              _this.sandboxesList.hyperty[adderessList[0]] = sandbox;
+
+              //message to register the new hyperty, within the domain registry
+              let msg = {
+                type: 'CREATE', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {user: identityURL,  hypertyDescriptorURL: descriptor, hypertyURL: adderessList[0]}
+              };
+
+              _this._messageBus.postMessage(msg, (reply) => {
+                console.log('===> RegisterHyperty Reply: ', reply);
+              });
+
+              resolve(adderessList[0]);
             });
 
-            let hyperty = new HypertyInstance(_this.identifier, _this.registryURL,
-            descriptor, adderessList[0], identities[0].identity);
-
-            _this.hypertiesList.push(hyperty);
-            _this.sandboxesList.hyperty[adderessList[0]] = sandbox;
-
-            //message to register the new hyperty, within the domain registry
-            let msg = {
-              type: 'CREATE', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {user: identities[0].identity,  hypertyDescriptorURL: descriptor, hypertyURL: adderessList[0]}
-            };
-
-            _this._messageBus.postMessage(msg, (reply) => {
-              console.log('===> RegisterHyperty Reply: ', reply);
-            });
-
-            resolve(adderessList[0]);
+          }).catch(function(reason) {
+            console.log('Address Reason: ', reason);
+            reject(reason);
           });
 
-        }).catch(function(reason) {
-          console.log('Address Reason: ', reason);
-          reject(reason);
-        });
-
-      }
+        }
+      }, function(err) {
+        reject('Failed to obtain an identity');
+      });
     });
 
   }
