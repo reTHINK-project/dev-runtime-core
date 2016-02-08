@@ -12,6 +12,8 @@ Hyperty Runtime Core
 
 This repository contains the source code and associated documentation of the core components required to support the deployment and execution of Hyperties in user devices or in network servers. More information about the Hyperty concept and the reTHINK framework in general is provided [here](https://github.com/reTHINK-project/dev-service-framework/blob/master/README.md).
 
+The Hyperty Runtime architecture follows a security by design approach since it was highly influenced by a careful [security analysis](docs/specs/securityanalysis.md) where different types of components are executed in isolated sandboxes. Thus, components downloaded from a specific Service Provider are executed in sandboxes that are different from the sandboxes used to execute components downloaded from another service provider. Communication between components running in different sandboxes is only possible through messages exchanged through a Message Bus functionality provided by the Hyperty Runtime Core Sandbox. On the other hand, and according to the [ProtoOFly concept](https://github.com/reTHINK-project/dev-service-framework/blob/master/docs/manuals/hyperty-messaging-framework.md#protocol-on-the-fly-protofly-and-protostubs), the protocol stub is executed in isolated sandbox and provides the bridge for the Hperty Runtime to communicate with associated Service Provider. The detailed specification of the Hyperty Runtime Core is provided [here](docs/specs/readme.md).
+
 Hyperty Core Runtime components are platform agnostic and are to be included in platform specific Hyperty Runtimes, like Web Browsers and Nodejs based platforms.
 
 ### User View
