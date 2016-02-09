@@ -224,16 +224,16 @@ function encode(filename, descriptorName, configuration, isDefault) {
       language = 'JSON-Schema';
     }
 
-    json[value].cguid = Math.random() + 1;
+    json[value].cguid = Math.floor(Math.random() + 1);
     json[value].type = descriptorName;
     json[value].version = '0.1';
     json[value].description = 'Description of ' + filename;
     json[value].objectName = filename;
     json[value].configuration = configuration;
-    json[value].sourcePackageURL = '';
+    json[value].sourcePackageURL = '/sourcePackage';
     json[value].sourcePackage.sourceCode = encoded;
     json[value].sourcePackage.sourceCodeClassname = filename;
-    json[value].sourcePackage.encoding = 'Base64';
+    json[value].sourcePackage.encoding = 'base64';
     json[value].sourcePackage.signature = '';
     json[value].language = language;
     json[value].signature = '';

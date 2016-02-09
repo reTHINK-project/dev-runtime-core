@@ -1,6 +1,5 @@
 import {divideURL} from '../utils/utils';
 import {CatalogueFactory} from 'service-framework';
-import {HypertyDescriptor, ProtocolStubDescriptor, SourcePackage} from 'service-framework';
 
 class RuntimeCatalogue {
 
@@ -222,8 +221,6 @@ class RuntimeCatalogue {
 
         // parse and attach sourcePackage
         let sourcePackage = result.sourcePackage;
-        let sourceCode = atob(sourcePackage.sourceCode);
-        sourcePackage.sourceCode = sourceCode;
         if (sourcePackage) {
           // console.log("hyperty has sourcePackage:", sourcePackage);
           hyperty.sourcePackage = _this._createSourcePackage(_this._factory, sourcePackage);
@@ -323,8 +320,6 @@ class RuntimeCatalogue {
 
         // parse and attach sourcePackage
         let sourcePackage = result.sourcePackage;
-        let sourceCode = atob(sourcePackage.sourceCode);
-        sourcePackage.sourceCode = sourceCode;
 
         if (sourcePackage) {
           sourcePackage = _this._createSourcePackage(_this._factory, sourcePackage);
