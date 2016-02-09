@@ -14,12 +14,13 @@ import base64url from 'base64-url';
 class GraphConnector {
 
   // TODO: import / export methods
-  // TODO: communication with global registry
 
   /**
    * Constructs a new and empty Graph Connector.
+   * @param {string}   HypertyRuntimeURL    The Hyperty Runtime URL.
+   * @param {messageBus}    MessageBus      The Message Bus.
    */
-  constructor() {
+  constructor(hypertyRuntimeURL, messageBus) {
     this.contacts = [];
     this.lastCalculationnBloomFilter1Hop = new Date(0).toISOString();
 
@@ -30,6 +31,25 @@ class GraphConnector {
     this.residenceLocation;
     this.firstName;
     this.lastName;
+
+    this._messageBus = messageBus;
+    this._hypertyRuntimeURL = hypertyRuntimeURL;
+  }
+
+  /**
+  * Returns the MessageBus.
+  * @param {MessageBus}           messageBus    The Message Bus.
+  */
+  get messageBus() {
+    return this._messageBus;
+  }
+
+  /**
+  * Sets the MessageBus.
+  * @param {MessageBus}           messageBus    The Message Bus.
+  */
+  set messageBus(messageBus) {
+    this._messageBus = messageBus;
   }
 
   /**
@@ -46,7 +66,7 @@ class GraphConnector {
     this._createKeys(mnemonic, saltWord);
 
     // set lasUpdate date
-    this.globalRegistryRecord.lastUpdate = new Date();
+    this.globalRegistryRecord.lastUpdate = new Date().toISOString();
 
     // set defualt timeout
     let timeout = new Date();
@@ -65,7 +85,9 @@ class GraphConnector {
   /**
    * Generates a public/private key pair from a given mnemonic (16 words).
    * Expects a string containing 16 words seperated by single spaces.
+   * Retrieves data from the Global Registry.
    * @param  {string}     mnemonicAndSalt     A string of 16 words.
+   * @returns  {Promise}  Promise          Global Registry Record.
    */
   useGUID(mnemonicAndSalt) {
     // TODO: check if format is correct and if all words are from bip39 english wordlist
@@ -74,7 +96,54 @@ class GraphConnector {
     let saltWord = mnemonicAndSalt.substring(lastIndex + 1, mnemonicAndSalt.length);
     this._createKeys(mnemonic, saltWord);
 
-    // TODO: retrieve current info from Global Registry and fill this.globalRegistryRecord
+    let _this = this;
+
+    // retrieve current info from Global Registry and fill this.globalRegistryRecord
+    let msg = {
+      type: 'READ',
+      from: this._hypertyRuntimeURL + '/graph-connector',
+      to: 'global://registry/',
+      body: { guid: this.globalRegistryRecord.guid }
+    };
+
+    return new Promise(function(resolve, reject) {
+
+      if (_this.messageBus === undefined) {
+        reject('MessageBus not found on GraphConnector');
+      } else {
+
+        _this.messageBus.postMessage(msg, (reply) => {
+
+          // reply should be the JSON returned from the Global Registry REST-interface
+          let unwrappedJWT = KJUR.jws.JWS.parse(reply.body.data);
+          let dataEncoded = unwrappedJWT.payloadObj.data;
+          let dataDecoded = base64url.decode(dataEncoded);
+          let dataJSON = JSON.parse(dataDecoded);
+
+          // public key should match
+          let sameKey = (dataJSON.publicKey == _this.globalRegistryRecord.publicKey);
+          if (!sameKey) {
+            reject('Retrieved key does not match!');
+          } else {
+            let publicKeyObject = jsrsasign.KEYUTIL.getKey(dataJSON.publicKey);
+            let isValid = KJUR.jws.JWS.verify(reply.body.data, publicKeyObject, ['ES256']);
+            if (!isValid) {
+              reject('Retrieved Record not valid!');
+            } else {
+              if (typeof dataJSON.userIDs != 'undefined' && dataJSON.userIDs != null) {
+                _this.globalRegistryRecord.userIDs = dataJSON.userIDs;
+              }
+              _this.globalRegistryRecord.lastUpdate = dataJSON.lastUpdate;
+              _this.globalRegistryRecord.timeout = dataJSON.timeout;
+              _this.globalRegistryRecord.salt = dataJSON.salt;
+              _this.globalRegistryRecord.active = dataJSON.active;
+              _this.globalRegistryRecord.revoked = dataJSON.revoked;
+              resolve(_this.globalRegistryRecord);
+            }
+          }
+        });
+      }
+    });
   }
 
   /**
@@ -106,9 +175,9 @@ class GraphConnector {
     pubKey.setPublicKeyHex(hPub);
     pubKey.isPrivate = false;
     pubKey.isPublic = true;
-    let publicKeyPEM = jsrsasign.KEYUTIL.getPEM(pubKey, 'PKCS8PUB');
-    publicKeyPEM = publicKeyPEM.replace(/(\r\n|\n|\r)/gm, '');
-    this.globalRegistryRecord.publicKeyPEM = publicKeyPEM;
+    let publicKey = jsrsasign.KEYUTIL.getPEM(pubKey, 'PKCS8PUB');
+    publicKey = publicKey.replace(/(\r\n|\n|\r)/gm, '');
+    this.globalRegistryRecord.publicKey = publicKey;
 
     // generate salt
     let saltHashedBitArray = sjcl.hash.sha256.hash(saltWord);
@@ -117,7 +186,7 @@ class GraphConnector {
 
     // generate GUID
     let iterations = 10000;
-    let guidBitArray = sjcl.misc.pbkdf2(this.globalRegistryRecord.publicKeyPEM, salt, iterations);
+    let guidBitArray = sjcl.misc.pbkdf2(this.globalRegistryRecord.publicKey, salt, iterations);
     let guid = sjcl.codec.base64url.fromBits(guidBitArray);
     this.globalRegistryRecord.guid = guid;
   }
@@ -135,6 +204,94 @@ class GraphConnector {
     let jwt = KJUR.jws.JWS.sign(null, {alg: 'ES256'}, {data: recordStringBase64}, this._prvKey);
     return jwt;
   }
+
+  /**
+   * Takes the Global Registry Record as a signed JWT and sends it to the Global Registry via the MessageBus.
+   * Returns the response code of the REST-interface of the Global Registry as a Promise.
+   * @param  {string}     jwt     The Global Registry Record as a signed JWT.
+   * @returns {Propmise}  Promise Response Code from Global Registry.
+   */
+  sendGlobalRegistryRecord(jwt) {
+
+    let payloadObj = KJUR.jws.JWS.parse(jwt).payloadObj;
+    let guid = payloadObj.guid;
+
+    let _this = this;
+
+    let msg = {
+      type: 'CREATE',
+      from: this._hypertyRuntimeURL + '/graph-connector',
+      to: 'global://registry/',
+      body: { guid: this.globalRegistryRecord.guid, jwt: jwt }
+    };
+
+    return new Promise(function(resolve, reject) {
+
+      if (_this.messageBus === undefined) {
+        reject('MessageBus not found on GraphConnector');
+      } else {
+
+        _this.messageBus.postMessage(msg, (reply) => {
+
+          let responseCode = reply.body.responseCode;
+          if (responseCode == 200) {
+            resolve(200);
+          } else {
+            reject(responseCode);
+          }
+
+        });
+      }
+    });
+  }
+
+  /**
+   * Queries the Global Registry for a given GUID.
+   * Returns a Graph Connector Contact Data as a Promise.
+   * @param  {string}   guid  The GUID to query the Global Registry for
+   * @returns   {Promise}   Promise   Graph Connector Contact Data containing UserIDs.
+   */
+   queryGlobalRegistry(guid) {
+
+     let _this = this;
+
+     let msg = {
+       type: 'READ',
+       from: this._hypertyRuntimeURL + '/graph-connector',
+       to: 'global://registry/',
+       body: { guid: guid }
+     };
+
+     return new Promise(function(resolve, reject) {
+
+       if (_this.messageBus === undefined) {
+         reject('MessageBus not found on GraphConnector');
+       } else {
+
+         _this.messageBus.postMessage(msg, (reply) => {
+
+           // reply should be the JSON returned from the Global Registry REST-interface
+           let unwrappedJWT = KJUR.jws.JWS.parse(reply.body.data);
+           let dataEncoded = unwrappedJWT.payloadObj.data;
+           let dataDecoded = base64url.decode(dataEncoded);
+           let dataJSON = JSON.parse(dataDecoded);
+
+           let publicKeyObject = jsrsasign.KEYUTIL.getKey(dataJSON.publicKey);
+           let isValid = KJUR.jws.JWS.verify(reply.body.data, publicKeyObject, ['ES256']);
+           if (!isValid) {
+             reject('Retrieved Record not valid!');
+           } else {
+             let queriedContact = new GraphConnectorContactData(dataJSON.guid, '', '');
+             if (typeof dataJSON.userIDs != 'undefined' && dataJSON.userIDs != null) {
+               queriedContact.userIDs = dataJSON.userIDs;
+             }
+             resolve(queriedContact);
+           }
+         });
+       }
+     });
+
+   }
 
   /**
    * Adds a UserID for the user.
