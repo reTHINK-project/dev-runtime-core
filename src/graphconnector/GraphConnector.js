@@ -22,7 +22,7 @@ class GraphConnector {
    */
   constructor(hypertyRuntimeURL, messageBus) {
     this.contacts = [];
-    this.lastCalculationnBloomFilter1Hop = new Date(0).toISOString();
+    this.lastCalculationBloomFilter1Hop = new Date(0).toISOString();
 
     this.globalRegistryRecord = new GlobalRegistryRecord();
     this._prvKey;
@@ -366,7 +366,7 @@ class GraphConnector {
       }
     }
     this.contactsBloomFilter1Hop = bf;
-    this.lastCalculationnBloomFilter1Hop = new Date().toISOString();
+    this.lastCalculationBloomFilter1Hop = new Date().toISOString();
   }
 
   /**

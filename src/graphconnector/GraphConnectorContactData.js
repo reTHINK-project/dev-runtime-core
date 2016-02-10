@@ -18,6 +18,7 @@ class GraphConnectorContactData {
       this._privateContact = false;
       this._lastSyncBloomFilter1Hop = new Date(0).toISOString();
       this._residenceLocation;
+      this._groups = [];
     }
 
     /**
@@ -130,6 +131,22 @@ class GraphConnectorContactData {
      */
     set residenceLocation(geohash) {
       this._residenceLocation = geohash;
+    }
+
+    /**
+     * Returns the groups.
+     * @returns  {List<String>}     groups        Groups of the contact.
+     */
+    get groups() {
+      return this._groups;
+    }
+
+    /**
+     * Sets the groups.
+     * @param  {List<String>}     groups        Groups of the contat.
+     */
+    set groups(groups) {
+      this._groups = groups;
     }
 
 }
