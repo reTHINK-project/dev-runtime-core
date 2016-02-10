@@ -1,0 +1,201 @@
+{
+  "coverage": "68.45%",
+  "expectCount": 168,
+  "actualCount": 115,
+  "files": {
+    "src/registry/AddressAllocation.js": {
+      "expectCount": 4,
+      "actualCount": 4,
+      "undocumentLines": []
+    },
+    "src/graphconnector/BloomFilter.js": {
+      "expectCount": 15,
+      "actualCount": 1,
+      "undocumentLines": [
+        93,
+        115,
+        66,
+        47,
+        139,
+        156,
+        161,
+        151,
+        60,
+        79,
+        59,
+        132,
+        124,
+        100
+      ]
+    },
+    "src/utils/EventEmitter.js": {
+      "expectCount": 3,
+      "actualCount": 3,
+      "undocumentLines": []
+    },
+    "src/graphconnector/GlobalRegistryRecord.js": {
+      "expectCount": 4,
+      "actualCount": 3,
+      "undocumentLines": [
+        13
+      ]
+    },
+    "src/graphconnector/GraphConnector.js": {
+      "expectCount": 17,
+      "actualCount": 12,
+      "undocumentLines": [
+        23,
+        211,
+        26,
+        29,
+        24
+      ]
+    },
+    "src/graphconnector/GraphConnectorContactData.js": {
+      "expectCount": 16,
+      "actualCount": 16,
+      "undocumentLines": []
+    },
+    "src/registry/HypertyDiscovery.js": {
+      "expectCount": 3,
+      "actualCount": 3,
+      "undocumentLines": []
+    },
+    "src/registry/HypertyInstance.js": {
+      "expectCount": 5,
+      "actualCount": 1,
+      "undocumentLines": [
+        9,
+        29,
+        19,
+        24
+      ]
+    },
+    "src/identity/IdentityModule.js": {
+      "expectCount": 10,
+      "actualCount": 10,
+      "undocumentLines": []
+    },
+    "src/bus/MessageBus.js": {
+      "expectCount": 3,
+      "actualCount": 1,
+      "undocumentLines": [
+        24,
+        18
+      ]
+    },
+    "src/bus/MiniBus.js": {
+      "expectCount": 9,
+      "actualCount": 7,
+      "undocumentLines": [
+        20,
+        35
+      ]
+    },
+    "src/syncher/ObjectAllocation.js": {
+      "expectCount": 4,
+      "actualCount": 3,
+      "undocumentLines": [
+        1
+      ]
+    },
+    "src/bus/Pipeline.js": {
+      "expectCount": 3,
+      "actualCount": 1,
+      "undocumentLines": [
+        12,
+        19
+      ]
+    },
+    "src/policy/PolicyEngine.js": {
+      "expectCount": 6,
+      "actualCount": 5,
+      "undocumentLines": [
+        90
+      ]
+    },
+    "src/registry/Registry.js": {
+      "expectCount": 16,
+      "actualCount": 16,
+      "undocumentLines": []
+    },
+    "src/registry/RegistryDataModel.js": {
+      "expectCount": 5,
+      "actualCount": 1,
+      "undocumentLines": [
+        7,
+        30,
+        20,
+        25
+      ]
+    },
+    "src/runtime/RuntimeCatalogue-Local.js": {
+      "expectCount": 12,
+      "actualCount": 5,
+      "undocumentLines": [
+        5,
+        7,
+        35,
+        14,
+        25,
+        55,
+        45
+      ]
+    },
+    "src/runtime/RuntimeCatalogue.js": {
+      "expectCount": 11,
+      "actualCount": 7,
+      "undocumentLines": [
+        5,
+        7,
+        20,
+        15
+      ]
+    },
+    "src/runtime/RuntimeUA.js": {
+      "expectCount": 7,
+      "actualCount": 7,
+      "undocumentLines": []
+    },
+    "src/sandbox/Sandbox.js": {
+      "expectCount": 4,
+      "actualCount": 3,
+      "undocumentLines": [
+        11
+      ]
+    },
+    "src/sandbox/SandboxRegistry.js": {
+      "expectCount": 3,
+      "actualCount": 1,
+      "undocumentLines": [
+        36,
+        13
+      ]
+    },
+    "src/syncher/SyncherManager.js": {
+      "expectCount": 3,
+      "actualCount": 1,
+      "undocumentLines": [
+        18,
+        50
+      ]
+    },
+    "src/protostub/ProtoStub.js": {
+      "expectCount": 1,
+      "actualCount": 1,
+      "undocumentLines": []
+    },
+    "src/utils/utils.js": {
+      "expectCount": 3,
+      "actualCount": 3,
+      "undocumentLines": []
+    },
+    "src/persistence/PersistenceManager.js": {
+      "expectCount": 1,
+      "actualCount": 0,
+      "undocumentLines": [
+        3
+      ]
+    }
+  }
+}

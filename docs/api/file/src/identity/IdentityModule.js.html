@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">src/identity/IdentityModule.js | API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="git+ssh://git@github.com:reTHINK-project/dev-runtime-core.git">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html">MiniBus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Pipeline.js~Pipeline.html">Pipeline</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">graphconnector</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/BloomFilter.js~BloomFilter.html">BloomFilter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GlobalRegistryRecord.js~GlobalRegistryRecord.html">GlobalRegistryRecord</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html">GraphConnector</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html">GraphConnectorContactData</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">identity</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/IdentityModule.js~IdentityModule.html">IdentityModule</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">persistence</div><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-persistenceManager">persistenceManager</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/PolicyEngine.js~PolicyEngine.html">PolicyEngine</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">protostub</div><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-activate">activate</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">registry</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/AddressAllocation.js~AddressAllocation.html">AddressAllocation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/HypertyDiscovery.js~HypertyDiscovery.html">HypertyDiscovery</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/HypertyInstance.js~HypertyInstance.html">HypertyInstance</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html">Registry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/RegistryDataModel.js~RegistryDataModel.html">RegistryDataModel</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">runtime</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/RuntimeCatalogue-Local.js~RuntimeCatalogue.html">RuntimeCatalogue</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/RuntimeCatalogue.js~RuntimeCatalogue.html">RuntimeCatalogue</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/RuntimeUA.js~RuntimeUA.html">RuntimeUA</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">sandbox</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/sandbox/Sandbox.js~Sandbox.html">Sandbox</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/sandbox/SandboxRegistry.js~SandboxRegistry.html">SandboxRegistry</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">syncher</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/ObjectAllocation.js~ObjectAllocation.html">ObjectAllocation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/SyncherManager.js~SyncherManager.html">SyncherManager</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">utils</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/utils/EventEmitter.js~EventEmitter.html">EventEmitter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-deepClone">deepClone</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-divideURL">divideURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-emptyObject">emptyObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-divideURL">divideURL</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/identity/IdentityModule.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import hello from &apos;hellojs&apos;;
+
+/**
+* IdentityModule
+*
+* Initial specification: D4.1
+*
+* The IdentityModule is a component managing user Identity. It downloads, instantiates
+* and manage Identity Provider Proxy (IdP) for its own user identity or for external
+* user identity verification.
+*
+*/
+class IdentityModule {
+
+  /**
+  * USER&apos;S OWN IDENTITY
+  */
+  constructor() {
+    let _this = this;
+    //to store items with this format: {identity: identityURL, token: tokenID}
+    _this.identities = [];
+  }
+
+  /**
+  * Register a new Identity with an Identity Provider
+  */
+  registerIdentity() {
+    // Body...
+  }
+
+  /**
+  * In relation with a classical Relying Party: Registration
+  */
+  registerWithRP() {
+    // Body...
+  }
+
+  /**
+  * Find and return all available identities that can be associated to the Hyperty Instance
+  * @return {Array&lt;Identities&gt;}         Array         Identities
+  */
+  getIdentities() {
+    let _this = this;
+    return _this.identities;
+  }
+
+  /**
+  * In relation with a classical Relying Party: Login
+  * @param  {Identifier}      identifier      identifier
+  * @param  {Scope}           scope           scope
+  * @return {Promise}         Promise         IDToken
+  */
+  loginWithRP(identifier, scope) {
+    let _this = this;
+
+    /*
+      When calling this function, if everything is fine, a small pop-up will open requesting a login with a google account. After the login is made, the pop-up will close and the function will return the ID token.
+      This function was tested with the URL: http://127.0.0.1:8080/ and with the same redirect URI
+
+    	In case the redirect URI is not accepted or is required to add others redirect URIs, a little information is provided to fix the problem:
+
+    	So that an application can use Google&apos;s OAuth 2.0 authentication system for user login,
+    	first is required to set up a project in the Google Developers Console to obtain OAuth 2.0 credentials and set a redirect URI.
+    	A test account was created to set the project in the Google Developers Console to obtain OAuth 2.0 credentials,	with the following credentials:
+	        	username: openidtest10@gmail.com
+	          password: testOpenID10
+
+    	To add more URI&apos;s, follow the steps:
+    	1&#xBA; choose the project ( can be the My OpenID Project)	 from  https://console.developers.google.com/projectselector/apis/credentials using the credentials provided above.
+    	2&#xBA; Open The Client Web 1 listed in OAuth 2.0 Client ID&apos;s
+    	3&#xBA; Add the URI  in the authorized redirect URI section.
+      4&#xBA; change the REDIRECT parameter bellow with the pretended URI
+
+      identityModule._hello.init({google: &quot;808329566012-tqr8qoh111942gd2kg007t0s8f277roi.apps.googleusercontent.com&quot;});
+      identityModule._hello(&quot;google&quot;).login();
+
+    */
+
+    let VALIDURL   =   &apos;https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=&apos;;
+    let USERINFURL =   &apos;https://www.googleapis.com/oauth2/v1/userinfo?access_token=&apos;;
+    let acToken;
+    let tokenType;
+    let expiresIn;
+    let user;
+    let tokenID;
+    let infoToken;
+    let loggedIn = false;
+
+    return new Promise(function(resolve, reject) {
+
+      if (_this.infoToken !== undefined) {
+        //TODO verify whether the token is still valid or not.
+        return resolve(_this.infoToken);
+      }
+
+      //function to validate the access token received during the authentication
+      function validateToken(token) {
+        let req = new XMLHttpRequest();
+        req.open(&apos;GET&apos;, VALIDURL + token, true);
+
+        req.onreadystatechange = function(e) {
+          if (req.readyState == 4) {
+            if (req.status == 200) {
+              getInfoToken(token);
+            } else if (req.status == 400) {
+              reject(&apos;There was an error processing the token&apos;);
+            } else {
+              reject(&apos;something else other than 200 was returned&apos;);
+            }
+          }
+        };
+        req.send();
+
+      }
+
+      //function to exchange the access token with an ID Token containing the information
+      function getInfoToken(token) {
+        let req = new XMLHttpRequest();
+        req.open(&apos;GET&apos;, USERINFURL + token, true);
+
+        req.onreadystatechange = function(e) {
+          if (req.readyState === 4) {
+            if (req.status === 200) {
+              infoToken = JSON.parse(req.responseText);
+              _this.infoToken = infoToken;
+              let email = infoToken.email;
+
+              //contruct the identityURL to be defined as in specification
+              // model: user://&lt;idpdomain&gt;/&lt;user-identifier&gt;
+              let identityURL = &apos;user://&apos; + email.substring(email.indexOf(&apos;@&apos;) + 1, email.length) + &apos;/&apos; + email.substring(0, email.indexOf(&apos;@&apos;));
+
+              //TODO remove later the &apos;token&apos; field key
+              let identityBundle = {identity: identityURL, token: infoToken, accessToken: token, idToken: {}, infoToken: infoToken};
+
+              getIDToken(token, identityBundle);
+            } else if (req.status === 400) {
+              reject(&apos;There was an error processing the token&apos;);
+            } else {
+              reject(&apos;something else other than 200 was returned&apos;);
+            }
+          }
+        };
+        req.send();
+      }
+
+      function getIDToken(token, identityBundle) {
+        let req = new XMLHttpRequest();
+        req.open(&apos;GET&apos;, VALIDURL + token, true);
+
+        req.onreadystatechange = function(e) {
+          if (req.readyState === 4) {
+            if (req.status === 200) {
+              tokenID = JSON.parse(req.responseText);
+
+              identityBundle.idToken = tokenID;
+              _this.identities.push(identityBundle);
+              resolve(identityBundle.token);
+
+            } else if (req.status === 400) {
+              reject(&apos;There was an error processing the token&apos;);
+            } else {
+              reject(&apos;something else other than 200 was returned&apos;);
+            }
+          }
+        };
+        req.send();
+      }
+
+      hello.init({google: &apos;808329566012-tqr8qoh111942gd2kg007t0s8f277roi.apps.googleusercontent.com&apos;});
+      hello(&apos;google&apos;).login({scope: &apos;email&apos;}).then(function(token) {
+
+        validateToken(token.authResponse.access_token);
+      }, function(error) {
+        console.log(&apos;errorValidating &apos;, error);
+        reject(error);
+      });
+
+    });
+  }
+
+  /**
+  * In relation with a Hyperty Instance: Associate identity
+  */
+  setHypertyIdentity() {
+    // Body...
+  }
+
+  /**
+  * Generates an Identity Assertion for a call session
+  * @param  {DOMString} contents     contents
+  * @param  {DOMString} origin       origin
+  * @param  {DOMString} usernameHint usernameHint
+  * @return {IdAssertion}              IdAssertion
+  */
+  generateAssertion(contents, origin, usernameHint) {
+    // Body...
+  }
+
+  /**
+  * OTHER USER&apos;S IDENTITY
+  */
+
+  /**
+  * Verification of a received IdAssertion validity
+  * @param  {DOMString} assertion assertion
+  */
+  validateAssertion(assertion) {
+    // Body...
+  }
+
+  /**
+  * Trust level evaluation of a received IdAssertion
+  * @param  {DOMString} assertion assertion
+  */
+  getAssertionTrustLevel(assertion) {
+    // Body...
+  }
+
+}
+
+export default IdentityModule;
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.4)</span></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

@@ -1,27 +1,24 @@
 Runtime-Core
 ------------
 
- - [Release 0.1.0](release_notes_0.1.0.md)
- - [Example](#example)
- - [Tasks](#tasks)
- - [Notes](#notes)
+-	[Release 0.1.0](release_notes_0.1.0.md)
+-	[Example](#example)
+-	[Tasks](#tasks)
+-	[Notes](#notes)
 
 ### Setup Environment
 
-On the first time you are cloning this repository, you need to run the command:
-```
+On the first time you are cloning this repository, you need to run the command:`
 npm run init-setup
-```
+`
 
 After running successfully this command you will have 2 folders (node_modules and vendor), these folders are excluded from the commit process, and are only for development.
 
-if you already have the project configured on your machine, you only need run the next command to add new dependencies:
-```
+if you already have the project configured on your machine, you only need run the next command to add new dependencies:`
 npm install
 jspm install
-```
+`
 
-----
 **Private Repository Note**
 
 if you have problems with the `npm install` command, like "access was forbidden", "404 not found", and have the service framework module reference, it is an authentication problem;
@@ -30,19 +27,19 @@ you may need following the steps present on [Github Help](https://help.github.co
 
 This could happen because it is a private module and need your GitHub authentication to allow cloning the repository.
 
-If you have some troubles with authentication on windows using the Git Shell, you can try [caching your GitHub password](https://help.github.com/articles/caching-your-github-password-in-git/#platform-windows).
-This should avoid the constant prompt for username and password;
+If you have some troubles with authentication on windows using the Git Shell, you can try [caching your GitHub password](https://help.github.com/articles/caching-your-github-password-in-git/#platform-windows). This should avoid the constant prompt for username and password;
 
 **Instalation through jspm**
 
-We need configure jspm config using github tokens, for that, following this (based on issue [3](https://github.com/reTHINK-project/dev-runtime-browser/issues/3)):
+We need configure jspm config using github tokens, for that, following this (based on issue [3](https://github.com/reTHINK-project/dev-runtime-browser/issues/3)\):
 
-  1. [Here](https://github.com/settings/tokens), generate token with public_repo permission enabled
-  2. Save the token generated;
-  3. Execute the command ```jspm registry config github``` and you'll be asked for the credentials;
-  4. Now you can execute command ```jspm install -y and the runtime-core``` or ```jspm install runtime-core=github:reTHINK-project/dev-runtime-core``` or only ```jspm install```;
+1.	[Here](https://github.com/settings/tokens), generate token with public_repo permission enabled
+2.	Save the token generated;
+3.	Execute the command `jspm registry config github` and you'll be asked for the credentials;
+4.	Now you can execute command `jspm install -y and the runtime-core` or `jspm install runtime-core=github:reTHINK-project/dev-runtime-core` or only `jspm install`;
 
-----
+---
+
 **Issues**
 
 if you have some trouble with the environment, you can open an issue;
@@ -91,9 +88,7 @@ How to include this repository in other software parts, like [dev-runtime-browse
 
 example: [dev-runtime-browser](https://github.com/reTHINK-project/dev-runtime-browser)
 
-Verify these use cases:
-1. if you will create a new repository, you can use this template, and can configure your development environment;
-2. if you already have an respository cloned;
+Verify these use cases: 1. if you will create a new repository, you can use this template, and can configure your development environment; 2. if you already have an respository cloned;
 
 for both cases you just have run the command:
 
@@ -148,76 +143,69 @@ if you have some problems starting the karma tests, try running this commands fo
 
 This repository is ready to start working on development of runtime-core. The code will go to the **src** folder. The unit tests will be on **test** folder, following the name standard <component>.spec.js
 
-To run karma tests is mandatory to run **live-server** because of the mock-up's dependencies:
-```
-live-server --port=4000
-```
----
+To run karma tests is mandatory to run **live-server** because of the mock-up's dependencies:\`\`\` live-server --port=4000
+
+\`\`\`
+------
+
 ### <a id="Tasks">Tasks</a>
 
- - [Documentation](#documentation)
- - [Dist](#dist)
- - [Build](#build)
- - [Encode](#encode)
+-	[Documentation](#documentation)
+-	[Dist](#dist)
+-	[Build](#build)
+-	[Encode](#encode)
 
 ##### Documentation
 
 Generate all documentation associated to runtime core;
 
- - if you run **gulp doc** the documentation based on jsdoc3 will be generated on folder docs/jsdoc and you can interact;
-```
-gulp doc
-```
+-	if you run **gulp doc** the documentation based on jsdoc3 will be generated on folder docs/jsdoc and you can interact;`
+	gulp doc
+	`
 
- - if you run **gulp api** the documentation is generate based on docs/jsdoc/*.html files, and converted to markdown;
-```
-gulp api
-```
+-	if you run **gulp api** the documentation is generate based on docs/jsdoc/*.html files, and converted to markdown;`
+	gulp api
+	`
 
- - if you run **gulp docx** should be generated an .docx file, but **this process should be optimized**, is not working very well;
-```
-gulp docx
-```
+-	if you run **gulp docx** should be generated an .docx file, but **this process should be optimized**, is not working very well;`
+	gulp docx
+	`
 
 ##### Dist
 
 To distribute the runtime-core, you can make a distribution file.
 
-
-Run the command:
-```
+Run the command:`
 // compact true | false;
 gulp dist --compact=false
-```
+`
 
 ##### Build
 
 To distribute the runtime-core, but with the source code maps, and to detect where is some error.
 
-Run the command:
-```
+Run the command:`
 gulp build
-```
+`
 
 ##### Encode
 
-In this repository, we have some tasks which can help you.
-If you need change some resource file, like an Hyperty or ProtoStub, and load it to the Hyperties.json or ProtoStubs.json, run the following command, and answer to the questions;
+In this repository, we have some tasks which can help you. If you need change some resource file, like an Hyperty or ProtoStub, and load it to the Hyperties.json or ProtoStubs.json, run the following command, and answer to the questions;
 
 ```
 gulp compile --file=path/to/file;
 ```
+
 ---
+
 ### <a id="example">Example</a>
 
 This repository have a folder with an working example of Hyperty Connector and we can send message and make a WebRTC call between remote hyperties through the vertx;
 
-To run the demo on example folder:
- - this example have a dependecy from [dev-msg-node-vertx](https://github.com/reTHINK-project/dev-msg-node-vertx/tree/dev-0.2#unit-testing) and [dev-registry-domain](https://github.com/reTHINK-project/dev-registry-domain#dev-registry-domain) for communication between hyperties in two distinct browsers or tabs. **At this moment you need run locally [dev-msg-node-vertx](https://github.com/reTHINK-project/dev-msg-node-vertx/tree/dev-0.2#unit-testing) and [dev-registry-domain](https://github.com/reTHINK-project/dev-registry-domain#dev-registry-domain)**
- - you need, in the root folder, run command: ``` npm start ```
- - in your browser, access to https://127.0.0.1:8080/example
+To run the demo on example folder: - this example have a dependecy from [dev-msg-node-vertx](https://github.com/reTHINK-project/dev-msg-node-vertx/tree/dev-0.2#unit-testing) and [dev-registry-domain](https://github.com/reTHINK-project/dev-registry-domain#dev-registry-domain) for communication between hyperties in two distinct browsers or tabs. **At this moment you need run locally [dev-msg-node-vertx](https://github.com/reTHINK-project/dev-msg-node-vertx/tree/dev-0.2#unit-testing) and [dev-registry-domain](https://github.com/reTHINK-project/dev-registry-domain#dev-registry-domain)** - you need, in the root folder, run command: `npm start` - in your browser, access to https://127.0.0.1:8080/example
 
 ---
+
 ### <a ide="notes">Notes</a>
 
 It was done an version of RuntimeCatalogue for local instances, based on the RuntimeCatalogue, and is activated by default;

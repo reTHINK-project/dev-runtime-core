@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">src/sandbox/SandboxRegistry.js | API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="git+ssh://git@github.com:reTHINK-project/dev-runtime-core.git">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html">MiniBus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Pipeline.js~Pipeline.html">Pipeline</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">graphconnector</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/BloomFilter.js~BloomFilter.html">BloomFilter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GlobalRegistryRecord.js~GlobalRegistryRecord.html">GlobalRegistryRecord</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html">GraphConnector</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html">GraphConnectorContactData</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">identity</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/IdentityModule.js~IdentityModule.html">IdentityModule</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">persistence</div><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-persistenceManager">persistenceManager</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/PolicyEngine.js~PolicyEngine.html">PolicyEngine</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">protostub</div><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-activate">activate</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">registry</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/AddressAllocation.js~AddressAllocation.html">AddressAllocation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/HypertyDiscovery.js~HypertyDiscovery.html">HypertyDiscovery</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/HypertyInstance.js~HypertyInstance.html">HypertyInstance</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html">Registry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/RegistryDataModel.js~RegistryDataModel.html">RegistryDataModel</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">runtime</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/RuntimeCatalogue-Local.js~RuntimeCatalogue.html">RuntimeCatalogue</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/RuntimeCatalogue.js~RuntimeCatalogue.html">RuntimeCatalogue</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/RuntimeUA.js~RuntimeUA.html">RuntimeUA</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">sandbox</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/sandbox/Sandbox.js~Sandbox.html">Sandbox</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/sandbox/SandboxRegistry.js~SandboxRegistry.html">SandboxRegistry</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">syncher</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/ObjectAllocation.js~ObjectAllocation.html">ObjectAllocation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/SyncherManager.js~SyncherManager.html">SyncherManager</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">utils</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/utils/EventEmitter.js~EventEmitter.html">EventEmitter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-deepClone">deepClone</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-divideURL">divideURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-emptyObject">emptyObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-divideURL">divideURL</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/sandbox/SandboxRegistry.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">/**
+ * @author micaelpedrosa@gmail.com
+ * Base class to implement internal deploy manager of components.
+ */
+
+// import MessageFactory from &apos;../../resources/MessageFactory&apos;;
+
+class SandboxRegistry {
+  /* private
+  _components: &lt;url: instance&gt;
+  */
+
+  constructor(bus) {
+    let _this = this;
+
+    _this._bus = bus;
+    _this._components = {};
+
+    // Add Message Factory
+    // let messageFactory = new MessageFactory();
+    // _this.messageFactory = messageFactory;
+
+    bus.addListener(SandboxRegistry.InternalDeployAddress, (msg) =&gt; {
+      //console.log(&apos;SandboxRegistry-RCV: &apos;, msg);
+      // let responseMsg = {
+      //   id: msg.id, type: &apos;response&apos;, from: SandboxRegistry.InternalDeployAddress, to: SandboxRegistry.ExternalDeployAddress
+      // };
+
+      switch (msg.type) {
+        case &apos;create&apos;: _this._onDeploy(msg); break;
+        case &apos;delete&apos;: _this._onRemove(msg); break;
+      }
+    });
+  }
+
+  get components() { return this._components; }
+
+  _responseMsg(msg, code, value) {
+
+    let _this = this;
+
+    // let messageFactory = _this.messageFactory;
+
+    let responseMsg = {
+      id: msg.id, type: &apos;response&apos;, from: SandboxRegistry.InternalDeployAddress, to: SandboxRegistry.ExternalDeployAddress
+    };
+
+    // Chanege the origin message, because the response;
+    // msg.from = SandboxRegistry.InternalDeployAddress;
+    // msg.to = SandboxRegistry.ExternalDeployAddress;
+
+    let body = {};
+    if (code) body.code = code;
+    if (value) body.desc = value;
+
+    responseMsg.body = body;
+
+    // return messageFactory.createResponse(msg, code, value);
+    return responseMsg;
+  }
+
+  _onDeploy(msg) {
+    let _this = this;
+    let config = msg.body.config;
+    let componentURL = msg.body.url;
+    let sourceCode = msg.body.sourceCode;
+    let responseCode;
+    let responseDesc;
+
+    if (!_this._components.hasOwnProperty(componentURL)) {
+      try {
+        _this._components[componentURL] = _this._create(componentURL, sourceCode, config);
+        responseCode = 200;
+      } catch (error) {
+        responseCode = 500;
+        responseDesc = error;
+      }
+    } else {
+      responseCode = 500;
+      responseDesc = &apos;Instance &apos; + componentURL + &apos; already exist!&apos;;
+    }
+
+    // Create response message with MessageFactory
+    let responseMsg = _this._responseMsg(msg, responseCode, responseDesc);
+    _this._bus.postMessage(responseMsg);
+  }
+
+  _onRemove(msg) {
+    let _this = this;
+    let componentURL = msg.body.url;
+    let responseCode;
+    let responseDesc;
+
+    if (_this._components.hasOwnProperty(componentURL)) {
+      //remove component from the pool and all listeners
+      delete _this._components[componentURL];
+      _this._bus.removeAllListenersOf(componentURL);
+      responseCode = 200;
+    } else {
+      responseCode = 500;
+      responseDesc = &apos;Instance &apos; + componentURL + &apos; doesn\&apos;t exist!&apos;;
+    }
+
+    let responseMsg = _this._responseMsg(msg, responseCode, responseDesc);
+
+    _this._bus.postMessage(responseMsg);
+  }
+
+  /**
+   * This method should be implemented by the internal sandbox code.
+   * @param  {ComponentURL} url URL used for the instance
+   * @param  {string} sourceCode Code of the component
+   * @param  {Config} config Configuration parameters
+   * @return {Object} Returns instance of the component or throw an error &quot;throw &apos;error message&apos;&quot;
+   */
+  _create(url, sourceCode, config) {
+    //implementation specific
+    /* example code:
+      eval(sourceCode);
+      return activate(url, _this._bus, config);
+    */
+  }
+}
+
+SandboxRegistry.ExternalDeployAddress = &apos;sandbox://external&apos;;
+SandboxRegistry.InternalDeployAddress = &apos;sandbox://internal&apos;;
+
+export default SandboxRegistry;
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.4)</span></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

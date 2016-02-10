@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">src/graphconnector/GraphConnector.js | API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  
+  <a data-ice="repoURL" href="git+ssh://git@github.com:reTHINK-project/dev-runtime-core.git">Repository</a>
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html">MiniBus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Pipeline.js~Pipeline.html">Pipeline</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">graphconnector</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/BloomFilter.js~BloomFilter.html">BloomFilter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GlobalRegistryRecord.js~GlobalRegistryRecord.html">GlobalRegistryRecord</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html">GraphConnector</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html">GraphConnectorContactData</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">identity</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/IdentityModule.js~IdentityModule.html">IdentityModule</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">persistence</div><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-persistenceManager">persistenceManager</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/PolicyEngine.js~PolicyEngine.html">PolicyEngine</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">protostub</div><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-activate">activate</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">registry</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/AddressAllocation.js~AddressAllocation.html">AddressAllocation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/HypertyDiscovery.js~HypertyDiscovery.html">HypertyDiscovery</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/HypertyInstance.js~HypertyInstance.html">HypertyInstance</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html">Registry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/RegistryDataModel.js~RegistryDataModel.html">RegistryDataModel</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">runtime</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/RuntimeCatalogue-Local.js~RuntimeCatalogue.html">RuntimeCatalogue</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/RuntimeCatalogue.js~RuntimeCatalogue.html">RuntimeCatalogue</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/RuntimeUA.js~RuntimeUA.html">RuntimeUA</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">sandbox</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/sandbox/Sandbox.js~Sandbox.html">Sandbox</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/sandbox/SandboxRegistry.js~SandboxRegistry.html">SandboxRegistry</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">syncher</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/ObjectAllocation.js~ObjectAllocation.html">ObjectAllocation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/SyncherManager.js~SyncherManager.html">SyncherManager</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">utils</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/utils/EventEmitter.js~EventEmitter.html">EventEmitter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-deepClone">deepClone</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-divideURL">divideURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-emptyObject">emptyObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-divideURL">divideURL</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/graphconnector/GraphConnector.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import GraphConnectorContactData from &apos;./GraphConnectorContactData&apos;;
+import BloomFilter from &apos;./BloomFilter&apos;;
+import GlobalRegistryRecord from &apos;./GlobalRegistryRecord&apos;;
+import bitcoin from &apos;bitcoinjs-lib&apos;;
+import bip39 from &apos;bip39&apos;;
+import sjcl from &apos;sjcl&apos;;
+import jsrsasign from &apos;jsrsasign&apos;;
+import base64url from &apos;base64-url&apos;;
+
+/**
+* The Graph Connector contains the contact list/address book.
+* @author beierle@tu-berlin.de
+*/
+class GraphConnector {
+
+  // TODO: import / export methods
+  // TODO: communication with global registry
+
+  /**
+   * Constructs a new and empty Graph Connector.
+   */
+  constructor() {
+    this.contacts = [];
+    this.lastCalculationnBloomFilter1Hop = new Date(0).toISOString();
+
+    this.globalRegistryRecord = new GlobalRegistryRecord();
+    this._prvKey;
+
+    this.groups = [];
+    this.residenceLocation;
+    this.firstName;
+    this.lastName;
+  }
+
+  /**
+   * Generates a GUID and returns a mnemonic from which the GUID can be re-created later.
+   * @returns  {string}    mnemonic      A string with 16 words.
+   */
+  generateGUID() {
+
+    // generate mnemonic and salt
+    Buffer.TYPED_ARRAY_SUPPORT = true;
+    let mnemonic = bip39.generateMnemonic(160);
+
+    let saltWord = bip39.generateMnemonic(8);
+    this._createKeys(mnemonic, saltWord);
+
+    // set lasUpdate date
+    this.globalRegistryRecord.lastUpdate = new Date();
+
+    // set defualt timeout
+    let timeout = new Date();
+    timeout.setMonth(timeout.getMonth() + 120);
+    this.globalRegistryRecord.timeout = timeout.toISOString();
+
+    // set default values
+    this.globalRegistryRecord.active = 1;
+    this.globalRegistryRecord.revoked = 0;
+
+    // return mnemonic
+    let rtn = mnemonic + &apos; &apos; + saltWord;
+    return rtn;
+  }
+
+  /**
+   * Generates a public/private key pair from a given mnemonic (16 words).
+   * Expects a string containing 16 words seperated by single spaces.
+   * @param  {string}     mnemonicAndSalt     A string of 16 words.
+   */
+  useGUID(mnemonicAndSalt) {
+    // TODO: check if format is correct and if all words are from bip39 english wordlist
+    let lastIndex = mnemonicAndSalt.lastIndexOf(&apos; &apos;);
+    let mnemonic = mnemonicAndSalt.substring(0, lastIndex);
+    let saltWord = mnemonicAndSalt.substring(lastIndex + 1, mnemonicAndSalt.length);
+    this._createKeys(mnemonic, saltWord);
+
+    // TODO: retrieve current info from Global Registry and fill this.globalRegistryRecord
+  }
+
+  /**
+   * Creates the keys from mnemonic and salt. Also sets public key, guid, and salt for globalRegistryRecord.
+   * @param  {string}     mnemonic     A string with 15 words.
+   * @param  {string}     salt         A word.
+   */
+  _createKeys(mnemonic, saltWord) {
+
+    // generate key pair
+    let seed = bip39.mnemonicToSeed(mnemonic);
+    Buffer.TYPED_ARRAY_SUPPORT = false;
+    let hdnode = bitcoin.HDNode.fromSeedBuffer(seed);
+    let ecparams = KJUR.crypto.ECParameterDB.getByName(&apos;secp256k1&apos;);
+    let biPrv = hdnode.keyPair.d; // private key big integer
+    let epPub = ecparams.G.multiply(biPrv); // d*G
+    let biX = epPub.getX().toBigInteger(); // x from Q
+    let biY = epPub.getY().toBigInteger(); // y from Q
+    let charlen = ecparams.keylen / 4;
+    let hPrv = (&apos;0000000000&apos; + biPrv.toString(16)).slice(-charlen);
+    let hX   = (&apos;0000000000&apos; + biX.toString(16)).slice(-charlen);
+    let hY   = (&apos;0000000000&apos; + biY.toString(16)).slice(-charlen);
+    let hPub = &apos;04&apos; + hX + hY;
+    this._prvKey = new KJUR.crypto.ECDSA({curve: &apos;secp256k1&apos;});
+    this._prvKey.setPrivateKeyHex(hPrv);
+    this._prvKey.isPrivate = true;
+    this._prvKey.isPublic = false;
+    let pubKey = new KJUR.crypto.ECDSA({curve: &apos;secp256k1&apos;});
+    pubKey.setPublicKeyHex(hPub);
+    pubKey.isPrivate = false;
+    pubKey.isPublic = true;
+    let publicKeyPEM = jsrsasign.KEYUTIL.getPEM(pubKey, &apos;PKCS8PUB&apos;);
+    publicKeyPEM = publicKeyPEM.replace(/(\r\n|\n|\r)/gm, &apos;&apos;);
+    this.globalRegistryRecord.publicKeyPEM = publicKeyPEM;
+
+    // generate salt
+    let saltHashedBitArray = sjcl.hash.sha256.hash(saltWord);
+    let salt = sjcl.codec.base64.fromBits(saltHashedBitArray);
+    this.globalRegistryRecord.salt = salt;
+
+    // generate GUID
+    let iterations = 10000;
+    let guidBitArray = sjcl.misc.pbkdf2(this.globalRegistryRecord.publicKeyPEM, salt, iterations);
+    let guid = sjcl.codec.base64url.fromBits(guidBitArray);
+    this.globalRegistryRecord.guid = guid;
+  }
+
+  /**
+   * SignGenerates a public/private key pair from a given mnemonic.
+   * @returns  {string}     JWT     JSON Web Token ready to commit to Global Registry.
+   */
+  signGlobalRegistryRecord() {
+
+    let record = this.globalRegistryRecord.getRecord();
+    let recordString = JSON.stringify(record);
+    let recordStringBase64 = base64url.encode(recordString);
+
+    let jwt = KJUR.jws.JWS.sign(null, {alg: &apos;ES256&apos;}, {data: recordStringBase64}, this._prvKey);
+    return jwt;
+  }
+
+  /**
+   * Adds a UserID for the user.
+   * @param  {string}     userID          The UserID for a Domain Registry to add for the user.
+   */
+  addUserID(userID) {
+    // check if already inside
+    let found = false;
+    for (let i = 0; i &lt; this.globalRegistryRecord.userIDs.length; i++) {
+      if (this.globalRegistryRecord.userIDs == userID) {
+        found = true;
+      }
+    }
+    if (!found) {
+      this.globalRegistryRecord.userIDs.push(userID);
+    }
+  }
+
+  /**
+   * Removes a UserID for the user.
+   * @param  {string}     userID          The UserID to remove.
+   */
+  removeUserID(userID) {
+    for (let i = 0; i &lt; this.globalRegistryRecord.userIDs.length; i++) {
+      if (this.globalRegistryRecord.userIDs == userID) {
+        this.globalRegistryRecord.userIDs.splice(i, 1);
+      }
+    }
+  }
+
+  /**
+   * Add a contact to the Graph Connector.
+   * @param  {string}   guid          GUID of the new contact.
+   * @param  {string}   firstName     First name of the new contact.
+   * @param  {string}   lastname      Last name of the new contact.
+   */
+  addContact(guid, firstName, lastName) {
+
+    // TODO: what if two contacts have the same GUID?
+    // TODO: reject invalid GUIDs
+
+    this.contacts.push(new GraphConnectorContactData(guid, firstName, lastName));
+  }
+
+  /**
+   * Remove a contact from the Graph Connector.
+   * @param  {string}     guid      GUID of the user to be removed.
+   */
+  removeContact(guid) {
+    // remove from contacts
+    for (let i = 0; i &lt; this.contacts.length; i++) {
+      if (this.contacts[i].guid == guid) {
+        this.contacts.splice(i, 1);
+      }
+    }
+
+    // re-calculate BF1hop
+    this.calculateBloomFilter1Hop();
+  }
+
+  /**
+   * Calculates the Bloom filter containing all non-private contacts.
+   */
+  calculateBloomFilter1Hop() {
+    let bf = new BloomFilter(
+      431328,   // number of bits to allocate. With 30000 entries, we have a false positive rate of 0.1 %.
+      10        // number of hash functions.
+    );
+    for (let i = 0; i &lt; this.contacts.length; i++) {
+      if (!this.contacts[i].privateContact) {
+        bf.add(this.contacts[i].guid);
+      }
+    }
+    this.contactsBloomFilter1Hop = bf;
+    this.lastCalculationnBloomFilter1Hop = new Date().toISOString();
+  }
+
+  /**
+   * Gets contacts by name.
+   * @param  {string}   name    First or last name to look for in the contact list.
+   * @returns  {array}   matchingContacts       Contacts matching the given name. The format is: Contacts&lt;GraphConnectorContactData&gt;.
+   */
+  getContact(name) {
+    // TODO: optimize, e.g., find misspelled people
+    let rtnArray = [];
+    for (let i = 0; i &lt; this.contacts.length; i++) {
+      if (this.contacts[i].firstName == name || this.contacts[i].lastName == name) {
+        rtnArray.push(this.contacts[i]);
+      }
+    }
+    return rtnArray;
+  }
+
+  /**
+   * Checks, if the given GUID is known and returns a list of contacs that are direct connections as well as a list of contacts that (most likely) know the given contact.
+   * @param  {string}     guid      GUID of the contact to look for.
+   * @returns  {array}    relatedContacts     List of related direct contacts and of related friends-of-friends contacts.The format is: RelatedContacts&lt;Direct&lt;GraphConnectorContactData&gt;,FoF&lt;GraphConnectorContactData&gt;&gt;.
+   */
+  checkGUID(guid) {
+    let directContactsArray = [];
+    let fofContactsArray = [];
+    for (let i = 0; i &lt; this.contacts.length; i++) {
+      if (this.contacts[i].guid == guid) {
+        directContactsArray.push(this.contacts[i]);
+      }
+      let bf1hop = this.contacts[i].contactsBloomFilter1Hop;
+      if (bf1hop !== undefined) {
+        if (bf1hop.test(guid)) {
+          fofContactsArray.push(this.contacts[i]);
+        }
+      }
+    }
+    let rtnArray = [];
+    rtnArray.push(directContactsArray, fofContactsArray);
+    return rtnArray;
+  }
+
+  // TODO: exportGraphData(?){}
+  // TODO: importGraphData(?){}
+
+}
+
+export default GraphConnector;
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.4)</span></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>
