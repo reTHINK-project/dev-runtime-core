@@ -137,6 +137,7 @@ class SyncherManager {
     let hypertyUrl = msg.body.subscriber;
 
     let subscription = _this._subscriptions[objURL];
+    let childBaseURL = objURL + '/children/';
 
     //27. validate if subscription already exists?
     if (subscription.subs.indexOf(hypertyUrl) !== -1) {
@@ -165,6 +166,12 @@ class SyncherManager {
         if (reply.body.code === 200) {
           //subscription accepted (add forward and subscription)
           _this._bus.addForward(objURL, hypertyUrl);
+
+          //add forward for children
+          subscription.children.forEach((child) => {
+            _this._bus.addForward(childBaseURL + child, hypertyUrl);
+          });
+
           subscription.subs.push(hypertyUrl);
         }
 
@@ -227,13 +234,14 @@ class SyncherManager {
           });
 
           let objSubscribeMsg = {
-            id: msg.id, type: 'subscribe', from: _this._url, to: objURLSubscription,
+            type: 'subscribe', from: _this._url, to: objURLSubscription,
             body: { subscriber: msg.from }
           };
 
           //subscribe to reporter SM
           _this._bus.postMessage(objSubscribeMsg, (reply) => {
             //forward to hyperty:
+            reply.id = msg.id;
             reply.from = _this._url;
             reply.to = msg.from;
             this._bus.postMessage(reply);

@@ -20,7 +20,7 @@ System.config({
     "babelify": "npm:babelify@6.3.0",
     "base64-url": "npm:base64-url@1.2.1",
     "bip39": "npm:bip39@2.2.0",
-    "bitcoinjs-lib": "npm:bitcoinjs-lib@2.1.4",
+    "bitcoinjs-lib": "npm:bitcoinjs-lib@2.2.0",
     "browserify": "npm:browserify@11.1.0",
     "core-js": "npm:core-js@1.2.6",
     "deep-eql": "npm:deep-eql@0.1.3",
@@ -107,11 +107,11 @@ System.config({
     },
     "github:rethink-project/dev-service-framework@develop": {
       "array.observe": "npm:array.observe@0.0.1",
-      "babel-polyfill": "npm:babel-polyfill@6.3.14",
+      "babel-polyfill": "npm:babel-polyfill@6.5.0",
       "indexeddbshim": "npm:indexeddbshim@2.2.1",
       "object.observe": "npm:object.observe@0.2.6",
       "ortc-over-rtc": "npm:ortc-over-rtc@0.1.0",
-      "webrtc-adapter-test": "npm:webrtc-adapter-test@0.2.8",
+      "webrtc-adapter-test": "npm:webrtc-adapter-test@0.2.9",
       "webrtc-shim": "npm:webrtc-shim@0.1.2"
     },
     "npm:JSONStream@1.0.4": {
@@ -147,9 +147,9 @@ System.config({
     "npm:array.observe@0.0.1": {
       "process": "github:jspm/nodelibs-process@0.1.2"
     },
-    "npm:asn1.js@4.3.0": {
+    "npm:asn1.js@4.4.0": {
       "assert": "github:jspm/nodelibs-assert@0.1.0",
-      "bn.js": "npm:bn.js@4.9.0",
+      "bn.js": "npm:bn.js@4.10.1",
       "buffer": "github:jspm/nodelibs-buffer@0.1.0",
       "inherits": "npm:inherits@2.0.1",
       "minimalistic-assert": "npm:minimalistic-assert@1.0.0",
@@ -164,13 +164,13 @@ System.config({
     "npm:async@0.2.10": {
       "process": "github:jspm/nodelibs-process@0.1.2"
     },
-    "npm:babel-polyfill@6.3.14": {
-      "babel-regenerator-runtime": "npm:babel-regenerator-runtime@6.3.13",
+    "npm:babel-polyfill@6.5.0": {
+      "babel-regenerator-runtime": "npm:babel-regenerator-runtime@6.5.0",
       "babel-runtime": "npm:babel-runtime@5.8.35",
       "core-js": "npm:core-js@1.2.6",
       "process": "github:jspm/nodelibs-process@0.1.2"
     },
-    "npm:babel-regenerator-runtime@6.3.13": {
+    "npm:babel-regenerator-runtime@6.5.0": {
       "process": "github:jspm/nodelibs-process@0.1.2"
     },
     "npm:babel-runtime@5.8.35": {
@@ -225,11 +225,12 @@ System.config({
       "buffer": "github:jspm/nodelibs-buffer@0.1.0",
       "systemjs-json": "github:systemjs/plugin-json@0.1.0"
     },
-    "npm:bitcoinjs-lib@2.1.4": {
+    "npm:bitcoinjs-lib@2.2.0": {
       "bigi": "npm:bigi@1.4.1",
       "bip66": "npm:bip66@1.1.0",
       "bs58check": "npm:bs58check@1.0.8",
       "buffer": "github:jspm/nodelibs-buffer@0.1.0",
+      "buffer-compare": "npm:buffer-compare@1.1.1",
       "buffer-equals": "npm:buffer-equals@1.0.3",
       "buffer-reverse": "npm:buffer-reverse@1.0.0",
       "create-hash": "npm:create-hash@1.1.2",
@@ -237,11 +238,14 @@ System.config({
       "ecurve": "npm:ecurve@1.0.2",
       "randombytes": "npm:randombytes@2.0.2",
       "systemjs-json": "github:systemjs/plugin-json@0.1.0",
-      "typeforce": "npm:typeforce@1.6.1",
+      "typeforce": "npm:typeforce@1.6.2",
       "wif": "npm:wif@1.2.1"
     },
     "npm:bluebird@2.10.0": {
       "process": "github:jspm/nodelibs-process@0.1.2"
+    },
+    "npm:bn.js@4.10.1": {
+      "buffer": "github:jspm/nodelibs-buffer@0.1.0"
     },
     "npm:body-parser@1.13.3": {
       "bytes": "npm:bytes@2.1.0",
@@ -312,20 +316,20 @@ System.config({
       "inherits": "npm:inherits@2.0.1"
     },
     "npm:browserify-rsa@4.0.0": {
-      "bn.js": "npm:bn.js@4.9.0",
+      "bn.js": "npm:bn.js@4.10.1",
       "buffer": "github:jspm/nodelibs-buffer@0.1.0",
       "constants": "github:jspm/nodelibs-constants@0.1.0",
       "crypto": "github:jspm/nodelibs-crypto@0.1.0",
       "randombytes": "npm:randombytes@2.0.2"
     },
     "npm:browserify-sign@4.0.0": {
-      "bn.js": "npm:bn.js@4.9.0",
+      "bn.js": "npm:bn.js@4.10.1",
       "browserify-rsa": "npm:browserify-rsa@4.0.0",
       "buffer": "github:jspm/nodelibs-buffer@0.1.0",
       "create-hash": "npm:create-hash@1.1.2",
       "create-hmac": "npm:create-hmac@1.1.4",
       "crypto": "github:jspm/nodelibs-crypto@0.1.0",
-      "elliptic": "npm:elliptic@6.2.2",
+      "elliptic": "npm:elliptic@6.2.3",
       "inherits": "npm:inherits@2.0.1",
       "parse-asn1": "npm:parse-asn1@5.0.0",
       "stream": "github:jspm/nodelibs-stream@0.1.0"
@@ -570,10 +574,10 @@ System.config({
       "buffer": "github:jspm/nodelibs-buffer@0.1.0"
     },
     "npm:create-ecdh@4.0.0": {
-      "bn.js": "npm:bn.js@4.9.0",
+      "bn.js": "npm:bn.js@4.10.1",
       "buffer": "github:jspm/nodelibs-buffer@0.1.0",
       "crypto": "github:jspm/nodelibs-crypto@0.1.0",
-      "elliptic": "npm:elliptic@6.2.2"
+      "elliptic": "npm:elliptic@6.2.3"
     },
     "npm:create-hash@1.1.2": {
       "buffer": "github:jspm/nodelibs-buffer@0.1.0",
@@ -582,7 +586,7 @@ System.config({
       "fs": "github:jspm/nodelibs-fs@0.1.2",
       "inherits": "npm:inherits@2.0.1",
       "ripemd160": "npm:ripemd160@1.0.1",
-      "sha.js": "npm:sha.js@2.3.6"
+      "sha.js": "npm:sha.js@2.4.4"
     },
     "npm:create-hmac@1.1.4": {
       "buffer": "github:jspm/nodelibs-buffer@0.1.0",
@@ -675,7 +679,7 @@ System.config({
       "fs": "github:jspm/nodelibs-fs@0.1.2"
     },
     "npm:diffie-hellman@5.0.2": {
-      "bn.js": "npm:bn.js@4.9.0",
+      "bn.js": "npm:bn.js@4.10.1",
       "buffer": "github:jspm/nodelibs-buffer@0.1.0",
       "crypto": "github:jspm/nodelibs-crypto@0.1.0",
       "miller-rabin": "npm:miller-rabin@4.0.0",
@@ -700,8 +704,8 @@ System.config({
       "buffer": "github:jspm/nodelibs-buffer@0.1.0",
       "systemjs-json": "github:systemjs/plugin-json@0.1.0"
     },
-    "npm:elliptic@6.2.2": {
-      "bn.js": "npm:bn.js@4.9.0",
+    "npm:elliptic@6.2.3": {
+      "bn.js": "npm:bn.js@4.10.1",
       "brorand": "npm:brorand@1.0.5",
       "hash.js": "npm:hash.js@1.0.3",
       "inherits": "npm:inherits@2.0.1",
@@ -1123,7 +1127,7 @@ System.config({
       "regex-cache": "npm:regex-cache@0.4.2"
     },
     "npm:miller-rabin@4.0.0": {
-      "bn.js": "npm:bn.js@4.9.0",
+      "bn.js": "npm:bn.js@4.10.1",
       "brorand": "npm:brorand@1.0.5"
     },
     "npm:mime-db@1.18.0": {
@@ -1250,7 +1254,7 @@ System.config({
       "process": "github:jspm/nodelibs-process@0.1.2"
     },
     "npm:parse-asn1@5.0.0": {
-      "asn1.js": "npm:asn1.js@4.3.0",
+      "asn1.js": "npm:asn1.js@4.4.0",
       "browserify-aes": "npm:browserify-aes@1.0.6",
       "buffer": "github:jspm/nodelibs-buffer@0.1.0",
       "create-hash": "npm:create-hash@1.1.2",
@@ -1306,7 +1310,7 @@ System.config({
       "assert": "github:jspm/nodelibs-assert@0.1.0"
     },
     "npm:public-encrypt@4.0.0": {
-      "bn.js": "npm:bn.js@4.9.0",
+      "bn.js": "npm:bn.js@4.10.1",
       "browserify-rsa": "npm:browserify-rsa@4.0.0",
       "buffer": "github:jspm/nodelibs-buffer@0.1.0",
       "create-hash": "npm:create-hash@1.1.2",
@@ -1408,6 +1412,12 @@ System.config({
       "process": "github:jspm/nodelibs-process@0.1.2"
     },
     "npm:sha.js@2.3.6": {
+      "buffer": "github:jspm/nodelibs-buffer@0.1.0",
+      "fs": "github:jspm/nodelibs-fs@0.1.2",
+      "inherits": "npm:inherits@2.0.1",
+      "process": "github:jspm/nodelibs-process@0.1.2"
+    },
+    "npm:sha.js@2.4.4": {
       "buffer": "github:jspm/nodelibs-buffer@0.1.0",
       "fs": "github:jspm/nodelibs-fs@0.1.2",
       "inherits": "npm:inherits@2.0.1",
@@ -1578,7 +1588,7 @@ System.config({
       "media-typer": "npm:media-typer@0.3.0",
       "mime-types": "npm:mime-types@2.1.6"
     },
-    "npm:typeforce@1.6.1": {
+    "npm:typeforce@1.6.2": {
       "assert": "github:jspm/nodelibs-assert@0.1.0",
       "buffer": "github:jspm/nodelibs-buffer@0.1.0",
       "inherits": "npm:inherits@2.0.1",

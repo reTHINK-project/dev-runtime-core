@@ -17,7 +17,9 @@ class GraphConnectorContactData {
       this._lastName = lastName;
       this._privateContact = false;
       this._lastSyncBloomFilter1Hop = new Date(0).toISOString();
+      this._lastSyncDomainUserIDs = new Date(0).toISOString();
       this._residenceLocation;
+      this._groups = [];
     }
 
     /**
@@ -50,6 +52,7 @@ class GraphConnectorContactData {
      */
     set userIDs(userIDs) {
       this._userIDs = userIDs;
+      this._lastSyncDomainUserIDs = new Date().toISOString();
     }
 
     /**
@@ -114,6 +117,7 @@ class GraphConnectorContactData {
      */
     set contactsBloomFilter1Hop(bf) {
       this._contactsBloomFilter1Hop = bf;
+      this._lastSyncBloomFilter1Hop = new Date().toISOString();
     }
 
     /**
@@ -130,6 +134,22 @@ class GraphConnectorContactData {
      */
     set residenceLocation(geohash) {
       this._residenceLocation = geohash;
+    }
+
+    /**
+     * Returns the groups.
+     * @returns  {List<String>}     groups        Groups of the contact.
+     */
+    get groups() {
+      return this._groups;
+    }
+
+    /**
+     * Sets the groups.
+     * @param  {List<String>}     groups        Groups of the contat.
+     */
+    set groups(groups) {
+      this._groups = groups;
     }
 
 }

@@ -13,7 +13,7 @@ class GlobalRegistryRecord {
       this.userIDs = [];
       this.lastUpdate;
       this.timeout;
-      this.publicKeyPEM;
+      this.publicKey;
       this.active;
       this.revoked;
     }
@@ -32,7 +32,7 @@ class GlobalRegistryRecord {
       record.userIDs = this.userIds;
       record.lastUpdate = this.lastUpdate;
       record.timeout = this.timeout;
-      record.publicKey = this.publicKeyPEM;
+      record.publicKey = this.publicKey;
       record.active = this.active;
       record.revoked = this.revoked;
 
