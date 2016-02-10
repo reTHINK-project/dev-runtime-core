@@ -209,15 +209,18 @@ function encode(filename, descriptorName, configuration, isDefault) {
     var value = 'default';
 
     if (isDefault) {
-      if (json.hasOwnProperty(filename)) {
-        value = filename;
-      }
+      value = 'default';
     } else {
-      var newObject = {};
-      json[filename] = newObject;
-      json[filename].sourcePackage = {};
       value = filename;
     }
+
+    if (!json.hasOwnProperty(value)) {
+      var newObject = {};
+      json[value] = newObject;
+      json[value].sourcePackage = {};
+    }
+
+    console.log(filename, descriptorName, configuration, isDefault, value);
 
     var language = 'javascript';
     if (descriptorName === 'DataSchemas') {
@@ -321,7 +324,7 @@ gulp.task('encode', function(done) {
   .pipe(prompt.prompt([{
     type: 'input',
     name: 'file',
-    message: 'File to be converted? (resources/<ProtoStub.js or Hyperty.js>)'
+    message: 'File to be converted? (resources/<ProtoStub.js, DataSchema.json or Hyperty.js>)'
   },
   {
     type: 'input',
@@ -340,7 +343,7 @@ gulp.task('encode', function(done) {
   {
     type: 'radio',
     name: 'defaultFile',
-    message: 'This will be a default file to be loaded? (yes/no)',
+    message: 'This will be a default file to be loaded? (y)es/(n)o',
     choices: ['yes', 'no']
   }], function(res) {
 
@@ -352,7 +355,7 @@ gulp.task('encode', function(done) {
     var configuration = JSON.parse(res.configuration);
 
     var isDefault = true;
-    if (res.defaultFile === 'no') {
+    if (res.defaultFile === 'no' || res.defaultFile === 'n') {
       isDefault = false;
     }
 
