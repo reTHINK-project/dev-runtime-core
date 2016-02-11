@@ -32,14 +32,37 @@ class HypertyDiscovery {
 
     // message to query domain registry, asking for a user hyperty.
     let message = {
-      type: 'READ', from: _this.discoveryURL, to: 'domain://registry.' + _this.domain + '/', body: { user: identityURL}
+      type: 'READ', from: _this.discoveryURL, to: 'domain://registry.' + _this.domain + '/', body: { resource: identityURL}
     };
 
     return new Promise(function(resolve, reject) {
 
       _this.messageBus.postMessage(message, (reply) => {
+        //console.log('MESSAGE', reply);
 
-        let hypertyURL = reply.body.last;
+        let hyperty;
+        let mostRecent;
+        let lastHyperty;
+        let value = reply.body.value;
+        let valueParsed = JSON.parse(value);
+
+        //console.log('valueParsed', valueParsed);
+        for (hyperty in valueParsed) {
+          if (valueParsed[hyperty].lastModified !== undefined) {
+            if (mostRecent === undefined) {
+              mostRecent = new Date(valueParsed[hyperty].lastModified);
+              lastHyperty = hyperty;
+            } else {
+              let hypertyDate = new Date(valueParsed[hyperty].lastModified);
+              if (mostRecent.getTime() < hypertyDate.getTime()) {
+                mostRecent = hypertyDate;
+                lastHyperty = hyperty;
+              }
+            }
+          }
+
+        }
+        let hypertyURL = lastHyperty;
 
         if (hypertyURL === undefined) {
           return reject('User Hyperty not found');
@@ -47,10 +70,11 @@ class HypertyDiscovery {
 
         let idPackage = {
           id: email,
-          descriptor: reply.body.hyperties[hypertyURL].descriptor,
+          descriptor: valueParsed[hypertyURL].descriptor,
           hypertyURL: hypertyURL
         };
 
+        console.log('===> RegisterHyperty messageBundle: ', idPackage);
         resolve(idPackage);
       });
     });

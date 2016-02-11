@@ -69,6 +69,9 @@ class Registry extends EventEmitter {
     // Install AddressAllocation
     let addressAllocation = new AddressAllocation(_this.registryURL, messageBus);
     _this.addressAllocation = addressAllocation;
+
+    //let hypertyDiscovery = new HypertyDiscovery('localhost', messageBus);
+    //_this.hypertyDiscovery = hypertyDiscovery;
   }
 
   /**
@@ -87,14 +90,36 @@ class Registry extends EventEmitter {
     let identityURL = 'user://' + email.substring(email.indexOf('@') + 1, email.length) + '/' + email.substring(0, email.indexOf('@'));
 
     let msg = {
-      type: 'READ', from: _this.registryURL, to: 'domain://registry.' + _this._domain + '/', body: { user: identityURL}
+      type: 'READ', from: _this.registryURL, to: 'domain://registry.' + _this._domain + '/', body: { resource: identityURL}
     };
 
     return new Promise(function(resolve, reject) {
 
       _this._messageBus.postMessage(msg, (reply) => {
+        //console.log('MESSAGE', reply);
 
-        let hypertyURL = reply.body.last;
+        let hyperty;
+        let mostRecent;
+        let lastHyperty;
+        let value = reply.body.value;
+        let valueParsed = JSON.parse(value);
+        //console.log('valueParsed', valueParsed);
+        for (hyperty in valueParsed) {
+          if (valueParsed[hyperty].lastModified !== undefined) {
+            if (mostRecent === undefined) {
+              mostRecent = new Date(valueParsed[hyperty].lastModified);
+              lastHyperty = hyperty;
+            } else {
+              let hypertyDate = new Date(valueParsed[hyperty].lastModified);
+              if (mostRecent.getTime() < hypertyDate.getTime()) {
+                mostRecent = hypertyDate;
+                lastHyperty = hyperty;
+              }
+            }
+          }
+
+        }
+        let hypertyURL = lastHyperty;
 
         if (hypertyURL === undefined) {
           return reject('User Hyperty not found');
@@ -102,7 +127,7 @@ class Registry extends EventEmitter {
 
         let idPackage = {
           id: email,
-          descriptor: reply.body.hyperties[hypertyURL].descriptor,
+          descriptor: valueParsed[hypertyURL].descriptor,
           hypertyURL: hypertyURL
         };
 
@@ -161,7 +186,7 @@ class Registry extends EventEmitter {
 
               //message to register the new hyperty, within the domain registry
               let msg = {
-                type: 'CREATE', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {user: identityURL,  hypertyDescriptorURL: descriptor, hypertyURL: adderessList[0]}
+                type: 'CREATE', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: {user: identityURL,  hypertyDescriptorURL: descriptor, hypertyURL: adderessList[0]}}
               };
 
               _this._messageBus.postMessage(msg, (reply) => {
