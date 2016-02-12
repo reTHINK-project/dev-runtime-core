@@ -1,19 +1,37 @@
 import hello from 'hellojs';
 
 /**
-* IdentityModule
 *
-* Initial specification: D4.1
+* The Identity Module (Id Module) is the component responsible for handling the
+* user identity and the association of this identity with the Hyperty instances,
+* in order to make Hyperty instances identifiable. The identity in the reTHINK project
+* is not fixed to a unique Identity Service Provider, but obtained through several
+* different Identity sources. With this approach, the Id Module provides to the user the
+* option to choose the preferred method for authentication.
+* This module will thus able to support multiple Identity acquisition methods,
+* such as OpenID connect 1.0, Kerberos System, or authentication through smart cards.
+* For example, a user with a Google account can use the Google as an Identity Provider to provide Identity Tokens,
+*  which can be used by the Identity Module to associate it with a Hyperty instance.
 *
-* The IdentityModule is a component managing user Identity. It downloads, instantiates
-* and manage Identity Provider Proxy (IdP) for its own user identity or for external
-* user identity verification.
+* The Identity Module uses a node package, the HelloJS, which is a client-side JavaScript API for authentication
+* that facilitates the requests for the OpenID connect protocol. This method allows for some abstraction
+* when making requests for different Identity Providers, such as OpenID connect used by Google, Facebook, Microsoft, for example.
+*
+* When a request for a user identity is made using the method loginWithRP(identifier, scope),
+* this method will analyse the Identity Provider chosen to obtain an identity and will use the HelloJS node package
+* with the selected Identity Provider and identity scope. After the HelloJS request for an Access Token
+* to the Identity Providers, the user will be prompted to authenticate towards the Identity Provider.
+* Upon receiving the Access Token, this token is validated with a RESTful web service request to an endpoint
+* on the Identity Provider Authorization Server, and after the validation is done,
+* an ID token is obtained with the information according to the scope required.
+* This ID token is then preserved in this module that can obtained through the getIdentities()
+* and is passed as return value of the loginWithRP function. The methods generateAssertion and validateAssertion have not yet been developed.
 *
 */
 class IdentityModule {
 
   /**
-  * USER'S OWN IDENTITY
+  * This is the constructor to initialise the Identity Module it does not require any input.
   */
   constructor() {
     let _this = this;
@@ -36,7 +54,8 @@ class IdentityModule {
   }
 
   /**
-  * Find and return all available identities that can be associated to the Hyperty Instance
+  * Function to return all the identities registered within a session by a user.
+  * These identities are returned in an array containing a JSON package for each user identity.
   * @return {Array<Identities>}         Array         Identities
   */
   getIdentities() {
@@ -45,10 +64,14 @@ class IdentityModule {
   }
 
   /**
-  * In relation with a classical Relying Party: Login
+  * Function to request an ID Token from a user. If no token exists, the Identity Module
+  * will try to obtain one from an Identity Provider, and the user will be asked to authenticate
+  *  towards the Identity Provider.
+  * The function returns a promise with a token containing the user information.
+  *
   * @param  {Identifier}      identifier      identifier
   * @param  {Scope}           scope           scope
-  * @return {Promise}         Promise         IDToken
+  * @return {Promise}         Promise         IDToken containing the user information
   */
   loginWithRP(identifier, scope) {
     let _this = this;
@@ -186,7 +209,8 @@ class IdentityModule {
   }
 
   /**
-  * Generates an Identity Assertion for a call session
+  * Generates an Identity Assertion
+  *
   * @param  {DOMString} contents     contents
   * @param  {DOMString} origin       origin
   * @param  {DOMString} usernameHint usernameHint
@@ -201,8 +225,10 @@ class IdentityModule {
   */
 
   /**
-  * Verification of a received IdAssertion validity
-  * @param  {DOMString} assertion assertion
+  * Function to validate an identity assertion generated previously.
+  * Returns a promise with the result from the validation.
+  * @param  {DOMString} assertion
+  * @return {Promise}         Promise         promise with the result from the validation
   */
   validateAssertion(assertion) {
     // Body...
