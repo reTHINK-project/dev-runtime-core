@@ -3,6 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
 	<title>Documentation Index</title>
 
 	<!--[if lt IE 9]>
@@ -96,17 +97,15 @@
 <li><a href="#tasks">Tasks</a></li>
 <li><a href="#notes">Notes</a></li>
 </ul>
-<h3>Setup Environment</h3><p>On the first time you are cloning this repository, you need to run the command:</p>
-<pre class="prettyprint source"><code>npm run init-setup</code></pre><p>After running successfully this command you will have 2 folders (node_modules and vendor), these folders are excluded from the commit process, and are only for development.</p>
-<p>if you already have the project configured on your machine, you only need run the next command to add new dependencies:</p>
-<pre class="prettyprint source"><code>npm install
-jspm install</code></pre><hr>
+<h3>Setup Environment</h3><p>On the first time you are cloning this repository, you need to run the command:<code>npm run init-setup</code></p>
+<p>After running successfully this command you will have 2 folders (node_modules and vendor), these folders are excluded from the commit process, and are only for development.</p>
+<p>if you already have the project configured on your machine, you only need run the next command to add new dependencies:<code>npm install
+jspm install</code></p>
 <p><strong>Private Repository Note</strong></p>
 <p>if you have problems with the <code>npm install</code> command, like &quot;access was forbidden&quot;, &quot;404 not found&quot;, and have the service framework module reference, it is an authentication problem;</p>
 <p>you may need following the steps present on <a href="https://help.github.com/articles/generating-ssh-keys/">Github Help</a>. and select operation system you are using.</p>
 <p>This could happen because it is a private module and need your GitHub authentication to allow cloning the repository.</p>
-<p>If you have some troubles with authentication on windows using the Git Shell, you can try <a href="https://help.github.com/articles/caching-your-github-password-in-git/#platform-windows">caching your GitHub password</a>.
-This should avoid the constant prompt for username and password;</p>
+<p>If you have some troubles with authentication on windows using the Git Shell, you can try <a href="https://help.github.com/articles/caching-your-github-password-in-git/#platform-windows">caching your GitHub password</a>. This should avoid the constant prompt for username and password;</p>
 <p><strong>Instalation through jspm</strong></p>
 <p>We need configure jspm config using github tokens, for that, following this (based on issue <a href="https://github.com/reTHINK-project/dev-runtime-browser/issues/3">3</a>):</p>
 <ol>
@@ -140,11 +139,7 @@ This should avoid the constant prompt for username and password;</p>
 <hr>
 <h3>How to include this runtime-core code into others parts of reTHINK Project;</h3><p>How to include this repository in other software parts, like <a href="https://github.com/reTHINK-project/dev-runtime-browser">dev-runtime-browser</a> or <a href="https://github.com/reTHINK-project/dev-runtime-node">dev-runtime-node</a> - for example;</p>
 <h4>browser project</h4><p>example: <a href="https://github.com/reTHINK-project/dev-runtime-browser">dev-runtime-browser</a></p>
-<p>Verify these use cases:</p>
-<ol>
-<li>if you will create a new repository, you can use this template, and can configure your development environment;</li>
-<li>if you already have an respository cloned;</li>
-</ol>
+<p>Verify these use cases: 1. if you will create a new repository, you can use this template, and can configure your development environment; 2. if you already have an respository cloned;</p>
 <p>for both cases you just have run the command:</p>
 <pre class="prettyprint source"><code>jspm install runtime-core=github:rethink-project/dev-runtime-core@dev-0.2</code></pre><p>and on javascript code you need import the script like other modules;</p>
 <pre class="prettyprint source"><code>import RuntimeUA from 'runtime-core/dist/runtimeUA';
@@ -167,29 +162,32 @@ var runtime = new RuntimeUA();</code></pre><p>if you found some issues, please s
 <li><code>jspm update</code></li>
 </ol>
 <h4>Note</h4><p>This repository is ready to start working on development of runtime-core. The code will go to the <strong>src</strong> folder. The unit tests will be on <strong>test</strong> folder, following the name standard <component>.spec.js</p>
-<p>To run karma tests is mandatory to run <strong>live-server</strong> because of the mock-up's dependencies:</p>
-<pre class="prettyprint source"><code>live-server --port=4000</code></pre><h3><a id="Tasks">Tasks</a></h3><ul>
+<p>To run karma tests is mandatory to run <strong>live-server</strong> because of the mock-up's dependencies:``` live-server --port=4000</p>
+<h2>```</h2><h3><a id="Tasks">Tasks</a></h3><ul>
 <li><a href="#documentation">Documentation</a></li>
 <li><a href="#dist">Dist</a></li>
 <li><a href="#build">Build</a></li>
 <li><a href="#encode">Encode</a></li>
 </ul>
-<h5>Documentation</h5><p>Generate all documentation associated to runtime core;
-Run the command:</p>
-<pre class="prettyprint source"><code>gulp docs</code></pre><h5>Dist</h5><p>To distribute the runtime-core, you can make a distribution file.</p>
-<p>Run the command:</p>
-<pre class="prettyprint source"><code>// compact true | false;
-gulp dist --compact=false</code></pre><h5>Build</h5><p>To distribute the runtime-core, but with the source code maps, and to detect where is some error.</p>
-<p>Run the command:</p>
-<pre class="prettyprint source"><code>gulp build</code></pre><h5>Encode</h5><p>In this repository, we have some tasks which can help you.
-If you need change some resource file, like an Hyperty or ProtoStub, and load it to the Hyperties.json or ProtoStubs.json, run the following command, and answer to the questions;</p>
-<pre class="prettyprint source"><code>gulp compile --file=path/to/file;</code></pre><h3><a id="example">Example</a></h3><p>This repository have a folder with an working example of Hyperty Connector and we can send message and make a WebRTC call between remote hyperties through the vertx;</p>
-<p>To run the demo on example folder:</p>
+<h5>Documentation</h5><p>Generate all documentation associated to runtime core;</p>
 <ul>
-<li>this example have a dependecy from <a href="https://github.com/reTHINK-project/dev-msg-node-vertx/tree/dev-0.2#unit-testing">dev-msg-node-vertx</a> and <a href="https://github.com/reTHINK-project/dev-registry-domain#dev-registry-domain">dev-registry-domain</a> for communication between hyperties in two distinct browsers or tabs. <strong>At this moment you need run locally <a href="https://github.com/reTHINK-project/dev-msg-node-vertx/tree/dev-0.2#unit-testing">dev-msg-node-vertx</a> and <a href="https://github.com/reTHINK-project/dev-registry-domain#dev-registry-domain">dev-registry-domain</a></strong></li>
-<li>you need, in the root folder, run command: <code>npm start</code></li>
-<li>in your browser, access to https://127.0.0.1:8080/example</li>
+<li><p>if you run <strong>gulp doc</strong> the documentation based on jsdoc3 will be generated on folder docs/jsdoc and you can interact;<code>gulp doc</code></p>
+</li>
+<li><p>if you run <strong>gulp api</strong> the documentation is generate based on docs/jsdoc/*.html files, and converted to markdown;<code>gulp api</code></p>
+</li>
+<li><p>if you run <strong>gulp docx</strong> should be generated an .docx file, but <strong>this process should be optimized</strong>, is not working very well;<code>gulp docx</code></p>
+</li>
 </ul>
+<h5>Dist</h5><p>To distribute the runtime-core, you can make a distribution file.</p>
+<p>Run the command:<code>// compact true | false;
+gulp dist --compact=false</code></p>
+<h5>Build</h5><p>To distribute the runtime-core, but with the source code maps, and to detect where is some error.</p>
+<p>Run the command:<code>gulp build</code></p>
+<h5>Encode</h5><p>In this repository, we have some tasks which can help you. If you need change some resource file, like an Hyperty or ProtoStub, and load it to the Hyperties.json or ProtoStubs.json, run the following command, and answer to the questions;</p>
+<pre class="prettyprint source"><code>gulp compile --file=path/to/file;</code></pre><hr>
+<h3><a id="example">Example</a></h3><p>This repository have a folder with an working example of Hyperty Connector and we can send message and make a WebRTC call between remote hyperties through the vertx;</p>
+<p>To run the demo on example folder: - this example have a dependecy from <a href="https://github.com/reTHINK-project/dev-msg-node-vertx/tree/dev-0.2#unit-testing">dev-msg-node-vertx</a> and <a href="https://github.com/reTHINK-project/dev-registry-domain#dev-registry-domain">dev-registry-domain</a> for communication between hyperties in two distinct browsers or tabs. <strong>At this moment you need run locally <a href="https://github.com/reTHINK-project/dev-msg-node-vertx/tree/dev-0.2#unit-testing">dev-msg-node-vertx</a> and <a href="https://github.com/reTHINK-project/dev-registry-domain#dev-registry-domain">dev-registry-domain</a></strong> - you need, in the root folder, run command: <code>npm start</code> - in your browser, access to https://127.0.0.1:8080/example</p>
+<hr>
 <h3><a ide="notes">Notes</a></h3><p>It was done an version of RuntimeCatalogue for local instances, based on the RuntimeCatalogue, and is activated by default;</p></article>
     </section>
 
@@ -234,7 +232,7 @@ If you need change some resource file, like an Hyperty or ProtoStub, and load it
 <span class="jsdoc-message">
 	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a>
 	
-		on January 26th 2016, 6:27:00 pm
+		on February 12th 2016, 12:00:25 pm
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>
