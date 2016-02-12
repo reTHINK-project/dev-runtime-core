@@ -3,6 +3,7 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
 	<title>Documentation Class: GraphConnector</title>
 
 	<!--[if lt IE 9]>
@@ -90,7 +91,7 @@
         
 <hr>
 <dt>
-    <h4 class="name" id="GraphConnector"><span class="type-signature"></span>new GraphConnector()</h4>
+    <h4 class="name" id="GraphConnector"><span class="type-signature"></span>new GraphConnector(HypertyRuntimeURL, MessageBus)</h4>
     
     
 </dt>
@@ -107,6 +108,80 @@
     
 
     
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>HypertyRuntimeURL</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The Hyperty Runtime URL.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>MessageBus</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">messageBus</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The Message Bus.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
     
 
     
@@ -184,6 +259,134 @@
 
     
 
+    
+        <h3 class="subsection-title">Members</h3>
+
+        <dl>
+            
+<hr>
+<dt class="name" id="messageBus">
+    <h4><span class="type-signature"></span>messageBus<span class="type-signature"></span></h4>
+
+    
+    <p class="summary">Returns the MessageBus.</p>
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>Returns the MessageBus.</p>
+    </div>
+    
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt class="name" id="messageBus">
+    <h4><span class="type-signature"></span>messageBus<span class="type-signature"></span></h4>
+
+    
+    <p class="summary">Sets the MessageBus.</p>
+    
+</dt>
+<dd>
+    
+    <div class="description">
+        <p>Sets the MessageBus.</p>
+    </div>
+    
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+</dd>
+
+        </dl>
     
 
     
@@ -1147,6 +1350,161 @@
             
 <hr>
 <dt>
+    <h4 class="name" id="queryGlobalRegistry"><span class="type-signature"></span>queryGlobalRegistry(guid)</h4>
+    
+    
+    <p class="summary">Queries the Global Registry for a given GUID.</p>
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Queries the Global Registry for a given GUID.
+Returns a Graph Connector Contact Data as a Promise.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>guid</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The GUID to query the Global Registry for</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>Promise   Graph Connector Contact Data containing UserIDs.</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
     <h4 class="name" id="removeContact"><span class="type-signature"></span>removeContact(guid)</h4>
     
     
@@ -1407,6 +1765,161 @@
             
 <hr>
 <dt>
+    <h4 class="name" id="sendGlobalRegistryRecord"><span class="type-signature"></span>sendGlobalRegistryRecord(jwt)</h4>
+    
+    
+    <p class="summary">Takes the Global Registry Record as a signed JWT and sends it to the Global Registry via the MessageBus.</p>
+    
+</dt>
+<dd>
+
+    
+    <div class="description">
+        <p>Takes the Global Registry Record as a signed JWT and sends it to the Global Registry via the MessageBus.
+Returns the response code of the REST-interface of the Global Registry as a Promise.</p>
+    </div>
+    
+
+    
+
+    
+
+    
+    
+        <h5>Parameters:</h5>
+        
+
+<table class="params table table-striped">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>jwt</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>The Global Registry Record as a signed JWT.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+    
+
+    
+<dl class="details">
+    
+
+	
+
+	
+
+	
+
+    
+
+    
+
+    
+
+    
+
+	
+
+	
+
+	
+
+	
+
+	
+
+
+
+	
+
+	
+
+	
+
+	
+</dl>
+
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>Promise Response Code from Global Registry.</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Propmise</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
+
+    
+</dd>
+
+        
+            
+<hr>
+<dt>
     <h4 class="name" id="signGlobalRegistryRecord"><span class="type-signature"></span>signGlobalRegistryRecord()</h4>
     
     
@@ -1522,7 +2035,8 @@
     
     <div class="description">
         <p>Generates a public/private key pair from a given mnemonic (16 words).
-Expects a string containing 16 words seperated by single spaces.</p>
+Expects a string containing 16 words seperated by single spaces.
+Retrieves data from the Global Registry.</p>
     </div>
     
 
@@ -1634,6 +2148,30 @@ Expects a string containing 16 words seperated by single spaces.</p>
     
 
     
+    <h5>Returns:</h5>
+    
+            
+<div class="param-desc">
+    <p>Promise          Global Registry Record.</p>
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+
+    </dd>
+</dl>
+
+
+        
 
     
 </dd>
@@ -1686,7 +2224,7 @@ Expects a string containing 16 words seperated by single spaces.</p>
 <span class="jsdoc-message">
 	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a>
 	
-		on January 26th 2016, 6:27:00 pm
+		on February 12th 2016, 12:00:25 pm
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>

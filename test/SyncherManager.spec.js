@@ -1,6 +1,6 @@
 import {Syncher, DataObjectReporter, DataObjectObserver} from 'service-framework';
 import SyncherManager from '../src/syncher/SyncherManager';
-import MiniBus from '../src/bus/MiniBus';
+import MessageBus from '../src/bus/MessageBus';
 
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
@@ -47,7 +47,7 @@ describe('SyncherManager', function() {
   };
 
   it('reporter observer integration', function(done) {
-    let bus = new MiniBus();
+    let bus = new MessageBus();
 
     bus.addForward = (from, to) => {
       //no need to config forward, sync2 adds listener for objURL, and it's on the same sandbox
@@ -502,7 +502,7 @@ describe('SyncherManager', function() {
   });
 
   it('reporter addChildren', function(done) {
-    let bus = new MiniBus();
+    let bus = new MessageBus();
 
     bus.addForward = (from, to) => {
       //no need to config forward, sync2 adds listener for objURL, and it's on the same sandbox
@@ -527,7 +527,7 @@ describe('SyncherManager', function() {
   });
 
   it('observer addChildren', function(done) {
-    let bus = new MiniBus();
+    let bus = new MessageBus();
     bus.addForward = (from, to) => {
       console.log('6-addForward: ', from, to);
       expect(to).to.eql(hyperURL2);
@@ -576,7 +576,7 @@ describe('SyncherManager', function() {
   });
 
   it('children deltas generate and process', function(done) {
-    let bus = new MiniBus();
+    let bus = new MessageBus();
     bus.addForward = (from, to) => {
       console.log('7-addForward: ', from, to);
       expect(to).to.eql(hyperURL2);
