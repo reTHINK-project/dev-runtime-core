@@ -1,14 +1,15 @@
-import MiniBus from './MiniBus';
+import Bus from './Bus';
+import Pipeline from './Pipeline';
 /**
 * Message BUS Interface is an extension of the MiniBus
 * It doesn't support the default '*' listener, instead it uses the registry.resolve(..)
 */
-class MessageBus extends MiniBus {
+class MessageBus extends Bus {
   /* private
   _registry: Registry
   _forwards: { <from-url>: { fl: MsgListener, sandboxToUrls: Map(Sandbox, [to-url]), urlToSandbox: { to-url: Sandbox } } }
 
-  //_forwards: { <from-url>: { fl: MsgListener, destinations: [to-url] } }
+  _pipeline: Pipeline
   */
 
   //TODO: future optimization
@@ -19,6 +20,36 @@ class MessageBus extends MiniBus {
     super();
     this._registry = registry;
     this._forwards = {};
+
+    this._pipeline = new Pipeline((error) => {
+      console.log('PIPELINE-ERROR: ', JSON.stringify(error));
+    });
+  }
+
+  get pipeline() { return this._pipeline; }
+
+  postMessage(inMsg, responseCallback) {
+    let _this = this;
+
+    _this._genId(inMsg);
+
+    _this._pipeline.process(inMsg, (msg) => {
+
+      _this._responseCallback(inMsg, responseCallback);
+
+      if (!_this._onResponse(msg)) {
+        let itemList = _this._subscriptions[msg.to];
+        if (itemList) {
+          //do not publish on default address, because of loopback cycle
+          _this._publishOn(itemList, msg);
+        } else {
+          //if there is no listener, send to external interface
+          _this._onPostMessage(msg);
+        }
+      }
+    });
+
+    return inMsg.id;
   }
 
   addForward(from, to) {
@@ -71,47 +102,6 @@ class MessageBus extends MiniBus {
       });
     });
   }
-
-  /*
-  addForward(from, to) {
-    let _this = this;
-
-    //verify if forward exist
-    let conf = _this._forwards[from];
-    if (!conf) {
-      let forwardListener = _this.addListener(from, (msg) => {
-        let resolves = new Set();
-        conf.destinations.forEach((url) => {
-          //resolve and forward for unique resolution...
-          _this._registry.resolve(url).then((route) => {
-            if (!resolves.has(route)) {
-              console.log('MB-FORWARD: (' + from + ', ' + url + ', ' + route + ')');
-              resolves.add(route);
-              _this._publish(route, msg);
-            } else {
-              console.log('MB-FORWARD-IGNORE: (' + from + ', ' + url + ', ' + route + ')');
-            }
-          }).catch(function(e) {
-            console.log('RESOLVE-ERROR: ', e);
-          });
-
-        });
-      });
-
-      //TODO: remove(url) -remove url destination, if destinations is empty, remove forward-
-      conf = {
-        from: from,
-        fl: forwardListener,
-        destinations: new Set()
-      };
-
-      _this._forwards[from] = conf;
-    }
-
-    //add new forward detination and return
-    conf.destinations.add(to);
-    return conf;
-  }*/
 
   _publish(url, msg) {
     let _this = this;

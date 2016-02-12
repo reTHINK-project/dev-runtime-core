@@ -3,48 +3,23 @@ import MiniBus from '../src/bus/MiniBus';
 
 describe('MiniBus', function() {
   it('simple sending message', function(done) {
-    this.timeout(4000);
-    let msgResult;
-
     let mBus = new MiniBus();
-    let listener = mBus.addListener('hyper-2', (msg) => {
-      msgResult = msg;
-    });
+    mBus._onPostMessage = (msg) => {
+      expect(msg).to.eql({
+        id: 1, type: 'test', from: 'hyper-1', to: 'hyper-2',
+        body: {value: 'x'}
+      });
+
+      done();
+    };
 
     mBus.postMessage({
       type: 'test', from: 'hyper-1', to: 'hyper-2',
       body: {value: 'x'}
     });
-
-    expect(listener.url).to.eql('hyper-2');
-
-    setTimeout(() => {
-      expect(msgResult).to.eql({
-        id: 1, type: 'test', from: 'hyper-1', to: 'hyper-2',
-        body: {value: 'x'}
-      });
-
-      listener.remove();
-      expect(mBus._subscriptions).to.eql({});
-
-      mBus.postMessage({
-        type: 'test', from: 'hyper-3', to: 'hyper-2',
-        body: {value: 'y'}
-      });
-
-      setTimeout(() => {
-        //should stay the same since the listener is off
-        expect(msgResult).to.eql({
-          id: 1, type: 'test', from: 'hyper-1', to: 'hyper-2',
-          body: {value: 'x'}
-        });
-
-        done();
-      });
-    });
   });
 
-  it('send and response', function(done) {
+  it('send with external response', function(done) {
     this.timeout(4000);
     let msgResult = {};
 
@@ -53,17 +28,17 @@ describe('MiniBus', function() {
       msgResult = msg;
     });
 
-    mBus.addListener('hyper-2', (msg) => {
+    mBus._onPostMessage = (msg) => {
       expect(msg).to.eql({
         id: 1, type: 'test', from: 'hyper-1', to: 'hyper-2',
         body: {value: 'x'}
       });
 
-      mBus.postMessage({
+      mBus._onMessage({
         id: 1, type: 'response', from: 'hyper-2', to: 'hyper-1',
         body: {value: 'y'}
       });
-    });
+    };
 
     mBus.postMessage({
       type: 'test', from: 'hyper-1', to: 'hyper-2',
@@ -74,26 +49,68 @@ describe('MiniBus', function() {
         body: {value: 'y'}
       });
 
-      expect(msgResult).to.be.empty();
-      done();
+      setTimeout(() => {
+        //expect not to enter in the hyper-1 listener
+        expect(msgResult).to.be.empty();
+        done();
+      });
     });
   });
 
-  it('pipeline msg change', function(done) {
+  it('send and publish', function(done) {
     let mBus = new MiniBus();
-    mBus.pipeline.handlers = [
-      function(ctx) {
-        ctx.msg.token = '12345678';
-        ctx.next();
-      }
-    ];
+    let msgResult = {};
 
-    mBus.addListener('hyper-2', (msg) => {
-      expect(msg).to.eql({ id: 1, type: 'ping', token: '12345678', from: 'hyper-1', to: 'hyper-2' });
-      done();
+    let defaultListener = false;
+    let hyper2Listener = false;
+    let objListener = false;
+
+    mBus.addListener('*', (msg) => {
+      msgResult = msg;
+      defaultListener = true;
     });
 
-    mBus.postMessage({ type: 'ping', from: 'hyper-1', to: 'hyper-2' });
-  });
+    mBus.addListener('hyperty://hyper-2', (msg) => {
+      msgResult = msg;
+      hyper2Listener = true;
+    });
 
+    mBus.addListener('resource://fake-url', (msg) => {
+      msgResult = msg;
+      objListener = true;
+    });
+
+    //simulate message from MessageBus core
+    mBus._onMessage({
+      id: 1, type: 'send', from: 'hyperty://hyper-1', to: 'hyperty://hyper-2',
+      body: {value: 'x'}
+    });
+
+    setTimeout(() => {
+      //should be only received in the hyperty listener
+      expect(defaultListener).to.eql(false);
+      expect(hyper2Listener).to.eql(true);
+      expect(msgResult).to.eql({
+        id: 1, type: 'send', from: 'hyperty://hyper-1', to: 'hyperty://hyper-2',
+        body: {value: 'x'}
+      });
+
+      //simulate message from MessageBus core
+      mBus._onMessage({
+        id: 2, type: 'publish', from: 'hyperty://hyper-1', to: 'resource://fake-url',
+        body: {value: 'x'}
+      });
+
+      setTimeout(() => {
+        //should be received in default and object listener
+        expect(defaultListener).to.eql(true);
+        expect(objListener).to.eql(true);
+        expect(msgResult).to.eql({
+          id: 2, type: 'publish', from: 'hyperty://hyper-1', to: 'resource://fake-url',
+          body: {value: 'x'}
+        });
+        done();
+      });
+    });
+  });
 });
