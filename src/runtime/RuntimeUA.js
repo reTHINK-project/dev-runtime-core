@@ -3,6 +3,7 @@ import Registry from '../registry/Registry';
 import IdentityModule from '../identity/IdentityModule';
 import PolicyEngine from '../policy/PolicyEngine';
 import MessageBus from '../bus/MessageBus';
+import GraphConnector from '../graphconnector/GraphConnector';
 
 import RuntimeCatalogue from './RuntimeCatalogue-Local';
 
@@ -22,6 +23,7 @@ import {divideURL, emptyObject} from '../utils/utils';
  * @property {PolicyEngine} policyEngine - Policy Engine Module;
  * @property {Registry} registry - Registry Module;
  * @property {MessageBus} messageBus - Message Bus is used like a router to redirect the messages from one component to other(s)
+ * @property {GraphConnector} graphConnector - Graph Connector handling GUID and contacts
  */
 class RuntimeUA {
 
@@ -104,6 +106,9 @@ class RuntimeUA {
 
     // Instanciate the SyncherManager;
     _this.syncherManager = new SyncherManager(_this.runtimeURL, _this.messageBus, { }, _this.runtimeCatalogue);
+
+    // Instantiate the Graph Connector
+    _this.graphConnector = new GraphConnector(_this.runtimeURL, _this.messageBus);
 
   }
 
