@@ -1,3 +1,5 @@
+</div>
+
 <div class="self-detail detail">
 
 ObjectAllocation {#objectallocation data-ice="name"}

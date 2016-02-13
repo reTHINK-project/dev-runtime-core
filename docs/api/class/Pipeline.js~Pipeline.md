@@ -1,3 +1,5 @@
+</div>
+
 <div class="self-detail detail">
 
 Pipeline {#pipeline data-ice="name"}

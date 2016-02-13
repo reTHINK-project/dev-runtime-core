@@ -32,7 +32,8 @@
 <nav class="navigation" data-ice="nav"><div>
   <ul>
     
-  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span></span></li>
+  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html">Bus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html">MiniBus</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Pipeline.js~Pipeline.html">Pipeline</a></span></span></li>
 <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">graphconnector</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/BloomFilter.js~BloomFilter.html">BloomFilter</a></span></span></li>
@@ -72,19 +73,15 @@
 <li><a href="#notes">Notes</a></li>
 </ul>
 <h3 id="setup-environment">Setup Environment</h3>
-<p>On the first time you are cloning this repository, you need to run the command:</p>
-<pre><code><code class="source-code prettyprint">npm run init-setup</code>
-</code></pre><p>After running successfully this command you will have 2 folders (node_modules and vendor), these folders are excluded from the commit process, and are only for development.</p>
-<p>if you already have the project configured on your machine, you only need run the next command to add new dependencies:</p>
-<pre><code><code class="source-code prettyprint">npm install
-jspm install</code>
-</code></pre><hr>
+<p>On the first time you are cloning this repository, you need to run the command:<code>npm run init-setup</code></p>
+<p>After running successfully this command you will have 2 folders (node_modules and vendor), these folders are excluded from the commit process, and are only for development.</p>
+<p>if you already have the project configured on your machine, you only need run the next command to add new dependencies:<code>npm install
+jspm install</code></p>
 <p><strong>Private Repository Note</strong></p>
 <p>if you have problems with the <code>npm install</code> command, like &quot;access was forbidden&quot;, &quot;404 not found&quot;, and have the service framework module reference, it is an authentication problem;</p>
 <p>you may need following the steps present on <a href="https://help.github.com/articles/generating-ssh-keys/">Github Help</a>. and select operation system you are using.</p>
 <p>This could happen because it is a private module and need your GitHub authentication to allow cloning the repository.</p>
-<p>If you have some troubles with authentication on windows using the Git Shell, you can try <a href="https://help.github.com/articles/caching-your-github-password-in-git/#platform-windows">caching your GitHub password</a>.
-This should avoid the constant prompt for username and password;</p>
+<p>If you have some troubles with authentication on windows using the Git Shell, you can try <a href="https://help.github.com/articles/caching-your-github-password-in-git/#platform-windows">caching your GitHub password</a>. This should avoid the constant prompt for username and password;</p>
 <p><strong>Instalation through jspm</strong></p>
 <p>We need configure jspm config using github tokens, for that, following this (based on issue <a href="https://github.com/reTHINK-project/dev-runtime-browser/issues/3">3</a>):</p>
 <ol>
@@ -125,11 +122,7 @@ This should avoid the constant prompt for username and password;</p>
 <p>How to include this repository in other software parts, like <a href="https://github.com/reTHINK-project/dev-runtime-browser">dev-runtime-browser</a> or <a href="https://github.com/reTHINK-project/dev-runtime-node">dev-runtime-node</a> - for example;</p>
 <h4 id="browser-project">browser project</h4>
 <p>example: <a href="https://github.com/reTHINK-project/dev-runtime-browser">dev-runtime-browser</a></p>
-<p>Verify these use cases:</p>
-<ol>
-<li>if you will create a new repository, you can use this template, and can configure your development environment;</li>
-<li>if you already have an respository cloned;</li>
-</ol>
+<p>Verify these use cases: 1. if you will create a new repository, you can use this template, and can configure your development environment; 2. if you already have an respository cloned;</p>
 <p>for both cases you just have run the command:</p>
 <pre><code><code class="source-code prettyprint">jspm install runtime-core=github:rethink-project/dev-runtime-core@dev-0.2</code>
 </code></pre><p>and on javascript code you need import the script like other modules;</p>
@@ -159,9 +152,8 @@ var runtime = new RuntimeUA();</code>
 </ol>
 <h4 id="note">Note</h4>
 <p>This repository is ready to start working on development of runtime-core. The code will go to the <strong>src</strong> folder. The unit tests will be on <strong>test</strong> folder, following the name standard &lt;component&gt;.spec.js</p>
-<p>To run karma tests is mandatory to run <strong>live-server</strong> because of the mock-up&apos;s dependencies:</p>
-<pre><code><code class="source-code prettyprint">live-server --port=4000</code>
-</code></pre><hr>
+<p>To run karma tests is mandatory to run <strong>live-server</strong> because of the mock-up&apos;s dependencies:``` live-server --port=4000</p>
+<h2 id="-">```</h2>
 <h3 id="-a-id-tasks-tasks-a-"><a id="Tasks">Tasks</a></h3>
 <ul>
 <li><a href="#documentation">Documentation</a></li>
@@ -172,38 +164,27 @@ var runtime = new RuntimeUA();</code>
 <h5 id="documentation">Documentation</h5>
 <p>Generate all documentation associated to runtime core;</p>
 <ul>
-<li><p>if you run <strong>gulp doc</strong> the documentation based on jsdoc3 will be generated on folder docs/jsdoc and you can interact;</p>
-<pre><code><code class="source-code prettyprint">gulp doc</code>
-</code></pre></li>
-<li><p>if you run <strong>gulp api</strong> the documentation is generate based on docs/jsdoc/*.html files, and converted to markdown;</p>
-<pre><code><code class="source-code prettyprint">gulp api</code>
-</code></pre></li>
-<li><p>if you run <strong>gulp docx</strong> should be generated an .docx file, but <strong>this process should be optimized</strong>, is not working very well;</p>
-<pre><code><code class="source-code prettyprint">gulp docx</code>
-</code></pre></li>
+<li><p>if you run <strong>gulp doc</strong> the documentation based on jsdoc3 will be generated on folder docs/jsdoc and you can interact;<code>gulp doc</code></p>
+</li>
+<li><p>if you run <strong>gulp api</strong> the documentation is generate based on docs/jsdoc/*.html files, and converted to markdown;<code>gulp api</code></p>
+</li>
+<li><p>if you run <strong>gulp docx</strong> should be generated an .docx file, but <strong>this process should be optimized</strong>, is not working very well;<code>gulp docx</code></p>
+</li>
 </ul>
 <h5 id="dist">Dist</h5>
 <p>To distribute the runtime-core, you can make a distribution file.</p>
-<p>Run the command:</p>
-<pre><code><code class="source-code prettyprint">// compact true | false;
-gulp dist --compact=false</code>
-</code></pre><h5 id="build">Build</h5>
+<p>Run the command:<code>// compact true | false;
+gulp dist --compact=false</code></p>
+<h5 id="build">Build</h5>
 <p>To distribute the runtime-core, but with the source code maps, and to detect where is some error.</p>
-<p>Run the command:</p>
-<pre><code><code class="source-code prettyprint">gulp build</code>
-</code></pre><h5 id="encode">Encode</h5>
-<p>In this repository, we have some tasks which can help you.
-If you need change some resource file, like an Hyperty or ProtoStub, and load it to the Hyperties.json or ProtoStubs.json, run the following command, and answer to the questions;</p>
+<p>Run the command:<code>gulp build</code></p>
+<h5 id="encode">Encode</h5>
+<p>In this repository, we have some tasks which can help you. If you need change some resource file, like an Hyperty or ProtoStub, and load it to the Hyperties.json or ProtoStubs.json, run the following command, and answer to the questions;</p>
 <pre><code><code class="source-code prettyprint">gulp compile --file=path/to/file;</code>
 </code></pre><hr>
 <h3 id="-a-id-example-example-a-"><a id="example">Example</a></h3>
 <p>This repository have a folder with an working example of Hyperty Connector and we can send message and make a WebRTC call between remote hyperties through the vertx;</p>
-<p>To run the demo on example folder:</p>
-<ul>
-<li>this example have a dependecy from <a href="https://github.com/reTHINK-project/dev-msg-node-vertx/tree/dev-0.2#unit-testing">dev-msg-node-vertx</a> and <a href="https://github.com/reTHINK-project/dev-registry-domain#dev-registry-domain">dev-registry-domain</a> for communication between hyperties in two distinct browsers or tabs. <strong>At this moment you need run locally <a href="https://github.com/reTHINK-project/dev-msg-node-vertx/tree/dev-0.2#unit-testing">dev-msg-node-vertx</a> and <a href="https://github.com/reTHINK-project/dev-registry-domain#dev-registry-domain">dev-registry-domain</a></strong></li>
-<li>you need, in the root folder, run command: <code>npm start</code></li>
-<li>in your browser, access to <a href="https://127.0.0.1:8080/example">https://127.0.0.1:8080/example</a></li>
-</ul>
+<p>To run the demo on example folder: - this example have a dependecy from <a href="https://github.com/reTHINK-project/dev-msg-node-vertx/tree/dev-0.2#unit-testing">dev-msg-node-vertx</a> and <a href="https://github.com/reTHINK-project/dev-registry-domain#dev-registry-domain">dev-registry-domain</a> for communication between hyperties in two distinct browsers or tabs. <strong>At this moment you need run locally <a href="https://github.com/reTHINK-project/dev-msg-node-vertx/tree/dev-0.2#unit-testing">dev-msg-node-vertx</a> and <a href="https://github.com/reTHINK-project/dev-registry-domain#dev-registry-domain">dev-registry-domain</a></strong> - you need, in the root folder, run command: <code>npm start</code> - in your browser, access to <a href="https://127.0.0.1:8080/example">https://127.0.0.1:8080/example</a></p>
 <hr>
 <h3 id="-a-ide-notes-notes-a-"><a>Notes</a></h3>
 <p>It was done an version of RuntimeCatalogue for local instances, based on the RuntimeCatalogue, and is activated by default;</p>

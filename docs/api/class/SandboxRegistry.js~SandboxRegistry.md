@@ -1,3 +1,5 @@
+</div>
+
 <div class="self-detail detail">
 
 SandboxRegistry {#sandboxregistry data-ice="name"}

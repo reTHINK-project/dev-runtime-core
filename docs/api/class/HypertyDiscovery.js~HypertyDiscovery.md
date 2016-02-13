@@ -1,3 +1,5 @@
+</div>
+
 <div class="self-detail detail">
 
 HypertyDiscovery {#hypertydiscovery data-ice="name"}

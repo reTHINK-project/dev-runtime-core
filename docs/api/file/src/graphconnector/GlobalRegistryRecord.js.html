@@ -32,7 +32,8 @@
 <nav class="navigation" data-ice="nav"><div>
   <ul>
     
-  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span></span></li>
+  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html">Bus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html">MiniBus</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Pipeline.js~Pipeline.html">Pipeline</a></span></span></li>
 <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">graphconnector</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/BloomFilter.js~BloomFilter.html">BloomFilter</a></span></span></li>
@@ -80,7 +81,7 @@ class GlobalRegistryRecord {
       this.userIDs = [];
       this.lastUpdate;
       this.timeout;
-      this.publicKeyPEM;
+      this.publicKey;
       this.active;
       this.revoked;
     }
@@ -99,7 +100,7 @@ class GlobalRegistryRecord {
       record.userIDs = this.userIds;
       record.lastUpdate = this.lastUpdate;
       record.timeout = this.timeout;
-      record.publicKey = this.publicKeyPEM;
+      record.publicKey = this.publicKey;
       record.active = this.active;
       record.revoked = this.revoked;
 

@@ -32,7 +32,8 @@
 <nav class="navigation" data-ice="nav"><div>
   <ul>
     
-  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span></span></li>
+  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html">Bus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html">MiniBus</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Pipeline.js~Pipeline.html">Pipeline</a></span></span></li>
 <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">graphconnector</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/BloomFilter.js~BloomFilter.html">BloomFilter</a></span></span></li>
@@ -65,13 +66,13 @@
 </nav>
 
 <div class="content" data-ice="content"><div class="header-notice">
-  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import MiniBus from &apos;<span><a href="file/src/bus/MiniBus.js.html#lineNumber9">runtime-core/src/bus/MiniBus.js</a></span>&apos;</code></pre></div>
+  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import MiniBus from &apos;<span><a href="file/src/bus/MiniBus.js.html#lineNumber3">runtime-core/src/bus/MiniBus.js</a></span>&apos;</code></pre></div>
   <span data-ice="access">public</span>
   <span data-ice="kind">class</span>
   
   
   
-  <span data-ice="source">| <span><a href="file/src/bus/MiniBus.js.html#lineNumber9">source</a></span></span>
+  <span data-ice="source">| <span><a href="file/src/bus/MiniBus.js.html#lineNumber3">source</a></span></span>
 </div>
 
 <div class="self-detail detail">
@@ -81,8 +82,8 @@
 
   
   
-  
-  <div class="flat-list" data-ice="directSubclass"><h4>Direct Subclass:</h4><div><span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span>, <span><a href="class/src/sandbox/Sandbox.js~Sandbox.html">Sandbox</a></span></div></div>
+  <div class="flat-list" data-ice="extendsChain"><h4>Extends:</h4><div><span><a href="class/src/bus/Bus.js~Bus.html">Bus</a></span> &#x2192; MiniBus</div></div>
+  <div class="flat-list" data-ice="directSubclass"><h4>Direct Subclass:</h4><div><span><a href="class/src/sandbox/Sandbox.js~Sandbox.html">Sandbox</a></span></div></div>
   
   
   
@@ -136,22 +137,23 @@
 </tbody>
 </table>
 </div>
-<div data-ice="memberSummary"><h2>Member Summary</h2><table class="summary" data-ice="summary">
-  <thead><tr><td data-ice="title" colspan="3">Public Members</td></tr></thead>
+
+<div data-ice="methodSummary"><h2>Method Summary</h2><table class="summary" data-ice="summary">
+  <thead><tr><td data-ice="title" colspan="3">Public Methods</td></tr></thead>
   <tbody>
   
   <tr data-ice="target">
     <td>
       <span class="access" data-ice="access">public</span>
       
-      <span class="kind" data-ice="kind">get</span>
+      
       
       <span class="override" data-ice="override"></span>
     </td>
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html#instance-get-pipeline">pipeline</a></span></span><span data-ice="signature">: <span>*</span></span>
+           <span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html#instance-method-postMessage">postMessage</a></span></span><span data-ice="signature">(inMsg: <span>*</span>, responseCallback: <span>*</span>): <span>*</span></span>
         </p>
       </div>
       <div>
@@ -168,8 +170,9 @@
 </tbody>
 </table>
 </div>
-<div data-ice="methodSummary"><h2>Method Summary</h2><table class="summary" data-ice="summary">
-  <thead><tr><td data-ice="title" colspan="3">Public Methods</td></tr></thead>
+
+<div class="inherited-summary" data-ice="inheritedSummary"><h2>Inherited Summary</h2><table class="summary" data-ice="summary">
+  <thead><tr><td data-ice="title" colspan="3"><span class="toggle closed"></span> From class <span><a href="class/src/bus/Bus.js~Bus.html">Bus</a></span></td></tr></thead>
   <tbody>
   
   <tr data-ice="target">
@@ -183,7 +186,7 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html#instance-method-addListener">addListener</a></span></span><span data-ice="signature">(url: <span>URL</span>, listener: <span>Listener</span>): <span>MsgListener</span></span>
+           <span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html#instance-method-addListener">addListener</a></span></span><span data-ice="signature">(url: <span>URL</span>, listener: <span>Listener</span>): <span>MsgListener</span></span>
         </p>
       </div>
       <div>
@@ -209,7 +212,7 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html#instance-method-addResponseListener">addResponseListener</a></span></span><span data-ice="signature">(url: <span>URL</span>, msgId: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>, responseListener: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">Function</a></span>)</span>
+           <span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html#instance-method-addResponseListener">addResponseListener</a></span></span><span data-ice="signature">(url: <span>URL</span>, msgId: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>, responseListener: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">Function</a></span>)</span>
         </p>
       </div>
       <div>
@@ -235,7 +238,7 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html#instance-method-bind">bind</a></span></span><span data-ice="signature">(outUrl: <span>URL</span>, inUrl: <span>URL</span>, target: <span><a href="class/src/bus/MiniBus.js~MiniBus.html">MiniBus</a></span>): <span>Bound</span></span>
+           <span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html#instance-method-bind">bind</a></span></span><span data-ice="signature">(outUrl: <span>URL</span>, inUrl: <span>URL</span>, target: <span><a href="class/src/bus/MiniBus.js~MiniBus.html">MiniBus</a></span>): <span>Bound</span></span>
         </p>
       </div>
       <div>
@@ -261,7 +264,7 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html#instance-method-postMessage">postMessage</a></span></span><span data-ice="signature">(msg: <span>Message</span>, responseCallback: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">Function</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></span>
+           <span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html#instance-method-postMessage">postMessage</a></span></span><span data-ice="signature">(msg: <span>Message</span>, responseCallback: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">Function</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></span>
         </p>
       </div>
       <div>
@@ -287,7 +290,7 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html#instance-method-removeAllListenersOf">removeAllListenersOf</a></span></span><span data-ice="signature">(url: <span>URL</span>)</span>
+           <span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html#instance-method-removeAllListenersOf">removeAllListenersOf</a></span></span><span data-ice="signature">(url: <span>URL</span>)</span>
         </p>
       </div>
       <div>
@@ -313,7 +316,7 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html#instance-method-removeResponseListener">removeResponseListener</a></span></span><span data-ice="signature">(url: <span>URL</span>, msgId: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>)</span>
+           <span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html#instance-method-removeResponseListener">removeResponseListener</a></span></span><span data-ice="signature">(url: <span>URL</span>, msgId: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>)</span>
         </p>
       </div>
       <div>
@@ -334,8 +337,6 @@
 
 
 
-
-
 <div data-ice="constructorDetails"><h2 data-ice="title">Public Constructors</h2>
 
 <div class="detail" data-ice="detail">
@@ -349,7 +350,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/bus/MiniBus.js.html#lineNumber20">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/bus/MiniBus.js.html#lineNumber5">source</a></span></span>
     </span>
   </h3>
 
@@ -358,7 +359,7 @@
   
   
 
-  
+  <div data-ice="override"><h4>Override:</h4><span><a href="class/src/bus/Bus.js~Bus.html#instance-constructor-constructor">Bus#constructor</a></span></div>
 
   <div data-ice="properties">
 </div>
@@ -379,285 +380,9 @@
   
 </div>
 </div>
-<div data-ice="memberDetails"><h2 data-ice="title">Public Members</h2>
 
-<div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-get-pipeline">
-    <span class="access" data-ice="access">public</span>
-    
-    <span class="kind" data-ice="kind">get</span>
-    
-    
-    <span data-ice="name">pipeline</span><span data-ice="signature">: <span>*</span></span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/src/bus/MiniBus.js.html#lineNumber35">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  
-
-  
-
-  <div data-ice="properties">
-</div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-</div>
 <div data-ice="methodDetails"><h2 data-ice="title">Public Methods</h2>
 
-<div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-addListener">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    
-    <span data-ice="name">addListener</span><span data-ice="signature">(url: <span>URL</span>, listener: <span>Listener</span>): <span>MsgListener</span></span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/src/bus/MiniBus.js.html#lineNumber44">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  <div data-ice="description"><p>Register listener to receive message when &quot;msg.to === url&quot;.
-Special url &quot;*&quot; for default listener is accepted to intercept all messages.</p>
-</div>
-
-  
-
-  <div data-ice="properties"><div data-ice="properties">
-  <h4 data-ice="title">Params:</h4>
-  <table class="params">
-    <thead>
-    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-    
-    <tr data-ice="property" data-depth="0">
-      <td data-ice="name" data-depth="0">url</td>
-      <td data-ice="type"><span>URL</span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>Address to intercept, tha is in the message &quot;to&quot;</p>
-</td>
-    </tr>
-<tr data-ice="property" data-depth="0">
-      <td data-ice="name" data-depth="0">listener</td>
-      <td data-ice="type"><span>Listener</span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>listener</p>
-</td>
-    </tr>
-</tbody>
-  </table>
-</div>
-</div>
-
-  <div class="return-params" data-ice="returnParams">
-    <h4>Return:</h4>
-    <table>
-      <tr>
-        <td class="return-type" data-ice="returnType"><span>MsgListener</span></td>
-        <td class="return-desc" data-ice="returnDescription"><p>instance of MsgListener</p>
-</td>
-      </tr>
-    </table>
-    <div data-ice="returnProperties">
-</div>
-  </div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-addResponseListener">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    
-    <span data-ice="name">addResponseListener</span><span data-ice="signature">(url: <span>URL</span>, msgId: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>, responseListener: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">Function</a></span>)</span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/src/bus/MiniBus.js.html#lineNumber66">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  <div data-ice="description"><p>Manually add a response listener. Only one listener per message ID should exist.
-ATENTION, there is no timeout for this listener.
-The listener should be removed with a removeResponseListener, failing to do this will result in a unreleased memory problem.</p>
-</div>
-
-  
-
-  <div data-ice="properties"><div data-ice="properties">
-  <h4 data-ice="title">Params:</h4>
-  <table class="params">
-    <thead>
-    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-    
-    <tr data-ice="property" data-depth="0">
-      <td data-ice="name" data-depth="0">url</td>
-      <td data-ice="type"><span>URL</span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>Origin address of the message sent, &quot;msg.from&quot;.</p>
-</td>
-    </tr>
-<tr data-ice="property" data-depth="0">
-      <td data-ice="name" data-depth="0">msgId</td>
-      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>Message ID that is returned from the postMessage.</p>
-</td>
-    </tr>
-<tr data-ice="property" data-depth="0">
-      <td data-ice="name" data-depth="0">responseListener</td>
-      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">Function</a></span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>Callback function for the response</p>
-</td>
-    </tr>
-</tbody>
-  </table>
-</div>
-</div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-bind">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    
-    <span data-ice="name">bind</span><span data-ice="signature">(outUrl: <span>URL</span>, inUrl: <span>URL</span>, target: <span><a href="class/src/bus/MiniBus.js~MiniBus.html">MiniBus</a></span>): <span>Bound</span></span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/src/bus/MiniBus.js.html#lineNumber151">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  <div data-ice="description"><p>Helper method to bind listeners (in both directions) into other MiniBus target.</p>
-</div>
-
-  
-
-  <div data-ice="properties"><div data-ice="properties">
-  <h4 data-ice="title">Params:</h4>
-  <table class="params">
-    <thead>
-    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-    
-    <tr data-ice="property" data-depth="0">
-      <td data-ice="name" data-depth="0">outUrl</td>
-      <td data-ice="type"><span>URL</span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>Outbound URL, register listener for url in direction &quot;this -&gt; target&quot;</p>
-</td>
-    </tr>
-<tr data-ice="property" data-depth="0">
-      <td data-ice="name" data-depth="0">inUrl</td>
-      <td data-ice="type"><span>URL</span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>Inbound URL, register listener for url in direction &quot;target -&gt; this&quot;</p>
-</td>
-    </tr>
-<tr data-ice="property" data-depth="0">
-      <td data-ice="name" data-depth="0">target</td>
-      <td data-ice="type"><span><a href="class/src/bus/MiniBus.js~MiniBus.html">MiniBus</a></span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>The other target MiniBus</p>
-</td>
-    </tr>
-</tbody>
-  </table>
-</div>
-</div>
-
-  <div class="return-params" data-ice="returnParams">
-    <h4>Return:</h4>
-    <table>
-      <tr>
-        <td class="return-type" data-ice="returnType"><span>Bound</span></td>
-        <td class="return-desc" data-ice="returnDescription"><p>an object that contains the properties [thisListener, targetListener] and the unbind method.</p>
-</td>
-      </tr>
-    </table>
-    <div data-ice="returnProperties">
-</div>
-  </div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
 <div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-method-postMessage">
     <span class="access" data-ice="access">public</span>
@@ -665,23 +390,20 @@ The listener should be removed with a removeResponseListener, failing to do this
     
     
     
-    <span data-ice="name">postMessage</span><span data-ice="signature">(msg: <span>Message</span>, responseCallback: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">Function</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></span>
+    <span data-ice="name">postMessage</span><span data-ice="signature">(inMsg: <span>*</span>, responseCallback: <span>*</span>): <span>*</span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/bus/MiniBus.js.html#lineNumber95">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/bus/MiniBus.js.html#lineNumber9">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  <div data-ice="description"><p>Send messages to local listeners, or if not exists to external listeners.
-It&apos;s has an optional mechanism for automatic management of response handlers.
-The response handler will be unregistered after receiving the response, or after response timeout (default to 3s).</p>
-</div>
-
   
+
+  <div data-ice="override"><h4>Override:</h4><span><a href="class/src/bus/Bus.js~Bus.html#instance-method-postMessage">Bus#postMessage</a></span></div>
 
   <div data-ice="properties"><div data-ice="properties">
   <h4 data-ice="title">Params:</h4>
@@ -692,18 +414,16 @@ The response handler will be unregistered after receiving the response, or after
     <tbody>
     
     <tr data-ice="property" data-depth="0">
-      <td data-ice="name" data-depth="0">msg</td>
-      <td data-ice="type"><span>Message</span></td>
+      <td data-ice="name" data-depth="0">inMsg</td>
+      <td data-ice="type"><span>*</span></td>
       <td data-ice="appendix"></td>
-      <td data-ice="description"><p>Message to send. Message ID is automatically added to the message.</p>
-</td>
+      <td data-ice="description"></td>
     </tr>
 <tr data-ice="property" data-depth="0">
       <td data-ice="name" data-depth="0">responseCallback</td>
-      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">Function</a></span></td>
+      <td data-ice="type"><span>*</span></td>
       <td data-ice="appendix"></td>
-      <td data-ice="description"><p>Optional parameter, if the developer what&apos;s automatic response management.</p>
-</td>
+      <td data-ice="description"></td>
     </tr>
 </tbody>
   </table>
@@ -714,137 +434,13 @@ The response handler will be unregistered after receiving the response, or after
     <h4>Return:</h4>
     <table>
       <tr>
-        <td class="return-type" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></td>
-        <td class="return-desc" data-ice="returnDescription"><p>Returns the message ID, in case it should be needed for manual management of the response handler.</p>
-</td>
+        <td class="return-type" data-ice="returnType"><span>*</span></td>
+        
       </tr>
     </table>
     <div data-ice="returnProperties">
 </div>
   </div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-removeAllListenersOf">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    
-    <span data-ice="name">removeAllListenersOf</span><span data-ice="signature">(url: <span>URL</span>)</span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/src/bus/MiniBus.js.html#lineNumber83">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  <div data-ice="description"><p>Remove all existent listeners for the URL</p>
-</div>
-
-  
-
-  <div data-ice="properties"><div data-ice="properties">
-  <h4 data-ice="title">Params:</h4>
-  <table class="params">
-    <thead>
-    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-    
-    <tr data-ice="property" data-depth="0">
-      <td data-ice="name" data-depth="0">url</td>
-      <td data-ice="type"><span>URL</span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>Address registered</p>
-</td>
-    </tr>
-</tbody>
-  </table>
-</div>
-</div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-removeResponseListener">
-    <span class="access" data-ice="access">public</span>
-    
-    
-    
-    
-    <span data-ice="name">removeResponseListener</span><span data-ice="signature">(url: <span>URL</span>, msgId: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>)</span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/src/bus/MiniBus.js.html#lineNumber75">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  <div data-ice="description"><p>Remove the response listener.</p>
-</div>
-
-  
-
-  <div data-ice="properties"><div data-ice="properties">
-  <h4 data-ice="title">Params:</h4>
-  <table class="params">
-    <thead>
-    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
-    </thead>
-    <tbody>
-    
-    <tr data-ice="property" data-depth="0">
-      <td data-ice="name" data-depth="0">url</td>
-      <td data-ice="type"><span>URL</span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>Origin address of the message sent, &quot;msg.from&quot;.</p>
-</td>
-    </tr>
-<tr data-ice="property" data-depth="0">
-      <td data-ice="name" data-depth="0">msgId</td>
-      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></td>
-      <td data-ice="appendix"></td>
-      <td data-ice="description"><p>Message ID that is returned from the postMessage</p>
-</td>
-    </tr>
-</tbody>
-  </table>
-</div>
-</div>
-
-  
 
   
 

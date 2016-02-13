@@ -1,4 +1,6 @@
 
+</div>
+
 <div class="self-detail detail">
 
 RuntimeUA {#runtimeua data-ice="name"}
@@ -164,7 +166,7 @@ Public Constructors {#public-constructors data-ice="title"}
 
 <div class="detail" data-ice="detail">
 
-### <span class="access" data-ice="access">public</span> <span data-ice="name">constructor</span><span data-ice="signature">(sandboxFactory: <span>sandboxFactory</span>, domainURL: <span>domain</span>)</span> <span class="right-info"> <span data-ice="source"><span>[source](../../../file/src/runtime/RuntimeUA.js.html#lineNumber33)</span></span> </span> {#instance-constructor-constructor data-ice="anchor"}
+### <span class="access" data-ice="access">public</span> <span data-ice="name">constructor</span><span data-ice="signature">(sandboxFactory: <span>sandboxFactory</span>, domainURL: <span>domain</span>)</span> <span class="right-info"> <span data-ice="source"><span>[source](../../../file/src/runtime/RuntimeUA.js.html#lineNumber35)</span></span> </span> {#instance-constructor-constructor data-ice="anchor"}
 
 <div data-ice="description">
 
@@ -206,7 +208,7 @@ Public Methods {#public-methods data-ice="title"}
 
 <div class="detail" data-ice="detail">
 
-### <span class="access" data-ice="access">public</span> <span data-ice="name">checkForUpdate</span><span data-ice="signature">(url: <span>CatalogueURL</span>)</span> <span class="right-info"> <span data-ice="source"><span>[source](../../../file/src/runtime/RuntimeUA.js.html#lineNumber451)</span></span> </span> {#instance-method-checkForUpdate data-ice="anchor"}
+### <span class="access" data-ice="access">public</span> <span data-ice="name">checkForUpdate</span><span data-ice="signature">(url: <span>CatalogueURL</span>)</span> <span class="right-info"> <span data-ice="source"><span>[source](../../../file/src/runtime/RuntimeUA.js.html#lineNumber456)</span></span> </span> {#instance-method-checkForUpdate data-ice="anchor"}
 
 <div data-ice="description">
 
@@ -238,7 +240,7 @@ url
 
 <div class="detail" data-ice="detail">
 
-### <span class="access" data-ice="access">public</span> <span data-ice="name">discoverHiperty</span><span data-ice="signature">(descriptor: <span>CatalogueDataObject.HypertyDescriptor</span>)</span> <span class="right-info"> <span data-ice="source"><span>[source](../../../file/src/runtime/RuntimeUA.js.html#lineNumber114)</span></span> </span> {#instance-method-discoverHiperty data-ice="anchor"}
+### <span class="access" data-ice="access">public</span> <span data-ice="name">discoverHiperty</span><span data-ice="signature">(descriptor: <span>CatalogueDataObject.HypertyDescriptor</span>)</span> <span class="right-info"> <span data-ice="source"><span>[source](../../../file/src/runtime/RuntimeUA.js.html#lineNumber119)</span></span> </span> {#instance-method-discoverHiperty data-ice="anchor"}
 
 <div data-ice="description">
 
@@ -269,7 +271,7 @@ descriptor
 
 <div class="detail" data-ice="detail">
 
-### <span class="access" data-ice="access">public</span> <span data-ice="name">loadHyperty</span><span data-ice="signature">(hyperty: <span>URL.HypertyCatalogueURL</span>): <span>\*</span></span> <span class="right-info"> <span data-ice="source"><span>[source](../../../file/src/runtime/RuntimeUA.js.html#lineNumber131)</span></span> </span> {#instance-method-loadHyperty data-ice="anchor"}
+### <span class="access" data-ice="access">public</span> <span data-ice="name">loadHyperty</span><span data-ice="signature">(hyperty: <span>URL.HypertyCatalogueURL</span>): <span>\*</span></span> <span class="right-info"> <span data-ice="source"><span>[source](../../../file/src/runtime/RuntimeUA.js.html#lineNumber136)</span></span> </span> {#instance-method-loadHyperty data-ice="anchor"}
 
 <div data-ice="description">
 
@@ -313,7 +315,7 @@ hypertyDescriptor url;
 
 <div class="detail" data-ice="detail">
 
-### <span class="access" data-ice="access">public</span> <span data-ice="name">loadStub</span><span data-ice="signature">(domain: <span>URL.URL</span>): <span>\*</span></span> <span class="right-info"> <span data-ice="source"><span>[source](../../../file/src/runtime/RuntimeUA.js.html#lineNumber297)</span></span> </span> {#instance-method-loadStub data-ice="anchor"}
+### <span class="access" data-ice="access">public</span> <span data-ice="name">loadStub</span><span data-ice="signature">(domain: <span>URL.URL</span>): <span>\*</span></span> <span class="right-info"> <span data-ice="source"><span>[source](../../../file/src/runtime/RuntimeUA.js.html#lineNumber302)</span></span> </span> {#instance-method-loadStub data-ice="anchor"}
 
 <div data-ice="description">
 
@@ -357,7 +359,7 @@ domain
 
 <div class="detail" data-ice="detail">
 
-### <span class="access" data-ice="access">public</span> <span data-ice="name">registerHyperty</span><span data-ice="signature">(Object: <span>[Object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)</span>, descriptor: <span>URL.HypertyCatalogueURL</span>)</span> <span class="right-info"> <span data-ice="source"><span>[source](../../../file/src/runtime/RuntimeUA.js.html#lineNumber123)</span></span> </span> {#instance-method-registerHyperty data-ice="anchor"}
+### <span class="access" data-ice="access">public</span> <span data-ice="name">registerHyperty</span><span data-ice="signature">(Object: <span>[Object](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)</span>, descriptor: <span>URL.HypertyCatalogueURL</span>)</span> <span class="right-info"> <span data-ice="source"><span>[source](../../../file/src/runtime/RuntimeUA.js.html#lineNumber128)</span></span> </span> {#instance-method-registerHyperty data-ice="anchor"}
 
 <div data-ice="description">
 

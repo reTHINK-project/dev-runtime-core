@@ -1,7 +1,7 @@
 {
-  "coverage": "68.45%",
-  "expectCount": 168,
-  "actualCount": 115,
+  "coverage": "67.97%",
+  "expectCount": 178,
+  "actualCount": 121,
   "files": {
     "src/registry/AddressAllocation.js": {
       "expectCount": 4,
@@ -28,6 +28,13 @@
         100
       ]
     },
+    "src/bus/Bus.js": {
+      "expectCount": 8,
+      "actualCount": 7,
+      "undocumentLines": [
+        17
+      ]
+    },
     "src/utils/EventEmitter.js": {
       "expectCount": 3,
       "actualCount": 3,
@@ -41,19 +48,19 @@
       ]
     },
     "src/graphconnector/GraphConnector.js": {
-      "expectCount": 17,
-      "actualCount": 12,
+      "expectCount": 21,
+      "actualCount": 16,
       "undocumentLines": [
-        23,
-        211,
-        26,
-        29,
-        24
+        24,
+        368,
+        27,
+        30,
+        25
       ]
     },
     "src/graphconnector/GraphConnectorContactData.js": {
-      "expectCount": 16,
-      "actualCount": 16,
+      "expectCount": 18,
+      "actualCount": 18,
       "undocumentLines": []
     },
     "src/registry/HypertyDiscovery.js": {
@@ -67,8 +74,8 @@
       "undocumentLines": [
         9,
         29,
-        19,
-        24
+        24,
+        19
       ]
     },
     "src/identity/IdentityModule.js": {
@@ -77,19 +84,22 @@
       "undocumentLines": []
     },
     "src/bus/MessageBus.js": {
-      "expectCount": 3,
+      "expectCount": 5,
       "actualCount": 1,
       "undocumentLines": [
-        24,
-        18
+        55,
+        19,
+        29,
+        31
       ]
     },
     "src/bus/MiniBus.js": {
-      "expectCount": 9,
-      "actualCount": 7,
+      "expectCount": 3,
+      "actualCount": 0,
       "undocumentLines": [
-        20,
-        35
+        3,
+        5,
+        9
       ]
     },
     "src/syncher/ObjectAllocation.js": {
@@ -133,13 +143,13 @@
       "expectCount": 12,
       "actualCount": 5,
       "undocumentLines": [
-        5,
-        7,
-        35,
-        14,
-        25,
-        55,
-        45
+        4,
+        6,
+        34,
+        13,
+        24,
+        44,
+        54
       ]
     },
     "src/runtime/RuntimeCatalogue.js": {

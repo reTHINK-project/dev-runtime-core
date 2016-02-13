@@ -1,3 +1,5 @@
+</div>
+
 <div class="self-detail detail">
 
 RuntimeCatalogue {#runtimecatalogue data-ice="name"}

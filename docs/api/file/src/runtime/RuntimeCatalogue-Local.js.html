@@ -32,7 +32,8 @@
 <nav class="navigation" data-ice="nav"><div>
   <ul>
     
-  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span></span></li>
+  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html">Bus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html">MiniBus</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Pipeline.js~Pipeline.html">Pipeline</a></span></span></li>
 <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">graphconnector</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/BloomFilter.js~BloomFilter.html">BloomFilter</a></span></span></li>
@@ -67,7 +68,6 @@
 <div class="content" data-ice="content"><h1 data-ice="title">src/runtime/RuntimeCatalogue-Local.js</h1>
 <pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import {divideURL} from &apos;../utils/utils&apos;;
 import {CatalogueFactory} from &apos;service-framework&apos;;
-import {HypertyDescriptor, ProtocolStubDescriptor, SourcePackage} from &apos;service-framework&apos;;
 
 class RuntimeCatalogue {
 
@@ -289,8 +289,6 @@ class RuntimeCatalogue {
 
         // parse and attach sourcePackage
         let sourcePackage = result.sourcePackage;
-        let sourceCode = atob(sourcePackage.sourceCode);
-        sourcePackage.sourceCode = sourceCode;
         if (sourcePackage) {
           // console.log(&quot;hyperty has sourcePackage:&quot;, sourcePackage);
           hyperty.sourcePackage = _this._createSourcePackage(_this._factory, sourcePackage);
@@ -390,8 +388,6 @@ class RuntimeCatalogue {
 
         // parse and attach sourcePackage
         let sourcePackage = result.sourcePackage;
-        let sourceCode = atob(sourcePackage.sourceCode);
-        sourcePackage.sourceCode = sourceCode;
 
         if (sourcePackage) {
           sourcePackage = _this._createSourcePackage(_this._factory, sourcePackage);

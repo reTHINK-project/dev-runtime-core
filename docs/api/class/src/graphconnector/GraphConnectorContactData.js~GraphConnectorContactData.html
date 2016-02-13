@@ -32,7 +32,8 @@
 <nav class="navigation" data-ice="nav"><div>
   <ul>
     
-  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span></span></li>
+  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html">Bus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html">MiniBus</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Pipeline.js~Pipeline.html">Pipeline</a></span></span></li>
 <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">graphconnector</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/BloomFilter.js~BloomFilter.html">BloomFilter</a></span></span></li>
@@ -250,6 +251,58 @@
     <td>
       <span class="access" data-ice="access">public</span>
       
+      <span class="kind" data-ice="kind">set</span>
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+           <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html#instance-set-groups">groups</a></span></span><span data-ice="signature">(groups: <span>List</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>&gt;): <span>*</span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Sets the groups.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      <span class="kind" data-ice="kind">get</span>
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+           <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html#instance-get-groups">groups</a></span></span><span data-ice="signature">: <span>List</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>&gt;: <span>*</span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Returns the groups.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
       <span class="kind" data-ice="kind">get</span>
       
       <span class="override" data-ice="override"></span>
@@ -302,32 +355,6 @@
     <td>
       <span class="access" data-ice="access">public</span>
       
-      <span class="kind" data-ice="kind">get</span>
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-           <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html#instance-get-lastName">lastName</a></span></span><span data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>: <span>*</span></span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>Returns the last name.</p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
       <span class="kind" data-ice="kind">set</span>
       
       <span class="override" data-ice="override"></span>
@@ -361,13 +388,13 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html#instance-get-privateContact">privateContact</a></span></span><span data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>: <span>*</span></span>
+           <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html#instance-get-lastName">lastName</a></span></span><span data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>: <span>*</span></span>
         </p>
       </div>
       <div>
         
         
-        <div data-ice="description"><p>Returns the privacy status of the contact.</p>
+        <div data-ice="description"><p>Returns the last name.</p>
 </div>
       </div>
     </td>
@@ -394,6 +421,32 @@
         
         
         <div data-ice="description"><p>Sets the privacy status of the contact according to the given Boolean value.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      <span class="kind" data-ice="kind">get</span>
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+           <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html#instance-get-privateContact">privateContact</a></span></span><span data-ice="signature">: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>: <span>*</span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Returns the privacy status of the contact.</p>
 </div>
       </div>
     </td>
@@ -603,7 +656,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnectorContactData.js.html#lineNumber115">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnectorContactData.js.html#lineNumber118">source</a></span></span>
     </span>
   </h3>
 
@@ -644,7 +697,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnectorContactData.js.html#lineNumber107">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnectorContactData.js.html#lineNumber110">source</a></span></span>
     </span>
   </h3>
 
@@ -696,7 +749,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnectorContactData.js.html#lineNumber59">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnectorContactData.js.html#lineNumber62">source</a></span></span>
     </span>
   </h3>
 
@@ -748,7 +801,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnectorContactData.js.html#lineNumber67">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnectorContactData.js.html#lineNumber70">source</a></span></span>
     </span>
   </h3>
 
@@ -779,6 +832,99 @@
   
 </div>
 <div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-set-groups">
+    <span class="access" data-ice="access">public</span>
+    
+    <span class="kind" data-ice="kind">set</span>
+    
+    
+    <span data-ice="name">groups</span><span data-ice="signature">(groups: <span>List</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>&gt;): <span>*</span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnectorContactData.js.html#lineNumber151">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Sets the groups.</p>
+</div>
+
+  
+
+  <div data-ice="properties">
+</div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-get-groups">
+    <span class="access" data-ice="access">public</span>
+    
+    <span class="kind" data-ice="kind">get</span>
+    
+    
+    <span data-ice="name">groups</span><span data-ice="signature">: <span>List</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>&gt;: <span>*</span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnectorContactData.js.html#lineNumber143">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Returns the groups.</p>
+</div>
+
+  
+
+  <div data-ice="properties">
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tr>
+        <td class="return-type" data-ice="returnType"><span>List</span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>&gt;</td>
+        <td class="return-desc" data-ice="returnDescription"><p>groups        Groups of the contact.</p>
+</td>
+      </tr>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-get-guid">
     <span class="access" data-ice="access">public</span>
     
@@ -789,7 +935,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnectorContactData.js.html#lineNumber27">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnectorContactData.js.html#lineNumber29">source</a></span></span>
     </span>
   </h3>
 
@@ -841,7 +987,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnectorContactData.js.html#lineNumber35">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnectorContactData.js.html#lineNumber37">source</a></span></span>
     </span>
   </h3>
 
@@ -849,6 +995,47 @@
   
   
   <div data-ice="description"><p>Sets the GUID.</p>
+</div>
+
+  
+
+  <div data-ice="properties">
+</div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-set-lastName">
+    <span class="access" data-ice="access">public</span>
+    
+    <span class="kind" data-ice="kind">set</span>
+    
+    
+    <span data-ice="name">lastName</span><span data-ice="signature">(lastName: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>): <span>*</span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnectorContactData.js.html#lineNumber86">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Sets the last name.</p>
 </div>
 
   
@@ -882,7 +1069,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnectorContactData.js.html#lineNumber75">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnectorContactData.js.html#lineNumber78">source</a></span></span>
     </span>
   </h3>
 
@@ -924,24 +1111,24 @@
   
 </div>
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-set-lastName">
+  <h3 data-ice="anchor" id="instance-set-privateContact">
     <span class="access" data-ice="access">public</span>
     
     <span class="kind" data-ice="kind">set</span>
     
     
-    <span data-ice="name">lastName</span><span data-ice="signature">(lastName: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>): <span>*</span></span>
+    <span data-ice="name">privateContact</span><span data-ice="signature">(boolPrivate: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>): <span>*</span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnectorContactData.js.html#lineNumber83">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnectorContactData.js.html#lineNumber102">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  <div data-ice="description"><p>Sets the last name.</p>
+  <div data-ice="description"><p>Sets the privacy status of the contact according to the given Boolean value.</p>
 </div>
 
   
@@ -975,7 +1162,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnectorContactData.js.html#lineNumber91">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnectorContactData.js.html#lineNumber94">source</a></span></span>
     </span>
   </h3>
 
@@ -1017,47 +1204,6 @@
   
 </div>
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-set-privateContact">
-    <span class="access" data-ice="access">public</span>
-    
-    <span class="kind" data-ice="kind">set</span>
-    
-    
-    <span data-ice="name">privateContact</span><span data-ice="signature">(boolPrivate: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></span>): <span>*</span></span>
-    <span class="right-info">
-      
-      
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnectorContactData.js.html#lineNumber99">source</a></span></span>
-    </span>
-  </h3>
-
-  
-  
-  
-  <div data-ice="description"><p>Sets the privacy status of the contact according to the given Boolean value.</p>
-</div>
-
-  
-
-  <div data-ice="properties">
-</div>
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-  
-</div>
-<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-get-residenceLocation">
     <span class="access" data-ice="access">public</span>
     
@@ -1068,7 +1214,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnectorContactData.js.html#lineNumber123">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnectorContactData.js.html#lineNumber127">source</a></span></span>
     </span>
   </h3>
 
@@ -1120,7 +1266,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnectorContactData.js.html#lineNumber131">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnectorContactData.js.html#lineNumber135">source</a></span></span>
     </span>
   </h3>
 
@@ -1161,7 +1307,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnectorContactData.js.html#lineNumber51">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnectorContactData.js.html#lineNumber53">source</a></span></span>
     </span>
   </h3>
 
@@ -1202,7 +1348,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnectorContactData.js.html#lineNumber43">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnectorContactData.js.html#lineNumber45">source</a></span></span>
     </span>
   </h3>
 
