@@ -160,10 +160,9 @@ if you have some problems starting the karma tests, try running this commands fo
 
 This repository is ready to start working on development of runtime-core. The code will go to the **src** folder. The unit tests will be on **test** folder, following the name standard <component>.spec.js
 
-To run karma tests is mandatory to run **live-server** because of the mock-up's dependencies:\`\`\` live-server --port=4000
+To run karma tests is mandatory to run **live-server** because of the mock-up's dependencies: `live-server --port=4000`
 
-\`\`\`
-------
+---
 
 #### <a id="Tasks">Gulp Tasks</a>
 
@@ -176,34 +175,34 @@ To run karma tests is mandatory to run **live-server** because of the mock-up's 
 
 Generate all documentation associated to runtime core;
 
--	if you run **gulp doc** the documentation based on jsdoc3 will be generated on folder docs/jsdoc and you can interact;`
-	gulp doc
-	`
+-	if you run **gulp doc** the documentation based on jsdoc3 will be generated on folder docs/jsdoc and you can interact;
 
--	if you run **gulp api** the documentation is generate based on docs/jsdoc/*.html files, and converted to markdown;`
-	gulp api
-	`
+`gulp doc`
 
--	if you run **gulp docx** should be generated an .docx file, but **this process should be optimized**, is not working very well;`
-	gulp docx
-	`
+-	if you run **gulp api** the documentation is generate based on docs/api/ html files, and converted to markdown;
+
+`gulp api`
+
+-	if you run **gulp docx** should be generated an .docx file, but **this process should be optimized**, is not working very well;
+
+`gulp docx`
 
 ##### Dist
 
 To distribute the runtime-core, you can make a distribution file.
 
-Run the command:`
+Run the command:
+
+```
 // compact true | false;
 gulp dist --compact=false
-`
+```
 
 ##### Build
 
 To distribute the runtime-core, but with the source code maps, and to detect where is some error.
 
-Run the command:`
-gulp build
-`
+Run the command: `gulp build`
 
 ##### Encode
 
