@@ -3,6 +3,7 @@ import AddressAllocation from './AddressAllocation';
 import HypertyInstance from './HypertyInstance';
 import HypertyDiscovery from './HypertyDiscovery';
 
+import {MessageFactory} from 'service-framework';
 import {divideURL} from '../utils/utils.js';
 
 /**
@@ -47,6 +48,8 @@ class Registry extends EventEmitter {
 
     _this._domain = divideURL(_this.registryURL).domain;
     _this.sandboxesList.domain[_this._domain] = appSandbox;
+    let msgFactory = new MessageFactory('false', '{}');
+    _this.messageFactory = msgFactory;
   }
 
   /**
@@ -185,10 +188,21 @@ class Registry extends EventEmitter {
               _this.sandboxesList.hyperty[adderessList[0]] = sandbox;
 
               //message to register the new hyperty, within the domain registry
+              //TODO uncomment and remove the msg variable when the messageFactory is up.
+              /*let messageValue = {user: identityURL,  hypertyDescriptorURL: descriptor, hypertyURL: adderessList[0]};
+
+              let message = _this.messageFactory.createCreateMessageRequest(
+                _this.registryURL,
+                'domain://registry.' + _this.registryDomain + '/',
+                messageValue,
+                'policy'
+              );
+              console.log('messagefactory', message);*/
               let msg = {
                 type: 'CREATE', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: {user: identityURL,  hypertyDescriptorURL: descriptor, hypertyURL: adderessList[0]}}
               };
 
+              //console.log('messagenormal', msg);
               _this._messageBus.postMessage(msg, (reply) => {
                 console.log('===> RegisterHyperty Reply: ', reply);
               });

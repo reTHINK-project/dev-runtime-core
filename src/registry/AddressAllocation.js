@@ -43,7 +43,7 @@ class AddressAllocation {
 
     let msg = {
       type: 'create', from: _this._url, to: 'domain://msg-node.' + domain + '/hyperty-address-allocation',
-      body: {number: number}
+      body: {value: {number: number}}
     };
 
     // TODO: Apply the message factory
@@ -57,7 +57,7 @@ class AddressAllocation {
       // TODO: change this response Message using the MessageFactory
       _this._bus.postMessage(msg, (reply) => {
         if (reply.body.code === 200) {
-          resolve(reply.body.allocated);
+          resolve(reply.body.value.allocated);
         } else {
           reject(reply.body.desc);
         }

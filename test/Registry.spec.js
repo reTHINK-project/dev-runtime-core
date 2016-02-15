@@ -111,7 +111,7 @@ getRegistry.then(function(registry) {
 
         registry.messageBus.addListener('domain://msg-node.ua.pt/hyperty-address-allocation', (msg) => {
           let message = {id: 1, type: 'response', from: 'domain://msg-node.ua.pt/hyperty-address-allocation', to: msg.from,
-          body: {code: 200, allocated: ['hyperty-instance://ua.pt/1']}};
+          body: {code: 200, value: {allocated: ['hyperty-instance://ua.pt/1']}}};
 
           registry.messageBus.postMessage(message, (reply) => {
             console.log('Reply: ', reply);
