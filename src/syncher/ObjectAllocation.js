@@ -33,13 +33,13 @@ class ObjectAllocation {
 
     let msg = {
       type: 'create', from: _this._url, to: 'domain://msg-node.' + domain + '/object-address-allocation',
-      body: { urlScheme: scheme, resourceChildren: children, number: number }
+      body: { scheme: scheme, childrenResources: children, value: { number: number } }
     };
 
     return new Promise((resolve, reject) => {
       _this._bus.postMessage(msg, (reply) => {
         if (reply.body.code === 200) {
-          resolve(reply.body.allocated);
+          resolve(reply.body.value.allocated);
         } else {
           reject(reply.body.desc);
         }

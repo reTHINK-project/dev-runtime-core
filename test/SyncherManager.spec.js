@@ -59,7 +59,7 @@ describe('SyncherManager', function() {
       console.log('_onPostMessage: ', msg);
       expect(msg).to.eql({
         id: 4, type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.h2.domain/sm',
-        body: { resource: objURL, children: ['children1', 'children2'] }
+        body: { resource: objURL, childrenResources: ['children1', 'children2'] }
       });
 
       //simulate msg-node response

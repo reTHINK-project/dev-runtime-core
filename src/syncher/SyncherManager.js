@@ -212,7 +212,7 @@ class SyncherManager {
       //1. subscribe msg for the domain node
       let nodeSubscribeMsg = {
         type: 'subscribe', from: _this._url, to: 'domain://msg-node.' + domain + '/sm',
-        body: { resource: msg.body.resource, children: children }
+        body: { resource: msg.body.resource, childrenResources: children }
       };
 
       //2. subscribe in msg-node
