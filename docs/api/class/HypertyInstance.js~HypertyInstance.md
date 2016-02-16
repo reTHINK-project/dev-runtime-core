@@ -1,3 +1,5 @@
+</div>
+
 <div class="self-detail detail">
 
 HypertyInstance {#hypertyinstance data-ice="name"}

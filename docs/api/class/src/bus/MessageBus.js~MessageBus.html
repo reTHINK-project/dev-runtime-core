@@ -32,7 +32,8 @@
 <nav class="navigation" data-ice="nav"><div>
   <ul>
     
-  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span></span></li>
+  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html">Bus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html">MiniBus</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Pipeline.js~Pipeline.html">Pipeline</a></span></span></li>
 <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">graphconnector</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/BloomFilter.js~BloomFilter.html">BloomFilter</a></span></span></li>
@@ -65,13 +66,13 @@
 </nav>
 
 <div class="content" data-ice="content"><div class="header-notice">
-  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import MessageBus from &apos;<span><a href="file/src/bus/MessageBus.js.html#lineNumber6">runtime-core/src/bus/MessageBus.js</a></span>&apos;</code></pre></div>
+  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import MessageBus from &apos;<span><a href="file/src/bus/MessageBus.js.html#lineNumber7">runtime-core/src/bus/MessageBus.js</a></span>&apos;</code></pre></div>
   <span data-ice="access">public</span>
   <span data-ice="kind">class</span>
   
   
   
-  <span data-ice="source">| <span><a href="file/src/bus/MessageBus.js.html#lineNumber6">source</a></span></span>
+  <span data-ice="source">| <span><a href="file/src/bus/MessageBus.js.html#lineNumber7">source</a></span></span>
 </div>
 
 <div class="self-detail detail">
@@ -81,7 +82,7 @@
 
   
   
-  <div class="flat-list" data-ice="extendsChain"><h4>Extends:</h4><div><span><a href="class/src/bus/MiniBus.js~MiniBus.html">MiniBus</a></span> &#x2192; MessageBus</div></div>
+  <div class="flat-list" data-ice="extendsChain"><h4>Extends:</h4><div><span><a href="class/src/bus/Bus.js~Bus.html">Bus</a></span> &#x2192; MessageBus</div></div>
   
   
   
@@ -138,7 +139,38 @@ It doesn&apos;t support the default &apos;*&apos; listener, instead it uses the 
 </tbody>
 </table>
 </div>
-
+<div data-ice="memberSummary"><h2>Member Summary</h2><table class="summary" data-ice="summary">
+  <thead><tr><td data-ice="title" colspan="3">Public Members</td></tr></thead>
+  <tbody>
+  
+  <tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      <span class="kind" data-ice="kind">get</span>
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+           <span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html#instance-get-pipeline">pipeline</a></span></span><span data-ice="signature">: <span>*</span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+</tbody>
+</table>
+</div>
 <div data-ice="methodSummary"><h2>Method Summary</h2><table class="summary" data-ice="summary">
   <thead><tr><td data-ice="title" colspan="3">Public Methods</td></tr></thead>
   <tbody>
@@ -168,26 +200,18 @@ It doesn&apos;t support the default &apos;*&apos; listener, instead it uses the 
       
     </td>
   </tr>
-</tbody>
-</table>
-</div>
-
-<div class="inherited-summary" data-ice="inheritedSummary"><h2>Inherited Summary</h2><table class="summary" data-ice="summary">
-  <thead><tr><td data-ice="title" colspan="3"><span class="toggle closed"></span> From class <span><a href="class/src/bus/MiniBus.js~MiniBus.html">MiniBus</a></span></td></tr></thead>
-  <tbody>
-  
-  <tr data-ice="target">
+<tr data-ice="target">
     <td>
       <span class="access" data-ice="access">public</span>
       
-      <span class="kind" data-ice="kind">get</span>
+      
       
       <span class="override" data-ice="override"></span>
     </td>
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html#instance-get-pipeline">pipeline</a></span></span><span data-ice="signature">: <span>*</span></span>
+           <span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html#instance-method-postMessage">postMessage</a></span></span><span data-ice="signature">(inMsg: <span>*</span>, responseCallback: <span>*</span>): <span>*</span></span>
         </p>
       </div>
       <div>
@@ -201,7 +225,15 @@ It doesn&apos;t support the default &apos;*&apos; listener, instead it uses the 
       
     </td>
   </tr>
-<tr data-ice="target">
+</tbody>
+</table>
+</div>
+
+<div class="inherited-summary" data-ice="inheritedSummary"><h2>Inherited Summary</h2><table class="summary" data-ice="summary">
+  <thead><tr><td data-ice="title" colspan="3"><span class="toggle closed"></span> From class <span><a href="class/src/bus/Bus.js~Bus.html">Bus</a></span></td></tr></thead>
+  <tbody>
+  
+  <tr data-ice="target">
     <td>
       <span class="access" data-ice="access">public</span>
       
@@ -212,7 +244,7 @@ It doesn&apos;t support the default &apos;*&apos; listener, instead it uses the 
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html#instance-method-addListener">addListener</a></span></span><span data-ice="signature">(url: <span>URL</span>, listener: <span>Listener</span>): <span>MsgListener</span></span>
+           <span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html#instance-method-addListener">addListener</a></span></span><span data-ice="signature">(url: <span>URL</span>, listener: <span>Listener</span>): <span>MsgListener</span></span>
         </p>
       </div>
       <div>
@@ -238,7 +270,7 @@ It doesn&apos;t support the default &apos;*&apos; listener, instead it uses the 
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html#instance-method-addResponseListener">addResponseListener</a></span></span><span data-ice="signature">(url: <span>URL</span>, msgId: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>, responseListener: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">Function</a></span>)</span>
+           <span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html#instance-method-addResponseListener">addResponseListener</a></span></span><span data-ice="signature">(url: <span>URL</span>, msgId: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>, responseListener: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">Function</a></span>)</span>
         </p>
       </div>
       <div>
@@ -264,7 +296,7 @@ It doesn&apos;t support the default &apos;*&apos; listener, instead it uses the 
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html#instance-method-bind">bind</a></span></span><span data-ice="signature">(outUrl: <span>URL</span>, inUrl: <span>URL</span>, target: <span><a href="class/src/bus/MiniBus.js~MiniBus.html">MiniBus</a></span>): <span>Bound</span></span>
+           <span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html#instance-method-bind">bind</a></span></span><span data-ice="signature">(outUrl: <span>URL</span>, inUrl: <span>URL</span>, target: <span><a href="class/src/bus/MiniBus.js~MiniBus.html">MiniBus</a></span>): <span>Bound</span></span>
         </p>
       </div>
       <div>
@@ -290,7 +322,7 @@ It doesn&apos;t support the default &apos;*&apos; listener, instead it uses the 
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html#instance-method-postMessage">postMessage</a></span></span><span data-ice="signature">(msg: <span>Message</span>, responseCallback: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">Function</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></span>
+           <span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html#instance-method-postMessage">postMessage</a></span></span><span data-ice="signature">(msg: <span>Message</span>, responseCallback: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">Function</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span></span>
         </p>
       </div>
       <div>
@@ -316,7 +348,7 @@ It doesn&apos;t support the default &apos;*&apos; listener, instead it uses the 
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html#instance-method-removeAllListenersOf">removeAllListenersOf</a></span></span><span data-ice="signature">(url: <span>URL</span>)</span>
+           <span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html#instance-method-removeAllListenersOf">removeAllListenersOf</a></span></span><span data-ice="signature">(url: <span>URL</span>)</span>
         </p>
       </div>
       <div>
@@ -342,7 +374,7 @@ It doesn&apos;t support the default &apos;*&apos; listener, instead it uses the 
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html#instance-method-removeResponseListener">removeResponseListener</a></span></span><span data-ice="signature">(url: <span>URL</span>, msgId: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>)</span>
+           <span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html#instance-method-removeResponseListener">removeResponseListener</a></span></span><span data-ice="signature">(url: <span>URL</span>, msgId: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>)</span>
         </p>
       </div>
       <div>
@@ -376,7 +408,7 @@ It doesn&apos;t support the default &apos;*&apos; listener, instead it uses the 
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/bus/MessageBus.js.html#lineNumber18">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/bus/MessageBus.js.html#lineNumber19">source</a></span></span>
     </span>
   </h3>
 
@@ -385,7 +417,7 @@ It doesn&apos;t support the default &apos;*&apos; listener, instead it uses the 
   
   
 
-  <div data-ice="override"><h4>Override:</h4><span><a href="class/src/bus/MiniBus.js~MiniBus.html#instance-constructor-constructor">MiniBus#constructor</a></span></div>
+  <div data-ice="override"><h4>Override:</h4><span><a href="class/src/bus/Bus.js~Bus.html#instance-constructor-constructor">Bus#constructor</a></span></div>
 
   <div data-ice="properties"><div data-ice="properties">
   <h4 data-ice="title">Params:</h4>
@@ -422,7 +454,49 @@ It doesn&apos;t support the default &apos;*&apos; listener, instead it uses the 
   
 </div>
 </div>
+<div data-ice="memberDetails"><h2 data-ice="title">Public Members</h2>
 
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-get-pipeline">
+    <span class="access" data-ice="access">public</span>
+    
+    <span class="kind" data-ice="kind">get</span>
+    
+    
+    <span data-ice="name">pipeline</span><span data-ice="signature">: <span>*</span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/bus/MessageBus.js.html#lineNumber29">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  
+
+  
+
+  <div data-ice="properties">
+</div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+</div>
 <div data-ice="methodDetails"><h2 data-ice="title">Public Methods</h2>
 
 <div class="detail" data-ice="detail">
@@ -436,7 +510,7 @@ It doesn&apos;t support the default &apos;*&apos; listener, instead it uses the 
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/bus/MessageBus.js.html#lineNumber24">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/bus/MessageBus.js.html#lineNumber55">source</a></span></span>
     </span>
   </h3>
 
@@ -463,6 +537,78 @@ It doesn&apos;t support the default &apos;*&apos; listener, instead it uses the 
     </tr>
 <tr data-ice="property" data-depth="0">
       <td data-ice="name" data-depth="0">to</td>
+      <td data-ice="type"><span>*</span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"></td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tr>
+        <td class="return-type" data-ice="returnType"><span>*</span></td>
+        
+      </tr>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-postMessage">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    <span data-ice="name">postMessage</span><span data-ice="signature">(inMsg: <span>*</span>, responseCallback: <span>*</span>): <span>*</span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/bus/MessageBus.js.html#lineNumber31">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  
+
+  <div data-ice="override"><h4>Override:</h4><span><a href="class/src/bus/Bus.js~Bus.html#instance-method-postMessage">Bus#postMessage</a></span></div>
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">inMsg</td>
+      <td data-ice="type"><span>*</span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"></td>
+    </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">responseCallback</td>
       <td data-ice="type"><span>*</span></td>
       <td data-ice="appendix"></td>
       <td data-ice="description"></td>

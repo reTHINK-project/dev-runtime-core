@@ -12,6 +12,12 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
+    "runtime-core/src/bus/bus.js~bus",
+    "class/src/bus/Bus.js~Bus.html",
+    "<span>Bus</span> <span class=\"search-result-import-path\">runtime-core/src/bus/Bus.js</span>",
+    "class"
+  ],
+  [
     "runtime-core/src/utils/eventemitter.js~eventemitter",
     "class/src/utils/EventEmitter.js~EventEmitter.html",
     "<span>EventEmitter</span> <span class=\"search-result-import-path\">runtime-core/src/utils/EventEmitter.js</span>",
@@ -492,6 +498,54 @@ window.esdocSearchIndex = [
     "external"
   ],
   [
+    "src/bus/bus.js",
+    "file/src/bus/Bus.js.html",
+    "src/bus/Bus.js",
+    "file"
+  ],
+  [
+    "src/bus/bus.js~bus#addlistener",
+    "class/src/bus/Bus.js~Bus.html#instance-method-addListener",
+    "src/bus/Bus.js~Bus#addListener",
+    "method"
+  ],
+  [
+    "src/bus/bus.js~bus#addresponselistener",
+    "class/src/bus/Bus.js~Bus.html#instance-method-addResponseListener",
+    "src/bus/Bus.js~Bus#addResponseListener",
+    "method"
+  ],
+  [
+    "src/bus/bus.js~bus#bind",
+    "class/src/bus/Bus.js~Bus.html#instance-method-bind",
+    "src/bus/Bus.js~Bus#bind",
+    "method"
+  ],
+  [
+    "src/bus/bus.js~bus#constructor",
+    "class/src/bus/Bus.js~Bus.html#instance-constructor-constructor",
+    "src/bus/Bus.js~Bus#constructor",
+    "method"
+  ],
+  [
+    "src/bus/bus.js~bus#postmessage",
+    "class/src/bus/Bus.js~Bus.html#instance-method-postMessage",
+    "src/bus/Bus.js~Bus#postMessage",
+    "method"
+  ],
+  [
+    "src/bus/bus.js~bus#removealllistenersof",
+    "class/src/bus/Bus.js~Bus.html#instance-method-removeAllListenersOf",
+    "src/bus/Bus.js~Bus#removeAllListenersOf",
+    "method"
+  ],
+  [
+    "src/bus/bus.js~bus#removeresponselistener",
+    "class/src/bus/Bus.js~Bus.html#instance-method-removeResponseListener",
+    "src/bus/Bus.js~Bus#removeResponseListener",
+    "method"
+  ],
+  [
     "src/bus/messagebus.js",
     "file/src/bus/MessageBus.js.html",
     "src/bus/MessageBus.js",
@@ -510,28 +564,22 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/bus/messagebus.js~messagebus#pipeline",
+    "class/src/bus/MessageBus.js~MessageBus.html#instance-get-pipeline",
+    "src/bus/MessageBus.js~MessageBus#pipeline",
+    "member"
+  ],
+  [
+    "src/bus/messagebus.js~messagebus#postmessage",
+    "class/src/bus/MessageBus.js~MessageBus.html#instance-method-postMessage",
+    "src/bus/MessageBus.js~MessageBus#postMessage",
+    "method"
+  ],
+  [
     "src/bus/minibus.js",
     "file/src/bus/MiniBus.js.html",
     "src/bus/MiniBus.js",
     "file"
-  ],
-  [
-    "src/bus/minibus.js~minibus#addlistener",
-    "class/src/bus/MiniBus.js~MiniBus.html#instance-method-addListener",
-    "src/bus/MiniBus.js~MiniBus#addListener",
-    "method"
-  ],
-  [
-    "src/bus/minibus.js~minibus#addresponselistener",
-    "class/src/bus/MiniBus.js~MiniBus.html#instance-method-addResponseListener",
-    "src/bus/MiniBus.js~MiniBus#addResponseListener",
-    "method"
-  ],
-  [
-    "src/bus/minibus.js~minibus#bind",
-    "class/src/bus/MiniBus.js~MiniBus.html#instance-method-bind",
-    "src/bus/MiniBus.js~MiniBus#bind",
-    "method"
   ],
   [
     "src/bus/minibus.js~minibus#constructor",
@@ -540,27 +588,9 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/bus/minibus.js~minibus#pipeline",
-    "class/src/bus/MiniBus.js~MiniBus.html#instance-get-pipeline",
-    "src/bus/MiniBus.js~MiniBus#pipeline",
-    "member"
-  ],
-  [
     "src/bus/minibus.js~minibus#postmessage",
     "class/src/bus/MiniBus.js~MiniBus.html#instance-method-postMessage",
     "src/bus/MiniBus.js~MiniBus#postMessage",
-    "method"
-  ],
-  [
-    "src/bus/minibus.js~minibus#removealllistenersof",
-    "class/src/bus/MiniBus.js~MiniBus.html#instance-method-removeAllListenersOf",
-    "src/bus/MiniBus.js~MiniBus#removeAllListenersOf",
-    "method"
-  ],
-  [
-    "src/bus/minibus.js~minibus#removeresponselistener",
-    "class/src/bus/MiniBus.js~MiniBus.html#instance-method-removeResponseListener",
-    "src/bus/MiniBus.js~MiniBus#removeResponseListener",
     "method"
   ],
   [
@@ -768,10 +798,28 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
-    "src/graphconnector/graphconnector.js~graphconnector#lastcalculationnbloomfilter1hop",
-    "class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-member-lastCalculationnBloomFilter1Hop",
-    "src/graphconnector/GraphConnector.js~GraphConnector#lastCalculationnBloomFilter1Hop",
+    "src/graphconnector/graphconnector.js~graphconnector#lastcalculationbloomfilter1hop",
+    "class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-member-lastCalculationBloomFilter1Hop",
+    "src/graphconnector/GraphConnector.js~GraphConnector#lastCalculationBloomFilter1Hop",
     "member"
+  ],
+  [
+    "src/graphconnector/graphconnector.js~graphconnector#messagebus",
+    "class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-set-messageBus",
+    "src/graphconnector/GraphConnector.js~GraphConnector#messageBus",
+    "member"
+  ],
+  [
+    "src/graphconnector/graphconnector.js~graphconnector#messagebus",
+    "class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-get-messageBus",
+    "src/graphconnector/GraphConnector.js~GraphConnector#messageBus",
+    "member"
+  ],
+  [
+    "src/graphconnector/graphconnector.js~graphconnector#queryglobalregistry",
+    "class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-method-queryGlobalRegistry",
+    "src/graphconnector/GraphConnector.js~GraphConnector#queryGlobalRegistry",
+    "method"
   ],
   [
     "src/graphconnector/graphconnector.js~graphconnector#removecontact",
@@ -783,6 +831,12 @@ window.esdocSearchIndex = [
     "src/graphconnector/graphconnector.js~graphconnector#removeuserid",
     "class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-method-removeUserID",
     "src/graphconnector/GraphConnector.js~GraphConnector#removeUserID",
+    "method"
+  ],
+  [
+    "src/graphconnector/graphconnector.js~graphconnector#sendglobalregistryrecord",
+    "class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-method-sendGlobalRegistryRecord",
+    "src/graphconnector/GraphConnector.js~GraphConnector#sendGlobalRegistryRecord",
     "method"
   ],
   [
@@ -834,6 +888,18 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/graphconnector/graphconnectorcontactdata.js~graphconnectorcontactdata#groups",
+    "class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html#instance-set-groups",
+    "src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData#groups",
+    "member"
+  ],
+  [
+    "src/graphconnector/graphconnectorcontactdata.js~graphconnectorcontactdata#groups",
+    "class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html#instance-get-groups",
+    "src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData#groups",
+    "member"
+  ],
+  [
     "src/graphconnector/graphconnectorcontactdata.js~graphconnectorcontactdata#guid",
     "class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html#instance-get-guid",
     "src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData#guid",
@@ -847,13 +913,13 @@ window.esdocSearchIndex = [
   ],
   [
     "src/graphconnector/graphconnectorcontactdata.js~graphconnectorcontactdata#lastname",
-    "class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html#instance-get-lastName",
+    "class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html#instance-set-lastName",
     "src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData#lastName",
     "member"
   ],
   [
     "src/graphconnector/graphconnectorcontactdata.js~graphconnectorcontactdata#lastname",
-    "class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html#instance-set-lastName",
+    "class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html#instance-get-lastName",
     "src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData#lastName",
     "member"
   ],
@@ -871,25 +937,25 @@ window.esdocSearchIndex = [
   ],
   [
     "src/graphconnector/graphconnectorcontactdata.js~graphconnectorcontactdata#residencelocation",
-    "class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html#instance-set-residenceLocation",
-    "src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData#residenceLocation",
-    "member"
-  ],
-  [
-    "src/graphconnector/graphconnectorcontactdata.js~graphconnectorcontactdata#residencelocation",
     "class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html#instance-get-residenceLocation",
     "src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData#residenceLocation",
     "member"
   ],
   [
-    "src/graphconnector/graphconnectorcontactdata.js~graphconnectorcontactdata#userids",
-    "class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html#instance-set-userIDs",
-    "src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData#userIDs",
+    "src/graphconnector/graphconnectorcontactdata.js~graphconnectorcontactdata#residencelocation",
+    "class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html#instance-set-residenceLocation",
+    "src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData#residenceLocation",
     "member"
   ],
   [
     "src/graphconnector/graphconnectorcontactdata.js~graphconnectorcontactdata#userids",
     "class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html#instance-get-userIDs",
+    "src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData#userIDs",
+    "member"
+  ],
+  [
+    "src/graphconnector/graphconnectorcontactdata.js~graphconnectorcontactdata#userids",
+    "class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html#instance-set-userIDs",
     "src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData#userIDs",
     "member"
   ],
@@ -1123,13 +1189,13 @@ window.esdocSearchIndex = [
   ],
   [
     "src/registry/registry.js~registry#messagebus",
-    "class/src/registry/Registry.js~Registry.html#instance-get-messageBus",
+    "class/src/registry/Registry.js~Registry.html#instance-set-messageBus",
     "src/registry/Registry.js~Registry#messageBus",
     "member"
   ],
   [
     "src/registry/registry.js~registry#messagebus",
-    "class/src/registry/Registry.js~Registry.html#instance-set-messageBus",
+    "class/src/registry/Registry.js~Registry.html#instance-get-messageBus",
     "src/registry/Registry.js~Registry#messageBus",
     "member"
   ],

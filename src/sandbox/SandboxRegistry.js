@@ -122,7 +122,7 @@ class SandboxRegistry {
   }
 }
 
-SandboxRegistry.ExternalDeployAddress = 'sandbox://external';
-SandboxRegistry.InternalDeployAddress = 'sandbox://internal';
+SandboxRegistry.ExternalDeployAddress = 'hyperty-runtime://sandbox/external';
+SandboxRegistry.InternalDeployAddress = 'hyperty-runtime://sandbox/internal';
 
 export default SandboxRegistry;

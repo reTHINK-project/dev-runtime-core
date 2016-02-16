@@ -1,3 +1,5 @@
+</div>
+
 <div class="self-detail detail">
 
 GlobalRegistryRecord {#globalregistryrecord data-ice="name"}

@@ -32,7 +32,8 @@
 <nav class="navigation" data-ice="nav"><div>
   <ul>
     
-  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span></span></li>
+  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html">Bus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html">MiniBus</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Pipeline.js~Pipeline.html">Pipeline</a></span></span></li>
 <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">graphconnector</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/BloomFilter.js~BloomFilter.html">BloomFilter</a></span></span></li>
@@ -204,6 +205,7 @@ class SyncherManager {
     let hypertyUrl = msg.body.subscriber;
 
     let subscription = _this._subscriptions[objURL];
+    let childBaseURL = objURL + &apos;/children/&apos;;
 
     //27. validate if subscription already exists?
     if (subscription.subs.indexOf(hypertyUrl) !== -1) {
@@ -232,6 +234,12 @@ class SyncherManager {
         if (reply.body.code === 200) {
           //subscription accepted (add forward and subscription)
           _this._bus.addForward(objURL, hypertyUrl);
+
+          //add forward for children
+          subscription.children.forEach((child) =&gt; {
+            _this._bus.addForward(childBaseURL + child, hypertyUrl);
+          });
+
           subscription.subs.push(hypertyUrl);
         }
 
@@ -294,13 +302,14 @@ class SyncherManager {
           });
 
           let objSubscribeMsg = {
-            id: msg.id, type: &apos;subscribe&apos;, from: _this._url, to: objURLSubscription,
+            type: &apos;subscribe&apos;, from: _this._url, to: objURLSubscription,
             body: { subscriber: msg.from }
           };
 
           //subscribe to reporter SM
           _this._bus.postMessage(objSubscribeMsg, (reply) =&gt; {
             //forward to hyperty:
+            reply.id = msg.id;
             reply.from = _this._url;
             reply.to = msg.from;
             this._bus.postMessage(reply);

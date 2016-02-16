@@ -1,3 +1,5 @@
+</div>
+
 <div class="self-detail detail">
 
 Sandbox {#sandbox data-ice="name"}
@@ -9,6 +11,7 @@ Sandbox {#sandbox data-ice="name"}
 
 <div>
 
+<span>[Bus](../../../class/src/bus/Bus.js~Bus.html)</span> →
 <span>[MiniBus](../../../class/src/bus/MiniBus.js~MiniBus.html)</span> →
 Sandbox
 
@@ -97,28 +100,13 @@ Inherited Summary
 -----------------
 
 <span class="toggle closed"></span> From class
-<span>[MiniBus](../../../class/src/bus/MiniBus.js~MiniBus.html)</span>
-<span class="access" data-ice="access">public</span> <span class="kind"
-data-ice="kind">get</span> <span class="override"
-data-ice="override"></span>
-<div>
-
-<span
-data-ice="name"><span>[pipeline](../../../class/src/bus/MiniBus.js~MiniBus.html#instance-get-pipeline)</span></span><span
-data-ice="signature">: <span>\*</span></span>
-
-</div>
-
-<div>
-
-</div>
-
+<span>[Bus](../../../class/src/bus/Bus.js~Bus.html)</span>
 <span class="access" data-ice="access">public</span> <span
 class="override" data-ice="override"></span>
 <div>
 
 <span
-data-ice="name"><span>[addListener](../../../class/src/bus/MiniBus.js~MiniBus.html#instance-method-addListener)</span></span><span
+data-ice="name"><span>[addListener](../../../class/src/bus/Bus.js~Bus.html#instance-method-addListener)</span></span><span
 data-ice="signature">(url: <span>URL</span>, listener:
 <span>Listener</span>): <span>MsgListener</span></span>
 
@@ -139,7 +127,7 @@ class="override" data-ice="override"></span>
 <div>
 
 <span
-data-ice="name"><span>[addResponseListener](../../../class/src/bus/MiniBus.js~MiniBus.html#instance-method-addResponseListener)</span></span><span
+data-ice="name"><span>[addResponseListener](../../../class/src/bus/Bus.js~Bus.html#instance-method-addResponseListener)</span></span><span
 data-ice="signature">(url: <span>URL</span>, msgId:
 <span>[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)</span>,
 responseListener:
@@ -162,7 +150,7 @@ class="override" data-ice="override"></span>
 <div>
 
 <span
-data-ice="name"><span>[bind](../../../class/src/bus/MiniBus.js~MiniBus.html#instance-method-bind)</span></span><span
+data-ice="name"><span>[bind](../../../class/src/bus/Bus.js~Bus.html#instance-method-bind)</span></span><span
 data-ice="signature">(outUrl: <span>URL</span>, inUrl: <span>URL</span>,
 target:
 <span>[MiniBus](../../../class/src/bus/MiniBus.js~MiniBus.html)</span>):
@@ -186,7 +174,7 @@ class="override" data-ice="override"></span>
 <div>
 
 <span
-data-ice="name"><span>[postMessage](../../../class/src/bus/MiniBus.js~MiniBus.html#instance-method-postMessage)</span></span><span
+data-ice="name"><span>[postMessage](../../../class/src/bus/Bus.js~Bus.html#instance-method-postMessage)</span></span><span
 data-ice="signature">(msg: <span>Message</span>, responseCallback:
 <span>[Function](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function)</span>):
 <span>[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)</span></span>
@@ -209,7 +197,7 @@ class="override" data-ice="override"></span>
 <div>
 
 <span
-data-ice="name"><span>[removeAllListenersOf](../../../class/src/bus/MiniBus.js~MiniBus.html#instance-method-removeAllListenersOf)</span></span><span
+data-ice="name"><span>[removeAllListenersOf](../../../class/src/bus/Bus.js~Bus.html#instance-method-removeAllListenersOf)</span></span><span
 data-ice="signature">(url: <span>URL</span>)</span>
 
 </div>
@@ -229,7 +217,7 @@ class="override" data-ice="override"></span>
 <div>
 
 <span
-data-ice="name"><span>[removeResponseListener](../../../class/src/bus/MiniBus.js~MiniBus.html#instance-method-removeResponseListener)</span></span><span
+data-ice="name"><span>[removeResponseListener](../../../class/src/bus/Bus.js~Bus.html#instance-method-removeResponseListener)</span></span><span
 data-ice="signature">(url: <span>URL</span>, msgId:
 <span>[number](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number)</span>)</span>
 
@@ -242,6 +230,23 @@ data-ice="signature">(url: <span>URL</span>, msgId:
 Remove the response listener.
 
 </div>
+
+</div>
+
+<span class="toggle closed"></span> From class
+<span>[MiniBus](../../../class/src/bus/MiniBus.js~MiniBus.html)</span>
+<span class="access" data-ice="access">public</span> <span
+class="override" data-ice="override"></span>
+<div>
+
+<span
+data-ice="name"><span>[postMessage](../../../class/src/bus/MiniBus.js~MiniBus.html#instance-method-postMessage)</span></span><span
+data-ice="signature">(inMsg: <span>\*</span>, responseCallback:
+<span>\*</span>): <span>\*</span></span>
+
+</div>
+
+<div>
 
 </div>
 

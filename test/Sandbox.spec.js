@@ -8,6 +8,9 @@ let expect = chai.expect;
 chai.use(chaiAsPromised);
 
 describe('Sandbox', function() {
+  let externalURL = 'hyperty-runtime://sandbox/external';
+  let internalURL = 'hyperty-runtime://sandbox/internal';
+
   it('deploy and undeploy', function(done) {
     let deploySend;
 
@@ -16,14 +19,14 @@ describe('Sandbox', function() {
       console.log(msg);
       if (msg.id === 1) {
         expect(msg).to.eql({
-          id: 1, type: 'create', from: 'sandbox://external', to: 'sandbox://internal',
+          id: 1, type: 'create', from: externalURL, to: internalURL,
           body: { url: 'hyperty://fake-url', sourceCode: '<source code>', config: {init: '<init>'} }
         });
       }
 
       if (msg.id  === 2) {
         expect(msg).to.eql({
-          id: 2, type: 'delete', from: 'sandbox://external', to: 'sandbox://internal',
+          id: 2, type: 'delete', from: externalURL, to: internalURL,
           body: { url: 'hyperty://fake-url' }
         });
       }
@@ -33,13 +36,13 @@ describe('Sandbox', function() {
 
     let bus = {
       addListener: (url, callback) => {
-        expect(url).to.eql('sandbox://internal');
+        expect(url).to.eql(internalURL);
         deploySend = callback;
       },
 
       postMessage: (msg) => {
         expect(msg).to.eql({
-          id: msg.id, type: 'response', from: 'sandbox://internal', to: 'sandbox://external',
+          id: msg.id, type: 'response', from: internalURL, to: externalURL,
           body: { code: 200 }
         });
 

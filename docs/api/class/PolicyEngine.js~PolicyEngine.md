@@ -1,3 +1,5 @@
+</div>
+
 <div class="self-detail detail">
 
 PolicyEngine {#policyengine data-ice="name"}

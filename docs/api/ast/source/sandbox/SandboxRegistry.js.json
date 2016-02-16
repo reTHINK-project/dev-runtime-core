@@ -6551,11 +6551,11 @@
         },
         "right": {
           "type": "Literal",
-          "value": "sandbox://external",
-          "raw": "'sandbox://external'",
+          "value": "hyperty-runtime://sandbox/external",
+          "raw": "'hyperty-runtime://sandbox/external'",
           "range": [
             3653,
-            3673
+            3689
           ],
           "loc": {
             "start": {
@@ -6564,13 +6564,13 @@
             },
             "end": {
               "line": 125,
-              "column": 60
+              "column": 76
             }
           }
         },
         "range": [
           3613,
-          3673
+          3689
         ],
         "loc": {
           "start": {
@@ -6579,13 +6579,13 @@
           },
           "end": {
             "line": 125,
-            "column": 60
+            "column": 76
           }
         }
       },
       "range": [
         3613,
-        3674
+        3690
       ],
       "loc": {
         "start": {
@@ -6594,7 +6594,7 @@
         },
         "end": {
           "line": 125,
-          "column": 61
+          "column": 77
         }
       },
       "leadingComments": [
@@ -6648,8 +6648,8 @@
             "type": "Identifier",
             "name": "SandboxRegistry",
             "range": [
-              3676,
-              3691
+              3692,
+              3707
             ],
             "loc": {
               "start": {
@@ -6666,8 +6666,8 @@
             "type": "Identifier",
             "name": "InternalDeployAddress",
             "range": [
-              3692,
-              3713
+              3708,
+              3729
             ],
             "loc": {
               "start": {
@@ -6681,8 +6681,8 @@
             }
           },
           "range": [
-            3676,
-            3713
+            3692,
+            3729
           ],
           "loc": {
             "start": {
@@ -6697,11 +6697,11 @@
         },
         "right": {
           "type": "Literal",
-          "value": "sandbox://internal",
-          "raw": "'sandbox://internal'",
+          "value": "hyperty-runtime://sandbox/internal",
+          "raw": "'hyperty-runtime://sandbox/internal'",
           "range": [
-            3716,
-            3736
+            3732,
+            3768
           ],
           "loc": {
             "start": {
@@ -6710,13 +6710,13 @@
             },
             "end": {
               "line": 126,
-              "column": 60
+              "column": 76
             }
           }
         },
         "range": [
-          3676,
-          3736
+          3692,
+          3768
         ],
         "loc": {
           "start": {
@@ -6725,13 +6725,13 @@
           },
           "end": {
             "line": 126,
-            "column": 60
+            "column": 76
           }
         }
       },
       "range": [
-        3676,
-        3737
+        3692,
+        3769
       ],
       "loc": {
         "start": {
@@ -6740,7 +6740,7 @@
         },
         "end": {
           "line": 126,
-          "column": 61
+          "column": 77
         }
       }
     },
@@ -6750,8 +6750,8 @@
         "type": "Identifier",
         "name": "SandboxRegistry",
         "range": [
-          3756,
-          3771
+          3788,
+          3803
         ],
         "loc": {
           "start": {
@@ -6765,8 +6765,8 @@
         }
       },
       "range": [
-        3741,
-        3772
+        3773,
+        3804
       ],
       "loc": {
         "start": {
@@ -13311,8 +13311,8 @@
         "trailingComments": []
       },
       "range": [
-        3741,
-        3772
+        3773,
+        3804
       ],
       "loc": {
         "start": {
@@ -13330,7 +13330,7 @@
   "sourceType": "module",
   "range": [
     182,
-    3772
+    3804
   ],
   "loc": {
     "start": {
