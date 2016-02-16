@@ -73,8 +73,8 @@ class Registry extends EventEmitter {
     let addressAllocation = new AddressAllocation(_this.registryURL, messageBus);
     _this.addressAllocation = addressAllocation;
 
-    //let hypertyDiscovery = new HypertyDiscovery('localhost', messageBus);
-    //_this.hypertyDiscovery = hypertyDiscovery;
+    let hypertyDiscovery = new HypertyDiscovery('localhost', messageBus);
+    _this.hypertyDiscovery = hypertyDiscovery;
   }
 
   /**
@@ -105,15 +105,14 @@ class Registry extends EventEmitter {
         let mostRecent;
         let lastHyperty;
         let value = reply.body.value;
-        let valueParsed = JSON.parse(value);
-        //console.log('valueParsed', valueParsed);
-        for (hyperty in valueParsed) {
-          if (valueParsed[hyperty].lastModified !== undefined) {
+        console.log('reply', value);
+        for (hyperty in value) {
+          if (value[hyperty].lastModified !== undefined) {
             if (mostRecent === undefined) {
-              mostRecent = new Date(valueParsed[hyperty].lastModified);
+              mostRecent = new Date(value[hyperty].lastModified);
               lastHyperty = hyperty;
             } else {
-              let hypertyDate = new Date(valueParsed[hyperty].lastModified);
+              let hypertyDate = new Date(value[hyperty].lastModified);
               if (mostRecent.getTime() < hypertyDate.getTime()) {
                 mostRecent = hypertyDate;
                 lastHyperty = hyperty;
@@ -130,7 +129,7 @@ class Registry extends EventEmitter {
 
         let idPackage = {
           id: email,
-          descriptor: valueParsed[hypertyURL].descriptor,
+          descriptor: value[hypertyURL].descriptor,
           hypertyURL: hypertyURL
         };
 
