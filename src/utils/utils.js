@@ -47,5 +47,5 @@ export function emptyObject(object) {
  */
 export function deepClone(obj) {
   //TODO: simple but inefficient JSON deep clone...
-  return JSON.parse(JSON.stringify(obj));
+  if (obj) return JSON.parse(JSON.stringify(obj));
 }

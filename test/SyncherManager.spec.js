@@ -293,7 +293,7 @@ describe('SyncherManager', function() {
     let compacted = false;
 
     let sync = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
-    let observer = new DataObjectObserver(hyperURL1, objURL, schemaURL, bus, 'on', {}, []);
+    let observer = new DataObjectObserver(hyperURL1, objURL, schemaURL, bus, 'on', {}, [], 0);
     sync.observers[objURL] = observer;
 
     observer.onChange('*', (event) => {
@@ -608,6 +608,7 @@ describe('SyncherManager', function() {
         dor.onAddChildren((event) => {
           let children1 = dor.children[event.childId];
           children1.onChange((changeEvent) => {
+            console.log('onChange: ', changeEvent);
             expect(changeEvent).to.eql({ cType: 'update', oType: 'object', field: 'message', data: 'Hello Luis!' });
             expect(children1.data).to.eql({ message: 'Hello Luis!' });
             done();
