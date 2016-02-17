@@ -63,11 +63,11 @@ describe('PolicyEngine', function() {
   describe('authorise(message) with assertedIdentity in body', function() {
     let message = {id: 3212, type:'READ', from:'hyperty://ua.pt/asdf',
                             to:'hyperty://ua.pt/FindHyperty',
-                            body: {assertedIdentity: 'value', authorised: 'true', token: 'tokenID'}};
+                            body: {assertedIdentity: 'value', token: 'tokenID'}};
 
     let expectedMessage = {id: 3212, type:'READ', from:'hyperty://ua.pt/asdf',
                             to:'hyperty://ua.pt/FindHyperty',
-                            body: {assertedIdentity: 'value', authorised: 'true', token: 'tokenID'}};
+                            body: {assertedIdentity: 'value', authorised: true, token: 'tokenID'}};
 
     it('should maintain the assertedIdentity in the message body', function(done) {
 

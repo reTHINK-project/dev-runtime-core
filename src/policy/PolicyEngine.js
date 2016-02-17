@@ -1,122 +1,155 @@
-/**
- * Core Policy Engine (PDP/PEP) Interface
- * According to: https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/runtime-apis.md#core-policy-engine-pdppep-interface
- */
+import Policy from './Policy';
+import {divideURL} from '../utils/utils.js';
+
+
 class PolicyEngine {
 
-  /**
-  * To initialise the Policy Engine
-  * @param  IdentityModule      identityModule      identityModule
-  * @param  Registry    runtimeRegistry     runtimeRegistry
-  */
   constructor(identityModule, runtimeRegistry) {
     let _this = this;
     _this.idModule = identityModule;
     _this.registry = runtimeRegistry;
-    _this.policiesTable = new Object();
-    /* assumes the Policy Engine has the blacklist */
-    _this.blacklist = [];
-    /* _this.blacklist.push('Alice');*/
+    _this.policies = {};
   }
 
-  /**
-   * To add policies to be enforced for a certain deployed Hyperty Instance
-   * Example of an hyperty: hyperty-instance://tecnico.pt/e1b8fb0b-95e2-4f44-aa18-b40984741196
-   * Example of a policy: {subject: 'message.header.from', target: 'blacklist', action: 'deny'}
-   * @param {URL.HypertyURL}     hyperty  hyperty
-   * @param {HypertyPolicyList}  policies policies
-   */
-  addPolicies(hyperty, policies) {
+  /* TODO: validation needed */
+  addPolicies(key, policies) {
     let _this = this;
-    _this.policiesTable[hyperty] = policies;
+    for (let policy in policies) {
+      if (_this.policies[key] === undefined) {
+        _this.policies[key] = [];
+      }
+      _this.policies[key].push(policies[policy]);
+    }
   }
 
-  /**
-   * To remove previously added policies for a certain deployed Hyperty Instance
-   * @param  {URL.HypertyURL}  hyperty       hyperty
-   */
-  removePolicies(hyperty) {
+  simulate(key) {
     let _this = this;
-    delete _this.policiesTable[hyperty];
+
+    let id = 'allow-only-gmail';
+    let target = 'domain';
+    let when = 'gmail.com';
+    let authorise = true;
+    let actions = [];
+    let policy1 = new Policy(id, target, when, authorise, actions);
+
+    id = 'block-blacklisted';
+    target = 'lists';
+    when = 'isBlackListed';
+    authorise = false;
+    actions = [];
+    let policy2 = new Policy(id, target, when, authorise, actions);
+
+    /*id = 'allow-whitelisted';
+    target = 'lists';
+    when = 'isWhiteListed';
+    authorise = true;
+    actions = [];
+    let policy3 = new Policy(id, target, when, authorise, actions);
+
+    id = 'allow-8-23';
+    target = 'time';
+    when = 'isTimeBetween(\'8:00\', \'20:00\')';
+    authorise = true;
+    actions = [];
+    let policy4 = new Policy(id, target, when, authorise, actions);*/
+
+    _this.addPolicies(key, [policy1, policy2]);
   }
 
-  /**
-   * Authorisation request to accept a Subscription for a certain resource. Returns a Response Message to be returned to Subscription requester
-   * @param  {Message.Message} message       message
-   * @return {AuthorisationResponse}                 AuthorisationResponse
-   */
+  removePolicies(key, policyId) {
+    let _this = this;
+    let allPolicies = _this.policies;
+
+    if (key in allPolicies) {
+      if (policyId !== 'all') {
+        let policies = allPolicies[key];
+        let numPolicies = policies.length;
+
+        for (let i = 0; i < numPolicies; i++) {
+          if (policies[i].id === policyId) {
+            policies.splice(i, 1);
+            break;
+          }
+        }
+      }
+      else {
+        delete _this.policies[key];
+      }
+    }
+  }
+
   authorise(message) {
     let _this = this;
-
+    //_this.simulate(message.from);
     return new Promise(function(resolve, reject) {
-
-      // TODO: Optimize and improve this code;
-      // if (_this.checkPolicies(message) == 'allow') {
-
-      // let hypertyIdentity = _this.registry.getHypertyIdentity(message.body.hypertyURL);
-      // this step assume the hypertyIdentity will be google
-
       _this.idModule.loginWithRP('google identity', 'scope').then(function(value) {
         let assertedID = _this.idModule.getIdentities();
 
-        // Check if the message have an body or not
         if (!message.hasOwnProperty('body')) {
           message.body = {};
         }
-
-        //TODO dumb/insecure way to verify the direction of the message, improvement required later
+        let userID = assertedID[0].identity;
         if (!message.body.hasOwnProperty('assertedIdentity')) {
-
-          message.body.assertedIdentity = assertedID[0].identity;
+          message.body.assertedIdentity = userID;
           message.body.idToken = value;
+        }
+
+        let policiesResult = _this.checkPolicies(message, userID);
+        if (policiesResult[0]) {
           message.body.authorised = true;
-
-          //console.log('Message: ', message);
-
-        } else {
-          //TODO validate the received message identity
+          resolve(message);
+        }
+        else {
+          message.body.authorised = false;
+          reject(message);
         }
         resolve(message);
       }, function(error) {
         reject(error);
       });
-
-      // } else {
-      //   resolve(false);
-      // }
     });
   }
 
-  checkPolicies(message) {
+  checkPolicies(message, userID) {
     let _this = this;
-    var _results = ['allow']; /* by default, all messages are allowed */
-    var _policies = _this.policiesTable[message.body.hypertyURL];
-    if (_policies != undefined) { /* if there are applicable policies, checks them */
-      var _numPolicies = _policies.length;
+    let applicablePolicies = _this.getApplicablePolicies(message.from, message.to, userID);
+    let results = [true];
+    let actions = [];
 
-      for (var i = 0; i < _numPolicies; i++) {
-        var _policy = _policies[i];
-        console.log(_policy);
-        if (_policy.target == 'blacklist') {
-          if (_this.blacklist.indexOf(eval(_policy.subject)) > -1) {
-            console.log('Is in blacklist!');
-            _results.push(_policy.action);
-          }
-        }
-        if (_policy.target == 'whitelist') {
-          if (_this.whitelist.indexOf(eval(_policy.subject)) > -1) {
-            console.log('Is in whitelist!');
-            _results.push(_policy.action);
-          }
-        }
+    for (let policy in applicablePolicies) {
+      let result = applicablePolicies[policy].evaluate(message, userID);
+      results.push(result[0]);
+      actions.push(result[1]);
+    }
+
+    let authorisationDecision = _this.getAuthorisationDecision(results);
+    return [authorisationDecision, actions]
+  }
+
+  getApplicablePolicies(hypertyFrom, hypertyTo, userID) {
+    let _this = this;
+    let applicablePolicies = [];
+
+    if (hypertyFrom in _this.policies) {
+      for (let policy in _this.policies[hypertyFrom]) {
+        applicablePolicies.push(_this.policies[hypertyFrom][policy]);
       }
     }
-    console.log(_results);
-    if (_results.indexOf('deny') > -1) { /* if one policy evaluates to 'deny', the result is 'deny' */
-      return 'deny';
-    } else {
-      return 'allow';
+    if (hypertyTo in _this.policies) {
+      for (let policy in _this.policies[hypertyTo]) {
+        applicablePolicies.push(_this.policies[hypertyTo][policy]);
+      }
     }
+    if (userID in _this.policies) {
+      for (let policy in _this.policies[userID]) {
+        applicablePolicies.push(_this.policies[userID][policy]);
+      }
+    }
+    return applicablePolicies;
+  }
+
+  getAuthorisationDecision(results) {
+    return results.indexOf(false) == -1;
   }
 }
 
