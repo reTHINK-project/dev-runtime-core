@@ -220,8 +220,6 @@ function encode(filename, descriptorName, configuration, isDefault) {
       json[value].sourcePackage = {};
     }
 
-    console.log(filename, descriptorName, configuration, isDefault, value);
-
     var language = 'javascript';
     if (descriptorName === 'DataSchemas') {
       language = 'JSON-Schema';
@@ -320,50 +318,64 @@ gulp.task('watch', function() {
 
 gulp.task('encode', function(done) {
 
+  var files = [];
+  var dirFiles = fs.readdirSync('resources');
+  files = dirFiles.filter(isFile);
+  files = files.map(function(file) {
+    return 'resources/' + file;
+  });
+
+  function isFile(file) {
+    if (file.indexOf('Hyperty') !== -1 || file.indexOf('ProtoStub') !== -1 || file.indexOf('DataSchema') !== -1){
+      return fs.statSync('resources/' + file).isFile();
+    }
+  }
+
   gulp.src('./', {buffer:false})
-  .pipe(prompt.prompt([{
-    type: 'input',
-    name: 'file',
-    message: 'File to be converted? (resources/<ProtoStub.js, DataSchema.json or Hyperty.js>)'
-  },
-  {
-    type: 'input',
-    name: 'configuration',
-    message: 'ProtoStub Configuration, use something like:\n{"url": "wss://msg-node.localhost:9090/ws"}\nConfiguration:',
-    validate: function(value) {
-      try {
-        JSON.parse(value);
-        return true;
-      } catch (e) {
-        console.error('Check your configuration JSON\nShould be something like:\n{"url": "wss://msg-node.localhost:9090/ws"}');
-        return false;
+    .pipe(prompt.prompt([{
+      type: 'list',
+      name: 'file',
+      message: 'File to be converted:',
+      choices: files
+    },
+    {
+      type: 'input',
+      name: 'configuration',
+      message: 'ProtoStub Configuration, use something like:\n{"url": "wss://msg-node.localhost:9090/ws"}\nConfiguration:',
+      validate: function(value) {
+        try {
+          JSON.parse(value);
+          return true;
+        } catch (e) {
+          console.error('Check your configuration JSON\nShould be something like:\n{"url": "wss://msg-node.localhost:9090/ws"}');
+          return false;
+        }
       }
-    }
-  },
-  {
-    type: 'radio',
-    name: 'defaultFile',
-    message: 'This will be a default file to be loaded? (y)es/(n)o',
-    choices: ['yes', 'no']
-  }], function(res) {
+    },
+    {
+      type: 'list',
+      name: 'defaultFile',
+      message: 'This will be a default file to be loaded?',
+      choices: ['yes', 'no']
+    }], function(res) {
 
-    fs.access(res.file, fs.R_OK | fs.W_OK, function(err) {
-      if (err) done(new Error('No such file or directory'));
-      return;
-    });
+      fs.access(res.file, fs.R_OK | fs.W_OK, function(err) {
+        if (err) done(new Error('No such file or directory'));
+        return;
+      });
 
-    var configuration = JSON.parse(res.configuration);
+      var configuration = JSON.parse(res.configuration);
 
-    var isDefault = true;
-    if (res.defaultFile === 'no' || res.defaultFile === 'n') {
-      isDefault = false;
-    }
+      var isDefault = true;
+      if (res.defaultFile === 'no' || res.defaultFile === 'n') {
+        isDefault = false;
+      }
 
-    if (res.file) {
-      resource(res.file, configuration, isDefault);
-    }
-  })
-);
+      if (res.file) {
+        resource(res.file, configuration, isDefault);
+      }
+    })
+  );
 
 });
 

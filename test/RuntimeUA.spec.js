@@ -108,21 +108,22 @@ describe('RuntimeUA', function() {
       }
     };
 
-    let mockupHypertyDescriptor = sinon.stub(runtime.runtimeCatalogue, 'mockupHypertyDescriptor');
-    mockupHypertyDescriptor.returns(new Promise(function(resolve, reject) {
-      runtime.runtimeCatalogue.Hyperties = Hyperties;
-      resolve(Hyperties);
+    let stub = sinon.stub(runtime.runtimeCatalogue, '_makeLocalRequest');
+    stub.withArgs('../resources/descriptors/Hyperties.json').returns(new Promise(function(resolve, reject) {
+      try {
+        resolve(JSON.stringify(Hyperties));
+      } catch (e) {
+        reject(e);
+      }
+
     }));
 
-    let mockupStubDescriptor = sinon.stub(runtime.runtimeCatalogue, 'mockupStubDescriptor');
-    mockupStubDescriptor.returns(new Promise(function(resolve, reject) {
-      runtime.runtimeCatalogue.ProtoStubs = ProtoStubs;
-      resolve(ProtoStubs);
-    }));
-
-    let tes = sinon.stub(runtime.runtimeCatalogue, '_makeExternalRequest');
-    tes.returns(new Promise(function(resolve, reject) {
-      resolve(JSON.stringify(mockup));
+    stub.withArgs('../resources/descriptors/ProtoStubs.json').returns(new Promise(function(resolve, reject) {
+      try {
+        resolve(JSON.stringify(ProtoStubs));
+      } catch (e) {
+        reject(e);
+      }
     }));
 
     sinon.stub(runtime.registry, 'registerHyperty')
@@ -160,7 +161,7 @@ describe('RuntimeUA', function() {
   });
 
   after(function() {
-    runtime.runtimeCatalogue._makeExternalRequest.restore();
+    runtime.runtimeCatalogue._makeLocalRequest.restore();
   });
 
   describe('constructor()', function() {
