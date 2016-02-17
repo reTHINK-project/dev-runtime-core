@@ -9,8 +9,10 @@ class ProtoStub {
    * @param  {Message.Message}                           busPostMessage     configuration
    * @param  {ProtoStubDescriptor.ConfigurationDataList} configuration      configuration
    */
-  constructor(runtimeProtoStubURL, busPostMessage, configuration) {
-    // Body...
+  constructor(runtimeProtoStubURL, bus, config) {
+    this._runtimeProtoStubURL = runtimeProtoStubURL;
+    this._bus = bus;
+    this._config = config;
   }
 
   /**
@@ -34,6 +36,28 @@ class ProtoStub {
    */
   postMessage(message) {
 
+  }
+
+  /**
+   * Filter method that should be used for every messages in direction: Protostub -> MessageNode
+   * @param  {Message} msg Original message from the MessageBus
+   * @return {boolean} true if it's to be deliver in the MessageNode
+   */
+  _filter(msg) {
+    if (msg.body && msg.body.via === this._runtimeProtoStubURL)
+      return false;
+    return true;
+  }
+
+  /**
+   * Method that should be used to deliver the message in direction: Protostub -> MessageBus (core)
+   * @param  {Message} msg Original message from the MessageNode
+   */
+  _deliver(msg) {
+    if (!msg.body) msg.body = {};
+
+    msg.body.via = this._runtimeProtoStubURL;
+    this._bus.postMessage(msg);
   }
 
 }
