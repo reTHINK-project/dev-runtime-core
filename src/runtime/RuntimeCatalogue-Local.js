@@ -9,46 +9,9 @@ class RuntimeCatalogue {
     _this._factory = new CatalogueFactory(false, undefined);
   }
 
-  // TODO: Delete this
-  mockupHypertyDescriptor() {
-    let _this = this;
-
-    // TODO: Remove the code is only for development fase without the Server backend catalogue;
-    // Mockup load the base of descriptors
-    _this._makeLocalRequest('../resources/descriptors/Hyperties.json').then(function(result) {
-      _this.Hyperties = JSON.parse(result);
-    });
-  }
-
-  // TODO: Delete this
-  mockupStubDescriptor() {
-    let _this = this;
-
-    // TODO: Remove the code is only for development fase without the Server backend catalogue;
-    // Mockup load the base of descriptors
-    _this._makeLocalRequest('../resources/descriptors/ProtoStubs.json').then(function(result) {
-      _this.ProtoStubs = JSON.parse(result);
-    });
-  }
-
-  mockupDataSchemaDescriptor() {
-    let _this = this;
-
-    // TODO: Remove the code is only for development fase without the Server backend catalogue;
-    // Mockup load the base of descriptors
-    _this._makeLocalRequest('../resources/descriptors/DataSchemas.json').then(function(result) {
-      _this.DataSchemas = JSON.parse(result);
-    });
-  }
-
   set runtimeURL(runtimeURL) {
     let _this = this;
     _this._runtimeURL = runtimeURL;
-
-    // TODO: Delete this
-    _this.mockupHypertyDescriptor();
-    _this.mockupStubDescriptor();
-    _this.mockupDataSchemaDescriptor();
   }
 
   get runtimeURL() {
@@ -70,6 +33,8 @@ class RuntimeCatalogue {
   * TODO: Delete this method
   */
   _makeLocalRequest(url) {
+
+    console.log(url);
 
     return new Promise(function(resolve, reject) {
       let protocolmap = {
@@ -198,38 +163,43 @@ class RuntimeCatalogue {
         hyperty = hyperty.substring(hyperty.lastIndexOf('/') + 1);
       }
 
-      let result = _this.Hyperties[hyperty];
+      _this._makeLocalRequest('../resources/descriptors/Hyperties.json').then(function(descriptor) {
+        _this.Hyperties = JSON.parse(descriptor);
 
-      if (result.error) {
-        // TODO handle error properly
-        reject(result);
-      } else {
-        // console.log("creating hyperty descriptor based on: ", result);
+        let result = _this.Hyperties[hyperty];
 
-        // create the descriptor
-        let hyperty = _this._factory.createHypertyDescriptorObject(
-          result.cguid,
-          result.objectName,
-          result.description,
-          result.language,
-          result.sourcePackageURL,
-          result.type,
-          result.dataObjects
-        );
+        if (result.error) {
+          // TODO handle error properly
+          reject(result);
+        } else {
+          // console.log("creating hyperty descriptor based on: ", result);
 
-        // console.log("created hyperty descriptor object:", hyperty);
+          // create the descriptor
+          let hyperty = _this._factory.createHypertyDescriptorObject(
+            result.cguid,
+            result.objectName,
+            result.description,
+            result.language,
+            result.sourcePackageURL,
+            result.type,
+            result.dataObjects
+          );
 
-        // parse and attach sourcePackage
-        let sourcePackage = result.sourcePackage;
-        if (sourcePackage) {
-          // console.log("hyperty has sourcePackage:", sourcePackage);
-          hyperty.sourcePackage = _this._createSourcePackage(_this._factory, sourcePackage);
+          // console.log("created hyperty descriptor object:", hyperty);
+
+          // parse and attach sourcePackage
+          let sourcePackage = result.sourcePackage;
+          if (sourcePackage) {
+            // console.log("hyperty has sourcePackage:", sourcePackage);
+            hyperty.sourcePackage = _this._createSourcePackage(_this._factory, sourcePackage);
+          }
+
+          console.log('hyperty has sourcePackage:', hyperty);
+
+          resolve(hyperty);
         }
+      });
 
-        console.log('hyperty has sourcePackage:', hyperty);
-
-        resolve(hyperty);
-      }
     });
   }
 
@@ -298,35 +268,40 @@ class RuntimeCatalogue {
         protoStub = protoStub.substring(protoStub.lastIndexOf('/') + 1);
       }
 
-      let result = _this.ProtoStubs[protoStub];
+      _this._makeLocalRequest('../resources/descriptors/ProtoStubs.json').then(function(descriptor) {
+        _this.ProtoStubs = JSON.parse(descriptor);
 
-      if (result.error) {
-        // TODO handle error properly
-        reject(result);
-      } else {
-        console.log('creating stub descriptor based on: ', result);
+        let result = _this.ProtoStubs[protoStub];
 
-        // create the descriptor
-        let stub = _this._factory.createProtoStubDescriptorObject(
-          result.cguid,
-          result.objectName,
-          result.description,
-          result.language,
-          result.sourcePackageURL,
-          result.messageSchemas,
-          JSON.stringify(result.configuration),
-          result.constraints
-        );
+        if (result.error) {
+          // TODO handle error properly
+          reject(result);
+        } else {
+          console.log('creating stub descriptor based on: ', result);
 
-        // parse and attach sourcePackage
-        let sourcePackage = result.sourcePackage;
+          // create the descriptor
+          let stub = _this._factory.createProtoStubDescriptorObject(
+            result.cguid,
+            result.objectName,
+            result.description,
+            result.language,
+            result.sourcePackageURL,
+            result.messageSchemas,
+            JSON.stringify(result.configuration),
+            result.constraints
+          );
 
-        if (sourcePackage) {
-          sourcePackage = _this._createSourcePackage(_this._factory, sourcePackage);
-          stub.sourcePackage = sourcePackage;
+          // parse and attach sourcePackage
+          let sourcePackage = result.sourcePackage;
+
+          if (sourcePackage) {
+            sourcePackage = _this._createSourcePackage(_this._factory, sourcePackage);
+            stub.sourcePackage = sourcePackage;
+          }
+          resolve(stub);
         }
-        resolve(stub);
-      }
+
+      });
     });
 
   }
@@ -346,38 +321,44 @@ class RuntimeCatalogue {
         dataSchemaURL = dataSchemaURL.substring(dataSchemaURL.lastIndexOf('/') + 1);
       }
 
-      let result = _this.DataSchemas[dataSchemaURL];
+      _this._makeLocalRequest('../resources/descriptors/DataSchemas.json').then(function(descriptor) {
 
-      if (result.ERROR) {
-        // TODO handle error properly
-        reject(result);
-      } else {
-        console.log('creating dataSchema based on: ', result);
+        _this.DataSchemas = JSON.parse(descriptor);
 
-        // FIXME: accessControlPolicy field not needed?
-        // create the descriptor
-        let dataSchema = _this._factory.createDataObjectSchema(
-          result.cguid,
-          result.objectName,
-          result.description,
-          result.language,
-          result.sourcePackageURL
-        );
+        let result = _this.DataSchemas[dataSchemaURL];
 
-        console.log('created dataSchema descriptor object:', dataSchema);
+        if (result.ERROR) {
+          // TODO handle error properly
+          reject(result);
+        } else {
+          console.log('creating dataSchema based on: ', result);
 
-        // parse and attach sourcePackage
-        let sourcePackage = result.sourcePackage;
-        if (sourcePackage) {
-          // console.log('dataSchema has sourcePackage:', sourcePackage);
-          dataSchema.sourcePackage = _this._createSourcePackage(_this._factory, sourcePackage);
-          if (typeof dataSchema.sourcePackage.sourceCode === 'string') {
-            dataSchema.sourcePackage.sourceCode = JSON.parse(dataSchema.sourcePackage.sourceCode);
+          // FIXME: accessControlPolicy field not needed?
+          // create the descriptor
+          let dataSchema = _this._factory.createDataObjectSchema(
+            result.cguid,
+            result.objectName,
+            result.description,
+            result.language,
+            result.sourcePackageURL
+          );
+
+          console.log('created dataSchema descriptor object:', dataSchema);
+
+          // parse and attach sourcePackage
+          let sourcePackage = result.sourcePackage;
+          if (sourcePackage) {
+            // console.log('dataSchema has sourcePackage:', sourcePackage);
+            dataSchema.sourcePackage = _this._createSourcePackage(_this._factory, sourcePackage);
+            if (typeof dataSchema.sourcePackage.sourceCode === 'string') {
+              dataSchema.sourcePackage.sourceCode = JSON.parse(dataSchema.sourcePackage.sourceCode);
+            }
           }
-        }
 
-        resolve(dataSchema);
-      }
+          resolve(dataSchema);
+        }
+      });
+
     });
   }
 

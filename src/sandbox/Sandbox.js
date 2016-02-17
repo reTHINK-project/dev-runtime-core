@@ -39,9 +39,6 @@ class Sandbox extends MiniBus {
         body: { url: componentURL, sourceCode: componentSourceCode, config: configuration }
       };
 
-      // createMessageRequest(from, to, contextId, value, policy, idToken, accessToken, resource, signature)
-      // let deployMessage = messageFactory.createMessageRequest(SandboxRegistry.ExternalDeployAddress, SandboxRegistry.InternalDeployAddress, 'deploy', {url: componentURL, sourceCode: componentSourceCode, config: configuration});
-
       //send message into the sandbox internals and wait for reply
       _this.postMessage(deployMessage, (reply) => {
         if (reply.body.code === 200) {
