@@ -384,6 +384,69 @@ class RuntimeCatalogue {
     }
 
     /**
+     * Get IDPProxyDescriptor
+     * @param idpProxyURL - e.g. mydomain.com/.well-known/idp-proxy/MyProxy
+     * @returns {Promise}
+     */
+    getIdpProxyDescriptor(idpProxyURL) {
+        let _this = this;
+
+        console.log("getting idpproxy descriptor from: " + idpProxyURL);
+        return new Promise(function (resolve, reject) {
+
+            let dividedURL = divideURL(idpProxyURL);
+            let domain = dividedURL.domain;
+            let idpproxy = dividedURL.identity;
+
+            if (!domain) {
+                domain = idpProxyURL;
+            }
+
+            if (!idpproxy) {
+                idpproxy = 'default';
+            } else {
+                idpproxy = idpproxy.substring(idpproxy.lastIndexOf('/') + 1);
+            }
+
+            let url = 'hyperty-catalogue://' + domain + '/.well-known/idp-proxy/' + idpproxy;
+
+            _this._makeExternalRequest(url, _this._nodeHttp, _this._nodeHttps).then(function (result) {
+                // console.log("makeExternalRequest returned: ", result);
+
+                result = JSON.parse(result);
+                // console.log("parsed result: ", result);
+
+                if (result["ERROR"]) {
+                    // TODO handle error properly
+                    reject(result);
+                } else {
+                    // console.log("creating idpproxy descriptor based on: ", result);
+
+                    // create the descriptor
+                    let idpproxy = _this._factory.createProtoStubDescriptorObject(
+                        result["cguid"],
+                        result["objectName"],
+                        result["description"],
+                        result["language"],
+                        result["sourcePackageURL"],
+                        result["messageSchemas"],
+                        result["configuration"],
+                        result["constraints"]
+                    );
+
+                    // parse and attach the sourcePackage
+                    let sourcePackage = result["sourcePackage"];
+                    if (sourcePackage) {
+                        sourcePackage = _this._createSourcePackage(_this._factory, sourcePackage);
+                        idpproxy.sourcePackage = sourcePackage;
+                    }
+                    resolve(idpproxy);
+                }
+            });
+        });
+    }
+
+    /**
      * Returns the sourceCode of a given descriptor
      * @param descriptor - Catalogue Object that was retrieved using e.g. getHypertyDescriptor()
      * @returns {Promise}
