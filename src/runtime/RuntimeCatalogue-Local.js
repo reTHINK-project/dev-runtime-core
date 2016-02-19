@@ -3,10 +3,14 @@ import {CatalogueFactory} from 'service-framework';
 
 class RuntimeCatalogue {
 
-  constructor() {
+  constructor(runtimeFactory) {
     // console.log('runtime catalogue');
+    if (!runtimeFactory) throw Error('The catalogue needs the runtimeFactory');
+
     let _this = this;
     _this._factory = new CatalogueFactory(false, undefined);
+
+    _this.makeRequest = runtimeFactory.makeRequest();
   }
 
   set runtimeURL(runtimeURL) {
@@ -27,116 +31,6 @@ class RuntimeCatalogue {
 
     // TODO: check if this is real needed;
     return _this._hypertyRuntimeURL;
-  }
-
-  /**
-  * TODO: Delete this method
-  */
-  _makeLocalRequest(url) {
-
-    console.log(url);
-
-    return new Promise(function(resolve, reject) {
-      let protocolmap = {
-        'hyperty-catalogue://': 'http://',
-        '../': '../'
-      };
-
-      let foundProtocol = false;
-      for (let protocol in protocolmap) {
-        if (url.slice(0, protocol.length) === protocol) {
-          // console.log('exchanging ' + protocol + " with " + protocolmap[protocol]);
-          url = protocolmap[protocol] + url.slice(protocol.length, url.length);
-          foundProtocol = true;
-          break;
-        }
-      }
-
-      if (!foundProtocol) {
-        reject('Invalid protocol of url: ' + url);
-        return;
-      }
-
-      let xhr = new XMLHttpRequest();
-
-      // console.log(url);
-
-      xhr.open('GET', url, true);
-
-      xhr.onreadystatechange = function(event) {
-        let xhr = event.currentTarget;
-        if (xhr.readyState === 4) {
-          // console.log("got response:", xhr);
-          if (xhr.status === 200) {
-            resolve(xhr.responseText);
-          } else {
-            // console.log("rejecting promise because of response code: 200 != ", xhr.status);
-            reject(xhr.responseText);
-          }
-        }
-      };
-
-      xhr.send();
-
-    });
-
-  }
-
-  /**
-  * make a http request to a given URL.
-  * @param url
-  * @returns {Promise}
-  * @private
-  */
-  _makeExternalRequest(url) {
-    // console.log("_makeExternalRequest", url);
-
-    // TODO: make this request compatible with nodejs
-    // at this moment, XMLHttpRequest only is compatible with browser implementation
-    // nodejs doesn't support;
-    return new Promise(function(resolve, reject) {
-      let protocolmap = {
-        'hyperty-catalogue://': 'http://'
-      };
-
-      let foundProtocol = false;
-      for (let protocol in protocolmap) {
-        if (url.slice(0, protocol.length) === protocol) {
-          // console.log("exchanging " + protocol + " with " + protocolmap[protocol]);
-          url = protocolmap[protocol] + url.slice(protocol.length, url.length);
-          foundProtocol = true;
-          break;
-        }
-      }
-
-      if (!foundProtocol) {
-        reject('Invalid protocol of url: ' + url);
-        return;
-      }
-
-      let xhr = new XMLHttpRequest();
-
-      // console.log(url);
-
-      xhr.open('GET', url, true);
-
-      xhr.onreadystatechange = function(event) {
-        let xhr = event.currentTarget;
-        if (xhr.readyState === 4) {
-          // console.log("got response:", xhr);
-          if (xhr.status === 200) {
-            resolve(xhr.responseText);
-          } else {
-            // console.log("rejecting promise because of response code: 200 != ", xhr.status);
-            reject(xhr.responseText);
-          }
-        }
-      };
-
-      xhr.send();
-
-    });
-
   }
 
   /**
@@ -163,7 +57,7 @@ class RuntimeCatalogue {
         hyperty = hyperty.substring(hyperty.lastIndexOf('/') + 1);
       }
 
-      _this._makeLocalRequest('../resources/descriptors/Hyperties.json').then(function(descriptor) {
+      _this.makeRequest.get('../resources/descriptors/Hyperties.json').then(function(descriptor) {
         _this.Hyperties = JSON.parse(descriptor);
 
         let result = _this.Hyperties[hyperty];
@@ -268,7 +162,7 @@ class RuntimeCatalogue {
         protoStub = protoStub.substring(protoStub.lastIndexOf('/') + 1);
       }
 
-      _this._makeLocalRequest('../resources/descriptors/ProtoStubs.json').then(function(descriptor) {
+      _this.makeRequest.get('../resources/descriptors/ProtoStubs.json').then(function(descriptor) {
         _this.ProtoStubs = JSON.parse(descriptor);
 
         let result = _this.ProtoStubs[protoStub];
@@ -321,7 +215,7 @@ class RuntimeCatalogue {
         dataSchemaURL = dataSchemaURL.substring(dataSchemaURL.lastIndexOf('/') + 1);
       }
 
-      _this._makeLocalRequest('../resources/descriptors/DataSchemas.json').then(function(descriptor) {
+      _this.makeRequest.get('../resources/descriptors/DataSchemas.json').then(function(descriptor) {
 
         _this.DataSchemas = JSON.parse(descriptor);
 

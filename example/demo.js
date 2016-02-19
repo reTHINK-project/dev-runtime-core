@@ -5,9 +5,9 @@ import {addLoader, removeLoader, documentReady, errorMessage} from './support';
 // import {MessageFactory} from 'service-framework';
 
 import RuntimeUA from '../src/runtimeUA';
-import SandboxFactory from '../resources/sandboxes/SandboxFactory';
+import RuntimeFactory from '../resources/RuntimeFactory';
 
-let sandboxFactory = new SandboxFactory();
+let sandboxFactory = new RuntimeFactory();
 let avatar = 'https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/photo.jpg';
 
 // You can change this at your own domain
