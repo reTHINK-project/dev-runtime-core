@@ -6,10 +6,8 @@ chai.config.truncateThreshold = 0;
 let expect = chai.expect;
 chai.use(chaiAsPromised);
 
-//Main dependencies
 import PolicyEngine from '../src/policy/PolicyEngine';
-
-// Testing Policy Engine
+import Policy from '../src/policy/Policy';
 
 let runtimeRegistry = 'registry mockup';
 
@@ -59,7 +57,6 @@ describe('PolicyEngine', function() {
     });
   });
 
-  //expetct
   describe('authorise(message) with assertedIdentity in body', function() {
     let message = {id: 3212, type:'READ', from:'hyperty://ua.pt/asdf',
                             to:'hyperty://ua.pt/FindHyperty',
@@ -76,6 +73,40 @@ describe('PolicyEngine', function() {
       }), function(reject) {
         return reject;
       }).to.be.fulfilled.and.eventually.eql(expectedMessage).and.notify(done);
+    });
+  });
+
+  let key1 = 'user://gmail.com/openidtest10';
+  let key2 = 'user://gmail.com/openidtest20';
+  let policy1 = new Policy('allow-whitelisted', 'user', 'whitelisted', true, []);
+  let policy2 = new Policy('block-blacklisted', 'user', 'blacklisted', false, []);
+
+  describe('addPolicies', function() {
+    it('associates a policy with a user ID', function() {
+      policyEngine.addPolicies(key1, [policy1]);
+      expect(policyEngine.getApplicablePolicies(null, null, key1)).to.be.eql([policy1]);
+    });
+    it('associates a policy with an hyperty instance', function() {
+      policyEngine.addPolicies(key2, [policy2]);
+      expect(policyEngine.getApplicablePolicies(key2, null, null)).to.be.eql([policy2]);
+    })
+  });
+
+  let policy3 = new Policy('block-08-20', 'scope', 'time 08:00 20:00', true, []);
+
+  describe('removePolicies', function() {
+    it('removes the policy with the given ID associated with an hyperty instance', function() {
+      policyEngine.addPolicies(key1, [policy3]);
+      policyEngine.removePolicies(key1, 'allow-whitelisted');
+      expect(policyEngine.getApplicablePolicies(null, null, key1)).to.be.eql([policy3]);
+      expect(policyEngine.getApplicablePolicies(key2, null, null)).to.be.eql([policy2]);
+    });
+
+    it('removes all policies associated with an hyperty instance', function() {
+      policyEngine.addPolicies(key1, [policy1]);
+      policyEngine.removePolicies(key1, 'all');
+      expect(policyEngine.getApplicablePolicies(null, null, key1)).to.be.eql([]);
+      expect(policyEngine.getApplicablePolicies(key2, null, null)).to.be.eql([policy2]);
     });
   });
 
