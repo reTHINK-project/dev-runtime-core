@@ -185,7 +185,12 @@ class RuntimeCatalogue {
             result.dataObjects
           );
 
-          // console.log("created hyperty descriptor object:", hyperty);
+          // optional fields
+          hyperty.configuration = result.configuration;
+          hyperty.constraints = result.constraints;
+          hyperty.messageSchema = result.messageSchema;
+          hyperty.policies = result.policies;
+          hyperty.signature = result.signature;
 
           // parse and attach sourcePackage
           let sourcePackage = result.sourcePackage;
