@@ -73,7 +73,7 @@ gulp.task('runtime', function() {
     standalone: 'runtimeUA',
     debug: false
   })
-  .transform(babel, {compact: false, optional: 'runtime'})
+  .transform(babel, {compact: true})
   .bundle()
   .on('error', function(err) {
     console.error(err);
