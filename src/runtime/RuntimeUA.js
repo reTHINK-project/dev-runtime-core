@@ -261,7 +261,11 @@ class RuntimeUA {
         // Extend original hyperty configuration;
         let configuration = {};
         if (!emptyObject(_hypertyDescriptor.configuration)) {
-          configuration = Object.assign({}, JSON.parse(_hypertyDescriptor.configuration));
+          try {
+            configuration = Object.assign({}, JSON.parse(_hypertyDescriptor.configuration));
+          } catch (e) {
+            configuration = _hypertyDescriptor.configuration;
+          }
         }
         configuration.runtimeURL = _this.runtimeURL;
 
