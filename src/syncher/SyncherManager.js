@@ -96,7 +96,7 @@ class SyncherManager {
         //all ok, send response
         _this._bus.postMessage({
           id: msg.id, type: 'response', from: msg.to, to: owner,
-          body: { code: 200, resource: objURL, children: children }
+          body: { code: 200, resource: objURL, childrenResources: children }
         });
 
         //19. send create to all observers, responses will be deliver to the Hyperty owner?
@@ -165,7 +165,7 @@ class SyncherManager {
         console.log('forward-reply: ', reply);
         if (reply.body.code === 200) {
           //subscription accepted (add forward and subscription)
-          _this._bus.addForward(objURL, hypertyUrl);
+          _this._bus.addForward(objURL + '/changes', hypertyUrl);
 
           //add forward for children
           subscription.children.forEach((child) => {
@@ -212,7 +212,7 @@ class SyncherManager {
       //1. subscribe msg for the domain node
       let nodeSubscribeMsg = {
         type: 'subscribe', from: _this._url, to: 'domain://msg-node.' + domain + '/sm',
-        body: { resource: msg.body.resource, childrenResources: children }
+        body: { resource: msg.body.resource, childrenResources: children, schema: msg.body.schema }
       };
 
       //2. subscribe in msg-node
@@ -220,7 +220,7 @@ class SyncherManager {
         console.log('node-subscribe-response: ', reply);
         if (reply.body.code === 200) {
           //listener accepted (add forward and subscribe to reporter)
-          _this._bus.addForward(objURL, msg.from);
+          _this._bus.addForward(objURL + '/changes', msg.from);
 
           //add forward for children
           children.forEach((child) => {
