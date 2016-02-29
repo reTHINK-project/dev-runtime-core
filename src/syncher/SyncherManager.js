@@ -74,11 +74,15 @@ class SyncherManager {
           switch (msg.type) {
             case 'subscribe': _this._onRemoteSubscribe(objURL, msg); break;
             case 'unsubscribe': _this._onRemoteUnSubscribe(objURL, msg); break;
+            case 'response': _this._onRemoteResponse(objURL, msg); break;
           }
         });
 
         let objSubscription = { owner: owner, children: children, sl: subscriptorListener, cl: [], subs: [] };
         _this._subscriptions[objURL] = objSubscription;
+
+        //add forward of <ObjectURL> messages to the owner
+        _this._bus.addForward(objURL, owner);
 
         //add children listeners...
         let childBaseURL = objURL + '/children/';
@@ -96,7 +100,7 @@ class SyncherManager {
         //all ok, send response
         _this._bus.postMessage({
           id: msg.id, type: 'response', from: msg.to, to: owner,
-          body: { code: 200, resource: objURL, children: children }
+          body: { code: 200, resource: objURL, childrenResources: children }
         });
 
         //19. send create to all observers, responses will be deliver to the Hyperty owner?
@@ -104,8 +108,8 @@ class SyncherManager {
           //schedule for next cycle needed, because the Reporter should be available.
           msg.body.authorise.forEach((hypertyURL) => {
             _this._bus.postMessage({
-              type: 'create', from: owner, to: hypertyURL,
-              body: { schema: msg.body.schema, resource: objURL, value: msg.body.value }
+              type: 'create', from: objSubscriptorURL, to: hypertyURL,
+              body: { source: msg.from, value: msg.body.value, schema: msg.body.schema }
             });
           });
         });
@@ -165,7 +169,7 @@ class SyncherManager {
         console.log('forward-reply: ', reply);
         if (reply.body.code === 200) {
           //subscription accepted (add forward and subscription)
-          _this._bus.addForward(objURL, hypertyUrl);
+          _this._bus.addForward(objURL + '/changes', hypertyUrl);
 
           //add forward for children
           subscription.children.forEach((child) => {
@@ -196,6 +200,15 @@ class SyncherManager {
     //TODO: send un-subscribe message to Syncher? (depends on the operation mode)
   }
 
+  _onRemoteResponse(objURL, msg) {
+    let _this = this;
+
+    _this._bus.postMessage({
+      id: msg.id, type: 'response', from: msg.to, to: objURL,
+      body: { code: msg.body.code, source: msg.from }
+    });
+  }
+
   _onLocalSubscribe(msg) {
     let _this = this;
 
@@ -212,7 +225,7 @@ class SyncherManager {
       //1. subscribe msg for the domain node
       let nodeSubscribeMsg = {
         type: 'subscribe', from: _this._url, to: 'domain://msg-node.' + domain + '/sm',
-        body: { resource: msg.body.resource, childrenResources: children }
+        body: { resource: msg.body.resource, childrenResources: children, schema: msg.body.schema }
       };
 
       //2. subscribe in msg-node
@@ -220,7 +233,7 @@ class SyncherManager {
         console.log('node-subscribe-response: ', reply);
         if (reply.body.code === 200) {
           //listener accepted (add forward and subscribe to reporter)
-          _this._bus.addForward(objURL, msg.from);
+          _this._bus.addForward(objURL + '/changes', msg.from);
 
           //add forward for children
           children.forEach((child) => {
