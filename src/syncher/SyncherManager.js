@@ -74,11 +74,15 @@ class SyncherManager {
           switch (msg.type) {
             case 'subscribe': _this._onRemoteSubscribe(objURL, msg); break;
             case 'unsubscribe': _this._onRemoteUnSubscribe(objURL, msg); break;
+            case 'response': _this._onRemoteResponse(objURL, msg); break;
           }
         });
 
         let objSubscription = { owner: owner, children: children, sl: subscriptorListener, cl: [], subs: [] };
         _this._subscriptions[objURL] = objSubscription;
+
+        //add forward of <ObjectURL> messages to the owner
+        _this._bus.addForward(objURL, owner);
 
         //add children listeners...
         let childBaseURL = objURL + '/children/';
@@ -104,8 +108,8 @@ class SyncherManager {
           //schedule for next cycle needed, because the Reporter should be available.
           msg.body.authorise.forEach((hypertyURL) => {
             _this._bus.postMessage({
-              type: 'create', from: owner, to: hypertyURL,
-              body: { schema: msg.body.schema, resource: objURL, value: msg.body.value }
+              type: 'create', from: objSubscriptorURL, to: hypertyURL,
+              body: { source: msg.from, value: msg.body.value, schema: msg.body.schema }
             });
           });
         });
@@ -194,6 +198,15 @@ class SyncherManager {
     subs.splice(index, 1);
 
     //TODO: send un-subscribe message to Syncher? (depends on the operation mode)
+  }
+
+  _onRemoteResponse(objURL, msg) {
+    let _this = this;
+
+    _this._bus.postMessage({
+      id: msg.id, type: 'response', from: msg.to, to: objURL,
+      body: { code: msg.body.code, source: msg.from }
+    });
   }
 
   _onLocalSubscribe(msg) {

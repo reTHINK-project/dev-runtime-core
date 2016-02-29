@@ -53,7 +53,6 @@ describe('SyncherManager', function() {
     bus.addForward = (from, to) => {
       //no need to config forward, sync2 adds listener for objURL, and it's on the same sandbox
       console.log('addForward: ', from, to);
-      expect(to).to.eql(hyperURL2);
     };
 
     bus._onPostMessage = (msg) => {
@@ -508,7 +507,6 @@ describe('SyncherManager', function() {
     bus.addForward = (from, to) => {
       //no need to config forward, sync2 adds listener for objURL, and it's on the same sandbox
       console.log('5-addForward: ', from, to);
-      expect(to).to.eql(hyperURL2);
     };
 
     bus._onPostMessage = (msg) => {
@@ -531,7 +529,6 @@ describe('SyncherManager', function() {
     let bus = new MessageBus();
     bus.addForward = (from, to) => {
       console.log('6-addForward: ', from, to);
-      expect(to).to.eql(hyperURL2);
     };
     bus._onPostMessage = (msg) => {
       console.log('6-_onPostMessage: ', msg);
@@ -580,7 +577,6 @@ describe('SyncherManager', function() {
     let bus = new MessageBus();
     bus.addForward = (from, to) => {
       console.log('7-addForward: ', from, to);
-      expect(to).to.eql(hyperURL2);
     };
     bus._onPostMessage = (msg) => {
       console.log('7-_onPostMessage: ', msg);
