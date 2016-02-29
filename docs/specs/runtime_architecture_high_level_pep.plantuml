@@ -1,0 +1,86 @@
+@startuml "Runtime_Architecture_high_level_pep.png"
+
+
+node "Service Provider 1" as SP1 {
+}
+
+() "Service Provider 1\nMsg Interface" as SP1I
+
+node "Service Provider 2" as SP2 {
+}
+
+() "Service Provider 2\nMsg Interface" as SP2I
+
+
+node "Runtime Device" as rt {
+
+
+ node "Service Provider 1 Sandboxes" as SP1Sand {
+
+ node "Hyperties\nSandbox" as H1Sand {
+
+	 }
+
+ node "ProtoStub1\nSandbox" as Proto1Sand {
+
+ }
+
+node "Hyperty\nInterceptor1\nSandbox" as PEP1Sand {
+ }
+
+
+
+ }
+
+node "Service Provider 2 Sandboxes" as SP2Sand {
+
+ node "Hyperties\nSandbox" as H2Sand {
+	 }
+
+
+ node "ProtoStub2\nSandbox" as Proto2Sand {
+
+  }
+
+
+ }
+
+H1Sand <..up- SP1 : provides
+Proto1Sand <..up- SP1 : provides
+PEP1Sand <..up- SP1 : provides
+
+H2Sand <.up- SP2 : provides
+Proto2Sand <.up- SP2 : provides
+
+
+SP1 <-down-> SP1I : protocol\nmessage
+SP1I <-down-> Proto1Sand : protocol\nmessage
+
+SP2 <-down-> SP2I : protocol\nmessage
+SP2I <-down-> Proto2Sand : protocol\nmessage
+
+node "Core Sandbox" as core {
+
+ node "*            Message      BUS                *" as Bus
+
+}
+
+ H1Sand -down-> PEP1Sand : message
+
+ PEP1Sand -> Bus : message
+
+ Bus <-up-> Proto1Sand : message
+
+ Bus <-up-> Proto2Sand : message
+
+
+
+node "++++++++++++++++++++++ Native    Runtime ++++++++++++++++++++++++++++++++++++++++++++++" as native {
+
+	}
+
+}
+
+native -[hidden]up- core
+
+@enduml
