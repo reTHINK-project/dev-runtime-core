@@ -10,7 +10,7 @@ class RuntimeCatalogue {
     let _this = this;
     _this._factory = new CatalogueFactory(false, undefined);
 
-    _this.makeRequest = runtimeFactory.makeRequest();
+    _this.httpRequest = runtimeFactory.createHttpRequest();
   }
 
   set runtimeURL(runtimeURL) {
@@ -57,7 +57,7 @@ class RuntimeCatalogue {
         hyperty = hyperty.substring(hyperty.lastIndexOf('/') + 1);
       }
 
-      _this.makeRequest.get('../resources/descriptors/Hyperties.json').then(function(descriptor) {
+      _this.httpRequest.get('../resources/descriptors/Hyperties.json').then(function(descriptor) {
         _this.Hyperties = JSON.parse(descriptor);
 
         let result = _this.Hyperties[hyperty];
@@ -96,6 +96,61 @@ class RuntimeCatalogue {
 
     });
   }
+
+  /**
+   * Get RuntimeDescriptor
+   * @param runtimeURL - e.g. mydomain.com/.well-known/runtime/MyRuntime
+   * @returns {Promise}
+   */
+   getRuntimeDescriptor(runtimeURL) {
+     let _this = this;
+
+     return new Promise(function(resolve, reject) {
+
+       // request the json
+       _this._makeExternalRequest(runtimeURL, _this._nodeHttp, _this._nodeHttps).then(function(result) {
+         result = JSON.parse(result);
+
+         if (result.ERROR) {
+           // TODO handle error properly
+           reject(result);
+         } else {
+
+           // parse capabilities first
+           try {
+             result.hypertyCapabilities = JSON.parse(result.hypertyCapabilities);
+             result.protocolCapabilities = JSON.parse(result.protocolCapabilities);
+           } catch (e) {
+             // already json object
+           }
+           console.log('creating runtime descriptor based on: ', result);
+
+           // create the descriptor
+           let runtime = _this._factory.createHypertyRuntimeDescriptorObject(
+             result.cguid,
+             result.objectName,
+             result.description,
+             result.language,
+             result.sourcePackageURL,
+             result.type || result.runtimeType,
+             result.hypertyCapabilities,
+             result.protocolCapabilities
+           );
+
+           console.log('created runtime descriptor object:', runtime);
+
+           // parse and attach sourcePackage
+           let sourcePackage = result.sourcePackage;
+           if (sourcePackage) {
+             // console.log('runtime has sourcePackage:', sourcePackage);
+             runtime.sourcePackage = _this._createSourcePackage(_this._factory, sourcePackage);
+           }
+
+           resolve(runtime);
+         }
+       });
+     });
+   }
 
   /**
   * Get source Package from a URL
@@ -162,7 +217,7 @@ class RuntimeCatalogue {
         protoStub = protoStub.substring(protoStub.lastIndexOf('/') + 1);
       }
 
-      _this.makeRequest.get('../resources/descriptors/ProtoStubs.json').then(function(descriptor) {
+      _this.httpRequest.get('../resources/descriptors/ProtoStubs.json').then(function(descriptor) {
         _this.ProtoStubs = JSON.parse(descriptor);
 
         let result = _this.ProtoStubs[protoStub];
@@ -215,7 +270,7 @@ class RuntimeCatalogue {
         dataSchemaURL = dataSchemaURL.substring(dataSchemaURL.lastIndexOf('/') + 1);
       }
 
-      _this.makeRequest.get('../resources/descriptors/DataSchemas.json').then(function(descriptor) {
+      _this.httpRequest.get('../resources/descriptors/DataSchemas.json').then(function(descriptor) {
 
         _this.DataSchemas = JSON.parse(descriptor);
 

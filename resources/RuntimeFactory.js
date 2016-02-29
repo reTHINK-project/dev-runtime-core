@@ -24,7 +24,7 @@ class RuntimeFactory {
     return new AppSandboxBrowser(_this._messageBus);
   }
 
-  makeRequest() {
+  createHttpRequest() {
     let request = new Request();
     return request;
   }
