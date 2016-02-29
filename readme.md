@@ -217,6 +217,7 @@ To run karma tests is mandatory to run **live-server** because of the mock-up's 
 #### <a id="Tasks">Gulp Tasks</a>
 
 -	[Documentation](#documentation)
+-	[License](#license)
 -	[Dist](#dist)
 -	[Build](#build)
 -	[Encode](#encode)
@@ -236,6 +237,12 @@ Generate all documentation associated to runtime core;
 -	if you run **gulp docx** should be generated an .docx file, but **this process should be optimized**, is not working very well;
 
 `gulp docx`
+
+##### License
+
+To add the license text to all files in src folder;
+
+`gulp license`
 
 ##### Dist
 
