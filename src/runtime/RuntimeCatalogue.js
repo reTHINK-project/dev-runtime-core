@@ -1,6 +1,7 @@
 import {divideURL} from '../utils/utils';
 import {CatalogueFactory} from 'service-framework';
 import {HypertyDescriptor, ProtocolStubDescriptor, SourcePackage} from 'service-framework';
+import persistenceManager from '../persistence/PersistenceManager';
 
 class RuntimeCatalogue {
 
@@ -10,6 +11,7 @@ class RuntimeCatalogue {
         _this._nodeHttp = nodeHttp;
         _this._nodeHttps = nodeHttps;
         _this._factory = new CatalogueFactory(false, undefined);
+
     }
 
     set runtimeURL(runtimeURL) {
@@ -162,6 +164,7 @@ class RuntimeCatalogue {
                     // create the descriptor
                     let hyperty = _this._factory.createHypertyDescriptorObject(
                         result["cguid"],
+                        result["version"],
                         result["objectName"],
                         result["description"],
                         result["language"],
@@ -225,6 +228,7 @@ class RuntimeCatalogue {
                     // create the descriptor
                     let runtime = _this._factory.createHypertyRuntimeDescriptorObject(
                         result["cguid"],
+                        result["version"],
                         result["objectName"],
                         result["description"],
                         result["language"],
@@ -277,6 +281,7 @@ class RuntimeCatalogue {
                     // create the descriptor
                     let dataSchema = _this._factory.createDataObjectSchema(
                         result["cguid"],
+                        result["version"],
                         result["objectName"],
                         result["description"],
                         result["language"],
@@ -371,6 +376,7 @@ class RuntimeCatalogue {
                     // create the descriptor
                     let stub = _this._factory.createProtoStubDescriptorObject(
                         result["cguid"],
+                        result["version"],
                         result["objectName"],
                         result["description"],
                         result["language"],
@@ -438,6 +444,7 @@ class RuntimeCatalogue {
                     // create the descriptor
                     let idpproxy = _this._factory.createProtoStubDescriptorObject(
                         result["cguid"],
+                        result["version"],
                         result["objectName"],
                         result["description"],
                         result["language"],
@@ -464,7 +471,7 @@ class RuntimeCatalogue {
 
     /**
      * Returns the sourceCode of a given descriptor
-     * @param descriptor - Catalogue Object that was retrieved using e.g. getHypertyDescriptor()
+     * @param {CatalogueDataObject} descriptor - Catalogue Object that was retrieved using e.g. getHypertyDescriptor()
      * @returns {Promise}
      */
     getSourceCodeFromDescriptor(descriptor) {
@@ -475,12 +482,20 @@ class RuntimeCatalogue {
                 //console.log("returning sourceCode:", descriptor.sourcePackage.sourceCode);
                 resolve(descriptor.sourcePackage.sourceCode);
             } else {
-                //console.log("descriptor has no sourcePackage, getting it...");
-                let sourcePackage = _this.getSourcePackageFromURL(descriptor.sourcePackageURL).then(function (sourcePackage) {
-                    //console.log("got sourcePackage:", sourcePackage);
-                    //console.log("returning sourceCode:", sourcePackage.sourceCode);
-                    resolve(sourcePackage.sourceCode);
-                });
+                if (persistenceManager.getVersion(descriptor.sourcePackageURL + "/sourceCode") >= descriptor.version) {
+                    console.log("returning cached version from persistence manager");
+                    resolve(persistenceManager.get(descriptor.sourcePackageURL + "/sourceCode"));
+                } else {
+                    _this._makeExternalRequest(descriptor.sourcePackageURL + "/sourceCode", _this._nodeHttp, _this._nodeHttps).then(function (sourceCode) {
+                        if (sourceCode["ERROR"]) {
+                            // TODO handle error properly
+                            reject(sourceCode);
+                        } else {
+                            persistenceManager.set(descriptor.sourcePackageURL + "/sourceCode", descriptor.version, sourceCode);
+                            resolve(sourceCode);
+                        }
+                    });
+                }
             }
         });
     }
