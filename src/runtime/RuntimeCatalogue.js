@@ -11,25 +11,300 @@ class RuntimeCatalogue {
         _this._nodeHttp = nodeHttp;
         _this._nodeHttps = nodeHttps;
         _this._factory = new CatalogueFactory(false, undefined);
-
-    }
-
-    set runtimeURL(runtimeURL) {
-        let _this = this;
-        _this._runtimeURL = runtimeURL;
-    }
-
-    get runtimeURL() {
-        let _this = this;
-        return _this._runtimeURL;
     }
 
     /**
-     * Get hypertyRuntimeURL
+     * Get a Catalogue Data Object (Descriptor) from a URL, and construct it using the provided function
+     * @param {String} descriptorURL - e.g. mydomain.com/.well-known/hyperty/MyHyperty
+     * @param {function} createFunc - e.g. _createHyperty
+     * @returns {Promise}
      */
-    getHypertyRuntimeURL() {
-        // TODO: check if this is real needed;
-        return _hypertyRuntimeURL;
+    getDescriptor(descriptorURL, createFunc) {
+        let _this = this;
+        // console.log("getDescriptor", descriptorURL);
+
+        return new Promise(function (resolve, reject) {
+
+            _this._makeExternalRequest(descriptorURL + "/version", _this._nodeHttp, _this._nodeHttps).then(function (result) {
+                if (persistenceManager.getVersion(descriptorURL) >= result) {
+                    // return saved version
+                    console.log("returning saved version:", persistenceManager.get(descriptorURL));
+                    resolve(createFunc(_this, persistenceManager.get(descriptorURL)))
+                } else {
+                    // request the json
+                    _this._makeExternalRequest(descriptorURL, _this._nodeHttp, _this._nodeHttps).then(function (result) {
+                        result = JSON.parse(result);
+
+
+                        if (result["ERROR"]) {
+                            // TODO handle error properly
+                            reject(result);
+                        } else {
+                            // console.log("creating descriptor based on: ", result);
+                            let descriptor = createFunc(_this, result);
+                            persistenceManager.set(descriptorURL, descriptor.version, result);
+                            // console.log("created descriptor object:", hyperty);
+                            resolve(descriptor);
+                        }
+                    });
+                }
+            });
+        });
+    }
+
+    /**
+     * Get HypertyDescriptor
+     * @param hypertyURL - e.g. mydomain.com/.well-known/hyperty/MyHyperty
+     * @returns {Promise}
+     */
+    getHypertyDescriptor(hypertyURL) {
+        let _this = this;
+        return _this.getDescriptor(hypertyURL, _this._createHyperty)
+    }
+
+    /**
+     * Get StubDescriptor
+     * @param stubURL - e.g. mydomain.com/.well-known/protostub/MyProtostub
+     * @returns {Promise}
+     */
+    getStubDescriptor(stubURL) {
+        let _this = this;
+        return _this.getDescriptor(runtimeURL, _this._createStub)
+    }
+
+    /**
+     * Get RuntimeDescriptor
+     * @param runtimeURL - e.g. mydomain.com/.well-known/runtime/MyRuntime
+     * @returns {Promise}
+     */
+    getRuntimeDescriptor(runtimeURL) {
+        let _this = this;
+        return _this.getDescriptor(runtimeURL, _this._createRuntimeDescriptor)
+    }
+
+    /**
+     * Get DataSchemaDescriptor
+     * @param dataSchemaURL - e.g. mydomain.com/.well-known/dataschema/MyDataSchema
+     * @returns {Promise}
+     */
+    getDataSchemaDescriptor(dataSchemaURL) {
+        let _this = this;
+        return _this.getDescriptor(runtimeURL, _this._createDataSchema)
+    }
+
+    /**
+     * Get IDPProxyDescriptor
+     * @param idpProxyURL - e.g. mydomain.com/.well-known/idp-proxy/MyProxy
+     * @returns {Promise}
+     */
+    getIdpProxyDescriptor(idpProxyURL) {
+        let _this = this;
+        return _this.getDescriptor(runtimeURL, _this._createIdpProxy)
+    }
+
+    /**
+     * Create HypertyDescriptor based on raw object that contains its attributes
+     * @param _this
+     * @param rawHyperty
+     * @returns {HypertyDescriptor}
+     */
+    _createHyperty(_this, rawHyperty) {
+        // create the descriptor
+        let hyperty = _this._factory.createHypertyDescriptorObject(
+            rawHyperty["cguid"],
+            rawHyperty["version"],
+            rawHyperty["objectName"],
+            rawHyperty["description"],
+            rawHyperty["language"],
+            rawHyperty["sourcePackageURL"],
+            rawHyperty["type"] || rawHyperty["hypertyType"],
+            rawHyperty["dataObjects"]
+        );
+
+        // optional fields
+        hyperty.configuration = rawHyperty["configuration"];
+        hyperty.constraints = rawHyperty["constraints"];
+        hyperty.messageSchema = rawHyperty["messageSchema"];
+        hyperty.policies = rawHyperty["policies"];
+        hyperty.signature = rawHyperty["signature"];
+
+        // parse and attach sourcePackage
+        let sourcePackage = rawHyperty["sourcePackage"];
+        if (sourcePackage) {
+            // console.log("hyperty has sourcePackage:", sourcePackage);
+            hyperty.sourcePackage = _this._createSourcePackage(_this, sourcePackage);
+        }
+
+        return hyperty;
+    }
+
+    /**
+     * Create ProtocolStubDescriptor based on raw object that contains its attributes
+     * @param _this
+     * @param rawStub
+     * @returns {ProtocolStubDescriptor}
+     */
+    _createStub(_this, rawStub) {
+        // console.log("creating stub descriptor based on: ", rawStub);
+
+        // create the descriptor
+        let stub = _this._factory.createProtoStubDescriptorObject(
+            rawStub["cguid"],
+            rawStub["version"],
+            rawStub["objectName"],
+            rawStub["description"],
+            rawStub["language"],
+            rawStub["sourcePackageURL"],
+            rawStub["messageSchemas"],
+            rawStub["configuration"],
+            rawStub["constraints"]
+        );
+
+        // optional fields
+        stub.signature = rawStub["signature"];
+
+        // parse and attach the sourcePackage
+        let sourcePackage = rawStub["sourcePackage"];
+        if (sourcePackage) {
+            sourcePackage = _this._createSourcePackage(_this, sourcePackage);
+            stub.sourcePackage = sourcePackage;
+        }
+
+        return stub;
+    }
+
+    /**
+     * Create HypertyRuntimeDescriptor based on raw object that contains its attributes
+     * @param _this
+     * @param rawRuntime
+     * @returns {HypertyRuntimeDescriptor}
+     */
+    _createRuntimeDescriptor(_this, rawRuntime) {
+        // parse capabilities first
+        try {
+            rawRuntime["hypertyCapabilities"] = JSON.parse(rawRuntime["hypertyCapabilities"]);
+            rawRuntime["protocolCapabilities"] = JSON.parse(rawRuntime["protocolCapabilities"]);
+        } catch (e) {
+            // already json object
+        }
+        console.log("creating runtime descriptor based on: ", rawRuntime);
+
+
+        // create the descriptor
+        let runtime = _this._factory.createHypertyRuntimeDescriptorObject(
+            rawRuntime["cguid"],
+            rawRuntime["version"],
+            rawRuntime["objectName"],
+            rawRuntime["description"],
+            rawRuntime["language"],
+            rawRuntime["sourcePackageURL"],
+            rawRuntime["type"] || rawRuntime["runtimeType"],
+            rawRuntime["hypertyCapabilities"],
+            rawRuntime["protocolCapabilities"]
+        );
+
+        // optional fields
+        runtime.signature = rawRuntime["signature"];
+
+        // parse and attach sourcePackage
+        let sourcePackage = rawRuntime["sourcePackage"];
+        if (sourcePackage) {
+            // console.log("runtime has sourcePackage:", sourcePackage);
+            runtime.sourcePackage = _this._createSourcePackage(_this, sourcePackage);
+        }
+        return runtime;
+    }
+
+    /**
+     * Create DataObjectSchema based on raw object that contains its attributes
+     * @param _this
+     * @param rawSchema
+     * @returns {DataObjectSchema}
+     */
+    _createDataSchema(_this, rawSchema) {
+        console.log("creating dataSchema based on: ", rawSchema);
+
+        // FIXME: accessControlPolicy field not needed?
+        // create the descriptor
+        let dataSchema = _this._factory.createDataObjectSchema(
+            rawSchema["cguid"],
+            rawSchema["version"],
+            rawSchema["objectName"],
+            rawSchema["description"],
+            rawSchema["language"],
+            rawSchema["sourcePackageURL"]
+        );
+
+        // optional fields
+        dataSchema.signature = rawSchema["signature"];
+
+        // parse and attach sourcePackage
+        let sourcePackage = rawSchema["sourcePackage"];
+        if (sourcePackage) {
+            // console.log("dataSchema has sourcePackage:", sourcePackage);
+            dataSchema.sourcePackage = _this._createSourcePackage(_this, sourcePackage);
+        }
+
+        console.log("created dataSchema descriptor object:", dataSchema);
+        return dataSchema;
+    }
+
+    /**
+     * Create ProtocolStubDescriptor based on raw object that contains its attributes
+     * @param _this
+     * @param rawProxy
+     * @returns {ProtocolStubDescriptor}
+     */
+    _createIdpProxy(_this, rawProxy) {
+        // console.log("creating idpproxy descriptor based on: ", rawProxy);
+
+        // create the descriptor
+        let idpproxy = _this._factory.createProtoStubDescriptorObject(
+            rawProxy["cguid"],
+            rawProxy["version"],
+            rawProxy["objectName"],
+            rawProxy["description"],
+            rawProxy["language"],
+            rawProxy["sourcePackageURL"],
+            rawProxy["messageSchemas"],
+            rawProxy["configuration"],
+            rawProxy["constraints"]
+        );
+
+        // optional fields
+        idpproxy.signature = rawProxy["signature"];
+
+        // parse and attach the sourcePackage
+        let sourcePackage = rawProxy["sourcePackage"];
+        if (sourcePackage) {
+            sourcePackage = _this._createSourcePackage(_this, sourcePackage);
+            idpproxy.sourcePackage = sourcePackage;
+        }
+
+        return idpproxy;
+    }
+
+    _createSourcePackage(_this, sp) {
+        //console.log("creating sourcePackage. factory:", factory, ", raw package:", sp);
+        try {
+            sp = JSON.parse(sp);
+        } catch (e) {
+            console.log("parsing sourcePackage failed. already parsed? -> ", sp);
+        }
+
+        // check encoding
+        if (sp["encoding"] === "base64") {
+            sp["sourceCode"] = atob(sp["sourceCode"]);
+        }
+
+        let sourcePackage = _this.factory.createSourcePackage(sp["sourceCodeClassname"], sp["sourceCode"]);
+        if (sp["encoding"])
+            sourcePackage.encoding = sp["encoding"];
+
+        if (sp["signature"])
+            sourcePackage.signature = sp["signature"];
+
+        return sourcePackage;
     }
 
     /**
@@ -38,9 +313,9 @@ class RuntimeCatalogue {
      * @returns {Promise}
      * @private
      */
-    _makeExternalRequest(url, nodeHttp, nodeHttps) {
-        // console.log("_makeExternalRequest", url);
+    // console.log("_makeExternalRequest", url);
 
+    _makeExternalRequest(url, nodeHttp, nodeHttps) {
         // TODO: make this request compatible with nodejs
         // at this moment, XMLHttpRequest only is compatible with browser implementation
         // nodejs doesn't support;
@@ -140,172 +415,6 @@ class RuntimeCatalogue {
     }
 
     /**
-     * Get HypertyDescriptor
-     * @param hypertyURL - e.g. mydomain.com/.well-known/hyperty/MyHyperty
-     * @returns {Promise}
-     */
-    getHypertyDescriptor(hypertyURL) {
-        let _this = this;
-        // console.log("getHypertyDescriptor", hypertyURL);
-
-        return new Promise(function (resolve, reject) {
-
-            // request the json
-            _this._makeExternalRequest(hypertyURL, _this._nodeHttp, _this._nodeHttps).then(function (result) {
-                result = JSON.parse(result);
-
-
-                if (result["ERROR"]) {
-                    // TODO handle error properly
-                    reject(result);
-                } else {
-                    // console.log("creating hyperty descriptor based on: ", result);
-
-                    // create the descriptor
-                    let hyperty = _this._factory.createHypertyDescriptorObject(
-                        result["cguid"],
-                        result["version"],
-                        result["objectName"],
-                        result["description"],
-                        result["language"],
-                        result["sourcePackageURL"],
-                        result["type"] || result["hypertyType"],
-                        result["dataObjects"]
-                    );
-
-                    // optional fields
-                    hyperty.configuration = result["configuration"];
-                    hyperty.constraints = result["constraints"];
-                    hyperty.messageSchema = result["messageSchema"];
-                    hyperty.policies = result["policies"];
-                    hyperty.signature = result["signature"];
-
-                    // parse and attach sourcePackage
-                    let sourcePackage = result["sourcePackage"];
-                    if (sourcePackage) {
-                        // console.log("hyperty has sourcePackage:", sourcePackage);
-                        hyperty.sourcePackage = _this._createSourcePackage(_this._factory, sourcePackage);
-                    }
-
-                    // console.log("created hyperty descriptor object:", hyperty);
-                    resolve(hyperty);
-                }
-            });
-        });
-    }
-
-    /**
-     * Get RuntimeDescriptor
-     * @param runtimeURL - e.g. mydomain.com/.well-known/runtime/MyRuntime
-     * @returns {Promise}
-     */
-    getRuntimeDescriptor(runtimeURL) {
-        let _this = this;
-        // console.log("getRuntimeDescriptor", runtimeURL);
-
-        return new Promise(function (resolve, reject) {
-
-            // request the json
-            _this._makeExternalRequest(runtimeURL, _this._nodeHttp, _this._nodeHttps).then(function (result) {
-                result = JSON.parse(result);
-
-
-                if (result["ERROR"]) {
-                    // TODO handle error properly
-                    reject(result);
-                } else {
-
-                    // parse capabilities first
-                    try {
-                        result["hypertyCapabilities"] = JSON.parse(result["hypertyCapabilities"]);
-                        result["protocolCapabilities"] = JSON.parse(result["protocolCapabilities"]);
-                    } catch (e) {
-                        // already json object
-                    }
-                    console.log("creating runtime descriptor based on: ", result);
-
-
-                    // create the descriptor
-                    let runtime = _this._factory.createHypertyRuntimeDescriptorObject(
-                        result["cguid"],
-                        result["version"],
-                        result["objectName"],
-                        result["description"],
-                        result["language"],
-                        result["sourcePackageURL"],
-                        result["type"] || result["runtimeType"],
-                        result["hypertyCapabilities"],
-                        result["protocolCapabilities"]
-                    );
-
-                    // optional fields
-                    runtime.signature = result["signature"];
-
-                    // parse and attach sourcePackage
-                    let sourcePackage = result["sourcePackage"];
-                    if (sourcePackage) {
-                        // console.log("runtime has sourcePackage:", sourcePackage);
-                        runtime.sourcePackage = _this._createSourcePackage(_this._factory, sourcePackage);
-                    }
-
-                    // console.log("created runtime descriptor object:", runtime);
-                    resolve(runtime);
-                }
-            });
-        });
-    }
-
-    /**
-     * Get DataSchemaDescriptor
-     * @param dataSchemaURL - e.g. mydomain.com/.well-known/dataschema/MyDataSchema
-     * @returns {Promise}
-     */
-    getDataSchemaDescriptor(dataSchemaURL) {
-        let _this = this;
-        // console.log("getDataSchemaDescriptor", dataSchemaURL);
-
-        return new Promise(function (resolve, reject) {
-
-            // request the json
-            _this._makeExternalRequest(dataSchemaURL, _this._nodeHttp, _this._nodeHttps).then(function (result) {
-                result = JSON.parse(result);
-
-
-                if (result["ERROR"]) {
-                    // TODO handle error properly
-                    reject(result);
-                } else {
-                    console.log("creating dataSchema based on: ", result);
-
-                    // FIXME: accessControlPolicy field not needed?
-                    // create the descriptor
-                    let dataSchema = _this._factory.createDataObjectSchema(
-                        result["cguid"],
-                        result["version"],
-                        result["objectName"],
-                        result["description"],
-                        result["language"],
-                        result["sourcePackageURL"]
-                    );
-
-                    // optional fields
-                    dataSchema.signature = result["signature"];
-
-                    // parse and attach sourcePackage
-                    let sourcePackage = result["sourcePackage"];
-                    if (sourcePackage) {
-                        // console.log("dataSchema has sourcePackage:", sourcePackage);
-                        dataSchema.sourcePackage = _this._createSourcePackage(_this._factory, sourcePackage);
-                    }
-
-                    console.log("created dataSchema descriptor object:", dataSchema);
-                    resolve(dataSchema);
-                }
-            });
-        });
-    }
-
-    /**
      * Get source Package from a URL
      * @param sourcePackageURL - e.g. mydomain.com/.well-known/hyperty/MyHyperty/sourcePackage
      * @returns {Promise}
@@ -323,7 +432,7 @@ class RuntimeCatalogue {
                     reject(result);
                 } else {
                     result = JSON.parse(result);
-                    let sourcePackage = _this._createSourcePackage(_this._factory, result);
+                    let sourcePackage = _this._createSourcePackage(_this, result);
                     resolve(sourcePackage);
                 }
             }).catch(function (reason) {
@@ -332,141 +441,6 @@ class RuntimeCatalogue {
 
         });
 
-    }
-
-    /**
-     * Get StubDescriptor
-     * @param stubURL - e.g. mydomain.com/.well-known/protostub/MyProtostub
-     * @returns {Promise}
-     */
-    getStubDescriptor(stubURL) {
-        let _this = this;
-
-        // console.log("getting stub descriptor from: " + stubURL);
-        return new Promise(function (resolve, reject) {
-
-            let dividedURL = divideURL(stubURL);
-            let domain = dividedURL.domain;
-            let protoStub = dividedURL.identity;
-
-            if (!domain) {
-                domain = stubURL;
-            }
-
-            if (!protoStub) {
-                protoStub = 'default';
-            } else {
-                protoStub = protoStub.substring(protoStub.lastIndexOf('/') + 1);
-            }
-
-            let url = 'hyperty-catalogue://' + domain + '/.well-known/protocolstub/' + protoStub;
-
-            _this._makeExternalRequest(url, _this._nodeHttp, _this._nodeHttps).then(function (result) {
-                // console.log("makeExternalRequest returned: ", result);
-
-                result = JSON.parse(result);
-                // console.log("parsed result: ", result);
-
-                if (result["ERROR"]) {
-                    // TODO handle error properly
-                    reject(result);
-                } else {
-                    // console.log("creating stub descriptor based on: ", result);
-
-                    // create the descriptor
-                    let stub = _this._factory.createProtoStubDescriptorObject(
-                        result["cguid"],
-                        result["version"],
-                        result["objectName"],
-                        result["description"],
-                        result["language"],
-                        result["sourcePackageURL"],
-                        result["messageSchemas"],
-                        result["configuration"],
-                        result["constraints"]
-                    );
-
-                    // optional fields
-                    stub.signature = result["signature"];
-
-                    // parse and attach the sourcePackage
-                    let sourcePackage = result["sourcePackage"];
-                    if (sourcePackage) {
-                        sourcePackage = _this._createSourcePackage(_this._factory, sourcePackage);
-                        stub.sourcePackage = sourcePackage;
-                    }
-                    resolve(stub);
-                }
-            });
-        });
-
-    }
-
-    /**
-     * Get IDPProxyDescriptor
-     * @param idpProxyURL - e.g. mydomain.com/.well-known/idp-proxy/MyProxy
-     * @returns {Promise}
-     */
-    getIdpProxyDescriptor(idpProxyURL) {
-        let _this = this;
-
-        console.log("getting idpproxy descriptor from: " + idpProxyURL);
-        return new Promise(function (resolve, reject) {
-
-            let dividedURL = divideURL(idpProxyURL);
-            let domain = dividedURL.domain;
-            let idpproxy = dividedURL.identity;
-
-            if (!domain) {
-                domain = idpProxyURL;
-            }
-
-            if (!idpproxy) {
-                idpproxy = 'default';
-            } else {
-                idpproxy = idpproxy.substring(idpproxy.lastIndexOf('/') + 1);
-            }
-
-            let url = 'hyperty-catalogue://' + domain + '/.well-known/idp-proxy/' + idpproxy;
-
-            _this._makeExternalRequest(url, _this._nodeHttp, _this._nodeHttps).then(function (result) {
-                // console.log("makeExternalRequest returned: ", result);
-
-                result = JSON.parse(result);
-                // console.log("parsed result: ", result);
-
-                if (result["ERROR"]) {
-                    // TODO handle error properly
-                    reject(result);
-                } else {
-                    // console.log("creating idpproxy descriptor based on: ", result);
-
-                    // create the descriptor
-                    let idpproxy = _this._factory.createProtoStubDescriptorObject(
-                        result["cguid"],
-                        result["version"],
-                        result["objectName"],
-                        result["description"],
-                        result["language"],
-                        result["sourcePackageURL"],
-                        result["messageSchemas"],
-                        result["configuration"],
-                        result["constraints"]
-                    );
-
-                    // optional fields
-                    idpproxy.signature = result["signature"];
-
-                    // parse and attach the sourcePackage
-                    let sourcePackage = result["sourcePackage"];
-                    if (sourcePackage) {
-                        sourcePackage = _this._createSourcePackage(_this._factory, sourcePackage);
-                        idpproxy.sourcePackage = sourcePackage;
-                    }
-                    resolve(idpproxy);
-                }
-            });
-        });
     }
 
     /**
@@ -500,27 +474,18 @@ class RuntimeCatalogue {
         });
     }
 
-    _createSourcePackage(factory, sp) {
-        //console.log("creating sourcePackage. factory:", factory, ", raw package:", sp);
-        try {
-            sp = JSON.parse(sp);
-        } catch (e) {
-            console.log("parsing sourcePackage failed. already parsed? -> ", sp);
-        }
+    set runtimeURL(runtimeURL) {
+        let _this = this;
+        _this._runtimeURL = runtimeURL;
+    }
 
-        // check encoding
-        if (sp["encoding"] === "base64") {
-            sp["sourceCode"] = atob(sp["sourceCode"]);
-        }
+    get runtimeURL() {
+        let _this = this;
+        return _this._runtimeURL;
+    }
 
-        let sourcePackage = factory.createSourcePackage(sp["sourceCodeClassname"], sp["sourceCode"]);
-        if (sp["encoding"])
-            sourcePackage.encoding = sp["encoding"];
-
-        if (sp["signature"])
-            sourcePackage.signature = sp["signature"];
-
-        return sourcePackage;
+    deleteFromPM(url) {
+        persistenceManager.delete(url);
     }
 
 }
