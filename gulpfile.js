@@ -70,7 +70,7 @@ gulp.task('runtime', function() {
 
   return browserify({
     entries: ['./src/runtimeUA.js'],
-    standalone: 'runtimeUA',
+    standalone: 'RuntimeUA',
     debug: false
   })
   .transform(babel, {compact: true})
@@ -79,7 +79,7 @@ gulp.task('runtime', function() {
     console.error(err);
     this.emit('end');
   })
-  .pipe(source('runtimeUA.js'))
+  .pipe(source('RuntimeUA.js'))
   .pipe(buffer())
   .pipe(gulpif(compact, uglify()))
   .pipe(gulpif(compact, insert.prepend('// Runtime User Agent \n\n// version: {{version}}\n\n')))
