@@ -258,10 +258,9 @@ describe('SyncherManager', function() {
     };
 
     //BEGIN: skip message system (already tested in previous units) and manually create a reporter and subscription, this should not be done in real code.
-    let reporter = new DataObjectReporter(hyperURL1, objURL, schemaURL, bus, 'on', {}, []);
-    reporter.subscriptions[hyperURL2] = { status: 'on' };
-
     let sync = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
+    let reporter = new DataObjectReporter(sync, objURL, schemaURL, 'on', {}, []);
+    reporter.subscriptions[hyperURL2] = { status: 'on' };
     sync.reporters[objURL] = reporter;
 
     //END
@@ -293,7 +292,7 @@ describe('SyncherManager', function() {
     let compacted = false;
 
     let sync = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
-    let observer = new DataObjectObserver(hyperURL1, objURL, schemaURL, bus, 'on', {}, [], 0);
+    let observer = new DataObjectObserver(sync, objURL, schemaURL, 'on', {}, [], 0);
     sync.observers[objURL] = observer;
 
     observer.onChange('*', (event) => {
