@@ -86,21 +86,19 @@ class MessageBus extends Bus {
       _this._forwards[from] = conf;
     }
 
-    return new Promise((resolve) => {
-      //add forward detination
-      this._registry.getSandbox(to).then((sandbox) => {
-        let urls = conf.sandboxToUrls.get(sandbox);
-        if (!urls) {
-          urls = new Set();
-          conf.sandboxToUrls.set(sandbox, urls);
-        }
+    //add forward detination
+    this._registry.getSandbox(to).then((sandbox) => {
+      let urls = conf.sandboxToUrls.get(sandbox);
+      if (!urls) {
+        urls = new Set();
+        conf.sandboxToUrls.set(sandbox, urls);
+      }
 
-        urls.add(to);
-        conf.urlToSandbox.set(to, sandbox);
-
-        resolve(conf);
-      });
+      urls.add(to);
+      conf.urlToSandbox.set(to, sandbox);
     });
+
+    return conf;
   }
 
   _publish(url, msg) {

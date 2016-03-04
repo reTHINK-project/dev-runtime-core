@@ -36223,21 +36223,19 @@ var MessageBus = function (_Bus) {
         _this._forwards[from] = conf;
       }
 
-      return new Promise(function (resolve) {
-        //add forward detination
-        _this3._registry.getSandbox(to).then(function (sandbox) {
-          var urls = conf.sandboxToUrls.get(sandbox);
-          if (!urls) {
-            urls = new Set();
-            conf.sandboxToUrls.set(sandbox, urls);
-          }
+      //add forward detination
+      this._registry.getSandbox(to).then(function (sandbox) {
+        var urls = conf.sandboxToUrls.get(sandbox);
+        if (!urls) {
+          urls = new Set();
+          conf.sandboxToUrls.set(sandbox, urls);
+        }
 
-          urls.add(to);
-          conf.urlToSandbox.set(to, sandbox);
-
-          resolve(conf);
-        });
+        urls.add(to);
+        conf.urlToSandbox.set(to, sandbox);
       });
+
+      return conf;
     }
   }, {
     key: '_publish',
@@ -38246,112 +38244,6 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _utils = require('../utils/utils.js');
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-/**
-* Core HypertyDiscovery interface
-* Class to allow applications to search for hyperties using the message bus
-*/
-
-var HypertyDiscovery = function () {
-
-  /**
-  * To initialise the HypertyDiscover, which will provide the support for hyperties to
-  * query users registered in outside the internal core.
-  * @param  {MessageBus}          msgbus                msgbus
-  * @param  {RuntimeURL}          runtimeURL            runtimeURL
-  */
-
-  function HypertyDiscovery(domain, msgBus) {
-    _classCallCheck(this, HypertyDiscovery);
-
-    var _this = this;
-    _this.messageBus = msgBus;
-
-    _this.domain = domain;
-    _this.discoveryURL = 'hyperty://' + domain + '/hypertyDisovery';
-  }
-
-  /**
-  * function to request about users registered in domain registry, and
-  * return the hyperty instance if found.
-  * @param  {email}              email
-  * @return {Promise}          Promise
-  */
-
-
-  _createClass(HypertyDiscovery, [{
-    key: 'discoverHypertyPerUser',
-    value: function discoverHypertyPerUser(email) {
-      var _this = this;
-      var identityURL = 'user://' + email.substring(email.indexOf('@') + 1, email.length) + '/' + email.substring(0, email.indexOf('@'));
-
-      // message to query domain registry, asking for a user hyperty.
-      var message = {
-        type: 'READ', from: _this.discoveryURL, to: 'domain://registry.' + _this.domain + '/', body: { resource: identityURL }
-      };
-
-      return new Promise(function (resolve, reject) {
-
-        _this.messageBus.postMessage(message, function (reply) {
-          //console.log('MESSAGE', reply);
-
-          var hyperty = undefined;
-          var mostRecent = undefined;
-          var lastHyperty = undefined;
-          var value = reply.body.value;
-
-          //console.log('valueParsed', valueParsed);
-          for (hyperty in value) {
-            if (value[hyperty].lastModified !== undefined) {
-              if (mostRecent === undefined) {
-                mostRecent = new Date(value[hyperty].lastModified);
-                lastHyperty = hyperty;
-              } else {
-                var hypertyDate = new Date(value[hyperty].lastModified);
-                if (mostRecent.getTime() < hypertyDate.getTime()) {
-                  mostRecent = hypertyDate;
-                  lastHyperty = hyperty;
-                }
-              }
-            }
-          }
-          var hypertyURL = lastHyperty;
-
-          if (hypertyURL === undefined) {
-            return reject('User Hyperty not found');
-          }
-
-          var idPackage = {
-            id: email,
-            descriptor: value[hypertyURL].descriptor,
-            hypertyURL: hypertyURL
-          };
-
-          console.log('===> RegisterHyperty messageBundle: ', idPackage);
-          resolve(idPackage);
-        });
-      });
-    }
-  }]);
-
-  return HypertyDiscovery;
-}();
-
-exports.default = HypertyDiscovery;
-module.exports = exports['default'];
-
-},{"../utils/utils.js":201}],193:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 var _RegistryDataModel2 = require('./RegistryDataModel');
 
 var _RegistryDataModel3 = _interopRequireDefault(_RegistryDataModel2);
@@ -38410,7 +38302,7 @@ var HypertyInstance = function (_RegistryDataModel) {
 exports.default = HypertyInstance;
 module.exports = exports['default'];
 
-},{"./RegistryDataModel":195}],194:[function(require,module,exports){
+},{"./RegistryDataModel":194}],193:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -38430,10 +38322,6 @@ var _AddressAllocation2 = _interopRequireDefault(_AddressAllocation);
 var _HypertyInstance = require('./HypertyInstance');
 
 var _HypertyInstance2 = _interopRequireDefault(_HypertyInstance);
-
-var _HypertyDiscovery = require('./HypertyDiscovery');
-
-var _HypertyDiscovery2 = _interopRequireDefault(_HypertyDiscovery);
 
 var _serviceFramework = require('service-framework');
 
@@ -38569,6 +38457,43 @@ var Registry = function (_EventEmitter) {
           console.log('===> RegisterHyperty messageBundle: ', idPackage);
           resolve(idPackage);
         });
+      });
+    }
+
+    /**
+    *  function to delete an hypertyInstance in the Domain Registry
+    */
+
+  }, {
+    key: 'deleteHypertyInstance',
+    value: function deleteHypertyInstance(user, hypertyInstance) {
+      //TODO working but the user
+      var _this = this;
+
+      var message = { type: 'DELETE', from: _this.registryURL,
+        to: 'domain://registry.' + _this._domain + '/',
+        body: { value: { user: user, hypertyURL: hypertyInstance } } };
+
+      _this._messageBus.postMessage(message, function (reply) {
+        console.log('delete hyperty Reply', reply);
+      });
+    }
+
+    /**
+    * Function to update an Hyperty
+    */
+
+  }, {
+    key: 'updateHypertyInstance',
+    value: function updateHypertyInstance(resource, value) {
+      var _this = this;
+
+      var message = { type: 'UPDATE', from: _this.registryURL,
+        to: 'domain://registry.' + _this._domain + '/',
+        body: { resource: resource, value: value } };
+
+      _this._messageBus.post.postMessage(message, function (reply) {
+        console.log('Updated hyperty reply', reply);
       });
     }
 
@@ -38933,9 +38858,6 @@ var Registry = function (_EventEmitter) {
       // Install AddressAllocation
       var addressAllocation = new _AddressAllocation2.default(_this.registryURL, messageBus);
       _this.addressAllocation = addressAllocation;
-
-      var hypertyDiscovery = new _HypertyDiscovery2.default('localhost', messageBus);
-      _this.hypertyDiscovery = hypertyDiscovery;
     }
   }]);
 
@@ -38945,7 +38867,7 @@ var Registry = function (_EventEmitter) {
 exports.default = Registry;
 module.exports = exports['default'];
 
-},{"../utils/EventEmitter":200,"../utils/utils.js":201,"./AddressAllocation":191,"./HypertyDiscovery":192,"./HypertyInstance":193,"service-framework":160}],195:[function(require,module,exports){
+},{"../utils/EventEmitter":202,"../utils/utils.js":203,"./AddressAllocation":191,"./HypertyInstance":192,"service-framework":160}],194:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -39003,7 +38925,7 @@ var RegistryDataModel = function () {
 exports.default = RegistryDataModel;
 module.exports = exports['default'];
 
-},{}],196:[function(require,module,exports){
+},{}],195:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -39369,7 +39291,7 @@ var RuntimeCatalogue = function () {
 exports.default = RuntimeCatalogue;
 module.exports = exports['default'];
 
-},{"../utils/utils":201,"service-framework":160}],197:[function(require,module,exports){
+},{"../utils/utils":203,"service-framework":160}],196:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -39868,7 +39790,7 @@ var RuntimeUA = function () {
 exports.default = RuntimeUA;
 module.exports = exports['default'];
 
-},{"../bus/MessageBus":180,"../graphconnector/GraphConnector":184,"../identity/IdentityModule":186,"../policy/PolicyEngine":190,"../registry/Registry":194,"../syncher/SyncherManager":199,"../utils/utils":201,"./RuntimeCatalogue-Local":196}],198:[function(require,module,exports){
+},{"../bus/MessageBus":180,"../graphconnector/GraphConnector":184,"../identity/IdentityModule":186,"../policy/PolicyEngine":190,"../registry/Registry":193,"../syncher/SyncherManager":201,"../utils/utils":203,"./RuntimeCatalogue-Local":195}],197:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -39947,7 +39869,259 @@ var ObjectAllocation = function () {
 exports.default = ObjectAllocation;
 module.exports = exports['default'];
 
-},{}],199:[function(require,module,exports){
+},{}],198:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Subscription = require('./Subscription');
+
+var _Subscription2 = _interopRequireDefault(_Subscription);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var ObserverObject = function () {
+  function ObserverObject(bus, url) {
+    _classCallCheck(this, ObserverObject);
+
+    var _this = this;
+
+    _this._bus = bus;
+    _this._url = url;
+    _this._subscriptions = {};
+  }
+
+  _createClass(ObserverObject, [{
+    key: 'addSubscription',
+    value: function addSubscription(hyperty, childrens) {
+      var _this = this;
+
+      _this._subscriptions[hyperty] = new _Subscription2.default(_this._bus, hyperty, _this._url, childrens);
+    }
+  }, {
+    key: 'removeSubscription',
+    value: function removeSubscription(hyperty) {
+      var _this = this;
+
+      var subscription = _this._subscriptions[hyperty];
+      if (subscription) {
+        subscription.release();
+        delete _this._subscriptions[hyperty];
+      }
+    }
+  }]);
+
+  return ObserverObject;
+}();
+
+exports.default = ObserverObject;
+module.exports = exports['default'];
+
+},{"./Subscription":200}],199:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Subscription = require('./Subscription');
+
+var _Subscription2 = _interopRequireDefault(_Subscription);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var ReporterObject = function () {
+  function ReporterObject(bus, owner, url, childrens) {
+    _classCallCheck(this, ReporterObject);
+
+    var _this = this;
+    var objSubscriptorURL = url + '/subscription';
+
+    _this._bus = bus;
+    _this._owner = owner;
+    _this._url = url;
+    _this._childrens = childrens;
+    _this._subscriptions = {};
+
+    //add objectURL forward...
+    _this._objForward = bus.addForward(url, owner);
+
+    //add subscription listener...
+    _this._subscriptionListener = bus.addListener(objSubscriptorURL, function (msg) {
+      console.log(objSubscriptorURL + '-RCV: ', msg);
+      switch (msg.type) {
+        case 'subscribe':
+          _this._onRemoteSubscribe(msg);break;
+        case 'unsubscribe':
+          _this._onRemoteUnSubscribe(msg);break;
+        case 'response':
+          _this._onRemoteResponse(msg);break;
+      }
+    });
+
+    //add children listeners...
+    var childBaseURL = url + '/children/';
+    _this._childrenListeners = [];
+    childrens.forEach(function (child) {
+      var childURL = childBaseURL + child;
+      var childListener = bus.addListener(childURL, function (msg) {
+        //TODO: what todo here? Process child creations?
+        console.log('SyncherManager-' + childURL + '-RCV: ', msg);
+      });
+
+      _this._childrenListeners.push(childListener);
+    });
+  }
+
+  _createClass(ReporterObject, [{
+    key: 'release',
+    value: function release() {
+      var _this = this;
+
+      _this._objForward.remove();
+      _this._subscriptionListener.remove();
+      _this._childrenListeners.forEach(function (cl) {
+        cl.remove();
+      });
+
+      //remove all subscriptions
+      Object.keys(_this._subscriptions).forEach(function (key) {
+        //TODO: send unsubscribe message to all subscribed hyperties ?
+        _this._subscriptions[key].release();
+      });
+    }
+  }, {
+    key: '_onRemoteResponse',
+    value: function _onRemoteResponse(msg) {
+      var _this = this;
+
+      _this._bus.postMessage({
+        id: msg.id, type: 'response', from: msg.to, to: _this._url,
+        body: { code: msg.body.code, source: msg.from }
+      });
+    }
+  }, {
+    key: '_onRemoteSubscribe',
+    value: function _onRemoteSubscribe(msg) {
+      var _this = this;
+      var hypertyURL = msg.body.subscriber;
+
+      //validate if subscription already exists?
+      if (_this._subscriptions[hypertyURL]) {
+        var errorMsg = {
+          id: msg.id, type: 'response', from: msg.to, to: hypertyURL,
+          body: { code: 500, desc: 'Subscription for (' + _this._url + ' : ' + hypertyURL + ') already exists!' }
+        };
+
+        _this._bus.postMessage(errorMsg);
+        return;
+      }
+
+      //ask to subscribe to Syncher? (depends on the operation mode)
+      //TODO: get mode from object!
+      var mode = 'sub/pub';
+
+      if (mode === 'sub/pub') {
+        //forward to Hyperty owner
+        var forwardMsg = {
+          type: 'forward', from: _this._url, to: _this._owner,
+          body: { type: msg.type, from: hypertyURL, to: _this._url }
+        };
+
+        _this._bus.postMessage(forwardMsg, function (reply) {
+          console.log('forward-reply: ', reply);
+          if (reply.body.code === 200) {
+            _this._subscriptions[hypertyURL] = new _Subscription2.default(_this._bus, hypertyURL, _this._url, _this._childrens);
+          }
+
+          //send subscribe-response
+          _this._bus.postMessage({
+            id: msg.id, type: 'response', from: msg.to, to: msg.from,
+            body: reply.body
+          });
+        });
+      }
+    }
+  }, {
+    key: '_onRemoteUnSubscribe',
+    value: function _onRemoteUnSubscribe(msg) {
+      var _this = this;
+      var hypertyURL = msg.body.subscriber;
+
+      var subscription = _this._subscriptions[hypertyURL];
+      if (subscription) {
+        subscription.release();
+        delete _this._subscriptions[hypertyURL];
+
+        //TODO: send un-subscribe message to Syncher? (depends on the operation mode)
+      }
+    }
+  }]);
+
+  return ReporterObject;
+}();
+
+exports.default = ReporterObject;
+module.exports = exports['default'];
+
+},{"./Subscription":200}],200:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Subscription = function () {
+  function Subscription(bus, hyperty, url, childrens) {
+    _classCallCheck(this, Subscription);
+
+    var _this = this;
+    var childBaseURL = url + '/children/';
+
+    //subscription accepted (add forward and subscription)
+    _this._changeListener = bus.addForward(url + '/changes', hyperty);
+
+    //add forward for children
+    _this._childrenListeners = [];
+    childrens.forEach(function (child) {
+      var childrenForward = bus.addForward(childBaseURL + child, hyperty);
+      _this._childrenListeners.push(childrenForward);
+    });
+  }
+
+  _createClass(Subscription, [{
+    key: 'release',
+    value: function release() {
+      var _this = this;
+
+      _this._changeListener.remove();
+      _this._childrenListeners.forEach(function (forward) {
+        forward.remove();
+      });
+    }
+  }]);
+
+  return Subscription;
+}();
+
+exports.default = Subscription;
+module.exports = exports['default'];
+
+},{}],201:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -39961,6 +40135,14 @@ var _utils = require('../utils/utils');
 var _ObjectAllocation = require('./ObjectAllocation');
 
 var _ObjectAllocation2 = _interopRequireDefault(_ObjectAllocation);
+
+var _ReporterObject = require('./ReporterObject');
+
+var _ReporterObject2 = _interopRequireDefault(_ReporterObject);
+
+var _ObserverObject = require('./ObserverObject');
+
+var _ObserverObject2 = _interopRequireDefault(_ObserverObject);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -39977,7 +40159,8 @@ var SyncherManager = function () {
   _bus: MiniBus
   _registry: Registry
   _allocator: ObjectAllocation
-   _subscriptions: { ObjectURL: { owner: HypertyURL, schema: Schema, sl: MsgListener, cl: [MsgListener], subs: [HypertyURL] } }
+   _reporters: { ObjectURL: ReporterObject }
+  _observers: { ObjectURL: ObserverObject }
   */
 
   function SyncherManager(runtimeURL, bus, registry, catalog, allocator) {
@@ -39992,7 +40175,9 @@ var SyncherManager = function () {
     //TODO: these should be saved in persistence engine?
     _this._url = runtimeURL + '/sm';
     _this._objectURL = runtimeURL + '/object-allocation';
-    _this._subscriptions = {};
+
+    _this._reporters = {};
+    _this._observers = {};
 
     //TODO: this should not be hardcoded!
     _this._domain = (0, _utils.divideURL)(runtimeURL).domain;
@@ -40032,53 +40217,28 @@ var SyncherManager = function () {
       _this._catalog.getDataSchemaDescriptor(msg.body.schema).then(function (descriptor) {
         var properties = descriptor.sourcePackage.sourceCode.properties;
         var scheme = properties.scheme ? properties.scheme.constant : 'resource';
-        var children = properties.children ? properties.children.constant : [];
+        var childrens = properties.children ? properties.children.constant : [];
 
-        _this._allocator.create(domain, scheme, children, 1).then(function (allocated) {
+        _this._allocator.create(domain, scheme, childrens, 1).then(function (allocated) {
           //TODO: get address from address allocator ?
           var objURL = allocated[0];
           var objSubscriptorURL = objURL + '/subscription';
 
-          //15. add subscription listener
-          var subscriptorListener = _this._bus.addListener(objSubscriptorURL, function (msg) {
-            console.log(objSubscriptorURL + '-RCV: ', msg);
-            switch (msg.type) {
-              case 'subscribe':
-                _this._onRemoteSubscribe(objURL, msg);break;
-              case 'unsubscribe':
-                _this._onRemoteUnSubscribe(objURL, msg);break;
-            }
-          });
-
-          var objSubscription = { owner: owner, children: children, sl: subscriptorListener, cl: [], subs: [] };
-          _this._subscriptions[objURL] = objSubscription;
-
-          //add children listeners...
-          var childBaseURL = objURL + '/children/';
-          children.forEach(function (child) {
-            var childURL = childBaseURL + child;
-            var childListener = _this._bus.addListener(childURL, function (msg) {
-
-              //TODO: what todo here? Process child creations?
-              console.log('SyncherManager-' + childURL + '-RCV: ', msg);
-            });
-
-            objSubscription.cl.push(childListener);
-          });
+          _this._reporters[objURL] = new _ReporterObject2.default(_this._bus, owner, objURL, childrens);
 
           //all ok, send response
           _this._bus.postMessage({
             id: msg.id, type: 'response', from: msg.to, to: owner,
-            body: { code: 200, resource: objURL, children: children }
+            body: { code: 200, resource: objURL, childrenResources: childrens }
           });
 
-          //19. send create to all observers, responses will be deliver to the Hyperty owner?
+          //send create to all observers, responses will be deliver to the Hyperty owner?
           setTimeout(function () {
             //schedule for next cycle needed, because the Reporter should be available.
             msg.body.authorise.forEach(function (hypertyURL) {
               _this._bus.postMessage({
-                type: 'create', from: owner, to: hypertyURL,
-                body: { schema: msg.body.schema, resource: objURL, value: msg.body.value }
+                type: 'create', from: objSubscriptorURL, to: hypertyURL,
+                body: { source: msg.from, value: msg.body.value, schema: msg.body.schema }
               });
             });
           });
@@ -40092,83 +40252,18 @@ var SyncherManager = function () {
     }
   }, {
     key: '_onDelete',
-    value: function _onDelete(msg) {
+    value: function _onDelete() {
       var _this = this;
 
       //TODO: where to get objectURL ?
       var objURL = '<objURL>';
 
-      //destroy all objURL listeners
-      delete _this._subscriptions[objURL];
-      _this._bus.removeAllListenersOf(objURL);
-      _this._bus.removeAllListenersOf(objURL + '/subscription');
+      var object = _this._reporters[objURL];
+      if (object) {
+        object.release();
 
-      //TODO: destroy object in the registry?
-    }
-  }, {
-    key: '_onRemoteSubscribe',
-    value: function _onRemoteSubscribe(objURL, msg) {
-      var _this = this;
-      var hypertyUrl = msg.body.subscriber;
-
-      var subscription = _this._subscriptions[objURL];
-      var childBaseURL = objURL + '/children/';
-
-      //27. validate if subscription already exists?
-      if (subscription.subs.indexOf(hypertyUrl) !== -1) {
-        var errorMsg = {
-          id: msg.id, type: 'response', from: msg.to, to: hypertyUrl,
-          body: { code: 500, desc: 'Subscription for (' + objURL + ' : ' + hypertyUrl + ') already exists!' }
-        };
-
-        _this._bus.postMessage(errorMsg);
-        return;
+        //TODO: destroy object in the registry?
       }
-
-      //31. ask to subscribe to Syncher? (depends on the operation mode)
-      //TODO: get mode from object!
-      var mode = 'sub/pub';
-
-      if (mode === 'sub/pub') {
-        //forward to Hyperty owner
-        var forwardMsg = {
-          type: 'forward', from: _this._url, to: subscription.owner,
-          body: { type: msg.type, from: hypertyUrl, to: objURL }
-        };
-
-        _this._bus.postMessage(forwardMsg, function (reply) {
-          console.log('forward-reply: ', reply);
-          if (reply.body.code === 200) {
-            //subscription accepted (add forward and subscription)
-            _this._bus.addForward(objURL, hypertyUrl);
-
-            //add forward for children
-            subscription.children.forEach(function (child) {
-              _this._bus.addForward(childBaseURL + child, hypertyUrl);
-            });
-
-            subscription.subs.push(hypertyUrl);
-          }
-
-          //send subscribe-response
-          _this._bus.postMessage({
-            id: msg.id, type: 'response', from: msg.to, to: msg.from,
-            body: reply.body
-          });
-        });
-      }
-    }
-  }, {
-    key: '_onRemoteUnSubscribe',
-    value: function _onRemoteUnSubscribe(objURL, msg) {
-      var _this = this;
-      var hypertyUrl = msg.from;
-
-      var subs = _this._subscriptions[objURL].subs;
-      var index = subs.indexOf(hypertyUrl);
-      subs.splice(index, 1);
-
-      //TODO: send un-subscribe message to Syncher? (depends on the operation mode)
     }
   }, {
     key: '_onLocalSubscribe',
@@ -40177,57 +40272,62 @@ var SyncherManager = function () {
 
       var _this = this;
 
-      var domain = (0, _utils.divideURL)(msg.from).domain;
+      var hypertyURL = msg.from;
+      var domain = (0, _utils.divideURL)(hypertyURL).domain;
       var objURL = msg.body.resource;
       var objURLSubscription = objURL + '/subscription';
 
       //get schema from catalogue and parse -> (children)
       _this._catalog.getDataSchemaDescriptor(msg.body.schema).then(function (descriptor) {
         var properties = descriptor.sourcePackage.sourceCode.properties;
-        var children = properties.children ? properties.children.constant : [];
-        var childBaseURL = objURL + '/children/';
+        var childrens = properties.children ? properties.children.constant : [];
 
-        //1. subscribe msg for the domain node
+        //subscribe msg for the domain node
         var nodeSubscribeMsg = {
           type: 'subscribe', from: _this._url, to: 'domain://msg-node.' + domain + '/sm',
-          body: { resource: msg.body.resource, childrenResources: children }
+          body: { resource: objURL, childrenResources: childrens, schema: msg.body.schema }
         };
 
-        //2. subscribe in msg-node
+        //subscribe in msg-node
         _this._bus.postMessage(nodeSubscribeMsg, function (reply) {
           console.log('node-subscribe-response: ', reply);
           if (reply.body.code === 200) {
-            //listener accepted (add forward and subscribe to reporter)
-            _this._bus.addForward(objURL, msg.from);
-
-            //add forward for children
-            children.forEach(function (child) {
-              _this._bus.addForward(childBaseURL + child, msg.from);
-            });
 
             //send provisional response
-            _this2._bus.postMessage({
-              id: msg.id, type: 'response', from: msg.to, to: msg.from,
-              body: { code: 100, childrenResources: children }
+            _this._bus.postMessage({
+              id: msg.id, type: 'response', from: msg.to, to: hypertyURL,
+              body: { code: 100, childrenResources: childrens }
             });
 
             var objSubscribeMsg = {
               type: 'subscribe', from: _this._url, to: objURLSubscription,
-              body: { subscriber: msg.from }
+              body: { subscriber: hypertyURL }
             };
 
             //subscribe to reporter SM
             _this._bus.postMessage(objSubscribeMsg, function (reply) {
-              //forward to hyperty:
-              reply.id = msg.id;
-              reply.from = _this._url;
-              reply.to = msg.from;
-              _this2._bus.postMessage(reply);
+              console.log('reporter-subscribe-response: ', reply);
+              if (reply.body.code === 200) {
+
+                var observer = _this._observers[objURL];
+                if (!observer) {
+                  observer = new _ObserverObject2.default(_this._bus, objURL);
+                  _this._observers[objURL] = observer;
+                }
+
+                observer.addSubscription(hypertyURL, childrens);
+
+                //forward to hyperty:
+                reply.id = msg.id;
+                reply.from = _this._url;
+                reply.to = hypertyURL;
+                _this2._bus.postMessage(reply);
+              }
             });
           } else {
             //listener rejected
             _this._bus.postMessage({
-              id: msg.id, type: 'response', from: msg.to, to: msg.from,
+              id: msg.id, type: 'response', from: msg.to, to: hypertyURL,
               body: reply.body
             });
           }
@@ -40236,7 +40336,33 @@ var SyncherManager = function () {
     }
   }, {
     key: '_onLocalUnSubscribe',
-    value: function _onLocalUnSubscribe(msg) {}
+    value: function _onLocalUnSubscribe(msg) {
+      var _this = this;
+
+      var hypertyURL = msg.from;
+      var domain = (0, _utils.divideURL)(hypertyURL).domain;
+      var objURL = msg.body.resource;
+      var objURLSubscription = objURL + '/subscription';
+
+      var observer = _this._observers[objURL];
+      if (observer) {
+        observer.unsubscribe(hypertyURL);
+
+        //TODO: remove Object if no more subscription ?
+
+        //unsubscribe msg for the domain node
+        _this._bus.postMessage({
+          type: 'unsubscribe', from: _this._url, to: 'domain://msg-node.' + domain + '/sm',
+          body: { resource: objURL }
+        });
+
+        //unsubscribe msg for the Reporter SM
+        _this._bus.postMessage({
+          type: 'unsubscribe', from: _this._url, to: objURLSubscription,
+          body: { resource: objURL }
+        });
+      }
+    }
   }, {
     key: 'url',
     get: function get() {
@@ -40250,7 +40376,7 @@ var SyncherManager = function () {
 exports.default = SyncherManager;
 module.exports = exports['default'];
 
-},{"../utils/utils":201,"./ObjectAllocation":198}],200:[function(require,module,exports){
+},{"../utils/utils":203,"./ObjectAllocation":197,"./ObserverObject":198,"./ReporterObject":199}],202:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -40308,7 +40434,7 @@ var EventEmitter = function () {
 exports.default = EventEmitter;
 module.exports = exports['default'];
 
-},{}],201:[function(require,module,exports){
+},{}],203:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -40369,5 +40495,5 @@ function deepClone(obj) {
   if (obj) return JSON.parse(JSON.stringify(obj));
 }
 
-},{}]},{},[197])(197)
+},{}]},{},[196])(196)
 });

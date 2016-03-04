@@ -1,7 +1,6 @@
 import EventEmitter from '../utils/EventEmitter';
 import AddressAllocation from './AddressAllocation';
 import HypertyInstance from './HypertyInstance';
-import HypertyDiscovery from './HypertyDiscovery';
 
 import {MessageFactory} from 'service-framework';
 import {divideURL} from '../utils/utils.js';
@@ -72,9 +71,6 @@ class Registry extends EventEmitter {
     // Install AddressAllocation
     let addressAllocation = new AddressAllocation(_this.registryURL, messageBus);
     _this.addressAllocation = addressAllocation;
-
-    let hypertyDiscovery = new HypertyDiscovery('localhost', messageBus);
-    _this.hypertyDiscovery = hypertyDiscovery;
   }
 
   /**
@@ -136,6 +132,37 @@ class Registry extends EventEmitter {
         console.log('===> RegisterHyperty messageBundle: ', idPackage);
         resolve(idPackage);
       });
+    });
+  }
+
+  /**
+  *  function to delete an hypertyInstance in the Domain Registry
+  */
+  deleteHypertyInstance(user, hypertyInstance) {
+    //TODO working but the user
+    let _this = this;
+
+    let message = { type: 'DELETE', from: _this.registryURL,
+                   to: 'domain://registry.' + _this._domain + '/',
+                   body: { value: {user: user, hypertyURL: hypertyInstance }}};
+
+    _this._messageBus.postMessage(message, (reply) => {
+      console.log('delete hyperty Reply', reply);
+    });
+  }
+
+  /**
+  * Function to update an Hyperty
+  */
+  updateHypertyInstance(resource, value) {
+    let _this = this;
+
+    let message = { type: 'UPDATE', from: _this.registryURL,
+                    to: 'domain://registry.' + _this._domain + '/',
+                    body: { resource: resource, value: value}};
+
+    _this._messageBus.post.postMessage(message, (reply) => {
+      console.log('Updated hyperty reply', reply);
     });
   }
 
