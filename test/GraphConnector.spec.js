@@ -14,12 +14,12 @@ import bip39 from 'bip39';
 import jsrsasign from 'jsrsasign';
 import Registry from '../src/registry/Registry';
 import MessageBus from '../src/bus/MessageBus';
-import SandboxFactory from '../resources/sandboxes/SandboxFactory';
+import RuntimeFactory from '../resources/RuntimeFactory';
 
 // variables
 let runtimeURL = 'hyperty-runtime://ua.pt/123';
-let sandboxFactory = new SandboxFactory();
-let appSandbox = sandboxFactory.createAppSandbox();
+let runtimeFactory = new RuntimeFactory();
+let appSandbox = runtimeFactory.createAppSandbox();
 
 let identityModule = {
   getIdentities: () => {

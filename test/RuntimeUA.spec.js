@@ -11,23 +11,21 @@ chai.use(sinonChai);
 // Testing Module
 import RuntimeUA from '../src/runtime/RuntimeUA';
 
-import RuntimeCatalogue from '../src/runtime/RuntimeCatalogue-Local';
-
 // Main dependecies
 import Registry from '../src/registry/Registry';
 import IdentityModule from '../src/identity/IdentityModule';
 import PolicyEngine from '../src/policy/PolicyEngine';
 import MessageBus from '../src/bus/MessageBus';
 
-import SandboxFactory from './resources/sandboxes/SandboxFactory';
+import RuntimeFactory from './resources/RuntimeFactory';
 
 // Testing runtimeUA;
 describe('RuntimeUA', function() {
 
   // Only for testing
   let runtimeURL = 'runtime://sp.domain/123';
-  let sandboxFactory = new SandboxFactory();
-  let runtime = new RuntimeUA(sandboxFactory, 'sp.domain');
+  let runtimeFactory = new RuntimeFactory();
+  let runtime = new RuntimeUA(runtimeFactory, 'sp.domain');
 
   before(function() {
 
@@ -108,7 +106,7 @@ describe('RuntimeUA', function() {
       }
     };
 
-    let stub = sinon.stub(runtime.runtimeCatalogue, '_makeLocalRequest');
+    let stub = sinon.stub(runtime.runtimeCatalogue.httpRequest, 'get');
     stub.withArgs('../resources/descriptors/Hyperties.json').returns(new Promise(function(resolve, reject) {
       try {
         resolve(JSON.stringify(Hyperties));
@@ -145,12 +143,12 @@ describe('RuntimeUA', function() {
 
     sinon.stub(runtime.registry, 'getSandbox')
     .returns(new Promise(function(resolve, reject) {
-      resolve(sandboxFactory.createSandbox());
+      resolve(runtimeFactory.createSandbox());
     }));
 
     sinon.stub(runtime.registry, 'getAppSandbox')
     .returns(new Promise(function(resolve, reject) {
-      resolve(sandboxFactory.createAppSandbox());
+      resolve(runtimeFactory.createAppSandbox());
     }));
 
     sinon.stub(runtime.messageBus, 'addListener')
@@ -161,7 +159,7 @@ describe('RuntimeUA', function() {
   });
 
   after(function() {
-    runtime.runtimeCatalogue._makeLocalRequest.restore();
+    runtime.runtimeCatalogue.httpRequest.get.restore();
   });
 
   describe('constructor()', function() {
@@ -183,7 +181,7 @@ describe('RuntimeUA', function() {
     });
 
     it('should throw when given no arguments', function() {
-      expect(runtime).to.have.property('sandboxFactory');
+      expect(runtime).to.have.property('runtimeFactory');
     });
 
   });

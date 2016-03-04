@@ -1,6 +1,6 @@
+import PEP from './PEP';
+import PDP from './PDP';
 import Policy from './Policy';
-import {divideURL} from '../utils/utils.js';
-
 
 class PolicyEngine {
 
@@ -8,10 +8,13 @@ class PolicyEngine {
     let _this = this;
     _this.idModule = identityModule;
     _this.registry = runtimeRegistry;
+    _this.pep = new PEP();
+    _this.pdp = new PDP();
     _this.policies = {};
   }
 
-  /* TODO: validation needed */
+  // TODO: verify duplicates
+  // TODO: conflict detection
   addPolicies(key, policies) {
     let _this = this;
     for (let policy in policies) {
@@ -25,35 +28,37 @@ class PolicyEngine {
   simulate(key) {
     let _this = this;
 
-    let id = 'allow-only-gmail';
-    let target = 'domain';
-    let when = 'gmail.com';
-    let authorise = true;
-    let actions = [];
-    let policy1 = new Policy(id, target, when, authorise, actions);
+    let policy = {
+      id: 'block-blacklisted',
+      scope: 'user',
+      condition: 'blacklisted',
+      authorise: false,
+      actions: []
+    };
+    let policy2 = new Policy(policy.id, policy.scope, policy.condition,
+      policy.authorise, policy.actions);
 
-    id = 'block-blacklisted';
-    target = 'lists';
-    when = 'isBlackListed';
-    authorise = false;
-    actions = [];
-    let policy2 = new Policy(id, target, when, authorise, actions);
+    policy = {
+      id: 'allow-whitelisted',
+      scope: 'user',
+      condition: 'whitelisted',
+      authorise: true,
+      actions: []
+    };
+    let policy3 = new Policy(policy.id, policy.scope, policy.condition,
+      policy.authorise, policy.actions);
 
-    /*id = 'allow-whitelisted';
-    target = 'lists';
-    when = 'isWhiteListed';
-    authorise = true;
-    actions = [];
-    let policy3 = new Policy(id, target, when, authorise, actions);
+    policy = {
+      id: 'block-08-20',
+      scope: 'user',
+      condition: 'time 08:00 20:00',
+      authorise: false,
+      actions: []
+    };
+    let policy4 = new Policy(policy.id, policy.scope, policy.condition,
+      policy.authorise, policy.actions);
 
-    id = 'allow-8-23';
-    target = 'time';
-    when = 'isTimeBetween(\'8:00\', \'20:00\')';
-    authorise = true;
-    actions = [];
-    let policy4 = new Policy(id, target, when, authorise, actions);*/
-
-    _this.addPolicies(key, [policy1, policy2]);
+    _this.addPolicies(key, [policy4]);
   }
 
   removePolicies(key, policyId) {
@@ -65,22 +70,39 @@ class PolicyEngine {
         let policies = allPolicies[key];
         let numPolicies = policies.length;
 
-        for (let i = 0; i < numPolicies; i++) {
-          if (policies[i].id === policyId) {
-            policies.splice(i, 1);
+        for (let policy = 0; policy < numPolicies; policy++) {
+          if (policies[policy].id === policyId) {
+            policies.splice(policy, 1);
             break;
           }
         }
-      }
-      else {
+      } else {
         delete _this.policies[key];
       }
     }
   }
 
+  addToBlackList(userID) {
+    this.pdp.addToBlackList(userID);
+  }
+
+  removeFromBlackList(userID) {
+    this.pdp.removeFromBlackList(userID);
+  }
+
+  addToWhiteList(userID) {
+    this.pdp.addToWhiteList(userID);
+  }
+
+  removeFromWhiteList(userID) {
+    this.pdp.removeFromWhiteList(userID);
+  }
+
   authorise(message) {
     let _this = this;
-    //_this.simulate(message.from);
+    /*let message = { id: 123, type:'READ', from:'hyperty://ua.pt/asdf',
+                  to:'domain://registry.ua.pt/hyperty-instance/user' };
+    _this.simulate(message.from);*/
     return new Promise(function(resolve, reject) {
       _this.idModule.loginWithRP('google identity', 'scope').then(function(value) {
         let assertedID = _this.idModule.getIdentities();
@@ -94,12 +116,14 @@ class PolicyEngine {
           message.body.idToken = value;
         }
 
-        let policiesResult = _this.checkPolicies(message, userID);
+        let applicablePolicies = _this.getApplicablePolicies(message.from, message.to, userID);
+        let policiesResult = _this.pdp.evaluate(message, userID, applicablePolicies);
+        _this.pep.enforce(policiesResult[1]);
+
         if (policiesResult[0]) {
           message.body.authorised = true;
           resolve(message);
-        }
-        else {
+        } else {
           message.body.authorised = false;
           reject(message);
         }
@@ -110,22 +134,7 @@ class PolicyEngine {
     });
   }
 
-  checkPolicies(message, userID) {
-    let _this = this;
-    let applicablePolicies = _this.getApplicablePolicies(message.from, message.to, userID);
-    let results = [true];
-    let actions = [];
-
-    for (let policy in applicablePolicies) {
-      let result = applicablePolicies[policy].evaluate(message, userID);
-      results.push(result[0]);
-      actions.push(result[1]);
-    }
-
-    let authorisationDecision = _this.getAuthorisationDecision(results);
-    return [authorisationDecision, actions]
-  }
-
+  // TODO: applicability is to be based on scope
   getApplicablePolicies(hypertyFrom, hypertyTo, userID) {
     let _this = this;
     let applicablePolicies = [];
@@ -148,9 +157,6 @@ class PolicyEngine {
     return applicablePolicies;
   }
 
-  getAuthorisationDecision(results) {
-    return results.indexOf(false) == -1;
-  }
 }
 
 export default PolicyEngine;

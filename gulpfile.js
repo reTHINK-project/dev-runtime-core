@@ -5,6 +5,47 @@ var exec = require('child_process').exec;
 var jsdoc = require('gulp-jsdoc3');
 var pandoc = require('gulp-pandoc');
 
+// Task and dependencies to distribute for all environments;
+var babel = require('babelify');
+var browserify = require('browserify');
+var buffer = require('vinyl-buffer');
+var source = require('vinyl-source-stream');
+var replace = require('gulp-replace');
+var insert = require('gulp-insert');
+var uglify = require('gulp-uglify');
+var bump = require('gulp-bump');
+var argv = require('yargs').argv;
+var through = require('through2');
+var path = require('path');
+var gulpif = require('gulp-if');
+var Base64 = require('js-base64').Base64;
+var fs = require('fs');
+
+var pkg = require('./package.json');
+
+var license = '/**\n' +
+'* Copyright 2016 PT Inovação e Sistemas SA\n' +
+'* Copyright 2016 INESC-ID\n' +
+'* Copyright 2016 QUOBIS NETWORKS SL\n' +
+'* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V\n' +
+'* Copyright 2016 ORANGE SA\n' +
+'* Copyright 2016 Deutsche Telekom AG\n' +
+'* Copyright 2016 Apizee\n' +
+'* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN\n' +
+'*\n' +
+'* Licensed under the Apache License, Version 2.0 (the "License");\n' +
+'* you may not use this file except in compliance with the License.\n' +
+'* You may obtain a copy of the License at\n' +
+'*\n' +
+'*   http://www.apache.org/licenses/LICENSE-2.0\n' +
+'*\n' +
+'* Unless required by applicable law or agreed to in writing, software\n' +
+'* distributed under the License is distributed on an "AS IS" BASIS,\n' +
+'* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n' +
+'* See the License for the specific language governing permissions and\n' +
+'* limitations under the License.\n' +
+'**/\n\n';
+
 // Gulp task to generate development documentation;
 gulp.task('doc', function(done) {
 
@@ -49,40 +90,66 @@ gulp.task('docx', ['api'], function(done) {
 
 });
 
-// Task and dependencies to distribute for all environments;
-var babel = require('babelify');
-var browserify = require('browserify');
-var buffer = require('vinyl-buffer');
-var source = require('vinyl-source-stream');
-var replace = require('gulp-replace');
-var insert = require('gulp-insert');
-var uglify = require('gulp-uglify');
-var bump = require('gulp-bump');
-var gulpif = require('gulp-if');
-var argv = require('yargs').argv;
+gulp.task('license', function() {
 
-var pkg = require('./package.json');
+  var clean = argv.clean;
+  if (!clean) clean = false;
+
+  return gulp.src(['src/**/*.js'])
+  .pipe(prependLicense(clean));
+
+});
+
+function prependLicense(clean) {
+
+  return through.obj(function(file, enc, cb) {
+
+    if (file.isNull()) {
+      return cb(new Error('Fil is null'));
+    }
+
+    if (file.isStream()) {
+      return cb(new Error('Streaming not supported'));
+    }
+
+    var dest = path.dirname(file.path);
+
+    return gulp.src(file.path)
+    .pipe(replace(license, ''))
+    .pipe(gulpif(!clean, insert.prepend(license)))
+    .pipe(gulp.dest(dest))
+    .on('end', function() {
+      cb();
+    });
+
+  });
+
+}
 
 gulp.task('runtime', function() {
 
   var compact = argv.compact;
-  if (!compact) compact = true;
+  if (!compact) compact = false;
 
   return browserify({
-    entries: ['./src/runtimeUA.js'],
-    standalone: 'runtimeUA',
-    debug: false
+    entries: ['./src/runtime/RuntimeUA.js'],
+    standalone: 'RuntimeUA',
+    debug: compact
   })
-  .transform(babel, {compact: false, optional: 'runtime'})
+  .transform(babel, {
+    compact: compact,
+    presets: ['es2015'],
+    plugins: ['add-module-exports']
+  })
   .bundle()
   .on('error', function(err) {
     console.error(err);
     this.emit('end');
   })
-  .pipe(source('runtimeUA.js'))
+  .pipe(source('RuntimeUA.js'))
   .pipe(buffer())
   .pipe(gulpif(compact, uglify()))
-  .pipe(gulpif(compact, insert.prepend('// Runtime User Agent \n\n// version: {{version}}\n\n')))
+  .pipe(gulpif(compact, insert.prepend(license + '// Runtime User Agent \n\n// version: {{version}}\n\n')))
   .pipe(gulpif(compact, replace('{{version}}', pkg.version)))
   .pipe(gulp.dest('./dist'));
 
@@ -91,14 +158,20 @@ gulp.task('runtime', function() {
 gulp.task('minibus', function() {
 
   var compact = argv.compact;
-  if (!compact) compact = true;
+  if (!compact) compact = false;
+
+  var descriptionNote = '/**\n' +
+  '* Minimal interface and implementation to send and receive messages. It can be reused in many type of components.\n' +
+  '* Components that need a message system should receive this class as a dependency or extend it.\n' +
+  '* Extensions should implement the following private methods: _onPostMessage and _registerExternalListener.\n' +
+  '*/\n';
 
   return browserify({
     entries: ['./src/minibus.js'],
     standalone: 'MiniBus',
-    debug: true
+    debug: compact
   })
-  .transform(babel)
+  .transform(babel, {compact: compact, presets: ['es2015']})
   .bundle()
   .on('error', function(err) {
     console.error(err);
@@ -107,7 +180,7 @@ gulp.task('minibus', function() {
   .pipe(source('minibus.js'))
   .pipe(buffer())
   .pipe(gulpif(compact, uglify()))
-  .pipe(gulpif(compact, insert.prepend('// Runtime User Agent \n\n// version: {{version}}\n\n')))
+  .pipe(gulpif(compact, insert.prepend(descriptionNote + '// version: {{version}}\n\n')))
   .pipe(gulpif(compact, replace('{{version}}', pkg.version)))
   .pipe(gulp.dest('./dist'));
 
@@ -115,15 +188,20 @@ gulp.task('minibus', function() {
 
 gulp.task('sandbox', function() {
 
+  var descriptionNote = '/**\n' +
+  '* @author micaelpedrosa@gmail.com\n' +
+  '* Base class to implement external sandbox component\n' +
+  '*/\n\n';
+
   var compact = argv.compact;
-  if (!compact) compact = true;
+  if (!compact) compact = false;
 
   return browserify({
     entries: ['./src/sandbox.js'],
     standalone: 'sandbox',
-    debug: true
+    debug: compact
   })
-  .transform(babel)
+  .transform(babel, {compact: compact, presets: ['es2015']})
   .bundle()
   .on('error', function(err) {
     console.error(err);
@@ -132,7 +210,7 @@ gulp.task('sandbox', function() {
   .pipe(source('sandbox.js'))
   .pipe(buffer())
   .pipe(gulpif(compact, uglify()))
-  .pipe(gulpif(compact, insert.prepend('// Runtime User Agent \n\n// version: {{version}}\n\n')))
+  .pipe(gulpif(compact, insert.prepend(descriptionNote + '// version: {{version}}\n\n')))
   .pipe(gulpif(compact, replace('{{version}}', pkg.version)))
   .pipe(gulp.dest('./dist'));
 
@@ -186,10 +264,6 @@ gulp.task('compile', function() {
   return rebundle();
 
 });
-
-var through = require('through2');
-var Base64 = require('js-base64').Base64;
-var fs = require('fs');
 
 function encode(filename, descriptorName, configuration, isDefault) {
 
@@ -326,7 +400,7 @@ gulp.task('encode', function(done) {
   });
 
   function isFile(file) {
-    if (file.indexOf('Hyperty') !== -1 || file.indexOf('ProtoStub') !== -1 || file.indexOf('DataSchema') !== -1){
+    if (file.indexOf('Hyperty') !== -1 || file.indexOf('ProtoStub') !== -1 || file.indexOf('DataSchema') !== -1) {
       return fs.statSync('resources/' + file).isFile();
     }
   }

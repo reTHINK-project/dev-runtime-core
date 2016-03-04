@@ -103,10 +103,10 @@ class RuntimeCatalogue {
                     rejectUnauthorized: false
                 }, function (response) {
                     var body = "";
-                    response.on("data", function(d) {
+                    response.on("data", function (d) {
                         body += d;
                     });
-                    response.on("end", function() {
+                    response.on("end", function () {
                         resolve(body);
                     });
                 });
@@ -170,7 +170,12 @@ class RuntimeCatalogue {
                         result["dataObjects"]
                     );
 
-                    // console.log("created hyperty descriptor object:", hyperty);
+                    // optional fields
+                    hyperty.configuration = result["configuration"];
+                    hyperty.constraints = result["constraints"];
+                    hyperty.messageSchema = result["messageSchema"];
+                    hyperty.policies = result["policies"];
+                    hyperty.signature = result["signature"];
 
                     // parse and attach sourcePackage
                     let sourcePackage = result["sourcePackage"];
@@ -179,6 +184,7 @@ class RuntimeCatalogue {
                         hyperty.sourcePackage = _this._createSourcePackage(_this._factory, sourcePackage);
                     }
 
+                    // console.log("created hyperty descriptor object:", hyperty);
                     resolve(hyperty);
                 }
             });
@@ -228,7 +234,8 @@ class RuntimeCatalogue {
                         result["protocolCapabilities"]
                     );
 
-                    console.log("created runtime descriptor object:", runtime);
+                    // optional fields
+                    runtime.signature = result["signature"];
 
                     // parse and attach sourcePackage
                     let sourcePackage = result["sourcePackage"];
@@ -237,6 +244,7 @@ class RuntimeCatalogue {
                         runtime.sourcePackage = _this._createSourcePackage(_this._factory, sourcePackage);
                     }
 
+                    // console.log("created runtime descriptor object:", runtime);
                     resolve(runtime);
                 }
             });
@@ -275,7 +283,8 @@ class RuntimeCatalogue {
                         result["sourcePackageURL"]
                     );
 
-                    console.log("created dataSchema descriptor object:", dataSchema);
+                    // optional fields
+                    dataSchema.signature = result["signature"];
 
                     // parse and attach sourcePackage
                     let sourcePackage = result["sourcePackage"];
@@ -284,6 +293,7 @@ class RuntimeCatalogue {
                         dataSchema.sourcePackage = _this._createSourcePackage(_this._factory, sourcePackage);
                     }
 
+                    console.log("created dataSchema descriptor object:", dataSchema);
                     resolve(dataSchema);
                 }
             });
@@ -298,11 +308,11 @@ class RuntimeCatalogue {
     getSourcePackageFromURL(sourcePackageURL) {
         let _this = this;
 
-         //console.log("getting sourcePackage from:", sourcePackageURL);
+        //console.log("getting sourcePackage from:", sourcePackageURL);
 
         return new Promise(function (resolve, reject) {
             _this._makeExternalRequest(sourcePackageURL, _this._nodeHttp, _this._nodeHttps).then(function (result) {
-                 //console.log("got raw sourcePackage:", result);
+                //console.log("got raw sourcePackage:", result);
                 if (result["ERROR"]) {
                     // TODO handle error properly
                     reject(result);
@@ -330,19 +340,19 @@ class RuntimeCatalogue {
         // console.log("getting stub descriptor from: " + stubURL);
         return new Promise(function (resolve, reject) {
 
-          let dividedURL = divideURL(stubURL);
-          let domain = dividedURL.domain;
-          let protoStub = dividedURL.identity;
+            let dividedURL = divideURL(stubURL);
+            let domain = dividedURL.domain;
+            let protoStub = dividedURL.identity;
 
-          if (!domain) {
-            domain = stubURL;
-          }
+            if (!domain) {
+                domain = stubURL;
+            }
 
-          if (!protoStub) {
-            protoStub = 'default';
-          } else {
-            protoStub = protoStub.substring(protoStub.lastIndexOf('/') + 1);
-          }
+            if (!protoStub) {
+                protoStub = 'default';
+            } else {
+                protoStub = protoStub.substring(protoStub.lastIndexOf('/') + 1);
+            }
 
             let url = 'hyperty-catalogue://' + domain + '/.well-known/protocolstub/' + protoStub;
 
@@ -370,6 +380,9 @@ class RuntimeCatalogue {
                         result["constraints"]
                     );
 
+                    // optional fields
+                    stub.signature = result["signature"];
+
                     // parse and attach the sourcePackage
                     let sourcePackage = result["sourcePackage"];
                     if (sourcePackage) {
@@ -381,6 +394,72 @@ class RuntimeCatalogue {
             });
         });
 
+    }
+
+    /**
+     * Get IDPProxyDescriptor
+     * @param idpProxyURL - e.g. mydomain.com/.well-known/idp-proxy/MyProxy
+     * @returns {Promise}
+     */
+    getIdpProxyDescriptor(idpProxyURL) {
+        let _this = this;
+
+        console.log("getting idpproxy descriptor from: " + idpProxyURL);
+        return new Promise(function (resolve, reject) {
+
+            let dividedURL = divideURL(idpProxyURL);
+            let domain = dividedURL.domain;
+            let idpproxy = dividedURL.identity;
+
+            if (!domain) {
+                domain = idpProxyURL;
+            }
+
+            if (!idpproxy) {
+                idpproxy = 'default';
+            } else {
+                idpproxy = idpproxy.substring(idpproxy.lastIndexOf('/') + 1);
+            }
+
+            let url = 'hyperty-catalogue://' + domain + '/.well-known/idp-proxy/' + idpproxy;
+
+            _this._makeExternalRequest(url, _this._nodeHttp, _this._nodeHttps).then(function (result) {
+                // console.log("makeExternalRequest returned: ", result);
+
+                result = JSON.parse(result);
+                // console.log("parsed result: ", result);
+
+                if (result["ERROR"]) {
+                    // TODO handle error properly
+                    reject(result);
+                } else {
+                    // console.log("creating idpproxy descriptor based on: ", result);
+
+                    // create the descriptor
+                    let idpproxy = _this._factory.createProtoStubDescriptorObject(
+                        result["cguid"],
+                        result["objectName"],
+                        result["description"],
+                        result["language"],
+                        result["sourcePackageURL"],
+                        result["messageSchemas"],
+                        result["configuration"],
+                        result["constraints"]
+                    );
+
+                    // optional fields
+                    idpproxy.signature = result["signature"];
+
+                    // parse and attach the sourcePackage
+                    let sourcePackage = result["sourcePackage"];
+                    if (sourcePackage) {
+                        sourcePackage = _this._createSourcePackage(_this._factory, sourcePackage);
+                        idpproxy.sourcePackage = sourcePackage;
+                    }
+                    resolve(idpproxy);
+                }
+            });
+        });
     }
 
     /**
@@ -407,11 +486,11 @@ class RuntimeCatalogue {
     }
 
     _createSourcePackage(factory, sp) {
-         //console.log("creating sourcePackage. factory:", factory, ", raw package:", sp);
+        //console.log("creating sourcePackage. factory:", factory, ", raw package:", sp);
         try {
             sp = JSON.parse(sp);
         } catch (e) {
-             console.log("parsing sourcePackage failed. already parsed? -> ", sp);
+            console.log("parsing sourcePackage failed. already parsed? -> ", sp);
         }
 
         // check encoding

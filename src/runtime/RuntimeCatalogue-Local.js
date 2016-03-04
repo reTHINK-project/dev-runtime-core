@@ -1,5 +1,6 @@
 import {divideURL} from '../utils/utils';
 import {CatalogueFactory} from 'service-framework';
+import {HypertyDescriptor, ProtocolStubDescriptor, SourcePackage} from 'service-framework';
 
 class RuntimeCatalogue {
 
@@ -46,6 +47,7 @@ class RuntimeCatalogue {
     return new Promise(function(resolve, reject) {
 
       let dividedURL = divideURL(hypertyURL);
+      let type = dividedURL.type;
       let domain = dividedURL.domain;
       let hyperty = dividedURL.identity;
 
@@ -57,7 +59,7 @@ class RuntimeCatalogue {
         hyperty = hyperty.substring(hyperty.lastIndexOf('/') + 1);
       }
 
-      _this.httpRequest.get('../resources/descriptors/Hyperties.json').then(function(descriptor) {
+      _this.httpRequest.get(type + '://' + domain + '/resources/descriptors/Hyperties.json').then(function(descriptor) {
         _this.Hyperties = JSON.parse(descriptor);
 
         let result = _this.Hyperties[hyperty];
@@ -79,7 +81,12 @@ class RuntimeCatalogue {
             result.dataObjects
           );
 
-          // console.log("created hyperty descriptor object:", hyperty);
+          // optional fields
+          hyperty.configuration = result.configuration;
+          hyperty.constraints = result.constraints;
+          hyperty.messageSchema = result.messageSchema;
+          hyperty.policies = result.policies;
+          hyperty.signature = result.signature;
 
           // parse and attach sourcePackage
           let sourcePackage = result.sourcePackage;
@@ -107,9 +114,20 @@ class RuntimeCatalogue {
 
      return new Promise(function(resolve, reject) {
 
+       let dividedURL = divideURL(runtimeURL);
+       let type = dividedURL.type;
+       let domain = dividedURL.domain;
+       let runtime = dividedURL.identity;
+
+       if (runtime) {
+         runtime = runtime.substring(runtime.lastIndexOf('/') + 1);
+       }
+
        // request the json
-       _this._makeExternalRequest(runtimeURL, _this._nodeHttp, _this._nodeHttps).then(function(result) {
-         result = JSON.parse(result);
+       _this.httpRequest.get(type + '://' + domain + '/resources/descriptors/Runtimes.json').then(function(descriptor) {
+         _this.Runtimes = JSON.parse(descriptor);
+
+         let result = _this.Runtimes[runtime];
 
          if (result.ERROR) {
            // TODO handle error properly
@@ -123,6 +141,7 @@ class RuntimeCatalogue {
            } catch (e) {
              // already json object
            }
+
            console.log('creating runtime descriptor based on: ', result);
 
            // create the descriptor
@@ -168,7 +187,7 @@ class RuntimeCatalogue {
         reject('sourcePackage is already contained in descriptor, please use it directly');
       }
 
-      _this._makeExternalRequest(sourcePackageURL).then(function(result) {
+      _this.httpRequest.get(sourcePackageURL).then(function(result) {
         // console.log("got raw sourcePackage:", result);
         if (result.error) {
           // TODO handle error properly
@@ -204,6 +223,7 @@ class RuntimeCatalogue {
     return new Promise(function(resolve, reject) {
 
       let dividedURL = divideURL(stubURL);
+      let type = dividedURL.type;
       let domain = dividedURL.domain;
       let protoStub = dividedURL.identity;
 
@@ -212,12 +232,14 @@ class RuntimeCatalogue {
       }
 
       if (!protoStub) {
+        // TODO: Check this to correct the protocal;
+        type = 'http';
         protoStub = 'default';
       } else {
         protoStub = protoStub.substring(protoStub.lastIndexOf('/') + 1);
       }
 
-      _this.httpRequest.get('../resources/descriptors/ProtoStubs.json').then(function(descriptor) {
+      _this.httpRequest.get(type + '://' + domain + '/resources/descriptors/ProtoStubs.json').then(function(descriptor) {
         _this.ProtoStubs = JSON.parse(descriptor);
 
         let result = _this.ProtoStubs[protoStub];
@@ -265,16 +287,23 @@ class RuntimeCatalogue {
 
     return new Promise(function(resolve, reject) {
 
+      let dividedURL = divideURL(dataSchemaURL);
+      let type = dividedURL.type;
+      let domain = dividedURL.domain;
+      let schemaURL = dividedURL.identity;
+
       // request the json
-      if (dataSchemaURL) {
-        dataSchemaURL = dataSchemaURL.substring(dataSchemaURL.lastIndexOf('/') + 1);
+      if (schemaURL) {
+        schemaURL = schemaURL.substring(schemaURL.lastIndexOf('/') + 1);
       }
 
-      _this.httpRequest.get('../resources/descriptors/DataSchemas.json').then(function(descriptor) {
+      console.log('getDataSchemaDescriptor: ', dataSchemaURL, dividedURL);
+
+      _this.httpRequest.get(type + '://' + domain + '/resources/descriptors/DataSchemas.json').then(function(descriptor) {
 
         _this.DataSchemas = JSON.parse(descriptor);
 
-        let result = _this.DataSchemas[dataSchemaURL];
+        let result = _this.DataSchemas[schemaURL];
 
         if (result.ERROR) {
           // TODO handle error properly

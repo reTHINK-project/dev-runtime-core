@@ -10,6 +10,7 @@ chai.use(chaiAsPromised);
 chai.use(sinonChai);
 
 import RuntimeCatalogue from '../src/runtime/RuntimeCatalogue-Local';
+import RuntimeFactory from './resources/RuntimeFactory';
 
 // Testing runtimeUA;
 describe('Runtime Catalogue', function() {
@@ -17,8 +18,9 @@ describe('Runtime Catalogue', function() {
   let _hypertyDescriptor;
   let _stubDescriptor;
   let domain = 'sp.domain';
+  let runtimeFactory = new RuntimeFactory();
 
-  let runtimeCatalogue = new RuntimeCatalogue();
+  let runtimeCatalogue = new RuntimeCatalogue(runtimeFactory);
 
   before(function() {
 
@@ -99,7 +101,7 @@ describe('Runtime Catalogue', function() {
       }
     };
 
-    let stub = sinon.stub(runtimeCatalogue, '_makeLocalRequest');
+    let stub = sinon.stub(runtimeCatalogue.httpRequest, 'get');
     stub.withArgs('../resources/descriptors/Hyperties.json').returns(new Promise(function(resolve, reject) {
       try {
         resolve(JSON.stringify(Hyperties));
@@ -120,7 +122,7 @@ describe('Runtime Catalogue', function() {
   });
 
   after(function() {
-    runtimeCatalogue._makeLocalRequest.restore();
+    runtimeCatalogue.httpRequest.get.restore();
   });
 
   it('should get hyperty descriptor', function(done) {
