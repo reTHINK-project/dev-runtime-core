@@ -1,5 +1,4 @@
 import OpenIdLib from './OpenIdLib';
-
 import IdpProxyStub from '../protostub/IdpProxyStub';
 
 /**
