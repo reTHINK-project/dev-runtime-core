@@ -68,6 +68,10 @@ class Registry extends EventEmitter {
     let _this = this;
     _this._messageBus = messageBus;
 
+    // also set up messageBus in the IdentityModule component
+    // TODO redefine a better way to add the messageBus in the IdModule
+    _this.idModule.messageBus = messageBus;
+
     // Install AddressAllocation
     let addressAllocation = new AddressAllocation(_this.registryURL, messageBus);
     _this.addressAllocation = addressAllocation;

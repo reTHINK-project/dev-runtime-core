@@ -1,7 +1,7 @@
-import hello from 'hellojs';
+//import hello from 'hellojs';
 
 /**
-*
+*  class to facilitate the operations with the openID connect, through several Identity Providers
 *
 */
 class OpenIdLib {
@@ -19,6 +19,10 @@ class OpenIdLib {
       case 'facebook':
         let facebookInfo = new FacebookInfo();
         _this.info = facebookInfo;
+        break;
+      case 'windows':
+        let microsoftInfo = new MicrosoftInfo();
+        _this.info = microsoftInfo;
         break;
       default:
         break;
@@ -40,7 +44,7 @@ class OpenIdLib {
       //function to parse the query string in the given URL to obatin certain values
       function gup(url, name) {
         name = name.replace(/[\[]/, '\\\[').replace(/[\]]/, '\\\]');
-        let regexS = '[\\#&]' + name + '=([^&#]*)';
+        let regexS = '[\\#&?]' + name + '=([^&#]*)';
         let regex = new RegExp(regexS);
         let results = regex.exec(url);
         if (results === null)
@@ -48,9 +52,10 @@ class OpenIdLib {
         else
         return results[1];
       }
-      /*
-      hello.init({google: '808329566012-tqr8qoh111942gd2kg007t0s8f277roi.apps.googleusercontent.com',
-                 facebook: '460630087458906'});
+
+      /*hello.init({google: '808329566012-tqr8qoh111942gd2kg007t0s8f277roi.apps.googleusercontent.com',
+                 facebook: '655302667942219',
+                 windows: 'asdf197f6ad6-808f-4ddc-b725-3d8fe2660349'});
       hello(_this.identityProvider).login({scope: 'email'}).then(function(token) {
         console.log(token);
         resolve(token.authResponse.access_token);
@@ -68,24 +73,58 @@ class OpenIdLib {
             reject('Some error occured.');
             clearInterval(pollTimer);
           }
-
-          if (win.document.URL.indexOf(REDIRECT) !== -1) {
+          if (win.document.URL.indexOf('REDIRECT') !== -1 || win.document.URL.indexOf('http://localhost:8080') !== -1) {
             window.clearInterval(pollTimer);
             let url =   win.document.URL;
-            console.log('WINDOWN, ', url);
-            acToken =   gup(url, 'access_token');
-            tokenType = gup(url, 'token_type'); //FACEBOOK does not return tokenType in the field
-            expiresIn = gup(url, 'expires_in');
-            console.log('asdf', acToken, tokenType, expiresIn);
-            win.close();
 
-            if(_this.identityProvider === 'facebook'){
-              _this.info.VALIDURL = 'https://graph.facebook.com/debug_token?input_token=' + acToken + '&access_token=';
+            //not working yet. Some problems with the 'POST' method
+            if (_this.identityProvider === 'windows') {
+              let code = gup(url, 'code');
+              let sessionState = gup(url, 'session_state');
+
+              let reqAccessURL = _this.info.TOKENEND + 'redirect_uri=' + _this.info.REDIRECT + '&grant_type=authorization_code' + '&client_id=' + _this.info.CLIENTID + '&code=' + code;
+
+              win.close();
+
+              let req = new XMLHttpRequest();
+              req.open('POST',  _this.info.TOKENEND, true);
+              req.setRequestHeader('Access-Control-Allow-Origin', '*');
+
+              let data = new FormData();
+              data.append('redirect_uri', _this.info.REDIRECT);
+              data.append('grant_type', 'authorization_code');
+              data.append('client_id', _this.info.CLIENTID);
+              data.append('code', code);
+
+              req.onreadystatechange = function(e) {
+                if (req.readyState === 4) {
+                  if (req.status === 200) {
+
+                    resolve('null');
+                  } else if (req.status === 400) {
+                    reject('There was an error processing the token');
+                  } else {
+                    reject('something else other than 200 was returned');
+                  }
+                }
+              };
+              req.send(data);
+
+            } else {
+
+              acToken =   gup(url, 'access_token');
+              tokenType = gup(url, 'token_type'); //FACEBOOK does not return tokenType in the field
+              expiresIn = gup(url, 'expires_in');
+
+              win.close();
+
+              if (_this.identityProvider === 'facebook') {
+                _this.info.VALIDURL = 'https://graph.facebook.com/debug_token?input_token=' + acToken + '&access_token=';
+              }
+
+              //after receiving the access token, google requires to validate first the token to prevent confused deputy problem.
+              resolve(acToken);
             }
-
-            //after receiving the access token, google requires to validate first the token to prevent confused deputy problem.
-            resolve(acToken);
-
           }
         } catch (e) {
           //console.log(e);
@@ -100,18 +139,15 @@ class OpenIdLib {
     let VALIDURL = _this.info.VALIDURL;
     return new Promise(function(resolve, reject) {
       let req = new XMLHttpRequest();
-      console.log('lol ', VALIDURL + token + '&access_token=' + token);
       req.open('GET', VALIDURL + token, true);
 
       req.onreadystatechange = function(e) {
-        if (req.readyState == 4) {
-          if (req.status == 200) {
-            console.log('req ', req.responseText);
+        if (req.readyState === 4) {
+          if (req.status === 200) {
             tokenID = JSON.parse(req.responseText);
-            console.log('tokenID ', tokenID);
 
             resolve({token:token, tokenID: tokenID});
-          } else if (req.status == 400) {
+          } else if (req.status === 400) {
             reject('There was an error processing the token');
           } else {
             reject('something else other than 200 was returned');
@@ -159,6 +195,7 @@ class OpenIdLib {
   }
 }
 
+//Google works fine with OpenID connect
 class GoogleInfo {
   constructor() {
     let _this = this;
@@ -174,17 +211,37 @@ class GoogleInfo {
   }
 }
 
+//Facebook only provides the support for Oauth2 Tokens, and do not directly provide support for OpenID connect. So, no 'oficial' ID token can be requested, just information about the user.
 class FacebookInfo {
   constructor() {
     let _this = this;
     _this.OAUTHURL   =    'https://www.facebook.com/dialog/oauth?';
-    _this.CLIENTID   =    460630087458906;
+    _this.CLIENTID   =    655302667942219;
     _this.REDIRECT   =    document.URL; // 'http://localhost:8080/example/index.html';
     _this.TYPE       =    'token';
     _this.VALIDURL   =    'https://graph.facebook.com/debug_token?input_token='; //must be updated later
     _this.USERINFURL = 'https://graph.facebook.com/v2.5/me?fields=id,name,email,picture&access_token=';
     _this.URL        =    _this.OAUTHURL + 'client_id=' + _this.CLIENTID + '&redirect_uri=' + _this.REDIRECT + '&response_type=' + _this.TYPE;
   }
+}
+
+
+//Microsoft is not yet implemented to obtain the Access token / ID token. Some troubles to request the Access token, since it is required to make a http Post request with the authorization code.
+class MicrosoftInfo {
+  constructor() {
+    let _this = this;
+    _this.OAUTHURL   =    'https://login.microsoftonline.com/common/oauth2/authorize?';
+    _this.CLIENTID   =    '7e2f3589-4b38-4b1c-a321-c9251de00ef2';
+    _this.REDIRECT   =    document.URL;//'http%3A%2F%2Flocalhost%3A8080%2Fexample%2Findex%2Ehtml'
+    _this.TYPE       =    'code';
+
+    _this.TOKENEND   =    'https://login.microsoftonline.com/3fa4042c-7c4d-4382-aba8-fc8ec61103a4/oauth2/token';
+    _this.AUTHEND    =    'https://login.microsoftonline.com/3fa4042c-7c4d-4382-aba8-fc8ec61103a4/oauth2/authorize?';
+
+    _this.URL        =    _this.AUTHEND + 'response_type=' + _this.TYPE + '&client_id=' +
+    _this.CLIENTID ;//+ '&redirect_uri=' + _this.REDIRECT;
+  }
+
 }
 
 export default OpenIdLib;
