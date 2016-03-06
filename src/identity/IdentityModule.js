@@ -1,5 +1,7 @@
 import OpenIdLib from './OpenIdLib';
 
+import IdpProxyStub from '../protostub/IdpProxyStub';
+
 /**
 *
 * The Identity Module (Id Module) is the component responsible for handling the
@@ -35,22 +37,30 @@ class IdentityModule {
   */
   constructor() {
     let _this = this;
+
     //to store items with this format: {identity: identityURL, token: tokenID}
     _this.identities = [];
   }
 
   /**
-  * Register a new Identity with an Identity Provider
+  * return the messageBus in this Registry
+  * @param {MessageBus}           messageBus
   */
-  registerIdentity() {
-    // Body...
+  get messageBus() {
+    let _this = this;
+    return _this._messageBus;
   }
 
   /**
-  * In relation with a classical Relying Party: Registration
+  * Set the messageBus in this Registry
+  * @param {MessageBus}           messageBus
   */
-  registerWithRP() {
-    // Body...
+  set messageBus(messageBus) {
+    let _this = this;
+    _this._messageBus = messageBus;
+
+    let idpProxyStub = new IdpProxyStub(messageBus, _this.domain, 'idpProxy');
+    _this.idpProxyStub = idpProxyStub;
   }
 
   /**
@@ -126,16 +136,29 @@ class IdentityModule {
         });
       }
 
-
-
     });
   }
 
   /**
-  * In relation with a Hyperty Instance: Associate identity
+  * Obtain an Identity Assertion
+  *
+  * @return {IdAssertion}              IdAssertion
   */
-  setHypertyIdentity() {
-    // Body...
+  getIdentityAssertion() {
+    let _this = this;
+
+    let message = {type:'EXECUTE', to: 'domain://idpProxy', from: 'domain://localhost/id-module', body: {resource: 'identity', method: 'login',
+           params: {scope: 'login-scope'}}};
+
+    return new Promise(function(resolve,reject) {
+      _this._messageBus.postMessage(message, (result) => {
+        if (result.body.code === 200) {
+          resolve(result.body.value);
+        } else {
+          reject('error', result.body.code);
+        }
+      });
+    });
   }
 
   /**
@@ -147,7 +170,21 @@ class IdentityModule {
   * @return {IdAssertion}              IdAssertion
   */
   generateAssertion(contents, origin, usernameHint) {
-    // Body...
+    let _this = this;
+
+    let message = {type:'EXECUTE', to: 'domain://idpProxy', from: 'domain://localhost/id-module', body: {resource: 'identity', method: 'generateAssertion',
+           params: {contents: 'contents', origin: 'origin', usernameHint: 'hint'}}};
+
+    return new Promise(function(resolve,reject) {
+      _this._messageBus.postMessage(message, (result) => {
+        if (result.body.code === 200) {
+          resolve(result.body.value);
+        } else {
+          reject('error', result.body.code);
+        }
+      });
+    });
+
   }
 
   /**
@@ -158,18 +195,24 @@ class IdentityModule {
   * Function to validate an identity assertion generated previously.
   * Returns a promise with the result from the validation.
   * @param  {DOMString} assertion
+  * @param  {DOMString} origin       origin
   * @return {Promise}         Promise         promise with the result from the validation
   */
-  validateAssertion(assertion) {
-    // Body...
-  }
+  validateAssertion(assertion, origin) {
+    let _this = this;
 
-  /**
-  * Trust level evaluation of a received IdAssertion
-  * @param  {DOMString} assertion assertion
-  */
-  getAssertionTrustLevel(assertion) {
-    // Body...
+    let message = {type:'EXECUTE', to: 'domain://idpProxy', from: 'domain://localhost/id-module', body: {resource: 'identity', method: 'validateAssertion',
+           params: {assertion: 'assertion', origin: 'origin'}}};
+
+    return new Promise(function(resolve,reject) {
+      _this._messageBus.postMessage(message, (result) => {
+        if (result.body.code === 200) {
+          resolve(result.body.value);
+        } else {
+          reject('error', result.body.code);
+        }
+      });
+    });
   }
 
 }
