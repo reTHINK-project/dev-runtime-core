@@ -420,35 +420,50 @@ class Registry extends EventEmitter {
   */
   getSandbox(url) {
     if (!url) throw new Error('Parameter url needed');
-    console.log('getSandbox: ' + url);
+    let dividedURL = divideURL(url);
 
     let _this = this;
     return new Promise(function(resolve,reject) {
 
-      //check if it is a protostub url
-      let request = _this.sandboxesList.stub[url];
+      let request;
+      if (url.includes('msg-node')) {
+        request = _this.sandboxesList.stub[url];
 
-      if (request === undefined) {
-        //if not, check if it is a hyperty instance url
+        if (request === undefined) {
+          for (let stub in _this.sandboxesList.stub) {
+            if (stub.includes(url)) {
+
+              request = _this.sandboxesList.stub[stub];
+              break;
+            }
+          }
+        }
+
+      } else if (url.includes('hyperty')) {
         request = _this.sandboxesList.hyperty[url];
 
         if (request === undefined) {
-          //if not, check if it is a specific url
-          request = _this.sandboxesList.domain[url];
-
-          if (request === undefined) {
-            //if not, check if the domain in the url, is registred.
-            let dividedURL = divideURL(url);
-            request = _this.sandboxesList.domain[dividedURL.domain];
-
-            if (request === undefined) {
-              reject('Sandbox not found');
-            } else {
-              resolve(request);
+          for (let hyperty in _this.sandboxesList.hyperty) {
+            if (hyperty.includes(url)) {
+              request = _this.sandboxesList.hyperty[hyperty];
+              break;
             }
-          } else {
-            resolve(request);
           }
+        }
+      }
+      if (request === undefined) {
+        request = _this.sandboxesList.domain[url];
+
+        if (request === undefined) {
+          for (let domain in _this.sandboxesList.domain) {
+            if (domain.includes(dividedURL.domain)) {
+              request = _this.sandboxesList.domain[domain];
+              break;
+            }
+          }
+        }
+        if (request === undefined) {
+          reject('Sandbox not found');
         } else {
           resolve(request);
         }

@@ -158,6 +158,18 @@ getRegistry.then(function(registry) {
         })).to.be.fulfilled.and.eventually.to.be.instanceof(Sandbox).and.notify(done);
       });
 
+      it('should get a sandbox from a protoStub URL containing the domain', function(done) {
+        let sandBox = 'fakeSandbox';
+        let domainURL = 'anotherDomain.pt';
+
+        registry.registerStub(sandBox, domainURL).then(function() {
+          expect(registry.getSandbox('msg-node.anotherDomain.pt').then(function(response) {
+            return response;
+          })).to.be.fulfilled.and.eventually.equal(sandBox).and.notify(done);
+        });
+
+      });
+
     });
 
     describe('resolve(url)', function() {
