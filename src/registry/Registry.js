@@ -3,7 +3,7 @@ import AddressAllocation from './AddressAllocation';
 import HypertyInstance from './HypertyInstance';
 
 import {MessageFactory} from 'service-framework';
-import {divideURL} from '../utils/utils.js';
+import {divideURL, getUserEmailFromURL} from '../utils/utils.js';
 
 /**
 * Runtime Registry Interface
@@ -84,10 +84,17 @@ class Registry extends EventEmitter {
   /**
   * Function to query the Domain registry, with an user email.
   */
-  getUserHyperty(email) {
+  getUserHyperty(identifier) {
     let _this = this;
-    let identityURL = 'user://' + email.substring(email.indexOf('@') + 1, email.length) + '/' + email.substring(0, email.indexOf('@'));
-
+    let identityURL;
+    let email;
+    if (identifier.indexOf('@') > -1) {
+      identityURL = 'user://' + identifier.substring(identifier.indexOf('@') + 1, identifier.length) + '/' + identifier.substring(0, identifier.indexOf('@'));
+      email = identifier;
+    } else {
+      identityURL = identifier;
+      email = getUserEmailFromURL(identifier);
+    }
     let msg = {
       type: 'READ', from: _this.registryURL, to: 'domain://registry.' + _this._domain + '/', body: { resource: identityURL}
     };

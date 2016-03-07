@@ -67,6 +67,5 @@ export function getUserURLFromEmail(userEmail) {
  */
 export function getUserEmailFromURL(userURL) {
   let url = divideURL(userURL);
-  console.log(url);
   return url.identity.replace('/', '') + '@' + url.domain; // identity field has '/exampleID' instead of 'exampleID'
 }
