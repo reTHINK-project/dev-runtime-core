@@ -11,7 +11,7 @@ class Request {
 
       _this[methods[method]] = function(url) {
 
-        return new Promise(function(resolve, reject){
+        return new Promise(function(resolve, reject) {
 
           _this._makeLocalRequest(methods[method], url).then(function(result) {
             resolve(result);
@@ -32,7 +32,7 @@ class Request {
 
     return new Promise(function(resolve, reject) {
       let protocolmap = {
-        'hyperty-catalogue://': 'http://',
+        'hyperty-catalogue://': 'https://',
         'https://': 'https://',
         'http://': 'http://'
       };

@@ -232,8 +232,6 @@ class RuntimeCatalogue {
       }
 
       if (!protoStub) {
-        // TODO: Check this to correct the protocal;
-        type = 'http';
         protoStub = 'default';
       } else {
         protoStub = protoStub.substring(protoStub.lastIndexOf('/') + 1);

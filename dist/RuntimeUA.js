@@ -39157,8 +39157,6 @@ var RuntimeCatalogue = function () {
         }
 
         if (!protoStub) {
-          // TODO: Check this to correct the protocal;
-          type = 'http';
           protoStub = 'default';
         } else {
           protoStub = protoStub.substring(protoStub.lastIndexOf('/') + 1);
@@ -40467,6 +40465,13 @@ function divideURL(url) {
   var re = /([a-zA-Z-]*):\/\/(?:\.)?([-a-zA-Z0-9@:%._\+~#=]{2,256})([-a-zA-Z0-9@:%._\+~#=\/]*)/gi;
   var subst = '$1,$2,$3';
   var parts = url.replace(re, subst).split(',');
+
+  // If the url has no protocol, the default protocol set is https
+  if (parts[0] === url) {
+    parts[0] = 'https';
+    parts[1] = url;
+  }
+
   var result = {
     type: parts[0],
     domain: parts[1],
