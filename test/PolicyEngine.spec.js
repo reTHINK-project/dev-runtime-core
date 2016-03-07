@@ -11,6 +11,9 @@ import Policy from '../src/policy/Policy';
 
 let runtimeRegistry = 'registry mockup';
 
+
+/* ADD POLICY TO VERIFY IDENTITY */
+
 let identityModule = {
   getIdentities: () => {
     let identities = [];

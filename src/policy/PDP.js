@@ -6,8 +6,8 @@ class PDP {
     _this.whiteList = [];
   }
 
-  /* TODO: sanitization needed for eval() */
-  evaluate(message, userID, policies) {
+  /* use hashtable to allow dynamic management */
+  evaluate(registry, message, hypertyToVerify, policies) {
     let _this = this;
     let results = [true];
     let actions = [];
@@ -18,10 +18,12 @@ class PDP {
       let condition = policy.condition.split(' ');
       switch (condition[0]) {
         case 'blacklisted':
-          result[0] = _this.isBlackListed(userID) ? policy.authorise : !policy.authorise;
+          console.log('to verify', hypertyToVerify);
+          result[0] = _this.isBlackListed(registry, hypertyToVerify) ? policy.authorise : !policy.authorise;
+          console.log('result', result[0]);
           break;
         case 'whitelisted':
-          result[0] = _this.isWhiteListed(userID) ? policy.authorise : !policy.authorise;
+          result[0] = _this.isWhiteListed(hypertyToVerify) ? policy.authorise : !policy.authorise;
           break;
         case 'time':
           let start = condition[1];
@@ -44,17 +46,36 @@ class PDP {
 
   isSameOrigin() {}
 
-  isBlackListed(userID) {
+  isBlackListed(registry, hypertyToVerify) {
     let _this = this;
-    return _this.blackList.indexOf(userID) > -1;
+    let blackList = _this.blackList;
+    console.log('blacklist', blackList);
+    console.log('verifying ' + hypertyToVerify);
+    for (let i in blackList) {
+      console.log('checking email' + blackList[i]);
+      if (_this.hypertiesMatch(registry, blackList[i]), hypertyToVerify) {
+        console.log('returning true');
+        return true;
+      }
+    }
+    console.log('returning false');
+    return false;
   }
+
+/* TODO: cache this? */
+hypertiesMatch(registry, emailToVerify, hypertyToVerify) {
+  /* TODO: A user may be associated to several hyperties? */
+  registry.getUserHyperty(emailToVerify).then(function(hypertyOfEmail) {
+    console.log('email ' + emailToVerify + ' -> hyperty ' + hypertyOfEmail.hypertyURL);
+    return hypertyOfEmail.hypertyURL === hypertyToVerify;
+  });
+}
 
   isWhiteListed(userID) {
     let _this = this;
     return _this.whiteList.indexOf(userID) > -1;
   }
 
-  // TODO: implement for start > end
   isTimeBetween(start, end) {
     let _this = this;
     let now = new Date();
@@ -78,6 +99,11 @@ class PDP {
     return parseInt(timeSplit[0]) * 60 + parseInt(timeSplit[1]);
   }
 
+  getBlackList() {
+    let _this = this;
+    return _this.blackList;
+  }
+
   isContext() {}
 
   isHypertyType() {}
@@ -89,7 +115,10 @@ class PDP {
 
   addToBlackList(userID) {
     let _this = this;
-    _this.blackList.push(userID);
+    if (_this.blackList.indexOf(userID) === -1) {
+      _this.blackList.push(userID);
+    }
+    console.log(_this.blackList);
   }
 
   removeFromBlackList(userID) {
@@ -105,7 +134,9 @@ class PDP {
 
   addToWhiteList(userID) {
     let _this = this;
-    _this.whiteList.push(userID);
+    if (_this.blackList.indexOf(userID) === -1) {
+      _this.whiteList.push(userID);
+    }
   }
 
   removeFromWhiteList(userID) {
