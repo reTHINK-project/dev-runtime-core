@@ -4,6 +4,8 @@ class Subscription {
     let _this = this;
     let childBaseURL = url + '/children/';
 
+    //TODO: how to process delete message?
+
     //subscription accepted (add forward and subscription)
     _this._changeListener = bus.addForward(url + '/changes', hyperty);
 
@@ -15,7 +17,7 @@ class Subscription {
     });
   }
 
-  release() {
+  _releaseListeners() {
     let _this = this;
 
     _this._changeListener.remove();

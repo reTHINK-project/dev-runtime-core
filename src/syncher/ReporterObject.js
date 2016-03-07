@@ -1,23 +1,32 @@
+import { divideURL } from '../utils/utils';
 import Subscription from './Subscription';
 
 class ReporterObject {
 
-  constructor(bus, owner, url, childrens) {
+  constructor(parent, owner, url, childrens) {
     let _this = this;
-    let objSubscriptorURL = url + '/subscription';
 
-    _this._bus = bus;
+    _this._parent = parent;
     _this._owner = owner;
     _this._url = url;
     _this._childrens = childrens;
+
+    _this._objSubscriptorURL = _this._url + '/subscription';
+    _this._bus = parent._bus;
     _this._subscriptions = {};
 
+    _this._allocateListeners();
+  }
+
+  _allocateListeners() {
+    let _this = this;
+
     //add objectURL forward...
-    _this._objForward = bus.addForward(url, owner);
+    _this._objForward = _this._bus.addForward(_this._url, _this._owner);
 
     //add subscription listener...
-    _this._subscriptionListener = bus.addListener(objSubscriptorURL, (msg) => {
-      console.log(objSubscriptorURL + '-RCV: ', msg);
+    _this._subscriptionListener = _this._bus.addListener(_this._objSubscriptorURL, (msg) => {
+      console.log(_this._objSubscriptorURL + '-RCV: ', msg);
       switch (msg.type) {
         case 'subscribe': _this._onRemoteSubscribe(msg); break;
         case 'unsubscribe': _this._onRemoteUnSubscribe(msg); break;
@@ -26,34 +35,55 @@ class ReporterObject {
     });
 
     //add children listeners...
-    let childBaseURL = url + '/children/';
+    let childBaseURL = _this._url + '/children/';
     _this._childrenListeners = [];
-    childrens.forEach((child) => {
+    _this._childrens.forEach((child) => {
       let childURL = childBaseURL + child;
-      let childListener = bus.addListener(childURL, (msg) => {
+      let childListener = _this._bus.addListener(childURL, (msg) => {
         //TODO: what todo here? Process child creations?
         console.log('SyncherManager-' + childURL + '-RCV: ', msg);
       });
 
       _this._childrenListeners.push(childListener);
     });
-
   }
 
-  release() {
+  _releaseListeners() {
     let _this = this;
 
     _this._objForward.remove();
+
     _this._subscriptionListener.remove();
+
     _this._childrenListeners.forEach((cl) => {
       cl.remove();
     });
 
     //remove all subscriptions
     Object.keys(_this._subscriptions).forEach((key) => {
-      //TODO: send unsubscribe message to all subscribed hyperties ?
-      _this._subscriptions[key].release();
+      _this._subscriptions[key]._releaseListeners();
     });
+  }
+
+  delete() {
+    let _this = this;
+
+    let domain = divideURL(_this._owner).domain;
+
+    //delete msg to all subscriptions
+    _this._bus.postMessage({
+      type: 'delete', from: _this._objSubscriptorURL, to: _this._url + '/changes'
+    });
+
+    //TODO: should I wait for response before delete on msg-node
+    //delete msg to the domain node
+    _this._bus.postMessage({
+      type: 'delete', from: _this._url, to: 'domain://msg-node.' + domain + '/hyperty-address-allocation',
+      body: { resource: _this._url }
+    });
+
+    _this._releaseListeners();
+    delete _this._parent._reporters[_this._url];
   }
 
   _onRemoteResponse(msg) {
@@ -114,7 +144,7 @@ class ReporterObject {
 
     let subscription = _this._subscriptions[hypertyURL];
     if (subscription) {
-      subscription.release();
+      subscription._releaseListeners();
       delete _this._subscriptions[hypertyURL];
 
       //TODO: send un-subscribe message to Syncher? (depends on the operation mode)
