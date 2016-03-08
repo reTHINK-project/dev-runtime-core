@@ -1,4 +1,4 @@
-Hyperty Runtime Core
+# Hyperty Runtime Core
 --------------------
 
 -	[Overview](#overview)
@@ -31,13 +31,14 @@ Verify these use cases:
 
 for both cases you just have to run the command:
 
-```
+```shell
 jspm install runtime-core=github:rethink-project/dev-runtime-core@dev-0.2
-`
+```
 
 and on javascript code you just need to import the script like other modules;
 
-```
+```javascript
+
 import RuntimeUA from 'runtime-core/dist/runtimeUA';
 import {Sandbox, SandboxRegistry} from 'runtime-core/dist/sandbox'
 import MiniBus from 'runtime-core/dist/minibus';
@@ -45,22 +46,21 @@ import MiniBus from 'runtime-core/dist/minibus';
 console.log('Runtime: ', RuntimeUA);
 console.log('Sandbox: ', Sandbox, SandboxRegistry);
 console.log('MiniBus: ', MiniBus);
-
 ```
 
 #### [Nodejs Runtime](https://github.com/reTHINK-project/dev-runtime-node)
 
-[dev-runtime-node
-
-```
+```shell
 npm install github:rethink-project/dev-runtime-core#dev-0.2 --save
 ```
 
 after this you can require the runtime-core like other modules on node;
 
-```
-var RuntimeUA = require('runtime-core').runtimeUA;
+> **This code, probably, needs to be updated**
 
+```javascript
+
+var RuntimeUA = require('runtime-core').runtimeUA;
 var runtime = new RuntimeUA();
 
 ```
@@ -73,16 +73,18 @@ if you found some issues, please submit them into the respective repository;
 
 #### Setup Environment
 
-On the first time you are cloning this repository, you need to run the command:`
+On the first time you are cloning this repository, you need to run the command:
+```shell
 npm run init-setup
-`
+```
 
 After running successfully this command you will have 2 folders (node_modules and vendor), these folders are excluded from the commit process, and are only for development.
 
-if you already have the project configured on your machine, you only need run the next command to add new dependencies:`
+if you already have the project configured on your machine, you only need run the next command to add new dependencies:
+```shell
 npm install
 jspm install
-`
+```
 
 ---
 
@@ -159,13 +161,13 @@ Verify these use cases: 1. if you will create a new repository, you can use this
 
 for both cases you just have run the command:
 
-```
+```shell
 jspm install runtime-core=github:rethink-project/dev-runtime-core@dev-0.2
 ```
 
 and on javascript code you need import the script like other modules;
 
-```
+```javascript
 import RuntimeUA from 'runtime-core/dist/runtimeUA';
 import {Sandbox, SandboxRegistry} from 'runtime-core/dist/sandbox'
 import MiniBus from 'runtime-core/dist/minibus';
@@ -180,13 +182,13 @@ console.log('MiniBus: ', MiniBus);
 
 [dev-runtime-node](https://github.com/reTHINK-project/dev-runtime-node)
 
-```
+```shell
 npm install github:rethink-project/dev-runtime-core#dev-0.2 --save
 ```
 
 after this you can require the runtime-core like other modules on node;
 
-```
+```javascript
 var RuntimeUA = require('runtime-core').runtimeUA;
 
 var runtime = new RuntimeUA();
@@ -243,10 +245,10 @@ To distribute the runtime-core, you can make a distribution file.
 
 Run the command:
 
-```
-// compact true | false;
+```shell
+# compact true | false;
 gulp dist --compact=false
-`
+```
 
 ##### Build
 
@@ -258,7 +260,7 @@ Run the command: `gulp build`
 
 In this repository, we have some tasks which can help you. If you need change some resource file, like an Hyperty or ProtoStub, and load it to the Hyperties.json or ProtoStubs.json, run the following command, and answer to the questions;
 
-```
+```shell
 gulp compile --file=path/to/file;
 ```
 

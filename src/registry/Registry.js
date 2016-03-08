@@ -495,10 +495,13 @@ class Registry extends EventEmitter {
       let request  = _this.protostubsList[domainUrl];
 
       _this.addEventListener('runtime:stubLoaded', function(domainUrl) {
-        resolve(domainUrl);
+        request  = _this.protostubsList[domainUrl];
+        console.info('Resolved: ', request);
+        resolve(request);
       });
 
       if (request !== undefined) {
+        console.info('Resolved: ', request);
         resolve(request);
       } else {
         _this.trigger('runtime:loadStub', domainUrl);

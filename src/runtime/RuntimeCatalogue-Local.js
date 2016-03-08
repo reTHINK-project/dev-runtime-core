@@ -73,11 +73,12 @@ class RuntimeCatalogue {
           // create the descriptor
           let hyperty = _this._factory.createHypertyDescriptorObject(
             result.cguid,
+            result.version,
             result.objectName,
             result.description,
             result.language,
             result.sourcePackageURL,
-            result.type,
+            result.type || result.hypertyType,
             result.dataObjects
           );
 
@@ -251,6 +252,7 @@ class RuntimeCatalogue {
           // create the descriptor
           let stub = _this._factory.createProtoStubDescriptorObject(
             result.cguid,
+            result.version,
             result.objectName,
             result.description,
             result.language,
@@ -313,11 +315,15 @@ class RuntimeCatalogue {
           // create the descriptor
           let dataSchema = _this._factory.createDataObjectSchema(
             result.cguid,
+            result.version,
             result.objectName,
             result.description,
             result.language,
             result.sourcePackageURL
           );
+
+          // optional fields
+          dataSchema.signature = result.signature;
 
           console.log('created dataSchema descriptor object:', dataSchema);
 

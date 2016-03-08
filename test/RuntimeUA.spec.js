@@ -106,23 +106,29 @@ describe('RuntimeUA', function() {
       }
     };
 
-    let stub = sinon.stub(runtime.runtimeCatalogue.httpRequest, 'get');
-    stub.withArgs('../resources/descriptors/Hyperties.json').returns(new Promise(function(resolve, reject) {
-      try {
-        resolve(JSON.stringify(Hyperties));
-      } catch (e) {
-        reject(e);
-      }
+    sinon.stub(runtime.runtimeCatalogue.httpRequest, 'get', function(url) {
 
-    }));
+      console.log(url.includes('Hyperties'), url.includes('ProtoStubs'));
 
-    stub.withArgs('../resources/descriptors/ProtoStubs.json').returns(new Promise(function(resolve, reject) {
-      try {
-        resolve(JSON.stringify(ProtoStubs));
-      } catch (e) {
-        reject(e);
-      }
-    }));
+      return new Promise(function(resolve, reject) {
+
+        if (url.includes('Hyperties')) {
+          try {
+            resolve(JSON.stringify(Hyperties));
+          } catch (e) {
+            reject(e);
+          }
+
+        } else if (url.includes('ProtoStubs')) {
+          try {
+            resolve(JSON.stringify(ProtoStubs));
+          } catch (e) {
+            reject(e);
+          }
+        }
+      });
+
+    });
 
     sinon.stub(runtime.registry, 'registerHyperty')
     .returns(new Promise(function(resolve, reject) {
