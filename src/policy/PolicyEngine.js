@@ -1,6 +1,7 @@
 import PEP from './PEP';
 import PDP from './PDP';
-import Policy from './Policy';
+
+// import Policy from './Policy';
 
 class PolicyEngine {
 
@@ -17,31 +18,34 @@ class PolicyEngine {
   // TODO: conflict detection
   addPolicies(key, policies) {
     let _this = this;
-    for (let policy in policies) {
+    for (let i in policies) {
       if (_this.policies[key] === undefined) {
         _this.policies[key] = [];
       }
-      _this.policies[key].push(policies[policy]);
+      let exists = false;
+      for (let policy in _this.policies[key]) {
+        if (_this.policies[key][policy].id === policies[i].id) {
+          exists = true;
+          break;
+        }
+      }
+      if (!exists) {
+        _this.policies[key].push(policies[i]);
+      }
     }
   }
 
-  simulate(key) {
+  /*simulate(key) {
     let _this = this;
 
-    let policy = {
-      id: 'block-blacklisted',
-      scope: 'user',
-      condition: 'blacklisted',
-      authorise: false,
-      actions: []
-    };
+    yte
     let policy2 = new Policy(policy.id, policy.scope, policy.condition,
       policy.authorise, policy.actions);
 
     policy = {
       id: 'allow-whitelisted',
       scope: 'user',
-      condition: 'whitelisted',
+      condition: 'whitelisted'c,
       authorise: true,
       actions: []
     };
@@ -59,7 +63,7 @@ class PolicyEngine {
       policy.authorise, policy.actions);
 
     _this.addPolicies(key, [policy4]);
-  }
+  }*/
 
   removePolicies(key, policyId) {
     let _this = this;
@@ -110,53 +114,53 @@ class PolicyEngine {
         if (!message.hasOwnProperty('body')) {
           message.body = {};
         }
-        let userID = assertedID[0].identity;
+
+        let hypertyToVerify;
         if (!message.body.hasOwnProperty('assertedIdentity')) {
-          message.body.assertedIdentity = userID;
+          message.body.assertedIdentity = assertedID[0].identity;
           message.body.idToken = value;
+          hypertyToVerify = message.to;
+        } else {
+          hypertyToVerify = message.from;
         }
 
-        let applicablePolicies = _this.getApplicablePolicies(message.from, message.to, userID);
-        let policiesResult = _this.pdp.evaluate(message, userID, applicablePolicies);
+        /* TODO: get scope of the message */
+        let scope = 'user';
+
+        let applicablePolicies = _this.getApplicablePolicies(scope);
+        let policiesResult;
+        if (hypertyToVerify.split(':')[0] === 'hyperty') {
+          policiesResult = _this.pdp.evaluate(_this.registry, message, hypertyToVerify, applicablePolicies);
+        } else {
+          policiesResult = [true, []];
+        }
+
         _this.pep.enforce(policiesResult[1]);
 
         if (policiesResult[0]) {
-          message.body.authorised = true;
           resolve(message);
         } else {
-          message.body.authorised = false;
           reject(message);
         }
-        resolve(message);
       }, function(error) {
         reject(error);
       });
     });
   }
 
-  // TODO: applicability is to be based on scope
-  getApplicablePolicies(hypertyFrom, hypertyTo, userID) {
+  getApplicablePolicies(scope) {
     let _this = this;
-    let applicablePolicies = [];
-
-    if (hypertyFrom in _this.policies) {
-      for (let policy in _this.policies[hypertyFrom]) {
-        applicablePolicies.push(_this.policies[hypertyFrom][policy]);
-      }
-    }
-    if (hypertyTo in _this.policies) {
-      for (let policy in _this.policies[hypertyTo]) {
-        applicablePolicies.push(_this.policies[hypertyTo][policy]);
-      }
-    }
-    if (userID in _this.policies) {
-      for (let policy in _this.policies[userID]) {
-        applicablePolicies.push(_this.policies[userID][policy]);
-      }
+    let applicablePolicies = _this.policies[scope];
+    if (applicablePolicies === undefined) {
+      applicablePolicies = [];
     }
     return applicablePolicies;
   }
 
+  getBlackList() {
+    let _this = this;
+    return _this.pdp.getBlackList();
+  }
 }
 
 export default PolicyEngine;

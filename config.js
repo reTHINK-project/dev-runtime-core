@@ -28,7 +28,7 @@ System.config({
     "hellojs": "npm:hellojs@1.12.0",
     "jsrsasign": "npm:jsrsasign@5.0.7",
     "karma-browserify": "npm:karma-browserify@4.3.0",
-    "service-framework": "github:rethink-project/dev-service-framework@master",
+    "service-framework": "github:rethink-project/dev-service-framework@develop",
     "sjcl": "npm:sjcl@1.0.3",
     "github:jspm/nodelibs-assert@0.1.0": {
       "assert": "npm:assert@1.3.0"
@@ -105,7 +105,7 @@ System.config({
     "github:jspm/nodelibs-zlib@0.1.0": {
       "browserify-zlib": "npm:browserify-zlib@0.1.4"
     },
-    "github:rethink-project/dev-service-framework@master": {
+    "github:rethink-project/dev-service-framework@develop": {
       "array.observe": "npm:array.observe@0.0.1",
       "babel-polyfill": "npm:babel-polyfill@6.6.1",
       "indexeddbshim": "npm:indexeddbshim@2.2.1",
@@ -594,7 +594,7 @@ System.config({
       "fs": "github:jspm/nodelibs-fs@0.1.2",
       "inherits": "npm:inherits@2.0.1",
       "ripemd160": "npm:ripemd160@1.0.1",
-      "sha.js": "npm:sha.js@2.3.6"
+      "sha.js": "npm:sha.js@2.4.5"
     },
     "npm:create-hmac@1.1.4": {
       "buffer": "github:jspm/nodelibs-buffer@0.1.0",
@@ -1428,6 +1428,12 @@ System.config({
       "process": "github:jspm/nodelibs-process@0.1.2"
     },
     "npm:sha.js@2.3.6": {
+      "buffer": "github:jspm/nodelibs-buffer@0.1.0",
+      "fs": "github:jspm/nodelibs-fs@0.1.2",
+      "inherits": "npm:inherits@2.0.1",
+      "process": "github:jspm/nodelibs-process@0.1.2"
+    },
+    "npm:sha.js@2.4.5": {
       "buffer": "github:jspm/nodelibs-buffer@0.1.0",
       "fs": "github:jspm/nodelibs-fs@0.1.2",
       "inherits": "npm:inherits@2.0.1",

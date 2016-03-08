@@ -126,10 +126,24 @@ describe('Local Runtime Catalogue', function() {
 
     });
 
+    sinon.stub(runtimeCatalogue, 'getSourcePackageFromURL', function(sourcePackage) {
+
+      if (sourcePackage === '/sourcePackage') {
+        return new Promise(function(resolve, reject) {
+          try {
+            resolve(_hypertyDescriptor._sourcePackage);
+          } catch (e) {
+            reject(e);
+          }
+        });
+      }
+    });
+
   });
 
   after(function() {
     runtimeCatalogue.httpRequest.get.restore();
+    runtimeCatalogue.getSourcePackageFromURL.restore();
   });
 
   it('should get hyperty descriptor', function(done) {
@@ -159,7 +173,7 @@ describe('Local Runtime Catalogue', function() {
     //   _hypertyType: '0',
     //   _dataObjects: []
     // }
-    let descriptorValidation = ['_guid', '_type', '_version', '_objectName', '_description', '_language', '_sourcePackageURL', '_signature', '_sourcePackage', '_configuration', '_constraints','_policies', '_messageSchema',  '_hypertyType', '_dataObjects'];
+    let descriptorValidation = ['_guid', '_type', '_objectName', '_description', '_language', '_sourcePackageURL', '_signature', '_sourcePackage', '_configuration', '_constraints','_policies', '_messageSchema',  '_hypertyType', '_dataObjects'];
 
     // TODO: Check the hyperty descriptor response and compare
     // with what is defined in the specification;
@@ -178,13 +192,9 @@ describe('Local Runtime Catalogue', function() {
 
   it('should get hyperty source code', function(done) {
 
-    let sourcePackageURL = _hypertyDescriptor.sourcePackageURL;
-    expect(runtimeCatalogue.getSourcePackageFromURL(sourcePackageURL).then(function(sourcePackage) {
-      console.log(sourcePackage);
-    }).catch(function(reason) {
-      throw new Error(reason);
-    }))
-    .to.be.rejected.and.notify(done);
+    let sourcePackageURL = _hypertyDescriptor._sourcePackageURL;
+    expect(runtimeCatalogue.getSourcePackageFromURL(sourcePackageURL))
+    .to.be.fulfilled.and.notify(done);
 
   });
 
@@ -196,7 +206,7 @@ describe('Local Runtime Catalogue', function() {
     // policies, constraints, configuration,
     // hypertyCapabilities, protocolCapabilities
     //
-    let descriptorValidation = ['_guid', '_type', '_version', '_description', '_objectName', '_sourcePackageURL', '_sourcePackage', '_language', '_signature', '_messageSchemas', '_configuration', '_constraints'];
+    let descriptorValidation = ['_guid', '_type', '_description', '_objectName', '_sourcePackageURL', '_sourcePackage', '_language', '_signature', '_messageSchemas', '_configuration', '_constraints'];
 
     // TODO: Check the hyperty descriptor response and compare
     // with what is defined in the specification;
@@ -220,12 +230,8 @@ describe('Local Runtime Catalogue', function() {
   it('should get stub source code', function(done) {
 
     let sourcePackageURL = _stubDescriptor.sourcePackageURL;
-    expect(runtimeCatalogue.getSourcePackageFromURL(sourcePackageURL).then(function(sourcePackage) {
-      console.log(sourcePackage);
-    }).catch(function(reason) {
-      throw new Error(reason);
-    }))
-    .to.be.rejected.and.notify(done);
+    expect(runtimeCatalogue.getSourcePackageFromURL(sourcePackageURL))
+    .to.be.fulfilled.and.notify(done);
 
   });
 

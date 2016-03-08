@@ -73,7 +73,7 @@ class SyncherManager {
         let objURL = allocated[0];
         let objSubscriptorURL = objURL + '/subscription';
 
-        _this._reporters[objURL] = new ReporterObject(_this._bus, owner, objURL, childrens);
+        _this._reporters[objURL] = new ReporterObject(_this, owner, objURL, childrens);
 
         //all ok, send response
         _this._bus.postMessage({
@@ -101,17 +101,22 @@ class SyncherManager {
     });
   }
 
-  _onDelete() {
+  _onDelete(msg) {
     let _this = this;
 
-    //TODO: where to get objectURL ?
-    let objURL = '<objURL>';
+    let objURL = msg.body.resource;
 
     let object = _this._reporters[objURL];
     if (object) {
-      object.release();
+      //TODO: is there any policy verification before delete?
+      object.delete();
 
       //TODO: destroy object in the registry?
+      _this._bus.postMessage({
+        id: msg.id, type: 'response', from: msg.to, to: msg.from,
+        body: { code: 200 }
+      });
+
     }
   }
 
@@ -186,27 +191,21 @@ class SyncherManager {
     let _this = this;
 
     let hypertyURL = msg.from;
-    let domain = divideURL(hypertyURL).domain;
     let objURL = msg.body.resource;
-    let objURLSubscription = objURL + '/subscription';
 
     let observer = _this._observers[objURL];
     if (observer) {
-      observer.unsubscribe(hypertyURL);
+      //TODO: is there any policy verification before delete?
+      observer.removeSubscription(hypertyURL);
 
-      //TODO: remove Object if no more subscription ?
-
-      //unsubscribe msg for the domain node
+      //TODO: destroy object in the registry?
       _this._bus.postMessage({
-        type: 'unsubscribe', from: _this._url, to: 'domain://msg-node.' + domain + '/sm',
-        body: { resource: objURL }
+        id: msg.id, type: 'response', from: msg.to, to: msg.from,
+        body: { code: 200 }
       });
 
-      //unsubscribe msg for the Reporter SM
-      _this._bus.postMessage({
-        type: 'unsubscribe', from: _this._url, to: objURLSubscription,
-        body: { resource: objURL }
-      });
+      //TODO: remove Object if no more subscription?
+      //delete _this._observers[objURL];
     }
   }
 

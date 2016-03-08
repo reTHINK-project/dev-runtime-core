@@ -56,3 +56,23 @@ export function deepClone(obj) {
   //TODO: simple but inefficient JSON deep clone...
   if (obj) return JSON.parse(JSON.stringify(obj));
 }
+
+/**
+ * Obtains the user URL that corresponds to a given email
+ * @param  {string} userEmail The user email
+ * @return {URL.URL} userURL The user URL
+ */
+export function getUserURLFromEmail(userEmail) {
+  let indexOfAt = userEmail.indexOf('@');
+  return 'user://' + userEmail.substring(indexOfAt + 1, userEmail.length) + '/' + userEmail.substring(0, indexOfAt);
+}
+
+/**
+ * Obtains the user email that corresponds to a given URL
+ * @param  {URL.URL} userURL The user URL
+ * @return {string} userEmail The user email
+ */
+export function getUserEmailFromURL(userURL) {
+  let url = divideURL(userURL);
+  return url.identity.replace('/', '') + '@' + url.domain; // identity field has '/exampleID' instead of 'exampleID'
+}

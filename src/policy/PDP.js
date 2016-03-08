@@ -6,8 +6,8 @@ class PDP {
     _this.whiteList = [];
   }
 
-  /* TODO: sanitization needed for eval() */
-  evaluate(message, userID, policies) {
+  /* use hashtable to allow dynamic management */
+  evaluate(registry, message, hypertyToVerify, policies) {
     let _this = this;
     let results = [true];
     let actions = [];
@@ -18,10 +18,10 @@ class PDP {
       let condition = policy.condition.split(' ');
       switch (condition[0]) {
         case 'blacklisted':
-          result[0] = _this.isBlackListed(userID) ? policy.authorise : !policy.authorise;
+          result[0] = _this.isBlackListed(registry, hypertyToVerify) ? policy.authorise : !policy.authorise;
           break;
         case 'whitelisted':
-          result[0] = _this.isWhiteListed(userID) ? policy.authorise : !policy.authorise;
+          result[0] = _this.isWhiteListed(hypertyToVerify) ? policy.authorise : !policy.authorise;
           break;
         case 'time':
           let start = condition[1];
@@ -44,9 +44,22 @@ class PDP {
 
   isSameOrigin() {}
 
-  isBlackListed(userID) {
+  isBlackListed(registry, hypertyToVerify) {
     let _this = this;
-    return _this.blackList.indexOf(userID) > -1;
+    let blackList = _this.blackList;
+    for (let i in blackList) {
+      if (_this.hypertiesMatch(registry, blackList[i]), hypertyToVerify) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /* TODO: cache this? */
+  hypertiesMatch(registry, URLToVerify, hypertyToVerify) {
+    registry.getUserHyperty(URLToVerify).then(function(hyperty) {
+      return hyperty.hypertyURL === hypertyToVerify;
+    });
   }
 
   isWhiteListed(userID) {
@@ -54,7 +67,6 @@ class PDP {
     return _this.whiteList.indexOf(userID) > -1;
   }
 
-  // TODO: implement for start > end
   isTimeBetween(start, end) {
     let _this = this;
     let now = new Date();
@@ -78,6 +90,11 @@ class PDP {
     return parseInt(timeSplit[0]) * 60 + parseInt(timeSplit[1]);
   }
 
+  getBlackList() {
+    let _this = this;
+    return _this.blackList;
+  }
+
   isContext() {}
 
   isHypertyType() {}
@@ -89,7 +106,9 @@ class PDP {
 
   addToBlackList(userID) {
     let _this = this;
-    _this.blackList.push(userID);
+    if (_this.blackList.indexOf(userID) === -1) {
+      _this.blackList.push(userID);
+    }
   }
 
   removeFromBlackList(userID) {
@@ -105,7 +124,9 @@ class PDP {
 
   addToWhiteList(userID) {
     let _this = this;
-    _this.whiteList.push(userID);
+    if (_this.blackList.indexOf(userID) === -1) {
+      _this.whiteList.push(userID);
+    }
   }
 
   removeFromWhiteList(userID) {
