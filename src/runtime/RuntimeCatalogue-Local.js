@@ -169,7 +169,7 @@ class RuntimeCatalogue {
   getHypertyDescriptor(hypertyURL) {
     let _this = this;
 
-    // console.log("getHypertyDescriptor", hypertyURL);
+    console.log('getHypertyDescriptor', hypertyURL);
 
     return new Promise(function(resolve, reject) {
 
@@ -199,6 +199,7 @@ class RuntimeCatalogue {
           // create the descriptor
           let hyperty = _this._factory.createHypertyDescriptorObject(
             result.cguid,
+            result.version,
             result.objectName,
             result.description,
             result.language,
@@ -309,6 +310,7 @@ class RuntimeCatalogue {
           // create the descriptor
           let stub = _this._factory.createProtoStubDescriptorObject(
             result.cguid,
+            result.version,
             result.objectName,
             result.description,
             result.language,
@@ -364,6 +366,7 @@ class RuntimeCatalogue {
           // create the descriptor
           let dataSchema = _this._factory.createDataObjectSchema(
             result.cguid,
+            result.version,
             result.objectName,
             result.description,
             result.language,
