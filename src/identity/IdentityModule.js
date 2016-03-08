@@ -144,7 +144,7 @@ class IdentityModule {
   *
   * @return {IdAssertion}              IdAssertion
   */
-  getIdentityAssertion() {
+  getIdentityAssertion(scope) {
     let _this = this;
 
     let message = {type:'EXECUTE', to: 'domain://idpProxy', from: 'domain://localhost/id-module', body: {resource: 'identity', method: 'login',
@@ -152,11 +152,44 @@ class IdentityModule {
 
     return new Promise(function(resolve,reject) {
       _this._messageBus.postMessage(message, (result) => {
-        if (result.body.code === 200) {
-          resolve(result.body.value);
-        } else {
-          reject('error', result.body.code);
+        //function to parse the query string in the given URL to obatin certain values
+        function gup(url, name) {
+          name = name.replace(/[\[]/, '\\\[').replace(/[\]]/, '\\\]');
+          let regexS = '[\\#&?]' + name + '=([^&#]*)';
+          let regex = new RegExp(regexS);
+          let results = regex.exec(url);
+          if (results === null)
+          return '';
+          else
+          return results[1];
         }
+
+        //Open a window with the URL received by the proxy
+        let win = window.open(result.body.value, 'openIDrequest', 'width=800, height=600');
+        let pollTimer = window.setInterval(function() {
+          try {
+
+            if (win.closed) {
+              reject('Some error occured.');
+              clearInterval(pollTimer);
+            }
+            if (win.document.URL.indexOf('REDIRECT') !== -1 || win.document.URL.indexOf('localhost:8080') !== -1) {
+              window.clearInterval(pollTimer);
+              let url =   win.document.URL;
+
+              let acToken   = gup(url, 'access_token');
+              let tokenType = gup(url, 'token_type');
+              let expiresIn = gup(url, 'expires_in');
+
+              win.close();
+
+              //after receiving the access token, google requires to validate first the token to prevent confused deputy problem.
+              resolve(acToken);
+            }
+          } catch (e) {
+            console.log(e);
+          }
+        }, 1000);
       });
     });
   }
@@ -202,9 +235,9 @@ class IdentityModule {
     let _this = this;
 
     let message = {type:'EXECUTE', to: 'domain://idpProxy', from: 'domain://localhost/id-module', body: {resource: 'identity', method: 'validateAssertion',
-           params: {assertion: 'assertion', origin: 'origin'}}};
+           params: {assertion: assertion, origin: origin}}};
 
-    return new Promise(function(resolve,reject) {
+    return new Promise(function(resolve, reject) {
       _this._messageBus.postMessage(message, (result) => {
         if (result.body.code === 200) {
           resolve(result.body.value);
