@@ -150,7 +150,11 @@ class PolicyEngine {
 
   getApplicablePolicies(scope) {
     let _this = this;
-    return _this.policies[scope];
+    let applicablePolicies = _this.policies[scope];
+    if (applicablePolicies === undefined) {
+      applicablePolicies = [];
+    }
+    return applicablePolicies;
   }
 
   getBlackList() {
