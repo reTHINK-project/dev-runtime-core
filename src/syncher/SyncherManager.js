@@ -111,12 +111,11 @@ class SyncherManager {
       //TODO: is there any policy verification before delete?
       object.delete();
 
-      //TODO: destroy object in the registry?
+      //TODO: unregister object?
       _this._bus.postMessage({
         id: msg.id, type: 'response', from: msg.to, to: msg.from,
         body: { code: 200 }
       });
-
     }
   }
 
@@ -162,11 +161,11 @@ class SyncherManager {
 
               let observer = _this._observers[objURL];
               if (!observer) {
-                observer = new ObserverObject(_this._bus, objURL);
+                observer = new ObserverObject(_this, objURL, childrens);
                 _this._observers[objURL] = observer;
               }
 
-              observer.addSubscription(hypertyURL, childrens);
+              observer.addSubscription(hypertyURL);
 
               //forward to hyperty:
               reply.id = msg.id;

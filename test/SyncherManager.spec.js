@@ -615,4 +615,115 @@ describe('SyncherManager', function() {
       });
     });
   });
+
+  it('create and delete', function(done) {
+    let deleted = false;
+
+    let bus = new MessageBus();
+    bus.addForward = (from, to) => {
+      console.log('8-addForward: ', from, to);
+      return {
+        remove: () => {
+          console.log('8-Forward-Remove: ', from, to);
+        }
+      };
+    };
+    bus._onPostMessage = (msg) => {
+      console.log('8-_onPostMessage: ', msg);
+      if (msg.type === 'subscribe') {
+        bus.postMessage({
+          id: msg.id, type: 'response', from: msg.to, to: msg.from,
+          body: { code: 200 }
+        });
+      } else if (msg.type === 'delete') {
+        //expect delete message to msg-node
+        expect(msg.from).to.eql(runtimeURL + '/sm');
+        expect(msg.to).to.eql('domain://msg-node.h1.domain/object-address-allocation');
+        expect(msg.body.resource).to.eql(objURL);
+
+        expect(deleted).to.eql(true);
+
+        done();
+      }
+    };
+
+    new SyncherManager(runtimeURL, bus, { }, catalog, allocator);
+
+    let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
+    sync2.onNotification((notifyEvent) => {
+      console.log('onNotification: ', notifyEvent);
+      if (notifyEvent.type === 'create') {
+        sync2.subscribe(schemaURL, notifyEvent.url).then((doo) => {
+          console.log('subscribe: ', doo.url);
+        });
+      } else if (notifyEvent.type === 'delete') {
+        notifyEvent.ack();
+        deleted = true;
+      }
+    });
+
+    let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
+    sync1.create(schemaURL, [hyperURL2], { x: 10, y: 10 }).then((dor) => {
+      console.log('create: ', dor.url);
+      dor.onSubscription((subscribeEvent) => {
+        console.log('onSubscription: ', subscribeEvent);
+        subscribeEvent.accept();
+
+        setTimeout(() => {
+          expect(sync1.reporters[dor.url]).to.eql(dor);
+          dor.delete();
+          expect(sync1.reporters[dor.url]).to.be.empty;
+          console.log('reporter-deleted');
+        });
+      });
+    });
+  });
+
+  it('subscribe and unsubscribe', function(done) {
+    let bus = new MessageBus();
+    bus.addForward = (from, to) => {
+      console.log('8-addForward: ', from, to);
+      return {
+        remove: () => {
+          console.log('8-Forward-Remove: ', from, to);
+        }
+      };
+    };
+    bus._onPostMessage = (msg) => {
+      console.log('8-_onPostMessage: ', msg);
+      if (msg.type === 'subscribe') {
+        bus.postMessage({
+          id: msg.id, type: 'response', from: msg.to, to: msg.from,
+          body: { code: 200 }
+        });
+      } else if (msg.type === 'unsubscribe') {
+        //expect delete message to msg-node
+        expect(msg.from).to.eql(runtimeURL + '/sm');
+        expect(msg.to).to.eql('domain://msg-node.h2.domain/object-address-allocation');
+        expect(msg.body.resource).to.eql(objURL);
+
+        done();
+      }
+    };
+
+    new SyncherManager(runtimeURL, bus, { }, catalog, allocator);
+
+    let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
+    sync2.onNotification((notifyEvent) => {
+      console.log('onNotification: ', notifyEvent);
+      sync2.subscribe(schemaURL, notifyEvent.url).then((doo) => {
+        console.log('subscribe: ', doo.url);
+        doo.unsubscribe();
+      });
+    });
+
+    let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
+    sync1.create(schemaURL, [hyperURL2], { x: 10, y: 10 }).then((dor) => {
+      console.log('create: ', dor.url);
+      dor.onSubscription((subscribeEvent) => {
+        console.log('onSubscription: ', subscribeEvent);
+        subscribeEvent.accept();
+      });
+    });
+  });
 });
