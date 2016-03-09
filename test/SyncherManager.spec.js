@@ -699,7 +699,7 @@ describe('SyncherManager', function() {
       } else if (msg.type === 'unsubscribe') {
         //expect delete message to msg-node
         expect(msg.from).to.eql(runtimeURL + '/sm');
-        expect(msg.to).to.eql('domain://msg-node.h2.domain/object-address-allocation');
+        expect(msg.to).to.eql('domain://msg-node.h2.domain/sm');
         expect(msg.body.resource).to.eql(objURL);
 
         done();
