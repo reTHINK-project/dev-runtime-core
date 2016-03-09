@@ -8,16 +8,17 @@ chai.use(chaiAsPromised);
 
 // Main dependecies
 import Registry from '../src/registry/Registry';
-import SandboxFactory from '../resources/sandboxes/SandboxFactory';
 import Sandbox from '../src/sandbox/Sandbox';
 import MessageBus from '../src/bus/MessageBus';
+
+import RuntimeFactory from './resources/RuntimeFactory';
 
 // Testing Registry
 
 let runtimeURL = 'hyperty-runtime://ua.pt/123';
 
-let sandboxFactory = new SandboxFactory();
-let appSandbox = sandboxFactory.createAppSandbox();
+let runtimeFactory = new RuntimeFactory();
+let appSandbox = runtimeFactory.createAppSandbox();
 let protostubURL = 'url';
 let identityModule = {
   loginWithRP: () => {

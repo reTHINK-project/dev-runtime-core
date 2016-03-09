@@ -22,6 +22,13 @@ export function divideURL(url) {
   let re = /([a-zA-Z-]*):\/\/(?:\.)?([-a-zA-Z0-9@:%._\+~#=]{2,256})([-a-zA-Z0-9@:%._\+~#=\/]*)/gi;
   let subst = '$1,$2,$3';
   let parts = url.replace(re, subst).split(',');
+
+  // If the url has no protocol, the default protocol set is https
+  if (parts[0] === url) {
+    parts[0] = 'https';
+    parts[1] = url;
+  }
+
   let result = {
     type: parts[0],
     domain: parts[1],
@@ -67,6 +74,5 @@ export function getUserURLFromEmail(userEmail) {
  */
 export function getUserEmailFromURL(userURL) {
   let url = divideURL(userURL);
-  console.log(url);
   return url.identity.replace('/', '') + '@' + url.domain; // identity field has '/exampleID' instead of 'exampleID'
 }

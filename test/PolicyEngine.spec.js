@@ -10,10 +10,6 @@ import PolicyEngine from '../src/policy/PolicyEngine';
 import Policy from '../src/policy/Policy';
 
 let runtimeRegistry = 'registry mockup';
-
-
-/* ADD POLICY TO VERIFY IDENTITY */
-
 let identityModule = {
   getIdentities: () => {
     let identities = [];
@@ -47,8 +43,7 @@ describe('PolicyEngine', function() {
     let expectedMessage = {id: 123, type:'READ', from:'hyperty://ua.pt/asdf',
                           to:'domain://registry.ua.pt/hyperty-instance/user',
                           body: {assertedIdentity: 'user://gmail.com/openidtest10',
-                                 idToken:  {id:'identity'},
-                                 authorised: true}};
+                                 idToken:  {id:'identity'}}};
 
     it('should add an assertedIdentity in the message body', function(done) {
 
@@ -67,7 +62,7 @@ describe('PolicyEngine', function() {
 
     let expectedMessage = {id: 3212, type:'READ', from:'hyperty://ua.pt/asdf',
                             to:'hyperty://ua.pt/FindHyperty',
-                            body: {assertedIdentity: 'value', authorised: true, token: 'tokenID'}};
+                            body: {assertedIdentity: 'value', token: 'tokenID'}};
 
     it('should maintain the assertedIdentity in the message body', function(done) {
 
@@ -79,37 +74,37 @@ describe('PolicyEngine', function() {
     });
   });
 
-  let key1 = 'user://gmail.com/openidtest10';
-  let key2 = 'user://gmail.com/openidtest20';
+  let scope = 'user';
   let policy1 = new Policy('allow-whitelisted', 'user', 'whitelisted', true, []);
   let policy2 = new Policy('block-blacklisted', 'user', 'blacklisted', false, []);
 
   describe('addPolicies', function() {
-    it('associates a policy with a user ID', function() {
-      policyEngine.addPolicies(key1, [policy1]);
-      expect(policyEngine.getApplicablePolicies(null, null, key1)).to.be.eql([policy1]);
+    it('associates a policy with a scope', function() {
+      policyEngine.addPolicies(scope, [policy1]);
+      expect(policyEngine.getApplicablePolicies(scope)).to.be.eql([policy1]);
     });
     it('associates a policy with an hyperty instance', function() {
-      policyEngine.addPolicies(key2, [policy2]);
-      expect(policyEngine.getApplicablePolicies(key2, null, null)).to.be.eql([policy2]);
-    })
+      policyEngine.addPolicies(scope, [policy2]);
+      expect(policyEngine.getApplicablePolicies(scope)).to.be.eql([policy1, policy2]);
+    });
   });
 
   let policy3 = new Policy('block-08-20', 'scope', 'time 08:00 20:00', true, []);
 
   describe('removePolicies', function() {
-    it('removes the policy with the given ID associated with an hyperty instance', function() {
-      policyEngine.addPolicies(key1, [policy3]);
-      policyEngine.removePolicies(key1, 'allow-whitelisted');
-      expect(policyEngine.getApplicablePolicies(null, null, key1)).to.be.eql([policy3]);
-      expect(policyEngine.getApplicablePolicies(key2, null, null)).to.be.eql([policy2]);
+    it('removes the policy with the given ID associated with a scope', function() {
+      policyEngine.addPolicies(scope, [policy3]);
+      policyEngine.removePolicies(scope, 'allow-whitelisted');
+      expect(policyEngine.getApplicablePolicies(scope)).to.be.eql([policy2, policy3]);
+      policyEngine.removePolicies(scope, 'block-08-20');
+      policyEngine.removePolicies(scope, 'block-blacklisted');
+      expect(policyEngine.getApplicablePolicies(scope)).to.be.eql([]);
     });
 
-    it('removes all policies associated with an hyperty instance', function() {
-      policyEngine.addPolicies(key1, [policy1]);
-      policyEngine.removePolicies(key1, 'all');
-      expect(policyEngine.getApplicablePolicies(null, null, key1)).to.be.eql([]);
-      expect(policyEngine.getApplicablePolicies(key2, null, null)).to.be.eql([policy2]);
+    it('removes all policies associated with a scope', function() {
+      policyEngine.addPolicies(scope, [policy1]);
+      policyEngine.removePolicies(scope, 'all');
+      expect(policyEngine.getApplicablePolicies(scope)).to.be.eql([]);
     });
   });
 

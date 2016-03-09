@@ -3,7 +3,7 @@ import Registry from '../registry/Registry';
 import IdentityModule from '../identity/IdentityModule';
 import PolicyEngine from '../policy/PolicyEngine';
 import MessageBus from '../bus/MessageBus';
-//import GraphConnector from '../graphconnector/GraphConnector';
+import GraphConnector from '../graphconnector/GraphConnector';
 
 import RuntimeCatalogue from './RuntimeCatalogue-Local';
 
@@ -16,7 +16,7 @@ import {divideURL, emptyObject} from '../utils/utils';
  * @author Vitor Silva [vitor-t-silva@telecom.pt]
  * @version 0.2.0
  *
- * @property {sandboxFactory} sandboxFactory - Specific implementation of sandbox;
+ * @property {runtimeFactory} runtimeFactory - Specific implementation of sandbox;
  * @property {RuntimeCatalogue} runtimeCatalogue - Catalogue of components can be installed;
  * @property {runtimeURL} runtimeURL - This identify the core runtime, should be unique;
  * @property {IdentityModule} identityModule - Identity Module;
@@ -29,19 +29,19 @@ class RuntimeUA {
 
   /**
    * Create a new instance of Runtime User Agent
-   * @param {sandboxFactory} sandboxFactory - Specific implementation for the environment where the core runtime will run;
+   * @param {runtimeFactory} runtimeFactory - Specific implementation for the environment where the core runtime will run;
    * @param {domain} domainURL - specify the domain base for the runtime;
    */
-  constructor(sandboxFactory, domain) {
+  constructor(runtimeFactory, domain) {
 
-    if (!sandboxFactory) throw new Error('The sandbox factory is a needed parameter');
+    if (!runtimeFactory) throw new Error('The sandbox factory is a needed parameter');
     if (!domain) throw new Error('You need the domain of runtime');
 
     let _this = this;
 
-    _this.sandboxFactory = sandboxFactory;
+    _this.runtimeFactory = runtimeFactory;
 
-    _this.runtimeCatalogue = new RuntimeCatalogue();
+    _this.runtimeCatalogue = new RuntimeCatalogue(runtimeFactory);
 
     // TODO: post and return registry/hypertyRuntimeInstance to and from Back-end Service
     // the response is like: runtime://sp1/123
@@ -59,7 +59,7 @@ class RuntimeUA {
     // Use the sandbox factory to create an AppSandbox;
     // In the future can be decided by policyEngine if we need
     // create a AppSandbox or not;
-    let appSandbox = sandboxFactory.createAppSandbox();
+    let appSandbox = runtimeFactory.createAppSandbox();
 
     // Instantiate the Registry Module
     _this.registry = new Registry(runtimeURL, appSandbox, _this.identityModule);
@@ -102,13 +102,13 @@ class RuntimeUA {
 
     // Use sandbox factory to use specific methods
     // and set the message bus to the factory
-    sandboxFactory.messageBus = _this.messageBus;
+    runtimeFactory.messageBus = _this.messageBus;
 
     // Instanciate the SyncherManager;
     _this.syncherManager = new SyncherManager(_this.runtimeURL, _this.messageBus, { }, _this.runtimeCatalogue);
 
     // Instantiate the Graph Connector
-    //_this.graphConnector = new GraphConnector(_this.runtimeURL, _this.messageBus);
+    _this.graphConnector = new GraphConnector(_this.runtimeURL, _this.messageBus);
 
   }
 
@@ -233,7 +233,7 @@ class RuntimeUA {
         // check if the sandbox is registed for this hyperty descriptor url;
         // Make Steps xxx --- xxx
         // Instantiate the Sandbox
-        let sandbox = _this.sandboxFactory.createSandbox();
+        let sandbox = _this.runtimeFactory.createSandbox();
 
         sandbox.addListener('*', function(msg) {
           _this.messageBus.postMessage(msg);
@@ -393,7 +393,7 @@ class RuntimeUA {
         // check if the sandbox is registed for this stub descriptor url;
         // Make Steps xxx --- xxx
         // Instantiate the Sandbox
-        let sandbox = _this.sandboxFactory.createSandbox();
+        let sandbox = _this.runtimeFactory.createSandbox();
         sandbox.addListener('*', function(msg) {
           _this.messageBus.postMessage(msg);
         });

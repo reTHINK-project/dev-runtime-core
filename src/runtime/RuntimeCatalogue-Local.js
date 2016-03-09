@@ -3,10 +3,14 @@ import {CatalogueFactory} from 'service-framework';
 
 class RuntimeCatalogue {
 
-  constructor() {
+  constructor(runtimeFactory) {
     // console.log('runtime catalogue');
+    if (!runtimeFactory) throw Error('The catalogue needs the runtimeFactory');
+
     let _this = this;
     _this._factory = new CatalogueFactory(false, undefined);
+
+    _this.httpRequest = runtimeFactory.createHttpRequest();
   }
 
   set runtimeURL(runtimeURL) {
@@ -30,116 +34,6 @@ class RuntimeCatalogue {
   }
 
   /**
-  * TODO: Delete this method
-  */
-  _makeLocalRequest(url) {
-
-    console.log(url);
-
-    return new Promise(function(resolve, reject) {
-      let protocolmap = {
-        'hyperty-catalogue://': 'http://',
-        '../': '../'
-      };
-
-      let foundProtocol = false;
-      for (let protocol in protocolmap) {
-        if (url.slice(0, protocol.length) === protocol) {
-          // console.log('exchanging ' + protocol + " with " + protocolmap[protocol]);
-          url = protocolmap[protocol] + url.slice(protocol.length, url.length);
-          foundProtocol = true;
-          break;
-        }
-      }
-
-      if (!foundProtocol) {
-        reject('Invalid protocol of url: ' + url);
-        return;
-      }
-
-      let xhr = new XMLHttpRequest();
-
-      // console.log(url);
-
-      xhr.open('GET', url, true);
-
-      xhr.onreadystatechange = function(event) {
-        let xhr = event.currentTarget;
-        if (xhr.readyState === 4) {
-          // console.log("got response:", xhr);
-          if (xhr.status === 200) {
-            resolve(xhr.responseText);
-          } else {
-            // console.log("rejecting promise because of response code: 200 != ", xhr.status);
-            reject(xhr.responseText);
-          }
-        }
-      };
-
-      xhr.send();
-
-    });
-
-  }
-
-  /**
-  * make a http request to a given URL.
-  * @param url
-  * @returns {Promise}
-  * @private
-  */
-  _makeExternalRequest(url) {
-    // console.log("_makeExternalRequest", url);
-
-    // TODO: make this request compatible with nodejs
-    // at this moment, XMLHttpRequest only is compatible with browser implementation
-    // nodejs doesn't support;
-    return new Promise(function(resolve, reject) {
-      let protocolmap = {
-        'hyperty-catalogue://': 'http://'
-      };
-
-      let foundProtocol = false;
-      for (let protocol in protocolmap) {
-        if (url.slice(0, protocol.length) === protocol) {
-          // console.log("exchanging " + protocol + " with " + protocolmap[protocol]);
-          url = protocolmap[protocol] + url.slice(protocol.length, url.length);
-          foundProtocol = true;
-          break;
-        }
-      }
-
-      if (!foundProtocol) {
-        reject('Invalid protocol of url: ' + url);
-        return;
-      }
-
-      let xhr = new XMLHttpRequest();
-
-      // console.log(url);
-
-      xhr.open('GET', url, true);
-
-      xhr.onreadystatechange = function(event) {
-        let xhr = event.currentTarget;
-        if (xhr.readyState === 4) {
-          // console.log("got response:", xhr);
-          if (xhr.status === 200) {
-            resolve(xhr.responseText);
-          } else {
-            // console.log("rejecting promise because of response code: 200 != ", xhr.status);
-            reject(xhr.responseText);
-          }
-        }
-      };
-
-      xhr.send();
-
-    });
-
-  }
-
-  /**
   * Get HypertyDescriptor
   * @param hypertyURL - e.g. mydomain.com/.well-known/hyperty/MyHyperty
   * @returns {Promise}
@@ -152,6 +46,7 @@ class RuntimeCatalogue {
     return new Promise(function(resolve, reject) {
 
       let dividedURL = divideURL(hypertyURL);
+      let type = dividedURL.type;
       let domain = dividedURL.domain;
       let hyperty = dividedURL.identity;
 
@@ -163,7 +58,7 @@ class RuntimeCatalogue {
         hyperty = hyperty.substring(hyperty.lastIndexOf('/') + 1);
       }
 
-      _this._makeLocalRequest('../resources/descriptors/Hyperties.json').then(function(descriptor) {
+      _this.httpRequest.get(type + '://' + domain + '/resources/descriptors/Hyperties.json').then(function(descriptor) {
         _this.Hyperties = JSON.parse(descriptor);
 
         let result = _this.Hyperties[hyperty];
@@ -181,7 +76,7 @@ class RuntimeCatalogue {
             result.description,
             result.language,
             result.sourcePackageURL,
-            result.type,
+            result.type || result.hypertyType,
             result.dataObjects
           );
 
@@ -209,6 +104,73 @@ class RuntimeCatalogue {
   }
 
   /**
+   * Get RuntimeDescriptor
+   * @param runtimeURL - e.g. mydomain.com/.well-known/runtime/MyRuntime
+   * @returns {Promise}
+   */
+   getRuntimeDescriptor(runtimeURL) {
+     let _this = this;
+
+     return new Promise(function(resolve, reject) {
+
+       let dividedURL = divideURL(runtimeURL);
+       let type = dividedURL.type;
+       let domain = dividedURL.domain;
+       let runtime = dividedURL.identity;
+
+       if (runtime) {
+         runtime = runtime.substring(runtime.lastIndexOf('/') + 1);
+       }
+
+       // request the json
+       _this.httpRequest.get(type + '://' + domain + '/resources/descriptors/Runtimes.json').then(function(descriptor) {
+         _this.Runtimes = JSON.parse(descriptor);
+
+         let result = _this.Runtimes[runtime];
+
+         if (result.ERROR) {
+           // TODO handle error properly
+           reject(result);
+         } else {
+
+           // parse capabilities first
+           try {
+             result.hypertyCapabilities = JSON.parse(result.hypertyCapabilities);
+             result.protocolCapabilities = JSON.parse(result.protocolCapabilities);
+           } catch (e) {
+             // already json object
+           }
+
+           console.log('creating runtime descriptor based on: ', result);
+
+           // create the descriptor
+           let runtime = _this._factory.createHypertyRuntimeDescriptorObject(
+             result.cguid,
+             result.objectName,
+             result.description,
+             result.language,
+             result.sourcePackageURL,
+             result.type || result.runtimeType,
+             result.hypertyCapabilities,
+             result.protocolCapabilities
+           );
+
+           console.log('created runtime descriptor object:', runtime);
+
+           // parse and attach sourcePackage
+           let sourcePackage = result.sourcePackage;
+           if (sourcePackage) {
+             // console.log('runtime has sourcePackage:', sourcePackage);
+             runtime.sourcePackage = _this._createSourcePackage(_this._factory, sourcePackage);
+           }
+
+           resolve(runtime);
+         }
+       });
+     });
+   }
+
+  /**
   * Get source Package from a URL
   * @param sourcePackageURL - e.g. mydomain.com/.well-known/hyperty/MyHyperty/sourcePackage
   * @returns {Promise}
@@ -224,7 +186,7 @@ class RuntimeCatalogue {
         reject('sourcePackage is already contained in descriptor, please use it directly');
       }
 
-      _this._makeExternalRequest(sourcePackageURL).then(function(result) {
+      _this.httpRequest.get(sourcePackageURL).then(function(result) {
         // console.log("got raw sourcePackage:", result);
         if (result.error) {
           // TODO handle error properly
@@ -260,6 +222,7 @@ class RuntimeCatalogue {
     return new Promise(function(resolve, reject) {
 
       let dividedURL = divideURL(stubURL);
+      let type = dividedURL.type;
       let domain = dividedURL.domain;
       let protoStub = dividedURL.identity;
 
@@ -273,7 +236,7 @@ class RuntimeCatalogue {
         protoStub = protoStub.substring(protoStub.lastIndexOf('/') + 1);
       }
 
-      _this._makeLocalRequest('../resources/descriptors/ProtoStubs.json').then(function(descriptor) {
+      _this.httpRequest.get(type + '://' + domain + '/resources/descriptors/ProtoStubs.json').then(function(descriptor) {
         _this.ProtoStubs = JSON.parse(descriptor);
 
         let result = _this.ProtoStubs[protoStub];
@@ -321,16 +284,23 @@ class RuntimeCatalogue {
 
     return new Promise(function(resolve, reject) {
 
+      let dividedURL = divideURL(dataSchemaURL);
+      let type = dividedURL.type;
+      let domain = dividedURL.domain;
+      let schemaURL = dividedURL.identity;
+
       // request the json
-      if (dataSchemaURL) {
-        dataSchemaURL = dataSchemaURL.substring(dataSchemaURL.lastIndexOf('/') + 1);
+      if (schemaURL) {
+        schemaURL = schemaURL.substring(schemaURL.lastIndexOf('/') + 1);
       }
 
-      _this._makeLocalRequest('../resources/descriptors/DataSchemas.json').then(function(descriptor) {
+      console.log('getDataSchemaDescriptor: ', dataSchemaURL, dividedURL);
+
+      _this.httpRequest.get(type + '://' + domain + '/resources/descriptors/DataSchemas.json').then(function(descriptor) {
 
         _this.DataSchemas = JSON.parse(descriptor);
 
-        let result = _this.DataSchemas[dataSchemaURL];
+        let result = _this.DataSchemas[schemaURL];
 
         if (result.ERROR) {
           // TODO handle error properly
@@ -347,6 +317,9 @@ class RuntimeCatalogue {
             result.language,
             result.sourcePackageURL
           );
+
+          // optional fields
+          dataSchema.signature = result.signature;
 
           console.log('created dataSchema descriptor object:', dataSchema);
 

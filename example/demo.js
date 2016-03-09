@@ -6,9 +6,9 @@ import {getUserURLFromEmail, getUserEmailFromURL} from '../src/utils/utils.js';
 // import {MessageFactory} from 'service-framework';
 import Policy from '../src/policy/Policy';
 import RuntimeUA from '../src/runtimeUA';
-import SandboxFactory from '../resources/sandboxes/SandboxFactory';
+import RuntimeFactory from '../resources/RuntimeFactory';
 
-let sandboxFactory = new SandboxFactory();
+let sandboxFactory = new RuntimeFactory();
 let avatar = 'https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/photo.jpg';
 
 // You can change this at your own domain
@@ -108,19 +108,15 @@ function configPolicies() {
 
   $('ul.dropdown-content li').click(function(e) {
     e.preventDefault();
-    if ($(this).text() === 'BLACKLIST') {
-      console.log('b');
 
-      //runtime.policyEngine.addToBlackList('bla');
+    if ($(this).text() === 'BLACKLIST') {
       $('.blacklist').removeClass('hide');
       $('.user').removeClass('hide');
       updateBlackList();
 
       document.getElementById('lists').addEventListener('click', function(e) {
-        console.log(e.target);
-        console.log(runtime.policyEngine.getBlackList());
-        runtime.policyEngine.removeFromBlackList('user://gmail.com/openidtest10');
-        console.log(runtime.policyEngine.getBlackList());
+        let user = (document.getElementById(e.target.id).innerText).slice(0, -6);
+        runtime.policyEngine.removeFromBlackList(getUserURLFromEmail(user));
         $('#' + e.target.id).remove();
         updateBlackList();
       });
@@ -128,11 +124,10 @@ function configPolicies() {
       document.getElementById('add-email').placeholder = 'Type the email to block here';
       $('.ok').on('click', function(event) {
         event.preventDefault();
-        let emailToBlock = $('.add-email').val();
-        console.log(emailToBlock);
         runtime.policyEngine.addPolicies('user', [new Policy('block-blacklisted', 'user', 'blacklisted', false, [])]);
-        let userURLToBlock = getUserURLFromEmail(emailToBlock);
-        runtime.policyEngine.addToBlackList(userURLToBlock);
+        let emailToBlock = $('.add-email').val();
+        runtime.policyEngine.addToBlackList(getUserURLFromEmail(emailToBlock));
+
         updateBlackList();
       });
     }
@@ -143,9 +138,7 @@ function updateBlackList() {
   let blackList = runtime.policyEngine.getBlackList();
   let myList = document.getElementById('lists');
   myList.innerHTML = '<ul id=\'lists\'></ul>';
-  console.log(myList);
 
-  //myList.html = '<ul id="lists"></ul>';
   let blackListLength = blackList.length;
   let list = document.createElement('ul');
   let counter = 0;
@@ -153,7 +146,6 @@ function updateBlackList() {
   for (let i = 0; i < blackListLength; i++) {
     let removeBtn = document.createElement('button');
     let userEmail = getUserEmailFromURL(blackList[i]);
-    console.log(userEmail);
     removeBtn.id = 'user' + counter;
     removeBtn.innerHTML = 'Remove';
     removeBtn.type = 'button';
@@ -165,7 +157,6 @@ function updateBlackList() {
     list.appendChild(item);
     counter++;
   }
-  console.log(list);
   myList.appendChild(list);
 }
 

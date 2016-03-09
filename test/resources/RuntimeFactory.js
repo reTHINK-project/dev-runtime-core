@@ -1,7 +1,8 @@
-import SandboxBrowser from './SandboxBrowser';
-import AppSandboxBrowser from './AppSandboxBrowser';
+import SandboxBrowser from './sandboxes/SandboxBrowser';
+import AppSandboxBrowser from './sandboxes/AppSandboxBrowser';
+import Request from './Request';
 
-class SandboxFactory {
+class RuntimeFactory {
 
   get messageBus() {
     let _this = this;
@@ -23,10 +24,15 @@ class SandboxFactory {
     return new AppSandboxBrowser(_this._messageBus);
   }
 
+  createHttpRequest() {
+    let request = new Request();
+    return request;
+  }
+
   removeSandbox() {
 
   }
 
 }
 
-export default SandboxFactory;
+export default RuntimeFactory;

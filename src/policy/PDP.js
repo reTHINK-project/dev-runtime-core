@@ -18,9 +18,7 @@ class PDP {
       let condition = policy.condition.split(' ');
       switch (condition[0]) {
         case 'blacklisted':
-          console.log('to verify', hypertyToVerify);
           result[0] = _this.isBlackListed(registry, hypertyToVerify) ? policy.authorise : !policy.authorise;
-          console.log('result', result[0]);
           break;
         case 'whitelisted':
           result[0] = _this.isWhiteListed(hypertyToVerify) ? policy.authorise : !policy.authorise;
@@ -49,27 +47,20 @@ class PDP {
   isBlackListed(registry, hypertyToVerify) {
     let _this = this;
     let blackList = _this.blackList;
-    console.log('blacklist', blackList);
-    console.log('verifying ' + hypertyToVerify);
     for (let i in blackList) {
-      console.log('checking email' + blackList[i]);
       if (_this.hypertiesMatch(registry, blackList[i]), hypertyToVerify) {
-        console.log('returning true');
         return true;
       }
     }
-    console.log('returning false');
     return false;
   }
 
-/* TODO: cache this? */
-hypertiesMatch(registry, emailToVerify, hypertyToVerify) {
-  /* TODO: A user may be associated to several hyperties? */
-  registry.getUserHyperty(emailToVerify).then(function(hypertyOfEmail) {
-    console.log('email ' + emailToVerify + ' -> hyperty ' + hypertyOfEmail.hypertyURL);
-    return hypertyOfEmail.hypertyURL === hypertyToVerify;
-  });
-}
+  /* TODO: cache this? */
+  hypertiesMatch(registry, URLToVerify, hypertyToVerify) {
+    registry.getUserHyperty(URLToVerify).then(function(hyperty) {
+      return hyperty.hypertyURL === hypertyToVerify;
+    });
+  }
 
   isWhiteListed(userID) {
     let _this = this;
@@ -118,7 +109,6 @@ hypertiesMatch(registry, emailToVerify, hypertyToVerify) {
     if (_this.blackList.indexOf(userID) === -1) {
       _this.blackList.push(userID);
     }
-    console.log(_this.blackList);
   }
 
   removeFromBlackList(userID) {

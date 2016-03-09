@@ -22,8 +22,16 @@ class PolicyEngine {
       if (_this.policies[key] === undefined) {
         _this.policies[key] = [];
       }
-      _this.policies[key].push(policies[i]);
-      console.log(_this.policies);
+      let exists = false;
+      for (let policy in _this.policies[key]) {
+        if (_this.policies[key][policy].id === policies[i].id) {
+          exists = true;
+          break;
+        }
+      }
+      if (!exists) {
+        _this.policies[key].push(policies[i]);
+      }
     }
   }
 
@@ -96,7 +104,6 @@ class PolicyEngine {
 
   authorise(message) {
     let _this = this;
-    console.log('Message:', message);
     /*let message = { id: 123, type:'READ', from:'hyperty://ua.pt/asdf',
                   to:'domain://registry.ua.pt/hyperty-instance/user' };
     _this.simulate(message.from);*/
@@ -120,9 +127,7 @@ class PolicyEngine {
         /* TODO: get scope of the message */
         let scope = 'user';
 
-        console.log('THIS MESSAGE IS FROM ', message.body.assertedIdentity);
         let applicablePolicies = _this.getApplicablePolicies(scope);
-        console.log('POLICIES BEING CHECKED: ', applicablePolicies);
         let policiesResult;
         if (hypertyToVerify.split(':')[0] === 'hyperty') {
           policiesResult = _this.pdp.evaluate(_this.registry, message, hypertyToVerify, applicablePolicies);
@@ -133,10 +138,8 @@ class PolicyEngine {
         _this.pep.enforce(policiesResult[1]);
 
         if (policiesResult[0]) {
-          console.log('MESSAGE ACCEPTED');
           resolve(message);
         } else {
-          console.log('DENIIIIIIIIIIIIIIIIIIIED');
           reject(message);
         }
       }, function(error) {
@@ -147,7 +150,11 @@ class PolicyEngine {
 
   getApplicablePolicies(scope) {
     let _this = this;
-    return _this.policies[scope];
+    let applicablePolicies = _this.policies[scope];
+    if (applicablePolicies === undefined) {
+      applicablePolicies = [];
+    }
+    return applicablePolicies;
   }
 
   getBlackList() {
