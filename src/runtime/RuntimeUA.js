@@ -1,11 +1,12 @@
+// Service Framework dependecies
+import RuntimeCatalogue from 'service-framework/dist/RuntimeCatalogue';
+
 //Main dependecies
 import Registry from '../registry/Registry';
 import IdentityModule from '../identity/IdentityModule';
 import PolicyEngine from '../policy/PolicyEngine';
 import MessageBus from '../bus/MessageBus';
 import GraphConnector from '../graphconnector/GraphConnector';
-
-import RuntimeCatalogue from './RuntimeCatalogue-Local';
 
 import SyncherManager from '../syncher/SyncherManager';
 
@@ -14,7 +15,7 @@ import {divideURL, emptyObject} from '../utils/utils';
 /**
  * Runtime User Agent Interface will process all the dependecies of the core runtime;
  * @author Vitor Silva [vitor-t-silva@telecom.pt]
- * @version 0.2.0
+ * @version 0.4.0
  *
  * @property {runtimeFactory} runtimeFactory - Specific implementation of sandbox;
  * @property {RuntimeCatalogue} runtimeCatalogue - Catalogue of components can be installed;
@@ -40,6 +41,8 @@ class RuntimeUA {
     let _this = this;
 
     _this.runtimeFactory = runtimeFactory;
+
+    console.log(RuntimeCatalogue);
 
     _this.runtimeCatalogue = new RuntimeCatalogue(runtimeFactory);
 

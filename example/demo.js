@@ -5,16 +5,16 @@ import {getUserURLFromEmail, getUserEmailFromURL} from '../src/utils/utils.js';
 
 // import {MessageFactory} from 'service-framework';
 import Policy from '../src/policy/Policy';
-import RuntimeUA from '../src/runtimeUA';
+import RuntimeUA from '../src/runtime/RuntimeUA';
 import RuntimeFactory from '../resources/RuntimeFactory';
 
-let sandboxFactory = new RuntimeFactory();
+let runtimeFactory = new RuntimeFactory();
 let avatar = 'https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/photo.jpg';
 
 // You can change this at your own domain
 let domain = 'localhost';
 
-let runtime = new RuntimeUA(sandboxFactory, domain);
+let runtime = new RuntimeUA(runtimeFactory, domain);
 window.runtime = runtime;
 
 // Check if the document is ready

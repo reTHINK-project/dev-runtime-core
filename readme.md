@@ -124,6 +124,7 @@ JavaScript code should be written in ES6. There are direct dependencies from nod
 -	karma - Make the communication between unit test tool and jenkins. See more on [karma](http://karma-runner.github.io/0.13/index.html)
 -	mocha - Unit test tool. See more on [http://mochajs.org](http://mochajs.org/)
 -	jspm - Don't need compile the code, it uses babel (or traucer or typescript) to run ES6 code on browser. Know more in [jspm.io](http://jspm.io/)
+- live-server - need be installed with `npm install -g live-server`
 -	gulp - Automate and enhance your workflow. See more about gulp on [gulp](http://gulpjs.com/)
 
 ##### Code Style and Hinting
@@ -270,9 +271,31 @@ gulp compile --file=path/to/file;
 
 *to be moved to dev-service-framework*
 
+**NOTE:** While this example folder isn't moved to dev-service-framework, you need to do the following:
+
+ - On linux, run with `sudo`,
+ - On Windows, execute the terminal with administration permissions;
+
+Install and run http-server:
+```shell
+npm install -g http-server
+# or
+npm install
+
+# after installed
+npm start;
+```
+When this example folder will be moved, the 2 certificates need to be removed;
+ - [rethink-certificate cert](rethink-certificate.cert)
+ - [rethink-certificate key](rethink-certificate.key)
+
+
+
+#### Running the example
+
 This repository have a folder with an working example of Hyperty Connector and we can send message and make a WebRTC call between remote hyperties through the vertx;
 
-To run the demo on example folder: - this example have a dependecy from [dev-msg-node-vertx](https://github.com/reTHINK-project/dev-msg-node-vertx/tree/dev-0.2#unit-testing) and [dev-registry-domain](https://github.com/reTHINK-project/dev-registry-domain#dev-registry-domain) for communication between hyperties in two distinct browsers or tabs. **At this moment you need run locally [dev-msg-node-vertx](https://github.com/reTHINK-project/dev-msg-node-vertx/tree/dev-0.2#unit-testing) and [dev-registry-domain](https://github.com/reTHINK-project/dev-registry-domain#dev-registry-domain)** - you need, in the root folder, run command: `npm start` - in your browser, access to https://127.0.0.1:8080/example
+To run the demo on example folder: - this example have a dependecy from [dev-msg-node-vertx](https://github.com/reTHINK-project/dev-msg-node-vertx/tree/dev-0.2#unit-testing) and [dev-registry-domain](https://github.com/reTHINK-project/dev-registry-domain#dev-registry-domain) for communication between hyperties in two distinct browsers or tabs. **At this moment you need run locally [dev-msg-node-vertx](https://github.com/reTHINK-project/dev-msg-node-vertx/tree/dev-0.2#unit-testing) and [dev-registry-domain](https://github.com/reTHINK-project/dev-registry-domain#dev-registry-domain)** - you need, in the root folder, run command: `npm start` - in your browser, access to https://localhost/example
 
 ---
 

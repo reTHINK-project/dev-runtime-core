@@ -8,8 +8,9 @@
   },
   "scripts": {
     "init-setup": "npm init && npm install -g jspm karma-cli gulp-cli && npm install && jspm init && node setup.js",
+    "preinstall": "npm install -g http-server",
     "test": "karma start",
-    "start": "live-server --no-browser --port=8080"
+    "start": "http-server --cors -S -p 443 -C rethink-certificate.cert -K rethink-certificate.key"
   },
   "repository": {
     "type": "git",
