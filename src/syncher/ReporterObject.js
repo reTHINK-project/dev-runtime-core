@@ -67,7 +67,6 @@ class ReporterObject {
 
   delete() {
     let _this = this;
-
     let domain = divideURL(_this._owner).domain;
 
     //delete msg to all subscriptions
@@ -75,11 +74,9 @@ class ReporterObject {
       type: 'delete', from: _this._objSubscriptorURL, to: _this._url + '/changes'
     });
 
-    //TODO: should I wait for response before delete on msg-node
-    //delete msg to the domain node
     _this._bus.postMessage({
-      type: 'delete', from: _this._url, to: 'domain://msg-node.' + domain + '/hyperty-address-allocation',
-      body: { resource: _this._url }
+      type: 'delete', from: _this._parent._url, to: 'domain://msg-node.' + domain + '/object-address-allocation',
+      body: { resource: _this._url, childrenResources: _this._childrens }
     });
 
     _this._releaseListeners();
