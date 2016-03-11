@@ -2,6 +2,8 @@ import SandboxRegistry from '../sandbox/SandboxRegistry';
 import MiniBus from '../bus/MiniBus';
 // import MessageFactory from '../../resources/MessageFactory';
 
+export let SandboxType = {APP: 'app', NORMAL: 'normal'};
+
 /**
  * @author micaelpedrosa@gmail.com
  * Base class to implement external sandbox component
