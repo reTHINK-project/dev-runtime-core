@@ -42,11 +42,11 @@ class Registry extends EventEmitter {
     _this.hypertiesListToRemove = {};
     _this.hypertiesList = [];
     _this.protostubsList = {};
-    _this.sandboxesList = {stub: {}, hyperty: {}, domain: {} };
+    _this.sandboxesList = {sandbox: {}, appSandbox: {} };
     _this.pepList = {};
 
     _this._domain = divideURL(_this.registryURL).domain;
-    _this.sandboxesList.domain[_this._domain] = appSandbox;
+    _this.sandboxesList.appSandbox[runtimeURL] = appSandbox;
     let msgFactory = new MessageFactory('false', '{}');
     _this.messageFactory = msgFactory;
   }
@@ -218,7 +218,17 @@ class Registry extends EventEmitter {
               descriptor, adderessList[0], identityURL);
 
               _this.hypertiesList.push(hyperty);
-              _this.sandboxesList.hyperty[adderessList[0]] = sandbox;
+
+              //check whether the received sanbox e ApplicationSandbox or a normal sandbox
+              if (sandbox.type === 'app') {
+                _this.sandboxesList.appSandbox[adderessList[0]] = sandbox;
+
+              } else if (sandbox.type === 'normal') {
+
+                _this.sandboxesList.sandbox[adderessList[0]] = sandbox;
+              } else {
+                reject('Wrong SandboxType');
+              }
 
               //message to register the new hyperty, within the domain registry
               //TODO uncomment and remove the msg variable when the messageFactory is up.
@@ -336,7 +346,7 @@ class Registry extends EventEmitter {
 
       // TODO: Optimize this
       _this.protostubsList[domainURL] = runtimeProtoStubURL;
-      _this.sandboxesList.stub[runtimeProtoStubURL] = sandbox;
+      _this.sandboxesList.sandbox[runtimeProtoStubURL] = sandbox;
 
       // sandbox.addListener('*', function(msg) {
       //   _this._messageBus.postMessage(msg);
@@ -427,56 +437,40 @@ class Registry extends EventEmitter {
   */
   getSandbox(url) {
     if (!url) throw new Error('Parameter url needed');
-    let dividedURL = divideURL(url);
+    console.log('getSandbox: ', url);
 
     let _this = this;
     return new Promise(function(resolve,reject) {
 
       let request;
-      if (url.includes('msg-node')) {
-        request = _this.sandboxesList.stub[url];
 
-        if (request === undefined) {
-          for (let stub in _this.sandboxesList.stub) {
-            if (stub.includes(url)) {
+      //first try to find the url in the appSandbox list
+      request = _this.sandboxesList.appSandbox[url];
 
-              request = _this.sandboxesList.stub[stub];
-              break;
-            }
-          }
-        }
+      //if no appSandbox was found, try to search in the normal sandboxes list
+      if (!request) {
+        request = _this.sandboxesList.sandbox[url];
 
-      } else if (url.includes('hyperty')) {
-        request = _this.sandboxesList.hyperty[url];
+        if (!request) {
 
-        if (request === undefined) {
-          for (let hyperty in _this.sandboxesList.hyperty) {
-            if (hyperty.includes(url)) {
-              request = _this.sandboxesList.hyperty[hyperty];
+          let domain = divideURL(url).domain;
+
+          // search in the sandboxes list for a entry containing the domain given
+          for (let sandbox in _this.sandboxesList.sandbox) {
+            if (sandbox.includes(domain)) {
+              request = _this.sandboxesList.sandbox[sandbox];
               break;
             }
           }
         }
       }
-      if (request === undefined) {
-        request = _this.sandboxesList.domain[url];
 
-        if (request === undefined) {
-          for (let domain in _this.sandboxesList.domain) {
-            if (domain.includes(dividedURL.domain)) {
-              request = _this.sandboxesList.domain[domain];
-              break;
-            }
-          }
-        }
-        if (request === undefined) {
-          reject('Sandbox not found');
-        } else {
-          resolve(request);
-        }
+      if (!request) {
+        reject('no sandbox found for: ' + url);
       } else {
         resolve(request);
       }
+
     });
   }
 
