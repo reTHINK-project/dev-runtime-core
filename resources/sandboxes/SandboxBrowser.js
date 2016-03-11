@@ -1,5 +1,6 @@
 import MiniBus from '../../src/bus/MiniBus';
-import {Sandbox, SandboxType} from '../../src/sandbox/Sandbox';
+import Sandbox from '../../src/sandbox/Sandbox';
+import SandboxType from '../../src/sandbox/Sandbox';
 import SandboxRegistry from '../../src/sandbox/SandboxRegistry';
 
 // Mockup code for testing
