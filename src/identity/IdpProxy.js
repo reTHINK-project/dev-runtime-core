@@ -129,10 +129,10 @@ let IdpProxy = {
 
         //construction of the URL to be received by the identity module
         _this.OAUTHURL   =   'https://accounts.google.com/o/oauth2/auth?';
-        _this.SCOPE      =   'email%20profile';
+        _this.SCOPE      =   'openid%20email%20profile';
         _this.CLIENTID   =   '808329566012-tqr8qoh111942gd2kg007t0s8f277roi.apps.googleusercontent.com';
         _this.REDIRECT   =    'http://localhost:8080/example/index.html';//document.URL;
-        _this.TYPE       =   'token';
+        _this.TYPE       =   'id_token token';
         _this.VALIDURL   =   'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=';
         _this.USERINFURL =   'https://www.googleapis.com/oauth2/v1/userinfo?access_token=';
 

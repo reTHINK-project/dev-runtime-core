@@ -73,7 +73,9 @@ class OpenIdLib {
             reject('Some error occured.');
             clearInterval(pollTimer);
           }
-          if (win.document.URL.indexOf('REDIRECT') !== -1 || win.document.URL.indexOf('http://localhost:8080') !== -1) {
+
+          let redirectURL = document.URL;//window.location.origin;
+          if (win.document.URL.indexOf('REDIRECT') !== -1 || win.document.URL.indexOf(redirectURL) !== -1) {
             window.clearInterval(pollTimer);
             let url =   win.document.URL;
 
