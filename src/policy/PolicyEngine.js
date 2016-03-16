@@ -5,73 +5,90 @@ import PDP from './PDP';
 
 class PolicyEngine {
 
-  constructor(identityModule, runtimeRegistry) {
+  constructor(messageBus, identityModule, runtimeRegistry) {
     let _this = this;
+    _this.messageBus = messageBus;
     _this.idModule = identityModule;
-    _this.registry = runtimeRegistry;
     _this.pep = new PEP();
-    _this.pdp = new PDP();
+    _this.pdp = new PDP(runtimeRegistry);
     _this.policies = {};
+
+    _this.messageBus.addListener('domain://PolicyEngine', function(message) {
+      _this.processMessage(message);
+    });
   }
 
-  // TODO: verify duplicates
+  processMessage(message) {
+    let _this = this;
+    let method = 'addPolicies';
+
+    //let method = message.body.method;
+    let params = message.body.params;
+    switch (method) {
+      case 'addPolicies':
+        _this.addPolicies(params.scope, params.policies);
+        _this.sendOkResponse(message);
+        break;
+      case 'removePolicies':
+        _this.removePolicies(params.scope, params.policyID);
+        _this.sendOkResponse(message);
+        break;
+      case 'getList':
+        if (_this.getList(params.listName) !== undefined) { // TODO: verificar se quando lança exceção não faz 'sendOkResponse'
+          _this.sendOkResponse(message);
+        }
+        break;
+      case 'createList':
+        _this.createList(params.listName);
+        _this.sendOkResponse(message);
+        break;
+      case 'addToList':
+        _this.addToList(params.userID, params.listName);
+        _this.sendOkResponse(message);
+        break;
+      case 'removeFromList':
+        _this.removeFromList(params.userID, params.listName);
+        _this.sendOkResponse(message);
+        break;
+      default:
+        console.log('Invalid method call!');
+        break;
+    }
+  }
+
+  sendOkResponse(message) {
+    let _this = this;
+    let response = {id: message.id, type: 'response', to: message.from, from: message.to, body: {code: 200}};
+    _this.messageBus.postMessage(response);
+  }
+
   // TODO: conflict detection
-  addPolicies(key, policies) {
+  addPolicies(scope, policies) {
     let _this = this;
     for (let i in policies) {
-      if (_this.policies[key] === undefined) {
-        _this.policies[key] = [];
+      if (_this.policies[scope] === undefined) {
+        _this.policies[scope] = [];
       }
       let exists = false;
-      for (let policy in _this.policies[key]) {
-        if (_this.policies[key][policy].id === policies[i].id) {
+      for (let policy in _this.policies[scope]) {
+        if (_this.policies[scope][policy].id === policies[i].id) {
           exists = true;
           break;
         }
       }
       if (!exists) {
-        _this.policies[key].push(policies[i]);
+        _this.policies[scope].push(policies[i]);
       }
     }
   }
 
-  /*simulate(key) {
-    let _this = this;
-
-    yte
-    let policy2 = new Policy(policy.id, policy.scope, policy.condition,
-      policy.authorise, policy.actions);
-
-    policy = {
-      id: 'allow-whitelisted',
-      scope: 'user',
-      condition: 'whitelisted'c,
-      authorise: true,
-      actions: []
-    };
-    let policy3 = new Policy(policy.id, policy.scope, policy.condition,
-      policy.authorise, policy.actions);
-
-    policy = {
-      id: 'block-08-20',
-      scope: 'user',
-      condition: 'time 08:00 20:00',
-      authorise: false,
-      actions: []
-    };
-    let policy4 = new Policy(policy.id, policy.scope, policy.condition,
-      policy.authorise, policy.actions);
-
-    _this.addPolicies(key, [policy4]);
-  }*/
-
-  removePolicies(key, policyId) {
+  removePolicies(scope, policyId) {
     let _this = this;
     let allPolicies = _this.policies;
 
-    if (key in allPolicies) {
+    if (scope in allPolicies) {
       if (policyId !== 'all') {
-        let policies = allPolicies[key];
+        let policies = allPolicies[scope];
         let numPolicies = policies.length;
 
         for (let policy = 0; policy < numPolicies; policy++) {
@@ -81,32 +98,33 @@ class PolicyEngine {
           }
         }
       } else {
-        delete _this.policies[key];
+        delete _this.policies[scope];
       }
     }
   }
 
-  addToBlackList(userID) {
-    this.pdp.addToBlackList(userID);
+  getList(listName) {
+    let _this = this;
+    return _this.pdp.getList(listName);
   }
 
-  removeFromBlackList(userID) {
-    this.pdp.removeFromBlackList(userID);
+  createList(listName) {
+    let _this = this;
+    _this.pdp.createList(listName);
   }
 
-  addToWhiteList(userID) {
-    this.pdp.addToWhiteList(userID);
+  addToList(userID, listName) {
+    let _this = this;
+    _this.pdp.addToList(userID, listName);
   }
 
-  removeFromWhiteList(userID) {
-    this.pdp.removeFromWhiteList(userID);
+  removeFromList(userID, listName) {
+    let _this = this;
+    _this.pdp.removeFromList(userID, listName);
   }
 
   authorise(message) {
     let _this = this;
-    /*let message = { id: 123, type:'READ', from:'hyperty://ua.pt/asdf',
-                  to:'domain://registry.ua.pt/hyperty-instance/user' };
-    _this.simulate(message.from);*/
     return new Promise(function(resolve, reject) {
       _this.idModule.loginWithRP('google identity', 'scope').then(function(value) {
         let assertedID = _this.idModule.getIdentities();
@@ -130,7 +148,7 @@ class PolicyEngine {
         let applicablePolicies = _this.getApplicablePolicies(scope);
         let policiesResult;
         if (hypertyToVerify.split(':')[0] === 'hyperty') {
-          policiesResult = _this.pdp.evaluate(_this.registry, message, hypertyToVerify, applicablePolicies);
+          policiesResult = _this.pdp.evaluate(message, hypertyToVerify, applicablePolicies);
         } else {
           policiesResult = [true, []];
         }
@@ -138,8 +156,10 @@ class PolicyEngine {
         _this.pep.enforce(policiesResult[1]);
 
         if (policiesResult[0]) {
+          message.authorised = true;
           resolve(message);
         } else {
+          message.authorised = false;
           reject(message);
         }
       }, function(error) {
@@ -155,11 +175,6 @@ class PolicyEngine {
       applicablePolicies = [];
     }
     return applicablePolicies;
-  }
-
-  getBlackList() {
-    let _this = this;
-    return _this.pdp.getBlackList();
   }
 }
 

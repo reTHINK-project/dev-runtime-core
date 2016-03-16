@@ -17,7 +17,7 @@ let identityModule = {
     identities.push(identityBundle);
     return identities;
   },
-  loginWithRP: (domain, scope) => {
+  loginWithRP: (domain, scope) => { // TODO: posso tirar?
     return new Promise(function(resolve, reject) {
       let token = {
         id: 'identity'
@@ -30,81 +30,115 @@ let identityModule = {
     });
   }
 };
+let messageBus = {
+  addListener: (msg, callback) => { }};
 
-describe('PolicyEngine', function() {
+describe('Policy Engine', function() {
+  let policyEngine = new PolicyEngine(messageBus, identityModule, runtimeRegistry);
 
-  let policyEngine = new PolicyEngine(identityModule, runtimeRegistry);
+  let messageWithoutID = {
+    id: 1,
+    type:'read',
+    from:'hyperty://ua.pt/asdf',
+    to:'domain://registry.ua.pt/hyperty-instance/user'
+  };
 
-  describe('authorise(message) without assertedIdentity in body', function() {
+  let messageWithID = {
+    id: 1,
+    type:'read',
+    from:'hyperty://ua.pt/asdf',
+    to:'domain://registry.ua.pt/hyperty-instance/user',
+    body: {
+      assertedIdentity: 'user://gmail.com/openidtest10',
+      idToken: {
+        id:'identity'
+      }
+    },
+    authorised: true
+  };
 
-    let message = {id: 123, type:'READ', from:'hyperty://ua.pt/asdf',
-                  to:'domain://registry.ua.pt/hyperty-instance/user'};
-
-    let expectedMessage = {id: 123, type:'READ', from:'hyperty://ua.pt/asdf',
-                          to:'domain://registry.ua.pt/hyperty-instance/user',
-                          body: {assertedIdentity: 'user://gmail.com/openidtest10',
-                                 idToken:  {id:'identity'}}};
-
+  describe('assertedIdentity', function() {
     it('should add an assertedIdentity in the message body', function(done) {
-
-      expect(policyEngine.authorise(message).then(function(response) {
+      expect(policyEngine.authorise(messageWithoutID).then(function(response) {
         return response;
       }), function(reject) {
         return reject;
-      }).to.be.fulfilled.and.eventually.eql(expectedMessage).and.notify(done);
+      }).to.be.fulfilled.and.eventually.eql(messageWithID).and.notify(done);
     });
-  });
-
-  describe('authorise(message) with assertedIdentity in body', function() {
-    let message = {id: 3212, type:'READ', from:'hyperty://ua.pt/asdf',
-                            to:'hyperty://ua.pt/FindHyperty',
-                            body: {assertedIdentity: 'value', token: 'tokenID'}};
-
-    let expectedMessage = {id: 3212, type:'READ', from:'hyperty://ua.pt/asdf',
-                            to:'hyperty://ua.pt/FindHyperty',
-                            body: {assertedIdentity: 'value', token: 'tokenID'}};
 
     it('should maintain the assertedIdentity in the message body', function(done) {
-
-      expect(policyEngine.authorise(message).then(function(response) {
+      expect(policyEngine.authorise(messageWithID).then(function(response) {
         return response;
       }), function(reject) {
         return reject;
-      }).to.be.fulfilled.and.eventually.eql(expectedMessage).and.notify(done);
+      }).to.be.fulfilled.and.eventually.eql(messageWithID).and.notify(done);
     });
   });
 
-  let scope = 'user';
-  let policy1 = new Policy('allow-whitelisted', 'user', 'whitelisted', true, []);
-  let policy2 = new Policy('block-blacklisted', 'user', 'blacklisted', false, []);
+  let userScope = 'user';
+  let applicationScope = 'application';
+  let policy1 = new Policy('allow-listA', 'list listA', true, []);
+  let policy2 = new Policy('block-listB', 'list listB', false, []);
+  let policy3 = new Policy('block-listC', 'list listC', false, []);
 
   describe('addPolicies', function() {
-    it('associates a policy with a scope', function() {
-      policyEngine.addPolicies(scope, [policy1]);
-      expect(policyEngine.getApplicablePolicies(scope)).to.be.eql([policy1]);
+    it('associates a policy with the user scope', function() {
+      policyEngine.addPolicies(userScope, [policy1]);
+      expect(policyEngine.getApplicablePolicies(userScope)).to.be.eql([policy1]);
     });
-    it('associates a policy with an hyperty instance', function() {
-      policyEngine.addPolicies(scope, [policy2]);
-      expect(policyEngine.getApplicablePolicies(scope)).to.be.eql([policy1, policy2]);
+    it('associates a second policy with the user scope', function() {
+      policyEngine.addPolicies(userScope, [policy2]);
+      expect(policyEngine.getApplicablePolicies(userScope)).to.be.eql([policy1, policy2]);
+    });
+    it('associates a policy with the application scope', function() {
+      policyEngine.addPolicies(applicationScope, [policy3]);
+      expect(policyEngine.getApplicablePolicies(applicationScope)).to.be.eql([policy3]);
     });
   });
 
-  let policy3 = new Policy('block-08-20', 'scope', 'time 08:00 20:00', true, []);
-
   describe('removePolicies', function() {
-    it('removes the policy with the given ID associated with a scope', function() {
-      policyEngine.addPolicies(scope, [policy3]);
-      policyEngine.removePolicies(scope, 'allow-whitelisted');
-      expect(policyEngine.getApplicablePolicies(scope)).to.be.eql([policy2, policy3]);
-      policyEngine.removePolicies(scope, 'block-08-20');
-      policyEngine.removePolicies(scope, 'block-blacklisted');
-      expect(policyEngine.getApplicablePolicies(scope)).to.be.eql([]);
+    it('removes an existing policy associated with the user scope', function() {
+      policyEngine.removePolicies(userScope, 'allow-listA');
+      expect(policyEngine.getApplicablePolicies(userScope)).to.be.eql([policy2]);
+    });
+    it('tries to remove a policy that is not associated with the user scope', function() {
+      policyEngine.removePolicies(userScope, 'block-08-20');
+      expect(policyEngine.getApplicablePolicies(userScope)).to.be.eql([policy2]);
+    });
+    it('removes all policies associated with the application scope', function() {
+      policyEngine.removePolicies(applicationScope, 'all');
+      expect(policyEngine.getApplicablePolicies(applicationScope)).to.be.eql([]);
+    });
+  });
+
+  let listName1 = 'listA';
+
+  describe('createList', function() {
+    it('creates a list of users', function() {
+      policyEngine.createList(listName1);
+      expect(policyEngine.getList(listName1)).to.be.eql([]);
+    });
+  });
+
+  let userEmail1 = 'openidtest10@gmail.com';
+  let userEmail2 = 'openidtest20@gmail.com';
+
+  describe('addToList', function() {
+    it('adds a user to a list of users', function() {
+      policyEngine.addToList(userEmail1, listName1);
+      expect(policyEngine.getList(listName1)).to.be.eql([userEmail1]);
     });
 
-    it('removes all policies associated with a scope', function() {
-      policyEngine.addPolicies(scope, [policy1]);
-      policyEngine.removePolicies(scope, 'all');
-      expect(policyEngine.getApplicablePolicies(scope)).to.be.eql([]);
+    it('adds a second user to a list of users', function() {
+      policyEngine.addToList(userEmail2, listName1);
+      expect(policyEngine.getList(listName1)).to.be.eql([userEmail1, userEmail2]);
+    });
+  });
+
+  describe('removeFromList', function() {
+    it('adds a user from a list of users', function() {
+      policyEngine.removeFromList(userEmail1, listName1);
+      expect(policyEngine.getList(listName1)).to.be.eql([userEmail2]);
     });
   });
 

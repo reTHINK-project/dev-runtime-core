@@ -1,13 +1,44 @@
 class PDP {
 
-  constructor() {
+  constructor(runtimeRegistry) {
     let _this = this;
-    _this.blackList = [];
-    _this.whiteList = [];
+    _this.runtimeRegistry = runtimeRegistry;
+    _this.myLists = {};
+  }
+
+  getList(listName) {
+    let _this = this;
+    if (listName in _this.myLists) {
+      return _this.myLists[listName];
+    } else {
+      throw new Error('The list ' + listName + ' does not exist!');
+    }
+  }
+
+  createList(listName) {
+    let _this = this;
+    _this.myLists[listName] = [];
+  }
+
+  addToList(userID, listName) {
+    let _this = this;
+    _this.myLists[listName].push(userID);
+  }
+
+  // TODO: confirmar que remove de _this.myLists[listName] e não só de list
+  removeFromList(userID, listName) {
+    let _this = this;
+    let list = _this.myLists[listName];
+    for (let i in list) {
+      if (list[i] === userID) {
+        list.splice(i, 1);
+        break;
+      }
+    }
   }
 
   /* use hashtable to allow dynamic management */
-  evaluate(registry, message, hypertyToVerify, policies) {
+  evaluate(message, hypertyToVerify, policies) {
     let _this = this;
     let results = [true];
     let actions = [];
@@ -16,12 +47,11 @@ class PDP {
       let policy = policies[i];
       let result = [];
       let condition = policy.condition.split(' ');
-      switch (condition[0]) {
-        case 'blacklisted':
-          result[0] = _this.isBlackListed(registry, hypertyToVerify) ? policy.authorise : !policy.authorise;
-          break;
-        case 'whitelisted':
-          result[0] = _this.isWhiteListed(hypertyToVerify) ? policy.authorise : !policy.authorise;
+      let resource = condition[0];
+      switch (resource) {
+        case 'list':
+          let listName = condition[1];
+          result[0] = _this.isInList(hypertyToVerify, listName) ? policy.authorise : !policy.authorise;
           break;
         case 'time':
           let start = condition[1];
@@ -29,11 +59,8 @@ class PDP {
           result[0] = _this.isTimeBetween(start, end) ? policy.authorise : !policy.authorise;
           break;
         default:
-
-          // TODO: do actions depend on the decision?
-          result[1] = policy.actions;
+          result[1] = policy.actions; // TODO: do actions depend on the decision?
       }
-
       results.push(result[0]);
       actions.push(result[1]);
     }
@@ -42,13 +69,16 @@ class PDP {
     return [authDecision, actions];
   }
 
-  isSameOrigin() {}
+  /* Aux function for evaluate() */
+  getDecision(results) {
+    return results.indexOf(false) === -1;
+  }
 
-  isBlackListed(registry, hypertyToVerify) {
+  isInList(hypertyToVerify, listName) {
     let _this = this;
-    let blackList = _this.blackList;
-    for (let i in blackList) {
-      if (_this.hypertiesMatch(registry, blackList[i]), hypertyToVerify) {
+    let list = _this.myLists[listName];
+    for (let i in list) {
+      if (_this.hypertiesMatch(_this.registry, list[i]), hypertyToVerify) {
         return true;
       }
     }
@@ -88,56 +118,6 @@ class PDP {
   getMinutes(time) {
     let timeSplit = time.split(':');
     return parseInt(timeSplit[0]) * 60 + parseInt(timeSplit[1]);
-  }
-
-  getBlackList() {
-    let _this = this;
-    return _this.blackList;
-  }
-
-  isContext() {}
-
-  isHypertyType() {}
-
-  /* Aux function for evaluate() */
-  getDecision(results) {
-    return results.indexOf(false) === -1;
-  }
-
-  addToBlackList(userID) {
-    let _this = this;
-    if (_this.blackList.indexOf(userID) === -1) {
-      _this.blackList.push(userID);
-    }
-  }
-
-  removeFromBlackList(userID) {
-    let _this = this;
-    let blackList = _this.blackList;
-    for (let i in blackList) {
-      if (blackList[i] === userID) {
-        blackList.splice(i, 1);
-        break;
-      }
-    }
-  }
-
-  addToWhiteList(userID) {
-    let _this = this;
-    if (_this.blackList.indexOf(userID) === -1) {
-      _this.whiteList.push(userID);
-    }
-  }
-
-  removeFromWhiteList(userID) {
-    let _this = this;
-    let whiteList = _this.whiteList;
-    for (let i in whiteList) {
-      if (whiteList[i] === userID) {
-        whiteList.splice(i, 1);
-        break;
-      }
-    }
   }
 }
 
