@@ -1,6 +1,6 @@
 class Subscription {
 
-  constructor(bus, hyperty, url, childrens) {
+  constructor(bus, owner, url, childrens, isReporter) {
     let _this = this;
     let childBaseURL = url + '/children/';
     let changeURL = url + '/changes';
@@ -10,7 +10,7 @@ class Subscription {
       if (msg.type === 'delete') {
         console.log('Subscription-DELETE: ', msg);
         let deleteMessageToHyperty = {
-          type: 'delete', from: msg.from, to: hyperty,
+          type: 'delete', from: msg.from, to: owner,
           body: { resource: url }
         };
 
@@ -24,14 +24,24 @@ class Subscription {
       }
     });
 
-    //subscription accepted (add forward and subscription)
-    _this._changeListener = bus.addForward(changeURL, hyperty);
+    //add change publish address or forward
+    if (isReporter) {
+      _this._changeListener = bus.addPublish(changeURL);
+    } else {
+      _this._changeListener = bus.addForward(changeURL, owner);
+    }
 
-    //add forward for children
     _this._childrenListeners = [];
     childrens.forEach((child) => {
-      let childrenForward = bus.addForward(childBaseURL + child, hyperty);
+      let childId = childBaseURL + child;
+
+      //add children publish address
+      let childrenForward = bus.addPublish(childId);
       _this._childrenListeners.push(childrenForward);
+
+      //add self forward
+      let selfForward = bus.addForward(childId, owner);
+      _this._childrenListeners.push(selfForward);
     });
   }
 
@@ -39,7 +49,9 @@ class Subscription {
     let _this = this;
 
     _this._deleteListener.remove();
+
     _this._changeListener.remove();
+
     _this._childrenListeners.forEach((forward) => {
       forward.remove();
     });

@@ -49,24 +49,21 @@ describe('SyncherManager', function() {
 
   it('reporter observer integration', function(done) {
     let bus = new MessageBus();
-
-    bus.addForward = (from, to) => {
-      //no need to config forward, sync2 adds listener for objURL, and it's on the same sandbox
-      console.log('addForward: ', from, to);
-    };
-
     bus._onPostMessage = (msg) => {
       console.log('_onPostMessage: ', msg);
-      expect(msg).to.eql({
-        id: 4, type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.h2.domain/sm',
-        body: { resource: objURL, childrenResources: ['children1', 'children2'], schema: schemaURL }
-      });
 
-      //simulate msg-node response
-      bus.postMessage({
-        id: 4, type: 'response', from: 'domain://msg-node.h2.domain/sm', to: 'hyperty-runtime://fake-runtime/sm',
-        body: { code: 200 }
-      });
+      if (msg.type === 'subscribe') {
+        expect(msg).to.eql({
+          id: 4, type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.h2.domain/sm',
+          body: { resource: objURL, childrenResources: ['children1', 'children2'], schema: schemaURL }
+        });
+
+        //simulate msg-node response
+        bus.postMessage({
+          id: 4, type: 'response', from: 'domain://msg-node.h2.domain/sm', to: 'hyperty-runtime://fake-runtime/sm',
+          body: { code: 200 }
+        });
+      }
     };
 
     new SyncherManager(runtimeURL, bus, { }, catalog, allocator);
@@ -292,7 +289,7 @@ describe('SyncherManager', function() {
     let compacted = false;
 
     let sync = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
-    let observer = new DataObjectObserver(sync, objURL, schemaURL, 'on', {}, [], 0);
+    let observer = new DataObjectObserver(sync, objURL, schemaURL, 'on', { data: {}, childrens: {} }, [], 0);
     sync.observers[objURL] = observer;
 
     observer.onChange('*', (event) => {
@@ -502,12 +499,6 @@ describe('SyncherManager', function() {
 
   it('reporter addChildren', function(done) {
     let bus = new MessageBus();
-
-    bus.addForward = (from, to) => {
-      //no need to config forward, sync2 adds listener for objURL, and it's on the same sandbox
-      console.log('5-addForward: ', from, to);
-    };
-
     bus._onPostMessage = (msg) => {
       console.log('5-_onPostMessage: ', msg);
     };
@@ -526,9 +517,6 @@ describe('SyncherManager', function() {
 
   it('observer addChildren', function(done) {
     let bus = new MessageBus();
-    bus.addForward = (from, to) => {
-      console.log('6-addForward: ', from, to);
-    };
     bus._onPostMessage = (msg) => {
       console.log('6-_onPostMessage: ', msg);
       bus.postMessage({
@@ -574,18 +562,22 @@ describe('SyncherManager', function() {
 
   it('children deltas generate and process', function(done) {
     let bus = new MessageBus();
-    bus.addForward = (from, to) => {
-      console.log('7-addForward: ', from, to);
-    };
     bus._onPostMessage = (msg) => {
       console.log('7-_onPostMessage: ', msg);
-      bus.postMessage({
-        id: 4, type: 'response', from: 'domain://msg-node.h2.domain/sm', to: 'hyperty-runtime://fake-runtime/sm',
-        body: { code: 200 }
-      });
+      if (msg.type === 'subscribe') {
+        expect(msg).to.eql({
+          id: 4, type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.h2.domain/sm',
+          body: { resource: objURL, childrenResources: ['children1', 'children2'], schema: schemaURL }
+        });
+
+        bus.postMessage({
+          id: 4, type: 'response', from: 'domain://msg-node.h2.domain/sm', to: 'hyperty-runtime://fake-runtime/sm',
+          body: { code: 200 }
+        });
+      }
     };
 
-    new SyncherManager(runtimeURL, bus, { }, catalog, allocator);
+    new SyncherManager(runtimeURL, bus, {}, catalog, allocator);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
@@ -602,7 +594,7 @@ describe('SyncherManager', function() {
     sync1.create(schemaURL, [hyperURL2], { x: 10, y: 10 }).then((dor) => {
       dor.onSubscription((subscribeEvent) => {
         dor.onAddChildren((event) => {
-          let children1 = dor.children[event.childId];
+          let children1 = dor.childrens[event.childId];
           children1.onChange((changeEvent) => {
             console.log('onChange: ', changeEvent);
             expect(changeEvent).to.eql({ cType: 'update', oType: 'object', field: 'message', data: 'Hello Luis!' });
@@ -620,14 +612,6 @@ describe('SyncherManager', function() {
     let deleted = false;
 
     let bus = new MessageBus();
-    bus.addForward = (from, to) => {
-      console.log('8-addForward: ', from, to);
-      return {
-        remove: () => {
-          console.log('8-Forward-Remove: ', from, to);
-        }
-      };
-    };
     bus._onPostMessage = (msg) => {
       console.log('8-_onPostMessage: ', msg);
       if (msg.type === 'subscribe') {
@@ -637,13 +621,14 @@ describe('SyncherManager', function() {
         });
       } else if (msg.type === 'delete') {
         //expect delete message to msg-node
-        expect(msg.from).to.eql(runtimeURL + '/sm');
-        expect(msg.to).to.eql('domain://msg-node.h1.domain/object-address-allocation');
-        expect(msg.body.resource).to.eql(objURL);
+        if (msg.from === runtimeURL + '/sm') {
+          expect(msg.to).to.eql('domain://msg-node.h1.domain/object-address-allocation');
+          expect(msg.body.resource).to.eql(objURL);
 
-        expect(deleted).to.eql(true);
+          expect(deleted).to.eql(true);
 
-        done();
+          done();
+        }
       }
     };
 
@@ -681,14 +666,6 @@ describe('SyncherManager', function() {
 
   it('subscribe and unsubscribe', function(done) {
     let bus = new MessageBus();
-    bus.addForward = (from, to) => {
-      console.log('8-addForward: ', from, to);
-      return {
-        remove: () => {
-          console.log('8-Forward-Remove: ', from, to);
-        }
-      };
-    };
     bus._onPostMessage = (msg) => {
       console.log('8-_onPostMessage: ', msg);
       if (msg.type === 'subscribe') {

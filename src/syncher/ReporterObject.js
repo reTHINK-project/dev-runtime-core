@@ -13,7 +13,9 @@ class ReporterObject {
 
     _this._objSubscriptorURL = _this._url + '/subscription';
     _this._bus = parent._bus;
+
     _this._subscriptions = {};
+    _this._childrenListeners = [];
 
     _this._allocateListeners();
   }
@@ -34,13 +36,18 @@ class ReporterObject {
       }
     });
 
+    let changeURL = _this._url + '/changes';
+    _this._changeListener = _this._bus.addListener(changeURL, (msg) => {
+      //TODO: what todo here? Save changes?
+      console.log('SyncherManager-' + changeURL + '-RCV: ', msg);
+    });
+
     //add children listeners...
     let childBaseURL = _this._url + '/children/';
-    _this._childrenListeners = [];
     _this._childrens.forEach((child) => {
       let childURL = childBaseURL + child;
       let childListener = _this._bus.addListener(childURL, (msg) => {
-        //TODO: what todo here? Process child creations?
+        //TODO: what todo here? Save childrens?
         console.log('SyncherManager-' + childURL + '-RCV: ', msg);
       });
 
@@ -54,6 +61,8 @@ class ReporterObject {
     _this._objForward.remove();
 
     _this._subscriptionListener.remove();
+
+    _this._changeListener.remove();
 
     _this._childrenListeners.forEach((cl) => {
       cl.remove();
@@ -121,7 +130,7 @@ class ReporterObject {
       _this._bus.postMessage(forwardMsg, (reply) => {
         console.log('forward-reply: ', reply);
         if (reply.body.code === 200) {
-          _this._subscriptions[hypertyURL] = new Subscription(_this._bus, hypertyURL, _this._url, _this._childrens);
+          _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, _this._childrens, true);
         }
 
         //send subscribe-response

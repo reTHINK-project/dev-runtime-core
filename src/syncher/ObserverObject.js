@@ -17,7 +17,7 @@ class ObserverObject {
   addSubscription(hyperty) {
     let _this = this;
 
-    _this._subscriptions[hyperty] = new Subscription(_this._bus, hyperty, _this._url, _this._childrens);
+    _this._subscriptions[hyperty] = new Subscription(_this._bus, hyperty, _this._url, _this._childrens, false);
   }
 
   removeSubscription(hyperty) {

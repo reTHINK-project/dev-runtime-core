@@ -84,7 +84,7 @@ describe('MessageBus', function() {
 
   });
 
-  it('forward unique messages', function(done) {
+  it.skip('forward unique messages', function(done) {
     let result = { x1: 0, x2: 0 };
     let seq = 0;
 
