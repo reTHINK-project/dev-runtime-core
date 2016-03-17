@@ -3,18 +3,20 @@ import Subscription from './Subscription';
 
 class ReporterObject {
 
-  constructor(parent, owner, url, childrens) {
+  constructor(parent, owner, url) {
     let _this = this;
 
     _this._parent = parent;
     _this._owner = owner;
     _this._url = url;
-    _this._childrens = childrens;
 
-    _this._objSubscriptorURL = _this._url + '/subscription';
     _this._bus = parent._bus;
 
+    _this._domain = divideURL(owner).domain;
+    _this._objSubscriptorURL = _this._url + '/subscription';
+
     _this._subscriptions = {};
+    _this._childrens = [];
     _this._childrenListeners = [];
 
     _this._allocateListeners();
@@ -41,18 +43,6 @@ class ReporterObject {
       //TODO: what todo here? Save changes?
       console.log('SyncherManager-' + changeURL + '-RCV: ', msg);
     });
-
-    //add children listeners...
-    let childBaseURL = _this._url + '/children/';
-    _this._childrens.forEach((child) => {
-      let childURL = childBaseURL + child;
-      let childListener = _this._bus.addListener(childURL, (msg) => {
-        //TODO: what todo here? Save childrens?
-        console.log('SyncherManager-' + childURL + '-RCV: ', msg);
-      });
-
-      _this._childrenListeners.push(childListener);
-    });
   }
 
   _releaseListeners() {
@@ -74,6 +64,47 @@ class ReporterObject {
     });
   }
 
+  addChildrens(childrens) {
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+      if (childrens.length === 0) {
+        resolve();
+        return;
+      }
+
+      let childBaseURL = _this._url + '/children/';
+      _this._childrens.push(childrens);
+
+      let subscriptions = [];
+      childrens.forEach((child) => subscriptions.push(childBaseURL + child));
+
+      let nodeSubscribeMsg = {
+        type: 'subscribe', from: _this._parent._url, to: 'domain://msg-node.' + _this._domain + '/sm',
+        body: { subscribe: subscriptions, source: _this._owner }
+      };
+
+      _this._bus.postMessage(nodeSubscribeMsg, (reply) => {
+        if (reply.body.code === 200) {
+
+          //add children listeners on local ...
+          subscriptions.forEach((childURL) => {
+            let childListener = _this._bus.addListener(childURL, (msg) => {
+              //TODO: what todo here? Save childrens?
+              console.log('SyncherManager-' + childURL + '-RCV: ', msg);
+            });
+
+            _this._childrenListeners.push(childListener);
+          });
+
+          resolve();
+        } else {
+          reject('Error on msg-node subscription: ' + reply.body.desc);
+        }
+      });
+    });
+  }
+
   delete() {
     let _this = this;
     let domain = divideURL(_this._owner).domain;
@@ -83,6 +114,7 @@ class ReporterObject {
       type: 'delete', from: _this._objSubscriptorURL, to: _this._url + '/changes'
     });
 
+    //TODO: change delete spec!
     _this._bus.postMessage({
       type: 'delete', from: _this._parent._url, to: 'domain://msg-node.' + domain + '/object-address-allocation',
       body: { resource: _this._url, childrenResources: _this._childrens }
