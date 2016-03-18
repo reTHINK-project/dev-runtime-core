@@ -39833,6 +39833,7 @@ var ReporterObject = function () {
         };
 
         _this._bus.postMessage(nodeSubscribeMsg, function (reply) {
+          console.log('node-subscribe-response(reporter): ', reply);
           if (reply.body.code === 200) {
 
             //add children listeners on local ...
@@ -40185,10 +40186,11 @@ var SyncherManager = function () {
       var _this = this;
 
       var hypertyURL = msg.from;
-      var domain = (0, _utils.divideURL)(msg.to).domain;
       var objURL = msg.body.resource;
       var objURLSubscription = objURL + '/subscription';
       var childBaseURL = objURL + '/children/';
+
+      var domain = (0, _utils.divideURL)(objURL).domain;
 
       //get schema from catalogue and parse -> (children)
       _this._catalog.getDataSchemaDescriptor(msg.body.schema).then(function (descriptor) {
@@ -40210,7 +40212,7 @@ var SyncherManager = function () {
 
         //subscribe in msg-node
         _this._bus.postMessage(nodeSubscribeMsg, function (reply) {
-          console.log('node-subscribe-response: ', reply);
+          console.log('node-subscribe-response(observer): ', reply);
           if (reply.body.code === 200) {
 
             //send provisional response

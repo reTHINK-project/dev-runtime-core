@@ -126,10 +126,11 @@ class SyncherManager {
     let _this = this;
 
     let hypertyURL = msg.from;
-    let domain = divideURL(msg.to).domain;
     let objURL = msg.body.resource;
     let objURLSubscription = objURL + '/subscription';
     let childBaseURL = objURL + '/children/';
+
+    let domain = divideURL(objURL).domain;
 
     //get schema from catalogue and parse -> (children)
     _this._catalog.getDataSchemaDescriptor(msg.body.schema).then((descriptor) => {
@@ -149,7 +150,7 @@ class SyncherManager {
 
       //subscribe in msg-node
       _this._bus.postMessage(nodeSubscribeMsg, (reply) => {
-        console.log('node-subscribe-response: ', reply);
+        console.log('node-subscribe-response(observer): ', reply);
         if (reply.body.code === 200) {
 
           //send provisional response

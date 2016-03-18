@@ -85,6 +85,7 @@ class ReporterObject {
       };
 
       _this._bus.postMessage(nodeSubscribeMsg, (reply) => {
+        console.log('node-subscribe-response(reporter): ', reply);
         if (reply.body.code === 200) {
 
           //add children listeners on local ...

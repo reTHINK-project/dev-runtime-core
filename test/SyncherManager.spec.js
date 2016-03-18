@@ -23,13 +23,15 @@ describe('SyncherManager', function() {
   let msgNodeResponseFunc = (bus, msg) => {
     if (msg.type === 'subscribe') {
       if (msg.id === 2) {
+        //reporter subscribe
         expect(msg).to.eql({
           id: 2, type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.h1.domain/sm',
           body: { subscribe: [ objURL + '/children/children1', objURL + '/children/children2'], source: hyperURL1 }
         });
       } else {
+        //observer subscribe
         expect(msg).to.eql({
-          id: 5, type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.fake-runtime/sm',
+          id: 5, type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.obj1/sm',
           body: { subscribe: [ objURL + '/changes', objURL + '/children/children1', objURL + '/children/children2'], source: hyperURL2 }
         });
       }
