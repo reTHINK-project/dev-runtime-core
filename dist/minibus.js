@@ -20,9 +20,9 @@ var Bus = function () {
   /* private
   _msgId: number;
   _subscriptions: <url: MsgListener[]>
-    _responseTimeOut: number
+   _responseTimeOut: number
   _responseCallbacks: <url+id: (msg) => void>
-    */
+   */
 
   function Bus() {
     _classCallCheck(this, Bus);

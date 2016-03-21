@@ -70,6 +70,9 @@ class RuntimeUA {
     // Instantiate the Message Bus
     _this.messageBus = new MessageBus(_this.registry);
 
+    // Instantiate the Policy Engine
+    _this.policyEngine = new PolicyEngine(_this.messageBus, _this.identityModule, _this.registry);
+
     _this.messageBus.pipeline.handlers = [
 
       // Policy message authorise
@@ -83,9 +86,6 @@ class RuntimeUA {
         });
       }
     ];
-
-    // Instantiate the Policy Engine
-    _this.policyEngine = new PolicyEngine(_this.messageBus, _this.identityModule, _this.registry);
 
     // Add to App Sandbox the listener;
     appSandbox.addListener('*', function(msg) {
