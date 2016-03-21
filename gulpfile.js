@@ -379,14 +379,15 @@ function resource(file, configuration, isDefault) {
 
 gulp.task('watch', function() {
 
-  var watcher = gulp.watch(['resources/*Hyperty.js', 'resources/*ProtoStub.js']);
-  watcher.on('change', function(event) {
+  return gulp.watch(['src/runtime/RuntimeUA.js'], ['runtime']);
 
-    if (event.type === 'deleted') return;
-    console.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
-    resource(event.path);
-
-  });
+  // watcher.on('change', function(event) {
+  //
+  //   if (event.type === 'deleted') return;
+  //   console.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
+  //   resource(event.path);
+  //
+  // });
 
 });
 
