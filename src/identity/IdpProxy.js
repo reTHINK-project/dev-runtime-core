@@ -1,39 +1,87 @@
-function DB() {
-  this.store = {};
-}
-DB.prototype = {
-  put: function(key, value) {
-    this.store[key] = value;
-    return 'success';
-  },
-  get: function(key) {
-    let value = this.store[key];
-    return value;
-  }
+let openIDConfiguration;
+
+let googleInfo = {
+  clientSecret:          'Xx4rKucb5ZYTaXlcZX9HLfZW',
+  clientID:              '808329566012-tqr8qoh111942gd2kg007t0s8f277roi.apps.googleusercontent.com',
+  redirectURI:           location.origin,
+  issuer:                'https://accounts.google.com',
+  tokenEndpoint:         'https://www.googleapis.com/oauth2/v4/token?',
+  jwksUri:               'https://www.googleapis.com/oauth2/v3/certs?',
+  authorisationEndpoint: 'https://accounts.google.com/o/oauth2/auth?',
+  userinfo:              'https://www.googleapis.com/oauth2/v3/userinfo?access_token=',
+  tokenInfo:             'https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=',
+  accessType:            'offline',
+  type:                  'code token id_token',
+  scope:                 'openid%20email%20profile',
+  state:                 'state'
 };
 
-//initialise the db
-let db = new DB('idpkeystore', 'keys');
+//function to parse the query string in the given URL to obatin certain values
+function urlParser(url, name) {
+  name = name.replace(/[\[]/, '\\\[').replace(/[\]]/, '\\\]');
+  let regexS = '[\\#&?]' + name + '=([^&#]*)';
+  let regex = new RegExp(regexS);
+  let results = regex.exec(url);
+  if (results === null)
+  return '';
+  else
+  return results[1];
+}
 
-//generate a RSA-OAEP key pair
-crypto.subtle.generateKey(
-  {
-    name: 'ECDSA',
-    namedCurve: 'P-256' //can be "P-256", "P-384", or "P-521"
-  },
-  false, //whether the key is extractable (i.e. can be used in exportKey)
-  ['sign', 'verify'] //can be any combination of "sign" and "verify"
-)
-.then(function(key) {
-  //returns a keypair object
-  console.log(key);
-  db.put('keypair', key);
-})
-.catch(function(err) {
-  console.error(err);
+function sendHTTPRequest(method, url) {
+  let xhr = new XMLHttpRequest();
+  if ('withCredentials' in xhr) {
+    xhr.open(method, url, true);
+  } else if (typeof XDomainRequest != 'undefined') {
+    // Otherwise, check if XDomainRequest.
+    // XDomainRequest only exists in IE, and is IE's way of making CORS requests.
+    xhr = new XDomainRequest();
+    xhr.open(method, url);
+  } else {
+    // Otherwise, CORS is not supported by the browser.
+    xhr = null;
+  }
+  return new Promise(function(resolve,reject) {
+    if (xhr) {
+      xhr.onreadystatechange = function(e) {
+        if (xhr.readyState === 4) {
+          if (xhr.status === 200) {
+            let info = JSON.parse(xhr.responseText);
+            resolve(info);
+          } else if (xhr.status === 400) {
+            reject('There was an error processing the token');
+          } else {
+            reject('something else other than 200 was returned');
+          }
+        }
+      };
+      xhr.send();
+    } else {
+      reject('CORS not supported');
+    }
+  });
+}
+
+/**
+* Function to exchange the code received to the id Token, access token and a refresh token
+*
+*/
+let exchangeCode = (function(code) {
+  let i = googleInfo;
+
+  let URL = i.tokenEndpoint + 'code=' + code + '&client_id=' + i.clientID + '&client_secret=' + i.clientSecret + '&redirect_uri=' + i.redirectURI + '&grant_type=authorization_code';
+
+  //let URL = = i.tokenEndpoint + 'client_id=' + i.clientID + '&client_secret=' + i.clientSecret + '&refresh_token=' + code + '&grant_type=refresh_token';
+
+  return new Promise(function(resolve, reject) {
+    sendHTTPRequest('POST', URL).then(function(info) {
+      resolve(info);
+    }, function(error) {
+      reject(error);
+    });
+
+  });
 });
-
-let utf8 = s => new TextEncoder('utf-8').encode(s);
 
 /**
 * Identity Provider Proxy
@@ -42,7 +90,7 @@ let IdpProxy = {
 
   /**
   * Function to generate an identity Assertion
-  * TODO add details of the implementation
+  * TODO add details of the implementation, and improve implementation
   *
   * @param  {contents} The contents includes information about the identity received
   * @param  {origin} Origin parameter that identifies the origin of the RTCPeerConnection
@@ -50,25 +98,18 @@ let IdpProxy = {
   * @return {Promise} returns a promise with an identity assertion
   */
   generateAssertion: (contents, origin, hint) => {
+    let i = googleInfo;
+    let tokenID = contents;
     return new Promise(function(resolve,reject) {
       if (origin !== undefined) {
-        let key = db.get('keypair');
-        crypto.subtle.sign(
-          {
-            name: 'ECDSA',
-            hash: {name: 'SHA-256'} //can be "SHA-1", "SHA-256", "SHA-384", or "SHA-512"
-          },
-          key.privateKey, //from generateKey or importKey above
-          utf8(contents) //ArrayBuffer of data you want to encrypt
-        ).then(function(encrypted) {
-          //returns an ArrayBuffer containing the encrypted data
-          console.log(new Uint8Array(encrypted));
-
-          resolve([encrypted,contents]);
-        }).catch(function(err) {
-          console.log('err', err);
-          reject(err);
+        sendHTTPRequest('GET', i.tokenInfo + tokenID).then(function(value) {
+          let tokenIDJSON = value;
+          let encodedContent = btoa(JSON.stringify({tokenID: tokenID, tokenIDJSON: tokenIDJSON}));
+          resolve(encodedContent);
+        }, function(error) {
+          reject(error);
         });
+
       } else {
         reject('err');
       }
@@ -77,7 +118,7 @@ let IdpProxy = {
 
   /**
   * Function to validate an identity Assertion received
-  * TODO add details of the implementation
+  * TODO add details of the implementation, and improve the implementation
   *
   * @param  {assertion}    Identity Assertion to be validated
   * @param  {origin}       Origin parameter that identifies the origin of the RTCPeerConnection
@@ -85,29 +126,20 @@ let IdpProxy = {
   */
   validateAssertion: (assertion, origin) => {
     return new Promise(function(resolve,reject) {
-      let key = db.get('keypair');
-      if (origin !== undefined) {
+      let i = googleInfo;
 
-        crypto.subtle.verify(
-        {
-          name: 'ECDSA',
-          hash: {name: 'SHA-256'} //can be "SHA-1", "SHA-256", "SHA-384", or "SHA-512"
-        },
-        key.publicKey, //from generateKey or importKey above
-        assertion[0], //ArrayBuffer of the signature
-        utf8(assertion[1]) //ArrayBuffer of the data
-    )
-    .then(function(isvalid) {
-      //returns a boolean on whether the signature is true or not
-      console.log(isvalid);
-      resolve(isvalid);
-    }).catch(function(err) {
-      console.error(err);
-      reject(err);
-    });
-      } else {
-        reject('err');
-      }
+      let decodedContent = atob(assertion);
+      let content = JSON.parse(decodedContent);
+      sendHTTPRequest('GET', i.tokenInfo + content.tokenID).then(function(result) {
+
+        if (JSON.stringify(result) === JSON.stringify(content.tokenIDJSON)) {
+          resolve('valid');
+        } else {
+          reject('invalid');
+        }
+      }, function(err) {
+        reject(err);
+      });
     });
   },
 
@@ -118,40 +150,67 @@ let IdpProxy = {
   *
   * @param  {scope}     Scope
   */
-  getIdentityAssertion: (scope) => {
-    let _this = this;
+  getIdentityAssertion: (contents) => {
+    let i = googleInfo;
+
+    //start the login phase
+    //TODO later should be defined a better approach
     return new Promise(function(resolve, reject) {
-      try {
-        if (window) {
-          resolve('url');
+      if (!contents) {
+        try {
+          if (window) {
+            resolve('url');
+          }
+        } catch (error) {
+
+          let requestUrl = i.authorisationEndpoint + 'scope=' + i.scope + '&client_id=' + i.clientID + '&redirect_uri=' + i.redirectURI + '&response_type=' + i.type + '&state=' + i.state + '&access_type=' + i.accessType;
+
+          reject(requestUrl);
         }
-      } catch (error) {
 
-        //construction of the URL to be received by the identity module
-        _this.OAUTHURL   =   'https://accounts.google.com/o/oauth2/auth?';
-        _this.SCOPE      =   'openid%20email%20profile';
-        _this.CLIENTID   =   '808329566012-tqr8qoh111942gd2kg007t0s8f277roi.apps.googleusercontent.com';
-        _this.REDIRECT   =    'http://localhost:8080/example/index.html';//document.URL;
-        _this.TYPE       =   'id_token token';
-        _this.VALIDURL   =   'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=';
-        _this.USERINFURL =   'https://www.googleapis.com/oauth2/v1/userinfo?access_token=';
+      } else {
+        // the request have already been made, so idpPRoxy will exchange the tokens along to the idp, to obtain the information necessary
+        let accessToken = urlParser(contents, 'access_token');
+        let idToken = urlParser(contents, 'id_token');
+        let code = urlParser(contents, 'code');
 
-        _this.URL        =   _this.OAUTHURL + 'scope=' + _this.SCOPE + '&client_id=' + _this.CLIENTID + '&redirect_uri=' + _this.REDIRECT + '&response_type=' + _this.TYPE;
-        reject(URL);
+        exchangeCode(code).then(function(value) {
+          let identityBundle = {accessToken: value.access_token, idToken: value.id_token, refreshToken: value.refresh_token, tokenType: value.token_type};
+
+          //obtain information about the user
+          let infoTokenURL = i.userinfo + value.access_token;
+          sendHTTPRequest('GET', infoTokenURL).then(function(infoToken) {
+
+            //TODO delete later, and delete the need in the example
+            identityBundle.token = infoToken;
+            identityBundle.infoToken = infoToken;
+            let idTokenURL = i.tokenInfo + value.id_token;
+
+            //obtain information about the user idToken
+            sendHTTPRequest('GET', idTokenURL).then(function(idToken) {
+              identityBundle.idTokenJSON = idToken;
+              resolve(identityBundle);
+            }, function(e) {
+              reject(e);
+            });
+          }, function(error) {
+            reject(error);
+          });
+        }, function(err) {
+          reject(err);
+        });
+
       }
-
     });
   }
 };
 
-let string = 'hello world';
+//console.log('hello world from proxy');
 
-let encodedString = btoa(string);
-console.log('encode ', encodedString);
-
-let decodedString = atob(encodedString);
-
-console.log('decode ', decodedString);
+//let encodedString = btoa(string);
+//console.log('encode ', encodedString);
+//let decodedString = atob(encodedString);
+//console.log('decode ', decodedString);
 
 /**
 * function required so that the web worker can communicate
@@ -159,9 +218,10 @@ console.log('decode ', decodedString);
 */
 onmessage = function(e) {
   console.log('Message received from main script');
+  let data = e.data[1];
   switch (e.data[0]) {
     case 'generate':
-      IdpProxy.generateAssertion('asdf', 'fdsa', 'hint').then(function(resolve) {
+      IdpProxy.generateAssertion(data.contents, data.origin, data.usernameHint).then(function(resolve) {
         postMessage(resolve);
       }, function(reject) {
         postMessage(reject);
@@ -169,7 +229,6 @@ onmessage = function(e) {
       console.log('Posting generateAssertion message back to main script');
       break;
     case 'validate':
-      let data = e.data[1];
       IdpProxy.validateAssertion(data.assertion, data.origin).then(function(resolve) {
         postMessage(resolve);
       }, function(reject) {
@@ -177,7 +236,7 @@ onmessage = function(e) {
       });
       console.log('Posting validateAssertion message back to main script');
       break;
-    case 'obtain':
+    case 'login':
       IdpProxy.getIdentityAssertion(e.data[1]).then(function(resolve) {
         postMessage(resolve);
       }, function(reject) {

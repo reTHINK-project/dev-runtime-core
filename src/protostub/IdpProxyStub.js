@@ -35,7 +35,7 @@ class IdpProxyStub {
     let params = msg.body.params;
     switch (msg.body.method) {
       case 'login':
-        _this.login().then(function(value) { _this.replyMessage(msg, value);});
+        _this.login(params).then(function(value) { _this.replyMessage(msg, value);});
         break;
       case 'generateAssertion':
         _this.generate(params).then(function(value) { _this.replyMessage(msg, value);});
@@ -126,7 +126,7 @@ class IdpProxyStub {
     return new Promise(function(resolve,reject) {
       if (window.Worker) { //check if the browser supports the worker API
 
-        _this.myWorker.postMessage(['obtain', params]);
+        _this.myWorker.postMessage(['login', params]);
 
         _this.myWorker.onmessage = function(e) {
           resolve(e.data);

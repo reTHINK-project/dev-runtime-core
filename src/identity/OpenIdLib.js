@@ -182,7 +182,7 @@ class OpenIdLib {
             let identityURL = 'user://' + email.substring(email.indexOf('@') + 1, email.length) + '/' + email.substring(0, email.indexOf('@'));
 
             //TODO remove later the 'token' field key
-            let identityBundle = {identity: identityURL, token: infoToken, accessToken: token, idToken: tokenID, infoToken: infoToken};
+            let identityBundle = {identity: identityURL, token: infoToken, accessToken: token, idToken: tokenID, infoToken: infoToken, idp: 'google'};
 
             resolve(identityBundle);
           } else if (req.status === 400) {

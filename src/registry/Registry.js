@@ -235,7 +235,8 @@ class Registry extends EventEmitter {
               }
 
               //message to register the new hyperty, within the domain registry
-              let messageValue = {user: identityURL,  hypertyDescriptorURL: descriptor, hypertyURL: adderessList[0], expires: 3000};
+              // the expires in 21600s, represents 6 hours
+              let messageValue = {user: identityURL,  hypertyDescriptorURL: descriptor, hypertyURL: adderessList[0], expires: 21600};
 
               let message = _this.messageFactory.createCreateMessageRequest(
                 _this.registryURL,
