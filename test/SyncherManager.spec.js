@@ -20,6 +20,30 @@ describe('SyncherManager', function() {
   let hyperURL1 = 'hyperty://h1.domain/h1';
   let hyperURL2 = 'hyperty://h2.domain/h2';
 
+  let msgNodeResponseFunc = (bus, msg) => {
+    if (msg.type === 'subscribe') {
+      if (msg.id === 2) {
+        //reporter subscribe
+        expect(msg).to.eql({
+          id: 2, type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.h1.domain/sm',
+          body: { subscribe: [ objURL + '/children/children1', objURL + '/children/children2'], source: hyperURL1 }
+        });
+      } else {
+        //observer subscribe
+        expect(msg).to.eql({
+          id: 5, type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.obj1/sm',
+          body: { subscribe: [ objURL + '/changes', objURL + '/children/children1', objURL + '/children/children2'], source: hyperURL2 }
+        });
+      }
+
+      //simulate msg-node response
+      bus.postMessage({
+        id: msg.id, type: 'response', from: msg.to, to: msg.from,
+        body: { code: 200 }
+      });
+    }
+  };
+
   //fake object allocator -> always return the same URL
   let allocator = {
     create: () => {
@@ -51,19 +75,7 @@ describe('SyncherManager', function() {
     let bus = new MessageBus();
     bus._onPostMessage = (msg) => {
       console.log('_onPostMessage: ', msg);
-
-      if (msg.type === 'subscribe') {
-        expect(msg).to.eql({
-          id: 4, type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.h2.domain/sm',
-          body: { resource: objURL, childrenResources: ['children1', 'children2'], schema: schemaURL }
-        });
-
-        //simulate msg-node response
-        bus.postMessage({
-          id: 4, type: 'response', from: 'domain://msg-node.h2.domain/sm', to: 'hyperty-runtime://fake-runtime/sm',
-          body: { code: 200 }
-        });
-      }
+      msgNodeResponseFunc(bus, msg);
     };
 
     new SyncherManager(runtimeURL, bus, { }, catalog, allocator);
@@ -501,6 +513,7 @@ describe('SyncherManager', function() {
     let bus = new MessageBus();
     bus._onPostMessage = (msg) => {
       console.log('5-_onPostMessage: ', msg);
+      msgNodeResponseFunc(bus, msg);
     };
 
     new SyncherManager(runtimeURL, bus, { }, catalog, allocator);
@@ -519,10 +532,7 @@ describe('SyncherManager', function() {
     let bus = new MessageBus();
     bus._onPostMessage = (msg) => {
       console.log('6-_onPostMessage: ', msg);
-      bus.postMessage({
-        id: 4, type: 'response', from: 'domain://msg-node.h2.domain/sm', to: 'hyperty-runtime://fake-runtime/sm',
-        body: { code: 200 }
-      });
+      msgNodeResponseFunc(bus, msg);
     };
 
     new SyncherManager(runtimeURL, bus, { }, catalog, allocator);
@@ -564,17 +574,7 @@ describe('SyncherManager', function() {
     let bus = new MessageBus();
     bus._onPostMessage = (msg) => {
       console.log('7-_onPostMessage: ', msg);
-      if (msg.type === 'subscribe') {
-        expect(msg).to.eql({
-          id: 4, type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.h2.domain/sm',
-          body: { resource: objURL, childrenResources: ['children1', 'children2'], schema: schemaURL }
-        });
-
-        bus.postMessage({
-          id: 4, type: 'response', from: 'domain://msg-node.h2.domain/sm', to: 'hyperty-runtime://fake-runtime/sm',
-          body: { code: 200 }
-        });
-      }
+      msgNodeResponseFunc(bus, msg);
     };
 
     new SyncherManager(runtimeURL, bus, {}, catalog, allocator);

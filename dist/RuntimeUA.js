@@ -39767,12 +39767,12 @@ var ObjectAllocation = function () {
      * @param  {number} number - Number of addresses to request
      * @returns {Promise<ObjectURL>}  A list of ObjectURL's
      */
-    value: function create(domain, scheme, children, number) {
+    value: function create(domain, scheme, number) {
       var _this = this;
 
       var msg = {
         type: 'create', from: _this._url, to: 'domain://msg-node.' + domain + '/object-address-allocation',
-        body: { scheme: scheme, childrenResources: children, value: { number: number } }
+        body: { scheme: scheme, value: { number: number } }
       };
 
       return new Promise(function (resolve, reject) {
@@ -39893,7 +39893,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var ReporterObject = function () {
-  function ReporterObject(parent, owner, url, childrens) {
+  function ReporterObject(parent, owner, url) {
     _classCallCheck(this, ReporterObject);
 
     var _this = this;
@@ -39901,12 +39901,14 @@ var ReporterObject = function () {
     _this._parent = parent;
     _this._owner = owner;
     _this._url = url;
-    _this._childrens = childrens;
 
-    _this._objSubscriptorURL = _this._url + '/subscription';
     _this._bus = parent._bus;
 
+    _this._domain = (0, _utils.divideURL)(owner).domain;
+    _this._objSubscriptorURL = _this._url + '/subscription';
+
     _this._subscriptions = {};
+    _this._childrens = [];
     _this._childrenListeners = [];
 
     _this._allocateListeners();
@@ -39938,18 +39940,6 @@ var ReporterObject = function () {
         //TODO: what todo here? Save changes?
         console.log('SyncherManager-' + changeURL + '-RCV: ', msg);
       });
-
-      //add children listeners...
-      var childBaseURL = _this._url + '/children/';
-      _this._childrens.forEach(function (child) {
-        var childURL = childBaseURL + child;
-        var childListener = _this._bus.addListener(childURL, function (msg) {
-          //TODO: what todo here? Save childrens?
-          console.log('SyncherManager-' + childURL + '-RCV: ', msg);
-        });
-
-        _this._childrenListeners.push(childListener);
-      });
     }
   }, {
     key: '_releaseListeners',
@@ -39972,6 +39962,51 @@ var ReporterObject = function () {
       });
     }
   }, {
+    key: 'addChildrens',
+    value: function addChildrens(childrens) {
+      var _this = this;
+
+      return new Promise(function (resolve, reject) {
+        if (childrens.length === 0) {
+          resolve();
+          return;
+        }
+
+        var childBaseURL = _this._url + '/children/';
+        _this._childrens.push(childrens);
+
+        var subscriptions = [];
+        childrens.forEach(function (child) {
+          return subscriptions.push(childBaseURL + child);
+        });
+
+        var nodeSubscribeMsg = {
+          type: 'subscribe', from: _this._parent._url, to: 'domain://msg-node.' + _this._domain + '/sm',
+          body: { subscribe: subscriptions, source: _this._owner }
+        };
+
+        _this._bus.postMessage(nodeSubscribeMsg, function (reply) {
+          console.log('node-subscribe-response(reporter): ', reply);
+          if (reply.body.code === 200) {
+
+            //add children listeners on local ...
+            subscriptions.forEach(function (childURL) {
+              var childListener = _this._bus.addListener(childURL, function (msg) {
+                //TODO: what todo here? Save childrens?
+                console.log('SyncherManager-' + childURL + '-RCV: ', msg);
+              });
+
+              _this._childrenListeners.push(childListener);
+            });
+
+            resolve();
+          } else {
+            reject('Error on msg-node subscription: ' + reply.body.desc);
+          }
+        });
+      });
+    }
+  }, {
     key: 'delete',
     value: function _delete() {
       var _this = this;
@@ -39982,6 +40017,7 @@ var ReporterObject = function () {
         type: 'delete', from: _this._objSubscriptorURL, to: _this._url + '/changes'
       });
 
+      //TODO: change delete spec!
       _this._bus.postMessage({
         type: 'delete', from: _this._parent._url, to: 'domain://msg-node.' + domain + '/object-address-allocation',
         body: { resource: _this._url, childrenResources: _this._childrens }
@@ -40242,26 +40278,29 @@ var SyncherManager = function () {
         var scheme = properties.scheme ? properties.scheme.constant : 'resource';
         var childrens = properties.children ? properties.children.constant : [];
 
-        _this._allocator.create(domain, scheme, childrens, 1).then(function (allocated) {
+        _this._allocator.create(domain, scheme, 1).then(function (allocated) {
           //TODO: get address from address allocator ?
           var objURL = allocated[0];
           var objSubscriptorURL = objURL + '/subscription';
 
-          _this._reporters[objURL] = new _ReporterObject2.default(_this, owner, objURL, childrens);
+          var reporter = new _ReporterObject2.default(_this, owner, objURL);
+          reporter.addChildrens(childrens).then(function () {
+            _this._reporters[objURL] = reporter;
 
-          //all ok, send response
-          _this._bus.postMessage({
-            id: msg.id, type: 'response', from: msg.to, to: owner,
-            body: { code: 200, resource: objURL, childrenResources: childrens }
-          });
+            //all ok, send response
+            _this._bus.postMessage({
+              id: msg.id, type: 'response', from: msg.to, to: owner,
+              body: { code: 200, resource: objURL, childrenResources: childrens }
+            });
 
-          //send create to all observers, responses will be deliver to the Hyperty owner?
-          setTimeout(function () {
-            //schedule for next cycle needed, because the Reporter should be available.
-            msg.body.authorise.forEach(function (hypertyURL) {
-              _this._bus.postMessage({
-                type: 'create', from: objSubscriptorURL, to: hypertyURL,
-                body: { source: msg.from, value: msg.body.value, schema: msg.body.schema }
+            //send create to all observers, responses will be deliver to the Hyperty owner?
+            setTimeout(function () {
+              //schedule for next cycle needed, because the Reporter should be available.
+              msg.body.authorise.forEach(function (hypertyURL) {
+                _this._bus.postMessage({
+                  type: 'create', from: objSubscriptorURL, to: hypertyURL,
+                  body: { source: msg.from, value: msg.body.value, schema: msg.body.schema }
+                });
               });
             });
           });
@@ -40300,24 +40339,33 @@ var SyncherManager = function () {
       var _this = this;
 
       var hypertyURL = msg.from;
-      var domain = (0, _utils.divideURL)(hypertyURL).domain;
       var objURL = msg.body.resource;
       var objURLSubscription = objURL + '/subscription';
+      var childBaseURL = objURL + '/children/';
+
+      var domain = (0, _utils.divideURL)(objURL).domain;
 
       //get schema from catalogue and parse -> (children)
       _this._catalog.getDataSchemaDescriptor(msg.body.schema).then(function (descriptor) {
         var properties = descriptor.sourcePackage.sourceCode.properties;
         var childrens = properties.children ? properties.children.constant : [];
 
+        //children addresses
+        var subscriptions = [];
+        subscriptions.push(objURL + '/changes');
+        childrens.forEach(function (child) {
+          return subscriptions.push(childBaseURL + child);
+        });
+
         //subscribe msg for the domain node
         var nodeSubscribeMsg = {
           type: 'subscribe', from: _this._url, to: 'domain://msg-node.' + domain + '/sm',
-          body: { resource: objURL, childrenResources: childrens, schema: msg.body.schema }
+          body: { subscribe: subscriptions, source: hypertyURL }
         };
 
         //subscribe in msg-node
         _this._bus.postMessage(nodeSubscribeMsg, function (reply) {
-          console.log('node-subscribe-response: ', reply);
+          console.log('node-subscribe-response(observer): ', reply);
           if (reply.body.code === 200) {
 
             //send provisional response
