@@ -112,7 +112,7 @@ describe('SyncherManager', function() {
         if (seq === 1) {
           expect(msg).to.eql({
             type: 'update', from: objURL, to: objURLChanges,
-            body: { version: 1, attribute: '1',
+            body: { version: 1, source: hyperURL1, attribute: '1',
               value: {
                 name: 'Micael',
                 birthdate: '28-02-1981',
@@ -127,7 +127,7 @@ describe('SyncherManager', function() {
         if (seq === 2) {
           expect(msg).to.eql({
             type: 'update', from: objURL, to: objURLChanges,
-            body: { version: 2, attribute: '2',
+            body: { version: 2, source: hyperURL1, attribute: '2',
               value: {
                 name: 'Luis Duarte',
                 birthdate: '02-12-1991',
@@ -148,28 +148,28 @@ describe('SyncherManager', function() {
         if (seq === 3) {
           expect(msg).to.eql({
             type: 'update', from: objURL, to: objURLChanges,
-            body: { version: 3, attribute: '2' }
+            body: { version: 3, source: hyperURL1, attribute: '2' }
           });
         }
 
         if (seq === 4) {
           expect(msg).to.eql({
             type: 'update', from: objURL, to: objURLChanges,
-            body: { version: 4, attribute: '1.name', value: 'Micael Pedrosa' }
+            body: { version: 4, source: hyperURL1, attribute: '1.name', value: 'Micael Pedrosa' }
           });
         }
 
         if (seq === 5) {
           expect(msg).to.eql({
             type: 'update', from: objURL, to: objURLChanges,
-            body: { version: 5, attribute: '1.birthdate', value: '1982-02-28T00:00:00.000Z' }
+            body: { version: 5, source: hyperURL1, attribute: '1.birthdate', value: '1982-02-28T00:00:00.000Z' }
           });
         }
 
         if (seq === 6) {
           expect(msg).to.eql({
             type: 'update', from: objURL, to: objURLChanges,
-            body: { version: 6, attribute: '1.obj1.name', value: 'XPTO' }
+            body: { version: 6, source: hyperURL1, attribute: '1.obj1.name', value: 'XPTO' }
           });
 
           //apply changes...
@@ -179,7 +179,7 @@ describe('SyncherManager', function() {
         if (seq === 7) {
           expect(msg).to.eql({
             type: 'update', from: objURL, to: objURLChanges,
-            body: { version: 7, attribute: '1.arr', value: [1, 0, {x: 10, y: 20}] }
+            body: { version: 7, source: hyperURL1, attribute: '1.arr', value: [1, 0, {x: 10, y: 20}] }
           });
 
           //apply changes...
@@ -189,7 +189,7 @@ describe('SyncherManager', function() {
         if (seq === 8) {
           expect(msg).to.eql({
             type: 'update', from: objURL, to: objURLChanges,
-            body:{ version: 8, attributeType: 'array', attribute: '1.arr.1', value: 2 }
+            body:{ version: 8, source: hyperURL1, attributeType: 'array', attribute: '1.arr.1', value: 2 }
           });
 
           //apply changes...
@@ -200,14 +200,14 @@ describe('SyncherManager', function() {
         if (seq === 9) {
           expect(msg).to.eql({
             type: 'update', from: objURL, to: objURLChanges,
-            body: { version: 9, attributeType: 'array', operation: 'add', attribute: '1.arr.3', value: [3] }
+            body: { version: 9, source: hyperURL1, attributeType: 'array', operation: 'add', attribute: '1.arr.3', value: [3] }
           });
         }
 
         if (seq === 10) {
           expect(msg).to.eql({
             type: 'update', from: objURL, to: objURLChanges,
-            body: { version: 10, attributeType: 'array', operation: 'add', attribute: '1.arr.4', value: [{x: 1, y: 2}] }
+            body: { version: 10, source: hyperURL1, attributeType: 'array', operation: 'add', attribute: '1.arr.4', value: [{x: 1, y: 2}] }
           });
 
           //apply changes...
@@ -218,21 +218,21 @@ describe('SyncherManager', function() {
         if (seq === 11) {
           expect(msg).to.eql({
             type: 'update', from: objURL, to: objURLChanges,
-            body: { version: 11, attributeType: 'array', operation: 'remove', attribute: '1.arr.1', value: 2 }
+            body: { version: 11, source: hyperURL1, attributeType: 'array', operation: 'remove', attribute: '1.arr.1', value: 2 }
           });
         }
 
         if (seq === 12) {
           expect(msg).to.eql({
             type: 'update', from: objURL, to: objURLChanges,
-            body: { version: 12, attributeType: 'array', operation: 'add', attribute: '1.arr.1', value: [10, 11, 12] }
+            body: { version: 12, source: hyperURL1, attributeType: 'array', operation: 'add', attribute: '1.arr.1', value: [10, 11, 12] }
           });
         }
 
         if (seq === 13) {
           expect(msg).to.eql({
             type: 'update', from: objURL, to: objURLChanges,
-            body: { version: 13, attribute: '1.arr.5.x', value: 10 }
+            body: { version: 13, source: hyperURL1, attribute: '1.arr.5.x', value: 10 }
           });
 
           //apply changes...
@@ -242,7 +242,7 @@ describe('SyncherManager', function() {
         if (seq === 14) {
           expect(msg).to.eql({
             type: 'update', from: objURL, to: objURLChanges,
-            body: { version: 14, attributeType: 'array', operation: 'remove', attribute: '1.arr.5', value: 1 }
+            body: { version: 14, source: hyperURL1, attributeType: 'array', operation: 'remove', attribute: '1.arr.5', value: 1 }
           });
 
           done();
