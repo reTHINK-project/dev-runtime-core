@@ -32302,54 +32302,101 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+/**
+* The Policy Decision Point (PDP) decides if a message is to be authorised by checking a set of
+* policies. The resource to be verified is specified in the first word of the 'condition' field of
+* a Policy object. The implementation that verifies if the message is compliant with a policy is
+* specified in a hashtable to allow dynamic definition of the implementation, providing
+* extensibility to the Policy Engine functionalities.
+*/
+
 var PDP = function () {
+
+  /**
+  * This method is invoked by the Policy Engine and instantiates the Policy Decision Point. It initialises or loads from the Persistence Manager the object 'myLists' to store the user's lists.
+  * @param  {Registry}    runtimeRegistry
+  */
+
   function PDP(runtimeRegistry) {
     _classCallCheck(this, PDP);
 
     var _this = this;
     _this.runtimeRegistry = runtimeRegistry;
-    _this.myLists = {};
+    _this.myLists = {}; // TODO: load from the Persistence Manager
   }
+
+  /**
+  * Returns the list with the given list name.
+  * @param  {String}  listName
+  * @return {Array}   list
+  */
+
 
   _createClass(PDP, [{
     key: 'getList',
     value: function getList(listName) {
       var _this = this;
-      if (listName in _this.myLists) {
-        return _this.myLists[listName];
-      } else {
-        throw new Error('The list ' + listName + ' does not exist!');
-      }
+      return listName in _this.myLists ? _this.myLists[listName] : [];
     }
+
+    /**
+    * Creates a list with the given name.
+    * @param  {String}  listName
+    */
+
   }, {
     key: 'createList',
     value: function createList(listName) {
       var _this = this;
       _this.myLists[listName] = [];
     }
+
+    /**
+    * Adds the given user email to the list with the given name.
+    * @param  {String}  userEmail
+    * @param  {String}  listName
+    */
+
   }, {
     key: 'addToList',
-    value: function addToList(userID, listName) {
+    value: function addToList(userEmail, listName) {
       var _this = this;
-      _this.myLists[listName].push(userID);
+      var list = _this.myLists[listName];
+      if (list === undefined) {
+        _this.createList(listName);
+        list = _this.getList(listName);
+      }
+      list.push(userEmail);
     }
 
-    // TODO: confirmar que remove de _this.myLists[listName] e não só de list
+    /**
+    * Removes the given user email from the list with the given name.
+    * @param  {String}  userEmail
+    * @param  {String}  listName
+    */
 
   }, {
     key: 'removeFromList',
-    value: function removeFromList(userID, listName) {
+    value: function removeFromList(userEmail, listName) {
       var _this = this;
       var list = _this.myLists[listName];
       for (var i in list) {
-        if (list[i] === userID) {
+        if (list[i] === userEmail) {
           list.splice(i, 1);
           break;
         }
       }
     }
 
-    /* use hashtable to allow dynamic management */
+    /**
+    * Verifies if the given message is compliant with the given policies. If one of the policies
+    * evaluates to 'false', then the message is not authorised. Returns the final authorisation
+    * decision and a set of actions that policies may require.
+    * @param {Message}  message
+    * @param {URL}      hypertyToVerify
+    * @param {Array}    policies
+    * @return {Array}   [authDecision, actions]
+    */
 
   }, {
     key: 'evaluate',
@@ -32358,6 +32405,7 @@ var PDP = function () {
       var results = [true];
       var actions = [];
 
+      // TODO: use hashtable to allow dynamic management
       for (var i in policies) {
         var policy = policies[i];
         var result = [];
@@ -32374,51 +32422,44 @@ var PDP = function () {
             result[0] = _this.isTimeBetween(start, end) ? policy.authorise : !policy.authorise;
             break;
           default:
-            result[1] = policy.actions; // TODO: do actions depend on the decision?
+            result[1] = policy.actions;
         }
         results.push(result[0]);
-        actions.push(result[1]);
+        actions.push(result[1]); // TODO: do actions depend on the final authorisation decision?
       }
 
-      var authDecision = _this.getDecision(results);
+      var authDecision = results.indexOf(false) === -1;
       return [authDecision, actions];
     }
 
-    /* Aux function for evaluate() */
+    /**
+    * Verifies if the given hyperty URL corresponds to an email that is in the list with the given
+    * name.
+    * @param {URL}        hypertyURL
+    * @param {String}     listName
+    * @return {Boolean}   boolean
+    */
 
   }, {
-    key: 'getDecision',
-    value: function getDecision(results) {
-      return results.indexOf(false) === -1;
-    }
-  }, {
     key: 'isInList',
-    value: function isInList(hypertyToVerify, listName) {
+    value: function isInList(hypertyURL, listName) {
       var _this = this;
       var list = _this.myLists[listName];
       for (var i in list) {
-        if (_this.hypertiesMatch(_this.registry, list[i]), hypertyToVerify) {
+        if (_this.registry.getUserHyperty(list[i]) === hypertyURL) {
           return true;
         }
       }
       return false;
     }
 
-    /* TODO: cache this? */
+    /**
+    * Verifies if the current time is between the given start and end times.
+    * @param {Number}     start
+    * @param {Number}     end
+    * @return {Boolean}   boolean
+    */
 
-  }, {
-    key: 'hypertiesMatch',
-    value: function hypertiesMatch(registry, URLToVerify, hypertyToVerify) {
-      registry.getUserHyperty(URLToVerify).then(function (hyperty) {
-        return hyperty.hypertyURL === hypertyToVerify;
-      });
-    }
-  }, {
-    key: 'isWhiteListed',
-    value: function isWhiteListed(userID) {
-      var _this = this;
-      return _this.whiteList.indexOf(userID) > -1;
-    }
   }, {
     key: 'isTimeBetween',
     value: function isTimeBetween(start, end) {
@@ -32438,7 +32479,11 @@ var PDP = function () {
       }
     }
 
-    /* Aux function for isTimeBetween() */
+    /**
+    * Returns the number of minutes that correspond to the given time in the format <HOURS>:<MINUTES>.
+    * @param {Number}   time
+    * @return {Number}  minutes
+    */
 
   }, {
     key: 'getMinutes',
@@ -32511,145 +32556,55 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-// import Policy from './Policy';
+/**
+* The Policy Engine intercepts all the messages sent through the Message Bus and applies the
+* policies defined by the service provider and the user.
+*/
 
 var PolicyEngine = function () {
+
+  /**
+  * This method is invoked by the RuntimeUA and instantiates the Policy Engine. A Policy Decision
+  * Point (PDP) and a Policy Enforcement Point (PEP) are initialised for the evaluation of policies
+  * and the enforcement of additional actions, respectively. Adds a listener do the Message Bus to
+  * allow method invokation.
+  * @param  {MessageBus}        messageBus
+  * @param  {IdentityModule}    identityModule
+  * @param  {Registry}          runtimeRegistry
+  */
+
   function PolicyEngine(messageBus, identityModule, runtimeRegistry) {
     _classCallCheck(this, PolicyEngine);
 
     var _this = this;
     _this.messageBus = messageBus;
     _this.idModule = identityModule;
-    _this.pep = new _PEP2.default();
     _this.pdp = new _PDP2.default(runtimeRegistry);
+    _this.pep = new _PEP2.default();
     _this.policies = {};
-
-    _this.messageBus.addListener('domain://PolicyEngine', function (message) {
-      _this.processMessage(message);
-    });
   }
 
+  /**
+  * This method is executed when a message is intercepted in the Message Bus. The first step is the
+  * assignment of the identity associated with the message. The second step is the evaluation of the
+  * applicable policies in order to obtain an authorisation decision: if a policy evaluates to
+  * false, then the message is unauthorised. The third step is the enforcement of the actions that
+  * policies may require. Finally, the message is stamped as authorised or not and is returned to
+  * the Message Bus, where it will be forwarded or blocked.
+  * @param  {Message}  message
+  */
+
+
   _createClass(PolicyEngine, [{
-    key: 'processMessage',
-    value: function processMessage(message) {
-      var _this = this;
-      var method = 'addPolicies';
-
-      //let method = message.body.method;
-      var params = message.body.params;
-      switch (method) {
-        case 'addPolicies':
-          _this.addPolicies(params.scope, params.policies);
-          _this.sendOkResponse(message);
-          break;
-        case 'removePolicies':
-          _this.removePolicies(params.scope, params.policyID);
-          _this.sendOkResponse(message);
-          break;
-        case 'getList':
-          if (_this.getList(params.listName) !== undefined) {
-            // TODO: verificar se quando lança exceção não faz 'sendOkResponse'
-            _this.sendOkResponse(message);
-          }
-          break;
-        case 'createList':
-          _this.createList(params.listName);
-          _this.sendOkResponse(message);
-          break;
-        case 'addToList':
-          _this.addToList(params.userID, params.listName);
-          _this.sendOkResponse(message);
-          break;
-        case 'removeFromList':
-          _this.removeFromList(params.userID, params.listName);
-          _this.sendOkResponse(message);
-          break;
-        default:
-          console.log('Invalid method call!');
-          break;
-      }
-    }
-  }, {
-    key: 'sendOkResponse',
-    value: function sendOkResponse(message) {
-      var _this = this;
-      var response = { id: message.id, type: 'response', to: message.from, from: message.to, body: { code: 200 } };
-      _this.messageBus.postMessage(response);
-    }
-
-    // TODO: conflict detection
-
-  }, {
-    key: 'addPolicies',
-    value: function addPolicies(scope, policies) {
-      var _this = this;
-      for (var i in policies) {
-        if (_this.policies[scope] === undefined) {
-          _this.policies[scope] = [];
-        }
-        var exists = false;
-        for (var policy in _this.policies[scope]) {
-          if (_this.policies[scope][policy].id === policies[i].id) {
-            exists = true;
-            break;
-          }
-        }
-        if (!exists) {
-          _this.policies[scope].push(policies[i]);
-        }
-      }
-    }
-  }, {
-    key: 'removePolicies',
-    value: function removePolicies(scope, policyId) {
-      var _this = this;
-      var allPolicies = _this.policies;
-
-      if (scope in allPolicies) {
-        if (policyId !== 'all') {
-          var policies = allPolicies[scope];
-          var numPolicies = policies.length;
-
-          for (var policy = 0; policy < numPolicies; policy++) {
-            if (policies[policy].id === policyId) {
-              policies.splice(policy, 1);
-              break;
-            }
-          }
-        } else {
-          delete _this.policies[scope];
-        }
-      }
-    }
-  }, {
-    key: 'getList',
-    value: function getList(listName) {
-      var _this = this;
-      return _this.pdp.getList(listName);
-    }
-  }, {
-    key: 'createList',
-    value: function createList(listName) {
-      var _this = this;
-      _this.pdp.createList(listName);
-    }
-  }, {
-    key: 'addToList',
-    value: function addToList(userID, listName) {
-      var _this = this;
-      _this.pdp.addToList(userID, listName);
-    }
-  }, {
-    key: 'removeFromList',
-    value: function removeFromList(userID, listName) {
-      var _this = this;
-      _this.pdp.removeFromList(userID, listName);
-    }
-  }, {
     key: 'authorise',
     value: function authorise(message) {
       var _this = this;
+      if (message.to === 'domain://localhost/policy-engine') {
+        _this.processMessage(message);
+      }
+
       return new Promise(function (resolve, reject) {
+        //TODO turn it later into a policy
         if (message.from === 'domain://google.com' || message.to === 'domain://google.com') {
           message.authorised = true;
           return resolve(message);
@@ -32670,17 +32625,9 @@ var PolicyEngine = function () {
             hypertyToVerify = message.from;
           }
 
-          /* TODO: get scope of the message */
-          var scope = 'user';
-
+          var scope = _this.getScope();
           var applicablePolicies = _this.getApplicablePolicies(scope);
-          var policiesResult = void 0;
-          if (hypertyToVerify.split(':')[0] === 'hyperty') {
-            policiesResult = _this.pdp.evaluate(message, hypertyToVerify, applicablePolicies);
-          } else {
-            policiesResult = [true, []];
-          }
-
+          var policiesResult = _this.pdp.evaluate(message, hypertyToVerify, applicablePolicies);
           _this.pep.enforce(policiesResult[1]);
 
           if (policiesResult[0]) {
@@ -32688,22 +32635,229 @@ var PolicyEngine = function () {
             resolve(message);
           } else {
             message.authorised = false;
-            reject(message);
+            reject('Unauthorised message');
           }
         }, function (error) {
           reject(error);
         });
       });
     }
+
+    /**
+    * Invokes the method specified in the message aimed at the Policy Engine.
+    * @param  {Message}    message
+    */
+
+  }, {
+    key: 'processMessage',
+    value: function processMessage(message) {
+      var _this = this;
+      var method = message.body.method;
+      var params = message.body.params;
+
+      switch (method) {
+        case 'addPolicies':
+          _this.addPolicies(params.policies, params.scope);
+          _this.sendResponse(message, 200);
+          break;
+        case 'removePolicies':
+          _this.removePolicies(params.policyID, params.scope);
+          _this.sendResponse(message, 200);
+          break;
+        case 'getList':
+          var list = _this.getList(params.listName);
+          if (list !== []) {
+            _this.sendList(message, list);
+          } else {
+            _this.sendResponse(message, 404);
+          }
+          break;
+        case 'createList':
+          _this.createList(params.listName);
+          _this.sendResponse(message, 200);
+          break;
+        case 'addToList':
+          _this.addToList(params.userEmail, params.listName);
+          _this.sendResponse(message, 200);
+          break;
+        case 'removeFromList':
+          _this.removeFromList(params.userEmail, params.listName);
+          _this.sendResponse(message, 200);
+          break;
+      }
+    }
+
+    /**
+    * Sends a response to the message origin.
+    * @param  {Message}   message
+    * @param  {Number}    httpCode
+    */
+
+  }, {
+    key: 'sendResponse',
+    value: function sendResponse(message, httpCode) {
+      var _this = this;
+      var response = { id: message.id, type: 'response', to: message.from, from: message.to, body: { code: httpCode } };
+      _this.messageBus.postMessage(response);
+    }
+
+    /**
+    * Sends the requested list to the message origin.
+    * @param  {Message}   message
+    * @param  {Array}     list
+    */
+
+  }, {
+    key: 'sendList',
+    value: function sendList(message, list) {
+      var _this = this;
+      var response = { id: message.id, type: 'response', to: message.from, from: message.to, body: { code: 200, value: list } };
+      _this.messageBus.postMessage(response);
+    }
+
+    /**
+    * Associates the given policies with a scope. The possible scopes are 'application', 'hyperty' and
+    * 'user'.
+    * @param  {Policy[]}  policies
+    * @param  {String}    scope
+    */
+
+  }, {
+    key: 'addPolicies',
+    value: function addPolicies(policies, scope) {
+      var _this = this;
+      for (var i in policies) {
+        // TODO: conflict detection
+        if (_this.policies[scope] === undefined) {
+          _this.policies[scope] = [];
+        }
+        var exists = false;
+        for (var policy in _this.policies[scope]) {
+          if (_this.policies[scope][policy].id === policies[i].id) {
+            exists = true;
+            break;
+          }
+        }
+        if (!exists) {
+          _this.policies[scope].push(policies[i]);
+        }
+      }
+    }
+
+    /**
+    * Removes the policy with the given ID from the given scope. If policyID is '*', removes all policies associated with the given scope.
+    * @param  {String}  policyID
+    * @param  {String}  scope
+    */
+
+  }, {
+    key: 'removePolicies',
+    value: function removePolicies(policyId, scope) {
+      var _this = this;
+      var allPolicies = _this.policies;
+
+      if (scope in allPolicies) {
+        if (policyId !== '*') {
+          var policies = allPolicies[scope];
+          var numPolicies = policies.length;
+
+          for (var policy = 0; policy < numPolicies; policy++) {
+            if (policies[policy].id === policyId) {
+              policies.splice(policy, 1);
+              break;
+            }
+          }
+        } else {
+          delete _this.policies[scope];
+        }
+      }
+    }
+
+    /**
+    * Retrieves the list with the given list name from the PDP.
+    * @param  {String}  listName
+    * @return {Array}   list
+    */
+
+  }, {
+    key: 'getList',
+    value: function getList(listName) {
+      var _this = this;
+      return _this.pdp.getList(listName);
+    }
+
+    /**
+    * Forwards a request for the creation of a list with the given name to the PDP.
+    * @param  {String}  listName
+    */
+
+  }, {
+    key: 'createList',
+    value: function createList(listName) {
+      var _this = this;
+      _this.pdp.createList(listName);
+    }
+
+    /**
+    * Forwards a request to add a user to the list with the given name to the PDP.
+    * @param  {String}  userEmail
+    * @param  {String}  listName
+    */
+
+  }, {
+    key: 'addToList',
+    value: function addToList(userEmail, listName) {
+      var _this = this;
+      _this.pdp.addToList(userEmail, listName);
+    }
+
+    /**
+    * Forwards a request to remove a user from the list with the given name to the PDP.
+    * @param  {String}  userEmail
+    * @param  {String}  listName
+    */
+
+  }, {
+    key: 'removeFromList',
+    value: function removeFromList(userEmail, listName) {
+      var _this = this;
+      _this.pdp.removeFromList(userEmail, listName);
+    }
+
+    /**
+    * Returns the scope of the given message to restrict policy applicability. For now, all policies
+    * are applied to each message.
+    * @return {String} scope
+    */
+
+  }, {
+    key: 'getScope',
+    value: function getScope() {
+      return '*';
+    }
+
+    /**
+    * Returns the policies associated with a scope.
+    * @param   {String} scope
+    * @return  {Array}  policies
+    */
+
   }, {
     key: 'getApplicablePolicies',
     value: function getApplicablePolicies(scope) {
       var _this = this;
-      var applicablePolicies = _this.policies[scope];
-      if (applicablePolicies === undefined) {
-        applicablePolicies = [];
+      var policiesTable = _this.policies;
+      var policies = [];
+      if (scope !== '*') {
+        if (policiesTable[scope] !== undefined) {
+          policies = policiesTable[scope];
+        }
+      } else {
+        for (var i in policiesTable) {
+          policies.push.apply(policies, policiesTable[i]);
+        }
       }
-      return applicablePolicies;
+      return policies;
     }
   }]);
 
@@ -33856,6 +34010,9 @@ var RuntimeUA = function () {
     // Instantiate the Message Bus
     _this.messageBus = new _MessageBus2.default(_this.registry);
 
+    // Instantiate the Policy Engine
+    _this.policyEngine = new _PolicyEngine2.default(_this.messageBus, _this.identityModule, _this.registry);
+
     _this.messageBus.pipeline.handlers = [
 
     // Policy message authorise
@@ -33868,9 +34025,6 @@ var RuntimeUA = function () {
         ctx.fail(reason);
       });
     }];
-
-    // Instantiate the Policy Engine
-    _this.policyEngine = new _PolicyEngine2.default(_this.messageBus, _this.identityModule, _this.registry);
 
     // Add to App Sandbox the listener;
     appSandbox.addListener('*', function (msg) {
@@ -34307,12 +34461,12 @@ var ObjectAllocation = function () {
      * @param  {number} number - Number of addresses to request
      * @returns {Promise<ObjectURL>}  A list of ObjectURL's
      */
-    value: function create(domain, scheme, children, number) {
+    value: function create(domain, scheme, number) {
       var _this = this;
 
       var msg = {
         type: 'create', from: _this._url, to: 'domain://msg-node.' + domain + '/object-address-allocation',
-        body: { scheme: scheme, childrenResources: children, value: { number: number } }
+        body: { scheme: scheme, value: { number: number } }
       };
 
       return new Promise(function (resolve, reject) {
@@ -34433,7 +34587,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var ReporterObject = function () {
-  function ReporterObject(parent, owner, url, childrens) {
+  function ReporterObject(parent, owner, url) {
     _classCallCheck(this, ReporterObject);
 
     var _this = this;
@@ -34441,12 +34595,14 @@ var ReporterObject = function () {
     _this._parent = parent;
     _this._owner = owner;
     _this._url = url;
-    _this._childrens = childrens;
 
-    _this._objSubscriptorURL = _this._url + '/subscription';
     _this._bus = parent._bus;
 
+    _this._domain = (0, _utils.divideURL)(owner).domain;
+    _this._objSubscriptorURL = _this._url + '/subscription';
+
     _this._subscriptions = {};
+    _this._childrens = [];
     _this._childrenListeners = [];
 
     _this._allocateListeners();
@@ -34478,18 +34634,6 @@ var ReporterObject = function () {
         //TODO: what todo here? Save changes?
         console.log('SyncherManager-' + changeURL + '-RCV: ', msg);
       });
-
-      //add children listeners...
-      var childBaseURL = _this._url + '/children/';
-      _this._childrens.forEach(function (child) {
-        var childURL = childBaseURL + child;
-        var childListener = _this._bus.addListener(childURL, function (msg) {
-          //TODO: what todo here? Save childrens?
-          console.log('SyncherManager-' + childURL + '-RCV: ', msg);
-        });
-
-        _this._childrenListeners.push(childListener);
-      });
     }
   }, {
     key: '_releaseListeners',
@@ -34512,6 +34656,51 @@ var ReporterObject = function () {
       });
     }
   }, {
+    key: 'addChildrens',
+    value: function addChildrens(childrens) {
+      var _this = this;
+
+      return new Promise(function (resolve, reject) {
+        if (childrens.length === 0) {
+          resolve();
+          return;
+        }
+
+        var childBaseURL = _this._url + '/children/';
+        _this._childrens.push(childrens);
+
+        var subscriptions = [];
+        childrens.forEach(function (child) {
+          return subscriptions.push(childBaseURL + child);
+        });
+
+        var nodeSubscribeMsg = {
+          type: 'subscribe', from: _this._parent._url, to: 'domain://msg-node.' + _this._domain + '/sm',
+          body: { subscribe: subscriptions, source: _this._owner }
+        };
+
+        _this._bus.postMessage(nodeSubscribeMsg, function (reply) {
+          console.log('node-subscribe-response(reporter): ', reply);
+          if (reply.body.code === 200) {
+
+            //add children listeners on local ...
+            subscriptions.forEach(function (childURL) {
+              var childListener = _this._bus.addListener(childURL, function (msg) {
+                //TODO: what todo here? Save childrens?
+                console.log('SyncherManager-' + childURL + '-RCV: ', msg);
+              });
+
+              _this._childrenListeners.push(childListener);
+            });
+
+            resolve();
+          } else {
+            reject('Error on msg-node subscription: ' + reply.body.desc);
+          }
+        });
+      });
+    }
+  }, {
     key: 'delete',
     value: function _delete() {
       var _this = this;
@@ -34522,6 +34711,7 @@ var ReporterObject = function () {
         type: 'delete', from: _this._objSubscriptorURL, to: _this._url + '/changes'
       });
 
+      //TODO: change delete spec!
       _this._bus.postMessage({
         type: 'delete', from: _this._parent._url, to: 'domain://msg-node.' + domain + '/object-address-allocation',
         body: { resource: _this._url, childrenResources: _this._childrens }
@@ -34782,26 +34972,29 @@ var SyncherManager = function () {
         var scheme = properties.scheme ? properties.scheme.constant : 'resource';
         var childrens = properties.children ? properties.children.constant : [];
 
-        _this._allocator.create(domain, scheme, childrens, 1).then(function (allocated) {
+        _this._allocator.create(domain, scheme, 1).then(function (allocated) {
           //TODO: get address from address allocator ?
           var objURL = allocated[0];
           var objSubscriptorURL = objURL + '/subscription';
 
-          _this._reporters[objURL] = new _ReporterObject2.default(_this, owner, objURL, childrens);
+          var reporter = new _ReporterObject2.default(_this, owner, objURL);
+          reporter.addChildrens(childrens).then(function () {
+            _this._reporters[objURL] = reporter;
 
-          //all ok, send response
-          _this._bus.postMessage({
-            id: msg.id, type: 'response', from: msg.to, to: owner,
-            body: { code: 200, resource: objURL, childrenResources: childrens }
-          });
+            //all ok, send response
+            _this._bus.postMessage({
+              id: msg.id, type: 'response', from: msg.to, to: owner,
+              body: { code: 200, resource: objURL, childrenResources: childrens }
+            });
 
-          //send create to all observers, responses will be deliver to the Hyperty owner?
-          setTimeout(function () {
-            //schedule for next cycle needed, because the Reporter should be available.
-            msg.body.authorise.forEach(function (hypertyURL) {
-              _this._bus.postMessage({
-                type: 'create', from: objSubscriptorURL, to: hypertyURL,
-                body: { source: msg.from, value: msg.body.value, schema: msg.body.schema }
+            //send create to all observers, responses will be deliver to the Hyperty owner?
+            setTimeout(function () {
+              //schedule for next cycle needed, because the Reporter should be available.
+              msg.body.authorise.forEach(function (hypertyURL) {
+                _this._bus.postMessage({
+                  type: 'create', from: objSubscriptorURL, to: hypertyURL,
+                  body: { source: msg.from, value: msg.body.value, schema: msg.body.schema }
+                });
               });
             });
           });
@@ -34840,24 +35033,33 @@ var SyncherManager = function () {
       var _this = this;
 
       var hypertyURL = msg.from;
-      var domain = (0, _utils.divideURL)(hypertyURL).domain;
       var objURL = msg.body.resource;
       var objURLSubscription = objURL + '/subscription';
+      var childBaseURL = objURL + '/children/';
+
+      var domain = (0, _utils.divideURL)(objURL).domain;
 
       //get schema from catalogue and parse -> (children)
       _this._catalog.getDataSchemaDescriptor(msg.body.schema).then(function (descriptor) {
         var properties = descriptor.sourcePackage.sourceCode.properties;
         var childrens = properties.children ? properties.children.constant : [];
 
+        //children addresses
+        var subscriptions = [];
+        subscriptions.push(objURL + '/changes');
+        childrens.forEach(function (child) {
+          return subscriptions.push(childBaseURL + child);
+        });
+
         //subscribe msg for the domain node
         var nodeSubscribeMsg = {
           type: 'subscribe', from: _this._url, to: 'domain://msg-node.' + domain + '/sm',
-          body: { resource: objURL, childrenResources: childrens, schema: msg.body.schema }
+          body: { subscribe: subscriptions, source: hypertyURL }
         };
 
         //subscribe in msg-node
         _this._bus.postMessage(nodeSubscribeMsg, function (reply) {
-          console.log('node-subscribe-response: ', reply);
+          console.log('node-subscribe-response(observer): ', reply);
           if (reply.body.code === 200) {
 
             //send provisional response

@@ -1,48 +1,87 @@
+/**
+* The Policy Decision Point (PDP) decides if a message is to be authorised by checking a set of
+* policies. The resource to be verified is specified in the first word of the 'condition' field of
+* a Policy object. The implementation that verifies if the message is compliant with a policy is
+* specified in a hashtable to allow dynamic definition of the implementation, providing
+* extensibility to the Policy Engine functionalities.
+*/
 class PDP {
 
+  /**
+  * This method is invoked by the Policy Engine and instantiates the Policy Decision Point. It initialises or loads from the Persistence Manager the object 'myLists' to store the user's lists.
+  * @param  {Registry}    runtimeRegistry
+  */
   constructor(runtimeRegistry) {
     let _this = this;
     _this.runtimeRegistry = runtimeRegistry;
-    _this.myLists = {};
+    _this.myLists = {}; // TODO: load from the Persistence Manager
   }
 
+  /**
+  * Returns the list with the given list name.
+  * @param  {String}  listName
+  * @return {Array}   list
+  */
   getList(listName) {
     let _this = this;
-    if (listName in _this.myLists) {
-      return _this.myLists[listName];
-    } else {
-      throw new Error('The list ' + listName + ' does not exist!');
-    }
+    return (listName in _this.myLists) ? _this.myLists[listName] : [];
   }
 
+  /**
+  * Creates a list with the given name.
+  * @param  {String}  listName
+  */
   createList(listName) {
     let _this = this;
     _this.myLists[listName] = [];
   }
 
-  addToList(userID, listName) {
+  /**
+  * Adds the given user email to the list with the given name.
+  * @param  {String}  userEmail
+  * @param  {String}  listName
+  */
+  addToList(userEmail, listName) {
     let _this = this;
-    _this.myLists[listName].push(userID);
+    let list = _this.myLists[listName];
+    if (list === undefined) {
+      _this.createList(listName);
+      list = _this.getList(listName);
+    }
+    list.push(userEmail);
   }
 
-  // TODO: confirmar que remove de _this.myLists[listName] e não só de list
-  removeFromList(userID, listName) {
+  /**
+  * Removes the given user email from the list with the given name.
+  * @param  {String}  userEmail
+  * @param  {String}  listName
+  */
+  removeFromList(userEmail, listName) {
     let _this = this;
     let list = _this.myLists[listName];
     for (let i in list) {
-      if (list[i] === userID) {
+      if (list[i] === userEmail) {
         list.splice(i, 1);
         break;
       }
     }
   }
 
-  /* use hashtable to allow dynamic management */
+  /**
+  * Verifies if the given message is compliant with the given policies. If one of the policies
+  * evaluates to 'false', then the message is not authorised. Returns the final authorisation
+  * decision and a set of actions that policies may require.
+  * @param {Message}  message
+  * @param {URL}      hypertyToVerify
+  * @param {Array}    policies
+  * @return {Array}   [authDecision, actions]
+  */
   evaluate(message, hypertyToVerify, policies) {
     let _this = this;
     let results = [true];
     let actions = [];
 
+    // TODO: use hashtable to allow dynamic management
     for (let i in policies) {
       let policy = policies[i];
       let result = [];
@@ -59,44 +98,40 @@ class PDP {
           result[0] = _this.isTimeBetween(start, end) ? policy.authorise : !policy.authorise;
           break;
         default:
-          result[1] = policy.actions; // TODO: do actions depend on the decision?
+          result[1] = policy.actions;
       }
       results.push(result[0]);
-      actions.push(result[1]);
+      actions.push(result[1]); // TODO: do actions depend on the final authorisation decision?
     }
 
-    let authDecision = _this.getDecision(results);
+    let authDecision = results.indexOf(false) === -1;
     return [authDecision, actions];
   }
 
-  /* Aux function for evaluate() */
-  getDecision(results) {
-    return results.indexOf(false) === -1;
-  }
-
-  isInList(hypertyToVerify, listName) {
+  /**
+  * Verifies if the given hyperty URL corresponds to an email that is in the list with the given
+  * name.
+  * @param {URL}        hypertyURL
+  * @param {String}     listName
+  * @return {Boolean}   boolean
+  */
+  isInList(hypertyURL, listName) {
     let _this = this;
     let list = _this.myLists[listName];
     for (let i in list) {
-      if (_this.hypertiesMatch(_this.registry, list[i]), hypertyToVerify) {
+      if (_this.registry.getUserHyperty(list[i]) === hypertyURL) {
         return true;
       }
     }
     return false;
   }
 
-  /* TODO: cache this? */
-  hypertiesMatch(registry, URLToVerify, hypertyToVerify) {
-    registry.getUserHyperty(URLToVerify).then(function(hyperty) {
-      return hyperty.hypertyURL === hypertyToVerify;
-    });
-  }
-
-  isWhiteListed(userID) {
-    let _this = this;
-    return _this.whiteList.indexOf(userID) > -1;
-  }
-
+  /**
+  * Verifies if the current time is between the given start and end times.
+  * @param {Number}     start
+  * @param {Number}     end
+  * @return {Boolean}   boolean
+  */
   isTimeBetween(start, end) {
     let _this = this;
     let now = new Date();
@@ -114,7 +149,11 @@ class PDP {
     }
   }
 
-  /* Aux function for isTimeBetween() */
+  /**
+  * Returns the number of minutes that correspond to the given time in the format <HOURS>:<MINUTES>.
+  * @param {Number}   time
+  * @return {Number}  minutes
+  */
   getMinutes(time) {
     let timeSplit = time.split(':');
     return parseInt(timeSplit[0]) * 60 + parseInt(timeSplit[1]);

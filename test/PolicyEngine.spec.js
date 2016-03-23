@@ -17,7 +17,7 @@ let identityModule = {
     identities.push(identityBundle);
     return identities;
   },
-  loginWithRP: (domain, scope) => { // TODO: posso tirar?
+  loginWithRP: (domain, scope) => {
     return new Promise(function(resolve, reject) {
       let token = {
         id: 'identity'
@@ -83,30 +83,30 @@ describe('Policy Engine', function() {
 
   describe('addPolicies', function() {
     it('associates a policy with the user scope', function() {
-      policyEngine.addPolicies(userScope, [policy1]);
+      policyEngine.addPolicies([policy1], userScope);
       expect(policyEngine.getApplicablePolicies(userScope)).to.be.eql([policy1]);
     });
     it('associates a second policy with the user scope', function() {
-      policyEngine.addPolicies(userScope, [policy2]);
+      policyEngine.addPolicies([policy2], userScope);
       expect(policyEngine.getApplicablePolicies(userScope)).to.be.eql([policy1, policy2]);
     });
     it('associates a policy with the application scope', function() {
-      policyEngine.addPolicies(applicationScope, [policy3]);
+      policyEngine.addPolicies([policy3], applicationScope);
       expect(policyEngine.getApplicablePolicies(applicationScope)).to.be.eql([policy3]);
     });
   });
 
   describe('removePolicies', function() {
     it('removes an existing policy associated with the user scope', function() {
-      policyEngine.removePolicies(userScope, 'allow-listA');
+      policyEngine.removePolicies('allow-listA', userScope);
       expect(policyEngine.getApplicablePolicies(userScope)).to.be.eql([policy2]);
     });
     it('tries to remove a policy that is not associated with the user scope', function() {
-      policyEngine.removePolicies(userScope, 'block-08-20');
+      policyEngine.removePolicies('block-08-20', userScope);
       expect(policyEngine.getApplicablePolicies(userScope)).to.be.eql([policy2]);
     });
     it('removes all policies associated with the application scope', function() {
-      policyEngine.removePolicies(applicationScope, 'all');
+      policyEngine.removePolicies('*', applicationScope);
       expect(policyEngine.getApplicablePolicies(applicationScope)).to.be.eql([]);
     });
   });
