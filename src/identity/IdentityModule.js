@@ -60,8 +60,6 @@ class IdentityModule {
     let _this = this;
     _this._messageBus = messageBus;
 
-    let idpProxyStub = new IdpProxyStub(messageBus, _this.domain, 'idpProxy');
-    _this.idpProxyStub = idpProxyStub;
   }
 
   /**
@@ -87,6 +85,15 @@ class IdentityModule {
   loginWithRP(identifier, scope) {
     let _this = this;
 
+    return new Promise(function(resolve, reject) {
+      _this.getIdentityAssertion().then(function(value) {
+        console.log('loginWithRP');
+        resolve(value);
+      }, function(err) {
+        console.log('loginWithRP err');
+        reject(err);
+      });
+    });
     /*
       When calling this function, if everything is fine, a small pop-up will open requesting a login with a google account. After the login is made, the pop-up will close and the function will return the ID token.
       This function was tested with the URL: http://127.0.0.1:8080/ and with the same redirect URI
@@ -109,7 +116,7 @@ class IdentityModule {
       identityModule._hello("google").login();
 
     */
-    let infoToken;
+    /*let infoToken;
 
     return new Promise(function(resolve, reject) {
 
@@ -137,7 +144,7 @@ class IdentityModule {
         });
       }
 
-    });
+    });*/
   }
 
   /**
@@ -174,7 +181,7 @@ class IdentityModule {
         return resolve(_this.infoToken);
       } else {
 
-        let message = {type:'EXECUTE', to: 'domain://idpProxy', from: 'domain://localhost/id-module', body: {resource: 'identity', method: 'login'}};
+        let message = {type:'EXECUTE', to: 'domain://google.com', from: 'domain://localhost/id-module', body: {resource: 'identity', method: 'login'}};
         _this._messageBus.postMessage(message, (result) => {
 
           //Open a window with the URL received by the proxy
@@ -193,7 +200,7 @@ class IdentityModule {
 
                 win.close();
 
-                message = {type:'EXECUTE', to: 'domain://idpProxy', from: 'domain://localhost/id-module', body: {resource: 'identity', method: 'login',
+                message = {type:'EXECUTE', to: 'domain://google.com', from: 'domain://localhost/id-module', body: {resource: 'identity', method: 'login',
                        params: url}};
 
                 _this._messageBus.postMessage(message, (res) => {
@@ -230,7 +237,7 @@ class IdentityModule {
   generateAssertion(contents, origin, usernameHint) {
     let _this = this;
 
-    let message = {type:'EXECUTE', to: 'domain://idpProxy', from: 'domain://localhost/id-module', body: {resource: 'identity', method: 'generateAssertion',
+    let message = {type:'EXECUTE', to: 'domain://google.com', from: 'domain://localhost/id-module', body: {resource: 'identity', method: 'generateAssertion',
            params: {contents: contents, origin: origin, usernameHint: usernameHint}}};
 
     return new Promise(function(resolve,reject) {
@@ -259,7 +266,7 @@ class IdentityModule {
   validateAssertion(assertion, origin) {
     let _this = this;
 
-    let message = {type:'EXECUTE', to: 'domain://idpProxy', from: 'domain://localhost/id-module', body: {resource: 'identity', method: 'validateAssertion',
+    let message = {type:'EXECUTE', to: 'domain://google.com', from: 'domain://localhost/id-module', body: {resource: 'identity', method: 'validateAssertion',
            params: {assertion: assertion, origin: origin}}};
 
     return new Promise(function(resolve, reject) {
