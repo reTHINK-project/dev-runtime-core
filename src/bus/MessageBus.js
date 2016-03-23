@@ -52,6 +52,7 @@ class MessageBus extends Bus {
     return inMsg.id;
   }
 
+  /*
   addForward(from, to) {
     let _this = this;
 
@@ -100,8 +101,27 @@ class MessageBus extends Bus {
 
     return conf;
   }
+  */
 
-  _publish(url, msg) {
+ addPublish(from) {
+   let _this = this;
+
+   return _this.addListener(from, (msg) => {
+     console.log('MB-PUBLISH: ( ' + from + ' )');
+     _this._onPostMessage(msg);
+   });
+ }
+
+ addForward(from, to) {
+   let _this = this;
+
+   return _this.addListener(from, (msg) => {
+     console.log('MB-FORWARD: ( ' + from + ' to ' + to + ' )');
+     _this.forward(to, msg);
+   });
+ }
+
+ forward(url, msg) {
     let _this = this;
 
     let itemList = _this._subscriptions[url];
@@ -115,7 +135,7 @@ class MessageBus extends Bus {
 
     //resolve external protostub...
     _this._registry.resolve(msg.to).then((route) => {
-      _this._publish(route, msg);
+      _this.forward(route, msg);
     }).catch(function(e) {
       console.log('RESOLVE-ERROR: ', e);
     });

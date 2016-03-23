@@ -1,10 +1,9 @@
 // jshint browser:true, jquery: true
 
 import {addLoader, removeLoader, documentReady, errorMessage} from './support';
-import {getUserURLFromEmail, getUserEmailFromURL} from '../src/utils/utils.js';
 
 // import {MessageFactory} from 'service-framework';
-import Policy from '../src/policy/Policy';
+
 import RuntimeUA from '../src/runtime/RuntimeUA';
 import RuntimeFactory from '../resources/RuntimeFactory';
 
@@ -43,6 +42,7 @@ loginBtn.addEventListener('click', function(e) {
 });
 
 function userLoged(result) {
+
   let hypertyHolder = $('.hyperties');
   hypertyHolder.removeClass('hide');
 
@@ -67,6 +67,7 @@ function userLoged(result) {
   runtime.loadHyperty(hyperty).then(hypertyDeployed).catch(function(reason) {
     errorMessage(reason);
   });
+
 }
 
 function hypertyDeployed(result) {
@@ -74,13 +75,9 @@ function hypertyDeployed(result) {
   let loginPanel = $('.login-panel');
   let cardAction = loginPanel.find('.card-action');
   let hypertyInfo = '<span class="white-text"><p><b>hypertyURL:</b> ' + result.runtimeHypertyURL + '</br><b>status:</b> ' + result.status + '</p></span>';
+
   loginPanel.attr('data-url', result.runtimeHypertyURL);
   cardAction.append(hypertyInfo);
-
-  $('.policy-btn').on('click', function(event) {
-    event.preventDefault();
-    configPolicies();
-  });
 
   // Prepare to discover email:
   discoverEmail();
@@ -90,74 +87,6 @@ function hypertyDeployed(result) {
   messageChat.removeClass('hide');
 
   runtime.messageBus.addListener(result.runtimeHypertyURL, newMessageRecived);
-}
-
-function configPolicies() {
-  $('.policies-conf').removeClass('hide');
-  $('.discover').addClass('hide');
-  $('.hyperty-chat').addClass('hide');
-  $('.messages').addClass('hide');
-
-  let backBtn = $('.back');
-  backBtn.on('click', function(event) {
-    event.preventDefault();
-    $('.policies-conf').addClass('hide');
-    $('.discover').removeClass('hide');
-    $('.hyperty-chat').removeClass('hide');
-  });
-
-  $('ul.dropdown-content li').click(function(e) {
-    e.preventDefault();
-
-    if ($(this).text() === 'BLACKLIST') {
-      $('.blacklist').removeClass('hide');
-      $('.user').removeClass('hide');
-      updateBlackList();
-
-      document.getElementById('lists').addEventListener('click', function(e) {
-        let user = (document.getElementById(e.target.id).innerText).slice(0, -6);
-        runtime.policyEngine.removeFromBlackList(getUserURLFromEmail(user));
-        $('#' + e.target.id).remove();
-        updateBlackList();
-      });
-
-      document.getElementById('add-email').placeholder = 'Type the email to block here';
-      $('.ok').on('click', function(event) {
-        event.preventDefault();
-        runtime.policyEngine.addPolicies('user', [new Policy('block-blacklisted', 'user', 'blacklisted', false, [])]);
-        let emailToBlock = $('.add-email').val();
-        runtime.policyEngine.addToBlackList(getUserURLFromEmail(emailToBlock));
-
-        updateBlackList();
-      });
-    }
-  });
-}
-
-function updateBlackList() {
-  let blackList = runtime.policyEngine.getBlackList();
-  let myList = document.getElementById('lists');
-  myList.innerHTML = '<ul id=\'lists\'></ul>';
-
-  let blackListLength = blackList.length;
-  let list = document.createElement('ul');
-  let counter = 0;
-  $('.policies-conf').find('.blacklist').removeClass('hide');
-  for (let i = 0; i < blackListLength; i++) {
-    let removeBtn = document.createElement('button');
-    let userEmail = getUserEmailFromURL(blackList[i]);
-    removeBtn.id = 'user' + counter;
-    removeBtn.innerHTML = 'Remove';
-    removeBtn.type = 'button';
-    removeBtn.className += 'remove waves-effect waves-light btn';
-    let item = document.createElement('li');
-    item.appendChild(document.createTextNode(userEmail));
-    item.id = 'user' + counter;
-    item.appendChild(removeBtn);
-    list.appendChild(item);
-    counter++;
-  }
-  myList.appendChild(list);
 }
 
 function discoverEmail() {
