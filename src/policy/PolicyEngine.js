@@ -126,7 +126,13 @@ class PolicyEngine {
   authorise(message) {
     let _this = this;
     return new Promise(function(resolve, reject) {
-      _this.idModule.loginWithRP('google identity', 'scope').then(function(value) {
+
+      //TODO turn it later into a policy
+      if (message.from === 'domain://google.com' || message.to === 'domain://google.com') {
+        message.authorised = true;
+        return resolve(message);
+      }
+      _this.idModule.getIdentityAssertion('google identity', 'scope').then(function(value) {
         let assertedID = _this.idModule.getIdentities();
 
         if (!message.hasOwnProperty('body')) {
