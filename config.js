@@ -28,7 +28,7 @@ System.config({
     "hellojs": "npm:hellojs@1.12.0",
     "jsrsasign": "npm:jsrsasign@5.0.7",
     "karma-browserify": "npm:karma-browserify@4.3.0",
-    "service-framework": "github:rethink-project/dev-service-framework@load-idpproxy",
+    "service-framework": "github:rethink-project/dev-service-framework@develop",
     "sjcl": "npm:sjcl@1.0.3",
     "github:jspm/nodelibs-assert@0.1.0": {
       "assert": "npm:assert@1.3.0"
@@ -109,23 +109,11 @@ System.config({
       "base64-url": "npm:base64-url@1.2.1",
       "bip39": "npm:bip39@2.2.0",
       "bitcoinjs-lib": "npm:bitcoinjs-lib@2.2.0",
-      "hellojs": "npm:hellojs@1.12.0",
       "jsrsasign": "npm:jsrsasign@5.0.7",
       "service-framework": "github:rethink-project/dev-service-framework@develop",
       "sjcl": "npm:sjcl@1.0.3"
     },
     "github:rethink-project/dev-service-framework@develop": {
-      "array.observe": "npm:array.observe@0.0.1",
-      "babel-polyfill": "npm:babel-polyfill@6.7.4",
-      "indexeddbshim": "npm:indexeddbshim@2.2.1",
-      "json": "github:systemjs/plugin-json@0.1.0",
-      "object.observe": "npm:object.observe@0.2.6",
-      "ortc-over-rtc": "npm:ortc-over-rtc@0.1.0",
-      "runtime-core": "github:rethink-project/dev-runtime-core@dev-0.4",
-      "webrtc-adapter-test": "npm:webrtc-adapter-test@0.2.10",
-      "webrtc-shim": "npm:webrtc-shim@0.1.2"
-    },
-    "github:rethink-project/dev-service-framework@load-idpproxy": {
       "array.observe": "npm:array.observe@0.0.1",
       "babel-polyfill": "npm:babel-polyfill@6.7.4",
       "indexeddbshim": "npm:indexeddbshim@2.2.1",
