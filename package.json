@@ -87,9 +87,8 @@
       "base64-url": "npm:base64-url@1.2.1",
       "bip39": "npm:bip39@^2.2.0",
       "bitcoinjs-lib": "npm:bitcoinjs-lib@^2.1.4",
-      "hellojs": "npm:hellojs@^1.9.8",
       "jsrsasign": "npm:jsrsasign@^5.0.5",
-      "service-framework": "github:rethink-project/dev-service-framework@develop",
+      "service-framework": "github:rethink-project/dev-service-framework@load-idpproxy",
       "sjcl": "npm:sjcl@1.0.3"
     },
     "devDependencies": {
@@ -102,9 +101,8 @@
     "base64-url": "^1.2.1",
     "bip39": "^2.2.0",
     "bitcoinjs-lib": "^2.1.4",
-    "hellojs": "^1.9.8",
     "jsrsasign": "^5.0.5",
-    "service-framework": "github:rethink-project/dev-service-framework#develop",
+    "service-framework": "github:rethink-project/dev-service-framework#load-idpproxy",
     "sjcl": "^1.0.3",
     "universal-localstorage": "^1.0.2"
   }
