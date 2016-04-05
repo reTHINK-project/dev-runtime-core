@@ -3,6 +3,8 @@ import ObjectAllocation from './ObjectAllocation';
 import ReporterObject from './ReporterObject';
 import ObserverObject from './ObserverObject';
 
+import {MessageFactory} from 'service-framework';
+
 /**
  * @author micaelpedrosa@gmail.com
  * Core Syncronization system.
@@ -34,6 +36,8 @@ class SyncherManager {
 
     //TODO: this should not be hardcoded!
     _this._domain = divideURL(runtimeURL).domain;
+
+    _this._mf = new MessageFactory(false, {});
 
     if (allocator) {
       _this._allocator = allocator;
@@ -77,6 +81,14 @@ class SyncherManager {
         reporter.addChildrens(childrens).then(() => {
           _this._reporters[objURL] = reporter;
 
+          /*{
+            id: msg.id, type: 'response', from: msg.to, to: owner,
+            body: { code: 200, resource: objURL, childrenResources: childrens }
+          }*/
+          let responseMsg = _this._mf.createMessageResponse(msg, 200);
+          responseMsg.body.resource = objURL;
+          responseMsg.body.childrenResources = childrens;
+
           //all ok, send response
           _this._bus.postMessage({
             id: msg.id, type: 'response', from: msg.to, to: owner,
@@ -87,6 +99,15 @@ class SyncherManager {
           setTimeout(() => {
             //schedule for next cycle needed, because the Reporter should be available.
             msg.body.authorise.forEach((hypertyURL) => {
+
+              /*{
+                type: 'create', from: objSubscriptorURL, to: hypertyURL,
+                body: { source: msg.from, value: msg.body.value, schema: msg.body.schema }
+              }*/
+              let createMsg = _this._mf.createCreateMessageRequest(objSubscriptorURL, hypertyURL, msg.body.value);
+              createMsg.body.source = msg.from;
+              createMsg.body.schema = msg.body.schema;
+
               _this._bus.postMessage({
                 type: 'create', from: objSubscriptorURL, to: hypertyURL,
                 body: { source: msg.from, value: msg.body.value, schema: msg.body.schema }
@@ -96,11 +117,14 @@ class SyncherManager {
         });
 
       });
-    }).catch((reason) => {
-      _this._bus.postMessage({
+    }).catch(() => {
+      /*{
         id: msg.id, type: 'response', from: msg.to, to: owner,
         body: { code: 500, desc: reason }
-      });
+      }*/
+      let responseMsg = _this._mf.createMessageResponse(msg, 500);
+
+      _this._bus.postMessage(responseMsg);
     });
   }
 

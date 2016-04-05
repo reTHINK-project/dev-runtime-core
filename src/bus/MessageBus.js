@@ -106,10 +106,31 @@ class MessageBus extends Bus {
  addPublish(from) {
    let _this = this;
 
-   return _this.addListener(from, (msg) => {
-     console.log('MB-PUBLISH: ( ' + from + ' )');
-     _this._onPostMessage(msg);
-   });
+   //verify if forward exist
+   let refCount = _this._forwards[from];
+   if (!refCount) {
+     let forwardListener = _this.addListener(from, (msg) => {
+       console.log('MB-PUBLISH: ( ' + from + ' )');
+       _this._onPostMessage(msg);
+     });
+
+     refCount = {
+       counter: 0,
+       fl: forwardListener,
+       remove: () => {
+         this.counter--;
+         if (this.counter === 0) {
+           this.fl.remove();
+           delete _this._forwards[from];
+         }
+       }
+     };
+
+     _this._forwards[from] = refCount;
+   }
+
+   refCount.counter++;
+   return refCount;
  }
 
  addForward(from, to) {

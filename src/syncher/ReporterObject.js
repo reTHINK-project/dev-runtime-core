@@ -76,6 +76,14 @@ class ReporterObject {
       let childBaseURL = _this._url + '/children/';
       _this._childrens.push(childrens);
 
+      /*
+      _this._childrens.forEach((child) => {
+        let childId = childBaseURL + child;
+
+        let selfForward = _this._bus.addForward(childId, owner);
+        _this._childrenListeners.push(selfForward);
+      });*/
+
       let subscriptions = [];
       childrens.forEach((child) => subscriptions.push(childBaseURL + child));
 
@@ -94,8 +102,10 @@ class ReporterObject {
               //TODO: what todo here? Save childrens?
               console.log('SyncherManager-' + childURL + '-RCV: ', msg);
             });
-
             _this._childrenListeners.push(childListener);
+
+            let selfForward = _this._bus.addForward(childURL, _this._owner);
+            _this._childrenListeners.push(selfForward);
           });
 
           resolve();

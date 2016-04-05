@@ -39,9 +39,11 @@ class Subscription {
       let childrenForward = bus.addPublish(childId);
       _this._childrenListeners.push(childrenForward);
 
-      //add self forward
-      let selfForward = bus.addForward(childId, owner);
-      _this._childrenListeners.push(selfForward);
+      //add self forward if an observer
+      if (!isReporter) {
+        let selfForward = bus.addForward(childId, owner);
+        _this._childrenListeners.push(selfForward);
+      }
     });
   }
 
