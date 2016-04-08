@@ -33717,7 +33717,7 @@ var Registry = function (_EventEmitter) {
       var domainUrl = (0, _utils.divideURL)(url).domain;
 
       // resolve the domain protostub in case of a message to global registry
-      if (url === 'global://registry') {
+      if (url.includes('global://registry')) {
         domainUrl = _this._domain;
       }
 

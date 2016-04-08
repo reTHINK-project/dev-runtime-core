@@ -581,7 +581,7 @@ class Registry extends EventEmitter {
     let domainUrl = divideURL(url).domain;
 
     // resolve the domain protostub in case of a message to global registry
-    if (url === 'global://registry') {
+    if (url.includes('global://registry')) {
       domainUrl = _this._domain;
     }
 
