@@ -1,5 +1,6 @@
 import EventEmitter from '../utils/EventEmitter';
 import AddressAllocation from './AddressAllocation';
+import ObjectAllocation from '../syncher/ObjectAllocation';
 import HypertyInstance from './HypertyInstance';
 
 import {MessageFactory} from 'service-framework';
@@ -38,10 +39,14 @@ class Registry extends EventEmitter {
     _this.remoteRegistry = remoteRegistry;
     _this.idModule = identityModule;
     _this.identifier = Math.floor((Math.random() * 10000) + 1);
+          // the expires in 21600s, represents 6 hours
+          //the expires is in seconds, unit of measure received by the domain registry
+    _this.expiresTime = 21600;
 
     _this.hypertiesListToRemove = {};
     _this.hypertiesList = [];
     _this.protostubsList = {};
+    _this.dataObjectList = {};
     _this.sandboxesList = {sandbox: {}, appSandbox: {} };
     _this.pepList = {};
 
@@ -75,6 +80,10 @@ class Registry extends EventEmitter {
     // Install AddressAllocation
     let addressAllocation = new AddressAllocation(_this.registryURL, messageBus);
     _this.addressAllocation = addressAllocation;
+
+    //Install ObjectAllocation
+    let objectAllocation = new ObjectAllocation(_this.registryURL + '/object-allocation', messageBus);
+    _this.objectAllocation = objectAllocation;
   }
 
   /**
@@ -87,6 +96,8 @@ class Registry extends EventEmitter {
 
   /**
   * Function to query the Domain registry, with an user email.
+  * @param    {string}      identifier      user identifier
+  * @return  {string}       hypertyURL      the last hypertyURL allocated to the user identifier
   */
   getUserHyperty(identifier) {
     let _this = this;
@@ -147,6 +158,29 @@ class Registry extends EventEmitter {
   }
 
   /**
+  * Function to query the Domain registry, with an user email.
+  * @param    {string}      identifier      user identifier
+  * @return  {string}       dataObjectURL      the last dataObjectURL allocated to the object identifier
+  */
+  getDataObject(identifier) {
+    let _this = this;
+
+    let msg = {
+      type: 'READ', from: _this.registryURL, to: 'domain://registry.' + _this._domain + '/', body: { resource: identifier}
+    };
+
+    return new Promise(function(resolve, reject) {
+
+      _this._messageBus.postMessage(msg, (reply) => {
+
+        resolve(reply);
+      });
+
+    });
+
+  }
+
+  /**
   *  function to delete an hypertyInstance in the Domain Registry
   */
   deleteHypertyInstance(user, hypertyInstance) {
@@ -174,6 +208,46 @@ class Registry extends EventEmitter {
 
     _this._messageBus.post.postMessage(message, (reply) => {
       console.log('Updated hyperty reply', reply);
+    });
+  }
+
+  /**
+  * To register a new Data Object in the runtime which returns the dataObjectURL allocated to the new Data Object.
+  * @param  {String}      descriptor            dataObjectCatalogueURL
+  * @param  {String}      dataObject            dataObject identifier
+  * @param  {String}      userIdentifier        User Identifier
+  * @return {String}      dataObjectURL         dataObject URL
+  */
+  registerDataObject(descriptor, dataObject, userIdentifier) {
+    let _this = this;
+    let domainUrl = divideURL(descriptor).domain;
+
+    return new Promise(function(resolve, reject) {
+
+      _this.objectAllocation.create(domainUrl, descriptor, 1).then((urlAllocated) => {
+
+        _this.dataObjectList[dataObject] = urlAllocated;
+
+        //message to register the new hyperty, within the domain registry
+        let messageValue = {dataObject: dataObject, descriptor: descriptor, dataObjectURL: urlAllocated, expires: _this.expiresTime};
+
+        let message = _this.messageFactory.createCreateMessageRequest(
+          _this.registryURL,
+          'domain://registry.' + _this.registryDomain + '/',
+          messageValue,
+          'policy'
+        );
+
+        //TODO small fix, because the connector do not yet accept lower case
+        message.type = 'CREATE';
+        _this._messageBus.postMessage(message, (reply) => {
+          console.log('===> registerDataObject Reply: ', reply);
+        });
+
+        resolve(urlAllocated);
+      }, (error) => {
+        reject(error);
+      });
     });
   }
 
@@ -235,8 +309,7 @@ class Registry extends EventEmitter {
               }
 
               //message to register the new hyperty, within the domain registry
-              // the expires in 21600s, represents 6 hours
-              let messageValue = {user: identityURL,  hypertyDescriptorURL: descriptor, hypertyURL: adderessList[0], expires: 21600};
+              let messageValue = {user: identityURL,  hypertyDescriptorURL: descriptor, hypertyURL: adderessList[0], expires: _this.expiresTime};
 
               let message = _this.messageFactory.createCreateMessageRequest(
                 _this.registryURL,
@@ -251,6 +324,24 @@ class Registry extends EventEmitter {
               _this._messageBus.postMessage(message, (reply) => {
                 console.log('===> RegisterHyperty Reply: ', reply);
               });
+
+              //timer to keep the registration alive
+              // the time is defined by a little less than half of the expires time defined
+              let keepAliveTimer = setInterval(function() {
+
+                let message = _this.messageFactory.createCreateMessageRequest(
+                  _this.registryURL,
+                  'domain://registry.' + _this.registryDomain + '/',
+                  messageValue,
+                  'policy'
+                );
+
+                //TODO small fix, because the connector do not yet accept lower case
+                message.type = 'CREATE';
+                _this._messageBus.postMessage(message, (reply) => {
+                  console.log('===> KeepAlive Reply: ', reply);
+                });
+              },(((_this.expiresTime / 1.1) / 2) * 1000));
 
               resolve(adderessList[0]);
             });
@@ -488,6 +579,11 @@ class Registry extends EventEmitter {
     //split the url to find the domainURL. deals with the url for example as:
     //"hyperty-runtime://sp1/protostub/123",
     let domainUrl = divideURL(url).domain;
+
+    // resolve the domain protostub in case of a message to global registry
+    if (url === 'global://registry') {
+      domainUrl = _this._domain;
+    }
 
     return new Promise((resolve, reject) => {
 

@@ -187,7 +187,7 @@ class IdentityModule {
           //Open a window with the URL received by the proxy
           //TODO later swap any existing redirectURI in the url, for a specific one in the idModule
           let win = window.open(result.body.value, 'openIDrequest', 'width=800, height=600');
-          let pollTimer = window.setInterval(function() {
+          let pollTimer = setInterval(function() {
             try {
 
               if (win.closed) {
