@@ -31545,17 +31545,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _OpenIdLib = require('./OpenIdLib');
-
-var _OpenIdLib2 = _interopRequireDefault(_OpenIdLib);
-
 var _utils = require('../utils/utils.js');
-
-var _IdpProxyStub = require('../protostub/IdpProxyStub');
-
-var _IdpProxyStub2 = _interopRequireDefault(_IdpProxyStub);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -31621,6 +31611,21 @@ var IdentityModule = function () {
     value: function getIdentities() {
       var _this = this;
       return _this.identities;
+    }
+
+    /**
+    * Function that resolve and create the domainURL in case it is provided one. If not, resolve the default domainURL
+    * @param {String}     idpDomain     idpDomain (Optional)
+    */
+
+  }, {
+    key: '_resolveDomain',
+    value: function _resolveDomain(idpDomain) {
+      if (!idpDomain) {
+        return 'domain://google.com';
+      } else {
+        return 'domain://' + idpDomain;
+      }
     }
 
     /**
@@ -31718,8 +31723,10 @@ var IdentityModule = function () {
 
   }, {
     key: 'getIdentityAssertion',
-    value: function getIdentityAssertion(identifier, scope) {
+    value: function getIdentityAssertion(identifier, scope, idpDomain) {
       var _this = this;
+
+      var domain = _this._resolveDomain(idpDomain);
 
       return new Promise(function (resolve, reject) {
 
@@ -31729,12 +31736,18 @@ var IdentityModule = function () {
         } else {
           (function () {
 
-            var message = { type: 'EXECUTE', to: 'domain://google.com', from: 'domain://localhost/id-module', body: { resource: 'identity', method: 'login' } };
+            var message = { type: 'EXECUTE', to: domain, from: 'domain://localhost/id-module', body: { resource: 'identity', method: 'login' } };
             _this._messageBus.postMessage(message, function (result) {
+
+              var urlToOpen = result.body.value.loginUrl;
+
+              if (!urlToOpen) {
+                return reject('Error: Invalid URL to obtain Identity');
+              }
 
               //Open a window with the URL received by the proxy
               //TODO later swap any existing redirectURI in the url, for a specific one in the idModule
-              var win = window.open(result.body.value, 'openIDrequest', 'width=800, height=600');
+              var win = window.open(urlToOpen, 'openIDrequest', 'width=800, height=600');
               var pollTimer = setInterval(function () {
                 try {
 
@@ -31748,7 +31761,7 @@ var IdentityModule = function () {
 
                     win.close();
 
-                    message = { type: 'EXECUTE', to: 'domain://google.com', from: 'domain://localhost/id-module', body: { resource: 'identity', method: 'login',
+                    message = { type: 'EXECUTE', to: domain, from: 'domain://localhost/id-module', body: { resource: 'identity', method: 'login',
                         params: url } };
 
                     _this._messageBus.postMessage(message, function (res) {
@@ -31786,10 +31799,12 @@ var IdentityModule = function () {
 
   }, {
     key: 'generateAssertion',
-    value: function generateAssertion(contents, origin, usernameHint) {
+    value: function generateAssertion(contents, origin, usernameHint, idpDomain) {
       var _this = this;
 
-      var message = { type: 'EXECUTE', to: 'domain://google.com', from: 'domain://localhost/id-module', body: { resource: 'identity', method: 'generateAssertion',
+      var domain = _this._resolveDomain(idpDomain);
+
+      var message = { type: 'EXECUTE', to: domain, from: 'domain://localhost/id-module', body: { resource: 'identity', method: 'generateAssertion',
           params: { contents: contents, origin: origin, usernameHint: usernameHint } } };
 
       return new Promise(function (resolve, reject) {
@@ -31817,10 +31832,12 @@ var IdentityModule = function () {
 
   }, {
     key: 'validateAssertion',
-    value: function validateAssertion(assertion, origin) {
+    value: function validateAssertion(assertion, origin, idpDomain) {
       var _this = this;
 
-      var message = { type: 'EXECUTE', to: 'domain://google.com', from: 'domain://localhost/id-module', body: { resource: 'identity', method: 'validateAssertion',
+      var domain = _this._resolveDomain(idpDomain);
+
+      var message = { type: 'EXECUTE', to: domain, from: 'domain://localhost/id-module', body: { resource: 'identity', method: 'validateAssertion',
           params: { assertion: assertion, origin: origin } } };
 
       return new Promise(function (resolve, reject) {
@@ -31857,280 +31874,7 @@ var IdentityModule = function () {
 exports.default = IdentityModule;
 module.exports = exports['default'];
 
-},{"../protostub/IdpProxyStub":191,"../utils/utils.js":203,"./OpenIdLib":187}],187:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-//import hello from 'hellojs';
-
-/**
-*  class to facilitate the operations with the openID connect, through several Identity Providers
-*
-*/
-
-var OpenIdLib = function () {
-  function OpenIdLib(identityProvider, clientID) {
-    _classCallCheck(this, OpenIdLib);
-
-    var _this = this;
-    _this.clientID = clientID;
-    _this.identityProvider = identityProvider;
-
-    switch (identityProvider) {
-      case 'google':
-        var googleInfo = new GoogleInfo();
-        _this.info = googleInfo;
-        break;
-      case 'facebook':
-        var facebookInfo = new FacebookInfo();
-        _this.info = facebookInfo;
-        break;
-      case 'windows':
-        var microsoftInfo = new MicrosoftInfo();
-        _this.info = microsoftInfo;
-        break;
-      default:
-        break;
-    }
-  }
-
-  _createClass(OpenIdLib, [{
-    key: 'openPopup',
-    value: function openPopup() {
-      var _this = this;
-
-      var REDIRECT = _this.info.REDIRECT;
-      var URL = _this.info.URL;
-
-      var acToken = void 0;
-      var tokenType = void 0;
-      var expiresIn = void 0;
-
-      return new Promise(function (resolve, reject) {
-
-        //function to parse the query string in the given URL to obatin certain values
-        function gup(url, name) {
-          name = name.replace(/[\[]/, '\\\[').replace(/[\]]/, '\\\]');
-          var regexS = '[\\#&?]' + name + '=([^&#]*)';
-          var regex = new RegExp(regexS);
-          var results = regex.exec(url);
-          if (results === null) return '';else return results[1];
-        }
-
-        /*hello.init({google: '808329566012-tqr8qoh111942gd2kg007t0s8f277roi.apps.googleusercontent.com',
-                   facebook: '655302667942219',
-                   windows: 'asdf197f6ad6-808f-4ddc-b725-3d8fe2660349'});
-        hello(_this.identityProvider).login({scope: 'email'}).then(function(token) {
-          console.log(token);
-          resolve(token.authResponse.access_token);
-        }, function(error) {
-          console.log('errorValidating ', error);
-          reject(error);
-        });*/
-
-        var win = window.open(URL, 'openIDrequest', 'width=800, height=600');
-        var pollTimer = window.setInterval(function () {
-          try {
-            //console.log(win.document.URL);
-
-            if (win.closed) {
-              reject('Some error occured.');
-              clearInterval(pollTimer);
-            }
-
-            var redirectURL = document.URL; //window.location.origin;
-            if (win.document.URL.indexOf('REDIRECT') !== -1 || win.document.URL.indexOf(redirectURL) !== -1) {
-              window.clearInterval(pollTimer);
-              var url = win.document.URL;
-
-              //not working yet. Some problems with the 'POST' method
-              if (_this.identityProvider === 'windows') {
-                (function () {
-                  var code = gup(url, 'code');
-                  var sessionState = gup(url, 'session_state');
-
-                  var reqAccessURL = _this.info.TOKENEND + 'redirect_uri=' + _this.info.REDIRECT + '&grant_type=authorization_code' + '&client_id=' + _this.info.CLIENTID + '&code=' + code;
-
-                  win.close();
-
-                  var req = new XMLHttpRequest();
-                  req.open('POST', _this.info.TOKENEND, true);
-                  req.setRequestHeader('Access-Control-Allow-Origin', '*');
-
-                  var data = new FormData();
-                  data.append('redirect_uri', _this.info.REDIRECT);
-                  data.append('grant_type', 'authorization_code');
-                  data.append('client_id', _this.info.CLIENTID);
-                  data.append('code', code);
-
-                  req.onreadystatechange = function (e) {
-                    if (req.readyState === 4) {
-                      if (req.status === 200) {
-
-                        resolve('null');
-                      } else if (req.status === 400) {
-                        reject('There was an error processing the token');
-                      } else {
-                        reject('something else other than 200 was returned');
-                      }
-                    }
-                  };
-                  req.send(data);
-                })();
-              } else {
-
-                acToken = gup(url, 'access_token');
-                tokenType = gup(url, 'token_type'); //FACEBOOK does not return tokenType in the field
-                expiresIn = gup(url, 'expires_in');
-
-                win.close();
-
-                if (_this.identityProvider === 'facebook') {
-                  _this.info.VALIDURL = 'https://graph.facebook.com/debug_token?input_token=' + acToken + '&access_token=';
-                }
-
-                //after receiving the access token, google requires to validate first the token to prevent confused deputy problem.
-                resolve(acToken);
-              }
-            }
-          } catch (e) {
-            //console.log(e);
-          }
-        }, 1000);
-      });
-    }
-  }, {
-    key: 'validateToken',
-    value: function validateToken(token) {
-      var _this = this;
-      var tokenID = void 0;
-      var VALIDURL = _this.info.VALIDURL;
-      return new Promise(function (resolve, reject) {
-        var req = new XMLHttpRequest();
-        req.open('GET', VALIDURL + token, true);
-
-        req.onreadystatechange = function (e) {
-          if (req.readyState === 4) {
-            if (req.status === 200) {
-              tokenID = JSON.parse(req.responseText);
-
-              resolve({ token: token, tokenID: tokenID });
-            } else if (req.status === 400) {
-              reject('There was an error processing the token');
-            } else {
-              reject('something else other than 200 was returned');
-            }
-          }
-        };
-        req.send();
-      });
-    }
-
-    //function to exchange the access token with an ID Token containing the information
-
-  }, {
-    key: 'getInfoToken',
-    value: function getInfoToken(token, tokenID) {
-      var _this = this;
-
-      return new Promise(function (resolve, reject) {
-        var USERINFURL = _this.info.USERINFURL;
-
-        var req = new XMLHttpRequest();
-        req.open('GET', USERINFURL + token, true);
-
-        req.onreadystatechange = function (e) {
-          if (req.readyState === 4) {
-            if (req.status === 200) {
-              var infoToken = JSON.parse(req.responseText);
-              var email = infoToken.email;
-
-              //contruct the identityURL to be defined as in specification
-              // model: user://<idpdomain>/<user-identifier>
-              var identityURL = 'user://' + email.substring(email.indexOf('@') + 1, email.length) + '/' + email.substring(0, email.indexOf('@'));
-
-              //TODO remove later the 'token' field key
-              var identityBundle = { identity: identityURL, token: infoToken, accessToken: token, idToken: tokenID, infoToken: infoToken, idp: 'google' };
-
-              resolve(identityBundle);
-            } else if (req.status === 400) {
-              reject('There was an error processing the token');
-            } else {
-              reject('something else other than 200 was returned');
-            }
-          }
-        };
-        req.send();
-      });
-    }
-  }]);
-
-  return OpenIdLib;
-}();
-
-//Google works fine with OpenID connect
-
-
-var GoogleInfo = function GoogleInfo() {
-  _classCallCheck(this, GoogleInfo);
-
-  var _this = this;
-  _this.OAUTHURL = 'https://accounts.google.com/o/oauth2/auth?';
-  _this.SCOPE = 'email%20profile';
-  _this.CLIENTID = '808329566012-tqr8qoh111942gd2kg007t0s8f277roi.apps.googleusercontent.com';
-  _this.REDIRECT = document.URL;
-  _this.TYPE = 'token';
-  _this.VALIDURL = 'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=';
-  _this.USERINFURL = 'https://www.googleapis.com/oauth2/v1/userinfo?access_token=';
-
-  _this.URL = _this.OAUTHURL + 'scope=' + _this.SCOPE + '&client_id=' + _this.CLIENTID + '&redirect_uri=' + _this.REDIRECT + '&response_type=' + _this.TYPE;
-};
-
-//Facebook only provides the support for Oauth2 Tokens, and do not directly provide support for OpenID connect. So, no 'oficial' ID token can be requested, just information about the user.
-
-
-var FacebookInfo = function FacebookInfo() {
-  _classCallCheck(this, FacebookInfo);
-
-  var _this = this;
-  _this.OAUTHURL = 'https://www.facebook.com/dialog/oauth?';
-  _this.CLIENTID = 655302667942219;
-  _this.REDIRECT = document.URL; // 'http://localhost:8080/example/index.html';
-  _this.TYPE = 'token';
-  _this.VALIDURL = 'https://graph.facebook.com/debug_token?input_token='; //must be updated later
-  _this.USERINFURL = 'https://graph.facebook.com/v2.5/me?fields=id,name,email,picture&access_token=';
-  _this.URL = _this.OAUTHURL + 'client_id=' + _this.CLIENTID + '&redirect_uri=' + _this.REDIRECT + '&response_type=' + _this.TYPE;
-};
-
-//Microsoft is not yet implemented to obtain the Access token / ID token. Some troubles to request the Access token, since it is required to make a http Post request with the authorization code.
-
-
-var MicrosoftInfo = function MicrosoftInfo() {
-  _classCallCheck(this, MicrosoftInfo);
-
-  var _this = this;
-  _this.OAUTHURL = 'https://login.microsoftonline.com/common/oauth2/authorize?';
-  _this.CLIENTID = '7e2f3589-4b38-4b1c-a321-c9251de00ef2';
-  _this.REDIRECT = document.URL; //'http%3A%2F%2Flocalhost%3A8080%2Fexample%2Findex%2Ehtml'
-  _this.TYPE = 'code';
-
-  _this.TOKENEND = 'https://login.microsoftonline.com/3fa4042c-7c4d-4382-aba8-fc8ec61103a4/oauth2/token';
-  _this.AUTHEND = 'https://login.microsoftonline.com/3fa4042c-7c4d-4382-aba8-fc8ec61103a4/oauth2/authorize?';
-
-  _this.URL = _this.AUTHEND + 'response_type=' + _this.TYPE + '&client_id=' + _this.CLIENTID; //+ '&redirect_uri=' + _this.REDIRECT;
-};
-
-exports.default = OpenIdLib;
-module.exports = exports['default'];
-
-},{}],188:[function(require,module,exports){
+},{"../utils/utils.js":201}],187:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -32338,7 +32082,7 @@ var PDP = function () {
 exports.default = PDP;
 module.exports = exports['default'];
 
-},{}],189:[function(require,module,exports){
+},{}],188:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -32374,7 +32118,7 @@ var PEP = function () {
 exports.default = PEP;
 module.exports = exports['default'];
 
-},{}],190:[function(require,module,exports){
+},{}],189:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -32706,212 +32450,7 @@ var PolicyEngine = function () {
 exports.default = PolicyEngine;
 module.exports = exports['default'];
 
-},{"./PDP":188,"./PEP":189}],191:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-/**
-* Identity Provider Proxy Protocol Stub
-*/
-
-var IdpProxyStub = function () {
-
-  /**
-  * Constructor of the IdpProxy Stub
-  * The constructor add a listener in the messageBus received and start a web worker with the idpProxy received
-  *
-  * @param  {messageBus}      messageBus
-  * @param  {domain}          Domain
-  * @param  {idpProxy}    identity Provider Proxy javascript file
-  */
-
-  function IdpProxyStub(messageBus, domain, idpProxy) {
-    _classCallCheck(this, IdpProxyStub);
-
-    var _this = this;
-    _this.messageBus = messageBus;
-    _this.domain = domain;
-    _this.idpProxy = idpProxy;
-
-    _this.messageBus.addListener('domain://' + idpProxy, function (msg) {
-      _this.requestToIdp(msg);
-    });
-
-    //start the web worker with the idpProxy
-    _this.start(idpProxy);
-  }
-
-  /**
-  * Function that see the intended method in the message received and call the respective function
-  *
-  * @param {message}  message received in the messageBus
-  */
-
-
-  _createClass(IdpProxyStub, [{
-    key: 'requestToIdp',
-    value: function requestToIdp(msg) {
-      var _this = this;
-      var params = msg.body.params;
-      switch (msg.body.method) {
-        case 'login':
-          _this.login(params).then(function (value) {
-            _this.replyMessage(msg, value);
-          });
-          break;
-        case 'generateAssertion':
-          _this.generate(params).then(function (value) {
-            _this.replyMessage(msg, value);
-          });
-          break;
-        case 'validateAssertion':
-          _this.validate(params).then(function (value) {
-            _this.replyMessage(msg, value);
-          });
-          break;
-        default:
-          break;
-      }
-    }
-
-    /**
-    * Starts a web worker with the idpProxy javascipt file
-    *
-    * @param  {idpProxy}    identity Provider Proxy javascript file
-    */
-
-  }, {
-    key: 'start',
-    value: function start(idpProxy) {
-      var _this = this;
-      if (window.Worker) {
-        //check if the browser supports the worker API
-
-        var myWorker = new Worker('/src/identity/IdpProxy.js');
-        _this.myWorker = myWorker;
-        _this.myWorker.postMessage(['create', 'IdpProxy']);
-      } else {
-        return 'error';
-      }
-    }
-
-    /**
-    * function that makes a request for an identity assertion to the web worker running the idpProxy
-    *
-    * @param  {params}  parameters received in the message. In this case contains the content, origin and usernamehint
-    * @return {Promise} returns a promise with an identity assertion generate by the idpProxy
-    */
-
-  }, {
-    key: 'generate',
-    value: function generate(params) {
-      var _this = this;
-
-      return new Promise(function (resolve, reject) {
-        if (window.Worker) {
-          //check if the browser supports the worker API
-
-          _this.myWorker.postMessage(['generate', params]);
-
-          _this.myWorker.onmessage = function (e) {
-            resolve(e.data);
-            console.log('Message received from worker', e.data);
-          };
-        } else {
-          reject('error');
-        }
-      });
-    }
-
-    /**
-    * function that makes a request to validate an identity assertion to the web worker running the idpProxy
-    *
-    * @param  {params}  parameters received in the message. In this case contains the identity assertion and origin
-    * @return {Promise} returns a promise with the identity assertion validation result, received by the idpProxy
-    */
-
-  }, {
-    key: 'validate',
-    value: function validate(params) {
-      var _this = this;
-
-      return new Promise(function (resolve, reject) {
-        if (window.Worker) {
-          //check if the browser supports the worker API
-
-          _this.myWorker.postMessage(['validate', params]);
-
-          _this.myWorker.onmessage = function (e) {
-            resolve(e.data);
-            console.log('Message received from worker', e.data);
-          };
-        } else {
-          reject('error');
-        }
-      });
-    }
-
-    /**
-    * function that makes a request for a user identity to the web worker running the idpProxy
-    *
-    * @param  {params}  parameters received in the message. In this case contains the login scope
-    * @return {Promise} returns a promise an URL so the Identity Module can use to obtain an identity
-    */
-
-  }, {
-    key: 'login',
-    value: function login(params) {
-      var _this = this;
-
-      return new Promise(function (resolve, reject) {
-        if (window.Worker) {
-          //check if the browser supports the worker API
-
-          _this.myWorker.postMessage(['login', params]);
-
-          _this.myWorker.onmessage = function (e) {
-            resolve(e.data);
-            console.log('Message received from worker', e.data);
-          };
-        } else {
-          reject('error');
-        }
-      });
-    }
-
-    /**
-    * This function receives a message and a value. It replies the value to the sender of the message received
-    *
-    * @param  {message}   message received
-    * @param  {value}     value to include in the new message to send
-    */
-
-  }, {
-    key: 'replyMessage',
-    value: function replyMessage(msg, value) {
-      var _this = this;
-
-      var message = { id: msg.id, type: 'response', to: msg.from, from: msg.to,
-        body: { code: 200, value: value } };
-
-      _this.messageBus.postMessage(message);
-    }
-  }]);
-
-  return IdpProxyStub;
-}();
-
-exports.default = IdpProxyStub;
-module.exports = exports['default'];
-
-},{}],192:[function(require,module,exports){
+},{"./PDP":187,"./PEP":188}],190:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -33039,7 +32578,7 @@ var AddressAllocation = function () {
 exports.default = AddressAllocation;
 module.exports = exports['default'];
 
-},{}],193:[function(require,module,exports){
+},{}],191:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -33106,7 +32645,7 @@ var HypertyInstance = function (_RegistryDataModel) {
 exports.default = HypertyInstance;
 module.exports = exports['default'];
 
-},{"./RegistryDataModel":195}],194:[function(require,module,exports){
+},{"./RegistryDataModel":193}],192:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -33779,7 +33318,7 @@ var Registry = function (_EventEmitter) {
 exports.default = Registry;
 module.exports = exports['default'];
 
-},{"../syncher/ObjectAllocation":197,"../utils/EventEmitter":202,"../utils/utils.js":203,"./AddressAllocation":192,"./HypertyInstance":193,"service-framework":160}],195:[function(require,module,exports){
+},{"../syncher/ObjectAllocation":195,"../utils/EventEmitter":200,"../utils/utils.js":201,"./AddressAllocation":190,"./HypertyInstance":191,"service-framework":160}],193:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -33837,7 +33376,7 @@ var RegistryDataModel = function () {
 exports.default = RegistryDataModel;
 module.exports = exports['default'];
 
-},{}],196:[function(require,module,exports){
+},{}],194:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -34345,7 +33884,7 @@ var RuntimeUA = function () {
 exports.default = RuntimeUA;
 module.exports = exports['default'];
 
-},{"../bus/MessageBus":180,"../graphconnector/GraphConnector":184,"../identity/IdentityModule":186,"../policy/PolicyEngine":190,"../registry/Registry":194,"../syncher/SyncherManager":201,"../utils/utils":203,"service-framework/dist/RuntimeCatalogue":159}],197:[function(require,module,exports){
+},{"../bus/MessageBus":180,"../graphconnector/GraphConnector":184,"../identity/IdentityModule":186,"../policy/PolicyEngine":189,"../registry/Registry":192,"../syncher/SyncherManager":199,"../utils/utils":201,"service-framework/dist/RuntimeCatalogue":159}],195:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -34424,7 +33963,7 @@ var ObjectAllocation = function () {
 exports.default = ObjectAllocation;
 module.exports = exports['default'];
 
-},{}],198:[function(require,module,exports){
+},{}],196:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -34499,7 +34038,7 @@ var ObserverObject = function () {
 exports.default = ObserverObject;
 module.exports = exports['default'];
 
-},{"../utils/utils":203,"./Subscription":200}],199:[function(require,module,exports){
+},{"../utils/utils":201,"./Subscription":198}],197:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -34735,7 +34274,7 @@ var ReporterObject = function () {
 exports.default = ReporterObject;
 module.exports = exports['default'];
 
-},{"../utils/utils":203,"./Subscription":200}],200:[function(require,module,exports){
+},{"../utils/utils":201,"./Subscription":198}],198:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -34817,7 +34356,7 @@ var Subscription = function () {
 exports.default = Subscription;
 module.exports = exports['default'];
 
-},{}],201:[function(require,module,exports){
+},{}],199:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -35106,7 +34645,7 @@ var SyncherManager = function () {
 exports.default = SyncherManager;
 module.exports = exports['default'];
 
-},{"../utils/utils":203,"./ObjectAllocation":197,"./ObserverObject":198,"./ReporterObject":199,"service-framework":160}],202:[function(require,module,exports){
+},{"../utils/utils":201,"./ObjectAllocation":195,"./ObserverObject":196,"./ReporterObject":197,"service-framework":160}],200:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -35164,7 +34703,7 @@ var EventEmitter = function () {
 exports.default = EventEmitter;
 module.exports = exports['default'];
 
-},{}],203:[function(require,module,exports){
+},{}],201:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -35254,5 +34793,5 @@ function getUserEmailFromURL(userURL) {
   return url.identity.replace('/', '') + '@' + url.domain; // identity field has '/exampleID' instead of 'exampleID'
 }
 
-},{}]},{},[196])(196)
+},{}]},{},[194])(194)
 });

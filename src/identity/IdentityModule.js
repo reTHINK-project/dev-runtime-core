@@ -1,7 +1,4 @@
-import OpenIdLib from './OpenIdLib';
 import {getUserURLFromEmail} from '../utils/utils.js';
-
-import IdpProxyStub from '../protostub/IdpProxyStub';
 
 /**
 *
@@ -70,6 +67,18 @@ class IdentityModule {
   getIdentities() {
     let _this = this;
     return _this.identities;
+  }
+
+  /**
+  * Function that resolve and create the domainURL in case it is provided one. If not, resolve the default domainURL
+  * @param {String}     idpDomain     idpDomain (Optional)
+  */
+  _resolveDomain(idpDomain) {
+    if (!idpDomain) {
+      return 'domain://google.com';
+    } else {
+      return 'domain://' + idpDomain;
+    }
   }
 
   /**
@@ -157,7 +166,7 @@ class IdentityModule {
 
     let identities = _this.identities;
 
-    if(!identities) {
+    if (!identities) {
       getIdentityAssertion().then(function(value) {
 
       });
@@ -171,8 +180,10 @@ class IdentityModule {
   *
   * @return {IdAssertion}              IdAssertion
   */
-  getIdentityAssertion(identifier, scope) {
+  getIdentityAssertion(identifier, scope, idpDomain) {
     let _this = this;
+
+    let domain = _this._resolveDomain(idpDomain);
 
     return new Promise(function(resolve,reject) {
 
@@ -181,12 +192,18 @@ class IdentityModule {
         return resolve(_this.infoToken);
       } else {
 
-        let message = {type:'EXECUTE', to: 'domain://google.com', from: 'domain://localhost/id-module', body: {resource: 'identity', method: 'login'}};
+        let message = {type:'EXECUTE', to: domain, from: 'domain://localhost/id-module', body: {resource: 'identity', method: 'login'}};
         _this._messageBus.postMessage(message, (result) => {
+
+          let urlToOpen = result.body.value.loginUrl;
+
+          if(!urlToOpen) {
+            return reject('Error: Invalid URL to obtain Identity');
+          }
 
           //Open a window with the URL received by the proxy
           //TODO later swap any existing redirectURI in the url, for a specific one in the idModule
-          let win = window.open(result.body.value, 'openIDrequest', 'width=800, height=600');
+          let win = window.open(urlToOpen, 'openIDrequest', 'width=800, height=600');
           let pollTimer = setInterval(function() {
             try {
 
@@ -200,7 +217,7 @@ class IdentityModule {
 
                 win.close();
 
-                message = {type:'EXECUTE', to: 'domain://google.com', from: 'domain://localhost/id-module', body: {resource: 'identity', method: 'login',
+                message = {type:'EXECUTE', to: domain, from: 'domain://localhost/id-module', body: {resource: 'identity', method: 'login',
                        params: url}};
 
                 _this._messageBus.postMessage(message, (res) => {
@@ -234,10 +251,12 @@ class IdentityModule {
   * @param  {DOMString} usernameHint usernameHint
   * @return {IdAssertion}              IdAssertion
   */
-  generateAssertion(contents, origin, usernameHint) {
+  generateAssertion(contents, origin, usernameHint, idpDomain) {
     let _this = this;
 
-    let message = {type:'EXECUTE', to: 'domain://google.com', from: 'domain://localhost/id-module', body: {resource: 'identity', method: 'generateAssertion',
+    let domain = _this._resolveDomain(idpDomain);
+
+    let message = {type:'EXECUTE', to: domain, from: 'domain://localhost/id-module', body: {resource: 'identity', method: 'generateAssertion',
            params: {contents: contents, origin: origin, usernameHint: usernameHint}}};
 
     return new Promise(function(resolve,reject) {
@@ -263,10 +282,12 @@ class IdentityModule {
   * @param  {DOMString} origin       origin
   * @return {Promise}         Promise         promise with the result from the validation
   */
-  validateAssertion(assertion, origin) {
+  validateAssertion(assertion, origin, idpDomain) {
     let _this = this;
 
-    let message = {type:'EXECUTE', to: 'domain://google.com', from: 'domain://localhost/id-module', body: {resource: 'identity', method: 'validateAssertion',
+    let domain = _this._resolveDomain(idpDomain);
+
+    let message = {type:'EXECUTE', to: domain, from: 'domain://localhost/id-module', body: {resource: 'identity', method: 'validateAssertion',
            params: {assertion: assertion, origin: origin}}};
 
     return new Promise(function(resolve, reject) {
