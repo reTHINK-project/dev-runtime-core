@@ -31743,45 +31743,48 @@ var IdentityModule = function () {
 
               if (!urlToOpen) {
                 return reject('Error: Invalid URL to obtain Identity');
+              } else {
+                (function () {
+
+                  //Open a window with the URL received by the proxy
+                  //TODO later swap any existing redirectURI in the url, for a specific one in the idModule
+                  var win = window.open(urlToOpen, 'openIDrequest', 'width=800, height=600');
+                  var pollTimer = setInterval(function () {
+                    try {
+
+                      if (win.closed) {
+                        reject('Some error occured.');
+                        clearInterval(pollTimer);
+                      }
+                      if (win.document.URL.indexOf('REDIRECT') !== -1 || win.document.URL.indexOf(location.origin) !== -1) {
+                        window.clearInterval(pollTimer);
+                        var url = win.document.URL;
+
+                        win.close();
+
+                        message = { type: 'EXECUTE', to: domain, from: 'domain://localhost/id-module', body: { resource: 'identity', method: 'login',
+                            params: url } };
+
+                        _this._messageBus.postMessage(message, function (res) {
+                          var result = res.body.value;
+                          result.identity = (0, _utils.getUserURLFromEmail)(result.idTokenJSON.email);
+                          result.idp = 'google';
+                          _this.identities.push(result);
+
+                          //TODO improve later
+                          _this.infoToken = result.infoToken;
+                          resolve(result.infoToken);
+                        });
+
+                        //
+                        //resolve(url);
+                      }
+                    } catch (e) {
+                      //console.log(e);
+                    }
+                  }, 500);
+                })();
               }
-
-              //Open a window with the URL received by the proxy
-              //TODO later swap any existing redirectURI in the url, for a specific one in the idModule
-              var win = window.open(urlToOpen, 'openIDrequest', 'width=800, height=600');
-              var pollTimer = setInterval(function () {
-                try {
-
-                  if (win.closed) {
-                    reject('Some error occured.');
-                    clearInterval(pollTimer);
-                  }
-                  if (win.document.URL.indexOf('REDIRECT') !== -1 || win.document.URL.indexOf(location.origin) !== -1) {
-                    window.clearInterval(pollTimer);
-                    var url = win.document.URL;
-
-                    win.close();
-
-                    message = { type: 'EXECUTE', to: domain, from: 'domain://localhost/id-module', body: { resource: 'identity', method: 'login',
-                        params: url } };
-
-                    _this._messageBus.postMessage(message, function (res) {
-                      var result = res.body.value;
-                      result.identity = (0, _utils.getUserURLFromEmail)(result.idTokenJSON.email);
-                      result.idp = 'google';
-                      _this.identities.push(result);
-
-                      //TODO improve later
-                      _this.infoToken = result.infoToken;
-                      resolve(result.infoToken);
-                    });
-
-                    //
-                    //resolve(url);
-                  }
-                } catch (e) {
-                  //console.log(e);
-                }
-              }, 500);
             });
           })();
         }
@@ -31810,10 +31813,40 @@ var IdentityModule = function () {
       return new Promise(function (resolve, reject) {
         _this._messageBus.postMessage(message, function (result) {
           if (result.body.code === 200) {
-            resolve(result.body.value);
+
+            var urlToOpen = result.body.value.loginUrl;
+
+            if (urlToOpen) {
+              (function () {
+                var win = window.open(urlToOpen, 'IdP request', 'width=800, height=600');
+                var pollTimer = setInterval(function () {
+                  try {
+
+                    if (win.closed) {
+                      reject('Some error occured.');
+                      clearInterval(pollTimer);
+                    }
+                    if (win.document.URL.indexOf('REDIRECT') !== -1 || win.document.URL.indexOf(location.origin) !== -1) {
+                      window.clearInterval(pollTimer);
+                      var url = win.document.URL;
+
+                      win.close();
+
+                      resolve(url);
+                    }
+                  } catch (e) {
+                    //console.log(e);
+                  }
+                }, 500);
+              })();
+            } else {
+              resolve(result.body.value);
+            }
+
+            //resolve(result.body.value);
           } else {
-            reject('error', result.body.code);
-          }
+              reject('error', result.body.code);
+            }
         });
       });
     }
