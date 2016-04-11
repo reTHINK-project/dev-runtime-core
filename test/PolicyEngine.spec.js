@@ -31,7 +31,7 @@ let identityModule = {
   }
 };
 let messageBus = {
-  addListener: (msg, callback) => { }};
+  addgroupener: (msg, callback) => { }};
 
 describe('Policy Engine', function() {
   let policyEngine = new PolicyEngine(messageBus, identityModule, runtimeRegistry);
@@ -49,7 +49,7 @@ describe('Policy Engine', function() {
     from:'hyperty://ua.pt/asdf',
     to:'domain://registry.ua.pt/hyperty-instance/user',
     body: {
-      assertedIdentity: 'user://gmail.com/openidtest10',
+      identity: 'user://gmail.com/openidtest10',
       idToken: {
         id:'identity'
       }
@@ -57,8 +57,8 @@ describe('Policy Engine', function() {
     authorised: true
   };
 
-  describe('assertedIdentity', function() {
-    it('should add an assertedIdentity in the message body', function(done) {
+  describe('identity', function() {
+    it('should add an identity in the message body', function(done) {
       expect(policyEngine.authorise(messageWithoutID).then(function(response) {
         return response;
       }), function(reject) {
@@ -66,7 +66,7 @@ describe('Policy Engine', function() {
       }).to.be.fulfilled.and.eventually.eql(messageWithID).and.notify(done);
     });
 
-    it('should maintain the assertedIdentity in the message body', function(done) {
+    it('should maintain the identity in the message body', function(done) {
       expect(policyEngine.authorise(messageWithID).then(function(response) {
         return response;
       }), function(reject) {
@@ -77,9 +77,9 @@ describe('Policy Engine', function() {
 
   let userScope = 'user';
   let applicationScope = 'application';
-  let policy1 = new Policy('allow-listA', 'list listA', true, []);
-  let policy2 = new Policy('block-listB', 'list listB', false, []);
-  let policy3 = new Policy('block-listC', 'list listC', false, []);
+  let policy1 = new Policy('allow-groupA', 'group groupA', true, []);
+  let policy2 = new Policy('block-groupB', 'group groupB', false, []);
+  let policy3 = new Policy('block-groupC', 'group groupC', false, []);
 
   describe('addPolicies', function() {
     it('associates a policy with the user scope', function() {
@@ -98,7 +98,7 @@ describe('Policy Engine', function() {
 
   describe('removePolicies', function() {
     it('removes an existing policy associated with the user scope', function() {
-      policyEngine.removePolicies('allow-listA', userScope);
+      policyEngine.removePolicies('allow-groupA', userScope);
       expect(policyEngine.getApplicablePolicies(userScope)).to.be.eql([policy2]);
     });
     it('tries to remove a policy that is not associated with the user scope', function() {
@@ -111,35 +111,103 @@ describe('Policy Engine', function() {
     });
   });
 
-  let listName1 = 'listA';
+  let groupName1 = 'groupA';
 
-  describe('createList', function() {
-    it('creates a list of users', function() {
-      policyEngine.createList(listName1);
-      expect(policyEngine.getList(listName1)).to.be.eql([]);
+  describe('creategroup', function() {
+    it('creates a group of users', function() {
+      policyEngine.createGroup(groupName1);
+      expect(policyEngine.getGroup(groupName1)).to.be.eql([]);
     });
   });
 
   let userEmail1 = 'openidtest10@gmail.com';
   let userEmail2 = 'openidtest20@gmail.com';
 
-  describe('addToList', function() {
-    it('adds a user to a list of users', function() {
-      policyEngine.addToList(userEmail1, listName1);
-      expect(policyEngine.getList(listName1)).to.be.eql([userEmail1]);
+  describe('addToGroup', function() {
+    it('adds a user to a group of users', function() {
+      policyEngine.addToGroup(userEmail1, groupName1);
+      expect(policyEngine.getGroup(groupName1)).to.be.eql([userEmail1]);
     });
 
-    it('adds a second user to a list of users', function() {
-      policyEngine.addToList(userEmail2, listName1);
-      expect(policyEngine.getList(listName1)).to.be.eql([userEmail1, userEmail2]);
-    });
-  });
-
-  describe('removeFromList', function() {
-    it('adds a user from a list of users', function() {
-      policyEngine.removeFromList(userEmail1, listName1);
-      expect(policyEngine.getList(listName1)).to.be.eql([userEmail2]);
+    it('adds a second user to a group of users', function() {
+      policyEngine.addToGroup(userEmail2, groupName1);
+      expect(policyEngine.getGroup(groupName1)).to.be.eql([userEmail1, userEmail2]);
     });
   });
 
+  describe('removeFromGroup', function() {
+    it('adds a user from a group of users', function() {
+      policyEngine.removeFromGroup(userEmail1, groupName1);
+      expect(policyEngine.getGroup(groupName1)).to.be.eql([userEmail2]);
+    });
+  });
+
+  describe('sync policy', function() {
+    let updatePolicy = {
+      id: 'block-observer-changes',
+      scope: 'global',
+      condition: 'sync update reporter',
+      authorise: true,
+      actions: []
+    };
+
+    let objectCreation = {
+      body: {
+        resource: 'fake://localhost/90a3f0d7-b2e2-4cee-a061-3f79c1f71c23'
+      },
+      from: 'runtime://localhost/7601/sm',
+      to: 'hyperty://localhost/e5c09447-26d5-4284-9ada-a3c479cc960b',
+      type: 'response'
+    };
+
+    let validUpdate = {
+      body: {
+        source: 'hyperty://localhost/e5c09447-26d5-4284-9ada-a3c479cc960b'
+      },
+      from: 'fake://localhost/90a3f0d7-b2e2-4cee-a061-3f79c1f71c23',
+      to: 'fake://localhost/90a3f0d7-b2e2-4cee-a061-3f79c1f71c23/changes',
+      type: 'update'
+    };
+
+    let outMessage = {
+      body: {
+        source: 'hyperty://localhost/e5c09447-26d5-4284-9ada-a3c479cc960b',
+        identity: 'user://gmail.com/openidtest10',
+        idToken: {
+          id: 'identity'
+        }
+      },
+      from: 'fake://localhost/90a3f0d7-b2e2-4cee-a061-3f79c1f71c23',
+      to: 'fake://localhost/90a3f0d7-b2e2-4cee-a061-3f79c1f71c23/changes',
+      type: 'update',
+      authorised: true
+    };
+
+    it('allows reporter changes', function(done) {
+      policyEngine.addPolicies([updatePolicy], 'objectManagement');
+      policyEngine.authorise(objectCreation);
+      expect(policyEngine.authorise(validUpdate).then(function(response) {
+        return response;
+      }), function(reject) {
+        return reject;
+      }).to.be.fulfilled.and.eventually.eql(outMessage).and.notify(done);
+    });
+
+    let invalidUpdate = {
+      body: {
+        source: 'hyperty://localhost/e5c09447-26d5-4284-9ada-a3c479cc960c'
+      },
+      from: 'fake://localhost/90a3f0d7-b2e2-4cee-a061-3f79c1f71c23',
+      to: 'fake://localhost/90a3f0d7-b2e2-4cee-a061-3f79c1f71c23/changes',
+      type: 'update'
+    };
+
+    it('blocks non-reporter changes', function(done) {
+      expect(policyEngine.authorise(invalidUpdate).then(function(response) {
+        return response;
+      }), function(reject) {
+        return reject;
+      }).to.be.rejected.and.notify(done);
+    });
+  });
 });

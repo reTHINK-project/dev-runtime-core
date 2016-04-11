@@ -23,6 +23,21 @@ class PolicyEngine {
     _this.pdp = new PDP(runtimeRegistry);
     _this.pep = new PEP();
     _this.policies = {};
+
+    /* TODO: add this policy when deploying the runtime */
+    _this.addObserverPolicy();
+  }
+
+  addObserverPolicy() {
+    let _this = this;
+    let policy = {
+      id: 'block-observer-changes',
+      scope: 'global',
+      condition: 'sync update reporter',
+      authorise: true,
+      actions: []
+    };
+    _this.addPolicies([policy], 'objectManagement');
   }
 
   /**
@@ -36,17 +51,15 @@ class PolicyEngine {
   */
   authorise(message) {
     let _this = this;
-    if (message.to === 'domain://localhost/policy-engine') {
-      _this.processMessage(message);
-    }
-
     return new Promise(function(resolve, reject) {
+
       //TODO turn it later into a policy
       if (message.from === 'domain://google.com' || message.to === 'domain://google.com') {
         message.authorised = true;
         return resolve(message);
       }
-      _this.idModule.getIdentityAssertion('google identity', 'scope').then(function(value) {
+
+      _this.idModule.loginWithRP('google identity', 'scope').then(function(value) {
         let assertedID = _this.idModule.getIdentities();
 
         if (!message.hasOwnProperty('body')) {
@@ -54,21 +67,36 @@ class PolicyEngine {
         }
 
         let hypertyToVerify;
-        if (!message.body.hasOwnProperty('assertedIdentity')) {
-          message.body.assertedIdentity = assertedID[0].identity;
+        if (!message.body.hasOwnProperty('identity')) {
+          message.body.identity = assertedID[0].identity;
           message.body.idToken = value;
           hypertyToVerify = message.to;
         } else {
           hypertyToVerify = message.from;
         }
 
-        let scope = _this.getScope();
-        let applicablePolicies = _this.getApplicablePolicies(scope);
+        if (_this.isObjectCreation(message)) {
+          _this.addObject(message.body.resource, message.to);
+        } else {
+          if (_this.isObjectSubscription(message)) {
+            let objectURL = message.from.substring(0, message.from.length - 13);
+            let reporterURL = message.body.value.data.communication.owner;
+            _this.addObject(objectURL, reporterURL);
+          }
+        }
+
+        let scope = _this.getScope(message);
+        let applicablePolicies = [];
+        if (message.to !== 'domain://localhost/policies-gui' && message.from !== 'domain://localhost/policies-gui') {
+          applicablePolicies = _this.getApplicablePolicies(scope);
+        }
         let policiesResult = _this.pdp.evaluate(message, hypertyToVerify, applicablePolicies);
         _this.pep.enforce(policiesResult[1]);
-
         if (policiesResult[0]) {
           message.authorised = true;
+          if (message.to === 'domain://localhost/policy-engine') {
+            _this.processMessage(message);
+          }
           resolve(message);
         } else {
           message.authorised = false;
@@ -78,6 +106,23 @@ class PolicyEngine {
         reject(error);
       });
     });
+  }
+
+  /*var create = {type:'response', from: 'runtime://hybroker.rethink.ptinovacao.pt/7465/sm', to: 'hyperty://hybroker.rethink.ptinovacao.pt/a94743d1-f308-42fb-9ad9-4c12d1e9c25', body: {resource: 'hello://hybroker.rethink.ptinovacao.pt/c10007a6-45cb-4962-90ae-fa915b7b4f94'}};*/
+  isObjectCreation(message) {
+    let isResponse = message.type === 'response';
+    let isFromSM = String(message.from.split('/').slice(-1)[0]) === 'sm';
+    let hasObjectURL = message.body.resource !== undefined;
+    return isResponse && isFromSM && hasObjectURL;
+  }
+
+  addObject(objectURL, reporterURL) {
+    let _this = this;
+    _this.pdp.addObject(objectURL, reporterURL);
+  }
+
+  isObjectSubscription(message) {
+    return String(message.from.split('/').slice(-1)[0]) === 'subscription';
   }
 
   /**
@@ -98,26 +143,41 @@ class PolicyEngine {
         _this.removePolicies(params.policyID, params.scope);
         _this.sendResponse(message, 200);
         break;
-      case 'getList':
-        let list = _this.getList(params.listName);
-        if (list !== []) {
-          _this.sendList(message, list);
-        } else {
-          _this.sendResponse(message, 404);
-        }
+      case 'getGroupsNames':
+        let groupsNames = _this.getGroupsNames();
+        _this.sendGroup(message, groupsNames);
         break;
-      case 'createList':
-        _this.createList(params.listName);
+      case 'getGroup':
+        let group = _this.getGroup(params.groupName);
+        _this.sendGroup(message, group);
+        break;
+      case 'createGroup':
+        _this.createGroup(params.groupName);
         _this.sendResponse(message, 200);
         break;
-      case 'addToList':
-        _this.addToList(params.userEmail, params.listName);
+      case 'removeGroup':
+        _this.removeGroup(params.groupName);
         _this.sendResponse(message, 200);
         break;
-      case 'removeFromList':
-        _this.removeFromList(params.userEmail, params.listName);
+      case 'addToGroup':
+        _this.addToGroup(params.userEmail, params.groupName);
         _this.sendResponse(message, 200);
         break;
+      case 'removeFromGroup':
+        _this.removeFromGroup(params.userEmail, params.groupName);
+        _this.sendResponse(message, 200);
+        break;
+      case 'getTimeRestrictions':
+        let timeRestrictions = _this.getTimeRestrictions();
+        _this.sendGroup(message, timeRestrictions);
+        break;
+      case 'getTimeRestrictionById':
+        let timeRestriction = _this.getTimeRestrictionById(params.policyID);
+        _this.sendGroup(message, timeRestriction);
+        break;
+      case 'changeTimePolicy':
+        _this.changeTimePolicy(params.policyID, params.authorise);
+        _this.sendResponse(message, 200);
     }
   }
 
@@ -133,13 +193,13 @@ class PolicyEngine {
   }
 
   /**
-  * Sends the requested list to the message origin.
+  * Sends the requested group to the message origin.
   * @param  {Message}   message
-  * @param  {Array}     list
+  * @param  {Array}     group
   */
-  sendList(message, list) {
+  sendGroup(message, group) {
     let _this = this;
-    let response = {id: message.id, type: 'response', to: message.from, from: message.to, body: {code: 200, value: list}};
+    let response = {id: message.id, type: 'response', to: message.from, from: message.to, body: {code: 200, method: message.body.method, value: group}};
     _this.messageBus.postMessage(response);
   }
 
@@ -155,16 +215,13 @@ class PolicyEngine {
       if (_this.policies[scope] === undefined) {
         _this.policies[scope] = [];
       }
-      let exists = false;
       for (let policy in _this.policies[scope]) {
         if (_this.policies[scope][policy].id === policies[i].id) {
-          exists = true;
+          _this.removePolicies(policies[i].id, 'user');
           break;
         }
       }
-      if (!exists) {
-        _this.policies[scope].push(policies[i]);
-      }
+      _this.policies[scope].push(policies[i]);
     }
   }
 
@@ -173,17 +230,17 @@ class PolicyEngine {
   * @param  {String}  policyID
   * @param  {String}  scope
   */
-  removePolicies(policyId, scope) {
+  removePolicies(policyID, scope) {
     let _this = this;
     let allPolicies = _this.policies;
 
     if (scope in allPolicies) {
-      if (policyId !== '*') {
+      if (policyID !== '*') {
         let policies = allPolicies[scope];
         let numPolicies = policies.length;
 
         for (let policy = 0; policy < numPolicies; policy++) {
-          if (policies[policy].id === policyId) {
+          if (policies[policy].id === policyID) {
             policies.splice(policy, 1);
             break;
           }
@@ -194,52 +251,109 @@ class PolicyEngine {
     }
   }
 
-  /**
-  * Retrieves the list with the given list name from the PDP.
-  * @param  {String}  listName
-  * @return {Array}   list
-  */
-  getList(listName) {
+  getGroupsNames() {
     let _this = this;
-    return _this.pdp.getList(listName);
+    return _this.pdp.getGroupsNames();
   }
 
   /**
-  * Forwards a request for the creation of a list with the given name to the PDP.
-  * @param  {String}  listName
+  * Retrieves the group with the given group name from the PDP.
+  * @param  {String}  groupName
+  * @return {Array}   group
   */
-  createList(listName) {
+  getGroup(groupName) {
     let _this = this;
-    _this.pdp.createList(listName);
+    return _this.pdp.getGroup(groupName);
   }
 
   /**
-  * Forwards a request to add a user to the list with the given name to the PDP.
+  * Forwards a request for the creation of a group with the given name to the PDP.
+  * @param  {String}  groupName
+  */
+  createGroup(groupName) {
+    let _this = this;
+    _this.pdp.createGroup(groupName);
+  }
+
+  removeGroup(groupName) {
+    let _this = this;
+    _this.pdp.removeGroup(groupName);
+  }
+
+  /**
+  * Forwards a request to add a user to the group with the given name to the PDP.
   * @param  {String}  userEmail
-  * @param  {String}  listName
+  * @param  {String}  groupName
   */
-  addToList(userEmail, listName) {
+  addToGroup(userEmail, groupName) {
     let _this = this;
-    _this.pdp.addToList(userEmail, listName);
+    _this.pdp.addToGroup(userEmail, groupName);
   }
 
   /**
-  * Forwards a request to remove a user from the list with the given name to the PDP.
+  * Forwards a request to remove a user from the group with the given name to the PDP.
   * @param  {String}  userEmail
-  * @param  {String}  listName
+  * @param  {String}  groupName
   */
-  removeFromList(userEmail, listName) {
+  removeFromGroup(userEmail, groupName) {
     let _this = this;
-    _this.pdp.removeFromList(userEmail, listName);
+    _this.pdp.removeFromGroup(userEmail, groupName);
+  }
+
+  getTimeRestrictions() {
+    let _this = this;
+    let policies = _this.policies.user;
+    let timeRestrictions = [];
+    for (let i in policies) {
+      if (policies[i].condition.split(' ')[0] === 'time') {
+        timeRestrictions.push(policies[i].condition);
+      }
+    }
+    return timeRestrictions;
+  }
+
+  getTimeRestrictionById(id) {
+    let _this = this;
+    let policies = _this.policies.user;
+    for (let i in policies) {
+      if (policies[i].id === id) {
+        return policies[i];
+      }
+    }
+  }
+
+  changeTimePolicy(id, authorise) {
+    let _this = this;
+    let policies = _this.policies.user;
+    for (let i in policies) {
+      if (policies[i].id === id) {
+        policies[i].authorise = authorise;
+      }
+    }
   }
 
   /**
-  * Returns the scope of the given message to restrict policy applicability. For now, all policies
-  * are applied to each message.
+  * Returns the scope of the given message to restrict policy applicability.
   * @return {String} scope
   */
-  getScope() {
-    return '*';
+  getScope(message) {
+    let _this = this;
+    let scope;
+    if (_this.isObjectUpdate(message)) {
+      scope = 'objectManagement';
+    } else {
+      scope = 'user';
+    }
+    return scope;
+  }
+
+  isObjectUpdate(message) {
+    let isForChanges = (message.to === message.from + '/changes');
+    if (message.type === 'update' && isForChanges) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   /**

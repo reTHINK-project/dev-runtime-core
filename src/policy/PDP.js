@@ -1,3 +1,5 @@
+import {getUserEmailFromURL} from '../utils/utils.js';
+
 /**
 * The Policy Decision Point (PDP) decides if a message is to be authorised by checking a set of
 * policies. The resource to be verified is specified in the first word of the 'condition' field of
@@ -8,60 +10,96 @@
 class PDP {
 
   /**
-  * This method is invoked by the Policy Engine and instantiates the Policy Decision Point. It initialises or loads from the Persistence Manager the object 'myLists' to store the user's lists.
+  * This method is invoked by the Policy Engine and instantiates the Policy Decision Point. It
+  * initialises or loads from the Persistence Manager the object 'myGroups' to store the user's
+  * groups.
   * @param  {Registry}    runtimeRegistry
   */
   constructor(runtimeRegistry) {
     let _this = this;
     _this.runtimeRegistry = runtimeRegistry;
-    _this.myLists = {}; // TODO: load from the Persistence Manager
+    _this.objectsReporters = {};
+    _this.myGroups = {}; // TODO: load from the Persistence Manager
+    _this.getPoliciesImplementation();
   }
 
-  /**
-  * Returns the list with the given list name.
-  * @param  {String}  listName
-  * @return {Array}   list
-  */
-  getList(listName) {
+  getPoliciesImplementation() {
     let _this = this;
-    return (listName in _this.myLists) ? _this.myLists[listName] : [];
+    _this.policiesImplementation = {};
+    _this.policiesImplementation.group = 'result[0] = _this.isInGroup(getUserEmailFromURL(message.body.identity), condition[1]) ? policy.authorise : !policy.authorise;';
+    _this.policiesImplementation.time = 'result[0] = _this.isTimeBetween(condition[1], condition[2]) ? policy.authorise : !policy.authorise;';
+    _this.policiesImplementation.sync = 'result[0] = _this.isReporterOfObject(message.from, message.body.source) ? policy.authorise : !policy.authorise;';
   }
 
-  /**
-  * Creates a list with the given name.
-  * @param  {String}  listName
-  */
-  createList(listName) {
+  addObject(objectURL, reporterURL) {
     let _this = this;
-    _this.myLists[listName] = [];
+    _this.objectsReporters[objectURL] = reporterURL;
   }
 
-  /**
-  * Adds the given user email to the list with the given name.
-  * @param  {String}  userEmail
-  * @param  {String}  listName
-  */
-  addToList(userEmail, listName) {
+  getGroupsNames() {
     let _this = this;
-    let list = _this.myLists[listName];
-    if (list === undefined) {
-      _this.createList(listName);
-      list = _this.getList(listName);
+    let myGroups = _this.myGroups;
+    let groupsNames = [];
+    for (let groupName in myGroups) {
+      groupsNames.push(groupName);
     }
-    list.push(userEmail);
+    return groupsNames;
   }
 
   /**
-  * Removes the given user email from the list with the given name.
-  * @param  {String}  userEmail
-  * @param  {String}  listName
+  * Returns the group with the given group name.
+  * @param  {String}  groupName
+  * @return {Array}   group
   */
-  removeFromList(userEmail, listName) {
+  getGroup(groupName) {
     let _this = this;
-    let list = _this.myLists[listName];
-    for (let i in list) {
-      if (list[i] === userEmail) {
-        list.splice(i, 1);
+    return (groupName in _this.myGroups) ? _this.myGroups[groupName] : [];
+  }
+
+  /**
+  * Creates a group with the given name.
+  * @param  {String}  groupName
+  */
+  createGroup(groupName) {
+    let _this = this;
+    _this.myGroups[groupName] = [];
+  }
+
+  /**
+  * Removes the group with the given name.
+  * @param  {String}  groupName
+  */
+  removeGroup(groupName) {
+    let _this = this;
+    delete _this.myGroups[groupName];
+  }
+
+  /**
+  * Adds the given user email to the group with the given name.
+  * @param  {String}  userEmail
+  * @param  {String}  groupName
+  */
+  addToGroup(userEmail, groupName) {
+    let _this = this;
+    let group = _this.myGroups[groupName];
+    if (group === undefined) {
+      _this.createGroup(groupName);
+      group = _this.getGroup(groupName);
+    }
+    group.push(userEmail);
+  }
+
+  /**
+  * Removes the given user email from the group with the given name.
+  * @param  {String}  userEmail
+  * @param  {String}  groupName
+  */
+  removeFromGroup(userEmail, groupName) {
+    let _this = this;
+    let group = _this.myGroups[groupName];
+    for (let i in group) {
+      if (group[i] === userEmail) {
+        group.splice(i, 1);
         break;
       }
     }
@@ -81,25 +119,12 @@ class PDP {
     let results = [true];
     let actions = [];
 
-    // TODO: use hashtable to allow dynamic management
     for (let i in policies) {
       let policy = policies[i];
       let result = [];
       let condition = policy.condition.split(' ');
       let resource = condition[0];
-      switch (resource) {
-        case 'list':
-          let listName = condition[1];
-          result[0] = _this.isInList(hypertyToVerify, listName) ? policy.authorise : !policy.authorise;
-          break;
-        case 'time':
-          let start = condition[1];
-          let end = condition[2];
-          result[0] = _this.isTimeBetween(start, end) ? policy.authorise : !policy.authorise;
-          break;
-        default:
-          result[1] = policy.actions;
-      }
+      eval(_this.policiesImplementation[resource]);
       results.push(result[0]);
       actions.push(result[1]); // TODO: do actions depend on the final authorisation decision?
     }
@@ -109,21 +134,16 @@ class PDP {
   }
 
   /**
-  * Verifies if the given hyperty URL corresponds to an email that is in the list with the given
+  * Verifies if the given hyperty URL corresponds to an email that is in the group with the given
   * name.
   * @param {URL}        hypertyURL
-  * @param {String}     listName
+  * @param {String}     groupName
   * @return {Boolean}   boolean
   */
-  isInList(hypertyURL, listName) {
+  isInGroup(userEmail, groupName) {
     let _this = this;
-    let list = _this.myLists[listName];
-    for (let i in list) {
-      if (_this.registry.getUserHyperty(list[i]) === hypertyURL) {
-        return true;
-      }
-    }
-    return false;
+    let group = _this.myGroups[groupName];
+    return group.indexOf(userEmail) > -1;
   }
 
   /**
@@ -157,6 +177,12 @@ class PDP {
   getMinutes(time) {
     let timeSplit = time.split(':');
     return parseInt(timeSplit[0]) * 60 + parseInt(timeSplit[1]);
+  }
+
+  /* var update = {type:'update', from: 'hello://hybroker.rethink.ptinovacao.pt/c10007a6-45cb-4962-90ae-fa915b7b4f94', to: 'hello://hybroker.rethink.ptinovacao.pt/c10007a6-45cb-4962-90ae-fa915b7b4f94/changes', body: {source: 'hyperty://hybroker.rethink.ptinovacao.pt/a94743d1-f308-42fb-9ad9-4c12d1e9c25'}};*/
+  isReporterOfObject(objectURL, hypertyURL) {
+    let _this = this;
+    return (_this.objectsReporters[objectURL] === hypertyURL);
   }
 }
 
