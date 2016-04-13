@@ -33026,7 +33026,7 @@ var Registry = function (_EventEmitter) {
       var _this = this;
 
       var msg = {
-        type: 'read', from: _this.registryURL, to: 'domain://registry.' + _this._domain + '/', body: { value: {}, resource: 'dataObject://' + identifier }
+        type: 'read', from: _this.registryURL, to: 'domain://registry.' + _this._domain + '/', body: { resource: 'dataObject://' + identifier }
       };
 
       return new Promise(function (resolve, reject) {
@@ -33046,6 +33046,9 @@ var Registry = function (_EventEmitter) {
 
     /**
     *  function to delete an hypertyInstance in the Domain Registry
+    *  @param   {String}      user        user url
+    *  @param   {String}      hypertyInstance   HypertyInsntance url
+    *
     */
 
   }, {
@@ -33054,7 +33057,7 @@ var Registry = function (_EventEmitter) {
       //TODO working but the user
       var _this = this;
 
-      var message = { type: 'DELETE', from: _this.registryURL,
+      var message = { type: 'delete', from: _this.registryURL,
         to: 'domain://registry.' + _this._domain + '/',
         body: { value: { user: user, hypertyURL: hypertyInstance } } };
 
@@ -33064,7 +33067,8 @@ var Registry = function (_EventEmitter) {
     }
 
     /**
-    *  function to delete an hypertyInstance in the Domain Registry
+    *  function to delete an dataObjectInstance in the Domain Registry
+    *  @param   {String}    name      DataObjectName
     */
 
   }, {
@@ -33072,7 +33076,7 @@ var Registry = function (_EventEmitter) {
     value: function deleteDataObjectInstance(name) {
       var _this = this;
 
-      var message = { type: 'DELETE', from: _this.registryURL,
+      var message = { type: 'delete', from: _this.registryURL,
         to: 'domain://registry.' + _this._domain + '/',
         body: { value: { name: name } } };
 

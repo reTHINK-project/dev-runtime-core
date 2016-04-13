@@ -166,7 +166,7 @@ class Registry extends EventEmitter {
     let _this = this;
 
     let msg = {
-      type: 'read', from: _this.registryURL, to: 'domain://registry.' + _this._domain + '/', body: { value:{}, resource: 'dataObject://' + identifier}
+      type: 'read', from: _this.registryURL, to: 'domain://registry.' + _this._domain + '/', body: { resource: 'dataObject://' + identifier}
     };
 
     return new Promise(function(resolve, reject) {
