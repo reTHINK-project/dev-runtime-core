@@ -111,7 +111,7 @@ class Registry extends EventEmitter {
       email = getUserEmailFromURL(identifier);
     }
     let msg = {
-      type: 'READ', from: _this.registryURL, to: 'domain://registry.' + _this._domain + '/', body: { resource: identityURL}
+      type: 'read', from: _this.registryURL, to: 'domain://registry.' + _this._domain + '/', body: { resource: identityURL}
     };
 
     return new Promise(function(resolve, reject) {
@@ -166,14 +166,20 @@ class Registry extends EventEmitter {
     let _this = this;
 
     let msg = {
-      type: 'READ', from: _this.registryURL, to: 'domain://registry.' + _this._domain + '/', body: { resource: identifier}
+      type: 'read', from: _this.registryURL, to: 'domain://registry.' + _this._domain + '/', body: { value:{}, resource: 'dataObject://' + identifier}
     };
 
     return new Promise(function(resolve, reject) {
 
       _this._messageBus.postMessage(msg, (reply) => {
 
-        resolve(reply);
+        let dataObjectUrl = reply.body.value.url;
+
+        if (dataObjectUrl) {
+          resolve(dataObjectUrl);
+        } else {
+          reject('DataObject name does not exist');
+        }
       });
 
     });
@@ -182,14 +188,33 @@ class Registry extends EventEmitter {
 
   /**
   *  function to delete an hypertyInstance in the Domain Registry
+  *  @param   {String}      user        user url
+  *  @param   {String}      hypertyInstance   HypertyInsntance url
+  *
   */
   deleteHypertyInstance(user, hypertyInstance) {
     //TODO working but the user
     let _this = this;
 
-    let message = { type: 'DELETE', from: _this.registryURL,
+    let message = { type: 'delete', from: _this.registryURL,
                    to: 'domain://registry.' + _this._domain + '/',
                    body: { value: {user: user, hypertyURL: hypertyInstance }}};
+
+    _this._messageBus.postMessage(message, (reply) => {
+      console.log('delete hyperty Reply', reply);
+    });
+  }
+
+  /**
+  *  function to delete an dataObjectInstance in the Domain Registry
+  *  @param   {String}    name      DataObjectName
+  */
+  deleteDataObjectInstance(name) {
+    let _this = this;
+
+    let message = { type: 'delete', from: _this.registryURL,
+                   to: 'domain://registry.' + _this._domain + '/',
+                   body: { value: {name: name}}};
 
     _this._messageBus.postMessage(message, (reply) => {
       console.log('delete hyperty Reply', reply);
@@ -213,41 +238,35 @@ class Registry extends EventEmitter {
 
   /**
   * To register a new Data Object in the runtime which returns the dataObjectURL allocated to the new Data Object.
-  * @param  {String}      descriptor            dataObjectCatalogueURL
-  * @param  {String}      dataObject            dataObject identifier
-  * @param  {String}      userIdentifier        User Identifier
-  * @return {String}      dataObjectURL         dataObject URL
+  * @param  {String}      identifier            identifier
+  * @param  {String}      dataObjectschema            dataObjectschema
+  * @param  {String}      dataObjectUrl        dataObjectUrl
+  * @return {String}      dataObjectReporter         dataObjectReporter
   */
-  registerDataObject(descriptor, dataObject, userIdentifier) {
+  registerDataObject(identifier, dataObjectschema, dataObjectUrl, dataObjectReporter) {
     let _this = this;
-    let domainUrl = divideURL(descriptor).domain;
 
     return new Promise(function(resolve, reject) {
 
-      _this.objectAllocation.create(domainUrl, descriptor, 1).then((urlAllocated) => {
+      //message to register the new hyperty, within the domain registry
+      let messageValue = {name: identifier, schema: dataObjectschema, url: dataObjectUrl, expires: _this.expiresTime, reporter: dataObjectReporter};
 
-        _this.dataObjectList[dataObject] = urlAllocated;
+      let message = _this.messageFactory.createCreateMessageRequest(
+        _this.registryURL,
+        'domain://registry.' + _this.registryDomain + '/',
+        messageValue,
+        'policy'
+      );
 
-        //message to register the new hyperty, within the domain registry
-        let messageValue = {dataObject: dataObject, descriptor: descriptor, dataObjectURL: urlAllocated, expires: _this.expiresTime};
-
-        let message = _this.messageFactory.createCreateMessageRequest(
-          _this.registryURL,
-          'domain://registry.' + _this.registryDomain + '/',
-          messageValue,
-          'policy'
-        );
-
-        //TODO small fix, because the connector do not yet accept lower case
-        message.type = 'CREATE';
-        _this._messageBus.postMessage(message, (reply) => {
-          console.log('===> registerDataObject Reply: ', reply);
-        });
-
-        resolve(urlAllocated);
-      }, (error) => {
-        reject(error);
+      _this._messageBus.postMessage(message, (reply) => {
+        console.log('===> registerDataObject Reply: ', reply);
+        if (reply.body.code === 200) {
+          resolve('ok');
+        } else {
+          reject('error on register DataObject');
+        }
       });
+
     });
   }
 
@@ -318,9 +337,6 @@ class Registry extends EventEmitter {
                 'policy'
               );
 
-              //TODO small fix, because the connector do not yet accept lower case
-              message.type = 'CREATE';
-
               _this._messageBus.postMessage(message, (reply) => {
                 console.log('===> RegisterHyperty Reply: ', reply);
               });
@@ -336,8 +352,6 @@ class Registry extends EventEmitter {
                   'policy'
                 );
 
-                //TODO small fix, because the connector do not yet accept lower case
-                message.type = 'CREATE';
                 _this._messageBus.postMessage(message, (reply) => {
                   console.log('===> KeepAlive Reply: ', reply);
                 });
