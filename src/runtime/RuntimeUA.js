@@ -1,5 +1,5 @@
 // Service Framework dependecies
-import RuntimeCatalogue from 'service-framework/dist/RuntimeCatalogue';
+import {RuntimeCatalogue, RuntimeCatalogueLocal} from 'service-framework/dist/RuntimeCatalogue';
 
 //Main dependecies
 import Registry from '../registry/Registry';
