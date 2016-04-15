@@ -20,6 +20,11 @@ describe('SyncherManager', function() {
   let hyperURL1 = 'hyperty://h1.domain/h1';
   let hyperURL2 = 'hyperty://h2.domain/h2';
 
+  let initialData = {
+    communication: { name: 'chat-x' },
+    x: 10, y: 10
+  };
+
   let msgNodeResponseFunc = (bus, msg) => {
     if (msg.type === 'subscribe') {
       if (msg.id === 2) {
@@ -53,6 +58,15 @@ describe('SyncherManager', function() {
     }
   };
 
+  let registry = {
+    registerDataObject: (identifier, dataObjectschema, dataObjectUrl, dataObjectReporter) => {
+      console.log('REGISTRY-OBJECT: ', identifier, dataObjectschema, dataObjectUrl, dataObjectReporter);
+      return new Promise((resolve) => {
+        resolve('ok');
+      });
+    }
+  };
+
   let catalog = {
     getDataSchemaDescriptor: (schema) => {
       console.log('REQUEST-SCHEMA: ', schema);
@@ -78,7 +92,7 @@ describe('SyncherManager', function() {
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, { }, catalog, allocator);
+    new SyncherManager(runtimeURL, bus, registry, catalog, allocator);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
@@ -90,14 +104,14 @@ describe('SyncherManager', function() {
         doo.onChange('*', (changeEvent) => {
           console.log('on-change: ', JSON.stringify(changeEvent));
           expect(changeEvent).to.eql({ cType: 'add', oType: 'object', field: 'test', data: ['a', 'b', 'c'] });
-          expect(doo.data).to.eql({ x: 10, y: 10, test: ['a', 'b', 'c'] });
+          expect(doo.data).to.eql({ communication: { name: 'chat-x' }, x: 10, y: 10, test: ['a', 'b', 'c'] });
           done();
         });
       });
     });
 
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
-    sync1.create(schemaURL, [hyperURL2], { x: 10, y: 10 }).then((dor) => {
+    sync1.create(schemaURL, [hyperURL2], initialData).then((dor) => {
       console.log('on-create-reply');
       dor.onSubscription((subscribeEvent) => {
         console.log('on-subscribe: ', subscribeEvent);
@@ -516,10 +530,10 @@ describe('SyncherManager', function() {
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, { }, catalog, allocator);
+    new SyncherManager(runtimeURL, bus, registry, catalog, allocator);
 
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
-    sync1.create(schemaURL, [], { x: 10, y: 10 }).then((dor) => {
+    sync1.create(schemaURL, [], initialData).then((dor) => {
       console.log('on-create-reply');
       dor.addChildren('children1', 'my message').then((doc) => {
         console.log('on-addChildren-reply', doc);
@@ -535,7 +549,7 @@ describe('SyncherManager', function() {
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, { }, catalog, allocator);
+    new SyncherManager(runtimeURL, bus, registry, catalog, allocator);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
@@ -556,7 +570,7 @@ describe('SyncherManager', function() {
     });
 
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
-    sync1.create(schemaURL, [hyperURL2], { x: 10, y: 10 }).then((dor) => {
+    sync1.create(schemaURL, [hyperURL2], initialData).then((dor) => {
       console.log('on-create-reply');
       dor.onSubscription((subscribeEvent) => {
         dor.onAddChildren((event) => {
@@ -577,7 +591,7 @@ describe('SyncherManager', function() {
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, {}, catalog, allocator);
+    new SyncherManager(runtimeURL, bus, registry, catalog, allocator);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
@@ -591,7 +605,7 @@ describe('SyncherManager', function() {
     });
 
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
-    sync1.create(schemaURL, [hyperURL2], { x: 10, y: 10 }).then((dor) => {
+    sync1.create(schemaURL, [hyperURL2], initialData).then((dor) => {
       dor.onSubscription((subscribeEvent) => {
         dor.onAddChildren((event) => {
           let children1 = dor.childrens[event.childId];
@@ -632,7 +646,7 @@ describe('SyncherManager', function() {
       }
     };
 
-    new SyncherManager(runtimeURL, bus, { }, catalog, allocator);
+    new SyncherManager(runtimeURL, bus, registry, catalog, allocator);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
@@ -648,7 +662,7 @@ describe('SyncherManager', function() {
     });
 
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
-    sync1.create(schemaURL, [hyperURL2], { x: 10, y: 10 }).then((dor) => {
+    sync1.create(schemaURL, [hyperURL2], initialData).then((dor) => {
       console.log('create: ', dor.url);
       dor.onSubscription((subscribeEvent) => {
         console.log('onSubscription: ', subscribeEvent);
@@ -683,7 +697,7 @@ describe('SyncherManager', function() {
       }
     };
 
-    new SyncherManager(runtimeURL, bus, { }, catalog, allocator);
+    new SyncherManager(runtimeURL, bus, registry, catalog, allocator);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
@@ -695,7 +709,7 @@ describe('SyncherManager', function() {
     });
 
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
-    sync1.create(schemaURL, [hyperURL2], { x: 10, y: 10 }).then((dor) => {
+    sync1.create(schemaURL, [hyperURL2], initialData).then((dor) => {
       console.log('create: ', dor.url);
       dor.onSubscription((subscribeEvent) => {
         console.log('onSubscription: ', subscribeEvent);
