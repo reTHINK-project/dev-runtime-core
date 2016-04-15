@@ -1,6 +1,3 @@
-// Service Framework dependecies
-import {RuntimeCatalogue, RuntimeCatalogueLocal} from 'service-framework/dist/RuntimeCatalogue';
-
 //Main dependecies
 import Registry from '../registry/Registry';
 import IdentityModule from '../identity/IdentityModule';
@@ -17,7 +14,7 @@ import {divideURL, emptyObject} from '../utils/utils';
  * @author Vitor Silva [vitor-t-silva@telecom.pt]
  * @version 0.4.0
  *
- * @property {runtimeFactory} runtimeFactory - Specific implementation of sandbox;
+ * @property {runtimeFactory} runtimeFactory - Specific implementation for all environments;
  * @property {RuntimeCatalogue} runtimeCatalogue - Catalogue of components can be installed;
  * @property {runtimeURL} runtimeURL - This identify the core runtime, should be unique;
  * @property {IdentityModule} identityModule - Identity Module;
@@ -41,7 +38,7 @@ class RuntimeUA {
     let _this = this;
 
     _this.runtimeFactory = runtimeFactory;
-    _this.runtimeCatalogue = new RuntimeCatalogueLocal(runtimeFactory);
+    _this.runtimeCatalogue = runtimeFactory.createRuntimeCatalogue();
 
     // TODO: post and return registry/hypertyRuntimeInstance to and from Back-end Service
     // the response is like: runtime://sp1/123
