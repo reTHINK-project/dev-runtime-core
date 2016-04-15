@@ -41,7 +41,7 @@ class RuntimeUA {
     let _this = this;
 
     _this.runtimeFactory = runtimeFactory;
-    _this.runtimeCatalogue = new RuntimeCatalogue(runtimeFactory);
+    _this.runtimeCatalogue = new RuntimeCatalogueLocal(runtimeFactory);
 
     // TODO: post and return registry/hypertyRuntimeInstance to and from Back-end Service
     // the response is like: runtime://sp1/123

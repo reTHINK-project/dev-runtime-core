@@ -138,7 +138,7 @@ gulp.task('runtime', function() {
   })
   .transform(babel, {
     compact: compact,
-    presets: ['es2015'],
+    presets: ['es2015', 'stage-0'],
     plugins: ['add-module-exports']
   })
   .bundle()
@@ -171,7 +171,11 @@ gulp.task('minibus', function() {
     standalone: 'MiniBus',
     debug: compact
   })
-  .transform(babel, {compact: compact, presets: ['es2015']})
+  .transform(babel, {
+    compact: compact,
+    presets: ['es2015', 'stage-0'],
+    plugins: ['add-module-exports']
+  })
   .bundle()
   .on('error', function(err) {
     console.error(err);
@@ -201,7 +205,11 @@ gulp.task('sandbox', function() {
     standalone: 'sandbox',
     debug: compact
   })
-  .transform(babel, {compact: compact, presets: ['es2015']})
+  .transform(babel, {
+    compact: compact,
+    presets: ['es2015', 'stage-0'],
+    plugins: ['add-module-exports']
+  })
   .bundle()
   .on('error', function(err) {
     console.error(err);

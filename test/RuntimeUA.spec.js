@@ -16,6 +16,7 @@ import Registry from '../src/registry/Registry';
 import IdentityModule from '../src/identity/IdentityModule';
 import PolicyEngine from '../src/policy/PolicyEngine';
 import MessageBus from '../src/bus/MessageBus';
+import {RuntimeCatalogueLocal} from 'service-framework/dist/RuntimeCatalogue';
 
 import RuntimeFactory from './resources/RuntimeFactory';
 
@@ -26,6 +27,9 @@ describe('RuntimeUA', function() {
   let runtimeURL = 'runtime://sp.domain/123';
   let runtimeFactory = new RuntimeFactory();
   let runtime = new RuntimeUA(runtimeFactory, 'sp.domain');
+
+  // Testing with the Local Runtime and Catalogue
+  runtime.runtimeCatalogue = new RuntimeCatalogueLocal(runtimeFactory);
 
   before(function() {
 
@@ -108,18 +112,20 @@ describe('RuntimeUA', function() {
 
     sinon.stub(runtime.runtimeCatalogue.httpRequest, 'get', function(url) {
 
-      console.log(url.includes('Hyperties'), url.includes('ProtoStubs'));
+      console.log(url);
+
+      console.log(url.includes('Hyperties'), url.includes('Hyperty'), url.includes('ProtoStubs'));
 
       return new Promise(function(resolve, reject) {
 
-        if (url.includes('Hyperties')) {
+        if (url.includes('Hyperties') || url.includes('Hyperty')) {
           try {
             resolve(JSON.stringify(Hyperties));
           } catch (e) {
             reject(e);
           }
 
-        } else if (url.includes('ProtoStubs')) {
+        } else if (url.includes('ProtoStubs') || url.includes('protostub')) {
           try {
             resolve(JSON.stringify(ProtoStubs));
           } catch (e) {
