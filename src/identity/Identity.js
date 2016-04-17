@@ -2,16 +2,35 @@
 * The Identity Data Model is used to model the reTHINK User entity. The Identity data model is handled by Identity Management functionality.
 *
 */
-
 class Identity {
 
-  constructor(guid, identifiers) {
+  constructor(guid, type) {
     let _this = this;
 
     _this.guid = guid;
-    _this.identifiers = identifiers;
+    _this.type = type;
+    _this.identifiersList = {};
 
-    _this.idAssertion = {};
+  }
+
+  addIdentity(identifier) {
+    let _this = this;
+    let identityInformation = {
+      idAssertion: '',
+      serviceAddress: '',
+      authenticationData: '',
+      authorisationData: '',
+      userProfile: ''
+    };
+    _this.identifiersList[identifier] = identityInformation;
+  }
+
+  addIdAssertion(identifier, assertion, idp, scope) {
+    let _this = this;
+
+    let newIdAssertion = new IdAssertion(assertion, idp, scope);
+
+    _this.idAssertionList.push(newIdAssertion);
   }
 }
 
@@ -35,11 +54,10 @@ class IdValidation {
     _this.contents = contents;
   }
 
-  validates() {
+  validates(identity, contents) {
+    //TODO implement the logic
 
   }
 }
 
 export default Identity;
-export default IdAssertion;
-export default IdValidation;

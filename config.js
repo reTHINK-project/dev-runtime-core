@@ -121,6 +121,7 @@ System.config({
       "object.observe": "npm:object.observe@0.2.6",
       "ortc-over-rtc": "npm:ortc-over-rtc@0.1.0",
       "runtime-core": "github:rethink-project/dev-runtime-core@dev-0.4",
+      "universal-localstorage": "npm:universal-localstorage@1.0.2",
       "webrtc-adapter-test": "npm:webrtc-adapter-test@0.2.10",
       "webrtc-shim": "npm:webrtc-shim@0.1.2"
     },
@@ -1218,6 +1219,12 @@ System.config({
     "npm:next-tick@0.2.2": {
       "process": "github:jspm/nodelibs-process@0.1.2"
     },
+    "npm:node-localstorage@0.5.2": {
+      "events": "github:jspm/nodelibs-events@0.1.1",
+      "fs": "github:jspm/nodelibs-fs@0.1.2",
+      "path": "github:jspm/nodelibs-path@0.1.0",
+      "process": "github:jspm/nodelibs-process@0.1.2"
+    },
     "npm:object.observe@0.2.6": {
       "process": "github:jspm/nodelibs-process@0.1.2"
     },
@@ -1624,6 +1631,9 @@ System.config({
     "npm:umd@3.0.1": {
       "fs": "github:jspm/nodelibs-fs@0.1.2",
       "process": "github:jspm/nodelibs-process@0.1.2"
+    },
+    "npm:universal-localstorage@1.0.2": {
+      "node-localstorage": "npm:node-localstorage@0.5.2"
     },
     "npm:url@0.10.3": {
       "assert": "github:jspm/nodelibs-assert@0.1.0",
