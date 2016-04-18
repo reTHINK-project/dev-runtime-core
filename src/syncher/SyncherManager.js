@@ -64,8 +64,10 @@ class SyncherManager {
     let owner = msg.from;
     let domain = divideURL(msg.from).domain;
 
-    //TODO: 5-7 authorizeObjectCreation(owner, obj ???? )
-    //TODO: other optional steps
+    if (msg.body.resource) {
+      _this._authorise(msg, msg.body.resource);
+      return;
+    }
 
     //get schema from catalogue and parse -> (scheme, children)
     _this._catalog.getDataSchemaDescriptor(msg.body.schema).then((descriptor) => {
@@ -74,26 +76,15 @@ class SyncherManager {
       let childrens = properties.children ? properties.children.constant : [];
 
       _this._allocator.create(domain, scheme, 1).then((allocated) => {
-        //TODO: get address from address allocator ?
         let objURL = allocated[0];
-        let objSubscriptorURL = objURL + '/subscription';
-
-        let reporter = new ReporterObject(_this, owner, objURL);
 
         //To register the dataObject in the runtimeRegistry
         _this._registry.registerDataObject(msg.body.value.communication.name, 'scheme', objURL, 'dataObjectReporter').then(function(resolve) {
           console.log('DataObject successfully registered', resolve);
 
+          let reporter = new ReporterObject(_this, owner, objURL);
           reporter.addChildrens(childrens).then(() => {
             _this._reporters[objURL] = reporter;
-
-            /*{
-              id: msg.id, type: 'response', from: msg.to, to: owner,
-              body: { code: 200, resource: objURL, childrenResources: childrens }
-            }*/
-            let responseMsg = _this._mf.createMessageResponse(msg, 200);
-            responseMsg.body.resource = objURL;
-            responseMsg.body.childrenResources = childrens;
 
             //all ok, send response
             _this._bus.postMessage({
@@ -102,23 +93,9 @@ class SyncherManager {
             });
 
             //send create to all observers, responses will be deliver to the Hyperty owner?
+            //schedule for next cycle needed, because the Reporter should be available.
             setTimeout(() => {
-              //schedule for next cycle needed, because the Reporter should be available.
-              msg.body.authorise.forEach((hypertyURL) => {
-
-                /*{
-                  type: 'create', from: objSubscriptorURL, to: hypertyURL,
-                  body: { source: msg.from, value: msg.body.value, schema: msg.body.schema }
-                }*/
-                let createMsg = _this._mf.createCreateMessageRequest(objSubscriptorURL, hypertyURL, msg.body.value);
-                createMsg.body.source = msg.from;
-                createMsg.body.schema = msg.body.schema;
-
-                _this._bus.postMessage({
-                  type: 'create', from: objSubscriptorURL, to: hypertyURL,
-                  body: { source: msg.from, value: msg.body.value, schema: msg.body.schema }
-                });
-              });
+              _this._authorise(msg, objURL);
             });
           });
 
@@ -135,6 +112,18 @@ class SyncherManager {
       let responseMsg = _this._mf.createMessageResponse(msg, 500);
 
       _this._bus.postMessage(responseMsg);
+    });
+  }
+
+  _authorise(msg, objURL) {
+    let _this = this;
+    let objSubscriptorURL = objURL + '/subscription';
+
+    msg.body.authorise.forEach((hypertyURL) => {
+      _this._bus.postMessage({
+        type: 'create', from: objSubscriptorURL, to: hypertyURL,
+        body: { source: msg.from, value: msg.body.value, schema: msg.body.schema }
+      });
     });
   }
 

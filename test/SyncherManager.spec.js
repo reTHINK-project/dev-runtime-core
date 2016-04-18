@@ -29,13 +29,13 @@ describe('SyncherManager', function() {
     if (msg.type === 'subscribe') {
       if (msg.id === 2) {
         //reporter subscribe
-        expect(msg).to.eql({
+        expect(msg).to.contain.all.keys({
           id: 2, type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.h1.domain/sm',
           body: { subscribe: [ objURL + '/children/children1', objURL + '/children/children2'], source: hyperURL1 }
         });
       } else {
         //observer subscribe
-        expect(msg).to.eql({
+        expect(msg).to.contain.all.keys({
           id: 5, type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.obj1/sm',
           body: { subscribe: [ objURL + '/changes', objURL + '/children/children1', objURL + '/children/children2'], source: hyperURL2 }
         });
@@ -103,16 +103,18 @@ describe('SyncherManager', function() {
         console.log('on-subscribe-reply');
         doo.onChange('*', (changeEvent) => {
           console.log('on-change: ', JSON.stringify(changeEvent));
-          expect(changeEvent).to.eql({ cType: 'add', oType: 'object', field: 'test', data: ['a', 'b', 'c'] });
-          expect(doo.data).to.eql({ communication: { name: 'chat-x' }, x: 10, y: 10, test: ['a', 'b', 'c'] });
+          expect(changeEvent).to.contain.all.keys({ cType: 'add', oType: 'object', field: 'test', data: ['a', 'b', 'c'] });
+          expect(doo.data).to.contain.all.keys({ communication: { name: 'chat-x' }, x: 10, y: 10, test: ['a', 'b', 'c'] });
           done();
         });
       });
     });
 
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
-    sync1.create(schemaURL, [hyperURL2], initialData).then((dor) => {
+    sync1.create(schemaURL, [], initialData).then((dor) => {
       console.log('on-create-reply');
+      dor.inviteObservers([hyperURL2]);
+
       dor.onSubscription((subscribeEvent) => {
         console.log('on-subscribe: ', subscribeEvent);
 
@@ -136,7 +138,7 @@ describe('SyncherManager', function() {
         console.log('3-postMessage: (seq === ' + seq + ')', JSON.stringify(msg));
 
         if (seq === 1) {
-          expect(msg).to.eql({
+          expect(msg).to.contain.all.keys({
             type: 'update', from: objURL, to: objURLChanges,
             body: { version: 1, source: hyperURL1, attribute: '1',
               value: {
@@ -151,7 +153,7 @@ describe('SyncherManager', function() {
         }
 
         if (seq === 2) {
-          expect(msg).to.eql({
+          expect(msg).to.contain.all.keys({
             type: 'update', from: objURL, to: objURLChanges,
             body: { version: 2, source: hyperURL1, attribute: '2',
               value: {
@@ -172,28 +174,28 @@ describe('SyncherManager', function() {
         }
 
         if (seq === 3) {
-          expect(msg).to.eql({
+          expect(msg).to.contain.all.keys({
             type: 'update', from: objURL, to: objURLChanges,
             body: { version: 3, source: hyperURL1, attribute: '2' }
           });
         }
 
         if (seq === 4) {
-          expect(msg).to.eql({
+          expect(msg).to.contain.all.keys({
             type: 'update', from: objURL, to: objURLChanges,
             body: { version: 4, source: hyperURL1, attribute: '1.name', value: 'Micael Pedrosa' }
           });
         }
 
         if (seq === 5) {
-          expect(msg).to.eql({
+          expect(msg).to.contain.all.keys({
             type: 'update', from: objURL, to: objURLChanges,
             body: { version: 5, source: hyperURL1, attribute: '1.birthdate', value: '1982-02-28T00:00:00.000Z' }
           });
         }
 
         if (seq === 6) {
-          expect(msg).to.eql({
+          expect(msg).to.contain.all.keys({
             type: 'update', from: objURL, to: objURLChanges,
             body: { version: 6, source: hyperURL1, attribute: '1.obj1.name', value: 'XPTO' }
           });
@@ -203,7 +205,7 @@ describe('SyncherManager', function() {
         }
 
         if (seq === 7) {
-          expect(msg).to.eql({
+          expect(msg).to.contain.all.keys({
             type: 'update', from: objURL, to: objURLChanges,
             body: { version: 7, source: hyperURL1, attribute: '1.arr', value: [1, 0, {x: 10, y: 20}] }
           });
@@ -213,7 +215,7 @@ describe('SyncherManager', function() {
         }
 
         if (seq === 8) {
-          expect(msg).to.eql({
+          expect(msg).to.contain.all.keys({
             type: 'update', from: objURL, to: objURLChanges,
             body:{ version: 8, source: hyperURL1, attributeType: 'array', attribute: '1.arr.1', value: 2 }
           });
@@ -224,14 +226,14 @@ describe('SyncherManager', function() {
         }
 
         if (seq === 9) {
-          expect(msg).to.eql({
+          expect(msg).to.contain.all.keys({
             type: 'update', from: objURL, to: objURLChanges,
             body: { version: 9, source: hyperURL1, attributeType: 'array', operation: 'add', attribute: '1.arr.3', value: [3] }
           });
         }
 
         if (seq === 10) {
-          expect(msg).to.eql({
+          expect(msg).to.contain.all.keys({
             type: 'update', from: objURL, to: objURLChanges,
             body: { version: 10, source: hyperURL1, attributeType: 'array', operation: 'add', attribute: '1.arr.4', value: [{x: 1, y: 2}] }
           });
@@ -242,21 +244,21 @@ describe('SyncherManager', function() {
         }
 
         if (seq === 11) {
-          expect(msg).to.eql({
+          expect(msg).to.contain.all.keys({
             type: 'update', from: objURL, to: objURLChanges,
             body: { version: 11, source: hyperURL1, attributeType: 'array', operation: 'remove', attribute: '1.arr.1', value: 2 }
           });
         }
 
         if (seq === 12) {
-          expect(msg).to.eql({
+          expect(msg).to.contain.all.keys({
             type: 'update', from: objURL, to: objURLChanges,
             body: { version: 12, source: hyperURL1, attributeType: 'array', operation: 'add', attribute: '1.arr.1', value: [10, 11, 12] }
           });
         }
 
         if (seq === 13) {
-          expect(msg).to.eql({
+          expect(msg).to.contain.all.keys({
             type: 'update', from: objURL, to: objURLChanges,
             body: { version: 13, source: hyperURL1, attribute: '1.arr.5.x', value: 10 }
           });
@@ -266,7 +268,7 @@ describe('SyncherManager', function() {
         }
 
         if (seq === 14) {
-          expect(msg).to.eql({
+          expect(msg).to.contain.all.keys({
             type: 'update', from: objURL, to: objURLChanges,
             body: { version: 14, source: hyperURL1, attributeType: 'array', operation: 'remove', attribute: '1.arr.5', value: 1 }
           });
@@ -323,14 +325,14 @@ describe('SyncherManager', function() {
       console.log('4-onChange: (seq === ' + seq + ')', JSON.stringify(event));
 
       if (seq === 1) {
-        expect(event).to.eql({ cType: 'add', oType: 'object', field: '1', data: { name: 'Micael', birthdate:'28-01-1981', email: 'micael-xxx@gmail.com', phone: 911000000, obj1: { name: 'xpto' } } });
+        expect(event).to.contain.all.keys({ cType: 'add', oType: 'object', field: '1', data: { name: 'Micael', birthdate:'28-01-1981', email: 'micael-xxx@gmail.com', phone: 911000000, obj1: { name: 'xpto' } } });
       }
 
       if (seq === 2) {
-        expect(event).to.eql({ cType: 'add', oType: 'object', field: '2', data: { name: 'Luis Duarte', birthdate: '02-12-1991', email: 'luis-xxx@gmail.com', phone: 910000000, obj1:{ name: 'xpto' } } });
+        expect(event).to.contain.all.keys({ cType: 'add', oType: 'object', field: '2', data: { name: 'Luis Duarte', birthdate: '02-12-1991', email: 'luis-xxx@gmail.com', phone: 910000000, obj1:{ name: 'xpto' } } });
 
         //verify changes...
-        expect(data).to.eql({
+        expect(data).to.contain.all.keys({
           1: { name: 'Micael', birthdate: '28-01-1981', email: 'micael-xxx@gmail.com', phone: 911000000, obj1: { name: 'xpto' } },
           2: { name: 'Luis Duarte', birthdate: '02-12-1991', email: 'luis-xxx@gmail.com', phone: 910000000, obj1: { name: 'xpto' } }
         });
@@ -357,22 +359,22 @@ describe('SyncherManager', function() {
       }
 
       if (seq === 3) {
-        expect(event).to.eql({ cType: 'remove', oType: 'object', field: '2' });
+        expect(event).to.contain.all.keys({ cType: 'remove', oType: 'object', field: '2' });
       }
 
       if (seq === 4) {
-        expect(event).to.eql({ cType: 'update', oType: 'object', field: '1.name', data: 'Micael Pedrosa' });
+        expect(event).to.contain.all.keys({ cType: 'update', oType: 'object', field: '1.name', data: 'Micael Pedrosa' });
       }
 
       if (seq === 5) {
-        expect(event).to.eql({ cType: 'update', oType: 'object', field: '1.birthdate', data: '28-02-1981' });
+        expect(event).to.contain.all.keys({ cType: 'update', oType: 'object', field: '1.birthdate', data: '28-02-1981' });
       }
 
       if (seq === 6) {
-        expect(event).to.eql({ cType: 'update', oType: 'object', field: '1.obj1.name', data: 'XPTO' });
+        expect(event).to.contain.all.keys({ cType: 'update', oType: 'object', field: '1.obj1.name', data: 'XPTO' });
 
         //verify changes...
-        expect(data).to.eql({
+        expect(data).to.contain.all.keys({
           1: { name: 'Micael Pedrosa', birthdate: '28-02-1981', email: 'micael-xxx@gmail.com', phone: 911000000, obj1: { name: 'XPTO' } }
         });
 
@@ -383,10 +385,10 @@ describe('SyncherManager', function() {
       }
 
       if (seq === 7) {
-        expect(event).to.eql({ cType: 'add', oType: 'object', field: '1.arr', data: [1, 0, { x: 10, y: 20 }] });
+        expect(event).to.contain.all.keys({ cType: 'add', oType: 'object', field: '1.arr', data: [1, 0, { x: 10, y: 20 }] });
 
         //verify changes...
-        expect(data).to.eql({
+        expect(data).to.contain.all.keys({
           1: { name: 'Micael Pedrosa', birthdate: '28-02-1981', email: 'micael-xxx@gmail.com', phone: 911000000, obj1: {name: 'XPTO'}, arr: [1, 0, { x: 10, y: 20 }] }
         });
 
@@ -397,10 +399,10 @@ describe('SyncherManager', function() {
       }
 
       if (seq === 8) {
-        expect(event).to.eql({ cType: 'update', oType: 'array', field: '1.arr.1', data: 2 });
+        expect(event).to.contain.all.keys({ cType: 'update', oType: 'array', field: '1.arr.1', data: 2 });
 
         //verify changes...
-        expect(data).to.eql({
+        expect(data).to.contain.all.keys({
           1: { name: 'Micael Pedrosa', birthdate: '28-02-1981', email: 'micael-xxx@gmail.com', phone: 911000000, obj1: {name: 'XPTO'}, arr: [1, 2, { x: 10, y: 20 }] }
         });
 
@@ -417,23 +419,23 @@ describe('SyncherManager', function() {
 
       if (seq === 9) {
         if (event.data.length === 1) {
-          expect(event).to.eql({ cType: 'add', oType: 'array', field: '1.arr.3', data: [3] });
+          expect(event).to.contain.all.keys({ cType: 'add', oType: 'array', field: '1.arr.3', data: [3] });
         } else {
           //it's OK to compact 2 messages...
-          expect(event).to.eql({ cType: 'add', oType: 'array', field: '1.arr.3', data: [3, { x: 1, y: 2 }]});
+          expect(event).to.contain.all.keys({ cType: 'add', oType: 'array', field: '1.arr.3', data: [3, { x: 1, y: 2 }]});
           compacted = true;
         }
       }
 
       if (seq === 10) {
         if (!compacted) {
-          expect(event).to.eql({ cType: 'add', oType: 'array', field: '1.arr.4', data: [{ x: 1, y: 2 }] });
+          expect(event).to.contain.all.keys({ cType: 'add', oType: 'array', field: '1.arr.4', data: [{ x: 1, y: 2 }] });
         }
 
         compacted = false;
 
         //verify changes...
-        expect(data).to.eql({
+        expect(data).to.contain.all.keys({
           1: { name: 'Micael Pedrosa', birthdate: '28-02-1981', email: 'micael-xxx@gmail.com', phone: 911000000, obj1: { name: 'XPTO' }, arr: [1, 2, { x: 10, y: 20 }, 3, { x: 1, y: 2 }]}
         });
 
@@ -459,18 +461,18 @@ describe('SyncherManager', function() {
 
       /*
       if (seq === 11) {
-        expect(event).to.eql({ cType: 'remove', oType: 'array', field: '1.arr.1', data: 2 });
+        expect(event).to.contain.all.keys({ cType: 'remove', oType: 'array', field: '1.arr.1', data: 2 });
       }
 
       if (seq === 12) {
-        expect(event).to.eql({ cType: 'add', oType: 'array', field: '1.arr.1', data: [10, 11, 12] });
+        expect(event).to.contain.all.keys({ cType: 'add', oType: 'array', field: '1.arr.1', data: [10, 11, 12] });
       }
 
       if (seq === 13) {
-        expect(event).to.eql({ cType: 'update', oType: 'object', field: '1.arr.5.x', data: 10 });
+        expect(event).to.contain.all.keys({ cType: 'update', oType: 'object', field: '1.arr.5.x', data: 10 });
 
         //verify changes...
-        expect(data).to.eql({
+        expect(data).to.contain.all.keys({
           1: { name: 'Micael Pedrosa', birthdate: '28-02-1981', email: 'micael-xxx@gmail.com', phone: 911000000, obj1: { name: 'XPTO' }, arr: [1, 10, 11, 12, 3, { x: 10, y: 2 }] }
         });
 
@@ -481,10 +483,10 @@ describe('SyncherManager', function() {
       }
 
       if (seq === 14) {
-        expect(event).to.eql({ cType: 'remove', oType: 'array', field: '1.arr.5', data: 1 });
+        expect(event).to.contain.all.keys({ cType: 'remove', oType: 'array', field: '1.arr.5', data: 1 });
 
         //verify changes...
-        expect(data).to.eql({
+        expect(data).to.contain.all.keys({
           1: { name: 'Micael Pedrosa', birthdate: '28-02-1981', email: 'micael-xxx@gmail.com', phone: 911000000, obj1: { name: 'XPTO' }, arr: [1, 10, 11, 12, 3] }
         });
 
@@ -562,7 +564,7 @@ describe('SyncherManager', function() {
           console.log('on-local-addChildren');
           doc.onResponse((event) => {
             console.log('on-remote-addChildren-reply', event);
-            expect(event).to.eql({ type: 'response', url: hyperURL1, code: 200 });
+            expect(event).to.contain.all.keys({ type: 'response', url: hyperURL1, code: 200 });
             done();
           });
         });
@@ -575,7 +577,7 @@ describe('SyncherManager', function() {
       dor.onSubscription((subscribeEvent) => {
         dor.onAddChildren((event) => {
           console.log('on-remote-addChildren', event);
-          expect(event).to.eql({ type: 'create', from: hyperURL2, url: 'resource://obj1/children/children1', childId: hyperURL2 + '#1', value: { message: 'Hello World!' } });
+          expect(event).to.contain.all.keys({ type: 'create', from: hyperURL2, url: 'resource://obj1/children/children1', childId: hyperURL2 + '#1', value: { message: 'Hello World!' } });
         });
 
         console.log('on-subscribe: ', subscribeEvent);
@@ -611,8 +613,8 @@ describe('SyncherManager', function() {
           let children1 = dor.childrens[event.childId];
           children1.onChange((changeEvent) => {
             console.log('onChange: ', changeEvent);
-            expect(changeEvent).to.eql({ cType: 'update', oType: 'object', field: 'message', data: 'Hello Luis!' });
-            expect(children1.data).to.eql({ message: 'Hello Luis!' });
+            expect(changeEvent).to.contain.all.keys({ cType: 'update', oType: 'object', field: 'message', data: 'Hello Luis!' });
+            expect(children1.data).to.contain.all.keys({ message: 'Hello Luis!' });
             done();
           });
         });
