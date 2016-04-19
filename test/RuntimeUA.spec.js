@@ -11,23 +11,25 @@ chai.use(sinonChai);
 // Testing Module
 import RuntimeUA from '../src/runtime/RuntimeUA';
 
-import RuntimeCatalogue from '../src/runtime/RuntimeCatalogue-Local';
-
 // Main dependecies
 import Registry from '../src/registry/Registry';
 import IdentityModule from '../src/identity/IdentityModule';
 import PolicyEngine from '../src/policy/PolicyEngine';
 import MessageBus from '../src/bus/MessageBus';
+import {RuntimeCatalogueLocal} from 'service-framework/dist/RuntimeCatalogue';
 
-import SandboxFactory from './resources/sandboxes/SandboxFactory';
+import RuntimeFactory from './resources/RuntimeFactory';
 
 // Testing runtimeUA;
 describe('RuntimeUA', function() {
 
   // Only for testing
   let runtimeURL = 'runtime://sp.domain/123';
-  let sandboxFactory = new SandboxFactory();
-  let runtime = new RuntimeUA(sandboxFactory, 'sp.domain');
+  let runtimeFactory = new RuntimeFactory();
+  let runtime = new RuntimeUA(runtimeFactory, 'sp.domain');
+
+  // Testing with the Local Runtime and Catalogue
+  runtime.runtimeCatalogue = new RuntimeCatalogueLocal(runtimeFactory);
 
   before(function() {
 
@@ -108,23 +110,31 @@ describe('RuntimeUA', function() {
       }
     };
 
-    let stub = sinon.stub(runtime.runtimeCatalogue, '_makeLocalRequest');
-    stub.withArgs('../resources/descriptors/Hyperties.json').returns(new Promise(function(resolve, reject) {
-      try {
-        resolve(JSON.stringify(Hyperties));
-      } catch (e) {
-        reject(e);
-      }
+    sinon.stub(runtime.runtimeCatalogue.httpRequest, 'get', function(url) {
 
-    }));
+      console.log(url);
 
-    stub.withArgs('../resources/descriptors/ProtoStubs.json').returns(new Promise(function(resolve, reject) {
-      try {
-        resolve(JSON.stringify(ProtoStubs));
-      } catch (e) {
-        reject(e);
-      }
-    }));
+      console.log(url.includes('Hyperties'), url.includes('Hyperty'), url.includes('ProtoStubs'));
+
+      return new Promise(function(resolve, reject) {
+
+        if (url.includes('Hyperties') || url.includes('Hyperty')) {
+          try {
+            resolve(JSON.stringify(Hyperties));
+          } catch (e) {
+            reject(e);
+          }
+
+        } else if (url.includes('ProtoStubs') || url.includes('protostub')) {
+          try {
+            resolve(JSON.stringify(ProtoStubs));
+          } catch (e) {
+            reject(e);
+          }
+        }
+      });
+
+    });
 
     sinon.stub(runtime.registry, 'registerHyperty')
     .returns(new Promise(function(resolve, reject) {
@@ -145,12 +155,12 @@ describe('RuntimeUA', function() {
 
     sinon.stub(runtime.registry, 'getSandbox')
     .returns(new Promise(function(resolve, reject) {
-      resolve(sandboxFactory.createSandbox());
+      resolve(runtimeFactory.createSandbox());
     }));
 
     sinon.stub(runtime.registry, 'getAppSandbox')
     .returns(new Promise(function(resolve, reject) {
-      resolve(sandboxFactory.createAppSandbox());
+      resolve(runtimeFactory.createAppSandbox());
     }));
 
     sinon.stub(runtime.messageBus, 'addListener')
@@ -161,7 +171,7 @@ describe('RuntimeUA', function() {
   });
 
   after(function() {
-    runtime.runtimeCatalogue._makeLocalRequest.restore();
+    runtime.runtimeCatalogue.httpRequest.get.restore();
   });
 
   describe('constructor()', function() {
@@ -183,7 +193,7 @@ describe('RuntimeUA', function() {
     });
 
     it('should throw when given no arguments', function() {
-      expect(runtime).to.have.property('sandboxFactory');
+      expect(runtime).to.have.property('runtimeFactory');
     });
 
   });

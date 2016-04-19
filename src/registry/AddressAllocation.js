@@ -86,6 +86,34 @@ class AddressAllocation {
       });
     });
   }
+
+  /**
+  * Send a request to the domain message node, to deallocate one or more addresses
+  * @param  {Domain} domain - Domain of the message node.
+  * @param  {addresses} addresses to request the deallocation
+  * @returns {Promise}  the response by the message node
+  */
+  delete(domain, addresses) {
+    let _this = this;
+
+    let message = {
+      type: 'delete', from: _this._url, to: 'domain://msg-node.' + domain + '/hyperty-address-allocation',
+      body: {childrenResources: addresses}
+    };
+
+    return new Promise((resolve, reject) => {
+
+      _this._bus.postMessage(message, (reply) => {
+        console.log('reply', reply);
+        if (reply.body.code === 200) {
+          resolve(reply.body.code);
+        } else {
+          reject(reply.body.desc);
+        }
+      });
+    });
+
+  }
 }
 
 export default AddressAllocation;

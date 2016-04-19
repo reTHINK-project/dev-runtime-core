@@ -27,8 +27,6 @@ import PolicyEngine from '../policy/PolicyEngine';
 import MessageBus from '../bus/MessageBus';
 import GraphConnector from '../graphconnector/GraphConnector';
 
-import RuntimeCatalogue from './RuntimeCatalogue-Local';
-
 import SyncherManager from '../syncher/SyncherManager';
 
 import {divideURL, emptyObject} from '../utils/utils';
@@ -36,9 +34,9 @@ import {divideURL, emptyObject} from '../utils/utils';
 /**
  * Runtime User Agent Interface will process all the dependecies of the core runtime;
  * @author Vitor Silva [vitor-t-silva@telecom.pt]
- * @version 0.2.0
+ * @version 0.4.0
  *
- * @property {sandboxFactory} sandboxFactory - Specific implementation of sandbox;
+ * @property {runtimeFactory} runtimeFactory - Specific implementation for all environments;
  * @property {RuntimeCatalogue} runtimeCatalogue - Catalogue of components can be installed;
  * @property {runtimeURL} runtimeURL - This identify the core runtime, should be unique;
  * @property {IdentityModule} identityModule - Identity Module;
@@ -51,19 +49,18 @@ class RuntimeUA {
 
   /**
    * Create a new instance of Runtime User Agent
-   * @param {sandboxFactory} sandboxFactory - Specific implementation for the environment where the core runtime will run;
+   * @param {runtimeFactory} runtimeFactory - Specific implementation for the environment where the core runtime will run;
    * @param {domain} domainURL - specify the domain base for the runtime;
    */
-  constructor(sandboxFactory, domain) {
+  constructor(runtimeFactory, domain) {
 
-    if (!sandboxFactory) throw new Error('The sandbox factory is a needed parameter');
+    if (!runtimeFactory) throw new Error('The sandbox factory is a needed parameter');
     if (!domain) throw new Error('You need the domain of runtime');
 
     let _this = this;
 
-    _this.sandboxFactory = sandboxFactory;
-
-    _this.runtimeCatalogue = new RuntimeCatalogue();
+    _this.runtimeFactory = runtimeFactory;
+    _this.runtimeCatalogue = runtimeFactory.createRuntimeCatalogue();
 
     // TODO: post and return registry/hypertyRuntimeInstance to and from Back-end Service
     // the response is like: runtime://sp1/123
@@ -81,16 +78,17 @@ class RuntimeUA {
     // Use the sandbox factory to create an AppSandbox;
     // In the future can be decided by policyEngine if we need
     // create a AppSandbox or not;
-    let appSandbox = sandboxFactory.createAppSandbox();
+    let appSandbox = runtimeFactory.createAppSandbox();
 
     // Instantiate the Registry Module
     _this.registry = new Registry(runtimeURL, appSandbox, _this.identityModule);
 
-    // Instantiate the Policy Engine
-    _this.policyEngine = new PolicyEngine(_this.identityModule, _this.registry);
-
     // Instantiate the Message Bus
     _this.messageBus = new MessageBus(_this.registry);
+
+    // Instantiate the Policy Engine
+    _this.policyEngine = new PolicyEngine(_this.messageBus, _this.identityModule, _this.registry);
+
     _this.messageBus.pipeline.handlers = [
 
       // Policy message authorise
@@ -124,10 +122,10 @@ class RuntimeUA {
 
     // Use sandbox factory to use specific methods
     // and set the message bus to the factory
-    sandboxFactory.messageBus = _this.messageBus;
+    runtimeFactory.messageBus = _this.messageBus;
 
     // Instanciate the SyncherManager;
-    _this.syncherManager = new SyncherManager(_this.runtimeURL, _this.messageBus, { }, _this.runtimeCatalogue);
+    _this.syncherManager = new SyncherManager(_this.runtimeURL, _this.messageBus, _this.registry, _this.runtimeCatalogue);
 
     // Instantiate the Graph Connector
     _this.graphConnector = new GraphConnector(_this.runtimeURL, _this.messageBus);
@@ -255,7 +253,7 @@ class RuntimeUA {
         // check if the sandbox is registed for this hyperty descriptor url;
         // Make Steps xxx --- xxx
         // Instantiate the Sandbox
-        let sandbox = _this.sandboxFactory.createSandbox();
+        let sandbox = _this.runtimeFactory.createSandbox();
 
         sandbox.addListener('*', function(msg) {
           _this.messageBus.postMessage(msg);
@@ -352,124 +350,133 @@ class RuntimeUA {
       // Discover Protocol Stub
       console.info('------------------- ProtoStub ---------------------------\n');
       console.info('Discover or Create a new ProtoStub for domain: ', domain);
-      _this.registry.discoverProtostub(domain).then(function(descriptor) {
+      _this.registry.discoverProtostub(domain).then(function(runtimeProtoStubURL) {
         // Is registed?
-        console.info('1. Proto Stub Discovered: ', descriptor);
-        _stubDescriptor = descriptor;
+        console.info('1. Proto Stub Discovered: ', runtimeProtoStubURL);
 
         // we have completed step 2 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
-        return _stubDescriptor;
-      }, function(reason) {
+        // TODO: Check if the status is saved in the status of sandbox;
+        let stub = {
+          runtimeProtoStubURL: runtimeProtoStubURL,
+          status: 'deployed'
+        };
+
+        resolve(stub);
+        console.info('------------------- END ---------------------------\n');
+      })
+      .catch(function(reason) {
+
         // is not registed?
         console.info('1. Proto Stub not found:', reason);
 
         // we have completed step 3 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
         // we need to get ProtoStub descriptor step 4 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-        return _this.runtimeCatalogue.getStubDescriptor(protostubURL);
-      })
-      .then(function(stubDescriptor) {
+        _this.runtimeCatalogue.getStubDescriptor(protostubURL)
+        .then(function(stubDescriptor) {
 
-        console.info('2. return the ProtoStub descriptor:', stubDescriptor);
+          console.info('2. return the ProtoStub descriptor:', stubDescriptor);
 
-        // we have completed step 5 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          // we have completed step 5 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          _stubDescriptor = stubDescriptor;
 
-        _stubDescriptor = stubDescriptor;
+          let sourcePackageURL = stubDescriptor.sourcePackageURL;
 
-        let sourcePackageURL = stubDescriptor.sourcePackageURL;
+          if (sourcePackageURL === '/sourcePackage') {
+            return stubDescriptor.sourcePackage;
+          }
 
-        if (sourcePackageURL === '/sourcePackage') {
-          return stubDescriptor.sourcePackage;
-        }
+          // we need to get ProtoStub Source code from descriptor - step 6 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          return _this.runtimeCatalogue.getSourcePackageFromURL(sourcePackageURL);
+        })
+        .then(function(stubSourcePackage) {
+          console.info('3. return the ProtoStub Source Code: ', stubSourcePackage);
 
-        // we need to get ProtoStub Source code from descriptor - step 6 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-        return _this.runtimeCatalogue.getSourcePackageFromURL(sourcePackageURL);
-      })
-      .then(function(stubSourcePackage) {
-        console.info('3. return the ProtoStub Source Code: ', stubSourcePackage);
+          // we have completed step 7 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
-        // we have completed step 7 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          _stubSourcePackage = stubSourcePackage;
 
-        _stubSourcePackage = stubSourcePackage;
+          // TODO: Check on PEP (policy Engine) if we need the sandbox and check if the Sandbox Factory have the context sandbox;
+          let policy = true;
+          return policy;
+        })
+        .then(function(policy) {
+          // this will return the sandbox or one promise to getSandbox;
+          return _this.registry.getSandbox(domain);
+        })
+        .then(function(stubSandbox) {
 
-        // TODO: Check on PEP (policy Engine) if we need the sandbox and check if the Sandbox Factory have the context sandbox;
-        let policy = true;
-        return policy;
-      })
-      .then(function(policy) {
-        // this will return the sandbox or one promise to getSandbox;
-        return _this.registry.getSandbox(domain);
-      })
-      .then(function(stubSandbox) {
+          console.info('4. if the sandbox is registered then return the sandbox', stubSandbox);
 
-        console.info('4. if the sandbox is registered then return the sandbox', stubSandbox);
+          // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
-        // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          _stubSandbox = stubSandbox;
+          return stubSandbox;
+        })
+        .catch(function(reason) {
+          console.info('5. Sandbox was not found, creating a new one', reason);
 
-        _stubSandbox = stubSandbox;
-        return stubSandbox;
-      }, function(reason) {
-        console.info('5. Sandbox was not found, creating a new one', reason);
+          // check if the sandbox is registed for this stub descriptor url;
+          // Make Steps xxx --- xxx
+          // Instantiate the Sandbox
+          let sandbox = _this.runtimeFactory.createSandbox();
+          sandbox.addListener('*', function(msg) {
+            _this.messageBus.postMessage(msg);
+          });
 
-        // check if the sandbox is registed for this stub descriptor url;
-        // Make Steps xxx --- xxx
-        // Instantiate the Sandbox
-        let sandbox = _this.sandboxFactory.createSandbox();
-        sandbox.addListener('*', function(msg) {
-          _this.messageBus.postMessage(msg);
-        });
+          return sandbox;
+        })
+        .then(function(sandbox) {
+          console.info('6. return the sandbox instance and register', sandbox, 'to domain ', domain);
 
-        return sandbox;
-      })
-      .then(function(sandbox) {
-        console.info('6. return the sandbox instance and register', sandbox, 'to domain ', domain);
+          _stubSandbox = sandbox;
 
-        _stubSandbox = sandbox;
+          // we need register stub on registry - step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          return _this.registry.registerStub(_stubSandbox, domain);
+        })
+        .then(function(runtimeProtoStubURL) {
 
-        // we need register stub on registry - step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-        return _this.registry.registerStub(_stubSandbox, domain);
-      })
-      .then(function(runtimeProtoStubURL) {
+          console.info('7. return the runtime protostub url: ', runtimeProtoStubURL);
 
-        console.info('7. return the runtime protostub url: ', runtimeProtoStubURL);
+          // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
-        // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          _runtimeProtoStubURL = runtimeProtoStubURL;
 
-        _runtimeProtoStubURL = runtimeProtoStubURL;
+          console.log(_stubDescriptor);
 
-        console.log(_stubDescriptor);
+          // Extend original hyperty configuration;
+          let configuration = Object.assign({}, JSON.parse(_stubDescriptor.configuration));
+          configuration.runtimeURL = _this.runtimeURL;
 
-        // Extend original hyperty configuration;
-        let configuration = Object.assign({}, JSON.parse(_stubDescriptor.configuration));
-        configuration.runtimeURL = _this.runtimeURL;
+          // Deploy Component step xxx
+          return _stubSandbox.deployComponent(_stubSourcePackage.sourceCode, runtimeProtoStubURL, configuration);
+        })
+        .then(function(deployComponentStatus) {
+          console.info('8: return deploy component for sandbox status: ', deployComponentStatus);
 
-        // Deploy Component step xxx
-        return _stubSandbox.deployComponent(_stubSourcePackage.sourceCode, runtimeProtoStubURL, configuration);
-      })
-      .then(function(deployComponentStatus) {
-        console.info('8: return deploy component for sandbox status: ', deployComponentStatus);
+          // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
-        // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          // Add the message bus listener
+          _this.messageBus.addListener(_runtimeProtoStubURL, function(msg) {
+            _stubSandbox.postMessage(msg);
+          });
 
-        // Add the message bus listener
-        _this.messageBus.addListener(_runtimeProtoStubURL, function(msg) {
-          _stubSandbox.postMessage(msg);
-        });
+          // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
-        // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          // Load Stub function resolved with success;
+          let stub = {
+            runtimeProtoStubURL: _runtimeProtoStubURL,
+            status: deployComponentStatus
+          };
 
-        // Load Stub function resolved with success;
-        let stub = {
-          runtimeProtoStubURL: _runtimeProtoStubURL,
-          status: deployComponentStatus
-        };
+          resolve(stub);
+          console.info('------------------- END ---------------------------\n');
 
-        resolve(stub);
-        console.info('------------------- END ---------------------------\n');
+        })
+        .catch(errorReason);
 
-      })
-      .catch(errorReason);
+      });
 
     });
 

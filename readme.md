@@ -1,4 +1,4 @@
-Hyperty Runtime Core
+# Hyperty Runtime Core
 --------------------
 
 -	[Overview](#overview)
@@ -31,13 +31,14 @@ Verify these use cases:
 
 for both cases you just have to run the command:
 
-```
+```shell
 jspm install runtime-core=github:rethink-project/dev-runtime-core@dev-0.2
-`
+```
 
 and on javascript code you just need to import the script like other modules;
 
-```
+```javascript
+
 import RuntimeUA from 'runtime-core/dist/runtimeUA';
 import {Sandbox, SandboxRegistry} from 'runtime-core/dist/sandbox'
 import MiniBus from 'runtime-core/dist/minibus';
@@ -45,22 +46,21 @@ import MiniBus from 'runtime-core/dist/minibus';
 console.log('Runtime: ', RuntimeUA);
 console.log('Sandbox: ', Sandbox, SandboxRegistry);
 console.log('MiniBus: ', MiniBus);
-
 ```
 
 #### [Nodejs Runtime](https://github.com/reTHINK-project/dev-runtime-node)
 
-[dev-runtime-node
-
-```
+```shell
 npm install github:rethink-project/dev-runtime-core#dev-0.2 --save
 ```
 
 after this you can require the runtime-core like other modules on node;
 
-```
-var RuntimeUA = require('runtime-core').runtimeUA;
+> **This code, probably, needs to be updated**
 
+```javascript
+
+var RuntimeUA = require('runtime-core').runtimeUA;
 var runtime = new RuntimeUA();
 
 ```
@@ -73,16 +73,18 @@ if you found some issues, please submit them into the respective repository;
 
 #### Setup Environment
 
-On the first time you are cloning this repository, you need to run the command:`
+On the first time you are cloning this repository, you need to run the command:
+```shell
 npm run init-setup
-`
+```
 
 After running successfully this command you will have 2 folders (node_modules and vendor), these folders are excluded from the commit process, and are only for development.
 
-if you already have the project configured on your machine, you only need run the next command to add new dependencies:`
+if you already have the project configured on your machine, you only need run the next command to add new dependencies:
+```shell
 npm install
 jspm install
-`
+```
 
 ---
 
@@ -122,6 +124,7 @@ JavaScript code should be written in ES6. There are direct dependencies from nod
 -	karma - Make the communication between unit test tool and jenkins. See more on [karma](http://karma-runner.github.io/0.13/index.html)
 -	mocha - Unit test tool. See more on [http://mochajs.org](http://mochajs.org/)
 -	jspm - Don't need compile the code, it uses babel (or traucer or typescript) to run ES6 code on browser. Know more in [jspm.io](http://jspm.io/)
+- live-server - need be installed with `npm install -g live-server`
 -	gulp - Automate and enhance your workflow. See more about gulp on [gulp](http://gulpjs.com/)
 
 ##### Code Style and Hinting
@@ -159,13 +162,13 @@ Verify these use cases: 1. if you will create a new repository, you can use this
 
 for both cases you just have run the command:
 
-```
+```shell
 jspm install runtime-core=github:rethink-project/dev-runtime-core@dev-0.2
 ```
 
 and on javascript code you need import the script like other modules;
 
-```
+```javascript
 import RuntimeUA from 'runtime-core/dist/runtimeUA';
 import {Sandbox, SandboxRegistry} from 'runtime-core/dist/sandbox'
 import MiniBus from 'runtime-core/dist/minibus';
@@ -180,13 +183,13 @@ console.log('MiniBus: ', MiniBus);
 
 [dev-runtime-node](https://github.com/reTHINK-project/dev-runtime-node)
 
-```
+```shell
 npm install github:rethink-project/dev-runtime-core#dev-0.2 --save
 ```
 
 after this you can require the runtime-core like other modules on node;
 
-```
+```javascript
 var RuntimeUA = require('runtime-core').runtimeUA;
 
 var runtime = new RuntimeUA();
@@ -250,10 +253,10 @@ To distribute the runtime-core, you can make a distribution file.
 
 Run the command:
 
-```
-// compact true | false;
+```shell
+# compact true | false;
 gulp dist --compact=false
-`
+```
 
 ##### Build
 
@@ -265,7 +268,7 @@ Run the command: `gulp build`
 
 In this repository, we have some tasks which can help you. If you need change some resource file, like an Hyperty or ProtoStub, and load it to the Hyperties.json or ProtoStubs.json, run the following command, and answer to the questions;
 
-```
+```shell
 gulp compile --file=path/to/file;
 ```
 
@@ -275,9 +278,31 @@ gulp compile --file=path/to/file;
 
 *to be moved to dev-service-framework*
 
+**NOTE:** While this example folder isn't moved to dev-service-framework, you need to do the following:
+
+ - On linux, run with `sudo`,
+ - On Windows, execute the terminal with administration permissions;
+
+Install and run http-server:
+```shell
+npm install -g http-server
+# or
+npm install
+
+# after installed
+npm start;
+```
+When this example folder will be moved, the 2 certificates need to be removed;
+ - [rethink-certificate cert](rethink-certificate.cert)
+ - [rethink-certificate key](rethink-certificate.key)
+
+
+
+#### Running the example
+
 This repository have a folder with an working example of Hyperty Connector and we can send message and make a WebRTC call between remote hyperties through the vertx;
 
-To run the demo on example folder: - this example have a dependecy from [dev-msg-node-vertx](https://github.com/reTHINK-project/dev-msg-node-vertx/tree/dev-0.2#unit-testing) and [dev-registry-domain](https://github.com/reTHINK-project/dev-registry-domain#dev-registry-domain) for communication between hyperties in two distinct browsers or tabs. **At this moment you need run locally [dev-msg-node-vertx](https://github.com/reTHINK-project/dev-msg-node-vertx/tree/dev-0.2#unit-testing) and [dev-registry-domain](https://github.com/reTHINK-project/dev-registry-domain#dev-registry-domain)** - you need, in the root folder, run command: `npm start` - in your browser, access to https://127.0.0.1:8080/example
+To run the demo on example folder: - this example have a dependecy from [dev-msg-node-vertx](https://github.com/reTHINK-project/dev-msg-node-vertx/tree/dev-0.2#unit-testing) and [dev-registry-domain](https://github.com/reTHINK-project/dev-registry-domain#dev-registry-domain) for communication between hyperties in two distinct browsers or tabs. **At this moment you need run locally [dev-msg-node-vertx](https://github.com/reTHINK-project/dev-msg-node-vertx/tree/dev-0.2#unit-testing) and [dev-registry-domain](https://github.com/reTHINK-project/dev-registry-domain#dev-registry-domain)** - you need, in the root folder, run command: `npm start` - in your browser, access to https://localhost/example
 
 ---
 

@@ -39,7 +39,9 @@ module.exports = function(config) {
 
     browserify: {
       debug: true,
-      transform: ['babelify']
+      transform: [
+        ['babelify', {presets: ['es2015', 'stage-0'], plugins: ['add-module-exports']}]
+      ]
     },
 
     // test results reporter to use

@@ -4,16 +4,16 @@ import {addLoader, removeLoader, documentReady, errorMessage} from './support';
 
 // import {MessageFactory} from 'service-framework';
 
-import RuntimeUA from '../src/runtimeUA';
-import SandboxFactory from '../resources/sandboxes/SandboxFactory';
+import RuntimeUA from '../src/runtime/RuntimeUA';
+import RuntimeFactory from '../resources/RuntimeFactory';
 
-let sandboxFactory = new SandboxFactory();
+let runtimeFactory = new RuntimeFactory();
 let avatar = 'https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/photo.jpg';
 
 // You can change this at your own domain
 let domain = 'localhost';
 
-let runtime = new RuntimeUA(sandboxFactory, domain);
+let runtime = new RuntimeUA(runtimeFactory, domain);
 window.runtime = runtime;
 
 // Check if the document is ready

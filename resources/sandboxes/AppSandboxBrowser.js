@@ -1,5 +1,7 @@
 import MiniBus from '../../src/bus/MiniBus';
 import Sandbox from '../../src/sandbox/Sandbox';
+import {SandboxType} from '../../src/sandbox/Sandbox';
+
 import SandboxRegistry from '../../src/sandbox/SandboxRegistry';
 
 // Mockup code for testing
@@ -8,6 +10,9 @@ class AppSandboxBrowser extends Sandbox {
   constructor() {
     super();
     let _this = this;
+
+    _this.type = SandboxType.APP;
+
     console.log('AppSandboxBrowser');
 
     //simulate sandbox frontier

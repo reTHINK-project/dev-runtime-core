@@ -1,6 +1,6 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import persistenceManager from '../src/persistence/PersistenceManager'
+import persistenceManager from '../src/persistence/PersistenceManager';
 
 let expect = chai.expect;
 let localStorage = window.localStorage
@@ -29,14 +29,14 @@ describe('PersistenceManager', function(){
             expect(persistenceManager.getVersion('key')).to.be.equal('v1.0.0')
         })
     })
-    
+
     describe('delete', function(){
         it('should remove a value from PersistenceManager for a given key', function(){
             localStorage.setItem('key', '{}')
 
             persistenceManager.delete('key')
 
-            expect(localStorage.getItem('key')).to.be.a('null') 
+            expect(localStorage.getItem('key')).to.be.a('null')
         })
     })
 })

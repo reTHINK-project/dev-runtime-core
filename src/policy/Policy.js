@@ -1,85 +1,18 @@
 /**
-* Copyright 2016 PT Inovação e Sistemas SA
-* Copyright 2016 INESC-ID
-* Copyright 2016 QUOBIS NETWORKS SL
-* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
-* Copyright 2016 ORANGE SA
-* Copyright 2016 Deutsche Telekom AG
-* Copyright 2016 Apizee
-* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-**/
-import {divideURL} from '../utils/utils.js';
-
+* A Policy is comprised of the following fields:
+* - ID: a unique identifier to allow referencing policies
+* - CONDITION: an expression that allows the definition of the requirement that the policy imposes.
+* - AUTHORISE: a boolean to specify the authorisation decision that results from the applicability
+* of the policy.
+* - ACTIONS: an optional array of actions to be executed.
+*/
 class Policy {
-
-  constructor(id, target, when, authorise, actions) {
+  constructor(id, condition, authorise, actions) {
     let _this = this;
     _this.id = id;
-    _this.target = target;
-    _this.when = when;
+    _this.condition = condition;
     _this.authorise = authorise;
     _this.actions = actions;
-  }
-
-  /* TODO: sanitization needed */
-  evaluate(message, userID) {
-    let _this = this;
-    let result = [];
-    switch (_this.target) {
-      case 'domain':
-        let domainURL = divideURL(userID).domain;
-        result[0] = (domainURL === _this.when) ? _this.authorise : !_this.authorise;
-        break;
-      case 'lists':
-        result[0] = eval('_this.' + _this.when + '(\''+ userID +'\')') ? _this.authorise : !_this.authorise;
-        break;
-      case 'time':
-        result[0] = eval('_this.' + _this.when) ? _this.authorise : !_this.authorise;
-        break;
-      default:
-        result[1] = _this.actions;
-        break;
-    }
-    return _result;
-  }
-
-  isBlackListed(user) {
-    // let blackList = trustEngine.getBlackList();
-    let blackList = [];
-    return blackList.indexOf(user) > -1;
-  }
-
-  isWhiteListed(user) {
-    // let whiteList = trustEngine.getWhiteList();
-    let whiteList = []
-    //whiteList.push('user://gmail.com/openidtest10');
-    return whiteList.indexOf(from) > -1;
-  }
-
-  getMinutes(time) {
-    var timeSplit = time.split(':');
-    return parseInt(timeSplit[0] * 60 + timeSplit[1]);
-  }
-
-  isTimeBetween(start, end) {
-    let _this = this;
-    let now = new Date();
-    let nowMinutes = _this.getMinutes(parseInt(now.getHours()) + ':' + now.getMinutes());
-    let startMinutes = _this.getMinutes(start);
-    let endMinutes = _this.getMinutes(end);
-    return (nowMinutes > startMinutes && nowMinutes < endMinutes);
   }
 
 }

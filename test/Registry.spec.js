@@ -8,16 +8,18 @@ chai.use(chaiAsPromised);
 
 // Main dependecies
 import Registry from '../src/registry/Registry';
-import SandboxFactory from '../resources/sandboxes/SandboxFactory';
 import Sandbox from '../src/sandbox/Sandbox';
 import MessageBus from '../src/bus/MessageBus';
+
+import RuntimeFactory from './resources/RuntimeFactory';
 
 // Testing Registry
 
 let runtimeURL = 'hyperty-runtime://ua.pt/123';
 
-let sandboxFactory = new SandboxFactory();
-let appSandbox = sandboxFactory.createAppSandbox();
+let runtimeFactory = new RuntimeFactory();
+let appSandbox = runtimeFactory.createAppSandbox();
+let sandboxDummy = {sandbox: 'sandbox', type: 'normal'};
 let protostubURL = 'url';
 let identityModule = {
   loginWithRP: () => {
@@ -56,10 +58,9 @@ getRegistry.then(function(registry) {
     describe('registerStub(sandBox, domainURL)', function() {
 
       it('should register a stub', function(done) {
-        let sandBox = new Sandbox('ua.pt');
         let domainURL = 'ua.pt';
 
-        expect(registry.registerStub(sandBox, domainURL).then(function(done) {
+        expect(registry.registerStub(sandboxDummy, domainURL).then(function(done) {
           return done;
         })).to.be.fulfilled.and.eventually.to.contain('msg-node.ua.pt/protostub/').and.notify(done);
 
@@ -106,7 +107,7 @@ getRegistry.then(function(registry) {
     describe('registerHyperty(sandbox, descriptor)', function() {
 
       it('should register an Hyperty', function(done) {
-        let sandbox = new Sandbox('ua.pt');
+
         let descriptor = 'hyperty-catalogue://ua.pt/<catalogue-object-identifier>';
 
         registry.messageBus.addListener('domain://msg-node.ua.pt/hyperty-address-allocation', (msg) => {
@@ -118,7 +119,7 @@ getRegistry.then(function(registry) {
           });
         });
 
-        expect(registry.registerHyperty(sandbox, descriptor)).to.be.fulfilled.and.eventually.equal('hyperty-instance://ua.pt/1').and.notify(done);
+        expect(registry.registerHyperty(sandboxDummy, descriptor)).to.be.fulfilled.and.eventually.equal('hyperty-instance://ua.pt/1').and.notify(done);
 
       });
     });
@@ -130,31 +131,34 @@ getRegistry.then(function(registry) {
 
         expect(registry.getSandbox(domain).then(function(response) {
           return response;
-        })).to.be.fulfilled.and.eventually.to.be.instanceof(Sandbox).and.notify(done);
+        })).to.be.fulfilled.and.eventually.to.be.eql(sandboxDummy).and.notify(done);
 
       });
 
-      it('should get a sandbox from an hypertyIstance', function(done) {
+      it('should get a sandbox from a specific hypertyIstance', function(done) {
         let hypertyInstance = 'hyperty-instance://ua.pt/1';
 
         expect(registry.getSandbox(hypertyInstance).then(function(response) {
           return response;
-        })).to.be.fulfilled.and.eventually.to.be.instanceof(Sandbox).and.notify(done);
+        })).to.be.fulfilled.and.eventually.to.be.eql(sandboxDummy).and.notify(done);
       });
 
-      it('should get a sandbox from a domain from an url', function(done) {
-        let url = 'hyperty://ua.pt/well-knownAddress/';
-
-        expect(registry.getSandbox(url).then(function(response) {
-          return response;
-        })).to.be.fulfilled.and.eventually.to.be.instanceof(Sandbox).and.notify(done);
-      });
-
-      it('should get a sandbox from a protostubURL', function(done) {
+      it('should get a sandbox from a specific protostubURL', function(done) {
 
         expect(registry.getSandbox(protostubURL).then(function(response) {
           return response;
-        })).to.be.fulfilled.and.eventually.to.be.instanceof(Sandbox).and.notify(done);
+        })).to.be.fulfilled.and.eventually.to.be.eql(sandboxDummy).and.notify(done);
+      });
+
+      it('should get a sandbox from a protoStub URL containing the domain', function(done) {
+        let domainURL = 'anotherDomain.pt';
+
+        registry.registerStub(sandboxDummy, domainURL).then(function() {
+          expect(registry.getSandbox('anotherDomain.pt').then(function(response) {
+            return response;
+          })).to.be.fulfilled.and.eventually.equal(sandboxDummy).and.notify(done);
+        });
+
       });
 
     });

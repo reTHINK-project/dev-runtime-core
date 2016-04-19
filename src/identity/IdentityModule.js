@@ -1,26 +1,6 @@
-/**
-* Copyright 2016 PT Inovação e Sistemas SA
-* Copyright 2016 INESC-ID
-* Copyright 2016 QUOBIS NETWORKS SL
-* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
-* Copyright 2016 ORANGE SA
-* Copyright 2016 Deutsche Telekom AG
-* Copyright 2016 Apizee
-* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-**/
-import hello from 'hellojs';
+
+import {getUserURLFromEmail} from '../utils/utils.js';
+import Identity from './Identity';
 
 /**
 *
@@ -57,22 +37,30 @@ class IdentityModule {
   */
   constructor() {
     let _this = this;
+
     //to store items with this format: {identity: identityURL, token: tokenID}
     _this.identities = [];
+    let newIdentity = new Identity('guid','HUMAN');
+    _this.identity = newIdentity;
   }
 
   /**
-  * Register a new Identity with an Identity Provider
+  * return the messageBus in this Registry
+  * @param {MessageBus}           messageBus
   */
-  registerIdentity() {
-    // Body...
+  get messageBus() {
+    let _this = this;
+    return _this._messageBus;
   }
 
   /**
-  * In relation with a classical Relying Party: Registration
+  * Set the messageBus in this Registry
+  * @param {MessageBus}           messageBus
   */
-  registerWithRP() {
-    // Body...
+  set messageBus(messageBus) {
+    let _this = this;
+    _this._messageBus = messageBus;
+
   }
 
   /**
@@ -83,6 +71,18 @@ class IdentityModule {
   getIdentities() {
     let _this = this;
     return _this.identities;
+  }
+
+  /**
+  * Function that resolve and create the domainURL in case it is provided one. If not, resolve the default domainURL
+  * @param {String}     idpDomain     idpDomain (Optional)
+  */
+  _resolveDomain(idpDomain) {
+    if (!idpDomain) {
+      return 'domain://google.com';
+    } else {
+      return 'domain://' + idpDomain;
+    }
   }
 
   /**
@@ -98,136 +98,45 @@ class IdentityModule {
   loginWithRP(identifier, scope) {
     let _this = this;
 
-    /*
-      When calling this function, if everything is fine, a small pop-up will open requesting a login with a google account. After the login is made, the pop-up will close and the function will return the ID token.
-      This function was tested with the URL: http://127.0.0.1:8080/ and with the same redirect URI
-
-    	In case the redirect URI is not accepted or is required to add others redirect URIs, a little information is provided to fix the problem:
-
-    	So that an application can use Google's OAuth 2.0 authentication system for user login,
-    	first is required to set up a project in the Google Developers Console to obtain OAuth 2.0 credentials and set a redirect URI.
-    	A test account was created to set the project in the Google Developers Console to obtain OAuth 2.0 credentials,	with the following credentials:
-	        	username: openidtest10@gmail.com
-	          password: testOpenID10
-
-    	To add more URI's, follow the steps:
-    	1º choose the project ( can be the My OpenID Project)	 from  https://console.developers.google.com/projectselector/apis/credentials using the credentials provided above.
-    	2º Open The Client Web 1 listed in OAuth 2.0 Client ID's
-    	3º Add the URI  in the authorized redirect URI section.
-      4º change the REDIRECT parameter bellow with the pretended URI
-
-      identityModule._hello.init({google: "808329566012-tqr8qoh111942gd2kg007t0s8f277roi.apps.googleusercontent.com"});
-      identityModule._hello("google").login();
-
-    */
-
-    let VALIDURL   =   'https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=';
-    let USERINFURL =   'https://www.googleapis.com/oauth2/v1/userinfo?access_token=';
-    let acToken;
-    let tokenType;
-    let expiresIn;
-    let user;
-    let tokenID;
-    let infoToken;
-    let loggedIn = false;
-
     return new Promise(function(resolve, reject) {
-
-      if (_this.infoToken !== undefined) {
-        //TODO verify whether the token is still valid or not.
-        return resolve(_this.infoToken);
-      }
-
-      //function to validate the access token received during the authentication
-      function validateToken(token) {
-        let req = new XMLHttpRequest();
-        req.open('GET', VALIDURL + token, true);
-
-        req.onreadystatechange = function(e) {
-          if (req.readyState == 4) {
-            if (req.status == 200) {
-              getInfoToken(token);
-            } else if (req.status == 400) {
-              reject('There was an error processing the token');
-            } else {
-              reject('something else other than 200 was returned');
-            }
-          }
-        };
-        req.send();
-
-      }
-
-      //function to exchange the access token with an ID Token containing the information
-      function getInfoToken(token) {
-        let req = new XMLHttpRequest();
-        req.open('GET', USERINFURL + token, true);
-
-        req.onreadystatechange = function(e) {
-          if (req.readyState === 4) {
-            if (req.status === 200) {
-              infoToken = JSON.parse(req.responseText);
-              _this.infoToken = infoToken;
-              let email = infoToken.email;
-
-              //contruct the identityURL to be defined as in specification
-              // model: user://<idpdomain>/<user-identifier>
-              let identityURL = 'user://' + email.substring(email.indexOf('@') + 1, email.length) + '/' + email.substring(0, email.indexOf('@'));
-
-              //TODO remove later the 'token' field key
-              let identityBundle = {identity: identityURL, token: infoToken, accessToken: token, idToken: {}, infoToken: infoToken};
-
-              getIDToken(token, identityBundle);
-            } else if (req.status === 400) {
-              reject('There was an error processing the token');
-            } else {
-              reject('something else other than 200 was returned');
-            }
-          }
-        };
-        req.send();
-      }
-
-      function getIDToken(token, identityBundle) {
-        let req = new XMLHttpRequest();
-        req.open('GET', VALIDURL + token, true);
-
-        req.onreadystatechange = function(e) {
-          if (req.readyState === 4) {
-            if (req.status === 200) {
-              tokenID = JSON.parse(req.responseText);
-
-              identityBundle.idToken = tokenID;
-              _this.identities.push(identityBundle);
-              resolve(identityBundle.token);
-
-            } else if (req.status === 400) {
-              reject('There was an error processing the token');
-            } else {
-              reject('something else other than 200 was returned');
-            }
-          }
-        };
-        req.send();
-      }
-
-      hello.init({google: '808329566012-tqr8qoh111942gd2kg007t0s8f277roi.apps.googleusercontent.com'});
-      hello('google').login({scope: 'email'}).then(function(token) {
-
-        validateToken(token.authResponse.access_token);
-      }, function(error) {
-        console.log('errorValidating ', error);
-        reject(error);
+      _this.getIdentityAssertion().then(function(value) {
+        console.log('loginWithRP');
+        resolve(value);
+      }, function(err) {
+        console.log('loginWithRP err');
+        reject(err);
       });
-
     });
   }
 
   /**
-  * In relation with a Hyperty Instance: Associate identity
+  * Obtain an Identity Assertion
+  *
+  * @return {IdAssertion}              IdAssertion
   */
-  setHypertyIdentity() {
-    // Body...
+  getIdentityAssertion(identifier, origin, usernameHint, scope, idpDomain) {
+    let _this = this;
+
+    return new Promise(function(resolve,reject) {
+
+      if (_this.currentIdentity !== undefined) {
+        //TODO verify whether the token is still valid or not.
+        // should be needed to make further requests, to obtain a valid token
+        return resolve(_this.currentIdentity);
+      } else {
+
+        _this.generateAssertion('', origin, usernameHint, idpDomain).then(function(url) {
+          _this.generateAssertion(url, origin, usernameHint, idpDomain).then(function(value) {
+            resolve(value);
+          }, function(err) {
+            reject(err);
+          });
+        }, function(error) {
+          reject(error);
+        });
+
+      }
+    });
   }
 
   /**
@@ -238,8 +147,76 @@ class IdentityModule {
   * @param  {DOMString} usernameHint usernameHint
   * @return {IdAssertion}              IdAssertion
   */
-  generateAssertion(contents, origin, usernameHint) {
-    // Body...
+  generateAssertion(contents, origin, usernameHint, idpDomain) {
+    let _this = this;
+    let domain = _this._resolveDomain(idpDomain);
+    let message;
+
+    return new Promise(function(resolve,reject) {
+
+      if (contents) {
+        message = {type:'execute', to: domain, from: 'domain://localhost/id-module', body: {resource: 'identity', method: 'generateAssertion',
+               params: {contents: contents, origin: origin, usernameHint: usernameHint}}};
+
+        _this._messageBus.postMessage(message, (res) => {
+          let result = res.body.value;
+
+          if (result) {
+            result.identity = getUserURLFromEmail(result.info.email);
+
+            _this.identity.addIdentity(result);
+
+            //creation of a new JSON with the identity to send via messages
+            let newIdentity = {idp: result.idp.domain, assertion: result.assertion, email: result.info.email, identity: result.identity, infoToken: result.infoToken};
+            result.messageInfo = newIdentity;
+
+            _this.currentIdentity = newIdentity;
+            _this.identities.push(result);
+            resolve(newIdentity);
+          } else {
+            reject('error on obtaining identity information');
+          }
+
+        });
+      } else {
+
+        message = {type:'execute', to: domain, from: 'domain://localhost/id-module', body: {resource: 'identity', method: 'generateAssertion',
+        params: {contents: '', origin: origin, usernameHint: usernameHint}}};
+        _this._messageBus.postMessage(message, (result) => {
+
+          let urlToOpen = result.body.value.loginUrl;
+
+          if (!urlToOpen) {
+            return reject('Error: Invalid URL to obtain Identity');
+          } else {
+
+            //Open a window with the URL received by the proxy
+            //TODO later swap any existing redirectURI in the url, for a specific one in the idModule
+            let win = window.open(urlToOpen, 'openIDrequest', 'width=800, height=600');
+            let pollTimer = setInterval(function() {
+              try {
+
+                if (win.closed) {
+                  reject('Some error occured.');
+                  clearInterval(pollTimer);
+                }
+
+                if (win.document.URL.indexOf('REDIRECT') !== -1 || win.document.URL.indexOf(location.origin) !== -1) {
+                  window.clearInterval(pollTimer);
+                  let url =   win.document.URL;
+
+                  win.close();
+
+                  resolve(url);
+                }
+              } catch (e) {
+                //console.log(e);
+              }
+            }, 500);
+          }
+        });
+      }}
+    );
   }
 
   /**
@@ -250,18 +227,26 @@ class IdentityModule {
   * Function to validate an identity assertion generated previously.
   * Returns a promise with the result from the validation.
   * @param  {DOMString} assertion
+  * @param  {DOMString} origin       origin
   * @return {Promise}         Promise         promise with the result from the validation
   */
-  validateAssertion(assertion) {
-    // Body...
-  }
+  validateAssertion(assertion, origin, idpDomain) {
+    let _this = this;
 
-  /**
-  * Trust level evaluation of a received IdAssertion
-  * @param  {DOMString} assertion assertion
-  */
-  getAssertionTrustLevel(assertion) {
-    // Body...
+    let domain = _this._resolveDomain(idpDomain);
+
+    let message = {type:'EXECUTE', to: domain, from: 'domain://localhost/id-module', body: {resource: 'identity', method: 'validateAssertion',
+           params: {assertion: assertion, origin: origin}}};
+
+    return new Promise(function(resolve, reject) {
+      _this._messageBus.postMessage(message, (result) => {
+        if (result.body.code === 200) {
+          resolve(result.body.value);
+        } else {
+          reject('error', result.body.code);
+        }
+      });
+    });
   }
 
 }

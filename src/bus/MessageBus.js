@@ -74,6 +74,7 @@ class MessageBus extends Bus {
     return inMsg.id;
   }
 
+  /*
   addForward(from, to) {
     let _this = this;
 
@@ -108,24 +109,62 @@ class MessageBus extends Bus {
       _this._forwards[from] = conf;
     }
 
-    return new Promise((resolve) => {
-      //add forward detination
-      this._registry.getSandbox(to).then((sandbox) => {
-        let urls = conf.sandboxToUrls.get(sandbox);
-        if (!urls) {
-          urls = new Set();
-          conf.sandboxToUrls.set(sandbox, urls);
-        }
+    //add forward detination
+    this._registry.getSandbox(to).then((sandbox) => {
+      let urls = conf.sandboxToUrls.get(sandbox);
+      if (!urls) {
+        urls = new Set();
+        conf.sandboxToUrls.set(sandbox, urls);
+      }
 
-        urls.add(to);
-        conf.urlToSandbox.set(to, sandbox);
-
-        resolve(conf);
-      });
+      urls.add(to);
+      conf.urlToSandbox.set(to, sandbox);
     });
-  }
 
-  _publish(url, msg) {
+    return conf;
+  }
+  */
+
+ addPublish(from) {
+   let _this = this;
+
+   //verify if forward exist
+   let refCount = _this._forwards[from];
+   if (!refCount) {
+     let forwardListener = _this.addListener(from, (msg) => {
+       console.log('MB-PUBLISH: ( ' + from + ' )');
+       _this._onPostMessage(msg);
+     });
+
+     refCount = {
+       counter: 0,
+       fl: forwardListener,
+       remove: () => {
+         this.counter--;
+         if (this.counter === 0) {
+           this.fl.remove();
+           delete _this._forwards[from];
+         }
+       }
+     };
+
+     _this._forwards[from] = refCount;
+   }
+
+   refCount.counter++;
+   return refCount;
+ }
+
+ addForward(from, to) {
+   let _this = this;
+
+   return _this.addListener(from, (msg) => {
+     console.log('MB-FORWARD: ( ' + from + ' to ' + to + ' )');
+     _this.forward(to, msg);
+   });
+ }
+
+ forward(url, msg) {
     let _this = this;
 
     let itemList = _this._subscriptions[url];
@@ -139,7 +178,7 @@ class MessageBus extends Bus {
 
     //resolve external protostub...
     _this._registry.resolve(msg.to).then((route) => {
-      _this._publish(route, msg);
+      _this.forward(route, msg);
     }).catch(function(e) {
       console.log('RESOLVE-ERROR: ', e);
     });

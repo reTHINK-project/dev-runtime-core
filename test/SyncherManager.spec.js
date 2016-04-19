@@ -20,11 +20,49 @@ describe('SyncherManager', function() {
   let hyperURL1 = 'hyperty://h1.domain/h1';
   let hyperURL2 = 'hyperty://h2.domain/h2';
 
+  let initialData = {
+    communication: { name: 'chat-x' },
+    x: 10, y: 10
+  };
+
+  let msgNodeResponseFunc = (bus, msg) => {
+    if (msg.type === 'subscribe') {
+      if (msg.id === 2) {
+        //reporter subscribe
+        expect(msg).to.contain.all.keys({
+          id: 2, type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.h1.domain/sm',
+          body: { subscribe: [ objURL + '/children/children1', objURL + '/children/children2'], source: hyperURL1 }
+        });
+      } else {
+        //observer subscribe
+        expect(msg).to.contain.all.keys({
+          id: 5, type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.obj1/sm',
+          body: { subscribe: [ objURL + '/changes', objURL + '/children/children1', objURL + '/children/children2'], source: hyperURL2 }
+        });
+      }
+
+      //simulate msg-node response
+      bus.postMessage({
+        id: msg.id, type: 'response', from: msg.to, to: msg.from,
+        body: { code: 200 }
+      });
+    }
+  };
+
   //fake object allocator -> always return the same URL
   let allocator = {
     create: () => {
       return new Promise((resolve) => {
         resolve([objURL]);
+      });
+    }
+  };
+
+  let registry = {
+    registerDataObject: (identifier, dataObjectschema, dataObjectUrl, dataObjectReporter) => {
+      console.log('REGISTRY-OBJECT: ', identifier, dataObjectschema, dataObjectUrl, dataObjectReporter);
+      return new Promise((resolve) => {
+        resolve('ok');
       });
     }
   };
@@ -49,27 +87,12 @@ describe('SyncherManager', function() {
 
   it('reporter observer integration', function(done) {
     let bus = new MessageBus();
-
-    bus.addForward = (from, to) => {
-      //no need to config forward, sync2 adds listener for objURL, and it's on the same sandbox
-      console.log('addForward: ', from, to);
-    };
-
     bus._onPostMessage = (msg) => {
       console.log('_onPostMessage: ', msg);
-      expect(msg).to.eql({
-        id: 4, type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.h2.domain/sm',
-        body: { resource: objURL, childrenResources: ['children1', 'children2'], schema: schemaURL }
-      });
-
-      //simulate msg-node response
-      bus.postMessage({
-        id: 4, type: 'response', from: 'domain://msg-node.h2.domain/sm', to: 'hyperty-runtime://fake-runtime/sm',
-        body: { code: 200 }
-      });
+      msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, { }, catalog, allocator);
+    new SyncherManager(runtimeURL, bus, registry, catalog, allocator);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
@@ -80,16 +103,18 @@ describe('SyncherManager', function() {
         console.log('on-subscribe-reply');
         doo.onChange('*', (changeEvent) => {
           console.log('on-change: ', JSON.stringify(changeEvent));
-          expect(changeEvent).to.eql({ cType: 'add', oType: 'object', field: 'test', data: ['a', 'b', 'c'] });
-          expect(doo.data).to.eql({ x: 10, y: 10, test: ['a', 'b', 'c'] });
+          expect(changeEvent).to.contain.all.keys({ cType: 'add', oType: 'object', field: 'test', data: ['a', 'b', 'c'] });
+          expect(doo.data).to.contain.all.keys({ communication: { name: 'chat-x' }, x: 10, y: 10, test: ['a', 'b', 'c'] });
           done();
         });
       });
     });
 
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
-    sync1.create(schemaURL, [hyperURL2], { x: 10, y: 10 }).then((dor) => {
+    sync1.create(schemaURL, [], initialData).then((dor) => {
       console.log('on-create-reply');
+      dor.inviteObservers([hyperURL2]);
+
       dor.onSubscription((subscribeEvent) => {
         console.log('on-subscribe: ', subscribeEvent);
 
@@ -113,9 +138,9 @@ describe('SyncherManager', function() {
         console.log('3-postMessage: (seq === ' + seq + ')', JSON.stringify(msg));
 
         if (seq === 1) {
-          expect(msg).to.eql({
+          expect(msg).to.contain.all.keys({
             type: 'update', from: objURL, to: objURLChanges,
-            body: { version: 1, attribute: '1',
+            body: { version: 1, source: hyperURL1, attribute: '1',
               value: {
                 name: 'Micael',
                 birthdate: '28-02-1981',
@@ -128,9 +153,9 @@ describe('SyncherManager', function() {
         }
 
         if (seq === 2) {
-          expect(msg).to.eql({
+          expect(msg).to.contain.all.keys({
             type: 'update', from: objURL, to: objURLChanges,
-            body: { version: 2, attribute: '2',
+            body: { version: 2, source: hyperURL1, attribute: '2',
               value: {
                 name: 'Luis Duarte',
                 birthdate: '02-12-1991',
@@ -149,30 +174,30 @@ describe('SyncherManager', function() {
         }
 
         if (seq === 3) {
-          expect(msg).to.eql({
+          expect(msg).to.contain.all.keys({
             type: 'update', from: objURL, to: objURLChanges,
-            body: { version: 3, attribute: '2' }
+            body: { version: 3, source: hyperURL1, attribute: '2' }
           });
         }
 
         if (seq === 4) {
-          expect(msg).to.eql({
+          expect(msg).to.contain.all.keys({
             type: 'update', from: objURL, to: objURLChanges,
-            body: { version: 4, attribute: '1.name', value: 'Micael Pedrosa' }
+            body: { version: 4, source: hyperURL1, attribute: '1.name', value: 'Micael Pedrosa' }
           });
         }
 
         if (seq === 5) {
-          expect(msg).to.eql({
+          expect(msg).to.contain.all.keys({
             type: 'update', from: objURL, to: objURLChanges,
-            body: { version: 5, attribute: '1.birthdate', value: '1982-02-28T00:00:00.000Z' }
+            body: { version: 5, source: hyperURL1, attribute: '1.birthdate', value: '1982-02-28T00:00:00.000Z' }
           });
         }
 
         if (seq === 6) {
-          expect(msg).to.eql({
+          expect(msg).to.contain.all.keys({
             type: 'update', from: objURL, to: objURLChanges,
-            body: { version: 6, attribute: '1.obj1.name', value: 'XPTO' }
+            body: { version: 6, source: hyperURL1, attribute: '1.obj1.name', value: 'XPTO' }
           });
 
           //apply changes...
@@ -180,9 +205,9 @@ describe('SyncherManager', function() {
         }
 
         if (seq === 7) {
-          expect(msg).to.eql({
+          expect(msg).to.contain.all.keys({
             type: 'update', from: objURL, to: objURLChanges,
-            body: { version: 7, attribute: '1.arr', value: [1, 0, {x: 10, y: 20}] }
+            body: { version: 7, source: hyperURL1, attribute: '1.arr', value: [1, 0, {x: 10, y: 20}] }
           });
 
           //apply changes...
@@ -190,9 +215,9 @@ describe('SyncherManager', function() {
         }
 
         if (seq === 8) {
-          expect(msg).to.eql({
+          expect(msg).to.contain.all.keys({
             type: 'update', from: objURL, to: objURLChanges,
-            body:{ version: 8, attributeType: 'array', attribute: '1.arr.1', value: 2 }
+            body:{ version: 8, source: hyperURL1, attributeType: 'array', attribute: '1.arr.1', value: 2 }
           });
 
           //apply changes...
@@ -201,16 +226,16 @@ describe('SyncherManager', function() {
         }
 
         if (seq === 9) {
-          expect(msg).to.eql({
+          expect(msg).to.contain.all.keys({
             type: 'update', from: objURL, to: objURLChanges,
-            body: { version: 9, attributeType: 'array', operation: 'add', attribute: '1.arr.3', value: [3] }
+            body: { version: 9, source: hyperURL1, attributeType: 'array', operation: 'add', attribute: '1.arr.3', value: [3] }
           });
         }
 
         if (seq === 10) {
-          expect(msg).to.eql({
+          expect(msg).to.contain.all.keys({
             type: 'update', from: objURL, to: objURLChanges,
-            body: { version: 10, attributeType: 'array', operation: 'add', attribute: '1.arr.4', value: [{x: 1, y: 2}] }
+            body: { version: 10, source: hyperURL1, attributeType: 'array', operation: 'add', attribute: '1.arr.4', value: [{x: 1, y: 2}] }
           });
 
           //apply changes...
@@ -219,23 +244,23 @@ describe('SyncherManager', function() {
         }
 
         if (seq === 11) {
-          expect(msg).to.eql({
+          expect(msg).to.contain.all.keys({
             type: 'update', from: objURL, to: objURLChanges,
-            body: { version: 11, attributeType: 'array', operation: 'remove', attribute: '1.arr.1', value: 2 }
+            body: { version: 11, source: hyperURL1, attributeType: 'array', operation: 'remove', attribute: '1.arr.1', value: 2 }
           });
         }
 
         if (seq === 12) {
-          expect(msg).to.eql({
+          expect(msg).to.contain.all.keys({
             type: 'update', from: objURL, to: objURLChanges,
-            body: { version: 12, attributeType: 'array', operation: 'add', attribute: '1.arr.1', value: [10, 11, 12] }
+            body: { version: 12, source: hyperURL1, attributeType: 'array', operation: 'add', attribute: '1.arr.1', value: [10, 11, 12] }
           });
         }
 
         if (seq === 13) {
-          expect(msg).to.eql({
+          expect(msg).to.contain.all.keys({
             type: 'update', from: objURL, to: objURLChanges,
-            body: { version: 13, attribute: '1.arr.5.x', value: 10 }
+            body: { version: 13, source: hyperURL1, attribute: '1.arr.5.x', value: 10 }
           });
 
           //apply changes...
@@ -243,9 +268,9 @@ describe('SyncherManager', function() {
         }
 
         if (seq === 14) {
-          expect(msg).to.eql({
+          expect(msg).to.contain.all.keys({
             type: 'update', from: objURL, to: objURLChanges,
-            body: { version: 14, attributeType: 'array', operation: 'remove', attribute: '1.arr.5', value: 1 }
+            body: { version: 14, source: hyperURL1, attributeType: 'array', operation: 'remove', attribute: '1.arr.5', value: 1 }
           });
 
           done();
@@ -258,10 +283,9 @@ describe('SyncherManager', function() {
     };
 
     //BEGIN: skip message system (already tested in previous units) and manually create a reporter and subscription, this should not be done in real code.
-    let reporter = new DataObjectReporter(hyperURL1, objURL, schemaURL, bus, 'on', {}, []);
-    reporter.subscriptions[hyperURL2] = { status: 'on' };
-
     let sync = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
+    let reporter = new DataObjectReporter(sync, objURL, schemaURL, 'on', {}, []);
+    reporter.subscriptions[hyperURL2] = { status: 'on' };
     sync.reporters[objURL] = reporter;
 
     //END
@@ -293,7 +317,7 @@ describe('SyncherManager', function() {
     let compacted = false;
 
     let sync = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
-    let observer = new DataObjectObserver(hyperURL1, objURL, schemaURL, bus, 'on', {}, [], 0);
+    let observer = new DataObjectObserver(sync, objURL, schemaURL, 'on', { data: {}, childrens: {} }, [], 0);
     sync.observers[objURL] = observer;
 
     observer.onChange('*', (event) => {
@@ -301,14 +325,14 @@ describe('SyncherManager', function() {
       console.log('4-onChange: (seq === ' + seq + ')', JSON.stringify(event));
 
       if (seq === 1) {
-        expect(event).to.eql({ cType: 'add', oType: 'object', field: '1', data: { name: 'Micael', birthdate:'28-01-1981', email: 'micael-xxx@gmail.com', phone: 911000000, obj1: { name: 'xpto' } } });
+        expect(event).to.contain.all.keys({ cType: 'add', oType: 'object', field: '1', data: { name: 'Micael', birthdate:'28-01-1981', email: 'micael-xxx@gmail.com', phone: 911000000, obj1: { name: 'xpto' } } });
       }
 
       if (seq === 2) {
-        expect(event).to.eql({ cType: 'add', oType: 'object', field: '2', data: { name: 'Luis Duarte', birthdate: '02-12-1991', email: 'luis-xxx@gmail.com', phone: 910000000, obj1:{ name: 'xpto' } } });
+        expect(event).to.contain.all.keys({ cType: 'add', oType: 'object', field: '2', data: { name: 'Luis Duarte', birthdate: '02-12-1991', email: 'luis-xxx@gmail.com', phone: 910000000, obj1:{ name: 'xpto' } } });
 
         //verify changes...
-        expect(data).to.eql({
+        expect(data).to.contain.all.keys({
           1: { name: 'Micael', birthdate: '28-01-1981', email: 'micael-xxx@gmail.com', phone: 911000000, obj1: { name: 'xpto' } },
           2: { name: 'Luis Duarte', birthdate: '02-12-1991', email: 'luis-xxx@gmail.com', phone: 910000000, obj1: { name: 'xpto' } }
         });
@@ -335,22 +359,22 @@ describe('SyncherManager', function() {
       }
 
       if (seq === 3) {
-        expect(event).to.eql({ cType: 'remove', oType: 'object', field: '2' });
+        expect(event).to.contain.all.keys({ cType: 'remove', oType: 'object', field: '2' });
       }
 
       if (seq === 4) {
-        expect(event).to.eql({ cType: 'update', oType: 'object', field: '1.name', data: 'Micael Pedrosa' });
+        expect(event).to.contain.all.keys({ cType: 'update', oType: 'object', field: '1.name', data: 'Micael Pedrosa' });
       }
 
       if (seq === 5) {
-        expect(event).to.eql({ cType: 'update', oType: 'object', field: '1.birthdate', data: '28-02-1981' });
+        expect(event).to.contain.all.keys({ cType: 'update', oType: 'object', field: '1.birthdate', data: '28-02-1981' });
       }
 
       if (seq === 6) {
-        expect(event).to.eql({ cType: 'update', oType: 'object', field: '1.obj1.name', data: 'XPTO' });
+        expect(event).to.contain.all.keys({ cType: 'update', oType: 'object', field: '1.obj1.name', data: 'XPTO' });
 
         //verify changes...
-        expect(data).to.eql({
+        expect(data).to.contain.all.keys({
           1: { name: 'Micael Pedrosa', birthdate: '28-02-1981', email: 'micael-xxx@gmail.com', phone: 911000000, obj1: { name: 'XPTO' } }
         });
 
@@ -361,10 +385,10 @@ describe('SyncherManager', function() {
       }
 
       if (seq === 7) {
-        expect(event).to.eql({ cType: 'add', oType: 'object', field: '1.arr', data: [1, 0, { x: 10, y: 20 }] });
+        expect(event).to.contain.all.keys({ cType: 'add', oType: 'object', field: '1.arr', data: [1, 0, { x: 10, y: 20 }] });
 
         //verify changes...
-        expect(data).to.eql({
+        expect(data).to.contain.all.keys({
           1: { name: 'Micael Pedrosa', birthdate: '28-02-1981', email: 'micael-xxx@gmail.com', phone: 911000000, obj1: {name: 'XPTO'}, arr: [1, 0, { x: 10, y: 20 }] }
         });
 
@@ -375,10 +399,10 @@ describe('SyncherManager', function() {
       }
 
       if (seq === 8) {
-        expect(event).to.eql({ cType: 'update', oType: 'array', field: '1.arr.1', data: 2 });
+        expect(event).to.contain.all.keys({ cType: 'update', oType: 'array', field: '1.arr.1', data: 2 });
 
         //verify changes...
-        expect(data).to.eql({
+        expect(data).to.contain.all.keys({
           1: { name: 'Micael Pedrosa', birthdate: '28-02-1981', email: 'micael-xxx@gmail.com', phone: 911000000, obj1: {name: 'XPTO'}, arr: [1, 2, { x: 10, y: 20 }] }
         });
 
@@ -395,23 +419,23 @@ describe('SyncherManager', function() {
 
       if (seq === 9) {
         if (event.data.length === 1) {
-          expect(event).to.eql({ cType: 'add', oType: 'array', field: '1.arr.3', data: [3] });
+          expect(event).to.contain.all.keys({ cType: 'add', oType: 'array', field: '1.arr.3', data: [3] });
         } else {
           //it's OK to compact 2 messages...
-          expect(event).to.eql({ cType: 'add', oType: 'array', field: '1.arr.3', data: [3, { x: 1, y: 2 }]});
+          expect(event).to.contain.all.keys({ cType: 'add', oType: 'array', field: '1.arr.3', data: [3, { x: 1, y: 2 }]});
           compacted = true;
         }
       }
 
       if (seq === 10) {
         if (!compacted) {
-          expect(event).to.eql({ cType: 'add', oType: 'array', field: '1.arr.4', data: [{ x: 1, y: 2 }] });
+          expect(event).to.contain.all.keys({ cType: 'add', oType: 'array', field: '1.arr.4', data: [{ x: 1, y: 2 }] });
         }
 
         compacted = false;
 
         //verify changes...
-        expect(data).to.eql({
+        expect(data).to.contain.all.keys({
           1: { name: 'Micael Pedrosa', birthdate: '28-02-1981', email: 'micael-xxx@gmail.com', phone: 911000000, obj1: { name: 'XPTO' }, arr: [1, 2, { x: 10, y: 20 }, 3, { x: 1, y: 2 }]}
         });
 
@@ -437,18 +461,18 @@ describe('SyncherManager', function() {
 
       /*
       if (seq === 11) {
-        expect(event).to.eql({ cType: 'remove', oType: 'array', field: '1.arr.1', data: 2 });
+        expect(event).to.contain.all.keys({ cType: 'remove', oType: 'array', field: '1.arr.1', data: 2 });
       }
 
       if (seq === 12) {
-        expect(event).to.eql({ cType: 'add', oType: 'array', field: '1.arr.1', data: [10, 11, 12] });
+        expect(event).to.contain.all.keys({ cType: 'add', oType: 'array', field: '1.arr.1', data: [10, 11, 12] });
       }
 
       if (seq === 13) {
-        expect(event).to.eql({ cType: 'update', oType: 'object', field: '1.arr.5.x', data: 10 });
+        expect(event).to.contain.all.keys({ cType: 'update', oType: 'object', field: '1.arr.5.x', data: 10 });
 
         //verify changes...
-        expect(data).to.eql({
+        expect(data).to.contain.all.keys({
           1: { name: 'Micael Pedrosa', birthdate: '28-02-1981', email: 'micael-xxx@gmail.com', phone: 911000000, obj1: { name: 'XPTO' }, arr: [1, 10, 11, 12, 3, { x: 10, y: 2 }] }
         });
 
@@ -459,10 +483,10 @@ describe('SyncherManager', function() {
       }
 
       if (seq === 14) {
-        expect(event).to.eql({ cType: 'remove', oType: 'array', field: '1.arr.5', data: 1 });
+        expect(event).to.contain.all.keys({ cType: 'remove', oType: 'array', field: '1.arr.5', data: 1 });
 
         //verify changes...
-        expect(data).to.eql({
+        expect(data).to.contain.all.keys({
           1: { name: 'Micael Pedrosa', birthdate: '28-02-1981', email: 'micael-xxx@gmail.com', phone: 911000000, obj1: { name: 'XPTO' }, arr: [1, 10, 11, 12, 3] }
         });
 
@@ -503,20 +527,15 @@ describe('SyncherManager', function() {
 
   it('reporter addChildren', function(done) {
     let bus = new MessageBus();
-
-    bus.addForward = (from, to) => {
-      //no need to config forward, sync2 adds listener for objURL, and it's on the same sandbox
-      console.log('5-addForward: ', from, to);
-    };
-
     bus._onPostMessage = (msg) => {
       console.log('5-_onPostMessage: ', msg);
+      msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, { }, catalog, allocator);
+    new SyncherManager(runtimeURL, bus, registry, catalog, allocator);
 
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
-    sync1.create(schemaURL, [], { x: 10, y: 10 }).then((dor) => {
+    sync1.create(schemaURL, [], initialData).then((dor) => {
       console.log('on-create-reply');
       dor.addChildren('children1', 'my message').then((doc) => {
         console.log('on-addChildren-reply', doc);
@@ -527,18 +546,12 @@ describe('SyncherManager', function() {
 
   it('observer addChildren', function(done) {
     let bus = new MessageBus();
-    bus.addForward = (from, to) => {
-      console.log('6-addForward: ', from, to);
-    };
     bus._onPostMessage = (msg) => {
       console.log('6-_onPostMessage: ', msg);
-      bus.postMessage({
-        id: 4, type: 'response', from: 'domain://msg-node.h2.domain/sm', to: 'hyperty-runtime://fake-runtime/sm',
-        body: { code: 200 }
-      });
+      msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, { }, catalog, allocator);
+    new SyncherManager(runtimeURL, bus, registry, catalog, allocator);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
@@ -551,7 +564,7 @@ describe('SyncherManager', function() {
           console.log('on-local-addChildren');
           doc.onResponse((event) => {
             console.log('on-remote-addChildren-reply', event);
-            expect(event).to.eql({ type: 'response', url: hyperURL1, code: 200 });
+            expect(event).to.contain.all.keys({ type: 'response', url: hyperURL1, code: 200 });
             done();
           });
         });
@@ -559,12 +572,12 @@ describe('SyncherManager', function() {
     });
 
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
-    sync1.create(schemaURL, [hyperURL2], { x: 10, y: 10 }).then((dor) => {
+    sync1.create(schemaURL, [hyperURL2], initialData).then((dor) => {
       console.log('on-create-reply');
       dor.onSubscription((subscribeEvent) => {
         dor.onAddChildren((event) => {
           console.log('on-remote-addChildren', event);
-          expect(event).to.eql({ type: 'create', from: hyperURL2, url: 'resource://obj1/children/children1', childId: hyperURL2 + '#1', value: { message: 'Hello World!' } });
+          expect(event).to.contain.all.keys({ type: 'create', from: hyperURL2, url: 'resource://obj1/children/children1', childId: hyperURL2 + '#1', value: { message: 'Hello World!' } });
         });
 
         console.log('on-subscribe: ', subscribeEvent);
@@ -575,18 +588,12 @@ describe('SyncherManager', function() {
 
   it('children deltas generate and process', function(done) {
     let bus = new MessageBus();
-    bus.addForward = (from, to) => {
-      console.log('7-addForward: ', from, to);
-    };
     bus._onPostMessage = (msg) => {
       console.log('7-_onPostMessage: ', msg);
-      bus.postMessage({
-        id: 4, type: 'response', from: 'domain://msg-node.h2.domain/sm', to: 'hyperty-runtime://fake-runtime/sm',
-        body: { code: 200 }
-      });
+      msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, { }, catalog, allocator);
+    new SyncherManager(runtimeURL, bus, registry, catalog, allocator);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
@@ -600,18 +607,114 @@ describe('SyncherManager', function() {
     });
 
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
-    sync1.create(schemaURL, [hyperURL2], { x: 10, y: 10 }).then((dor) => {
+    sync1.create(schemaURL, [hyperURL2], initialData).then((dor) => {
       dor.onSubscription((subscribeEvent) => {
         dor.onAddChildren((event) => {
-          let children1 = dor.children[event.childId];
+          let children1 = dor.childrens[event.childId];
           children1.onChange((changeEvent) => {
             console.log('onChange: ', changeEvent);
-            expect(changeEvent).to.eql({ cType: 'update', oType: 'object', field: 'message', data: 'Hello Luis!' });
-            expect(children1.data).to.eql({ message: 'Hello Luis!' });
+            expect(changeEvent).to.contain.all.keys({ cType: 'update', oType: 'object', field: 'message', data: 'Hello Luis!' });
+            expect(children1.data).to.contain.all.keys({ message: 'Hello Luis!' });
             done();
           });
         });
 
+        subscribeEvent.accept();
+      });
+    });
+  });
+
+  it('create and delete', function(done) {
+    let deleted = false;
+
+    let bus = new MessageBus();
+    bus._onPostMessage = (msg) => {
+      console.log('8-_onPostMessage: ', msg);
+      if (msg.type === 'subscribe') {
+        bus.postMessage({
+          id: msg.id, type: 'response', from: msg.to, to: msg.from,
+          body: { code: 200 }
+        });
+      } else if (msg.type === 'delete') {
+        //expect delete message to msg-node
+        if (msg.from === runtimeURL + '/sm') {
+          expect(msg.to).to.eql('domain://msg-node.h1.domain/object-address-allocation');
+          expect(msg.body.resource).to.eql(objURL);
+
+          expect(deleted).to.eql(true);
+
+          done();
+        }
+      }
+    };
+
+    new SyncherManager(runtimeURL, bus, registry, catalog, allocator);
+
+    let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
+    sync2.onNotification((notifyEvent) => {
+      console.log('onNotification: ', notifyEvent);
+      if (notifyEvent.type === 'create') {
+        sync2.subscribe(schemaURL, notifyEvent.url).then((doo) => {
+          console.log('subscribe: ', doo.url);
+        });
+      } else if (notifyEvent.type === 'delete') {
+        notifyEvent.ack();
+        deleted = true;
+      }
+    });
+
+    let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
+    sync1.create(schemaURL, [hyperURL2], initialData).then((dor) => {
+      console.log('create: ', dor.url);
+      dor.onSubscription((subscribeEvent) => {
+        console.log('onSubscription: ', subscribeEvent);
+        subscribeEvent.accept();
+
+        setTimeout(() => {
+          expect(sync1.reporters[dor.url]).to.eql(dor);
+          dor.delete();
+          expect(sync1.reporters[dor.url]).to.be.empty;
+          console.log('reporter-deleted');
+        });
+      });
+    });
+  });
+
+  it('subscribe and unsubscribe', function(done) {
+    let bus = new MessageBus();
+    bus._onPostMessage = (msg) => {
+      console.log('8-_onPostMessage: ', msg);
+      if (msg.type === 'subscribe') {
+        bus.postMessage({
+          id: msg.id, type: 'response', from: msg.to, to: msg.from,
+          body: { code: 200 }
+        });
+      } else if (msg.type === 'unsubscribe') {
+        //expect delete message to msg-node
+        expect(msg.from).to.eql(runtimeURL + '/sm');
+        expect(msg.to).to.eql('domain://msg-node.h2.domain/sm');
+        expect(msg.body.resource).to.eql(objURL);
+
+        done();
+      }
+    };
+
+    new SyncherManager(runtimeURL, bus, registry, catalog, allocator);
+
+    let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
+    sync2.onNotification((notifyEvent) => {
+      console.log('onNotification: ', notifyEvent);
+      sync2.subscribe(schemaURL, notifyEvent.url).then((doo) => {
+        console.log('subscribe: ', doo.url);
+        doo.unsubscribe();
+      });
+    });
+
+    let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
+    sync1.create(schemaURL, [hyperURL2], initialData).then((dor) => {
+      console.log('create: ', dor.url);
+      dor.onSubscription((subscribeEvent) => {
+        console.log('onSubscription: ', subscribeEvent);
         subscribeEvent.accept();
       });
     });
