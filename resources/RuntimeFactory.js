@@ -1,32 +1,35 @@
 import SandboxBrowser from './sandboxes/SandboxBrowser';
 import AppSandboxBrowser from './sandboxes/AppSandboxBrowser';
 import Request from './Request';
+import {RuntimeCatalogueLocal, RuntimeCatalogue} from 'service-framework/dist/RuntimeCatalogue';
 
 class RuntimeFactory {
 
-  get messageBus() {
-    let _this = this;
-    return _this._messageBus;
-  }
-
-  set messageBus(messageBus) {
-    let _this = this;
-    _this._messageBus = messageBus;
-  }
-
   createSandbox() {
-    let _this = this;
-    return new SandboxBrowser(_this._messageBus);
+    return new SandboxBrowser();
   }
 
   createAppSandbox() {
-    let _this = this;
-    return new AppSandboxBrowser(_this._messageBus);
+    return new AppSandboxBrowser();
   }
 
   createHttpRequest() {
     let request = new Request();
     return request;
+  }
+
+  // TODO optimize the parameter was passed to inside the RuntimeCatalogue
+  createRuntimeCatalogue() {
+
+    let _this = this;
+    let factory = {
+      createHttpRequest: function() {
+        return _this.createHttpRequest();
+      }
+    };
+
+    return new RuntimeCatalogueLocal(factory);
+
   }
 
   removeSandbox() {
