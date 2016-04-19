@@ -1,6 +1,6 @@
 {
   "name": "runtime-core",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "core runtime development",
   "main": "./dist/RuntimeUA.js",
   "directories": {
@@ -89,7 +89,7 @@
       "bip39": "npm:bip39@^2.2.0",
       "bitcoinjs-lib": "npm:bitcoinjs-lib@^2.1.4",
       "jsrsasign": "npm:jsrsasign@^5.0.5",
-      "service-framework": "github:rethink-project/dev-service-framework@master",
+      "service-framework": "github:rethink-project/dev-service-framework@develop",
       "sjcl": "npm:sjcl@1.0.3"
     },
     "devDependencies": {
@@ -103,7 +103,7 @@
     "bip39": "^2.2.0",
     "bitcoinjs-lib": "^2.1.4",
     "jsrsasign": "^5.0.5",
-    "service-framework": "github:rethink-project/dev-service-framework#master",
+    "service-framework": "github:rethink-project/dev-service-framework#develop",
     "sjcl": "^1.0.3",
     "universal-localstorage": "^1.0.2"
   }
