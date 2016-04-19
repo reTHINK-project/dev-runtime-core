@@ -119,23 +119,31 @@ class IdentityModule {
 
     return new Promise(function(resolve,reject) {
 
-      if (_this.currentIdentity !== undefined) {
-        //TODO verify whether the token is still valid or not.
-        // should be needed to make further requests, to obtain a valid token
-        return resolve(_this.currentIdentity);
+      if (!window) {
+        let randomNumber = Math.floor((Math.random() * 10000) + 1);
+        let identityBundle = {assertion: 'assertion', email: 'nodejs-' + randomNumber + '@nodejs.com', identity: 'user://nodejs-' + randomNumber, idp:'nodejs'};
+        return resolve(identityBundle);
       } else {
 
-        _this.generateAssertion('', origin, usernameHint, idpDomain).then(function(url) {
-          _this.generateAssertion(url, origin, usernameHint, idpDomain).then(function(value) {
-            resolve(value);
-          }, function(err) {
-            reject(err);
-          });
-        }, function(error) {
-          reject(error);
-        });
+        if (_this.currentIdentity !== undefined) {
+          //TODO verify whether the token is still valid or not.
+          // should be needed to make further requests, to obtain a valid token
+          return resolve(_this.currentIdentity);
+        } else {
 
+          _this.generateAssertion('', origin, usernameHint, idpDomain).then(function(url) {
+            _this.generateAssertion(url, origin, usernameHint, idpDomain).then(function(value) {
+              resolve(value);
+            }, function(err) {
+              reject(err);
+            });
+          }, function(error) {
+            reject(error);
+          });
+
+        }
       }
+
     });
   }
 
