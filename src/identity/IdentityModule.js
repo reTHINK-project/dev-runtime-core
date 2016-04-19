@@ -119,16 +119,22 @@ class IdentityModule {
 
     return new Promise(function(resolve,reject) {
 
-      if (!window) {
-        let randomNumber = Math.floor((Math.random() * 10000) + 1);
-        let identityBundle = {assertion: 'assertion', email: 'nodejs-' + randomNumber + '@nodejs.com', identity: 'user://nodejs-' + randomNumber, idp:'nodejs'};
-        return resolve(identityBundle);
+      if (_this.currentIdentity !== undefined) {
+        //TODO verify whether the token is still valid or not.
+        // should be needed to make further requests, to obtain a valid token
+        return resolve(_this.currentIdentity);
       } else {
 
-        if (_this.currentIdentity !== undefined) {
-          //TODO verify whether the token is still valid or not.
-          // should be needed to make further requests, to obtain a valid token
-          return resolve(_this.currentIdentity);
+        //CHECK whether is browser environment or nodejs
+        //if it is browser, then create a fake identity
+        if (!window) {
+          let randomNumber = Math.floor((Math.random() * 10000) + 1);
+          let identityBundle = {assertion: 'assertion', email: 'nodejs-' + randomNumber + '@nodejs.com', identity: 'user://nodejs-' + randomNumber, idp:'nodejs', infoToken: {
+            email:'nodejs-' + randomNumber + '@nodejs.com'
+          }};
+          _this.currentIdentity = identityBundle;
+          _this.identities.push(identityBundle);
+          return resolve(identityBundle);
         } else {
 
           _this.generateAssertion('', origin, usernameHint, idpDomain).then(function(url) {
