@@ -31,7 +31,7 @@ let identityModule = {
 };
 
 let getRegistry = new Promise(function(resolve, reject) {
-  var registry = new Registry(runtimeURL, appSandbox, identityModule);
+  let registry = new Registry(runtimeURL, appSandbox, identityModule);
   resolve(registry);
 });
 
@@ -250,9 +250,18 @@ getRegistry.then(function(registry) {
         });
 
         expect(graphConnector2.useGUID(mnemonic1).then(function(response) {
+
           let publicKey2 = graphConnector2.globalRegistryRecord.publicKey;
           let publicKeyObject2 = jsrsasign.KEYUTIL.getKey(publicKey2);
-          let isValid = KJUR.jws.JWS.verify(jwt1, publicKeyObject2, ['ES256']);
+
+          let unwrappedJWT = KJUR.jws.JWS.parse(jwt1);
+          let encodedString = jwt1.split('.').slice(0, 2).join('.');
+          let sigValueHex = unwrappedJWT.sigHex;
+          let sig = new KJUR.crypto.Signature({alg: 'SHA256withECDSA'});
+          sig.init(publicKeyObject2);
+          sig.updateString(encodedString);
+          let isValid = sig.verify(sigValueHex);
+
           return isValid;
         })).to.be.fulfilled.and.eventually.equal(true).and.notify(done);
 

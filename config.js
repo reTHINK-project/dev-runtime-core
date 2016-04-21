@@ -22,10 +22,12 @@ System.config({
     "bip39": "npm:bip39@2.2.0",
     "bitcoinjs-lib": "npm:bitcoinjs-lib@2.2.0",
     "browserify": "npm:browserify@11.1.0",
+    "buffer": "npm:buffer@4.5.1",
     "core-js": "npm:core-js@1.2.6",
     "deep-eql": "npm:deep-eql@0.1.3",
     "handlebars": "github:components/handlebars.js@4.0.5",
     "hellojs": "npm:hellojs@1.12.0",
+    "hex64": "npm:hex64@0.4.0",
     "jsrsasign": "npm:jsrsasign@5.0.7",
     "karma-browserify": "npm:karma-browserify@4.3.0",
     "service-framework": "github:rethink-project/dev-service-framework@develop",
@@ -492,6 +494,15 @@ System.config({
       "isarray": "npm:isarray@1.0.0",
       "process": "github:jspm/nodelibs-process@0.1.2"
     },
+    "npm:buffer@4.5.1": {
+      "base64-js": "npm:base64-js@1.1.2",
+      "child_process": "github:jspm/nodelibs-child_process@0.1.0",
+      "fs": "github:jspm/nodelibs-fs@0.1.2",
+      "ieee754": "npm:ieee754@1.1.6",
+      "isarray": "npm:isarray@1.0.0",
+      "path": "github:jspm/nodelibs-path@0.1.0",
+      "process": "github:jspm/nodelibs-process@0.1.2"
+    },
     "npm:bufferutil@1.0.1": {
       "bindings": "npm:bindings@1.2.1",
       "nan": "npm:nan@1.6.2"
@@ -938,6 +949,9 @@ System.config({
       "tty": "github:jspm/nodelibs-tty@0.1.0",
       "url": "github:jspm/nodelibs-url@0.1.0",
       "util": "github:jspm/nodelibs-util@0.1.0"
+    },
+    "npm:hex64@0.4.0": {
+      "buffer": "github:jspm/nodelibs-buffer@0.1.0"
     },
     "npm:http-browserify@1.7.0": {
       "Base64": "npm:Base64@0.2.1",
