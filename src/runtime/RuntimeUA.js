@@ -20,6 +20,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 **/
+
 //Main dependecies
 import Registry from '../registry/Registry';
 import IdentityModule from '../identity/IdentityModule';
@@ -443,11 +444,15 @@ class RuntimeUA {
 
           _runtimeProtoStubURL = runtimeProtoStubURL;
 
-          console.log(_stubDescriptor);
-
           // Extend original hyperty configuration;
-          let configuration = Object.assign({}, JSON.parse(_stubDescriptor.configuration));
-          configuration.runtimeURL = _this.runtimeURL;
+          let configuration = {};
+          if (!emptyObject(_stubDescriptor.configuration)) {
+            try {
+              configuration = Object.assign({}, JSON.parse(_stubDescriptor.configuration));
+            } catch (e) {
+              configuration = _stubDescriptor.configuration;
+            }
+          }
 
           // Deploy Component step xxx
           return _stubSandbox.deployComponent(_stubSourcePackage.sourceCode, runtimeProtoStubURL, configuration);
@@ -471,6 +476,171 @@ class RuntimeUA {
           };
 
           resolve(stub);
+          console.info('------------------- END ---------------------------\n');
+
+        })
+        .catch(errorReason);
+
+      });
+
+    });
+
+  }
+
+  /**
+  * Deploy Stub from Catalogue URL or domain url
+  * @param  {URL.URL}     domain          domain
+  */
+  loadIdpProxy(idpProxyURL) {
+
+    let _this = this;
+
+    if (!idpProxyURL) throw new Error('The IDP Proxy URL is a needed parameter, could be a DOMAIN or a URL');
+
+    return new Promise(function(resolve, reject) {
+
+      let domain = divideURL(idpProxyURL).domain;
+
+      if (!domain) {
+        domain = idpProxyURL;
+      }
+
+      let _proxySandbox;
+      let _proxyDescriptor;
+      let _runtimeIdpProxyURL;
+      let _proxySourcePackage;
+
+      let errorReason = function(reason) {
+        console.error(reason);
+        reject(reason);
+      };
+
+      // Discover IDPProxy
+      console.info('------------------- IDP Proxy Deploy ---------------------------\n');
+      console.info('Discover or Create a new IdpProxy for domain/URL: ', domain);
+      return _this.registry.discoverProtostub(domain).then(function(runtimeIdpProxyURL) {
+        // Is registed?
+        console.info('1. IDPProxy Discovered: ', runtimeIdpProxyURL);
+
+        // we have completed step 2 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+
+        // TODO: Check if the status is saved in the status of sandbox;
+        let idpProxy = {
+          runtimeIdpProxyURL: runtimeIdpProxyURL,
+          status: 'deployed'
+        };
+
+        resolve(idpProxy);
+        console.info('------------------- END ---------------------------\n');
+      })
+      .catch(function(reason) {
+
+        // is not registed?
+        console.info('1. IdpProxy not found:', reason);
+
+        // we have completed step 3 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+
+        // we need to get ProtoStub descriptor step 4 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+        _this.runtimeCatalogue.getIdpProxyDescriptor(idpProxyURL)
+        .then(function(proxyDescriptor) {
+
+          console.info('2. Return the IDPProxy descriptor:', proxyDescriptor);
+
+          // we have completed step 5 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          _proxyDescriptor = proxyDescriptor;
+
+          let sourcePackageURL = proxyDescriptor.sourcePackageURL;
+
+          if (sourcePackageURL === '/sourcePackage') {
+            return proxyDescriptor.sourcePackage;
+          }
+
+          // we need to get ProtoStub Source code from descriptor - step 6 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          return _this.runtimeCatalogue.getSourcePackageFromURL(sourcePackageURL);
+        })
+        .then(function(sourcePackage) {
+          console.info('3. return the IDPProxy source package: ', sourcePackage);
+
+          // we have completed step 7 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+
+          _proxySourcePackage = sourcePackage;
+
+          // TODO: Check on PEP (policy Engine) if we need the sandbox and check if the Sandbox Factory have the context sandbox;
+          let policy = true;
+          return policy;
+        })
+        .then(function(policy) {
+          // this will return the sandbox or one promise to getSandbox;
+          return _this.registry.getSandbox(domain);
+        })
+        .then(function(proxySandbox) {
+
+          console.info('4. if the sandbox is registered then return the sandbox', proxySandbox);
+
+          _proxySandbox = proxySandbox;
+          return proxySandbox;
+        })
+        .catch(function(reason) {
+          console.info('5. Sandbox was not found, creating a new one', reason);
+
+          // check if the sandbox is registed for this proxy descriptor url;
+          // Make Steps xxx --- xxx
+          // Instantiate the Sandbox
+          let sandbox = _this.runtimeFactory.createSandbox();
+          sandbox.addListener('*', function(msg) {
+            _this.messageBus.postMessage(msg);
+          });
+
+          return sandbox;
+        })
+        .then(function(sandbox) {
+          console.info('6. return the sandbox instance and register', sandbox, 'to domain ', domain);
+
+          _proxySandbox = sandbox;
+
+          // we need register stub on registry - step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          return _this.registry.registerStub(sandbox, domain);
+        })
+        .then(function(runtimeIdpProxyURL) {
+
+          console.info('7. Return the runtime Idp Proxy URL: ', runtimeIdpProxyURL);
+
+          // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+
+          _runtimeIdpProxyURL = runtimeIdpProxyURL;
+
+          // Extend original hyperty configuration;
+          let configuration = {};
+          if (!emptyObject(_proxyDescriptor.configuration)) {
+            try {
+              configuration = Object.assign({}, JSON.parse(_proxyDescriptor.configuration));
+            } catch (e) {
+              configuration = _proxyDescriptor.configuration;
+            }
+          }
+
+          // Deploy Component step xxx
+          return _proxySandbox.deployComponent(_proxySourcePackage.sourceCode, runtimeIdpProxyURL, configuration);
+        })
+        .then(function(deployComponentStatus) {
+          console.info('8: return deploy component for sandbox status: ', deployComponentStatus);
+
+          // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+
+          // Add the message bus listener
+          _this.messageBus.addListener(_runtimeIdpProxyURL, function(msg) {
+            _proxySandbox.postMessage(msg);
+          });
+
+          // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+
+          // Load Stub function resolved with success;
+          let idpProxy = {
+            runtimeIdpProxyURL: _runtimeIdpProxyURL,
+            status: deployComponentStatus
+          };
+
+          resolve(idpProxy);
           console.info('------------------- END ---------------------------\n');
 
         })

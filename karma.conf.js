@@ -14,10 +14,8 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       'node_modules/babel-polyfill/dist/polyfill.js',
-      'node_modules/indexeddbshim/dist/indexeddbshim.js',
       'node_modules/object.observe/dist/object-observe.js',
       'node_modules/array.observe/array-observe.js',
-      'node_modules/service-framework/dist/service-framework.js',
       'src/**/*.js',
       'test/**/*.spec.js'
     ],
