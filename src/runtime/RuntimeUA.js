@@ -350,7 +350,6 @@ class RuntimeUA {
       let _stubSourcePackage;
 
       let errorReason = function(reason) {
-        console.error(reason);
         reject(reason);
       };
 
@@ -397,6 +396,7 @@ class RuntimeUA {
           // we need to get ProtoStub Source code from descriptor - step 6 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
           return _this.runtimeCatalogue.getSourcePackageFromURL(sourcePackageURL);
         })
+        .catch(errorReason)
         .then(function(stubSourcePackage) {
           console.info('3. return the ProtoStub Source Code: ', stubSourcePackage);
 
@@ -517,7 +517,6 @@ class RuntimeUA {
       let _proxySourcePackage;
 
       let errorReason = function(reason) {
-        console.error(reason);
         reject(reason);
       };
 
@@ -564,6 +563,7 @@ class RuntimeUA {
           // we need to get ProtoStub Source code from descriptor - step 6 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
           return _this.runtimeCatalogue.getSourcePackageFromURL(sourcePackageURL);
         })
+        .catch(errorReason)
         .then(function(sourcePackage) {
           console.info('3. return the IDPProxy source package: ', sourcePackage);
 
