@@ -28,12 +28,6 @@ class PDP {
     _this.policiesImplementation = {};
     _this.policiesImplementation.group = 'result[0] = _this.isInGroup(getUserEmailFromURL(message.body.identity), condition[1]) ? policy.authorise : !policy.authorise;';
     _this.policiesImplementation.time = 'result[0] = _this.isTimeBetween(condition[1], condition[2]) ? policy.authorise : !policy.authorise;';
-    _this.policiesImplementation.sync = 'result[0] = _this.isReporterOfObject(message.from, message.body.source) ? policy.authorise : !policy.authorise;';
-  }
-
-  addObject(objectURL, reporterURL) {
-    let _this = this;
-    _this.objectsReporters[objectURL] = reporterURL;
   }
 
   getGroupsNames() {
@@ -114,7 +108,7 @@ class PDP {
   * @param {Array}    policies
   * @return {Array}   [authDecision, actions]
   */
-  evaluate(message, hypertyToVerify, policies) {
+  evaluate(message, policies) {
     let _this = this;
     let results = [true];
     let actions = [];
@@ -177,12 +171,6 @@ class PDP {
   getMinutes(time) {
     let timeSplit = time.split(':');
     return parseInt(timeSplit[0]) * 60 + parseInt(timeSplit[1]);
-  }
-
-  /* var update = {type:'update', from: 'hello://hybroker.rethink.ptinovacao.pt/c10007a6-45cb-4962-90ae-fa915b7b4f94', to: 'hello://hybroker.rethink.ptinovacao.pt/c10007a6-45cb-4962-90ae-fa915b7b4f94/changes', body: {source: 'hyperty://hybroker.rethink.ptinovacao.pt/a94743d1-f308-42fb-9ad9-4c12d1e9c25'}};*/
-  isReporterOfObject(objectURL, hypertyURL) {
-    let _this = this;
-    return (_this.objectsReporters[objectURL] === hypertyURL);
   }
 }
 
