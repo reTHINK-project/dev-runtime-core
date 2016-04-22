@@ -25,7 +25,7 @@ import ObjectAllocation from './ObjectAllocation';
 import ReporterObject from './ReporterObject';
 import ObserverObject from './ObserverObject';
 
-import {MessageFactory} from 'service-framework';
+import {MessageFactory} from 'service-framework/dist/MessageFactory';
 
 /**
  * @author micaelpedrosa@gmail.com

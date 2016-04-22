@@ -25,7 +25,7 @@ import AddressAllocation from './AddressAllocation';
 import ObjectAllocation from '../syncher/ObjectAllocation';
 import HypertyInstance from './HypertyInstance';
 
-import {MessageFactory} from 'service-framework';
+import {MessageFactory} from 'service-framework/dist/MessageFactory';
 import {divideURL, getUserEmailFromURL} from '../utils/utils.js';
 
 /**

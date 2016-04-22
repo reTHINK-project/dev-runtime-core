@@ -25,7 +25,6 @@ module.exports = function(config) {
 
     // list of files to exclude
     exclude: [
-      'test/**/GraphConnector.spec.js'
     ],
 
     // preprocess matching files before serving them to the browser

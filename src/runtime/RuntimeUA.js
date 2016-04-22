@@ -255,6 +255,7 @@ class RuntimeUA {
         // we have completed step 14 here.
         return sandbox;
       }, function(reason) {
+        console.log('regiter error:', reason);
         console.error('4.1: try to register a new sandbox', reason);
 
         // check if the sandbox is registed for this hyperty descriptor url;

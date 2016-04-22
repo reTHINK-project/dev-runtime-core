@@ -18,6 +18,8 @@ import PolicyEngine from '../src/policy/PolicyEngine';
 import MessageBus from '../src/bus/MessageBus';
 import {RuntimeCatalogueLocal} from 'service-framework/dist/RuntimeCatalogue';
 
+import { divideURL } from '../src/utils/utils';
+
 import RuntimeFactory from './resources/RuntimeFactory';
 
 // Testing runtimeUA;
@@ -35,7 +37,7 @@ describe('RuntimeUA', function() {
 
     let Hyperties = {
       HelloHyperty: {
-        cguid:'1',
+        cguid:'20',
         type:'0',
         version:'0.1',
         description: 'description of Hello Hyperty',
@@ -110,30 +112,116 @@ describe('RuntimeUA', function() {
       }
     };
 
-    sinon.stub(runtime.runtimeCatalogue.httpRequest, 'get', function(url) {
+    sinon.stub(runtime.runtimeCatalogue, 'getHypertyDescriptor', function(hypertyURL) {
+      let _this = this;
+      return _this.getDescriptor(hypertyURL, runtime.runtimeCatalogue._createHyperty);
+    });
 
-      console.log(url);
+    sinon.stub(runtime.runtimeCatalogue, 'getStubDescriptor', function(stubURL) {
+      let _this = this;
+      return _this.getDescriptor(stubURL, runtime.runtimeCatalogue._createStub);
+    });
 
-      console.log(url.includes('Hyperties'), url.includes('Hyperty'), url.includes('ProtoStubs'));
+    sinon.stub(runtime.runtimeCatalogue, 'getRuntimeDescriptor', function(runtimeURL) {
+      let _this = this;
+      return _this.getDescriptor(runtimeURL, runtime.runtimeCatalogue._createRuntimeDescriptor);
+    });
+
+    sinon.stub(runtime.runtimeCatalogue, 'getDataSchemaDescriptor', function(dataSchemaURL) {
+      let _this = this;
+      return _this.getDescriptor(dataSchemaURL, runtime.runtimeCatalogue._createDataSchema);
+    });
+
+    sinon.stub(runtime.runtimeCatalogue, 'getIdpProxyDescriptor', function(idpProxyURL) {
+      let _this = this;
+      return _this.getDescriptor(idpProxyURL, runtime.runtimeCatalogue._createIdpProxy);
+    });
+
+    sinon.stub(runtime.runtimeCatalogue, '_createHyperty', function(_this, rawHyperty) {
+      return rawHyperty;
+    });
+
+    sinon.stub(runtime.runtimeCatalogue, '_createStub', function(_this, rawHyperty) {
+      return rawHyperty;
+    });
+
+    sinon.stub(runtime.runtimeCatalogue, '_createRuntimeDescriptor', function(_this, rawHyperty) {
+      return rawHyperty;
+    });
+
+    sinon.stub(runtime.runtimeCatalogue, '_createDataSchema', function(_this, rawHyperty) {
+      return rawHyperty;
+    });
+
+    sinon.stub(runtime.runtimeCatalogue, '_createIdpProxy', function(_this, rawHyperty) {
+      return rawHyperty;
+    });
+
+    sinon.stub(runtime.runtimeCatalogue, 'getDescriptor', function(url, createFunc) {
+
+      let dividedURL = divideURL(url);
+      let identity = dividedURL.identity;
+
+      if (!identity) {
+        identity = 'default';
+      } else {
+        identity = identity.substring(identity.lastIndexOf('/') + 1);
+      }
 
       return new Promise(function(resolve, reject) {
 
+        let result;
+
         if (url.includes('Hyperties') || url.includes('Hyperty')) {
           try {
-            resolve(JSON.stringify(Hyperties));
+            result = Hyperties[identity];
           } catch (e) {
             reject(e);
           }
 
         } else if (url.includes('ProtoStubs') || url.includes('protostub')) {
           try {
-            resolve(JSON.stringify(ProtoStubs));
+            result = ProtoStubs[identity];
           } catch (e) {
             reject(e);
           }
         }
+
+        console.log(result);
+
+        // console.log('creating descriptor based on: ', result);
+        let descriptor = createFunc(runtime.runtimeCatalogue, result);
+
+        // persistenceManager.set(descriptorURL, descriptor.version, result);
+        // console.log('created descriptor object:', hyperty);
+        resolve(descriptor);
+
       });
 
+      // console.log(url.includes('Hyperties'), url.includes('Hyperty'), url.includes('ProtoStubs'));
+      //
+      // return new Promise(function(resolve, reject) {
+      //
+      //   if (url.includes('Hyperties') || url.includes('Hyperty')) {
+      //     try {
+      //       resolve(JSON.stringify(Hyperties[identity]));
+      //     } catch (e) {
+      //       reject(e);
+      //     }
+      //
+      //   } else if (url.includes('ProtoStubs') || url.includes('protostub')) {
+      //     try {
+      //       resolve(JSON.stringify(ProtoStubs));
+      //     } catch (e) {
+      //       reject(e);
+      //     }
+      //   }
+      // });
+
+    });
+
+    sinon.stub(runtime.runtimeCatalogue, 'getSourcePackageFromURL', function(value) {
+      console.log('SOURCE PACKAGE: ', value);
     });
 
     sinon.stub(runtime.registry, 'registerHyperty')
@@ -171,7 +259,8 @@ describe('RuntimeUA', function() {
   });
 
   after(function() {
-    runtime.runtimeCatalogue.httpRequest.get.restore();
+    runtime.runtimeCatalogue._createHyperty.restore();
+    runtime.runtimeCatalogue.getDescriptor.restore();
   });
 
   describe('constructor()', function() {
@@ -201,7 +290,7 @@ describe('RuntimeUA', function() {
   describe('loadHyperty(hypertyDescriptorURL)', function() {
 
     it('should throw when given no arguments', function(done) {
-      let hypertyDescriptorURL = 'hyperty-catalogue://sp.domain/HelloHyperty';
+      let hypertyDescriptorURL = 'hyperty-catalogue://sp.domain/.well-known/hyperty/HelloHyperty';
       let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL);
 
       expect(loadHyperty)
@@ -211,7 +300,7 @@ describe('RuntimeUA', function() {
 
     it('should be a Promise', function(done) {
 
-      let hypertyDescriptorURL = 'hyperty-catalogue://sp.domain/HelloHyperty';
+      let hypertyDescriptorURL = 'hyperty-catalogue://sp.domain/.well-known/hyperty/HelloHyperty';
       let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL);
 
       expect(loadHyperty)
@@ -223,7 +312,7 @@ describe('RuntimeUA', function() {
 
     it('should be deployed', function(done) {
 
-      let hypertyDescriptorURL = 'hyperty-catalogue://sp.domain/HelloHyperty';
+      let hypertyDescriptorURL = 'hyperty-catalogue://sp.domain/.well-known/hyperty/HelloHyperty';
       let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL);
 
       let hypertyResolved = ['runtimeHypertyURL', 'status'];
