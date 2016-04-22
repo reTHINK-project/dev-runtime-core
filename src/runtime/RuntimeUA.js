@@ -114,11 +114,17 @@ class RuntimeUA {
 
     _this.registry.addEventListener('runtime:loadStub', function(domainURL) {
 
-      _this.loadStub(domainURL).then(function() {
+      _this.loadIdpProxy(domainURL).then(function() {
+        _this.registry.trigger('runtime:stubLoaded', domainURL);
+      }).catch(function(reason) {
+        console.error(reason);
+        return _this.loadStub(domainURL);
+      }).then(function() {
         _this.registry.trigger('runtime:stubLoaded', domainURL);
       }).catch(function(reason) {
         console.error(reason);
       });
+
     });
 
     // Use sandbox factory to use specific methods
