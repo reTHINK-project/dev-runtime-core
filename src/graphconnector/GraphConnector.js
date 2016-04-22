@@ -28,6 +28,8 @@ import bip39 from 'bip39';
 import sjcl from 'sjcl';
 import jsrsasign from 'jsrsasign';
 import base64url from 'base64-url';
+import hex64 from 'hex64';
+import Buffer from 'buffer';
 
 /**
 * The Graph Connector contains the contact list/address book.
@@ -48,6 +50,7 @@ class GraphConnector {
 
     this.globalRegistryRecord = new GlobalRegistryRecord();
     this._prvKey;
+    this.privateKey;
 
     this.groups = [];
     this.residenceLocation;
@@ -137,6 +140,7 @@ class GraphConnector {
         _this.messageBus.postMessage(msg, (reply) => {
 
           // reply should be the JSON returned from the Global Registry REST-interface
+          let jwt = reply.body.data;
           let unwrappedJWT = KJUR.jws.JWS.parse(reply.body.data);
           let dataEncoded = unwrappedJWT.payloadObj.data;
           let dataDecoded = base64url.decode(dataEncoded);
@@ -148,7 +152,13 @@ class GraphConnector {
             reject('Retrieved key does not match!');
           } else {
             let publicKeyObject = jsrsasign.KEYUTIL.getKey(dataJSON.publicKey);
-            let isValid = KJUR.jws.JWS.verify(reply.body.data, publicKeyObject, ['ES256']);
+            let encodedString = jwt.split('.').slice(0, 2).join('.');
+            let sigValueHex = unwrappedJWT.sigHex;
+            let sig = new KJUR.crypto.Signature({alg: 'SHA256withECDSA'});
+            sig.init(publicKeyObject);
+            sig.updateString(encodedString);
+            let isValid = sig.verify(sigValueHex);
+
             if (!isValid) {
               reject('Retrieved Record not valid!');
             } else {
@@ -194,6 +204,7 @@ class GraphConnector {
     this._prvKey.isPrivate = true;
     this._prvKey.isPublic = false;
     let pubKey = new KJUR.crypto.ECDSA({curve: 'secp256k1'});
+    this.privateKey = jsrsasign.KEYUTIL.getPEM(this._prvKey, 'PKCS8PRV');
     pubKey.setPublicKeyHex(hPub);
     pubKey.isPrivate = false;
     pubKey.isPublic = true;
@@ -223,7 +234,16 @@ class GraphConnector {
     let recordString = JSON.stringify(record);
     let recordStringBase64 = base64url.encode(recordString);
 
-    let jwt = KJUR.jws.JWS.sign(null, {alg: 'ES256'}, {data: recordStringBase64}, this._prvKey);
+    let jwtTemp = KJUR.jws.JWS.sign(null, {alg: 'ES256'}, {data: recordStringBase64}, this._prvKey);
+    let encodedString = jwtTemp.split('.').slice(0, 2).join('.');
+
+    let sig = new KJUR.crypto.Signature({alg: 'SHA256withECDSA'});
+    sig.init(this.privateKey);
+    sig.updateString(encodedString);
+
+    let signatureHex = sig.sign();
+    let signature = hex64.toBase64(signatureHex);
+    let jwt = encodedString + '.' + signature;
     return jwt;
   }
 
@@ -293,13 +313,20 @@ class GraphConnector {
          _this.messageBus.postMessage(msg, (reply) => {
 
            // reply should be the JSON returned from the Global Registry REST-interface
+           let jwt = reply.body.data;
            let unwrappedJWT = KJUR.jws.JWS.parse(reply.body.data);
            let dataEncoded = unwrappedJWT.payloadObj.data;
            let dataDecoded = base64url.decode(dataEncoded);
            let dataJSON = JSON.parse(dataDecoded);
 
            let publicKeyObject = jsrsasign.KEYUTIL.getKey(dataJSON.publicKey);
-           let isValid = KJUR.jws.JWS.verify(reply.body.data, publicKeyObject, ['ES256']);
+           let encodedString = jwt.split('.').slice(0, 2).join('.');
+           let sigValueHex = unwrappedJWT.sigHex;
+           let sig = new KJUR.crypto.Signature({alg: 'SHA256withECDSA'});
+           sig.init(publicKeyObject);
+           sig.updateString(encodedString);
+           let isValid = sig.verify(sigValueHex);
+
            if (!isValid) {
              reject('Retrieved Record not valid!');
            } else {

@@ -51,7 +51,7 @@ class GlobalRegistryRecord {
       let record = new Object();
       record.guid = this.guid;
       record.salt = this.salt;
-      record.userIDs = this.userIds;
+      record.userIDs = this.userIDs;
       record.lastUpdate = this.lastUpdate;
       record.timeout = this.timeout;
       record.publicKey = this.publicKey;

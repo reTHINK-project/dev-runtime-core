@@ -88,6 +88,8 @@
       "base64-url": "npm:base64-url@1.2.1",
       "bip39": "npm:bip39@^2.2.0",
       "bitcoinjs-lib": "npm:bitcoinjs-lib@^2.1.4",
+      "buffer": "npm:buffer@4.5.1",
+      "hex64": "npm:hex64@0.4.0",
       "jsrsasign": "npm:jsrsasign@^5.0.5",
       "service-framework": "github:rethink-project/dev-service-framework@develop",
       "sjcl": "npm:sjcl@1.0.3"
@@ -105,6 +107,8 @@
     "jsrsasign": "^5.0.5",
     "service-framework": "github:rethink-project/dev-service-framework#develop",
     "sjcl": "^1.0.3",
-    "universal-localstorage": "^1.0.2"
+    "universal-localstorage": "^1.0.2",
+    "buffer": "^4.5.1",
+    "hex64": "^0.4.0"
   }
 }
