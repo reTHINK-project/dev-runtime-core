@@ -80,7 +80,7 @@ class PolicyEngine {
         } else {
           if (_this.isObjectSubscription(message)) {
             let objectURL = message.from.substring(0, message.from.length - 13);
-            let reporterURL = message.body.value.data.communication.owner;
+            let reporterURL = message.body.value.reporter; //hyperty owner
             _this.addObject(objectURL, reporterURL);
           }
         }
@@ -122,7 +122,7 @@ class PolicyEngine {
   }
 
   isObjectSubscription(message) {
-    return String(message.from.split('/').slice(-1)[0]) === 'subscription';
+    return message.type === 'create' && String(message.from.split('/').slice(-1)[0]) === 'subscription';
   }
 
   /**

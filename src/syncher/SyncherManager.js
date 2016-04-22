@@ -101,7 +101,7 @@ class SyncherManager {
         let objURL = allocated[0];
 
         //To register the dataObject in the runtimeRegistry
-        _this._registry.registerDataObject(msg.body.value.communication.name, 'scheme', objURL, 'dataObjectReporter').then(function(resolve) {
+        _this._registry.registerDataObject(msg.body.value.name, 'scheme', objURL, 'dataObjectReporter').then(function(resolve) {
           console.log('DataObject successfully registered', resolve);
 
           let reporter = new ReporterObject(_this, owner, objURL);
