@@ -140,7 +140,7 @@ gulp.task('runtime', function() {
   .transform(babel, {
     compact: compact,
     presets: ['es2015', 'stage-0'],
-    plugins: ['add-module-exports']
+    plugins: ['add-module-exports', 'transform-runtime', 'transform-regenerator']
   })
   .bundle()
   .on('error', function(err) {
@@ -175,7 +175,7 @@ gulp.task('minibus', function() {
   .transform(babel, {
     compact: compact,
     presets: ['es2015', 'stage-0'],
-    plugins: ['add-module-exports']
+    plugins: ['add-module-exports', 'transform-runtime', 'transform-regenerator']
   })
   .bundle()
   .on('error', function(err) {
@@ -209,7 +209,7 @@ gulp.task('sandbox', function() {
   .transform(babel, {
     compact: compact,
     presets: ['es2015', 'stage-0'],
-    plugins: ['add-module-exports']
+    plugins: ['add-module-exports', 'transform-runtime', 'transform-regenerator']
   })
   .bundle()
   .on('error', function(err) {

@@ -21,6 +21,8 @@
 * limitations under the License.
 **/
 
+import 'babel-polyfill';
+
 //Main dependecies
 import Registry from '../registry/Registry';
 import IdentityModule from '../identity/IdentityModule';
