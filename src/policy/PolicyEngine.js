@@ -45,7 +45,6 @@ class PolicyEngine {
       let initialResultOk = _this.followsIntrinsicBehaviour(message);
       if (initialResultOk === undefined) {
         _this.idModule.getIdentityAssertion().then(identity => {
-
           message.body.identity = message.body.identity || identity;
 
           let scope = _this.getScope(message);
@@ -215,7 +214,9 @@ class PolicyEngine {
     let policies = _this.policies.user;
     for (let i in policies) {
       let condition = policies[i].condition.split(' ');
-      if (condition[0] === 'group' && condition[1] === groupName) {
+      condition.shift();
+      let groupInPolicy = condition.join(' ');
+      if (groupInPolicy === groupName) {
         delete policies[i];
         break;
       }
@@ -236,8 +237,7 @@ class PolicyEngine {
     let _this = this;
     let policies = _this.policies.user;
     for (let i in policies) {
-      let policy = policies[i].condition.split(' ');
-      if (policy[0] === 'group' && policies[1] === groupName) {
+      if (policies[i].condition === 'group ' + groupName) {
         return policies[i].authorise;
       }
     }
@@ -245,12 +245,25 @@ class PolicyEngine {
 
   changePolicy(condition, authorise) {
     let _this = this;
+
     let policies = _this.policies.user;
+    policies = policies || [];
+    console.log(policies);
     for (let i in policies) {
       if (policies[i].condition === condition) {
+        console.log('in if');
         policies[i].authorise = authorise;
+        return;
       }
     }
+    let newPolicy = {
+      scope: 'user',
+      condition: condition,
+      authorise: authorise,
+      actions: []
+    };
+
+    _this.addPolicies([newPolicy]);
   }
 
   /**
@@ -290,7 +303,6 @@ class PolicyEngine {
   * @return {String} scope
   */
   getScope(message) {
-    let _this = this;
     let scope = 'user';
     return scope;
   }

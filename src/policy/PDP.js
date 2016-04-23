@@ -1,5 +1,3 @@
-import {getUserEmailFromURL} from '../utils/utils.js';
-
 /**
 * The Policy Decision Point (PDP) decides if a message is to be authorised by checking a set of
 * policies. The resource to be verified is specified in the first word of the 'condition' field of
@@ -20,13 +18,13 @@ class PDP {
     _this.runtimeRegistry = runtimeRegistry;
     _this.objectsReporters = {};
     _this.myGroups = {}; // TODO: load from the Persistence Manager
-    _this.getPoliciesImplementation();
+    _this.setPoliciesImplementation();
   }
 
-  getPoliciesImplementation() {
+  setPoliciesImplementation() {
     let _this = this;
     _this.policiesImplementation = {};
-    _this.policiesImplementation.group = 'result[0] = _this.isInGroup(getUserEmailFromURL(message.body.identity), condition[1]) ? policy.authorise : !policy.authorise;';
+    _this.policiesImplementation.group = 'let condition = policy.condition.split(\' \'); condition.shift(); let groupName = condition.join(\' \'); if(_this.isInGroup(message.body.identity.email, groupName)) { result[0] = policy.authorise; }';
     _this.policiesImplementation.time = 'result[0] = _this.isTimeBetween(condition[1], condition[2]) ? policy.authorise : !policy.authorise;';
   }
 
@@ -112,15 +110,15 @@ class PDP {
     let _this = this;
     let results = [true];
     let actions = [];
-
     for (let i in policies) {
       let policy = policies[i];
       let result = [];
       let condition = policy.condition.split(' ');
       let resource = condition[0];
+
       eval(_this.policiesImplementation[resource]);
       results.push(result[0]);
-      actions.push(result[1]); // TODO: do actions depend on the final authorisation decision?
+      actions.push(result[1]);
     }
 
     let authDecision = results.indexOf(false) === -1;
@@ -137,7 +135,11 @@ class PDP {
   isInGroup(userEmail, groupName) {
     let _this = this;
     let group = _this.myGroups[groupName];
-    return group.indexOf(userEmail) > -1;
+    if (group === undefined) {
+      return false;
+    } else {
+      return group.indexOf(userEmail) > -1;
+    }
   }
 
   /**
