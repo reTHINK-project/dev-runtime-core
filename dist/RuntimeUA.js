@@ -32777,6 +32777,7 @@ var PolicyEngine = function () {
     * DataObjects
     *   (3) Creation stores the object URL and its reporter's URL
     *   (4) Subscription stores the object URL and its reporter's URL
+    *   (5) Updates must come from reporters
     */
 
   }, {
@@ -32808,9 +32809,15 @@ var PolicyEngine = function () {
       }
 
       /* (4) */
-      if (message.type === 'create' && String(message.from.split('/').slice(-1)[0]) === 'subscription') {
+      //if (message.type === 'create' && String(message.from.split('/').slice(-1)[0]) === 'subscription') {
+      console.log('antes');
+      if (String(message.from.split('/').slice(-1)[0]) === 'subscription') {
+        console.log('in if');
         var _objectURL = message.from.substring(0, message.from.length - 13);
-        var _reporterURL = message.body.value.reporter;
+        //let reporterURL1 = message.body.value.reporter;
+        //console.log('reporterURL1', reporterURL1);
+
+        var _reporterURL = message.body.value.data.communication.owner;
         _this.addObject(_objectURL, _reporterURL);
         return true;
       }
@@ -32967,10 +32974,8 @@ var PolicyEngine = function () {
 
       var policies = _this.policies.user;
       policies = policies || [];
-      console.log(policies);
       for (var i in policies) {
         if (policies[i].condition === condition) {
-          console.log('in if');
           policies[i].authorise = authorise;
           return;
         }
