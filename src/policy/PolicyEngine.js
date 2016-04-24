@@ -111,9 +111,7 @@ class PolicyEngine {
 
     /* (4) */
     //if (message.type === 'create' && String(message.from.split('/').slice(-1)[0]) === 'subscription') {
-    console.log('antes');
     if (String(message.from.split('/').slice(-1)[0]) === 'subscription') {
-      console.log('in if');
       let objectURL = message.from.substring(0, message.from.length - 13);
       //let reporterURL1 = message.body.value.reporter;
       //console.log('reporterURL1', reporterURL1);
