@@ -54,7 +54,7 @@ class PolicyEngine {
     return new Promise(function(resolve, reject) {
 
       //TODO turn it later into a policy
-      if (message.from === 'domain://google.com' || message.to === 'domain://google.com') {
+      if (message.from === 'domain-idp://google.com' || message.to === 'domain-idp://google.com') {
         message.authorised = true;
         return resolve(message);
       }

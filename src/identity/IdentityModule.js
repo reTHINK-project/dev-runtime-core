@@ -79,9 +79,9 @@ class IdentityModule {
   */
   _resolveDomain(idpDomain) {
     if (!idpDomain) {
-      return 'domain://google.com';
+      return 'domain-idp://google.com';
     } else {
-      return 'domain://' + idpDomain;
+      return 'domain-idp://' + idpDomain;
     }
   }
 
