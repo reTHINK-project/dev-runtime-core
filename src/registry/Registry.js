@@ -676,7 +676,9 @@ class Registry extends EventEmitter {
 
     //split the url to find the domainURL. deals with the url for example as:
     //"hyperty-runtime://sp1/protostub/123",
-    let domainUrl = divideURL(url).domain;
+    let dividedURL = divideURL(url);
+    let domainUrl = dividedURL.domain;
+    let type = dividedURL.type;
 
     // resolve the domain protostub in case of a message to global registry
     if (url.includes('global://registry')) {
@@ -689,7 +691,12 @@ class Registry extends EventEmitter {
         domainUrl = domainUrl.substring(domainUrl.indexOf('.') + 1);
       }
 
-      let request  = _this.protostubsList[domainUrl];
+      let request;
+      if (type === 'domain-idp') {
+        request  = _this.idpProxyList[domainUrl];
+      } else {
+        request  = _this.protostubsList[domainUrl];
+      }
 
       _this.addEventListener('runtime:stubLoaded', function(domainUrl) {
         request  = _this.protostubsList[domainUrl];
@@ -697,17 +704,26 @@ class Registry extends EventEmitter {
         resolve(request);
       });
 
-      _this.addEventListener('runtime:idpproxy:error', function(domainUrl) {
-        request  = _this.protostubsList[domainUrl];
+      _this.addEventListener('runtime:idpProxyLoaded', function(domainUrl) {
+        request  = _this.idpProxyList[domainUrl];
         console.info('Resolved: ', request);
         resolve(request);
+      });
+
+      _this.addEventListener('runtime:idpproxy:error', function(domainUrl) {
+        console.log('Registry > IDPProxy load error use the fallback');
       });
 
       if (request !== undefined) {
         console.info('Resolved: ', request);
         resolve(request);
       } else {
-        _this.trigger('runtime:loadStub', domainUrl);
+        if (type === 'domain-idp') {
+          _this.trigger('runtime:loadIdpProxy', domainUrl);
+        } else {
+          _this.trigger('runtime:loadStub', domainUrl);
+        }
+
       }
 
     });

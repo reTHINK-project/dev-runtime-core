@@ -116,15 +116,25 @@ class RuntimeUA {
 
     _this.registry.addEventListener('runtime:loadStub', function(domainURL) {
 
+      console.log('Registry request to loadStub for domain ', domainURL);
+
+      _this.loadStub(domainURL).then(function() {
+        _this.registry.trigger('runtime:stubLoaded', domainURL);
+      }).catch(function(reason) {
+        console.error(reason);
+      });
+
+    });
+
+    _this.registry.addEventListener('runtime:loadIdpProxy', function(domainURL) {
+
+      console.log('Registry request to loadIdpProxy for domain ', domainURL);
+
       _this.loadIdpProxy(domainURL).then(function() {
-        _this.registry.trigger('runtime:stubLoaded', domainURL);
+        _this.registry.trigger('runtime:idpProxyLoaded', domainURL);
       }).catch(function(reason) {
         console.error(reason);
-        return _this.loadStub(domainURL);
-      }).then(function() {
-        _this.registry.trigger('runtime:stubLoaded', domainURL);
-      }).catch(function(reason) {
-        console.error(reason);
+        _this.registry.trigger('runtime:idpproxy:error', reason);
       });
 
     });
