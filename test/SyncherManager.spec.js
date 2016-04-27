@@ -525,7 +525,7 @@ describe('SyncherManager', function() {
     });
   });
 
-  it('reporter addChildren', function(done) {
+  it('reporter addChild', function(done) {
     let bus = new MessageBus();
     bus._onPostMessage = (msg) => {
       console.log('5-_onPostMessage: ', msg);
@@ -537,14 +537,14 @@ describe('SyncherManager', function() {
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
     sync1.create(schemaURL, [], initialData).then((dor) => {
       console.log('on-create-reply');
-      dor.addChildren('children1', 'my message').then((doc) => {
-        console.log('on-addChildren-reply', doc);
+      dor.addChild('children1', 'my message').then((doc) => {
+        console.log('on-addChild-reply', doc);
         done();
       });
     });
   });
 
-  it('observer addChildren', function(done) {
+  it('observer addChild', function(done) {
     let bus = new MessageBus();
     bus._onPostMessage = (msg) => {
       console.log('6-_onPostMessage: ', msg);
@@ -560,10 +560,10 @@ describe('SyncherManager', function() {
 
       sync2.subscribe(schemaURL, notifyEvent.url).then((doo) => {
         console.log('on-subscribe-reply');
-        doo.addChildren('children1', { message: 'Hello World!' }).then((doc) => {
-          console.log('on-local-addChildren');
+        doo.addChild('children1', { message: 'Hello World!' }).then((doc) => {
+          console.log('on-local-addChild');
           doc.onResponse((event) => {
-            console.log('on-remote-addChildren-reply', event);
+            console.log('on-remote-addChild-reply', event);
             expect(event).to.contain.all.keys({ type: 'response', url: hyperURL1, code: 200 });
             done();
           });
@@ -575,8 +575,8 @@ describe('SyncherManager', function() {
     sync1.create(schemaURL, [hyperURL2], initialData).then((dor) => {
       console.log('on-create-reply');
       dor.onSubscription((subscribeEvent) => {
-        dor.onAddChildren((event) => {
-          console.log('on-remote-addChildren', event);
+        dor.onAddChild((event) => {
+          console.log('on-remote-addChild', event);
           expect(event).to.contain.all.keys({ type: 'create', from: hyperURL2, url: 'resource://obj1/children/children1', childId: hyperURL2 + '#1', value: { message: 'Hello World!' } });
         });
 
@@ -600,7 +600,7 @@ describe('SyncherManager', function() {
       notifyEvent.ack();
 
       sync2.subscribe(schemaURL, notifyEvent.url).then((doo) => {
-        doo.addChildren('children1', { message: 'Hello Micael!' }).then((doc) => {
+        doo.addChild('children1', { message: 'Hello Micael!' }).then((doc) => {
           doc.data.message = 'Hello Luis!';
         });
       });
@@ -609,7 +609,7 @@ describe('SyncherManager', function() {
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
     sync1.create(schemaURL, [hyperURL2], initialData).then((dor) => {
       dor.onSubscription((subscribeEvent) => {
-        dor.onAddChildren((event) => {
+        dor.onAddChild((event) => {
           let children1 = dor.childrens[event.childId];
           children1.onChange((changeEvent) => {
             console.log('onChange: ', changeEvent);
