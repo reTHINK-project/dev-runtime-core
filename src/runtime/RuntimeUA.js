@@ -472,6 +472,8 @@ class RuntimeUA {
             }
           }
 
+          configuration.runtimeURL = _this.runtimeURL;
+
           // Deploy Component step xxx
           return _stubSandbox.deployComponent(_stubSourcePackage.sourceCode, runtimeProtoStubURL, configuration);
         })
@@ -535,7 +537,7 @@ class RuntimeUA {
       // Discover IDPProxy
       console.info('------------------- IDP Proxy Deploy ---------------------------\n');
       console.info('Discover or Create a new IdpProxy for domain/URL: ', domain);
-      return _this.registry.discoverProtostub(domain).then(function(runtimeIdpProxyURL) {
+      return _this.registry.discoverIdpProxy(domain).then(function(runtimeIdpProxyURL) {
         // Is registed?
         console.info('1. IDPProxy Discovered: ', runtimeIdpProxyURL);
 
@@ -617,7 +619,7 @@ class RuntimeUA {
           _proxySandbox = sandbox;
 
           // we need register stub on registry - step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-          return _this.registry.registerStub(sandbox, domain);
+          return _this.registry.registerIdpProxy(sandbox, domain);
         })
         .then(function(runtimeIdpProxyURL) {
 
@@ -636,6 +638,7 @@ class RuntimeUA {
               configuration = _proxyDescriptor.configuration;
             }
           }
+          configuration.runtimeURL = _this.runtimeURL;
 
           // Deploy Component step xxx
           return _proxySandbox.deployComponent(_proxySourcePackage.sourceCode, runtimeIdpProxyURL, configuration);

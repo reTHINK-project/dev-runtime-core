@@ -42,7 +42,7 @@ class IdentityModule {
 
     _this._runtimeURL = runtimeURL + '/idm';
 
-    _this._domain = divideURL(_this.registryURL).domain;
+    _this._domain = divideURL(_this._runtimeURL).domain;
 
     //to store items with this format: {identity: identityURL, token: tokenID}
     _this.identities = [];

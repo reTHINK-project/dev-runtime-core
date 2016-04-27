@@ -86,8 +86,8 @@ class PolicyEngine {
   followsIntrinsicBehaviour(message) {
     let _this = this;
 
-    let idpURL = 'domain://google.com';
-    let idmURL = 'domain://' + _this.pdp.runtimeRegistry._domain + '/id-module';
+    let idpURL = 'domain-idp://google.com';
+    let idmURL = _this.pdp.runtimeRegistry.runtimeURL + '/idm';
 
     /* (1) */
     if (message.from === idpURL) {

@@ -112,6 +112,26 @@ describe('RuntimeUA', function() {
       }
     };
 
+    sinon.stub(runtime.runtimeCatalogue, '_createHyperty', function(_this, rawHyperty) {
+      return rawHyperty;
+    });
+
+    sinon.stub(runtime.runtimeCatalogue, '_createStub', function(_this, rawHyperty) {
+      return rawHyperty;
+    });
+
+    sinon.stub(runtime.runtimeCatalogue, '_createRuntimeDescriptor', function(_this, rawHyperty) {
+      return rawHyperty;
+    });
+
+    sinon.stub(runtime.runtimeCatalogue, '_createDataSchema', function(_this, rawHyperty) {
+      return rawHyperty;
+    });
+
+    sinon.stub(runtime.runtimeCatalogue, '_createIdpProxy', function(_this, rawHyperty) {
+      return rawHyperty;
+    });
+
     sinon.stub(runtime.runtimeCatalogue, 'getHypertyDescriptor', function(hypertyURL) {
       let _this = this;
       return _this.getDescriptor(hypertyURL, runtime.runtimeCatalogue._createHyperty);
@@ -135,26 +155,6 @@ describe('RuntimeUA', function() {
     sinon.stub(runtime.runtimeCatalogue, 'getIdpProxyDescriptor', function(idpProxyURL) {
       let _this = this;
       return _this.getDescriptor(idpProxyURL, runtime.runtimeCatalogue._createIdpProxy);
-    });
-
-    sinon.stub(runtime.runtimeCatalogue, '_createHyperty', function(_this, rawHyperty) {
-      return rawHyperty;
-    });
-
-    sinon.stub(runtime.runtimeCatalogue, '_createStub', function(_this, rawHyperty) {
-      return rawHyperty;
-    });
-
-    sinon.stub(runtime.runtimeCatalogue, '_createRuntimeDescriptor', function(_this, rawHyperty) {
-      return rawHyperty;
-    });
-
-    sinon.stub(runtime.runtimeCatalogue, '_createDataSchema', function(_this, rawHyperty) {
-      return rawHyperty;
-    });
-
-    sinon.stub(runtime.runtimeCatalogue, '_createIdpProxy', function(_this, rawHyperty) {
-      return rawHyperty;
     });
 
     sinon.stub(runtime.runtimeCatalogue, 'getDescriptor', function(url, createFunc) {
@@ -197,31 +197,6 @@ describe('RuntimeUA', function() {
         resolve(descriptor);
 
       });
-
-      // console.log(url.includes('Hyperties'), url.includes('Hyperty'), url.includes('ProtoStubs'));
-      //
-      // return new Promise(function(resolve, reject) {
-      //
-      //   if (url.includes('Hyperties') || url.includes('Hyperty')) {
-      //     try {
-      //       resolve(JSON.stringify(Hyperties[identity]));
-      //     } catch (e) {
-      //       reject(e);
-      //     }
-      //
-      //   } else if (url.includes('ProtoStubs') || url.includes('protostub')) {
-      //     try {
-      //       resolve(JSON.stringify(ProtoStubs));
-      //     } catch (e) {
-      //       reject(e);
-      //     }
-      //   }
-      // });
-
-    });
-
-    sinon.stub(runtime.runtimeCatalogue, 'getSourcePackageFromURL', function(value) {
-      console.log('SOURCE PACKAGE: ', value);
     });
 
     sinon.stub(runtime.registry, 'registerHyperty')
@@ -259,8 +234,19 @@ describe('RuntimeUA', function() {
   });
 
   after(function() {
+    // runtime.runtimeCatalogue.getDescriptor.restore();
+
+    runtime.runtimeCatalogue.getHypertyDescriptor.restore();
+    runtime.runtimeCatalogue.getStubDescriptor.restore();
+    runtime.runtimeCatalogue.getRuntimeDescriptor.restore();
+    runtime.runtimeCatalogue.getDataSchemaDescriptor.restore();
+    runtime.runtimeCatalogue.getIdpProxyDescriptor.restore();
+
+    runtime.runtimeCatalogue._createStub.restore();
+    runtime.runtimeCatalogue._createRuntimeDescriptor.restore();
+    runtime.runtimeCatalogue._createDataSchema.restore();
+    runtime.runtimeCatalogue._createIdpProxy.restore();
     runtime.runtimeCatalogue._createHyperty.restore();
-    runtime.runtimeCatalogue.getDescriptor.restore();
   });
 
   describe('constructor()', function() {
