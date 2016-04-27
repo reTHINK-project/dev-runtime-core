@@ -700,18 +700,14 @@ class Registry extends EventEmitter {
 
       _this.addEventListener('runtime:stubLoaded', function(domainUrl) {
         request  = _this.protostubsList[domainUrl];
-        console.info('Resolved: ', request);
+        console.info('Resolved Protostub: ', request);
         resolve(request);
       });
 
       _this.addEventListener('runtime:idpProxyLoaded', function(domainUrl) {
         request  = _this.idpProxyList[domainUrl];
-        console.info('Resolved: ', request);
+        console.info('Resolved IDPProxy: ', request);
         resolve(request);
-      });
-
-      _this.addEventListener('runtime:idpproxy:error', function(domainUrl) {
-        console.log('Registry > IDPProxy load error use the fallback');
       });
 
       if (request !== undefined) {

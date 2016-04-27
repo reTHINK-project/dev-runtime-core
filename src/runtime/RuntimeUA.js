@@ -76,7 +76,7 @@ class RuntimeUA {
     _this.runtimeCatalogue.runtimeURL = runtimeURL;
 
     // Instantiate the identity Module
-    _this.identityModule = new IdentityModule();
+    _this.identityModule = new IdentityModule(runtimeURL);
 
     // Use the sandbox factory to create an AppSandbox;
     // In the future can be decided by policyEngine if we need
@@ -134,7 +134,6 @@ class RuntimeUA {
         _this.registry.trigger('runtime:idpProxyLoaded', domainURL);
       }).catch(function(reason) {
         console.error(reason);
-        _this.registry.trigger('runtime:idpproxy:error', reason);
       });
 
     });
