@@ -20,24 +20,10 @@ class PolicyEngine {
     let _this = this;
     _this.messageBus = messageBus;
     _this.idModule = identityModule;
+    _this.objectsReporters = {};
     _this.pdp = new PDP(runtimeRegistry);
     _this.pep = new PEP();
     _this.policies = {};
-
-    /* TODO: add this policy when deploying the runtime */
-    _this.addObserverPolicy();
-  }
-
-  addObserverPolicy() {
-    let _this = this;
-    let policy = {
-      id: 'block-observer-changes',
-      scope: 'global',
-      condition: 'sync update reporter',
-      authorise: true,
-      actions: []
-    };
-    _this.addPolicies([policy], 'objectManagement');
   }
 
   /**
@@ -51,156 +37,105 @@ class PolicyEngine {
   */
   authorise(message) {
     let _this = this;
+
     return new Promise(function(resolve, reject) {
+      console.log('--- Policy Engine ---');
+      console.log(message);
+      message.body = message.body || {};
+      let initialResultOk = _this.followsIntrinsicBehaviour(message);
+      if (initialResultOk === undefined) {
+        _this.idModule.getIdentityAssertion().then(identity => {
+          message.body.identity = message.body.identity || identity;
 
-      //TODO turn it later into a policy
-      if (message.from === 'domain-idp://google.com' || message.to === 'domain-idp://google.com') {
-        message.authorised = true;
-        return resolve(message);
-      }
-
-      _this.idModule.loginWithRP('google identity', 'scope').then(function(value) {
-        let assertedID = _this.idModule.getIdentities();
-
-        if (!message.hasOwnProperty('body')) {
-          message.body = {};
-        }
-
-        let hypertyToVerify;
-        if (!message.body.hasOwnProperty('identity')) {
-          message.body.identity = assertedID[0].identity;
-          message.body.idToken = value;
-          hypertyToVerify = message.to;
-        } else {
-          hypertyToVerify = message.from;
-        }
-
-        if (_this.isObjectCreation(message)) {
-          _this.addObject(message.body.resource, message.to);
-        } else {
-          if (_this.isObjectSubscription(message)) {
-            let objectURL = message.from.substring(0, message.from.length - 13);
-            let reporterURL = message.body.value.data.communication.owner;
-            _this.addObject(objectURL, reporterURL);
+          let scope = _this.getScope(message);
+          let applicablePolicies = _this.getApplicablePolicies(scope);
+          let policiesResult = _this.pdp.evaluate(message, applicablePolicies);
+          _this.pep.enforce(policiesResult[1]);
+          if (policiesResult[0]) {
+            message.body.auth = true;
+            resolve(message);
+          } else {
+            message.body.auth = false;
+            reject('Unauthorised message');
           }
-        }
-
-        let scope = _this.getScope(message);
-        let applicablePolicies = [];
-        if (message.to !== 'domain://localhost/policies-gui' && message.from !== 'domain://localhost/policies-gui') {
-          applicablePolicies = _this.getApplicablePolicies(scope);
-        }
-        let policiesResult = _this.pdp.evaluate(message, hypertyToVerify, applicablePolicies);
-        _this.pep.enforce(policiesResult[1]);
-        if (policiesResult[0]) {
-          message.authorised = true;
-          if (message.to === 'domain://localhost/policy-engine') {
-            _this.processMessage(message);
-          }
+        }, function(error) {
+          reject(error);
+        });
+      } else {
+        if (initialResultOk) {
+          message.body.auth = true;
           resolve(message);
         } else {
-          message.authorised = false;
-          reject('Unauthorised message');
+          message.body.auth = false;
+          reject('Intrinsic behaviour was not respected');
         }
-      }, function(error) {
-        reject(error);
-      });
+      }
     });
   }
 
-  /*var create = {type:'response', from: 'runtime://hybroker.rethink.ptinovacao.pt/7465/sm', to: 'hyperty://hybroker.rethink.ptinovacao.pt/a94743d1-f308-42fb-9ad9-4c12d1e9c25', body: {resource: 'hello://hybroker.rethink.ptinovacao.pt/c10007a6-45cb-4962-90ae-fa915b7b4f94'}};*/
-  isObjectCreation(message) {
+  /*
+  * IdProxy / IdModule
+  *   (1) Messages from the IDP Proxy must go to the ID Module.
+  *   (2) Messages to the IDP Proxy must come from the ID Module.
+  *
+  * DataObjects
+  *   (3) Creation stores the object URL and its reporter's URL
+  *   (4) Subscription stores the object URL and its reporter's URL
+  *   (5) Updates must come from reporters
+  */
+  followsIntrinsicBehaviour(message) {
+    let _this = this;
+
+    let idpURL = 'domain://google.com';
+    let idmURL = 'domain://' + _this.pdp.runtimeRegistry._domain + '/id-module';
+
+    /* (1) */
+    if (message.from === idpURL) {
+      return message.to === idmURL;
+    }
+
+    /* (2) */
+    if (message.to === idpURL) {
+      return message.from === idmURL;
+    }
+
+    /* (3) */
     let isResponse = message.type === 'response';
     let isFromSM = String(message.from.split('/').slice(-1)[0]) === 'sm';
-    let hasObjectURL = message.body.resource !== undefined;
-    return isResponse && isFromSM && hasObjectURL;
+    let objectURL = message.body.resource;
+    if (isResponse && isFromSM && objectURL !== undefined) {
+      let reporterURL = message.to;
+      _this.addObject(objectURL, reporterURL);
+      return true;
+    }
+
+    /* (4) */
+    //if (message.type === 'create' && String(message.from.split('/').slice(-1)[0]) === 'subscription') {
+    if (String(message.from.split('/').slice(-1)[0]) === 'subscription') {
+      let objectURL = message.from.substring(0, message.from.length - 13);
+      //let reporterURL1 = message.body.value.reporter;
+      //console.log('reporterURL1', reporterURL1);
+
+      let reporterURL = message.body.value.data.communication.owner;
+      _this.addObject(objectURL, reporterURL);
+      return true;
+    }
+
+    /* (5) */
+    if (message.type === 'update' && message.to === message.from + '/changes') {
+      let objectURL = message.from;
+      let hypertyURL = message.body.source;
+      if (_this.objectsReporters[objectURL] === hypertyURL) {
+        return true;
+      } else {
+        return false;
+      }
+    }
   }
 
   addObject(objectURL, reporterURL) {
     let _this = this;
-    _this.pdp.addObject(objectURL, reporterURL);
-  }
-
-  isObjectSubscription(message) {
-    return String(message.from.split('/').slice(-1)[0]) === 'subscription';
-  }
-
-  /**
-  * Invokes the method specified in the message aimed at the Policy Engine.
-  * @param  {Message}    message
-  */
-  processMessage(message) {
-    let _this = this;
-    let method = message.body.method;
-    let params = message.body.params;
-
-    switch (method) {
-      case 'addPolicies':
-        _this.addPolicies(params.policies, params.scope);
-        _this.sendResponse(message, 200);
-        break;
-      case 'removePolicies':
-        _this.removePolicies(params.policyID, params.scope);
-        _this.sendResponse(message, 200);
-        break;
-      case 'getGroupsNames':
-        let groupsNames = _this.getGroupsNames();
-        _this.sendGroup(message, groupsNames);
-        break;
-      case 'getGroup':
-        let group = _this.getGroup(params.groupName);
-        _this.sendGroup(message, group);
-        break;
-      case 'createGroup':
-        _this.createGroup(params.groupName);
-        _this.sendResponse(message, 200);
-        break;
-      case 'removeGroup':
-        _this.removeGroup(params.groupName);
-        _this.sendResponse(message, 200);
-        break;
-      case 'addToGroup':
-        _this.addToGroup(params.userEmail, params.groupName);
-        _this.sendResponse(message, 200);
-        break;
-      case 'removeFromGroup':
-        _this.removeFromGroup(params.userEmail, params.groupName);
-        _this.sendResponse(message, 200);
-        break;
-      case 'getTimeRestrictions':
-        let timeRestrictions = _this.getTimeRestrictions();
-        _this.sendGroup(message, timeRestrictions);
-        break;
-      case 'getTimeRestrictionById':
-        let timeRestriction = _this.getTimeRestrictionById(params.policyID);
-        _this.sendGroup(message, timeRestriction);
-        break;
-      case 'changeTimePolicy':
-        _this.changeTimePolicy(params.policyID, params.authorise);
-        _this.sendResponse(message, 200);
-    }
-  }
-
-  /**
-  * Sends a response to the message origin.
-  * @param  {Message}   message
-  * @param  {Number}    httpCode
-  */
-  sendResponse(message, httpCode) {
-    let _this = this;
-    let response = {id: message.id, type: 'response', to: message.from, from: message.to, body: {code: httpCode}};
-    _this.messageBus.postMessage(response);
-  }
-
-  /**
-  * Sends the requested group to the message origin.
-  * @param  {Message}   message
-  * @param  {Array}     group
-  */
-  sendGroup(message, group) {
-    let _this = this;
-    let response = {id: message.id, type: 'response', to: message.from, from: message.to, body: {code: 200, method: message.body.method, value: group}};
-    _this.messageBus.postMessage(response);
+    _this.objectsReporters[objectURL] = reporterURL;
   }
 
   /**
@@ -209,15 +144,18 @@ class PolicyEngine {
   * @param  {Policy[]}  policies
   * @param  {String}    scope
   */
-  addPolicies(policies, scope) {
+  addPolicies(policies) {
     let _this = this;
-    for (let i in policies) { // TODO: conflict detection
+    for (let i in policies) {
+      let newPolicy = policies[i];
+      let scope = newPolicy.scope;
       if (_this.policies[scope] === undefined) {
         _this.policies[scope] = [];
       }
-      for (let policy in _this.policies[scope]) {
-        if (_this.policies[scope][policy].id === policies[i].id) {
-          _this.removePolicies(policies[i].id, 'user');
+      for (let j in _this.policies[scope]) {
+        let existingPolicy = _this.policies[scope][j];
+        if (existingPolicy.condition === newPolicy.condition && existingPolicy.authorise === newPolicy.authorise) {
+          _this.removePolicies(policies[i].condition);
           break;
         }
       }
@@ -230,18 +168,17 @@ class PolicyEngine {
   * @param  {String}  policyID
   * @param  {String}  scope
   */
-  removePolicies(policyID, scope) {
+  removePolicies(condition, scope) {
     let _this = this;
     let allPolicies = _this.policies;
 
     if (scope in allPolicies) {
-      if (policyID !== '*') {
+      if (condition !== '*') {
         let policies = allPolicies[scope];
-        let numPolicies = policies.length;
 
-        for (let policy = 0; policy < numPolicies; policy++) {
-          if (policies[policy].id === policyID) {
-            policies.splice(policy, 1);
+        for (let i in policies) {
+          if (policies[i].condition === condition) {
+            policies.splice(condition, 1);
             break;
           }
         }
@@ -278,6 +215,17 @@ class PolicyEngine {
   removeGroup(groupName) {
     let _this = this;
     _this.pdp.removeGroup(groupName);
+
+    let policies = _this.policies.user;
+    for (let i in policies) {
+      let condition = policies[i].condition.split(' ');
+      condition.shift();
+      let groupInPolicy = condition.join(' ');
+      if (groupInPolicy === groupName) {
+        delete policies[i];
+        break;
+      }
+    }
   }
 
   /**
@@ -290,6 +238,37 @@ class PolicyEngine {
     _this.pdp.addToGroup(userEmail, groupName);
   }
 
+  getGroupReachability(groupName) {
+    let _this = this;
+    let policies = _this.policies.user;
+    for (let i in policies) {
+      if (policies[i].condition === 'group ' + groupName) {
+        return policies[i].authorise;
+      }
+    }
+  }
+
+  changePolicy(condition, authorise) {
+    let _this = this;
+
+    let policies = _this.policies.user;
+    policies = policies || [];
+    for (let i in policies) {
+      if (policies[i].condition === condition) {
+        policies[i].authorise = authorise;
+        return;
+      }
+    }
+    let newPolicy = {
+      scope: 'user',
+      condition: condition,
+      authorise: authorise,
+      actions: []
+    };
+
+    _this.addPolicies([newPolicy]);
+  }
+
   /**
   * Forwards a request to remove a user from the group with the given name to the PDP.
   * @param  {String}  userEmail
@@ -300,7 +279,7 @@ class PolicyEngine {
     _this.pdp.removeFromGroup(userEmail, groupName);
   }
 
-  getTimeRestrictions() {
+  getTimeslots() {
     let _this = this;
     let policies = _this.policies.user;
     let timeRestrictions = [];
@@ -312,22 +291,12 @@ class PolicyEngine {
     return timeRestrictions;
   }
 
-  getTimeRestrictionById(id) {
+  getTimeslotById(condition) {
     let _this = this;
     let policies = _this.policies.user;
     for (let i in policies) {
-      if (policies[i].id === id) {
+      if (policies[i].condition === condition) {
         return policies[i];
-      }
-    }
-  }
-
-  changeTimePolicy(id, authorise) {
-    let _this = this;
-    let policies = _this.policies.user;
-    for (let i in policies) {
-      if (policies[i].id === id) {
-        policies[i].authorise = authorise;
       }
     }
   }
@@ -337,23 +306,8 @@ class PolicyEngine {
   * @return {String} scope
   */
   getScope(message) {
-    let _this = this;
-    let scope;
-    if (_this.isObjectUpdate(message)) {
-      scope = 'objectManagement';
-    } else {
-      scope = 'user';
-    }
+    let scope = 'user';
     return scope;
-  }
-
-  isObjectUpdate(message) {
-    let isForChanges = (message.to === message.from + '/changes');
-    if (message.type === 'update' && isForChanges) {
-      return true;
-    } else {
-      return false;
-    }
   }
 
   /**

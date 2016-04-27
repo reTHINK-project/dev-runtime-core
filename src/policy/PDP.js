@@ -1,5 +1,3 @@
-import {getUserEmailFromURL} from '../utils/utils.js';
-
 /**
 * The Policy Decision Point (PDP) decides if a message is to be authorised by checking a set of
 * policies. The resource to be verified is specified in the first word of the 'condition' field of
@@ -20,20 +18,14 @@ class PDP {
     _this.runtimeRegistry = runtimeRegistry;
     _this.objectsReporters = {};
     _this.myGroups = {}; // TODO: load from the Persistence Manager
-    _this.getPoliciesImplementation();
+    _this.setPoliciesImplementation();
   }
 
-  getPoliciesImplementation() {
+  setPoliciesImplementation() {
     let _this = this;
     _this.policiesImplementation = {};
-    _this.policiesImplementation.group = 'result[0] = _this.isInGroup(getUserEmailFromURL(message.body.identity), condition[1]) ? policy.authorise : !policy.authorise;';
+    _this.policiesImplementation.group = 'let condition = policy.condition.split(\' \'); condition.shift(); let groupName = condition.join(\' \'); if(_this.isInGroup(message.body.identity.email, groupName)) { result[0] = policy.authorise; }';
     _this.policiesImplementation.time = 'result[0] = _this.isTimeBetween(condition[1], condition[2]) ? policy.authorise : !policy.authorise;';
-    _this.policiesImplementation.sync = 'result[0] = _this.isReporterOfObject(message.from, message.body.source) ? policy.authorise : !policy.authorise;';
-  }
-
-  addObject(objectURL, reporterURL) {
-    let _this = this;
-    _this.objectsReporters[objectURL] = reporterURL;
   }
 
   getGroupsNames() {
@@ -114,19 +106,19 @@ class PDP {
   * @param {Array}    policies
   * @return {Array}   [authDecision, actions]
   */
-  evaluate(message, hypertyToVerify, policies) {
+  evaluate(message, policies) {
     let _this = this;
     let results = [true];
     let actions = [];
-
     for (let i in policies) {
       let policy = policies[i];
       let result = [];
       let condition = policy.condition.split(' ');
       let resource = condition[0];
+
       eval(_this.policiesImplementation[resource]);
       results.push(result[0]);
-      actions.push(result[1]); // TODO: do actions depend on the final authorisation decision?
+      actions.push(result[1]);
     }
 
     let authDecision = results.indexOf(false) === -1;
@@ -143,7 +135,11 @@ class PDP {
   isInGroup(userEmail, groupName) {
     let _this = this;
     let group = _this.myGroups[groupName];
-    return group.indexOf(userEmail) > -1;
+    if (group === undefined) {
+      return false;
+    } else {
+      return group.indexOf(userEmail) > -1;
+    }
   }
 
   /**
@@ -177,12 +173,6 @@ class PDP {
   getMinutes(time) {
     let timeSplit = time.split(':');
     return parseInt(timeSplit[0]) * 60 + parseInt(timeSplit[1]);
-  }
-
-  /* var update = {type:'update', from: 'hello://hybroker.rethink.ptinovacao.pt/c10007a6-45cb-4962-90ae-fa915b7b4f94', to: 'hello://hybroker.rethink.ptinovacao.pt/c10007a6-45cb-4962-90ae-fa915b7b4f94/changes', body: {source: 'hyperty://hybroker.rethink.ptinovacao.pt/a94743d1-f308-42fb-9ad9-4c12d1e9c25'}};*/
-  isReporterOfObject(objectURL, hypertyURL) {
-    let _this = this;
-    return (_this.objectsReporters[objectURL] === hypertyURL);
   }
 }
 
