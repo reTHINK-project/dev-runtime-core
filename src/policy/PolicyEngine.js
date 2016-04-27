@@ -110,14 +110,16 @@ class PolicyEngine {
     }
 
     /* (4) */
-    //if (message.type === 'create' && String(message.from.split('/').slice(-1)[0]) === 'subscription') {
-    if (String(message.from.split('/').slice(-1)[0]) === 'subscription') {
-      let objectURL = message.from.substring(0, message.from.length - 13);
-      //let reporterURL1 = message.body.value.reporter;
-      //console.log('reporterURL1', reporterURL1);
+    if (message.type === 'create' && String(message.from.split('/').slice(-1)[0]) === 'subscription') {
+      //if (String(message.from.split('/').slice(-1)[0]) === 'subscription') {
 
-      let reporterURL = message.body.value.data.communication.owner;
+      let objectURL = message.from.substring(0, message.from.length - 13);
+      let reporterURL = message.body.value.reporter;
+
+      console.log('reporterURL', reporterURL);      //let reporterURL = message.body.value.data.communication.owner;
+
       _this.addObject(objectURL, reporterURL);
+
       return true;
     }
 
