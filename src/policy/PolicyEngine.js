@@ -35,42 +35,61 @@ class PolicyEngine {
   * the Message Bus, where it will be forwarded or blocked.
   * @param  {Message}  message
   */
+
   authorise(message) {
+
     let _this = this;
 
     return new Promise(function(resolve, reject) {
+
       console.log('--- Policy Engine ---');
       console.log(message);
       message.body = message.body || {};
-      let initialResultOk = _this.followsIntrinsicBehaviour(message);
-      if (initialResultOk === undefined) {
-        _this.idModule.getIdentityAssertion().then(identity => {
-          message.body.identity = message.body.identity || identity;
 
-          let scope = _this.getScope(message);
-          let applicablePolicies = _this.getApplicablePolicies(scope);
-          let policiesResult = _this.pdp.evaluate(message, applicablePolicies);
-          _this.pep.enforce(policiesResult[1]);
-          if (policiesResult[0]) {
-            message.body.auth = true;
-            resolve(message);
-          } else {
-            message.body.auth = false;
-            reject('Unauthorised message');
-          }
-        }, function(error) {
-          reject(error);
-        });
-      } else {
-        if (initialResultOk) {
+      if (_this.isIdpMessage(message)) {
+        message.body.auth = true;
+        resolve(message);
+        return;
+      }
+
+      //let initialResultOk = _this.followsIntrinsicBehaviour(message);
+      //if (initialResultOk === undefined) {
+      _this.idModule.getIdentityAssertion().then(identity => {
+
+        message.body.identity = message.body.identity || identity;
+
+        let scope = _this.getScope(message);
+        let applicablePolicies = _this.getApplicablePolicies(scope);
+        let policiesResult = _this.pdp.evaluate(message, applicablePolicies);
+
+        _this.pep.enforce(policiesResult[1]);
+
+        if (policiesResult[0]) {
           message.body.auth = true;
           resolve(message);
         } else {
           message.body.auth = false;
-          reject('Intrinsic behaviour was not respected');
+          reject('Unauthorised message');
         }
-      }
+
+      }, function(error) {
+        reject(error);
+      });
+
+      /*} else {
+        message.body.auth = false;
+        reject('Intrinsic behaviour was not respected');
+      }*/
     });
+  }
+
+  isIdpMessage(message) {
+    let _this = this;
+
+    let idpURL = 'domain-idp://google.com';
+    let idmURL = _this.pdp.runtimeRegistry.runtimeURL + '/idm';
+
+    return message.from === idpURL && message.to === idmURL || message.to === idpURL && message.from === idmURL;
   }
 
   /*
@@ -85,19 +104,6 @@ class PolicyEngine {
   */
   followsIntrinsicBehaviour(message) {
     let _this = this;
-
-    let idpURL = 'domain-idp://google.com';
-    let idmURL = _this.pdp.runtimeRegistry.runtimeURL + '/idm';
-
-    /* (1) */
-    if (message.from === idpURL) {
-      return message.to === idmURL;
-    }
-
-    /* (2) */
-    if (message.to === idpURL) {
-      return message.from === idmURL;
-    }
 
     /* (3) */
     let isResponse = message.type === 'response';

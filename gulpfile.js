@@ -129,8 +129,7 @@ function prependLicense(clean) {
 
 gulp.task('runtime', function() {
 
-  var compact = argv.compact;
-  if (!compact) compact = false;
+  var compact = true;
 
   return browserify({
     entries: ['./src/runtime/RuntimeUA.js'],
@@ -158,8 +157,7 @@ gulp.task('runtime', function() {
 
 gulp.task('minibus', function() {
 
-  var compact = argv.compact;
-  if (!compact) compact = false;
+  var compact = true;
 
   var descriptionNote = '/**\n' +
   '* Minimal interface and implementation to send and receive messages. It can be reused in many type of components.\n' +
@@ -198,8 +196,7 @@ gulp.task('sandbox', function() {
   '* Base class to implement external sandbox component\n' +
   '*/\n\n';
 
-  var compact = argv.compact;
-  if (!compact) compact = false;
+  var compact = true;
 
   return browserify({
     entries: ['./src/sandbox.js'],
