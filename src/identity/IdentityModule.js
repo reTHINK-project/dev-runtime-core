@@ -1,5 +1,5 @@
 
-import {getUserURLFromEmail} from '../utils/utils.js';
+import {divideURL, getUserURLFromEmail} from '../utils/utils.js';
 import Identity from './Identity';
 
 /**
@@ -35,8 +35,14 @@ class IdentityModule {
   /**
   * This is the constructor to initialise the Identity Module it does not require any input.
   */
-  constructor() {
+  constructor(runtimeURL) {
     let _this = this;
+
+    if (!runtimeURL) throw new Error('runtimeURL is missing.');
+
+    _this._runtimeURL = runtimeURL + '/idm';
+
+    _this._domain = divideURL(_this._runtimeURL).domain;
 
     //to store items with this format: {identity: identityURL, token: tokenID}
     _this.identities = [];
@@ -79,9 +85,9 @@ class IdentityModule {
   */
   _resolveDomain(idpDomain) {
     if (!idpDomain) {
-      return 'domain://google.com';
+      return 'domain-idp://google.com';
     } else {
-      return 'domain://' + idpDomain;
+      return 'domain-idp://' + idpDomain;
     }
   }
 
@@ -169,7 +175,7 @@ class IdentityModule {
     return new Promise(function(resolve,reject) {
 
       if (contents) {
-        message = {type:'execute', to: domain, from: 'domain://localhost/id-module', body: {resource: 'identity', method: 'generateAssertion',
+        message = {type:'execute', to: domain, from: _this._runtimeURL, body: {resource: 'identity', method: 'generateAssertion',
                params: {contents: contents, origin: origin, usernameHint: usernameHint}}};
 
         _this._messageBus.postMessage(message, (res) => {
@@ -181,7 +187,7 @@ class IdentityModule {
             _this.identity.addIdentity(result);
 
             //creation of a new JSON with the identity to send via messages
-            let newIdentity = {idp: result.idp.domain, assertion: result.assertion, email: result.info.email, identity: result.identity, infoToken: result.infoToken};
+            let newIdentity = {userProfile: {username: result.info.email, cn: result.infoToken.name}, idp: result.idp.domain, assertion: result.assertion, email: result.info.email, identity: result.identity, infoToken: result.infoToken};
             result.messageInfo = newIdentity;
 
             _this.currentIdentity = newIdentity;
@@ -194,7 +200,7 @@ class IdentityModule {
         });
       } else {
 
-        message = {type:'execute', to: domain, from: 'domain://localhost/id-module', body: {resource: 'identity', method: 'generateAssertion',
+        message = {type:'execute', to: domain, from: _this._runtimeURL, body: {resource: 'identity', method: 'generateAssertion',
         params: {contents: '', origin: origin, usernameHint: usernameHint}}};
         _this._messageBus.postMessage(message, (result) => {
 
@@ -203,6 +209,8 @@ class IdentityModule {
           if (!urlToOpen) {
             return reject('Error: Invalid URL to obtain Identity');
           } else {
+
+            //var msgOpenIframe = {type: 'execute', from: _this._runtimeURL, to: ''}
 
             //Open a window with the URL received by the proxy
             //TODO later swap any existing redirectURI in the url, for a specific one in the idModule
@@ -249,7 +257,7 @@ class IdentityModule {
 
     let domain = _this._resolveDomain(idpDomain);
 
-    let message = {type:'EXECUTE', to: domain, from: 'domain://localhost/id-module', body: {resource: 'identity', method: 'validateAssertion',
+    let message = {type:'EXECUTE', to: domain, from: _this._runtimeURL, body: {resource: 'identity', method: 'validateAssertion',
            params: {assertion: assertion, origin: origin}}};
 
     return new Promise(function(resolve, reject) {

@@ -25,7 +25,7 @@ import ObjectAllocation from './ObjectAllocation';
 import ReporterObject from './ReporterObject';
 import ObserverObject from './ObserverObject';
 
-import {MessageFactory} from 'service-framework';
+import {MessageFactory} from 'service-framework/dist/MessageFactory';
 
 /**
  * @author micaelpedrosa@gmail.com
@@ -93,12 +93,17 @@ class SyncherManager {
 
     //get schema from catalogue and parse -> (scheme, children)
     _this._catalog.getDataSchemaDescriptor(msg.body.schema).then((descriptor) => {
+
       let properties = descriptor.sourcePackage.sourceCode.properties;
       let scheme = properties.scheme ? properties.scheme.constant : 'resource';
       let childrens = properties.children ? properties.children.constant : [];
 
+      console.log('Scheme: ', scheme);
+
       _this._allocator.create(domain, scheme, 1).then((allocated) => {
         let objURL = allocated[0];
+
+        console.log('ALLOCATOR CREATE:', allocated);
 
         //To register the dataObject in the runtimeRegistry
         _this._registry.registerDataObject(msg.body.value.name, 'scheme', objURL, 'dataObjectReporter').then(function(resolve) {
@@ -126,12 +131,17 @@ class SyncherManager {
         });
 
       });
-    }).catch(() => {
+    }).catch((reason) => {
       /*{
         id: msg.id, type: 'response', from: msg.to, to: owner,
         body: { code: 500, desc: reason }
       }*/
-      let responseMsg = _this._mf.createMessageResponse(msg, 500);
+
+      // let responseMsg = _this._mf.createMessageResponse(msg, 500);
+      let responseMsg = {
+        id: msg.id, type: 'response', from: msg.to, to: owner,
+        body: { code: 500, desc: reason }
+      };
 
       _this._bus.postMessage(responseMsg);
     });

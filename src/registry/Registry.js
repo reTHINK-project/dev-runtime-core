@@ -25,7 +25,7 @@ import AddressAllocation from './AddressAllocation';
 import ObjectAllocation from '../syncher/ObjectAllocation';
 import HypertyInstance from './HypertyInstance';
 
-import {MessageFactory} from 'service-framework';
+import {MessageFactory} from 'service-framework/dist/MessageFactory';
 import {divideURL, getUserEmailFromURL} from '../utils/utils.js';
 
 /**
@@ -61,13 +61,15 @@ class Registry extends EventEmitter {
     _this.remoteRegistry = remoteRegistry;
     _this.idModule = identityModule;
     _this.identifier = Math.floor((Math.random() * 10000) + 1);
-          // the expires in 21600s, represents 6 hours
-          //the expires is in seconds, unit of measure received by the domain registry
+
+    // the expires in 21600s, represents 6 hours
+    //the expires is in seconds, unit of measure received by the domain registry
     _this.expiresTime = 21600;
 
     _this.hypertiesListToRemove = {};
     _this.hypertiesList = [];
     _this.protostubsList = {};
+    _this.idpProxyList = {};
     _this.dataObjectList = {};
     _this.sandboxesList = {sandbox: {}, appSandbox: {} };
     _this.pepList = {};
@@ -273,6 +275,8 @@ class Registry extends EventEmitter {
       //message to register the new hyperty, within the domain registry
       let messageValue = {name: identifier, schema: dataObjectschema, url: dataObjectUrl, expires: _this.expiresTime, reporter: dataObjectReporter};
 
+      _this.dataObjectList[identifier] = messageValue;
+
       let message = _this.messageFactory.createCreateMessageRequest(
         _this.registryURL,
         'domain://registry.' + _this.registryDomain + '/',
@@ -441,7 +445,7 @@ class Registry extends EventEmitter {
       let request = _this.protostubsList[url];
 
       if (request === undefined) {
-        reject('requestUpdate couldn\' get the ProtostubURL');
+        reject('requestUpdate couldn\'t get the ProtostubURL');
       } else {
         resolve(request);
       }
@@ -509,6 +513,64 @@ class Registry extends EventEmitter {
       } else {
         delete _this.protostubsList[hypertyRuntimeURL];
         resolve('ProtostubURL removed');
+      }
+    });
+  }
+
+  /**
+   * To register a new Identity Provider proxy in the runtime including as input parameters the function to postMessage, the DomainURL that is connected with the stub, which returns the RuntimeURL allocated to the new ProtocolStub.
+   * @param {Sandbox}        Sandbox
+   * @param  {DomainURL}     DomainURL service provider domain
+   * @return {RuntimeIdpProxyURL}
+   */
+  registerIdpProxy(sandbox, domainURL) {
+    let _this = this;
+    let idpProxyStubURL;
+
+    return new Promise(function(resolve,reject) {
+
+      //check if messageBus is registered in registry or not
+      if (_this._messageBus === undefined) {
+        reject('MessageBus not found on registerStub');
+      }
+
+      idpProxyStubURL = 'domain-idp://' + domainURL + '/stub/' + Math.floor((Math.random() * 10000) + 1);
+
+      // TODO: Optimize this
+      _this.idpProxyList[domainURL] = idpProxyStubURL;
+      _this.sandboxesList.sandbox[idpProxyStubURL] = sandbox;
+
+      // sandbox.addListener('*', function(msg) {
+      //   _this._messageBus.postMessage(msg);
+      // });
+
+      resolve(idpProxyStubURL);
+
+      _this._messageBus.addListener(idpProxyStubURL + '/status', (msg) => {
+        if (msg.resource === msg.to + '/status') {
+          console.log('idpProxyStubURL/status message: ', msg.body.value);
+        }
+      });
+    });
+  }
+
+  /**
+  * To discover idpProxy stubs available in the runtime for a certain domain. If available, it returns the runtime url for the idpProxy stub that connects to the requested domain. Required by the runtime BUS to route messages to remote servers or peers
+  * @param  {DomainURL}           DomainURL            url
+  * @return {RuntimeURL}           RuntimeURL         idpProxyUrl
+  */
+  discoverIdpProxy(url) {
+    if (!url) throw new Error('Parameter url needed');
+    let _this = this;
+
+    return new Promise(function(resolve,reject) {
+
+      let request = _this.idpProxyList[url];
+
+      if (request === undefined) {
+        reject('requestUpdate couldn\'t get the idpProxyURL');
+      } else {
+        resolve(request);
       }
     });
 
@@ -614,7 +676,9 @@ class Registry extends EventEmitter {
 
     //split the url to find the domainURL. deals with the url for example as:
     //"hyperty-runtime://sp1/protostub/123",
-    let domainUrl = divideURL(url).domain;
+    let dividedURL = divideURL(url);
+    let domainUrl = dividedURL.domain;
+    let type = dividedURL.type;
 
     // resolve the domain protostub in case of a message to global registry
     if (url.includes('global://registry')) {
@@ -627,11 +691,22 @@ class Registry extends EventEmitter {
         domainUrl = domainUrl.substring(domainUrl.indexOf('.') + 1);
       }
 
-      let request  = _this.protostubsList[domainUrl];
+      let request;
+      if (type === 'domain-idp') {
+        request  = _this.idpProxyList[domainUrl];
+      } else {
+        request  = _this.protostubsList[domainUrl];
+      }
 
       _this.addEventListener('runtime:stubLoaded', function(domainUrl) {
         request  = _this.protostubsList[domainUrl];
-        console.info('Resolved: ', request);
+        console.info('Resolved Protostub: ', request);
+        resolve(request);
+      });
+
+      _this.addEventListener('runtime:idpProxyLoaded', function(domainUrl) {
+        request  = _this.idpProxyList[domainUrl];
+        console.info('Resolved IDPProxy: ', request);
         resolve(request);
       });
 
@@ -639,7 +714,12 @@ class Registry extends EventEmitter {
         console.info('Resolved: ', request);
         resolve(request);
       } else {
-        _this.trigger('runtime:loadStub', domainUrl);
+        if (type === 'domain-idp') {
+          _this.trigger('runtime:loadIdpProxy', domainUrl);
+        } else {
+          _this.trigger('runtime:loadStub', domainUrl);
+        }
+
       }
 
     });

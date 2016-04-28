@@ -86,16 +86,16 @@ class PolicyEngine {
   followsIntrinsicBehaviour(message) {
     let _this = this;
 
-    let idpURL = 'domain://google.com';
-    let idmURL = 'domain://' + _this.pdp.runtimeRegistry._domain + '/id-module';
+    let idpURL = 'domain-idp://';
+    let idmURL = _this.pdp.runtimeRegistry.runtimeURL + '/idm';
 
     /* (1) */
-    if (message.from === idpURL) {
+    if (message.from.includes(idpURL)) {
       return message.to === idmURL;
     }
 
     /* (2) */
-    if (message.to === idpURL) {
+    if (message.to.includes(idpURL)) {
       return message.from === idmURL;
     }
 
@@ -109,19 +109,23 @@ class PolicyEngine {
       return true;
     }
 
+    //TODO uncomment and try to solve the problem
     /* (4) */
-    //if (message.type === 'create' && String(message.from.split('/').slice(-1)[0]) === 'subscription') {
-    if (String(message.from.split('/').slice(-1)[0]) === 'subscription') {
+    /*if (message.type === 'create' && String(message.from.split('/').slice(-1)[0]) === 'subscription') {
+      //if (String(message.from.split('/').slice(-1)[0]) === 'subscription') {
+          console.log('15 - PE');
       let objectURL = message.from.substring(0, message.from.length - 13);
-      //let reporterURL1 = message.body.value.reporter;
-      //console.log('reporterURL1', reporterURL1);
+      let reporterURL = message.body.value.reporter;
 
-      let reporterURL = message.body.value.data.communication.owner;
+      console.log('reporterURL', reporterURL);      //let reporterURL = message.body.value.data.communication.owner;
+
       _this.addObject(objectURL, reporterURL);
+
       return true;
-    }
+    }*/
 
     /* (5) */
+    /*
     if (message.type === 'update' && message.to === message.from + '/changes') {
       let objectURL = message.from;
       let hypertyURL = message.body.source;
@@ -130,7 +134,7 @@ class PolicyEngine {
       } else {
         return false;
       }
-    }
+    }*/
   }
 
   addObject(objectURL, reporterURL) {

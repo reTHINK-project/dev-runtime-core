@@ -18,8 +18,9 @@ var argv = require('yargs').argv;
 var through = require('through2');
 var path = require('path');
 var gulpif = require('gulp-if');
-var Base64 = require('js-base64').Base64;
-var fs = require('fs');
+
+var git = require('gulp-git');
+var prompt = require('gulp-prompt');
 
 var pkg = require('./package.json');
 
@@ -128,25 +129,24 @@ function prependLicense(clean) {
 
 gulp.task('runtime', function() {
 
-  var compact = argv.compact;
-  if (!compact) compact = false;
+  var compact = true;
 
   return browserify({
     entries: ['./src/runtime/RuntimeUA.js'],
-    standalone: 'RuntimeUA',
-    debug: compact
+    standalone: 'Runtime',
+    debug: false
   })
   .transform(babel, {
     compact: compact,
     presets: ['es2015', 'stage-0'],
-    plugins: ['add-module-exports']
+    plugins: ['add-module-exports', 'transform-runtime', 'transform-regenerator']
   })
   .bundle()
   .on('error', function(err) {
     console.error(err);
     this.emit('end');
   })
-  .pipe(source('RuntimeUA.js'))
+  .pipe(source('Runtime.js'))
   .pipe(buffer())
   .pipe(gulpif(compact, uglify()))
   .pipe(gulpif(compact, insert.prepend(license + '// Runtime User Agent \n\n// version: {{version}}\n\n')))
@@ -157,8 +157,7 @@ gulp.task('runtime', function() {
 
 gulp.task('minibus', function() {
 
-  var compact = argv.compact;
-  if (!compact) compact = false;
+  var compact = true;
 
   var descriptionNote = '/**\n' +
   '* Minimal interface and implementation to send and receive messages. It can be reused in many type of components.\n' +
@@ -169,12 +168,12 @@ gulp.task('minibus', function() {
   return browserify({
     entries: ['./src/minibus.js'],
     standalone: 'MiniBus',
-    debug: compact
+    debug: false
   })
   .transform(babel, {
     compact: compact,
     presets: ['es2015', 'stage-0'],
-    plugins: ['add-module-exports']
+    plugins: ['add-module-exports', 'transform-runtime', 'transform-regenerator']
   })
   .bundle()
   .on('error', function(err) {
@@ -197,18 +196,17 @@ gulp.task('sandbox', function() {
   '* Base class to implement external sandbox component\n' +
   '*/\n\n';
 
-  var compact = argv.compact;
-  if (!compact) compact = false;
+  var compact = true;
 
   return browserify({
     entries: ['./src/sandbox.js'],
     standalone: 'sandbox',
-    debug: compact
+    debug: false
   })
   .transform(babel, {
     compact: compact,
     presets: ['es2015', 'stage-0'],
-    plugins: ['add-module-exports']
+    plugins: ['add-module-exports', 'transform-runtime', 'transform-regenerator']
   })
   .bundle()
   .on('error', function(err) {
@@ -230,239 +228,6 @@ gulp.task('sandbox', function() {
  * How to use: gulp dist --compact false | true;
  */
 gulp.task('dist', ['runtime', 'minibus', 'sandbox']);
-
-/**
- * Compile on specific file from ES6 to ES5
- * @param  {string} 'compile' task name
- *
- * How to use: gulp compile --file=path/to/file;
- */
-gulp.task('compile', function() {
-
-  var filename = argv.file;
-  var path;
-
-  if (!filename) {
-    this.emit('end');
-  } else {
-    var splitIndex = filename.lastIndexOf('/') + 1;
-    path = filename.substr(0, splitIndex);
-    filename = filename.substr(splitIndex).replace('.js', '');
-  }
-
-  console.log('Converting ' + filename + ' on ' + path + ' to ES5');
-
-  var bundler = browserify(path + filename, {
-    standalone: 'activate',
-    debug: true
-  }).transform(babel);
-
-  function rebundle() {
-    return bundler.bundle()
-      .on('error', function(err) {
-        console.error(err);
-        this.emit('end');
-      })
-      .pipe(source(filename + '.ES5.js'))
-      .pipe(buffer())
-      .pipe(uglify())
-      .pipe(gulp.dest(path));
-  }
-
-  return rebundle();
-
-});
-
-function encode(filename, descriptorName, configuration, isDefault) {
-
-  var descriptor = fs.readFileSync('resources/descriptors/' + descriptorName + '.json', 'utf8');
-  var json = JSON.parse(descriptor);
-
-  return through.obj(function(file, enc, cb) {
-
-    if (file.isNull()) {
-      return cb(null, file);
-    }
-    if (file.isStream()) {
-      return cb(new Error('Streaming not supported'));
-    }
-
-    var encoded = Base64.encode(file.contents);
-    var value = 'default';
-
-    if (isDefault) {
-      value = 'default';
-    } else {
-      value = filename;
-    }
-
-    if (!json.hasOwnProperty(value)) {
-      var newObject = {};
-      json[value] = newObject;
-      json[value].sourcePackage = {};
-    }
-
-    var language = 'javascript';
-    if (descriptorName === 'DataSchemas') {
-      language = 'JSON-Schema';
-    }
-
-    json[value].cguid = Math.floor(Math.random() + 1);
-    json[value].type = descriptorName;
-    json[value].version = '0.1';
-    json[value].description = 'Description of ' + filename;
-    json[value].objectName = filename;
-    json[value].configuration = configuration;
-    json[value].sourcePackageURL = '/sourcePackage';
-    json[value].sourcePackage.sourceCode = encoded;
-    json[value].sourcePackage.sourceCodeClassname = filename;
-    json[value].sourcePackage.encoding = 'base64';
-    json[value].sourcePackage.signature = '';
-    json[value].language = language;
-    json[value].signature = '';
-    json[value].messageSchemas = '';
-    json[value].dataObjects = [];
-    json[value].accessControlPolicy = 'somePolicy';
-
-    var newDescriptor = new Buffer(JSON.stringify(json, null, 2));
-    console.log(value);
-    cb(null, newDescriptor);
-
-  });
-
-}
-
-function resource(file, configuration, isDefault) {
-
-  var filename = file;
-  var splitIndex = filename.lastIndexOf('/') + 1;
-  var extension = filename.substr(filename.lastIndexOf('.') + 1);
-
-  switch (extension) {
-    case 'js':
-      filename = filename.substr(splitIndex).replace('.js', '');
-      break;
-    case 'json':
-      filename = filename.substr(splitIndex).replace('.json', '');
-      break;
-  }
-
-  var descriptorName;
-  if (filename.indexOf('Hyperty') !== -1) {
-    descriptorName = 'Hyperties';
-  } else if (filename.indexOf('ProtoStub') !== -1) {
-    descriptorName = 'ProtoStubs';
-  } else if (filename.indexOf('DataSchema')) {
-    descriptorName = 'DataSchemas';
-  }
-
-  console.log('DATA:', descriptorName);
-
-  if (extension === 'js') {
-    return browserify({
-      entries: ['resources/' + filename + '.js'],
-      standalone: 'activate',
-      debug: false
-    })
-    .transform(babel)
-    .bundle()
-    .pipe(source('bundle.js'))
-    .pipe(gulp.dest('resources/'))
-    .pipe(buffer())
-    .pipe(encode(filename, descriptorName, configuration, isDefault))
-    .pipe(source(descriptorName + '.json'))
-    .pipe(gulp.dest('resources/descriptors/'));
-  } else if (extension === 'json') {
-
-    return gulp.src(['resources/' + filename + '.json'])
-    .pipe(gulp.dest('resources/'))
-    .pipe(buffer())
-    .pipe(encode(filename, descriptorName, configuration, isDefault))
-    .pipe(source(descriptorName + '.json'))
-    .pipe(gulp.dest('resources/descriptors/'));
-
-  }
-
-}
-
-gulp.task('watch', function() {
-
-  return gulp.watch(['src/runtime/RuntimeUA.js'], ['runtime']);
-
-  // watcher.on('change', function(event) {
-  //
-  //   if (event.type === 'deleted') return;
-  //   console.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
-  //   resource(event.path);
-  //
-  // });
-
-});
-
-gulp.task('encode', function(done) {
-
-  var files = [];
-  var dirFiles = fs.readdirSync('resources');
-  files = dirFiles.filter(isFile);
-  files = files.map(function(file) {
-    return 'resources/' + file;
-  });
-
-  function isFile(file) {
-    if (file.indexOf('Hyperty') !== -1 || file.indexOf('ProtoStub') !== -1 || file.indexOf('DataSchema') !== -1) {
-      return fs.statSync('resources/' + file).isFile();
-    }
-  }
-
-  gulp.src('./', {buffer:false})
-    .pipe(prompt.prompt([{
-      type: 'list',
-      name: 'file',
-      message: 'File to be converted:',
-      choices: files
-    },
-    {
-      type: 'input',
-      name: 'configuration',
-      message: 'ProtoStub Configuration, use something like:\n{"url": "wss://msg-node.localhost:9090/ws"}\nConfiguration:',
-      validate: function(value) {
-        try {
-          JSON.parse(value);
-          return true;
-        } catch (e) {
-          console.error('Check your configuration JSON\nShould be something like:\n{"url": "wss://msg-node.localhost:9090/ws"}');
-          return false;
-        }
-      }
-    },
-    {
-      type: 'list',
-      name: 'defaultFile',
-      message: 'This will be a default file to be loaded?',
-      choices: ['yes', 'no']
-    }], function(res) {
-
-      fs.access(res.file, fs.R_OK | fs.W_OK, function(err) {
-        if (err) done(new Error('No such file or directory'));
-        return;
-      });
-
-      var configuration = JSON.parse(res.configuration);
-
-      var isDefault = true;
-      if (res.defaultFile === 'no' || res.defaultFile === 'n') {
-        isDefault = false;
-      }
-
-      if (res.file) {
-        resource(res.file, configuration, isDefault);
-      }
-    })
-  );
-
-});
-
-//gulp.task('encode', ['watch']);
 
 /**
  * Bumping version number and tagging the repository with it.
@@ -505,9 +270,6 @@ gulp.task('test', function(done) {
     singleRun: true
   }, done).start();
 });
-
-var git = require('gulp-git');
-var prompt = require('gulp-prompt');
 
 // Run git add
 gulp.task('add', ['test'], function() {
