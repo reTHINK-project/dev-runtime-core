@@ -187,7 +187,7 @@ class IdentityModule {
             _this.identity.addIdentity(result);
 
             //creation of a new JSON with the identity to send via messages
-            let newIdentity = {userProfile: {username: result.info.email, cn: result.info.name}, idp: result.idp.domain, assertion: result.assertion, email: result.info.email, identity: result.identity, infoToken: result.infoToken};
+            let newIdentity = {userProfile: {username: result.info.email, cn: result.infoToken.name}, idp: result.idp.domain, assertion: result.assertion, email: result.info.email, identity: result.identity, infoToken: result.infoToken};
             result.messageInfo = newIdentity;
 
             _this.currentIdentity = newIdentity;
@@ -209,6 +209,8 @@ class IdentityModule {
           if (!urlToOpen) {
             return reject('Error: Invalid URL to obtain Identity');
           } else {
+
+            //var msgOpenIframe = {type: 'execute', from: _this._runtimeURL, to: ''}
 
             //Open a window with the URL received by the proxy
             //TODO later swap any existing redirectURI in the url, for a specific one in the idModule
