@@ -40,7 +40,8 @@ class IdentityModule {
 
     if (!runtimeURL) throw new Error('runtimeURL is missing.');
 
-    _this._runtimeURL = runtimeURL + '/idm';
+    _this._runtimeURL = runtimeURL;
+    _this._idmURL = runtimeURL + '/idm';
 
     _this._domain = divideURL(_this._runtimeURL).domain;
 
@@ -174,25 +175,71 @@ class IdentityModule {
 
     return new Promise(function(resolve,reject) {
 
-      if (contents) {
-        message = {type:'execute', to: domain, from: _this._runtimeURL, body: {resource: 'identity', method: 'generateAssertion',
+      //TODO improve better this logic, added this condition for integration purposes
+      if (idpDomain === 'orange.com') {
+        message = {type:'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'generateAssertion',
+               params: {contents: contents, origin: origin, usernameHint: usernameHint}}};
+
+        _this._messageBus.postMessage(message, (res) => {
+          let result = res.body.value;
+
+          // try to open the URL, in case of a reject with a login URL
+          if (result.loginUrl) {
+
+            let msgOpenIframe = {type: 'execute', from: _this._idmURL, to: _this._runtimeURL + '/gui-manager',
+                                body: {method: 'unhideAdminPage'}};
+
+            //Open a window with the URL received by the proxy
+            let win = window.open(result.loginUrl, 'AuthenticationRequest', 'width=800, height=600');
+            let pollTimer = setInterval(function() {
+              try {
+                if (win.closed) {
+                  clearInterval(pollTimer);
+                  resolve('DONE');
+                }
+              } catch (e) {
+                //console.log(e);
+              }
+            }, 500);
+
+          // the generateAssertion returned a valid assertion
+          } else if (result.assertion) {
+            return resolve(result);
+
+            //there was an error with the generateAssertion
+          } else {
+            return reject('Error on obtaining an identity');
+          }
+        });
+
+      //if there is any content, namely idTokens info
+      } else if (contents) {
+        message = {type:'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'generateAssertion',
                params: {contents: contents, origin: origin, usernameHint: usernameHint}}};
 
         _this._messageBus.postMessage(message, (res) => {
           let result = res.body.value;
 
           if (result) {
-            result.identity = getUserURLFromEmail(result.info.email);
 
-            _this.identity.addIdentity(result);
+            //assuming a generate assertion with extra fields. Point to discuss later
+            if (result.infoToken) {
+              result.identity = getUserURLFromEmail(result.infoToken.email);
 
-            //creation of a new JSON with the identity to send via messages
-            let newIdentity = {userProfile: {username: result.info.email, cn: result.infoToken.name}, idp: result.idp.domain, assertion: result.assertion, email: result.info.email, identity: result.identity, infoToken: result.infoToken};
-            result.messageInfo = newIdentity;
+              _this.identity.addIdentity(result);
 
-            _this.currentIdentity = newIdentity;
-            _this.identities.push(result);
-            resolve(newIdentity);
+              //creation of a new JSON with the identity to send via messages
+              let newIdentity = {userProfile: {username: result.infoToken.email, cn: result.infoToken.name}, idp: result.idp.domain, assertion: result.assertion, email: result.infoToken.email, identity: result.identity, infoToken: result.infoToken};
+              result.messageInfo = newIdentity;
+
+              _this.currentIdentity = newIdentity;
+              _this.identities.push(result);
+              resolve(newIdentity);
+
+              //This assumes is the raw webrtc generate assertion call
+            } else {
+              resolve(result);
+            }
           } else {
             reject('error on obtaining identity information');
           }
@@ -200,7 +247,7 @@ class IdentityModule {
         });
       } else {
 
-        message = {type:'execute', to: domain, from: _this._runtimeURL, body: {resource: 'identity', method: 'generateAssertion',
+        message = {type:'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'generateAssertion',
         params: {contents: '', origin: origin, usernameHint: usernameHint}}};
         _this._messageBus.postMessage(message, (result) => {
 
@@ -210,10 +257,10 @@ class IdentityModule {
             return reject('Error: Invalid URL to obtain Identity');
           } else {
 
-            //var msgOpenIframe = {type: 'execute', from: _this._runtimeURL, to: ''}
+            let msgOpenIframe = {type: 'execute', from: _this._idmURL, to: _this._runtimeURL + '/gui-manager',
+                                body: {method: 'unhideAdminPage'}};
 
             //Open a window with the URL received by the proxy
-            //TODO later swap any existing redirectURI in the url, for a specific one in the idModule
             let win = window.open(urlToOpen, 'openIDrequest', 'width=800, height=600');
             let pollTimer = setInterval(function() {
               try {
@@ -223,7 +270,7 @@ class IdentityModule {
                   clearInterval(pollTimer);
                 }
 
-                if (win.document.URL.indexOf('REDIRECT') !== -1 || win.document.URL.indexOf(location.origin) !== -1) {
+                if (win.document.URL.indexOf('id_token') !== -1 || win.document.URL.indexOf(location.origin) !== -1) {
                   window.clearInterval(pollTimer);
                   let url =   win.document.URL;
 
@@ -257,7 +304,7 @@ class IdentityModule {
 
     let domain = _this._resolveDomain(idpDomain);
 
-    let message = {type:'EXECUTE', to: domain, from: _this._runtimeURL, body: {resource: 'identity', method: 'validateAssertion',
+    let message = {type:'EXECUTE', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'validateAssertion',
            params: {assertion: assertion, origin: origin}}};
 
     return new Promise(function(resolve, reject) {
