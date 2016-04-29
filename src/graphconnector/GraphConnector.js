@@ -139,6 +139,8 @@ class GraphConnector {
 
         _this.messageBus.postMessage(msg, (reply) => {
 
+          console.log(reply);
+
           // reply should be the JSON returned from the Global Registry REST-interface
           let jwt = reply.body.data;
           let unwrappedJWT = KJUR.jws.JWS.parse(reply.body.data);
@@ -311,6 +313,8 @@ class GraphConnector {
        } else {
 
          _this.messageBus.postMessage(msg, (reply) => {
+
+           console.log(reply);
 
            // reply should be the JSON returned from the Global Registry REST-interface
            let jwt = reply.body.data;
