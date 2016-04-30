@@ -55,7 +55,7 @@ class Registry extends EventEmitter {
 
     let _this = this;
 
-    _this.registryURL = runtimeURL + '/registry/123';
+    _this.registryURL = runtimeURL + '/registry/';
     _this.appSandbox = appSandbox;
     _this.runtimeURL = runtimeURL;
     _this.remoteRegistry = remoteRegistry;
@@ -353,8 +353,11 @@ class Registry extends EventEmitter {
                 reject('Wrong SandboxType');
               }
 
+              let resourcesFake =  ['voice', 'chat']; //['voice', 'video', 'chat'];
+              let dataSchemesFake =  ['comm']; //['comm', 'call'];
+
               //message to register the new hyperty, within the domain registry
-              let messageValue = {user: identityURL,  hypertyDescriptorURL: descriptor, hypertyURL: adderessList[0], expires: _this.expiresTime};
+              let messageValue = {user: identityURL,  hypertyDescriptorURL: descriptor, hypertyURL: adderessList[0], expires: _this.expiresTime, resources: resourcesFake, dataSchemes: dataSchemesFake};
 
               let message = _this.messageFactory.createCreateMessageRequest(
                 _this.registryURL,
