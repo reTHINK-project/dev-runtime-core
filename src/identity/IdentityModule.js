@@ -175,117 +175,68 @@ class IdentityModule {
 
     return new Promise(function(resolve,reject) {
 
-      //TODO improve better this logic, added this condition for integration purposes
-      if (idpDomain === 'orange.com') {
-        message = {type:'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'generateAssertion',
-               params: {contents: contents, origin: origin, usernameHint: usernameHint}}};
+      message = {type:'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'generateAssertion', params: {contents: contents, origin: origin, usernameHint: usernameHint}}};
 
-        _this._messageBus.postMessage(message, (res) => {
-          let result = res.body.value;
+      _this._messageBus.postMessage(message, (res) => {
+        let result = res.body.value;
 
-          // try to open the URL, in case of a reject with a login URL
-          if (result.loginUrl) {
+        if (result.loginUrl) {
 
-            let msgOpenIframe = {type: 'execute', from: _this._idmURL, to: _this._runtimeURL + '/gui-manager',
-                                body: {method: 'unhideAdminPage'}};
+          //let msgOpenIframe = {type: 'execute', from: _this._idmURL, to: _this._runtimeURL + '/gui-manager', body: {method: 'unhideAdminPage'}};
 
-            //Open a window with the URL received by the proxy
-            let win = window.open(result.loginUrl, 'AuthenticationRequest', 'width=800, height=600');
-            let pollTimer = setInterval(function() {
-              try {
-                if (win.closed) {
-                  clearInterval(pollTimer);
-                  resolve('DONE');
-                }
-              } catch (e) {
-                //console.log(e);
+          let win = window.open(result.loginUrl, 'openIDrequest', 'width=800, height=600');
+          let pollTimer = setInterval(function() {
+            try {
+
+              if (win.closed) {
+                reject('Some error occured when trying to get identity.');
+                clearInterval(pollTimer);
               }
-            }, 500);
 
-          // the generateAssertion returned a valid assertion
-          } else if (result.assertion) {
-            return resolve(result);
+              if (win.document.URL.indexOf('id_token') !== -1 || win.document.URL.indexOf(location.origin) !== -1) {
+                window.clearInterval(pollTimer);
+                let url =   win.document.URL;
 
-            //there was an error with the generateAssertion
-          } else {
-            return reject('Error on obtaining an identity');
-          }
-        });
-
-      //if there is any content, namely idTokens info
-      } else if (contents) {
-        message = {type:'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'generateAssertion',
-               params: {contents: contents, origin: origin, usernameHint: usernameHint}}};
-
-        _this._messageBus.postMessage(message, (res) => {
-          let result = res.body.value;
-
-          if (result) {
-
-            //assuming a generate assertion with extra fields. Point to discuss later
-            if (result.infoToken) {
-              result.identity = getUserURLFromEmail(result.infoToken.email);
-
-              _this.identity.addIdentity(result);
-
-              //creation of a new JSON with the identity to send via messages
-              let newIdentity = {userProfile: {username: result.infoToken.email, cn: result.infoToken.name}, idp: result.idp.domain, assertion: result.assertion, email: result.infoToken.email, identity: result.identity, infoToken: result.infoToken};
-              result.messageInfo = newIdentity;
-
-              _this.currentIdentity = newIdentity;
-              _this.identities.push(result);
-              resolve(newIdentity);
-
-              //This assumes is the raw webrtc generate assertion call
-            } else {
-              resolve(result);
+                win.close();
+                resolve(url);
+              }
+            } catch (e) {
+              //console.log(e);
             }
+          }, 500);
+
+        } else if (result) {
+
+          let assertionParsed = JSON.parse(atob(result.assertion));
+          let idToken;
+
+          //TODO remove the verification and remove the tokenIDJSON from the google idpProxy;
+          if (assertionParsed.tokenIDJSON) {
+            idToken = assertionParsed.tokenIDJSON;
           } else {
-            reject('error on obtaining identity information');
+            idToken = assertionParsed;
           }
 
-        });
-      } else {
+          if (idToken) {
+            result.identity = getUserURLFromEmail(idToken.email);
 
-        message = {type:'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'generateAssertion',
-        params: {contents: '', origin: origin, usernameHint: usernameHint}}};
-        _this._messageBus.postMessage(message, (result) => {
+            _this.identity.addIdentity(result);
 
-          let urlToOpen = result.body.value.loginUrl;
+            //creation of a new JSON with the identity to send via messages
+            let newIdentity = {userProfile: {username: idToken.email, cn: idToken.name}, idp: result.idp.domain, assertion: result.assertion, email: idToken.email, identity: result.identity, infoToken: idToken};
+            result.messageInfo = newIdentity;
 
-          if (!urlToOpen) {
-            return reject('Error: Invalid URL to obtain Identity');
-          } else {
+            _this.currentIdentity = newIdentity;
+            _this.identities.push(result);
+            resolve(newIdentity);
 
-            let msgOpenIframe = {type: 'execute', from: _this._idmURL, to: _this._runtimeURL + '/gui-manager',
-                                body: {method: 'unhideAdminPage'}};
-
-            //Open a window with the URL received by the proxy
-            let win = window.open(urlToOpen, 'openIDrequest', 'width=800, height=600');
-            let pollTimer = setInterval(function() {
-              try {
-
-                if (win.closed) {
-                  reject('Some error occured.');
-                  clearInterval(pollTimer);
-                }
-
-                if (win.document.URL.indexOf('id_token') !== -1 || win.document.URL.indexOf(location.origin) !== -1) {
-                  window.clearInterval(pollTimer);
-                  let url =   win.document.URL;
-
-                  win.close();
-
-                  resolve(url);
-                }
-              } catch (e) {
-                //console.log(e);
-              }
-            }, 500);
           }
-        });
-      }}
-    );
+        } else {
+          reject('error on obtaining identity information');
+        }
+
+      });
+    });
   }
 
   /**
