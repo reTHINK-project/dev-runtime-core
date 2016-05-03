@@ -75,10 +75,10 @@ if you found some issues, please submit them into the respective repository;
 
 On the first time you are cloning this repository, you need to run the command:
 ```shell
-npm run init-setup
+npm install
 ```
 
-After running successfully this command you will have 2 folders (node_modules and vendor), these folders are excluded from the commit process, and are only for development.
+After running successfully this command you will have ~~2~~ 1 folders (node_modules ~~and vendor~~), these folders are excluded from the commit process, and are only for development.
 
 if you already have the project configured on your machine, you only need run the next command to add new dependencies:
 ```shell
