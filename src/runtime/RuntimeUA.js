@@ -115,25 +115,19 @@ class RuntimeUA {
     _this.registry.messageBus = _this.messageBus;
 
     _this.registry.addEventListener('runtime:loadStub', function(domainURL) {
-
-      console.log('Registry request to loadStub for domain ', domainURL);
-
       _this.loadStub(domainURL).then(function() {
         _this.registry.trigger('runtime:stubLoaded', domainURL);
       }).catch(function(reason) {
-        console.error(reason);
+        console.error('Failed to deploy the ProtocolStub component ', reason);
       });
 
     });
 
     _this.registry.addEventListener('runtime:loadIdpProxy', function(domainURL) {
-
-      console.log('Registry request to loadIdpProxy for domain ', domainURL);
-
       _this.loadIdpProxy(domainURL).then(function() {
         _this.registry.trigger('runtime:idpProxyLoaded', domainURL);
       }).catch(function(reason) {
-        console.error(reason);
+        console.error('Failed to deploy the IDP Proxy component ', reason);
       });
 
     });
@@ -185,6 +179,7 @@ class RuntimeUA {
       let _hypertySourcePackage;
 
       let errorReason = function(reason) {
+        console.error('Something failed on the deploy hyperty: ', reason);
         reject(reason);
       };
 
@@ -266,8 +261,7 @@ class RuntimeUA {
         // we have completed step 14 here.
         return sandbox;
       }, function(reason) {
-        console.log('regiter error:', reason);
-        console.error('4.1: try to register a new sandbox', reason);
+        console.error('4.1: Try to register a new sandbox ', reason);
 
         // check if the sandbox is registed for this hyperty descriptor url;
         // Make Steps xxx --- xxx
@@ -285,17 +279,21 @@ class RuntimeUA {
 
         _hypertySandbox = sandbox;
 
+        let dividedURL = divideURL(hypertyDescriptorURL);
+        let domain = dividedURL.domain;
+
+        if (hypertyDescriptorURL.includes('catalogue')) {
+          domain = domain.replace('catalogue.', '');
+        }
+
         // Register hyperty
-        return _this.registry.registerHyperty(sandbox, hypertyDescriptorURL);
+        return _this.registry.registerHyperty(sandbox, domain);
       })
       .then(function(hypertyURL) {
         console.info('6: Hyperty url, after register hyperty', hypertyURL);
 
         // we have completed step 16 of https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
-
         _hypertyURL = hypertyURL;
-
-        console.log(_hypertyDescriptor);
 
         // Extend original hyperty configuration;
         let configuration = {};
@@ -362,6 +360,7 @@ class RuntimeUA {
       let _stubSourcePackage;
 
       let errorReason = function(reason) {
+        console.error('Something failed on the deploy of protocolstub: ', reason);
         reject(reason);
       };
 
@@ -426,7 +425,7 @@ class RuntimeUA {
         })
         .then(function(stubSandbox) {
 
-          console.info('4. if the sandbox is registered then return the sandbox', stubSandbox);
+          console.info('4. if the sandbox is registered then return the sandbox ', stubSandbox);
 
           // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
@@ -434,7 +433,7 @@ class RuntimeUA {
           return stubSandbox;
         })
         .catch(function(reason) {
-          console.info('5. Sandbox was not found, creating a new one', reason);
+          console.info('5. Sandbox was not found, creating a new one ', reason);
 
           // check if the sandbox is registed for this stub descriptor url;
           // Make Steps xxx --- xxx
@@ -531,6 +530,7 @@ class RuntimeUA {
       let _proxySourcePackage;
 
       let errorReason = function(reason) {
+        console.error('Something failed on the deploy of IdpProxy: ', reason);
         reject(reason);
       };
 
