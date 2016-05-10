@@ -8,20 +8,17 @@ chai.use(chaiAsPromised);
 
 import PolicyEngine from '../src/policy/PolicyEngine';
 
-let runtimeRegistry = 'registry mockup';
+let runtimeRegistry = {
+  runtimeURL: 'runtime://localhost/7601'
+};
+
 let identityModule = {
-  getIdentities: () => {
-    let identities = [];
-    let identityBundle = {identity: 'user://gmail.com/openidtest10', token: 'idToken'};
-    identities.push(identityBundle);
-    return identities;
-  },
-  getIdentityAssertion: (domain, scope) => {
+  getIdentityAssertion: () => {
     return new Promise(function(resolve, reject) {
       let token = {
         id: 'identity'
       };
-      if (token === null) {
+      if (!token) {
         reject('token not found');
       } else {
         resolve(token);
@@ -29,8 +26,7 @@ let identityModule = {
     });
   }
 };
-let messageBus = {
-  addgroupener: (msg, callback) => { }};
+let messageBus = { };
 
 describe('Policy Engine', function() {
   let policyEngine = new PolicyEngine(messageBus, identityModule, runtimeRegistry);
@@ -44,7 +40,7 @@ describe('Policy Engine', function() {
 
   let messageWithID = {
     body: {
-      auth: true,
+      auth: false,
       identity: {
         id: 'identity'
       }
@@ -122,6 +118,10 @@ describe('Policy Engine', function() {
       policyEngine.removePolicies('*', 'application');
       expect(policyEngine.getApplicablePolicies('application')).to.be.eql([]);
     });
+    it('removes all policies associated with the user scope', function() {
+      policyEngine.removePolicies('*', 'user');
+      expect(policyEngine.getApplicablePolicies('user')).to.be.eql([]);
+    });
   });
 
   let groupName1 = 'groupA';
@@ -155,59 +155,179 @@ describe('Policy Engine', function() {
     });
   });
 
-  describe('sync function', function() {
+  describe('data objects management', function() {
     let objectCreation = {
       body: {
-        resource: 'fake://localhost/90a3f0d7-b2e2-4cee-a061-3f79c1f71c23'
+        authorise: [],
+        value: {
+          reporter: 'hyperty://localhost/1be8f8ca-b510-464f-91ab-0434d86ff8be'
+        }
+      },
+      from: 'hyperty://localhost/e5c09447-26d5-4284-9ada-a3c479cc960b',
+      id: 1,
+      to: 'runtime://localhost/7601/sm',
+      type: 'create'
+    };
+
+    let objectCreationOut = {
+      body: {
+        auth: false,
+        authorise: [],
+        identity: {
+          id: 'identity'
+        },
+        value: {
+          reporter: 'hyperty://localhost/1be8f8ca-b510-464f-91ab-0434d86ff8be'
+        }
+      },
+      from: 'hyperty://localhost/e5c09447-26d5-4284-9ada-a3c479cc960b',
+      id: 1,
+      to: 'runtime://localhost/7601/sm',
+      type: 'create'
+    };
+
+    it('allows object creation', function(done) {
+      expect(policyEngine.authorise(objectCreation).then(function(response) {
+        return response;
+      }), function(reject) {
+        return reject;
+      }).to.be.fulfilled.and.eventually.eql(objectCreationOut).and.notify(done);
+    });
+
+    it('sets waitingIDs[message.id] = reporterURL', function() {
+      expect(policyEngine.waitingIDs).to.be.eql({1: {reporter: 'hyperty://localhost/1be8f8ca-b510-464f-91ab-0434d86ff8be', preAuthorised: []}});
+    });
+
+    let objectCreationResponse = {
+      body: {
+        resource: 'comm://localhost/19fbde08-448a-4715-bfbb-427ca3126d7b'
       },
       from: 'runtime://localhost/7601/sm',
+      id: 1,
       to: 'hyperty://localhost/e5c09447-26d5-4284-9ada-a3c479cc960b',
       type: 'response'
     };
 
-    let validUpdate = {
+    let objectCreationResponseOut = {
       body: {
-        source: 'hyperty://localhost/e5c09447-26d5-4284-9ada-a3c479cc960b'
+        auth: false,
+        identity: {
+          id: 'identity'
+        },
+        resource: 'comm://localhost/19fbde08-448a-4715-bfbb-427ca3126d7b'
       },
-      from: 'fake://localhost/90a3f0d7-b2e2-4cee-a061-3f79c1f71c23',
-      to: 'fake://localhost/90a3f0d7-b2e2-4cee-a061-3f79c1f71c23/changes',
-      type: 'update'
+      from: 'runtime://localhost/7601/sm',
+      id: 1,
+      to: 'hyperty://localhost/e5c09447-26d5-4284-9ada-a3c479cc960b',
+      type: 'response'
     };
 
-    let outMessage = {
-      body: {
-        auth: true,
-        source: 'hyperty://localhost/e5c09447-26d5-4284-9ada-a3c479cc960b'
-      },
-      from: 'fake://localhost/90a3f0d7-b2e2-4cee-a061-3f79c1f71c23',
-      to: 'fake://localhost/90a3f0d7-b2e2-4cee-a061-3f79c1f71c23/changes',
-      type: 'update'
-    };
-
-    it('allows reporter changes', function(done) {
-      policyEngine.authorise(objectCreation);
-      expect(policyEngine.authorise(validUpdate).then(function(response) {
+    it('allows object creation response', function(done) {
+      expect(policyEngine.authorise(objectCreationResponse).then(function(response) {
         return response;
       }), function(reject) {
         return reject;
-      }).to.be.fulfilled.and.eventually.eql(outMessage).and.notify(done);
+      }).to.be.fulfilled.and.eventually.eql(objectCreationResponseOut).and.notify(done);
     });
 
-    let invalidUpdate = {
+    it('deletes waitingIDs[message.id]', function() {
+      expect(policyEngine.waitingIDs).to.be.eql({});
+    });
+
+    it('stores reporterURL and pre-authorised users along with the object URL', function() {
+      expect(policyEngine.pdp.dataObjectsInfo).to.be.eql({'comm://localhost/19fbde08-448a-4715-bfbb-427ca3126d7b': {reporter: 'hyperty://localhost/1be8f8ca-b510-464f-91ab-0434d86ff8be', preAuthorised: []}});
+    });
+
+    let objectSubscription = {
       body: {
-        source: 'hyperty://localhost/e5c09447-26d5-4284-9ada-a3c479cc960c'
+        subscriber: 'hyperty://localhost/428005ed-863e-49fe-835a-a29d5626a036'
       },
-      from: 'fake://localhost/90a3f0d7-b2e2-4cee-a061-3f79c1f71c23',
-      to: 'fake://localhost/90a3f0d7-b2e2-4cee-a061-3f79c1f71c23/changes',
-      type: 'update'
+      from: 'runtime://localhost/792/sm',
+      id: 5,
+      to: 'comm://localhost/19fbde08-448a-4715-bfbb-427ca3126d7b/subscription',
+      type: 'subscribe'
     };
 
-    it('blocks non-reporter changes', function(done) {
-      expect(policyEngine.authorise(invalidUpdate).then(function(response) {
+    it('returns scope = subscription', function() {
+      expect(policyEngine.getScope(objectSubscription)).to.be.eql('subscribe');
+    });
+
+    let allowPreAuthorisedSubscribers = {
+      actions: [],
+      authorise: true,
+      condition: 'subscription preauthorised',
+      scope: 'subscribe'
+    };
+
+    it('adds a subscription policy', function() {
+      policyEngine.addPolicies([allowPreAuthorisedSubscribers]);
+      expect(policyEngine.getApplicablePolicies('subscribe')).to.be.eql([allowPreAuthorisedSubscribers]);
+    });
+
+    it('blocks the subscription attempt of a non pre-authorised subscriber', function(done) {
+      expect(policyEngine.authorise(objectSubscription).then(function(response) {
         return response;
       }), function(reject) {
         return reject;
       }).to.be.rejected.and.notify(done);
     });
+
+    let objectSubscriptionOut = {
+      body: {
+        auth: true,
+        identity: {
+          id: 'identity'
+        },
+        subscriber: 'hyperty://localhost/428005ed-863e-49fe-835a-a29d5626a036'
+      },
+      from: 'runtime://localhost/792/sm',
+      id: 5,
+      to: 'comm://localhost/19fbde08-448a-4715-bfbb-427ca3126d7b/subscription',
+      type: 'subscribe'
+    };
+
+    it('allows the subscription attempt of a pre-authorised subscriber', function(done) {
+      policyEngine.pdp.dataObjectsInfo['comm://localhost/19fbde08-448a-4715-bfbb-427ca3126d7b'].preAuthorised = ['hyperty://localhost/428005ed-863e-49fe-835a-a29d5626a036'];
+      expect(policyEngine.authorise(objectSubscription).then(function(response) {
+        return response;
+      }), function(reject) {
+        return reject;
+      }).to.be.fulfilled.and.eventually.eql(objectSubscriptionOut).and.notify(done);
+    });
+
+    let blockAnySubscribers = {
+      actions: [],
+      authorise: false,
+      condition: 'subscription any',
+      scope: 'subscribe'
+    };
+
+    it('blocks the subscription attempt of all subscribers', function(done) {
+      policyEngine.removePolicies('subscription preauthorised', 'subscribe');
+      policyEngine.addPolicies([blockAnySubscribers]);
+      expect(policyEngine.authorise(objectSubscription).then(function(response) {
+        return response;
+      }), function(reject) {
+        return reject;
+      }).to.be.rejected.and.notify(done);
+    });
+
+    let allowAnySubscribers = {
+      actions: [],
+      authorise: true,
+      condition: 'subscription any',
+      scope: 'subscribe'
+    };
+
+    it('allows the subscription attempt of all subscribers', function(done) {
+      policyEngine.removePolicies('subscription any', 'subscribe');
+      policyEngine.addPolicies([allowAnySubscribers]);
+      expect(policyEngine.authorise(objectSubscription).then(function(response) {
+        return response;
+      }), function(reject) {
+        return reject;
+      }).to.be.fulfilled.and.eventually.eql(objectSubscriptionOut).and.notify(done);
+    });
+
   });
 });

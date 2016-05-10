@@ -16,7 +16,7 @@ class PDP {
   constructor(runtimeRegistry) {
     let _this = this;
     _this.runtimeRegistry = runtimeRegistry;
-    _this.objectsReporters = {};
+    _this.dataObjectsInfo = {};
     _this.myGroups = {}; // TODO: load from the Persistence Manager
     _this.setPoliciesImplementation();
   }
@@ -24,7 +24,10 @@ class PDP {
   setPoliciesImplementation() {
     let _this = this;
     _this.policiesImplementation = {};
-    _this.policiesImplementation.group = 'let condition = policy.condition.split(\' \'); condition.shift(); let groupName = condition.join(\' \'); if(_this.isInGroup(message.body.identity.email, groupName)) { result[0] = policy.authorise; }';
+    _this.policiesImplementation.subscription = 'var subscriberURL = message.body.subscriber; var splitObjectURL = message.to.split(\'/\'); splitObjectURL.splice(-1); var objectURL = splitObjectURL.join(\'/\'); var accessType = condition[1]; result[0] = (accessType === \'any\' || (accessType === \'preauthorised\' && _this.isPreAuthorisedSubscriptor(subscriberURL, objectURL))) ? policy.authorise : !policy.authorise;';
+
+    _this.policiesImplementation.group = 'let condition = policy.condition.split(\' \'); condition.shift(); let groupName = condition.join(\' \'); if (_this.isInGroup(message.body.identity.email, groupName)) { result[0] = policy.authorise; }';
+
     _this.policiesImplementation.time = 'result[0] = _this.isTimeBetween(condition[1], condition[2]) ? policy.authorise : !policy.authorise;';
   }
 
@@ -112,10 +115,11 @@ class PDP {
     let actions = [];
     for (let i in policies) {
       let policy = policies[i];
+      console.log(policy);
       let result = [];
       let condition = policy.condition.split(' ');
-      let resource = condition[0];
 
+      let resource = condition[0];
       eval(_this.policiesImplementation[resource]);
       results.push(result[0]);
       actions.push(result[1]);
@@ -123,6 +127,18 @@ class PDP {
 
     let authDecision = results.indexOf(false) === -1;
     return [authDecision, actions];
+  }
+
+  /**
+  * Verifies if the subscriptor is in the pre-authorised subscribers list.
+  * @param {URL}        observerURL
+  * @param {URL}        objectURL
+  * @return {Boolean}   boolean
+  */
+  isPreAuthorisedSubscriptor(observerURL, objectURL) {
+    let _this = this;
+    console.log(_this.dataObjectsInfo[objectURL]);
+    return _this.dataObjectsInfo[objectURL] !== undefined && _this.dataObjectsInfo[objectURL].preAuthorised.indexOf(observerURL) > -1;
   }
 
   /**

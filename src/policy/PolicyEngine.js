@@ -1,3 +1,4 @@
+import {divideURL} from '../utils/utils';
 import PEP from './PEP';
 import PDP from './PDP';
 
@@ -18,12 +19,16 @@ class PolicyEngine {
   */
   constructor(messageBus, identityModule, runtimeRegistry) {
     let _this = this;
-    _this.messageBus = messageBus;
-    _this.idModule = identityModule;
-    _this.objectsReporters = {};
     _this.pdp = new PDP(runtimeRegistry);
     _this.pep = new PEP();
+    _this.messageBus = messageBus;
+    _this.idModule = identityModule;
+    _this.waitingIDs = {};
     _this.policies = {};
+
+    //_this.addPolicies([{ scope: 'subscribe', condition: 'subscription any', authorise: true, actions: [] }]);
+
+    /*_this.addPolicies([{scope: 'create', condition: 'to endsin sm', authorise: 'true', actions: ['waitMessage(message.id)']}]);*/
   }
 
   /**
@@ -42,20 +47,33 @@ class PolicyEngine {
       console.log('--- Policy Engine ---');
       console.log(message);
       message.body = message.body || {};
-      let initialResultOk = _this.followsIntrinsicBehaviour(message);
+      let initialResultOk = _this.followsExpectedBehaviour(message);
       if (initialResultOk === undefined) {
         _this.idModule.getIdentityAssertion().then(identity => {
           message.body.identity = message.body.identity || identity;
-
           let scope = _this.getScope(message);
           let applicablePolicies = _this.getApplicablePolicies(scope);
           let policiesResult = _this.pdp.evaluate(message, applicablePolicies);
           _this.pep.enforce(policiesResult[1]);
+
           if (policiesResult[0]) {
-            message.body.auth = true;
+            message.body.auth = applicablePolicies.length !== 0;
+
+            if (_this.isObjectCreation(message)) {
+              _this.waitingIDs[message.id] = _this.waitingIDs[message.id] || {};
+              _this.waitingIDs[message.id].reporter = message.body.value.reporter;
+              _this.waitingIDs[message.id].preAuthorised = message.body.authorise;
+            } else {
+              let objectURL = _this.waitingIDs[message.id];
+              if (objectURL !== undefined) {
+                let objectURL = message.body.resource;
+                let objectInfo = _this.waitingIDs[message.id];
+                _this.pdp.dataObjectsInfo[objectURL] = objectInfo;
+                delete _this.waitingIDs[message.id];
+              }
+            }
             resolve(message);
           } else {
-            message.body.auth = false;
             reject('Unauthorised message');
           }
         }, function(error) {
@@ -63,10 +81,8 @@ class PolicyEngine {
         });
       } else {
         if (initialResultOk) {
-          message.body.auth = true;
           resolve(message);
         } else {
-          message.body.auth = false;
           reject('Intrinsic behaviour was not respected');
         }
       }
@@ -77,69 +93,34 @@ class PolicyEngine {
   * IdProxy / IdModule
   *   (1) Messages from the IDP Proxy must go to the ID Module.
   *   (2) Messages to the IDP Proxy must come from the ID Module.
+  *   (3) Messages from the GUI must go to the ID Module.
+  *   (4) Messages to the GUI must come from the ID Module.
   *
   * DataObjects
-  *   (3) Creation stores the object URL and its reporter's URL
-  *   (4) Subscription stores the object URL and its reporter's URL
   *   (5) Updates must come from reporters
   */
-  followsIntrinsicBehaviour(message) {
+  followsExpectedBehaviour(message) {
     let _this = this;
 
-    let idpURL = 'domain-idp://';
+    let idpScheme = 'domain-idp';
     let idmURL = _this.pdp.runtimeRegistry.runtimeURL + '/idm';
 
     /* (1) */
-    if (message.from.includes(idpURL)) {
+    if (divideURL(message.from).type === idpScheme) {
       return message.to === idmURL;
     }
 
     /* (2) */
-    if (message.to.includes(idpURL)) {
+    if (divideURL(message.to).type === idpScheme) {
       return message.from === idmURL;
     }
-
-    /* (3) */
-    let isResponse = message.type === 'response';
-    let isFromSM = String(message.from.split('/').slice(-1)[0]) === 'sm';
-    let objectURL = message.body.resource;
-    if (isResponse && isFromSM && objectURL !== undefined) {
-      let reporterURL = message.to;
-      _this.addObject(objectURL, reporterURL);
-      return true;
-    }
-
-    //TODO uncomment and try to solve the problem
-    /* (4) */
-    /*if (message.type === 'create' && String(message.from.split('/').slice(-1)[0]) === 'subscription') {
-      //if (String(message.from.split('/').slice(-1)[0]) === 'subscription') {
-          console.log('15 - PE');
-      let objectURL = message.from.substring(0, message.from.length - 13);
-      let reporterURL = message.body.value.reporter;
-
-      console.log('reporterURL', reporterURL);      //let reporterURL = message.body.value.data.communication.owner;
-
-      _this.addObject(objectURL, reporterURL);
-
-      return true;
-    }*/
-
-    /* (5) */
-    /*
-    if (message.type === 'update' && message.to === message.from + '/changes') {
-      let objectURL = message.from;
-      let hypertyURL = message.body.source;
-      if (_this.objectsReporters[objectURL] === hypertyURL) {
-        return true;
-      } else {
-        return false;
-      }
-    }*/
   }
 
-  addObject(objectURL, reporterURL) {
+  isObjectCreation(message) {
     let _this = this;
-    _this.objectsReporters[objectURL] = reporterURL;
+    let isCreation = message.type === 'create';
+    let isToSM = message.to === _this.pdp.runtimeRegistry.runtimeURL + '/sm';
+    return isCreation && isToSM;
   }
 
   /**
@@ -310,7 +291,23 @@ class PolicyEngine {
   * @return {String} scope
   */
   getScope(message) {
+    let _this = this;
     let scope = 'user';
+    if (message.type === 'subscribe') {
+      let runtimeURL = _this.pdp.runtimeRegistry.runtimeURL;
+      if (runtimeURL + '/sm' !== message.from) { // needed for the verification to be done in the reporter's policy engine and not in the subscriber's
+        let isFromSM = String(message.from.split('/').slice(-1)[0]) === 'sm';
+        let originRuntimeURLSplit = message.from.split('/');
+        originRuntimeURLSplit.splice(-1);
+        let originRuntimeURL = originRuntimeURLSplit.join(originRuntimeURLSplit);
+        let isThisRuntime = originRuntimeURL === runtimeURL;
+        let isToSubscription = String(message.to.split('/').slice(-1)[0]) === 'subscription';
+        if (isFromSM && !isThisRuntime && isToSubscription) {
+          scope = 'subscribe';
+        }
+      }
+    }
+
     return scope;
   }
 
@@ -334,6 +331,7 @@ class PolicyEngine {
     }
     return policies;
   }
+
 }
 
 export default PolicyEngine;
