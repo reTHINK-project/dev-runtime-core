@@ -106,7 +106,7 @@ class SyncherManager {
         console.log('ALLOCATOR CREATE:', allocated);
 
         //To register the dataObject in the runtimeRegistry
-        _this._registry.registerDataObject(msg.body.value.name, 'scheme', objURL, 'dataObjectReporter').then(function(resolve) {
+        _this._registry.registerDataObject(msg.body.value.name, msg.body.value.schema, objURL, msg.body.value.reporter).then(function(resolve) {
           console.log('DataObject successfully registered', resolve);
 
           let reporter = new ReporterObject(_this, owner, objURL);
