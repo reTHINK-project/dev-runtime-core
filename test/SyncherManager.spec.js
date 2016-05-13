@@ -85,6 +85,32 @@ describe('SyncherManager', function() {
     }
   };
 
+  it('reporter read', function(done) {
+    let bus = new MessageBus();
+    bus._onPostMessage = (msg) => {
+      console.log('_onPostMessage: ', msg);
+      msgNodeResponseFunc(bus, msg);
+    };
+
+    new SyncherManager(runtimeURL, bus, registry, catalog, allocator);
+
+    let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
+    let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
+    sync1.create(schemaURL, [], initialData).then((dor) => {
+      console.log('on-create-reply', dor.onRead);
+      dor.onRead((event) => {
+        console.log('on-read');
+        event.accept();
+      });
+
+      sync2.read(dor.url).then((data) => {
+        console.log('on-read-reply', data);
+        expect(data).to.contain.all.keys({ communication: { name: 'chat-x' }, x: 10, y: 10 });
+        done();
+      });
+    });
+  });
+
   it('reporter observer integration', function(done) {
     let bus = new MessageBus();
     bus._onPostMessage = (msg) => {

@@ -110,22 +110,23 @@ class SyncherManager {
           console.log('DataObject successfully registered', resolve);
 
           let reporter = new ReporterObject(_this, owner, objURL);
-          reporter.addChildrens(childrens).then(() => {
-            _this._reporters[objURL] = reporter;
+          reporter.forwardSubscribe(objURL).then(() => {
+            reporter.addChildrens(childrens).then(() => {
+              _this._reporters[objURL] = reporter;
 
-            //all ok, send response
-            _this._bus.postMessage({
-              id: msg.id, type: 'response', from: msg.to, to: owner,
-              body: { code: 200, resource: objURL, childrenResources: childrens }
-            });
+              //all ok, send response
+              _this._bus.postMessage({
+                id: msg.id, type: 'response', from: msg.to, to: owner,
+                body: { code: 200, resource: objURL, childrenResources: childrens }
+              });
 
-            //send create to all observers, responses will be deliver to the Hyperty owner?
-            //schedule for next cycle needed, because the Reporter should be available.
-            setTimeout(() => {
-              _this._authorise(msg, objURL);
+              //send create to all observers, responses will be deliver to the Hyperty owner?
+              //schedule for next cycle needed, because the Reporter should be available.
+              setTimeout(() => {
+                _this._authorise(msg, objURL);
+              });
             });
           });
-
         }, function(error) {
           console.error(error);
         });

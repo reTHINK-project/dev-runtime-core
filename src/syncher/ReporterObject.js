@@ -19,14 +19,13 @@ class ReporterObject {
     _this._childrens = [];
     _this._childrenListeners = [];
 
+    _this._forwards = {};
+
     _this._allocateListeners();
   }
 
   _allocateListeners() {
     let _this = this;
-
-    //add objectURL forward...
-    _this._objForward = _this._bus.addForward(_this._url, _this._owner);
 
     //add subscription listener...
     _this._subscriptionListener = _this._bus.addListener(_this._objSubscriptorURL, (msg) => {
@@ -48,8 +47,6 @@ class ReporterObject {
   _releaseListeners() {
     let _this = this;
 
-    _this._objForward.remove();
-
     _this._subscriptionListener.remove();
 
     _this._changeListener.remove();
@@ -58,10 +55,50 @@ class ReporterObject {
       cl.remove();
     });
 
+    Object.keys(_this._forwards).forEach((key) => {
+      _this.forwardUnSubscribe(key);
+    });
+
     //remove all subscriptions
     Object.keys(_this._subscriptions).forEach((key) => {
       _this._subscriptions[key]._releaseListeners();
     });
+  }
+
+  forwardSubscribe(address) {
+    let _this = this;
+
+    let nodeSubscribeMsg = {
+      type: 'subscribe', from: _this._parent._url, to: 'domain://msg-node.' + _this._domain + '/sm',
+      body: { subscribe: [address], source: _this._owner }
+    };
+
+    return new Promise((resolve, reject) => {
+      _this._bus.postMessage(nodeSubscribeMsg, (reply) => {
+        console.log('forward-subscribe-response(reporter): ', reply);
+        if (reply.body.code === 200) {
+          let newForward = _this._bus.addForward(_this._url, _this._owner);
+          _this._forwards[address] = newForward;
+          resolve();
+        } else {
+          reject('Error on msg-node subscription: ' + reply.body.desc);
+        }
+      });
+    });
+  }
+
+  forwardUnSubscribe(address) {
+    let _this = this;
+
+    _this._forwards[address].remove();
+    delete _this._forwards[address];
+
+    let nodeUnSubscribeMsg = {
+      type: 'unsubscribe', from: _this._parent._url, to: 'domain://msg-node.' + _this._domain + '/sm',
+      body: { subscribe: [address], source: _this._owner }
+    };
+
+    _this._bus.postMessage(nodeUnSubscribeMsg);
   }
 
   addChildrens(childrens) {
