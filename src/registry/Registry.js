@@ -205,9 +205,26 @@ class Registry extends EventEmitter {
           reject('DataObject name does not exist');
         }
       });
-
     });
+  }
 
+  /**
+  * function to return the reporterURL associated with the dataobject URL
+  * @param    {String}     dataObjectURL    dataObjectURL
+  * @return   {String}     reporterURL      reporterURL
+  */
+  getReporterURL(dataObjectURL) {
+    let _this = this;
+
+    let dataObject = _this.dataObjectList[dataObjectURL];
+
+    return new Promise(function(resolve, reject) {
+      if (dataObject) {
+        resolve(dataObject.reporter);
+      } else {
+        reject('No reporter was found');
+      }
+    });
   }
 
   /**
@@ -275,7 +292,7 @@ class Registry extends EventEmitter {
       //message to register the new hyperty, within the domain registry
       let messageValue = {name: identifier, schema: dataObjectschema, url: dataObjectUrl, expires: _this.expiresTime, reporter: dataObjectReporter};
 
-      _this.dataObjectList[identifier] = messageValue;
+      _this.dataObjectList[dataObjectUrl] = messageValue;
 
       let message = _this.messageFactory.createCreateMessageRequest(
         _this.registryURL,
