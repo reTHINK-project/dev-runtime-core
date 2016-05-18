@@ -149,8 +149,9 @@ gulp.task('runtime', function() {
   .pipe(source('Runtime.js'))
   .pipe(buffer())
   .pipe(gulpif(compact, uglify()))
-  .pipe(gulpif(compact, insert.prepend(license + '// Runtime User Agent \n\n// version: {{version}}\n\n')))
+  .pipe(gulpif(compact, insert.prepend(license + '// Runtime User Agent \n\n// version: {{version}}\n\n// Last build: {{date}}\n\n\n')))
   .pipe(gulpif(compact, replace('{{version}}', pkg.version)))
+  .pipe(gulpif(compact, replace('{{date}}', new Date())))
   .pipe(gulp.dest('./dist'));
 
 });

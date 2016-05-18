@@ -326,6 +326,10 @@ class Registry extends EventEmitter {
     //hyperty-catalogue://<service-provider-domain>/<catalogue-object-identifier>
     let domainUrl = divideURL(descriptor).domain;
 
+    if (domainUrl.includes('catalogue')) {
+      domainUrl = domainUrl.replace('catalogue.', '');
+    }
+
     return new Promise(function(resolve, reject) {
 
       _this.idModule.loginWithRP('google', 'me').then(function(result) {
