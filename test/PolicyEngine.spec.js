@@ -31,44 +31,6 @@ let messageBus = { };
 describe('Policy Engine', function() {
   let policyEngine = new PolicyEngine(messageBus, identityModule, runtimeRegistry);
 
-  let messageWithoutID = {
-    id: 1,
-    type: 'read',
-    from: 'hyperty://ua.pt/asdf',
-    to: 'domain://registry.ua.pt/hyperty-instance/user'
-  };
-
-  let messageWithID = {
-    body: {
-      auth: false,
-      identity: {
-        id: 'identity'
-      }
-    },
-    id: 1,
-    type: 'read',
-    from: 'hyperty://ua.pt/asdf',
-    to: 'domain://registry.ua.pt/hyperty-instance/user'
-  };
-
-  describe('identity', function() {
-    it('should add an identity in the message body', function(done) {
-      expect(policyEngine.authorise(messageWithoutID).then(function(response) {
-        return response;
-      }), function(reject) {
-        return reject;
-      }).to.be.fulfilled.and.eventually.eql(messageWithID).and.notify(done);
-    });
-
-    it('should maintain the identity in the message body', function(done) {
-      expect(policyEngine.authorise(messageWithID).then(function(response) {
-        return response;
-      }), function(reject) {
-        return reject;
-      }).to.be.fulfilled.and.eventually.eql(messageWithID).and.notify(done);
-    });
-  });
-
   let policy1 = {
     actions: [],
     authorise: false,
@@ -98,10 +60,6 @@ describe('Policy Engine', function() {
     it('associates a second policy with the user scope', function() {
       policyEngine.addPolicies([policy2]);
       expect(policyEngine.getApplicablePolicies('user')).to.be.eql([policy1, policy2]);
-    });
-    it('associates a policy with the application scope', function() {
-      policyEngine.addPolicies([policy3]);
-      expect(policyEngine.getApplicablePolicies('application')).to.be.eql([policy3]);
     });
   });
 
@@ -248,10 +206,6 @@ describe('Policy Engine', function() {
       type: 'subscribe'
     };
 
-    it('returns scope = subscription', function() {
-      expect(policyEngine.getScope(objectSubscription)).to.be.eql('subscribe');
-    });
-
     let allowPreAuthorisedSubscribers = {
       actions: [],
       authorise: true,
@@ -329,5 +283,44 @@ describe('Policy Engine', function() {
       }).to.be.fulfilled.and.eventually.eql(objectSubscriptionOut).and.notify(done);
     });
 
+  });
+
+  let messageWithoutID = {
+    id: 1,
+    type: 'read',
+    from: 'hyperty://ua.pt/asdf',
+    to: 'domain://registry.ua.pt/hyperty-instance/user'
+  };
+
+  let messageWithID = {
+    body: {
+      auth: false,
+      identity: {
+        id: 'identity'
+      }
+    },
+    id: 1,
+    type: 'read',
+    from: 'hyperty://ua.pt/asdf',
+    to: 'domain://registry.ua.pt/hyperty-instance/user'
+  };
+
+  describe('identity', function() {
+    it('should add an identity in the message body', function(done) {
+      policyEngine.removePolicies('*', '*');
+      expect(policyEngine.authorise(messageWithoutID).then(function(response) {
+        return response;
+      }), function(reject) {
+        return reject;
+      }).to.be.fulfilled.and.eventually.eql(messageWithID).and.notify(done);
+    });
+
+    it('should maintain the identity in the message body', function(done) {
+      expect(policyEngine.authorise(messageWithID).then(function(response) {
+        return response;
+      }), function(reject) {
+        return reject;
+      }).to.be.fulfilled.and.eventually.eql(messageWithID).and.notify(done);
+    });
   });
 });
