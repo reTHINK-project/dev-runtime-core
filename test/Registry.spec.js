@@ -22,7 +22,7 @@ let appSandbox = runtimeFactory.createAppSandbox();
 let sandboxDummy = {sandbox: 'sandbox', type: 'normal'};
 let protostubURL = 'url';
 let identityModule = {
-  loginWithRP: () => {
+  getIdentityAssertion: () => {
     let identityBundle = {email: 'openidtest10@gmail.com', token: 'idToken'};
     return new Promise(function(resolve, reject) {
       resolve(identityBundle);

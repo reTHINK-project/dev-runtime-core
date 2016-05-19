@@ -28,6 +28,8 @@ import HypertyInstance from './HypertyInstance';
 import {MessageFactory} from 'service-framework/dist/MessageFactory';
 import {divideURL, getUserEmailFromURL} from '../utils/utils.js';
 
+//import Discovery from './Discovery';
+
 /**
 * Runtime Registry Interface
 */
@@ -108,6 +110,9 @@ class Registry extends EventEmitter {
     //Install ObjectAllocation
     let objectAllocation = new ObjectAllocation(_this.registryURL + '/object-allocation', messageBus);
     _this.objectAllocation = objectAllocation;
+
+    /*let discovery = new Discovery(_this.registryURL, messageBus);
+    _this.discovery = discovery;*/
   }
 
   /**
@@ -116,115 +121,6 @@ class Registry extends EventEmitter {
   getAppSandbox() {
     let _this = this;
     return _this.appSandbox;
-  }
-
-  /**
-  * Function to query the Domain registry, with an user email.
-  * @param    {string}      identifier      user identifier
-  * @return  {string}       hypertyURL      the last hypertyURL allocated to the user identifier
-  */
-  getUserHyperty(identifier) {
-    let _this = this;
-    let identityURL;
-    let email;
-    if (identifier.indexOf('@') > -1) {
-      identityURL = 'user://' + identifier.substring(identifier.indexOf('@') + 1, identifier.length) + '/' + identifier.substring(0, identifier.indexOf('@'));
-      email = identifier;
-    } else {
-      identityURL = identifier;
-      email = getUserEmailFromURL(identifier);
-    }
-    let msg = {
-      type: 'read', from: _this.registryURL, to: 'domain://registry.' + _this._domain + '/', body: { resource: identityURL}
-    };
-
-    return new Promise(function(resolve, reject) {
-
-      _this._messageBus.postMessage(msg, (reply) => {
-        //console.log('MESSAGE', reply);
-
-        let hyperty;
-        let mostRecent;
-        let lastHyperty;
-        let value = reply.body.value;
-        console.log('reply', value);
-        for (hyperty in value) {
-          if (value[hyperty].lastModified !== undefined) {
-            if (mostRecent === undefined) {
-              mostRecent = new Date(value[hyperty].lastModified);
-              lastHyperty = hyperty;
-            } else {
-              let hypertyDate = new Date(value[hyperty].lastModified);
-              if (mostRecent.getTime() < hypertyDate.getTime()) {
-                mostRecent = hypertyDate;
-                lastHyperty = hyperty;
-              }
-            }
-          }
-
-        }
-        let hypertyURL = lastHyperty;
-
-        if (hypertyURL === undefined) {
-          return reject('User Hyperty not found');
-        }
-
-        let idPackage = {
-          id: email,
-          descriptor: value[hypertyURL].descriptor,
-          hypertyURL: hypertyURL
-        };
-
-        console.log('===> RegisterHyperty messageBundle: ', idPackage);
-        resolve(idPackage);
-      });
-    });
-  }
-
-  /**
-  * Function to query the Domain registry, with an user email.
-  * @param    {string}      identifier      user identifier
-  * @return  {string}       dataObjectURL      the last dataObjectURL allocated to the object identifier
-  */
-  getDataObject(identifier) {
-    let _this = this;
-
-    let msg = {
-      type: 'read', from: _this.registryURL, to: 'domain://registry.' + _this._domain + '/', body: { resource: 'dataObject://' + identifier}
-    };
-
-    return new Promise(function(resolve, reject) {
-
-      _this._messageBus.postMessage(msg, (reply) => {
-
-        let dataObjectUrl = reply.body.value.url;
-
-        if (dataObjectUrl) {
-          resolve(dataObjectUrl);
-        } else {
-          reject('DataObject name does not exist');
-        }
-      });
-    });
-  }
-
-  /**
-  * function to return the reporterURL associated with the dataobject URL
-  * @param    {String}     dataObjectURL    dataObjectURL
-  * @return   {String}     reporterURL      reporterURL
-  */
-  getReporterURL(dataObjectURL) {
-    let _this = this;
-
-    let dataObject = _this.dataObjectList[dataObjectURL];
-
-    return new Promise(function(resolve, reject) {
-      if (dataObject) {
-        resolve(dataObject.reporter);
-      } else {
-        reject('No reporter was found');
-      }
-    });
   }
 
   /**
@@ -332,7 +228,7 @@ class Registry extends EventEmitter {
 
     return new Promise(function(resolve, reject) {
 
-      _this.idModule.loginWithRP('google', 'me').then(function(result) {
+      _this.idModule.getIdentityAssertion().then(function(result) {
         let email = result.email;
         let identityURL = 'user://' + email.substring(email.indexOf('@') + 1, email.length) + '/' + email.substring(0, email.indexOf('@'));
 
