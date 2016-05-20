@@ -28,14 +28,14 @@ class ObserverObject {
 
     let subscription = _this._subscriptions[hyperty];
     if (subscription) {
-      //unsubscribe msg to the Reporter SM
+      //FLOW-OUT: message sent to remote ReporterObject -> _onRemoteUnSubscribe
       _this._bus.postMessage({
         type: 'unsubscribe', from: _this._parent._url, to: objURLSubscription,
         body: { resource: _this._url }
       });
 
       //TODO: should I wait for response before unsubscribe on msg-node
-      //unsubscribe msg to the domain node
+      //FLOW-OUT: message sent to msg-node SubscriptionManager component
       _this._bus.postMessage({
         type: 'unsubscribe', from: _this._parent._url, to: 'domain://msg-node.' + domain + '/sm',
         body: { resource: _this._url, childrenResources: _this._childrens }

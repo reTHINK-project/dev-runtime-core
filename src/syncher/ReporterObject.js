@@ -65,9 +65,15 @@ class ReporterObject {
     });
   }
 
+  /**
+   * Register a listener in the msg-node and in the local MessageBus, so that messages on this address are forwarded to the reporter object
+   * @param  {string} address - URL to register the listeners
+   * @return {Promise} Return Promise OK or error
+   */
   forwardSubscribe(address) {
     let _this = this;
 
+    //FLOW-OUT: message sent to the msg-node SubscriptionManager component
     let nodeSubscribeMsg = {
       type: 'subscribe', from: _this._parent._url, to: 'domain://msg-node.' + _this._domain + '/sm',
       body: { subscribe: [address], source: _this._owner }
@@ -87,12 +93,17 @@ class ReporterObject {
     });
   }
 
+  /**
+   * UnRegister a listener in the msg-node and in the local MessageBus, so that messages on this address are removed from forward
+   * @param  {string} address - URL to un-register the listeners
+   */
   forwardUnSubscribe(address) {
     let _this = this;
 
     _this._forwards[address].remove();
     delete _this._forwards[address];
 
+    //FLOW-OUT: message sent to the msg-node SubscriptionManager component
     let nodeUnSubscribeMsg = {
       type: 'unsubscribe', from: _this._parent._url, to: 'domain://msg-node.' + _this._domain + '/sm',
       body: { subscribe: [address], source: _this._owner }
@@ -101,6 +112,11 @@ class ReporterObject {
     _this._bus.postMessage(nodeUnSubscribeMsg);
   }
 
+  /**
+   * Register listeners for a list of childrens. Public channels used to transmit messages.
+   * @param  {string[]} childrens - channels to register
+   * @return {Promise} Return Promise OK or error
+   */
   addChildrens(childrens) {
     let _this = this;
 
@@ -124,6 +140,7 @@ class ReporterObject {
       let subscriptions = [];
       childrens.forEach((child) => subscriptions.push(childBaseURL + child));
 
+      //FLOW-OUT: message sent to the msg-node SubscriptionManager component
       let nodeSubscribeMsg = {
         type: 'subscribe', from: _this._parent._url, to: 'domain://msg-node.' + _this._domain + '/sm',
         body: { subscribe: subscriptions, source: _this._owner }
@@ -157,12 +174,12 @@ class ReporterObject {
     let _this = this;
     let domain = divideURL(_this._owner).domain;
 
-    //delete msg to all subscriptions
+    //FLOW-OUT: message sent directly to all subscribers of the reporter
     _this._bus.postMessage({
       type: 'delete', from: _this._objSubscriptorURL, to: _this._url + '/changes'
     });
 
-    //TODO: change delete spec!
+    //FLOW-OUT: message sent to the msg-node ObjectAllocationManager component
     _this._bus.postMessage({
       type: 'delete', from: _this._parent._url, to: 'domain://msg-node.' + domain + '/object-address-allocation',
       body: { resource: _this._url, childrenResources: _this._childrens }
@@ -181,6 +198,7 @@ class ReporterObject {
     });
   }
 
+  //FLOW-IN: message received from Syncher -> subscribe
   _onRemoteSubscribe(msg) {
     let _this = this;
     let hypertyURL = msg.body.subscriber;
@@ -201,7 +219,7 @@ class ReporterObject {
     let mode = 'sub/pub';
 
     if (mode === 'sub/pub') {
-      //forward to Hyperty owner
+      //FLOW-OUT: message sent to local hyperty address Syncher -> _onForward
       let forwardMsg = {
         type: 'forward', from: _this._url, to: _this._owner,
         body: { type: msg.type, from: hypertyURL, to: _this._url }
@@ -213,7 +231,7 @@ class ReporterObject {
           _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, _this._childrens, true);
         }
 
-        //send subscribe-response
+        //FLOW-OUT: subscription response sent (forward from internal Hyperty)
         _this._bus.postMessage({
           id: msg.id, type: 'response', from: msg.to, to: msg.from,
           body: reply.body
@@ -224,6 +242,7 @@ class ReporterObject {
 
   }
 
+  //FLOW-IN: message received from remote ObserverObject -> removeSubscription
   _onRemoteUnSubscribe(msg) {
     let _this = this;
     let hypertyURL = msg.body.subscriber;
