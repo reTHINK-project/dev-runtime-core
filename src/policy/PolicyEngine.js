@@ -28,20 +28,18 @@ class PolicyEngine {
     _this.idModule = identityModule;
     _this.waitingIDs = {};
     _this.policies = _this.loadPolicies();
-    console.log('Policies:');
-    console.log(_this.policies);
   }
 
   loadPolicies() {
     let _this = this;
-    //persistenceManager.delete('policies');
+    persistenceManager.delete('policies');
     let myPolicies = persistenceManager.get('policies');
 
     if (myPolicies === undefined) {
       let subscriptionPolicy = {
         scope: 'application',
         condition: 'subscription any',
-        authorise: true,
+        authorise: false,
         actions: []
       };
       _this.addPolicies([subscriptionPolicy]);
@@ -89,7 +87,6 @@ class PolicyEngine {
   * @param  {String}  scope
   */
   removePolicies(condition, scope) {
-    console.log('removePolicies');
     let _this = this;
     let myPolicies = persistenceManager.get('policies');
 
@@ -113,12 +110,9 @@ class PolicyEngine {
       }
 
     } else {
-      console.log('deleting all');
       persistenceManager.delete('policies');
       _this.policies = {};
     }
-    console.log('mypolicies');
-    console.log(_this.policies);
   }
 
   /**

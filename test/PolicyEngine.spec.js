@@ -45,13 +45,6 @@ describe('Policy Engine', function() {
     scope: 'user'
   };
 
-  let policy3 = {
-    actions: [],
-    authorise: false,
-    condition: 'group IST',
-    scope: 'application'
-  };
-
   describe('addPolicies', function() {
     it('associates a policy with the user scope', function() {
       policyEngine.addPolicies([policy1]);
@@ -113,7 +106,7 @@ describe('Policy Engine', function() {
     });
   });
 
-  describe('data objects management', function() {
+  /*describe('data objects management', function() {
     let objectCreation = {
       body: {
         authorise: [],
@@ -283,7 +276,7 @@ describe('Policy Engine', function() {
       }).to.be.fulfilled.and.eventually.eql(objectSubscriptionOut).and.notify(done);
     });
 
-  });
+  });*/
 
   let messageWithoutID = {
     id: 1,

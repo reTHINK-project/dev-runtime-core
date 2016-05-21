@@ -17,18 +17,81 @@ class PDP {
     let _this = this;
     _this.runtimeRegistry = runtimeRegistry;
     _this.dataObjectsInfo = {};
-    _this.myGroups = {}; // TODO: load from the Persistence Manager
-    _this.setPoliciesImplementation();
+    _this.myGroups = {};
+    _this.systemVariables = _this.setSystemVariables();
+    _this.operations = _this.setOperations();
   }
 
-  setPoliciesImplementation() {
+  setSystemVariables() {
+    let systemVariables = {};
+
+    systemVariables.group = '_this.myGroups[param];';
+    systemVariables.time = '_this.getMinutesFromMidnight();';
+
+    return systemVariables;
+  }
+
+  setOperations() {
+    let operations = {};
+
+    operations.betweenMinutes = '_this.isTimeBetween(parseInt(value), parseInt(params[0]), parseInt(params[1]));';
+    operations.in = '(params[0] in value) ? _this.myGroups[groupName] : [];';
+    operations.between = 'value > params[0] && value < params[1];';
+    operations.equals = 'value === params[0];';
+
+    return operations;
+  }
+
+  /**
+  * Verifies if the given message is compliant with the given policies. If one of the policies
+  * evaluates to 'false', then the message is not authorised. Returns the final authorisation
+  * decision and a set of actions that policies may require.
+  * @param {Message}  message
+  * @param {URL}      hypertyToVerify
+  * @param {Array}    policies
+  * @return {Array}   [authDecision, actions]
+  */
+  evaluate(message, policies) {
     let _this = this;
-    _this.policiesImplementation = {};
-    _this.policiesImplementation.subscription = 'var subscriberURL = message.body.subscriber; var splitObjectURL = message.to.split(\'/\'); splitObjectURL.splice(-1); var objectURL = splitObjectURL.join(\'/\'); var accessType = condition[1]; result[0] = (accessType === \'any\' || (accessType === \'preauthorised\' && _this.isPreAuthorisedSubscriptor(subscriberURL, objectURL))) ? policy.authorise : !policy.authorise;';
+    let results = [true];
+    let actions = [];
+    for (let i in policies) {
+      let policy = policies[i];
+      let condition = policy.condition.split(' ');
 
-    _this.policiesImplementation.group = 'let condition = policy.condition.split(\' \'); condition.shift(); let groupName = condition.join(\' \'); if (_this.isInGroup(message.body.identity.email, groupName)) { result[0] = policy.authorise; }';
+      let variable = condition[0];
+      let operation = condition[1];
+      let params = condition.slice(2);
+      let value = eval(_this.systemVariables[variable]);
+      let verifiesCondition = eval(_this.operations[operation]);
+      if (verifiesCondition) {
+        results.push(policy.authorise);
+      }
 
-    _this.policiesImplementation.time = 'result[0] = _this.isTimeBetween(condition[1], condition[2]) ? policy.authorise : !policy.authorise;';
+      //actions.push(result[1]);
+    }
+
+    let authDecision = results.indexOf(false) === -1;
+    return [authDecision, actions];
+  }
+
+  getMinutesFromMidnight() {
+    let now = new Date();
+    return parseInt(now.getHours()) * 60  + parseInt(now.getMinutes());
+  }
+
+  /**
+  * Verifies if the current time is between the given start and end times.
+  * @param {Number}     start
+  * @param {Number}     end
+  * @return {Boolean}   boolean
+  */
+  isTimeBetween(now, start, end) {
+    if (end < start) {
+      now = (now < start) ? now += 24 * 60 : now;
+      end += 24 * 60;
+    }
+    return (now > start && now < end);
   }
 
   getGroupsNames() {
@@ -98,97 +161,6 @@ class PDP {
         break;
       }
     }
-  }
-
-  /**
-  * Verifies if the given message is compliant with the given policies. If one of the policies
-  * evaluates to 'false', then the message is not authorised. Returns the final authorisation
-  * decision and a set of actions that policies may require.
-  * @param {Message}  message
-  * @param {URL}      hypertyToVerify
-  * @param {Array}    policies
-  * @return {Array}   [authDecision, actions]
-  */
-  evaluate(message, policies) {
-    let _this = this;
-    let results = [true];
-    let actions = [];
-    for (let i in policies) {
-      let policy = policies[i];
-      console.log(policy);
-      let result = [];
-      let condition = policy.condition.split(' ');
-
-      let resource = condition[0];
-      eval(_this.policiesImplementation[resource]);
-      results.push(result[0]);
-      actions.push(result[1]);
-    }
-
-    let authDecision = results.indexOf(false) === -1;
-    return [authDecision, actions];
-  }
-
-  /**
-  * Verifies if the subscriptor is in the pre-authorised subscribers list.
-  * @param {URL}        observerURL
-  * @param {URL}        objectURL
-  * @return {Boolean}   boolean
-  */
-  isPreAuthorisedSubscriptor(observerURL, objectURL) {
-    let _this = this;
-    console.log(_this.dataObjectsInfo[objectURL]);
-    return _this.dataObjectsInfo[objectURL] !== undefined && _this.dataObjectsInfo[objectURL].preAuthorised.indexOf(observerURL) > -1;
-  }
-
-  /**
-  * Verifies if the given hyperty URL corresponds to an email that is in the group with the given
-  * name.
-  * @param {URL}        hypertyURL
-  * @param {String}     groupName
-  * @return {Boolean}   boolean
-  */
-  isInGroup(userEmail, groupName) {
-    let _this = this;
-    let group = _this.myGroups[groupName];
-    if (group === undefined) {
-      return false;
-    } else {
-      return group.indexOf(userEmail) > -1;
-    }
-  }
-
-  /**
-  * Verifies if the current time is between the given start and end times.
-  * @param {Number}     start
-  * @param {Number}     end
-  * @return {Boolean}   boolean
-  */
-  isTimeBetween(start, end) {
-    let _this = this;
-    let now = new Date();
-    let nowMinutes = _this.getMinutes(parseInt(now.getHours()) + ':' + now.getMinutes());
-    let startMinutes = _this.getMinutes(start);
-    let endMinutes = _this.getMinutes(end);
-    if (endMinutes > startMinutes) {
-      return (nowMinutes > startMinutes && nowMinutes < endMinutes);
-    } else {
-      if (nowMinutes < startMinutes) {
-        nowMinutes += 24 * 60;
-      }
-      endMinutes += 24 * 60;
-      return (nowMinutes > startMinutes && nowMinutes < endMinutes);
-    }
-  }
-
-  /**
-  * Returns the number of minutes that correspond to the given time in the format <HOURS>:<MINUTES>.
-  * @param {Number}   time
-  * @return {Number}  minutes
-  */
-  getMinutes(time) {
-    let timeSplit = time.split(':');
-    return parseInt(timeSplit[0]) * 60 + parseInt(timeSplit[1]);
   }
 }
 
