@@ -39,7 +39,7 @@ class PolicyEngine {
       let subscriptionPolicy = {
         scope: 'application',
         condition: 'subscription any',
-        authorise: false,
+        authorise: true,
         actions: []
       };
       _this.addPolicies([subscriptionPolicy]);
