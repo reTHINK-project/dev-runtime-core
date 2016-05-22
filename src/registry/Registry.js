@@ -124,6 +124,39 @@ class Registry extends EventEmitter {
   }
 
   /**
+  * function to return the reporterURL associated with the dataobject URL
+  * @param    {String}     dataObjectURL    dataObjectURL
+  * @return   {String}     reporterURL      reporterURL
+  */
+  getReporterURL(dataObjectURL) {
+    let _this = this;
+
+    let dataObject = _this.dataObjectList[dataObjectURL];
+
+    return new Promise(function(resolve, reject) {
+      if (dataObject) {
+        resolve(dataObject.reporter);
+      } else {
+        reject('No reporter was found');
+      }
+    });
+  }
+
+  getPreAuthSubscribers(dataObjectURL) {
+    let _this = this;
+
+    let dataObject = _this.dataObjectList[dataObjectURL];
+
+    return new Promise(function(resolve, reject) {
+      if (dataObject) {
+        resolve(dataObject.preAuth);
+      } else {
+        reject('No reporter was found');
+      }
+    });
+  }
+
+  /**
   *  function to delete an hypertyInstance in the Domain Registry
   *  @param   {String}      user        user url
   *  @param   {String}      hypertyInstance   HypertyInsntance url
@@ -180,13 +213,13 @@ class Registry extends EventEmitter {
   * @param  {String}      dataObjectUrl        dataObjectUrl
   * @return {String}      dataObjectReporter         dataObjectReporter
   */
-  registerDataObject(identifier, dataObjectschema, dataObjectUrl, dataObjectReporter) {
+  registerDataObject(identifier, dataObjectschema, dataObjectUrl, dataObjectReporter, authorise) {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
 
       //message to register the new hyperty, within the domain registry
-      let messageValue = {name: identifier, schema: dataObjectschema, url: dataObjectUrl, expires: _this.expiresTime, reporter: dataObjectReporter};
+      let messageValue = {name: identifier, schema: dataObjectschema, url: dataObjectUrl, expires: _this.expiresTime, reporter: dataObjectReporter, preAuth: authorise};
 
       _this.dataObjectList[dataObjectUrl] = messageValue;
 
