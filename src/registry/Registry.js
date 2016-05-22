@@ -99,6 +99,15 @@ class Registry extends EventEmitter {
     let _this = this;
     _this._messageBus = messageBus;
 
+    _this._messageBus.addListener(_this.registryURL, function(msg) {
+
+      let userUrl = _this._getIdentityAssociated(msg.from);
+
+      let reply = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: {resource: userUrl}};
+
+      _this._messageBus.postMessage(reply);
+    });
+
     // also set up messageBus in the IdentityModule component
     // TODO redefine a better way to add the messageBus in the IdModule
     _this.idModule.messageBus = messageBus;
@@ -113,6 +122,18 @@ class Registry extends EventEmitter {
 
     /*let discovery = new Discovery(_this.registryURL, messageBus);
     _this.discovery = discovery;*/
+  }
+
+  _getIdentityAssociated(hypertyURL) {
+    let _this = this;
+
+    for (let hyperty in _this.hypertiesList) {
+      let value = _this.hypertiesList[hyperty];
+      if (value._hypertyURL === hypertyURL) {
+        return value._user;
+      }
+    }
+    return undefined;
   }
 
   /**
