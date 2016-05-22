@@ -135,6 +135,7 @@ class PolicyEngine {
       if (initialResultOk === undefined) {
         _this.idModule.getIdentityAssertion().then(identity => {
           message.body.identity = message.body.identity || identity;
+
           //let scope = _this.getScope(message);
           let applicablePolicies = _this.getApplicablePolicies('*');
           let policiesResult = _this.pdp.evaluate(message, applicablePolicies);

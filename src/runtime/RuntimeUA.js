@@ -279,15 +279,8 @@ class RuntimeUA {
 
         _hypertySandbox = sandbox;
 
-        let dividedURL = divideURL(hypertyDescriptorURL);
-        let domain = dividedURL.domain;
-
-        if (hypertyDescriptorURL.includes('catalogue')) {
-          domain = domain.replace('catalogue.', '');
-        }
-
         // Register hyperty
-        return _this.registry.registerHyperty(sandbox, domain);
+        return _this.registry.registerHyperty(sandbox, hypertyDescriptorURL);
       })
       .then(function(hypertyURL) {
         console.info('6: Hyperty url, after register hyperty', hypertyURL);
