@@ -6,6 +6,7 @@ chai.config.truncateThreshold = 0;
 let expect = chai.expect;
 chai.use(chaiAsPromised);
 
+import persistenceManager from '../src/persistence/PersistenceManager';
 import PolicyEngine from '../src/policy/PolicyEngine';
 
 let runtimeRegistry = {
@@ -29,7 +30,7 @@ let identityModule = {
 let messageBus = { };
 
 describe('Policy Engine', function() {
-  let policyEngine = new PolicyEngine(messageBus, identityModule, runtimeRegistry);
+  let policyEngine = new PolicyEngine(true, messageBus, identityModule, runtimeRegistry);
 
   let policy1 = {
     actions: [],
@@ -45,64 +46,120 @@ describe('Policy Engine', function() {
     scope: 'user'
   };
 
-  describe('addPolicies', function() {
+  describe('policies management', function() {
     it('associates a policy with the user scope', function() {
       policyEngine.addPolicies([policy1]);
       expect(policyEngine.getApplicablePolicies('user')).to.be.eql([policy1]);
     });
+
     it('associates a second policy with the user scope', function() {
       policyEngine.addPolicies([policy2]);
       expect(policyEngine.getApplicablePolicies('user')).to.be.eql([policy1, policy2]);
     });
-  });
 
-  describe('removePolicies', function() {
     it('removes an existing policy associated with the user scope', function() {
       policyEngine.removePolicies('group work', 'user');
       expect(policyEngine.getApplicablePolicies('user')).to.be.eql([policy2]);
     });
+
     it('tries to remove a policy that is not associated with the user scope', function() {
       policyEngine.removePolicies('block-08-20', 'user');
       expect(policyEngine.getApplicablePolicies('user')).to.be.eql([policy2]);
     });
+
     it('removes all policies associated with the application scope', function() {
       policyEngine.removePolicies('*', 'application');
       expect(policyEngine.getApplicablePolicies('application')).to.be.eql([]);
     });
+
     it('removes all policies associated with the user scope', function() {
       policyEngine.removePolicies('*', 'user');
       expect(policyEngine.getApplicablePolicies('user')).to.be.eql([]);
     });
-  });
 
-  let groupName1 = 'groupA';
-
-  describe('creategroup', function() {
-    it('creates a group of users', function() {
-      policyEngine.createGroup(groupName1);
-      expect(policyEngine.getGroup(groupName1)).to.be.eql([]);
+    it('removes all policies', function() {
+      policyEngine.removePolicies('*', '*');
+      expect(policyEngine.getApplicablePolicies('*')).to.be.eql([]);
     });
   });
 
-  let userEmail1 = 'openidtest10@gmail.com';
-  let userEmail2 = 'openidtest20@gmail.com';
+  describe('groups management', function() {
+    persistenceManager.delete('groups');
+    let groupName1 = 'groupA';
 
-  describe('addToGroup', function() {
-    it('adds a user to a group of users', function() {
+    it('creates a group', function() {
+      policyEngine.createGroup(groupName1);
+      expect(policyEngine.getGroupsNames()).to.be.eql([groupName1]);
+    });
+
+    let groupName2 = 'groupB';
+
+    it('creates a second group', function() {
+      policyEngine.createGroup(groupName2);
+      expect(policyEngine.getGroupsNames()).to.be.eql([groupName1, groupName2]);
+    });
+
+    let userEmail1 = 'openidtest10@gmail.com';
+
+    it('adds an email to a group', function() {
       policyEngine.addToGroup(userEmail1, groupName1);
       expect(policyEngine.getGroup(groupName1)).to.be.eql([userEmail1]);
     });
 
-    it('adds a second user to a group of users', function() {
+    let userEmail2 = 'openidtest20@gmail.com';
+
+    it('adds a second email to a group', function() {
       policyEngine.addToGroup(userEmail2, groupName1);
       expect(policyEngine.getGroup(groupName1)).to.be.eql([userEmail1, userEmail2]);
     });
-  });
 
-  describe('removeFromGroup', function() {
-    it('adds a user from a group of users', function() {
+    it('removes a user from a group', function() {
       policyEngine.removeFromGroup(userEmail1, groupName1);
       expect(policyEngine.getGroup(groupName1)).to.be.eql([userEmail2]);
+    });
+
+    it('deletes a group', function() {
+      policyEngine.deleteGroup(groupName1);
+      expect(policyEngine.getGroup(groupName1)).to.be.eql([]);
+      expect(policyEngine.getGroupsNames()).to.be.eql([groupName2]);
+    });
+  });
+
+  let messageWithoutID = {
+    id: 1,
+    type: 'read',
+    from: 'hyperty://ua.pt/asdf',
+    to: 'domain://registry.ua.pt/hyperty-instance/user'
+  };
+
+  let messageWithID = {
+    body: {
+      auth: false,
+      identity: {
+        id: 'identity'
+      }
+    },
+    id: 1,
+    type: 'read',
+    from: 'hyperty://ua.pt/asdf',
+    to: 'domain://registry.ua.pt/hyperty-instance/user'
+  };
+
+  describe('identity', function() {
+    it('should add an identity in the message body', function(done) {
+      expect(policyEngine.authorise(messageWithoutID).then(function(response) {
+        return response;
+      }), function(reject) {
+        return reject;
+      }).to.be.fulfilled.and.eventually.eql(messageWithID).and.notify(done);
+    });
+
+    it('should maintain the identity in the message body', function(done) {
+      expect(policyEngine.authorise(messageWithID).then(function(response) {
+        return response;
+      }), function(reject) {
+        return reject;
+      }).to.be.fulfilled.and.eventually.eql(messageWithID).and.notify(done);
     });
   });
 
@@ -277,43 +334,4 @@ describe('Policy Engine', function() {
     });
 
   });*/
-
-  let messageWithoutID = {
-    id: 1,
-    type: 'read',
-    from: 'hyperty://ua.pt/asdf',
-    to: 'domain://registry.ua.pt/hyperty-instance/user'
-  };
-
-  let messageWithID = {
-    body: {
-      auth: false,
-      identity: {
-        id: 'identity'
-      }
-    },
-    id: 1,
-    type: 'read',
-    from: 'hyperty://ua.pt/asdf',
-    to: 'domain://registry.ua.pt/hyperty-instance/user'
-  };
-
-  describe('identity', function() {
-    it('should add an identity in the message body', function(done) {
-      policyEngine.removePolicies('*', '*');
-      expect(policyEngine.authorise(messageWithoutID).then(function(response) {
-        return response;
-      }), function(reject) {
-        return reject;
-      }).to.be.fulfilled.and.eventually.eql(messageWithID).and.notify(done);
-    });
-
-    it('should maintain the identity in the message body', function(done) {
-      expect(policyEngine.authorise(messageWithID).then(function(response) {
-        return response;
-      }), function(reject) {
-        return reject;
-      }).to.be.fulfilled.and.eventually.eql(messageWithID).and.notify(done);
-    });
-  });
 });

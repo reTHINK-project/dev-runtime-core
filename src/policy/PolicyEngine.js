@@ -20,13 +20,13 @@ class PolicyEngine {
   * @param  {IdentityModule}    identityModule
   * @param  {Registry}          runtimeRegistry
   */
-  constructor(messageBus, identityModule, runtimeRegistry) {
+  constructor(isRuntimeCore, messageBus, identityModule, runtimeRegistry) {
     let _this = this;
+    _this.isRuntimeCore = isRuntimeCore;
     _this.pdp = new PDP(runtimeRegistry);
     _this.pep = new PEP();
     _this.messageBus = messageBus;
     _this.idModule = identityModule;
-    _this.waitingIDs = {};
     _this.policies = _this.loadPolicies();
   }
 
@@ -45,7 +45,8 @@ class PolicyEngine {
       _this.addPolicies([subscriptionPolicy]);
       myPolicies = persistenceManager.get('policies');
     }
-
+    console.log('load');
+    console.log(myPolicies);
     return myPolicies;
   }
 
@@ -133,37 +134,33 @@ class PolicyEngine {
       message.body = message.body || {};
       let initialResultOk = _this.followsExpectedBehaviour(message);
       if (initialResultOk === undefined) {
-        _this.idModule.getIdentityAssertion().then(identity => {
-          message.body.identity = message.body.identity || identity;
+        if (_this.isRuntimeCore) {
+          _this.idModule.getIdentityAssertion().then(identity => {
+            message.body.identity = message.body.identity || identity;
+          }, function(error) {
+            reject(error);
+          });
+        } else {
 
-          //let scope = _this.getScope(message);
-          let applicablePolicies = _this.getApplicablePolicies('*');
-          let policiesResult = _this.pdp.evaluate(message, applicablePolicies);
-          _this.pep.enforce(policiesResult[1]);
+          //TODO: obtain the identity from Domain Registry
+          console.log('obtain the identity from Domain Registry');
+        }
 
-          if (policiesResult[0]) {
-            message.body.auth = applicablePolicies.length !== 0;
+        //let scope = _this.getScope(message);
+        let applicablePolicies = _this.getApplicablePolicies('*');
+        console.log('applicablePolicies');
+        console.log(applicablePolicies);
+        console.log(_this.myPolicies);
+        let policiesResult = _this.pdp.evaluate(message, applicablePolicies);
+        _this.pep.enforce(policiesResult[1]);
 
-            if (_this.isObjectCreation(message)) {
-              _this.waitingIDs[message.id] = _this.waitingIDs[message.id] || {};
-              _this.waitingIDs[message.id].reporter = message.body.value.reporter;
-              _this.waitingIDs[message.id].preAuthorised = message.body.authorise;
-            } else {
-              let objectURL = _this.waitingIDs[message.id];
-              if (objectURL !== undefined) {
-                let objectURL = message.body.resource;
-                let objectInfo = _this.waitingIDs[message.id];
-                _this.pdp.dataObjectsInfo[objectURL] = objectInfo;
-                delete _this.waitingIDs[message.id];
-              }
-            }
-            resolve(message);
-          } else {
-            reject('Unauthorised message');
-          }
-        }, function(error) {
-          reject(error);
-        });
+        if (policiesResult[0]) {
+          message.body.auth = applicablePolicies.length !== 0;
+          resolve(message);
+        } else {
+          reject('Unauthorised message');
+        }
+
       } else {
         if (initialResultOk) {
           resolve(message);
@@ -201,13 +198,6 @@ class PolicyEngine {
     }
   }
 
-  isObjectCreation(message) {
-    let _this = this;
-    let isCreation = message.type === 'create';
-    let isToSM = message.to === _this.pdp.runtimeRegistry.runtimeURL + '/sm';
-    return isCreation && isToSM;
-  }
-
   getGroupsNames() {
     let _this = this;
     return _this.pdp.getGroupsNames();
@@ -232,9 +222,9 @@ class PolicyEngine {
     _this.pdp.createGroup(groupName);
   }
 
-  removeGroup(groupName) {
+  deleteGroup(groupName) {
     let _this = this;
-    _this.pdp.removeGroup(groupName);
+    _this.pdp.deleteGroup(groupName);
 
     let policies = _this.policies.user;
     for (let i in policies) {

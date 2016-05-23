@@ -1,3 +1,5 @@
+import persistenceManager from '../persistence/PersistenceManager';
+
 /**
 * The Policy Decision Point (PDP) decides if a message is to be authorised by checking a set of
 * policies. The resource to be verified is specified in the first word of the 'condition' field of
@@ -11,13 +13,11 @@ class PDP {
   * This method is invoked by the Policy Engine and instantiates the Policy Decision Point. It
   * initialises or loads from the Persistence Manager the object 'myGroups' to store the user's
   * groups.
-  * @param  {Registry}    runtimeRegistry
+  * @param  {Registry}    muchruntimeRegistry
   */
   constructor(runtimeRegistry) {
     let _this = this;
     _this.runtimeRegistry = runtimeRegistry;
-    _this.dataObjectsInfo = {};
-    _this.myGroups = {};
     _this.systemVariables = _this.setSystemVariables();
     _this.operations = _this.setOperations();
   }
@@ -27,6 +27,8 @@ class PDP {
 
     systemVariables.group = '_this.myGroups[param];';
     systemVariables.time = '_this.getMinutesFromMidnight();';
+    systemVariables.weekday = 'String(new Date().getDay());';
+    systemVariables.date = '_this.getDate();';
 
     return systemVariables;
   }
@@ -80,6 +82,11 @@ class PDP {
     return parseInt(now.getHours()) * 60  + parseInt(now.getMinutes());
   }
 
+  getDate() {
+    let date = new Date();
+    return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear();
+  }
+
   /**
   * Verifies if the current time is between the given start and end times.
   * @param {Number}     start
@@ -95,12 +102,15 @@ class PDP {
   }
 
   getGroupsNames() {
-    let _this = this;
-    let myGroups = _this.myGroups;
+    let myGroups = persistenceManager.get('groups') || {};
     let groupsNames = [];
-    for (let groupName in myGroups) {
-      groupsNames.push(groupName);
+
+    if (myGroups !== {}) {
+      for (let groupName in myGroups) {
+        groupsNames.push(groupName);
+      }
     }
+
     return groupsNames;
   }
 
@@ -110,8 +120,9 @@ class PDP {
   * @return {Array}   group
   */
   getGroup(groupName) {
-    let _this = this;
-    return (groupName in _this.myGroups) ? _this.myGroups[groupName] : [];
+    let myGroups = persistenceManager.get('groups') || {};
+
+    return (groupName in myGroups) ? myGroups[groupName] : [];
   }
 
   /**
@@ -119,17 +130,20 @@ class PDP {
   * @param  {String}  groupName
   */
   createGroup(groupName) {
-    let _this = this;
-    _this.myGroups[groupName] = [];
+    let myGroups = persistenceManager.get('groups') || {};
+    myGroups[groupName] = [];
+    persistenceManager.set('groups', 0, myGroups);
   }
 
   /**
   * Removes the group with the given name.
   * @param  {String}  groupName
   */
-  removeGroup(groupName) {
-    let _this = this;
-    delete _this.myGroups[groupName];
+  deleteGroup(groupName) {
+    let myGroups = persistenceManager.get('groups') || {};
+
+    delete myGroups[groupName];
+    persistenceManager.set('groups', 0, myGroups);
   }
 
   /**
@@ -139,12 +153,15 @@ class PDP {
   */
   addToGroup(userEmail, groupName) {
     let _this = this;
-    let group = _this.myGroups[groupName];
+    let myGroups = persistenceManager.get('groups') || {};
+    let group = myGroups[groupName];
+
     if (group === undefined) {
       _this.createGroup(groupName);
       group = _this.getGroup(groupName);
     }
     group.push(userEmail);
+    persistenceManager.set('groups', 0, myGroups);
   }
 
   /**
@@ -153,11 +170,13 @@ class PDP {
   * @param  {String}  groupName
   */
   removeFromGroup(userEmail, groupName) {
-    let _this = this;
-    let group = _this.myGroups[groupName];
+    let myGroups = persistenceManager.get('groups') || {};
+    let group = myGroups[groupName];
+
     for (let i in group) {
       if (group[i] === userEmail) {
         group.splice(i, 1);
+        persistenceManager.set('groups', 0, myGroups);
         break;
       }
     }
