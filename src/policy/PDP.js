@@ -1,3 +1,5 @@
+import persistenceManager from '../persistence/PersistenceManager';
+
 /**
 * The Policy Decision Point (PDP) decides if a message is to be authorised by checking a set of
 * policies. The resource to be verified is specified in the first word of the 'condition' field of
@@ -11,90 +13,35 @@ class PDP {
   * This method is invoked by the Policy Engine and instantiates the Policy Decision Point. It
   * initialises or loads from the Persistence Manager the object 'myGroups' to store the user's
   * groups.
-  * @param  {Registry}    runtimeRegistry
+  * @param  {Registry}    muchruntimeRegistry
   */
   constructor(runtimeRegistry) {
     let _this = this;
     _this.runtimeRegistry = runtimeRegistry;
-    _this.objectsReporters = {};
-    _this.myGroups = {}; // TODO: load from the Persistence Manager
-    _this.setPoliciesImplementation();
+    _this.systemVariables = _this.setSystemVariables();
+    _this.operations = _this.setOperations();
   }
 
-  setPoliciesImplementation() {
-    let _this = this;
-    _this.policiesImplementation = {};
-    _this.policiesImplementation.group = 'let condition = policy.condition.split(\' \'); condition.shift(); let groupName = condition.join(\' \'); if(_this.isInGroup(message.body.identity.email, groupName)) { result[0] = policy.authorise; }';
-    _this.policiesImplementation.time = 'result[0] = _this.isTimeBetween(condition[1], condition[2]) ? policy.authorise : !policy.authorise;';
+  setSystemVariables() {
+    let systemVariables = {};
+
+    systemVariables.group = '_this.myGroups[param];';
+    systemVariables.time = '_this.getMinutesFromMidnight();';
+    systemVariables.weekday = 'String(new Date().getDay());';
+    systemVariables.date = '_this.getDate();';
+
+    return systemVariables;
   }
 
-  getGroupsNames() {
-    let _this = this;
-    let myGroups = _this.myGroups;
-    let groupsNames = [];
-    for (let groupName in myGroups) {
-      groupsNames.push(groupName);
-    }
-    return groupsNames;
-  }
+  setOperations() {
+    let operations = {};
 
-  /**
-  * Returns the group with the given group name.
-  * @param  {String}  groupName
-  * @return {Array}   group
-  */
-  getGroup(groupName) {
-    let _this = this;
-    return (groupName in _this.myGroups) ? _this.myGroups[groupName] : [];
-  }
+    operations.betweenMinutes = '_this.isTimeBetween(parseInt(value), parseInt(params[0]), parseInt(params[1]));';
+    operations.in = '(params[0] in value) ? _this.myGroups[groupName] : [];';
+    operations.between = 'value > params[0] && value < params[1];';
+    operations.equals = 'value === params[0];';
 
-  /**
-  * Creates a group with the given name.
-  * @param  {String}  groupName
-  */
-  createGroup(groupName) {
-    let _this = this;
-    _this.myGroups[groupName] = [];
-  }
-
-  /**
-  * Removes the group with the given name.
-  * @param  {String}  groupName
-  */
-  removeGroup(groupName) {
-    let _this = this;
-    delete _this.myGroups[groupName];
-  }
-
-  /**
-  * Adds the given user email to the group with the given name.
-  * @param  {String}  userEmail
-  * @param  {String}  groupName
-  */
-  addToGroup(userEmail, groupName) {
-    let _this = this;
-    let group = _this.myGroups[groupName];
-    if (group === undefined) {
-      _this.createGroup(groupName);
-      group = _this.getGroup(groupName);
-    }
-    group.push(userEmail);
-  }
-
-  /**
-  * Removes the given user email from the group with the given name.
-  * @param  {String}  userEmail
-  * @param  {String}  groupName
-  */
-  removeFromGroup(userEmail, groupName) {
-    let _this = this;
-    let group = _this.myGroups[groupName];
-    for (let i in group) {
-      if (group[i] === userEmail) {
-        group.splice(i, 1);
-        break;
-      }
-    }
+    return operations;
   }
 
   /**
@@ -112,34 +59,32 @@ class PDP {
     let actions = [];
     for (let i in policies) {
       let policy = policies[i];
-      let result = [];
       let condition = policy.condition.split(' ');
-      let resource = condition[0];
 
-      eval(_this.policiesImplementation[resource]);
-      results.push(result[0]);
-      actions.push(result[1]);
+      let variable = condition[0];
+      let operation = condition[1];
+      let params = condition.slice(2);
+      let value = eval(_this.systemVariables[variable]);
+      let verifiesCondition = eval(_this.operations[operation]);
+      if (verifiesCondition) {
+        results.push(policy.authorise);
+      }
+
+      //actions.push(result[1]);
     }
 
     let authDecision = results.indexOf(false) === -1;
     return [authDecision, actions];
   }
 
-  /**
-  * Verifies if the given hyperty URL corresponds to an email that is in the group with the given
-  * name.
-  * @param {URL}        hypertyURL
-  * @param {String}     groupName
-  * @return {Boolean}   boolean
-  */
-  isInGroup(userEmail, groupName) {
-    let _this = this;
-    let group = _this.myGroups[groupName];
-    if (group === undefined) {
-      return false;
-    } else {
-      return group.indexOf(userEmail) > -1;
-    }
+  getMinutesFromMidnight() {
+    let now = new Date();
+    return parseInt(now.getHours()) * 60  + parseInt(now.getMinutes());
+  }
+
+  getDate() {
+    let date = new Date();
+    return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear();
   }
 
   /**
@@ -148,31 +93,93 @@ class PDP {
   * @param {Number}     end
   * @return {Boolean}   boolean
   */
-  isTimeBetween(start, end) {
-    let _this = this;
-    let now = new Date();
-    let nowMinutes = _this.getMinutes(parseInt(now.getHours()) + ':' + now.getMinutes());
-    let startMinutes = _this.getMinutes(start);
-    let endMinutes = _this.getMinutes(end);
-    if (endMinutes > startMinutes) {
-      return (nowMinutes > startMinutes && nowMinutes < endMinutes);
-    } else {
-      if (nowMinutes < startMinutes) {
-        nowMinutes += 24 * 60;
-      }
-      endMinutes += 24 * 60;
-      return (nowMinutes > startMinutes && nowMinutes < endMinutes);
+  isTimeBetween(now, start, end) {
+    if (end < start) {
+      now = (now < start) ? now += 24 * 60 : now;
+      end += 24 * 60;
     }
+    return (now > start && now < end);
+  }
+
+  getGroupsNames() {
+    let myGroups = persistenceManager.get('groups') || {};
+    let groupsNames = [];
+
+    if (myGroups !== {}) {
+      for (let groupName in myGroups) {
+        groupsNames.push(groupName);
+      }
+    }
+
+    return groupsNames;
   }
 
   /**
-  * Returns the number of minutes that correspond to the given time in the format <HOURS>:<MINUTES>.
-  * @param {Number}   time
-  * @return {Number}  minutes
+  * Returns the group with the given group name.
+  * @param  {String}  groupName
+  * @return {Array}   group
   */
-  getMinutes(time) {
-    let timeSplit = time.split(':');
-    return parseInt(timeSplit[0]) * 60 + parseInt(timeSplit[1]);
+  getGroup(groupName) {
+    let myGroups = persistenceManager.get('groups') || {};
+
+    return (groupName in myGroups) ? myGroups[groupName] : [];
+  }
+
+  /**
+  * Creates a group with the given name.
+  * @param  {String}  groupName
+  */
+  createGroup(groupName) {
+    let myGroups = persistenceManager.get('groups') || {};
+    myGroups[groupName] = [];
+    persistenceManager.set('groups', 0, myGroups);
+  }
+
+  /**
+  * Removes the group with the given name.
+  * @param  {String}  groupName
+  */
+  deleteGroup(groupName) {
+    let myGroups = persistenceManager.get('groups') || {};
+
+    delete myGroups[groupName];
+    persistenceManager.set('groups', 0, myGroups);
+  }
+
+  /**
+  * Adds the given user email to the group with the given name.
+  * @param  {String}  userEmail
+  * @param  {String}  groupName
+  */
+  addToGroup(userEmail, groupName) {
+    let _this = this;
+    let myGroups = persistenceManager.get('groups') || {};
+    let group = myGroups[groupName];
+
+    if (group === undefined) {
+      _this.createGroup(groupName);
+      group = _this.getGroup(groupName);
+    }
+    group.push(userEmail);
+    persistenceManager.set('groups', 0, myGroups);
+  }
+
+  /**
+  * Removes the given user email from the group with the given name.
+  * @param  {String}  userEmail
+  * @param  {String}  groupName
+  */
+  removeFromGroup(userEmail, groupName) {
+    let myGroups = persistenceManager.get('groups') || {};
+    let group = myGroups[groupName];
+
+    for (let i in group) {
+      if (group[i] === userEmail) {
+        group.splice(i, 1);
+        persistenceManager.set('groups', 0, myGroups);
+        break;
+      }
+    }
   }
 }
 

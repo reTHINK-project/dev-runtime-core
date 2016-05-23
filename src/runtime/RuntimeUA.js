@@ -90,7 +90,7 @@ class RuntimeUA {
     _this.messageBus = new MessageBus(_this.registry);
 
     // Instantiate the Policy Engine
-    _this.policyEngine = new PolicyEngine(_this.messageBus, _this.identityModule, _this.registry);
+    _this.policyEngine = new PolicyEngine(_this.identityModule, _this.registry);
 
     _this.messageBus.pipeline.handlers = [
 
