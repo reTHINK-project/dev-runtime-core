@@ -22,12 +22,23 @@
 **/
 import Bus from './Bus';
 
+/**
+* @author micaelpedrosa@gmail.com
+* Message BUS Interface is an extension of the Bus
+* It is used mainly in the internal sandbox routing.
+*/
 class MiniBus extends Bus {
 
   constructor() {
     super();
   }
 
+  /**
+   * Post a message for routing. Message is routed directly to the external routing _onPostMessage.
+   * @param  {Message} inMsg            JSON with mandatory Message structure {id, type, from, to}
+   * @param  {Callback} responseCallback Optional callback if a response is expected from the request. A response will be always sent, even if it is a "Timeout".
+   * @return {number}                  the Message id
+   */
   postMessage(inMsg, responseCallback) {
     let _this = this;
 
@@ -40,6 +51,7 @@ class MiniBus extends Bus {
     return inMsg.id;
   }
 
+  //internal method used when a message is received by an external routing system
   _onMessage(msg) {
     let _this = this;
 

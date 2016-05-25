@@ -22,8 +22,10 @@
 **/
 import Bus from './Bus';
 import Pipeline from './Pipeline';
+
 /**
-* Message BUS Interface is an extension of the MiniBus
+* @author micaelpedrosa@gmail.com
+* Message BUS Interface is an extension of the Bus
 * It doesn't support the default '*' listener, instead it uses the registry.resolve(..)
 */
 class MessageBus extends Bus {
@@ -50,6 +52,13 @@ class MessageBus extends Bus {
 
   get pipeline() { return this._pipeline; }
 
+  /**
+   * Post a message for routing. It will first search for a listener, if there is no one, it sends to a external routing using the _onPostMessage.
+   * External routing use the registry.resolve(..) method to decide the destination sandbox.
+   * @param  {Message} inMsg            JSON with mandatory Message structure {id, type, from, to}
+   * @param  {Callback} responseCallback Optional callback if a response is expected from the request. A response will be always sent, even if it is a "Timeout".
+   * @return {number}                  the Message id
+   */
   postMessage(inMsg, responseCallback) {
     let _this = this;
 
@@ -74,115 +83,80 @@ class MessageBus extends Bus {
     return inMsg.id;
   }
 
-  /*
-  addForward(from, to) {
+  /**
+   * Adds an external publish address listener. Every message for the address will be forwarded to the external routing by _onPostMessage.
+   * This means, even if there is a listener for the address, it will also send the message to the external routing.
+   * @param {URL} from Publish address.
+   */
+  addPublish(from) {
     let _this = this;
 
     //verify if forward exist
-    let conf = _this._forwards[from];
-    if (!conf) {
+    let refCount = _this._forwards[from];
+    if (!refCount) {
       let forwardListener = _this.addListener(from, (msg) => {
-        conf.sandboxToUrls.forEach((urls, sandbox) => {
-          console.log('MB-FORWARD: ( ' + from + ' to ' + urls.size + ' destinations)');
-          urls.forEach((value) => { console.log('SEND-TO: ', value); });
-
-          sandbox.postMessage(msg);
-        });
+        console.log('MB-PUBLISH: ( ' + from + ' )');
+        _this._onPostMessage(msg);
       });
 
-      conf = {
-        from: from,
+      refCount = {
+        counter: 0,
         fl: forwardListener,
-        sandboxToUrls: new Map(),
-        urlToSandbox: new Map(),
-
-        //remove forward detination
-        remove: (url) => {
-          let sandbox = this.urlToSandbox.get(url);
-          if (sandbox) {
-            this.urlToSandbox.delete(url);
-            this.sandboxToUrls.get(sandbox).delete(url);
+        remove: () => {
+          this.counter--;
+          if (this.counter === 0) {
+            this.fl.remove();
+            delete _this._forwards[from];
           }
         }
       };
-
-      _this._forwards[from] = conf;
-    }
-
-    //add forward detination
-    this._registry.getSandbox(to).then((sandbox) => {
-      let urls = conf.sandboxToUrls.get(sandbox);
-      if (!urls) {
-        urls = new Set();
-        conf.sandboxToUrls.set(sandbox, urls);
-      }
-
-      urls.add(to);
-      conf.urlToSandbox.set(to, sandbox);
-    });
-
-    return conf;
-  }
-  */
-
- addPublish(from) {
-   let _this = this;
-
-   //verify if forward exist
-   let refCount = _this._forwards[from];
-   if (!refCount) {
-     let forwardListener = _this.addListener(from, (msg) => {
-       console.log('MB-PUBLISH: ( ' + from + ' )');
-       _this._onPostMessage(msg);
-     });
-
-     refCount = {
-       counter: 0,
-       fl: forwardListener,
-       remove: () => {
-         this.counter--;
-         if (this.counter === 0) {
-           this.fl.remove();
-           delete _this._forwards[from];
-         }
-       }
-     };
 
      _this._forwards[from] = refCount;
    }
 
    refCount.counter++;
    return refCount;
- }
-
- addForward(from, to) {
-   let _this = this;
-
-   return _this.addListener(from, (msg) => {
-     console.log('MB-FORWARD: ( ' + from + ' to ' + to + ' )');
-     _this.forward(to, msg);
-   });
- }
-
- forward(url, msg) {
-    let _this = this;
-
-    let itemList = _this._subscriptions[url];
-    if (itemList) {
-      _this._publishOn(itemList, msg);
-    }
   }
 
-  _onPostMessage(msg) {
-    let _this = this;
+  /**
+   * Adds a forward listener for a message destination. Every message reaching an address will be also sent to the forward address.
+   * @param {URL} from Message destination, it's actually the field "to" of the message.
+   * @param {URL} to   Forward address.
+   */
+   addForward(from, to) {
+     let _this = this;
 
-    //resolve external protostub...
-    _this._registry.resolve(msg.to).then((route) => {
-      _this.forward(route, msg);
-    }).catch(function(e) {
-      console.log('RESOLVE-ERROR: ', e);
-    });
-  }
+     return _this.addListener(from, (msg) => {
+       console.log('MB-FORWARD: ( ' + from + ' to ' + to + ' )');
+       _this.forward(to, msg);
+     });
+   }
+
+   /**
+    * Just forward's a message to the forward address. Listeners should be available for the forward address.
+    * @param  {URL} url Forward address.
+    * @param  {Message} msg Message to forward
+    */
+   forward(url, msg) {
+     let _this = this;
+
+     let itemList = _this._subscriptions[url];
+     if (itemList) {
+       _this._publishOn(itemList, msg);
+     }
+   }
+
+   //default route, if there are no listeners available for a message destination.
+   _onPostMessage(msg) {
+     let _this = this;
+
+     //resolve external protostub...
+     _this._registry.resolve(msg.to).then((route) => {
+       _this.forward(route, msg);
+     }).catch(function(e) {
+       console.log('RESOLVE-ERROR: ', e);
+     });
+   }
 }
 
 export default MessageBus;
