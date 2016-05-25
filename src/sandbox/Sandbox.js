@@ -57,7 +57,7 @@ class Sandbox extends MiniBus {
     // let messageFactory = _this.messageFactory;
 
     return new Promise((resolve, reject) => {
-      //TODO: message format is not properly defined yet
+      //FLOW-OUT: deploy message for the internal SandboxRegistry -> _onDeploy
       let deployMessage = {
         type: 'create', from: SandboxRegistry.ExternalDeployAddress, to: SandboxRegistry.InternalDeployAddress,
         body: { url: componentURL, sourceCode: componentSourceCode, config: configuration }
@@ -84,7 +84,7 @@ class Sandbox extends MiniBus {
     let _this = this;
 
     return new Promise((resolve, reject) => {
-      //TODO: message format is not properly defined yet
+      //FLOW-OUT: un-deploy message for the internal SandboxRegistry -> _onRemove
       let removeMessage = {
         type: 'delete', from: SandboxRegistry.ExternalDeployAddress, to: SandboxRegistry.InternalDeployAddress,
         body: { url: componentURL }

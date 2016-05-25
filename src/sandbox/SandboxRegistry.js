@@ -27,6 +27,11 @@
 
 // import MessageFactory from '../../resources/MessageFactory';
 
+/**
+ * @author micaelpedrosa@gmail.com
+ * Internal component registry of all sandboxes.
+ * Process internal request's for component deploy.
+ */
 class SandboxRegistry {
   /* private
   _components: <url: instance>
@@ -63,6 +68,7 @@ class SandboxRegistry {
 
     // let messageFactory = _this.messageFactory;
 
+    //FLOW-OUT: generic response message to external Sandbox (deploy and un-deploy responses)
     let responseMsg = {
       id: msg.id, type: 'response', from: SandboxRegistry.InternalDeployAddress, to: SandboxRegistry.ExternalDeployAddress
     };
@@ -81,6 +87,7 @@ class SandboxRegistry {
     return responseMsg;
   }
 
+  //FLOW-IN: message from the runtime core Sandbox -> deployComponent
   _onDeploy(msg) {
     let _this = this;
     let config = msg.body.config;
@@ -107,6 +114,7 @@ class SandboxRegistry {
     _this._bus.postMessage(responseMsg);
   }
 
+  //FLOW-IN: message from the runtime core Sandbox -> removeComponent
   _onRemove(msg) {
     let _this = this;
     let componentURL = msg.body.url;
