@@ -34,14 +34,14 @@ describe('Policy Engine', function() {
   let policy1 = {
     actions: [],
     authorise: false,
-    condition: 'group work',
+    condition: 'source in blockedEmails',
     scope: 'user'
   };
 
   let policy2 = {
     actions: [],
     authorise: false,
-    condition: 'group students',
+    condition: 'source in students',
     scope: 'user'
   };
 
@@ -57,11 +57,11 @@ describe('Policy Engine', function() {
     });
 
     it('removes an existing policy associated with the user scope', function() {
-      policyEngine.removePolicies('group work', 'user');
+      policyEngine.removePolicies('source in blockedEmails', 'user');
       expect(policyEngine.getApplicablePolicies('user')).to.be.eql([policy2]);
     });
 
-    it('tries to remove a policy that is not associated with the user scope', function() {
+    it('tries to remove a policy that does not exist with the user scope', function() {
       policyEngine.removePolicies('block-08-20', 'user');
       expect(policyEngine.getApplicablePolicies('user')).to.be.eql([policy2]);
     });
@@ -82,6 +82,8 @@ describe('Policy Engine', function() {
     });
   });
 
+  let userEmail1 = 'openidtest10@gmail.com';
+
   describe('groups management', function() {
     persistenceManager.delete('groups');
     let groupName1 = 'groupA';
@@ -98,28 +100,26 @@ describe('Policy Engine', function() {
       expect(policyEngine.getGroupsNames()).to.be.eql([groupName1, groupName2]);
     });
 
-    let userEmail1 = 'openidtest10@gmail.com';
-
     it('adds an email to a group', function() {
       policyEngine.addToGroup(userEmail1, groupName1);
-      expect(policyEngine.getGroup(groupName1)).to.be.eql([userEmail1]);
+      expect(policyEngine.getList(groupName1)).to.be.eql([userEmail1]);
     });
 
     let userEmail2 = 'openidtest20@gmail.com';
 
     it('adds a second email to a group', function() {
       policyEngine.addToGroup(userEmail2, groupName1);
-      expect(policyEngine.getGroup(groupName1)).to.be.eql([userEmail1, userEmail2]);
+      expect(policyEngine.getList(groupName1)).to.be.eql([userEmail1, userEmail2]);
     });
 
     it('removes a user from a group', function() {
       policyEngine.removeFromGroup(userEmail1, groupName1);
-      expect(policyEngine.getGroup(groupName1)).to.be.eql([userEmail2]);
+      expect(policyEngine.getList(groupName1)).to.be.eql([userEmail2]);
     });
 
     it('deletes a group', function() {
       policyEngine.deleteGroup(groupName1);
-      expect(policyEngine.getGroup(groupName1)).to.be.eql([]);
+      expect(policyEngine.getList(groupName1)).to.be.eql([]);
       expect(policyEngine.getGroupsNames()).to.be.eql([groupName2]);
     });
   });
@@ -159,6 +159,175 @@ describe('Policy Engine', function() {
       }), function(reject) {
         return reject;
       }).to.be.fulfilled.and.eventually.eql(messageWithID).and.notify(done);
+    });
+  });
+
+  let messageFromBlocked = {
+    body: {
+      identity: {
+        email: userEmail1
+      }
+    },
+    id: 1,
+    type: 'read',
+    from: 'hyperty://ua.pt/asdf',
+    to: 'domain://registry.ua.pt/hyperty-instance/user'
+  };
+
+  describe('functionality: source', function() {
+    it('rejects the message as it comes from a blocked source', function(done) {
+      policyEngine.removePolicies('*', '*');
+      policyEngine.addPolicies([policy1]);
+      policyEngine.addToGroup(userEmail1, 'blockedEmails');
+      expect(policyEngine.authorise(messageFromBlocked).then(function(response) {
+        return response;
+      }), function(reject) {
+        return reject;
+      }).to.be.rejected.and.notify(done);
+    });
+  });
+
+  describe('functionality: time of the day', function() {
+    let timePolicy = {
+      scope: 'application',
+      condition: 'time betweenMinutes 2300 1600',
+      authorise: false,
+      actions: []
+    };
+
+    it('rejects the message as it is received in a blocked timeslot', function(done) {
+      policyEngine.pdp.systemVariables.time = () => { return 1530; };
+      policyEngine.removePolicies('*', '*');
+      policyEngine.addPolicies([timePolicy]);
+      expect(policyEngine.authorise(messageWithID).then(function(response) {
+        return response;
+      }), function(reject) {
+        return reject;
+      }).to.be.rejected.and.notify(done);
+    });
+
+    it('accepts the message as it is received in a timeslot not blocked', function(done) {
+      policyEngine.pdp.systemVariables.time = () => { return 1700; };
+      expect(policyEngine.authorise(messageWithID).then(function(response) {
+        return response;
+      }), function(reject) {
+        return reject;
+      }).to.be.fulfilled.and.eventually.eql(messageWithID).and.notify(done);
+    });
+  });
+
+  describe('functionality: date', function() {
+    let datePolicy = {
+      scope: 'application',
+      condition: 'date in blockedDates',
+      authorise: false,
+      actions: []
+    };
+
+    it('rejects the message as it is received in a blocked date', function(done) {
+      policyEngine.pdp.systemVariables.date = () => { return '01/01/2016'; };
+      policyEngine.removePolicies('*', '*');
+      policyEngine.addPolicies([datePolicy]);
+      policyEngine.addToGroup('01/01/2016', 'blockedDates');
+      expect(policyEngine.authorise(messageWithID).then(function(response) {
+        return response;
+      }), function(reject) {
+        return reject;
+      }).to.be.rejected.and.notify(done);
+    });
+
+    it('accepts the message as it is received in a timeslot not blocked', function(done) {
+      policyEngine.pdp.systemVariables.date = () => { return '02/01/2016'; };
+      expect(policyEngine.authorise(messageWithID).then(function(response) {
+        return response;
+      }), function(reject) {
+        return reject;
+      }).to.be.fulfilled.and.eventually.eql(messageWithID).and.notify(done);
+    });
+  });
+
+  let userEmail3 = 'openidtest10@microsoft.com';
+
+  let messageFromAllowed = {
+    body: {
+      identity: {
+        email: userEmail3
+      }
+    },
+    id: 1,
+    type: 'read',
+    from: 'hyperty://ua.pt/asdf',
+    to: 'domain://registry.ua.pt/hyperty-instance/user'
+  };
+
+  let outMessageFromAllowed = {
+    body: {
+      auth: true,
+      identity: {
+        email: userEmail3
+      }
+    },
+    id: 1,
+    type: 'read',
+    from: 'hyperty://ua.pt/asdf',
+    to: 'domain://registry.ua.pt/hyperty-instance/user'
+  };
+
+  describe('functionality: domain', function() {
+    let domainPolicy = {
+      scope: 'application',
+      condition: 'domain in blockedDomains',
+      authorise: false,
+      actions: []
+    };
+
+    it('rejects the message as it comes from a blocked domain', function(done) {
+      policyEngine.removePolicies('*', '*');
+      policyEngine.addPolicies([domainPolicy]);
+      policyEngine.addToGroup('gmail.com', 'blockedDomains');
+      expect(policyEngine.authorise(messageFromBlocked).then(function(response) {
+        return response;
+      }), function(reject) {
+        return reject;
+      }).to.be.rejected.and.notify(done);
+    });
+
+    it('allows the message as it comes from a domain that is not blocked', function(done) {
+      expect(policyEngine.authorise(messageFromAllowed).then(function(response) {
+        return response;
+      }), function(reject) {
+        return reject;
+      }).to.be.fulfilled.and.eventually.eql(outMessageFromAllowed).and.notify(done);
+    });
+  });
+
+  describe('functionality: weekday', function() {
+    let weekdayPolicy = {
+      scope: 'application',
+      condition: 'weekday in blockedWeekdays',
+      authorise: false,
+      actions: []
+    };
+
+    it('rejects the message as it is received in a blocked weekday', function(done) {
+      policyEngine.pdp.systemVariables.weekday = () => { return '0'; };
+      policyEngine.removePolicies('*', '*');
+      policyEngine.addPolicies([weekdayPolicy]);
+      policyEngine.addToGroup('0', 'blockedWeekdays');
+      expect(policyEngine.authorise(messageWithID).then(function(response) {
+        return response;
+      }), function(reject) {
+        return reject;
+      }).to.be.rejected.and.notify(done);
+    });
+
+    it('allows the message as it comes from a weekday that is not blocked', function(done) {
+      policyEngine.pdp.systemVariables.weekday = () => { return '1'; };
+      expect(policyEngine.authorise(messageFromAllowed).then(function(response) {
+        return response;
+      }), function(reject) {
+        return reject;
+      }).to.be.fulfilled.and.eventually.eql(outMessageFromAllowed).and.notify(done);
     });
   });
 
@@ -268,9 +437,7 @@ describe('Policy Engine', function() {
     });
 
     it('blocks the subscription attempt of a non pre-authorised subscriber', function(done) {
-      expect(policyEngine.authorise(objectSubscription).then(function(response) {
-        return response;
-      }), function(reject) {
+      expect(policyEnto.be.rejected.and.notify(done);ect) {
         return reject;
       }).to.be.rejected.and.notify(done);
     });

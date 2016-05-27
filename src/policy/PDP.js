@@ -1,4 +1,5 @@
 import persistenceManager from '../persistence/PersistenceManager';
+import {divideEmail} from '../utils/utils';
 
 /**
 * The Policy Decision Point (PDP) decides if a message is to be authorised by checking a set of
@@ -22,24 +23,26 @@ class PDP {
     _this.operations = _this.setOperations();
   }
 
+  /* System variable's obtention, needed to verify a condition. */
   setSystemVariables() {
-    let systemVariables = {};
-
-    systemVariables.group = '_this.myGroups[param];';
-    systemVariables.time = '_this.getMinutesFromMidnight();';
-    systemVariables.weekday = 'String(new Date().getDay());';
-    systemVariables.date = '_this.getDate();';
-
+    let _this = this;
+    let systemVariables = {
+      source: (message) => { return message.body.identity.email; },
+      domain: (message) => { return divideEmail(message.body.identity.email).domain; },
+      time: () => { return _this.getCurrentTime(); },
+      weekday: () => { return String(new Date().getDay()); },
+      date: () => { return _this.getDate(); }
+    };
     return systemVariables;
   }
 
   setOperations() {
     let operations = {};
 
-    operations.betweenMinutes = '_this.isTimeBetween(parseInt(value), parseInt(params[0]), parseInt(params[1]));';
-    operations.in = '(params[0] in value) ? _this.myGroups[groupName] : [];';
-    operations.between = 'value > params[0] && value < params[1];';
-    operations.equals = 'value === params[0];';
+    operations.betweenMinutes = '_this.isTimeBetween(value, parseInt(params[0]), parseInt(params[1]))';
+    operations.in = '_this.getList(params[0]).indexOf(value) != -1';
+    operations.between = 'value > params[0] && value < params[1]';
+    operations.equals = '(params[0] === \'*\') || value === params[0]';
 
     return operations;
   }
@@ -64,7 +67,7 @@ class PDP {
       let variable = condition[0];
       let operation = condition[1];
       let params = condition.slice(2);
-      let value = eval(_this.systemVariables[variable]);
+      let value = _this.systemVariables[variable](message);
       let verifiesCondition = eval(_this.operations[operation]);
       if (verifiesCondition) {
         results.push(policy.authorise);
@@ -77,9 +80,9 @@ class PDP {
     return [authDecision, actions];
   }
 
-  getMinutesFromMidnight() {
+  getCurrentTime() {
     let now = new Date();
-    return parseInt(now.getHours()) * 60  + parseInt(now.getMinutes());
+    return parseInt(String(now.getHours()) + now.getMinutes());
   }
 
   getDate() {
@@ -95,8 +98,8 @@ class PDP {
   */
   isTimeBetween(now, start, end) {
     if (end < start) {
-      now = (now < start) ? now += 24 * 60 : now;
-      end += 24 * 60;
+      now = (now < start) ? now += 2400 : now;
+      end += 2400;
     }
     return (now > start && now < end);
   }
@@ -119,9 +122,8 @@ class PDP {
   * @param  {String}  groupName
   * @return {Array}   group
   */
-  getGroup(groupName) {
+  getList(groupName) {
     let myGroups = persistenceManager.get('groups') || {};
-
     return (groupName in myGroups) ? myGroups[groupName] : [];
   }
 
@@ -133,6 +135,7 @@ class PDP {
     let myGroups = persistenceManager.get('groups') || {};
     myGroups[groupName] = [];
     persistenceManager.set('groups', 0, myGroups);
+    return myGroups;
   }
 
   /**
@@ -154,13 +157,11 @@ class PDP {
   addToGroup(userEmail, groupName) {
     let _this = this;
     let myGroups = persistenceManager.get('groups') || {};
-    let group = myGroups[groupName];
-
-    if (group === undefined) {
-      _this.createGroup(groupName);
-      group = _this.getGroup(groupName);
+    if (myGroups[groupName] === undefined) {
+      myGroups = _this.createGroup(groupName);
+      myGroups[groupName] = [];
     }
-    group.push(userEmail);
+    myGroups[groupName].push(userEmail);
     persistenceManager.set('groups', 0, myGroups);
   }
 

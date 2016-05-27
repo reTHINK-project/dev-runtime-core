@@ -22,8 +22,6 @@ class PolicyEngine {
   constructor(identityModule, runtimeRegistry) {
     let _this = this;
     _this.isRuntimeCore = (identityModule & runtimeRegistry) === 0;
-    console.log('is?');
-    console.log(_this.isRuntimeCore);
     _this.pdp = new PDP(runtimeRegistry);
     _this.pep = new PEP();
     _this.idModule = identityModule;
@@ -31,20 +29,20 @@ class PolicyEngine {
   }
 
   loadPolicies() {
-    let _this = this;
+    //let _this = this;
     persistenceManager.delete('policies');
     let myPolicies = persistenceManager.get('policies');
 
-    if (myPolicies === undefined) {
+    /*if (myPolicies === undefined) {
       let subscriptionPolicy = {
         scope: 'application',
-        condition: 'subscription any',
+        condition: 'subscription equals *',
         authorise: true,
         actions: []
       };
       _this.addPolicies([subscriptionPolicy]);
       myPolicies = persistenceManager.get('policies');
-    }
+    }*/
     return myPolicies;
   }
 
@@ -130,6 +128,7 @@ class PolicyEngine {
       console.log('--- Policy Engine ---');
       console.log(message);
       message.body = message.body || {};
+
       let initialResultOk = _this.followsExpectedBehaviour(message);
       if (initialResultOk === undefined) {
         if (_this.isRuntimeCore) {
@@ -203,9 +202,9 @@ class PolicyEngine {
   * @param  {String}  groupName
   * @return {Array}   group
   */
-  getGroup(groupName) {
+  getList(groupName) {
     let _this = this;
-    return _this.pdp.getGroup(groupName);
+    return _this.pdp.getList(groupName);
   }
 
   /**

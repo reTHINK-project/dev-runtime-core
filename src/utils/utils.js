@@ -62,6 +62,17 @@ export function divideURL(url) {
   return result;
 }
 
+export function divideEmail(email) {
+  let indexOfAt = email.indexOf('@');
+
+  let result = {
+    username: email.substring(0, indexOfAt),
+    domain: email.substring(indexOfAt + 1, email.length)
+  };
+
+  return result;
+}
+
 /**
  * Check if an Object is empty
  * @param  {Object} object Object to be checked
