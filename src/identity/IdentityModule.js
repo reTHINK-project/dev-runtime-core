@@ -258,8 +258,12 @@ class IdentityModule {
 
             _this.identity.addIdentity(result);
 
+            // check if exists any infoToken in the result received
+            let infoToken = (result.infoToken) ? result.infoToken : {};
+            let userProfileBundle = {username: idToken.email, cn: idToken.name, avatar: infoToken.picture, locale: infoToken.locale, userURL: getUserURLFromEmail(idToken.email)};
+
             //creation of a new JSON with the identity to send via messages
-            let newIdentity = {userProfile: {username: idToken.email, cn: idToken.name}, idp: result.idp.domain, assertion: result.assertion, email: idToken.email, identity: result.identity, infoToken: idToken};
+            let newIdentity = {userProfile: userProfileBundle, idp: result.idp.domain, assertion: result.assertion, email: idToken.email, identity: result.identity, idToken: idToken, infoToken: infoToken};
             result.messageInfo = newIdentity;
 
             _this.currentIdentity = newIdentity;

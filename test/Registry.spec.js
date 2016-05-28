@@ -23,7 +23,7 @@ let sandboxDummy = {sandbox: 'sandbox', type: 'normal'};
 let protostubURL = 'url';
 let identityModule = {
   getIdentityAssertion: () => {
-    let identityBundle = {email: 'openidtest10@gmail.com', token: 'idToken'};
+    let identityBundle = {userProfile: {email: 'openidtest10@gmail.com', token: 'idToken', userURL: 'user://gmail.com/openidtest10'}};
     return new Promise(function(resolve, reject) {
       resolve(identityBundle);
     });

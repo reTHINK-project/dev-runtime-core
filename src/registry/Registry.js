@@ -26,9 +26,10 @@ import ObjectAllocation from '../syncher/ObjectAllocation';
 import HypertyInstance from './HypertyInstance';
 
 import {MessageFactory} from 'service-framework/dist/MessageFactory';
-import {divideURL, getUserEmailFromURL} from '../utils/utils.js';
+import {divideURL} from '../utils/utils.js';
 
-//import Discovery from './Discovery';
+/*import IdentityManager from './IdentityManager';
+import Discovery from './Discovery';*/
 
 /**
 * Runtime Registry Interface
@@ -101,7 +102,7 @@ class Registry extends EventEmitter {
 
     _this._messageBus.addListener(_this.registryURL, function(msg) {
 
-      let userUrl = _this._getIdentityAssociated(msg.from);
+      let userUrl = _this._getIdentityAssociated(msg.body.resource, msg.from);
 
       let reply = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: {resource: userUrl}};
 
@@ -121,19 +122,37 @@ class Registry extends EventEmitter {
     _this.objectAllocation = objectAllocation;
 
     /*let discovery = new Discovery(_this.registryURL, messageBus);
-    _this.discovery = discovery;*/
+    _this.discovery = discovery;
+
+    let identityManager = new IdentityManager('hyperty://localhost/833a6e52-515b-498b-a57b-e3daeece48d2', _this.runtimeURL, messageBus);
+    _this.identityManager = identityManager;*/
   }
 
-  _getIdentityAssociated(hypertyURL) {
+  _getIdentityAssociated(type, hypertyURL) {
     let _this = this;
 
     for (let hyperty in _this.hypertiesList) {
       let value = _this.hypertiesList[hyperty];
       if (value._hypertyURL === hypertyURL) {
-        return value._user;
+        switch (type) {
+          case 'username':
+            return value._user.username;
+          case 'cn':
+            return value._user.cn;
+          case 'locale':
+            return value._user.locale;
+          case 'avatar':
+            return value._user.avatar;
+          case 'userURL':
+            return value._user.userURL;
+          case '.':
+            return value._user;
+          default:
+            return 'No information could be found';
+        }
       }
     }
-    return undefined;
+    return 'no identity found';
   }
 
   /**
@@ -283,8 +302,8 @@ class Registry extends EventEmitter {
     return new Promise(function(resolve, reject) {
 
       _this.idModule.getIdentityAssertion().then(function(result) {
-        let email = result.email;
-        let identityURL = 'user://' + email.substring(email.indexOf('@') + 1, email.length) + '/' + email.substring(0, email.indexOf('@'));
+        let userProfile = result.userProfile;
+        let identityURL = userProfile.userURL;
 
         if (_this._messageBus === undefined) {
           reject('MessageBus not found on registerStub');
@@ -309,7 +328,7 @@ class Registry extends EventEmitter {
               });
 
               let hyperty = new HypertyInstance(_this.identifier, _this.registryURL,
-              descriptor, adderessList[0], identityURL);
+              descriptor, adderessList[0], userProfile);
 
               _this.hypertiesList.push(hyperty);
 
