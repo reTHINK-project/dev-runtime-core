@@ -29,7 +29,10 @@
     "url": "https://github.com/reTHINK-project/dev-runtime-core/issues"
   },
   "homepage": "https://rethink-project.eu/",
-  "dependencies": {},
+  "dependencies": {
+    "gulp-sourcemaps": "^1.6.0",
+    "gulp-util": "^3.0.7"
+  },
   "devDependencies": {
     "array.observe": "0.0.1",
     "babel-plugin-add-module-exports": "^0.1.3",

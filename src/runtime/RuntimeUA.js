@@ -84,7 +84,7 @@ class RuntimeUA {
     let appSandbox = runtimeFactory.createAppSandbox();
 
     // Instantiate the Registry Module
-    _this.registry = new Registry(runtimeURL, appSandbox, _this.identityModule);
+    _this.registry = new Registry(runtimeURL, appSandbox, _this.identityModule, _this.runtimeCatalogue);
 
     // Instantiate the Message Bus
     _this.messageBus = new MessageBus(_this.registry);
@@ -189,7 +189,7 @@ class RuntimeUA {
       // Probably we need to pass a factory like we do for sandboxes;
       console.info('------------------ Hyperty ------------------------');
       console.info('Get hyperty descriptor for :', hypertyDescriptorURL);
-      _this.runtimeCatalogue.getHypertyDescriptor(hypertyDescriptorURL).then(function(hypertyDescriptor) {
+      return _this.runtimeCatalogue.getHypertyDescriptor(hypertyDescriptorURL).then(function(hypertyDescriptor) {
         // at this point, we have completed "step 2 and 3" as shown in https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md
         console.info('1: return hyperty descriptor', hypertyDescriptor);
 
@@ -280,7 +280,7 @@ class RuntimeUA {
         _hypertySandbox = sandbox;
 
         // Register hyperty
-        return _this.registry.registerHyperty(sandbox, hypertyDescriptorURL);
+        return _this.registry.registerHyperty(sandbox, hypertyDescriptorURL, _hypertyDescriptor);
       })
       .then(function(hypertyURL) {
         console.info('6: Hyperty url, after register hyperty', hypertyURL);

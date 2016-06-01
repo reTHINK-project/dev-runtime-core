@@ -4,12 +4,14 @@ var gulp = require('gulp');
 var exec = require('child_process').exec;
 var jsdoc = require('gulp-jsdoc3');
 var pandoc = require('gulp-pandoc');
+var fs = require('fs');
 
 // Task and dependencies to distribute for all environments;
 var babel = require('babelify');
 var browserify = require('browserify');
 var buffer = require('vinyl-buffer');
 var source = require('vinyl-source-stream');
+var sourcemaps = require('gulp-sourcemaps');
 var replace = require('gulp-replace');
 var insert = require('gulp-insert');
 var uglify = require('gulp-uglify');
@@ -18,6 +20,8 @@ var argv = require('yargs').argv;
 var through = require('through2');
 var path = require('path');
 var gulpif = require('gulp-if');
+var gutil = require('gulp-util');
+var extensions = ['.js', '.json'];
 
 var git = require('gulp-git');
 var prompt = require('gulp-prompt');
@@ -127,108 +131,120 @@ function prependLicense(clean) {
 
 }
 
-gulp.task('runtime', function() {
-
-  var compact = true;
-
-  return browserify({
-    entries: ['./src/runtime/RuntimeUA.js'],
-    standalone: 'Runtime',
-    debug: false
-  })
-  .transform(babel, {
-    compact: compact,
-    presets: ['es2015', 'stage-0'],
-    plugins: ['add-module-exports', 'transform-runtime', 'transform-regenerator']
-  })
-  .bundle()
-  .on('error', function(err) {
-    console.error(err);
-    this.emit('end');
-  })
-  .pipe(source('Runtime.js'))
-  .pipe(buffer())
-  .pipe(gulpif(compact, uglify()))
-  .pipe(gulpif(compact, insert.prepend(license + '// Runtime User Agent \n\n// version: {{version}}\n\n// Last build: {{date}}\n\n\n')))
-  .pipe(gulpif(compact, replace('{{version}}', pkg.version)))
-  .pipe(gulpif(compact, replace('{{date}}', new Date())))
-  .pipe(gulp.dest('./dist'));
-
-});
-
-gulp.task('minibus', function() {
-
-  var compact = true;
-
-  var descriptionNote = '/**\n' +
-  '* Minimal interface and implementation to send and receive messages. It can be reused in many type of components.\n' +
-  '* Components that need a message system should receive this class as a dependency or extend it.\n' +
-  '* Extensions should implement the following private methods: _onPostMessage and _registerExternalListener.\n' +
-  '*/\n';
-
-  return browserify({
-    entries: ['./src/minibus.js'],
-    standalone: 'MiniBus',
-    debug: false
-  })
-  .transform(babel, {
-    compact: compact,
-    presets: ['es2015', 'stage-0'],
-    plugins: ['add-module-exports', 'transform-runtime', 'transform-regenerator']
-  })
-  .bundle()
-  .on('error', function(err) {
-    console.error(err);
-    this.emit('end');
-  })
-  .pipe(source('minibus.js'))
-  .pipe(buffer())
-  .pipe(gulpif(compact, uglify()))
-  .pipe(gulpif(compact, insert.prepend(descriptionNote + '// version: {{version}}\n\n')))
-  .pipe(gulpif(compact, replace('{{version}}', pkg.version)))
-  .pipe(gulp.dest('./dist'));
-
-});
-
-gulp.task('sandbox', function() {
-
-  var descriptionNote = '/**\n' +
-  '* @author micaelpedrosa@gmail.com\n' +
-  '* Base class to implement external sandbox component\n' +
-  '*/\n\n';
-
-  var compact = true;
-
-  return browserify({
-    entries: ['./src/sandbox.js'],
-    standalone: 'sandbox',
-    debug: false
-  })
-  .transform(babel, {
-    compact: compact,
-    presets: ['es2015', 'stage-0'],
-    plugins: ['add-module-exports', 'transform-runtime', 'transform-regenerator']
-  })
-  .bundle()
-  .on('error', function(err) {
-    console.error(err);
-    this.emit('end');
-  })
-  .pipe(source('sandbox.js'))
-  .pipe(buffer())
-  .pipe(gulpif(compact, uglify()))
-  .pipe(gulpif(compact, insert.prepend(descriptionNote + '// version: {{version}}\n\n')))
-  .pipe(gulpif(compact, replace('{{version}}', pkg.version)))
-  .pipe(gulp.dest('./dist'));
-
-});
-
 /**
  * Make 3 distriution files
  * By default the compact mode is true;
  * How to use: gulp dist --compact false | true;
  */
-gulp.task('dist', ['runtime', 'minibus', 'sandbox']);
+gulp.task('dist', function() {
+
+  return gulp.src(['src/sandbox.js', 'src/minibus.js', 'src/runtime/RuntimeUA.js'])
+  .pipe(dist());
+
+});
+
+function dist(debug) {
+
+  if (!debug) debug = false;
+
+  return through.obj(function(file, enc, cb) {
+
+    if (file.isNull()) {
+      return cb(new Error('Fil is null'));
+    }
+
+    if (file.isStream()) {
+      return cb(new Error('Streaming not supported'));
+    }
+
+    var filename = path.basename(file.path, '.js');
+
+    var opts = {
+      configuration: {},
+      debug: false,
+      standalone: filename === 'RuntimeUA' ? 'Runtime' : filename,
+      destination: __dirname + '/dist'
+    };
+
+    gutil.log(gutil.colors.yellow('Make a distribution file from', filename + '.js'));
+
+    gulp.src([file.path])
+    .pipe(transpile(opts))
+    .pipe(mark())
+    .pipe(gulp.dest(__dirname + '/dist'))
+    .on('error', function(error) {
+      gutil.log(gutil.colors.red(error));
+    })
+    .on('end', function() {
+      gutil.log('> ' + gutil.colors.green('Distribution ') + gutil.colors.white(filename) + gutil.colors.green(' done!'));
+      cb();
+    });
+  });
+
+}
+
+function mark() {
+
+  return through.obj(function(file, enc, cb) {
+
+    var fileObject = path.parse(file.path);
+
+    gulp.src([file.path])
+    .pipe(insert.prepend(license + '// Distribution file for {{package}} \n// version: {{version}}\n// Last build: {{date}}\n\n'))
+    .pipe(replace('{{version}}', pkg.version))
+    .pipe(replace('{{package}}', fileObject.name + '.js'))
+    .pipe(replace('{{date}}', new Date()))
+    .pipe(gulp.dest(__dirname + '/dist'))
+    .on('end', function() {
+      cb();
+    });
+
+  });
+
+}
+
+function transpile(opts) {
+
+  return through.obj(function(file, enc, cb) {
+
+    var fileObject = path.parse(file.path);
+    var filename = fileObject.base === 'RuntimeUA.js' ? 'Runtime.js' : fileObject.base;
+    var args = {};
+
+    var environment = argv.production || process.env.NODE_ENV;
+    process.env.environment = environment ? 'production' : 'development';
+
+    args.entries = [file.path];
+    args.extensions = extensions;
+    if (opts.debug) args.debug = opts.debug;
+    if (opts.standalone) args.standalone = opts.standalone;
+
+    return browserify(args)
+    .transform(babel, {
+      compact: true,
+      presets: ['es2015', 'stage-0'],
+      plugins: ['add-module-exports', 'babel-polyfill', 'transform-runtime', 'transform-regenerator']
+    })
+    .bundle()
+    .on('error', function(err) {
+      gutil.log(gutil.colors.red(err));
+      this.emit('end');
+    })
+    .pipe(source(filename))
+    .pipe(buffer())
+    .pipe(sourcemaps.init({loadMaps: true}))
+    .pipe(uglify())
+    .pipe(sourcemaps.write('./'))
+    .pipe(gulp.dest(opts.destination))
+    .on('end', function() {
+      file.contents = fs.readFileSync(opts.destination + '/' + filename);
+      file.path = opts.destination + '/' + filename;
+      cb(null, file);
+    });
+
+  });
+
+}
 
 /**
  * Bumping version number and tagging the repository with it.
