@@ -41,9 +41,10 @@ class Registry extends EventEmitter {
   * @param  {MessageBus}          msgbus                msgbus
   * @param  {HypertyRuntimeURL}   runtimeURL            runtimeURL
   * @param  {AppSandbox}          appSandbox            appSandbox
+  * @param  {runtimeCatalogue}    runtimeCatalogue      runtimeCatalogue
   * @param  {DomainURL}           remoteRegistry        remoteRegistry
   */
-  constructor(runtimeURL, appSandbox, identityModule, remoteRegistry) {
+  constructor(runtimeURL, appSandbox, identityModule, runtimeCatalogue, remoteRegistry) {
 
     super();
 
@@ -61,6 +62,7 @@ class Registry extends EventEmitter {
     _this.registryURL = runtimeURL + '/registry/';
     _this.appSandbox = appSandbox;
     _this.runtimeURL = runtimeURL;
+    _this.runtimeCatalogue = runtimeCatalogue;
     _this.remoteRegistry = remoteRegistry;
     _this.idModule = identityModule;
     _this.identifier = Math.floor((Math.random() * 10000) + 1);
@@ -288,12 +290,12 @@ class Registry extends EventEmitter {
   * @param  {HypertyCatalogueURL} HypertyCatalogueURL   descriptor
   * @return {HypertyURL}          HypertyURL
   */
-  registerHyperty(sandbox, descriptor) {
+  registerHyperty(sandbox, descriptorURL, descriptor) {
     let _this = this;
 
     //assuming descriptor come in this format, the service-provider-domain url is retrieved by a split instruction
     //hyperty-catalogue://<service-provider-domain>/<catalogue-object-identifier>
-    let domainUrl = divideURL(descriptor).domain;
+    let domainUrl = divideURL(descriptorURL).domain;
 
     if (domainUrl.includes('catalogue')) {
       domainUrl = domainUrl.replace('catalogue.', '');
@@ -328,41 +330,49 @@ class Registry extends EventEmitter {
               });
 
               let hyperty = new HypertyInstance(_this.identifier, _this.registryURL,
-              descriptor, adderessList[0], userProfile);
+              descriptorURL, descriptor, adderessList[0], userProfile);
 
               _this.hypertiesList.push(hyperty);
 
               //check whether the received sanbox e ApplicationSandbox or a normal sandbox
               if (sandbox.type === 'app') {
                 _this.sandboxesList.appSandbox[adderessList[0]] = sandbox;
-
               } else if (sandbox.type === 'normal') {
-
                 _this.sandboxesList.sandbox[adderessList[0]] = sandbox;
               } else {
                 reject('Wrong SandboxType');
               }
 
-              let resourcesFake =  ['voice', 'chat']; //['voice', 'video', 'chat'];
-              let dataSchemesFake =  ['comm']; //['comm', 'call'];
+              let resources;
 
-              //message to register the new hyperty, within the domain registry
-              let messageValue = {user: identityURL,  hypertyDescriptorURL: descriptor, hypertyURL: adderessList[0], expires: _this.expiresTime, resources: resourcesFake, dataSchemes: dataSchemesFake};
+              // check if the hyperty resources is a vector or a string
+              // TODO delete later when catalogue is fixed
+              if (typeof (descriptor.hypertyType) === 'string') {
+                resources = [];
+                resources.push(descriptor.hypertyType);
+              } else {
+                resources = descriptor.hypertyType;
+              }
 
-              let message = _this.messageFactory.createCreateMessageRequest(
-                _this.registryURL,
-                'domain://registry.' + _this.registryDomain + '/',
-                messageValue,
-                'policy'
-              );
+              let descriptorDataSchema = descriptor.dataObjects;
+              let dataSchemasArray = [];
 
-              _this._messageBus.postMessage(message, (reply) => {
-                console.log('===> RegisterHyperty Reply: ', reply);
-              });
+              //this will create a array with a Promise in each position
+              for (let index in descriptorDataSchema) {
+                dataSchemasArray.push(_this.runtimeCatalogue.getDataSchemaDescriptor(descriptorDataSchema[index]));
+              }
 
-              //timer to keep the registration alive
-              // the time is defined by a little less than half of the expires time defined
-              let keepAliveTimer = setInterval(function() {
+              // as soon as the previous array is completed, this will wait for the resolve of all promises in the array
+              Promise.all(dataSchemasArray).then(function(dataSchemas) {
+
+                let filteredDataSchemas = [];
+                for (let index in dataSchemas) {
+                  let dataSchema = dataSchemas[index];
+                  filteredDataSchemas.push(dataSchema.sourcePackage.sourceCode.properties.scheme.constant);
+                }
+
+                //message to register the new hyperty, within the domain registry
+                let messageValue = {user: identityURL,  hypertyDescriptorURL: descriptorURL, hypertyURL: adderessList[0], expires: _this.expiresTime, resources: resources, dataSchemes: filteredDataSchemas};
 
                 let message = _this.messageFactory.createCreateMessageRequest(
                   _this.registryURL,
@@ -372,18 +382,36 @@ class Registry extends EventEmitter {
                 );
 
                 _this._messageBus.postMessage(message, (reply) => {
-                  console.log('===> KeepAlive Reply: ', reply);
+                  console.log('===> RegisterHyperty Reply: ', reply);
                 });
-              },(((_this.expiresTime / 1.1) / 2) * 1000));
 
-              resolve(adderessList[0]);
+                //timer to keep the registration alive
+                // the time is defined by a little less than half of the expires time defined
+                let keepAliveTimer = setInterval(function() {
+
+                  let message = _this.messageFactory.createCreateMessageRequest(
+                    _this.registryURL,
+                    'domain://registry.' + _this.registryDomain + '/',
+                    messageValue,
+                    'policy'
+                  );
+
+                  _this._messageBus.postMessage(message, (reply) => {
+                    console.log('===> KeepAlive Reply: ', reply);
+                  });
+                },(((_this.expiresTime / 1.1) / 2) * 1000));
+
+                console.log('Hyperty Schemas', filteredDataSchemas);
+                console.log('Hyperty resources', resources);
+
+                resolve(adderessList[0]);
+              });
+
+            }).catch(function(reason) {
+              console.log('Address Reason: ', reason);
+              reject(reason);
             });
-
-          }).catch(function(reason) {
-            console.log('Address Reason: ', reason);
-            reject(reason);
           });
-
         }
       }, function(err) {
         reject('Failed to obtain an identity');
