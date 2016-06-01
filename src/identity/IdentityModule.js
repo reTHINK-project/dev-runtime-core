@@ -73,11 +73,43 @@ class IdentityModule {
   /**
   * Function to return all the identities registered within a session by a user.
   * These identities are returned in an array containing a JSON package for each user identity.
-  * @return {Array<Identities>}         Array         Identities
+  * @return {Array<Identities>}         Identities
   */
   getIdentities() {
     let _this = this;
     return _this.identities;
+  }
+
+  /**
+  * Function to return the selected Identity within a session
+  * @return {Identity}        identity         identity
+  */
+  getCurrentIdentity() {
+    let _this = this;
+    return _this.currentIdentity;
+  }
+
+  /**
+  * Function to set the current Identity with a given Identity
+  * @param {Identity}        identity         identity
+  */
+  setCurrentIdentity(identity) {
+    let _this = this;
+    _this.currentIdentity = identity;
+  }
+
+  /**
+  * Function to remove the an identity from the Identities array
+  * @param {String}    userURL      userURL
+  */
+  deleteIdentity(userURL) {
+    let _this = this;
+
+    for (let identity in _this.identities) {
+      if (_this.identities[identity].identity === userURL) {
+        _this.identities.splice(identity, 1);
+      }
+    }
   }
 
   /**
@@ -93,10 +125,7 @@ class IdentityModule {
   }
 
   /**
-  * Function to request an ID Token from a user. If no token exists, the Identity Module
-  * will try to obtain one from an Identity Provider, and the user will be asked to authenticate
-  *  towards the Identity Provider.
-  * The function returns a promise with a token containing the user information.
+  * Function to login a user within the session, it will start the process to obtain an Identity from a user, including the request for an identity Assertion. The function returns a promise with the token received by the idpProxy.
   *
   * @param  {Identifier}      identifier      identifier
   * @param  {Scope}           scope           scope
@@ -106,7 +135,10 @@ class IdentityModule {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
-      _this.getIdentityAssertion().then(function(value) {
+
+      //TODO remove this verification and refactor this part
+      _this.currentIdentity = undefined;
+      _this.getIdentityAssertion('identifier', 'origin', 'hint', identifier).then(function(value) {
         console.log('loginWithRP');
         resolve(value);
       }, function(err) {
@@ -117,11 +149,11 @@ class IdentityModule {
   }
 
   /**
-  * Obtain an Identity Assertion
+  * Function that fetch an identityAssertion from a user.
   *
   * @return {IdAssertion}              IdAssertion
   */
-  getIdentityAssertion(identifier, origin, usernameHint, scope, idpDomain) {
+  getIdentityAssertion(identifier, origin, usernameHint, idpDomain) {
     let _this = this;
 
     return new Promise(function(resolve,reject) {
@@ -146,22 +178,24 @@ class IdentityModule {
 
           _this.generateAssertion('', origin, usernameHint, idpDomain).then(function(url) {
             _this.generateAssertion(url, origin, usernameHint, idpDomain).then(function(value) {
-              resolve(value);
+              if (value) {
+                resolve(value);
+              } else {
+                reject('Error on obtaining Identity');
+              }
             }, function(err) {
               reject(err);
             });
           }, function(error) {
             reject(error);
           });
-
         }
       }
-
     });
   }
 
   /**
-  * Generates an Identity Assertion
+  * Requests the IdpProxy from a given Domain for an identityAssertion
   *
   * @param  {DOMString} contents     contents
   * @param  {DOMString} origin       origin
@@ -185,36 +219,36 @@ class IdentityModule {
           //let msgOpenIframe = {type: 'execute', from: _this._idmURL, to: _this._runtimeURL + '/gui-manager', body: {method: 'unhideAdminPage'}};
 
           let win = window.open(result.loginUrl, 'openIDrequest', 'width=800, height=600');
-          if(window.cordova){
-              win.addEventListener('loadstart', function(e){
-                var url = e.url
-                var code = /\&code=(.+)$/.exec(url)
-                var error = /\&error=(.+)$/.exec(url)
-              
-                if(code || error){
-                    win.close()
-                    resolve(url)
-                }
-              })
+          if (window.cordova) {
+            win.addEventListener('loadstart', function(e){
+              let url = e.url;
+              let code = /\&code=(.+)$/.exec(url);
+              let error = /\&error=(.+)$/.exec(url);
+
+              if (code || error) {
+                win.close();
+                resolve(url);
+              }
+            });
           } else {
-              let pollTimer = setInterval(function() {
-                try {
-                  if (win.closed) {
-                    reject('Some error occured when trying to get identity.');
-                    clearInterval(pollTimer);
-                  }
-
-                  if (win.document.URL.indexOf('id_token') !== -1 || win.document.URL.indexOf(location.origin) !== -1) {
-                    window.clearInterval(pollTimer);
-                    let url =   win.document.URL;
-
-                    win.close();
-                    resolve(url);
-                  }
-                } catch (e) {
-                  //console.log(e);
+            let pollTimer = setInterval(function() {
+              try {
+                if (win.closed) {
+                  reject('Some error occured when trying to get identity.');
+                  clearInterval(pollTimer);
                 }
-              }, 500);
+
+                if (win.document.URL.indexOf('id_token') !== -1 || win.document.URL.indexOf(location.origin) !== -1) {
+                  window.clearInterval(pollTimer);
+                  let url =   win.document.URL;
+
+                  win.close();
+                  resolve(url);
+                }
+              } catch (e) {
+                //console.log(e);
+              }
+            }, 500);
           }
         } else if (result) {
 
@@ -233,8 +267,12 @@ class IdentityModule {
 
             _this.identity.addIdentity(result);
 
+            // check if exists any infoToken in the result received
+            let infoToken = (result.infoToken) ? result.infoToken : {};
+            let userProfileBundle = {username: idToken.email, cn: idToken.name, avatar: infoToken.picture, locale: infoToken.locale, userURL: getUserURLFromEmail(idToken.email)};
+
             //creation of a new JSON with the identity to send via messages
-            let newIdentity = {userProfile: {username: idToken.email, cn: idToken.name}, idp: result.idp.domain, assertion: result.assertion, email: idToken.email, identity: result.identity, infoToken: idToken};
+            let newIdentity = {userProfile: userProfileBundle, idp: result.idp.domain, assertion: result.assertion, email: idToken.email, identity: result.identity, idToken: idToken, infoToken: infoToken};
             result.messageInfo = newIdentity;
 
             _this.currentIdentity = newIdentity;
@@ -255,7 +293,7 @@ class IdentityModule {
   */
 
   /**
-  * Function to validate an identity assertion generated previously.
+  * Requests the IdpProxy from a given Domain to validate an IdentityAssertion
   * Returns a promise with the result from the validation.
   * @param  {DOMString} assertion
   * @param  {DOMString} origin       origin
@@ -278,6 +316,14 @@ class IdentityModule {
         }
       });
     });
+  }
+
+  /**
+  * Function that encrypts the messages to send and decrypts and validate the messages received.
+  * In case there is no session key established between the two users from the message, this function will start the communication with the other user acquire a session key.
+  **/
+  validateMessage(message) {
+    console.log(message);
   }
 
 }

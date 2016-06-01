@@ -1,3 +1,7 @@
+//jshint browser:true, jquery: true
+
+import persistenceManager from '../persistence/PersistenceManager';
+import {divideURL} from '../utils/utils';
 import PEP from './PEP';
 import PDP from './PDP';
 
@@ -12,18 +16,100 @@ class PolicyEngine {
   * Point (PDP) and a Policy Enforcement Point (PEP) are initialised for the evaluation of policies
   * and the enforcement of additional actions, respectively. Adds a listener do the Message Bus to
   * allow method invokation.
-  * @param  {MessageBus}        messageBus
   * @param  {IdentityModule}    identityModule
   * @param  {Registry}          runtimeRegistry
   */
-  constructor(messageBus, identityModule, runtimeRegistry) {
+  constructor(identityModule, runtimeRegistry) {
     let _this = this;
-    _this.messageBus = messageBus;
-    _this.idModule = identityModule;
-    _this.objectsReporters = {};
+    _this.isRuntimeCore = (identityModule & runtimeRegistry) === 0;
     _this.pdp = new PDP(runtimeRegistry);
     _this.pep = new PEP();
-    _this.policies = {};
+    _this.idModule = identityModule;
+    _this.policies = _this.loadPolicies();
+  }
+
+  loadPolicies() {
+    //let _this = this;
+    persistenceManager.delete('policies');
+    let myPolicies = persistenceManager.get('policies');
+
+    /*if (myPolicies === undefined) {
+      let subscriptionPolicy = {
+        scope: 'application',
+        condition: 'subscription equals *',
+        authorise: true,
+        actions: []
+      };
+      _this.addPolicies([subscriptionPolicy]);
+      myPolicies = persistenceManager.get('policies');
+    }*/
+    return myPolicies;
+  }
+
+  /**
+  * Associates the given policies with a scope. The possible scopes are 'application', 'hyperty' and
+  * 'user'.
+  * @param  {Policy[]}  policies
+  * @param  {String}    scope
+  */
+  addPolicies(newPolicies) {
+    let _this = this;
+    let myPolicies = persistenceManager.get('policies');
+    if (myPolicies === undefined) {
+      myPolicies = {};
+    }
+
+    for (let i in newPolicies) {
+      let newPolicy = newPolicies[i];
+      let scope = newPolicy.scope;
+      if (myPolicies[scope] === undefined) {
+        myPolicies[scope] = [];
+      }
+      for (let j in myPolicies[scope]) {
+        let existingPolicy = myPolicies[scope][j];
+        if (existingPolicy.condition === newPolicy.condition) {
+          _this.removePolicies(newPolicies[i].condition);
+          break;
+        }
+      }
+      myPolicies[scope].push(newPolicies[i]);
+    }
+    persistenceManager.set('policies', 0, myPolicies);
+    _this.policies = myPolicies;
+  }
+
+  /**
+  * Removes the policy with the given ID from the given scope. If policyID is '*', removes all policies associated with the given scope.
+  * @param  {String}  policyID
+  * @param  {String}  scope
+  */
+  removePolicies(condition, scope) {
+    let _this = this;
+    let myPolicies = persistenceManager.get('policies');
+
+    if (scope !== '*') {
+
+      if (scope in myPolicies) {
+        if (condition !== '*') {
+          let policies = myPolicies[scope];
+          for (let i in policies) {
+            if (policies[i].condition === condition) {
+              policies.splice(condition, 1);
+
+              break;
+            }
+          }
+        } else {
+          delete myPolicies[scope];
+        }
+        persistenceManager.set('policies', 0, myPolicies);
+        _this.policies = myPolicies;
+      }
+
+    } else {
+      persistenceManager.delete('policies');
+      _this.policies = {};
+    }
   }
 
   /**
@@ -42,31 +128,37 @@ class PolicyEngine {
       console.log('--- Policy Engine ---');
       console.log(message);
       message.body = message.body || {};
-      let initialResultOk = _this.followsIntrinsicBehaviour(message);
-      if (initialResultOk === undefined) {
-        _this.idModule.getIdentityAssertion().then(identity => {
-          message.body.identity = message.body.identity || identity;
 
-          let scope = _this.getScope(message);
-          let applicablePolicies = _this.getApplicablePolicies(scope);
-          let policiesResult = _this.pdp.evaluate(message, applicablePolicies);
-          _this.pep.enforce(policiesResult[1]);
-          if (policiesResult[0]) {
-            message.body.auth = true;
-            resolve(message);
-          } else {
-            message.body.auth = false;
-            reject('Unauthorised message');
-          }
-        }, function(error) {
-          reject(error);
-        });
-      } else {
-        if (initialResultOk) {
-          message.body.auth = true;
+      let initialResultOk = _this.followsExpectedBehaviour(message);
+      if (initialResultOk === undefined) {
+        if (_this.isRuntimeCore) {
+          _this.idModule.getIdentityAssertion().then(identity => {
+            message.body.identity = message.body.identity || identity;
+          }, function(error) {
+            reject(error);
+          });
+        } else {
+
+          //TODO: obtain the identity from Domain Registry
+          console.log('obtain the identity from Domain Registry');
+        }
+
+        //let scope = _this.getScope(message);
+        let applicablePolicies = _this.getApplicablePolicies('*');
+        let policiesResult = _this.pdp.evaluate(message, applicablePolicies);
+        _this.pep.enforce(policiesResult[1]);
+
+        if (policiesResult[0]) {
+          message.body.auth = applicablePolicies.length !== 0;
           resolve(message);
         } else {
-          message.body.auth = false;
+          reject('Unauthorised message');
+        }
+
+      } else {
+        if (initialResultOk) {
+          resolve(message);
+        } else {
           reject('Intrinsic behaviour was not respected');
         }
       }
@@ -77,118 +169,26 @@ class PolicyEngine {
   * IdProxy / IdModule
   *   (1) Messages from the IDP Proxy must go to the ID Module.
   *   (2) Messages to the IDP Proxy must come from the ID Module.
+  *   (3) Messages from the GUI must go to the ID Module.
+  *   (4) Messages to the GUI must come from the ID Module.
   *
   * DataObjects
-  *   (3) Creation stores the object URL and its reporter's URL
-  *   (4) Subscription stores the object URL and its reporter's URL
   *   (5) Updates must come from reporters
   */
-  followsIntrinsicBehaviour(message) {
+  followsExpectedBehaviour(message) {
     let _this = this;
 
-    let idpURL = 'domain-idp://';
+    let idpScheme = 'domain-idp';
     let idmURL = _this.pdp.runtimeRegistry.runtimeURL + '/idm';
 
     /* (1) */
-    if (message.from.includes(idpURL)) {
+    if (divideURL(message.from).type === idpScheme) {
       return message.to === idmURL;
     }
 
     /* (2) */
-    if (message.to.includes(idpURL)) {
+    if (divideURL(message.to).type === idpScheme) {
       return message.from === idmURL;
-    }
-
-    /* (3) */
-    let isResponse = message.type === 'response';
-    let isFromSM = String(message.from.split('/').slice(-1)[0]) === 'sm';
-    let objectURL = message.body.resource;
-    if (isResponse && isFromSM && objectURL !== undefined) {
-      let reporterURL = message.to;
-      _this.addObject(objectURL, reporterURL);
-      return true;
-    }
-
-    //TODO uncomment and try to solve the problem
-    /* (4) */
-    /*if (message.type === 'create' && String(message.from.split('/').slice(-1)[0]) === 'subscription') {
-      //if (String(message.from.split('/').slice(-1)[0]) === 'subscription') {
-          console.log('15 - PE');
-      let objectURL = message.from.substring(0, message.from.length - 13);
-      let reporterURL = message.body.value.reporter;
-
-      console.log('reporterURL', reporterURL);      //let reporterURL = message.body.value.data.communication.owner;
-
-      _this.addObject(objectURL, reporterURL);
-
-      return true;
-    }*/
-
-    /* (5) */
-    /*
-    if (message.type === 'update' && message.to === message.from + '/changes') {
-      let objectURL = message.from;
-      let hypertyURL = message.body.source;
-      if (_this.objectsReporters[objectURL] === hypertyURL) {
-        return true;
-      } else {
-        return false;
-      }
-    }*/
-  }
-
-  addObject(objectURL, reporterURL) {
-    let _this = this;
-    _this.objectsReporters[objectURL] = reporterURL;
-  }
-
-  /**
-  * Associates the given policies with a scope. The possible scopes are 'application', 'hyperty' and
-  * 'user'.
-  * @param  {Policy[]}  policies
-  * @param  {String}    scope
-  */
-  addPolicies(policies) {
-    let _this = this;
-    for (let i in policies) {
-      let newPolicy = policies[i];
-      let scope = newPolicy.scope;
-      if (_this.policies[scope] === undefined) {
-        _this.policies[scope] = [];
-      }
-      for (let j in _this.policies[scope]) {
-        let existingPolicy = _this.policies[scope][j];
-        if (existingPolicy.condition === newPolicy.condition && existingPolicy.authorise === newPolicy.authorise) {
-          _this.removePolicies(policies[i].condition);
-          break;
-        }
-      }
-      _this.policies[scope].push(policies[i]);
-    }
-  }
-
-  /**
-  * Removes the policy with the given ID from the given scope. If policyID is '*', removes all policies associated with the given scope.
-  * @param  {String}  policyID
-  * @param  {String}  scope
-  */
-  removePolicies(condition, scope) {
-    let _this = this;
-    let allPolicies = _this.policies;
-
-    if (scope in allPolicies) {
-      if (condition !== '*') {
-        let policies = allPolicies[scope];
-
-        for (let i in policies) {
-          if (policies[i].condition === condition) {
-            policies.splice(condition, 1);
-            break;
-          }
-        }
-      } else {
-        delete _this.policies[scope];
-      }
     }
   }
 
@@ -202,9 +202,9 @@ class PolicyEngine {
   * @param  {String}  groupName
   * @return {Array}   group
   */
-  getGroup(groupName) {
+  getList(groupName) {
     let _this = this;
-    return _this.pdp.getGroup(groupName);
+    return _this.pdp.getList(groupName);
   }
 
   /**
@@ -216,9 +216,9 @@ class PolicyEngine {
     _this.pdp.createGroup(groupName);
   }
 
-  removeGroup(groupName) {
+  deleteGroup(groupName) {
     let _this = this;
-    _this.pdp.removeGroup(groupName);
+    _this.pdp.deleteGroup(groupName);
 
     let policies = _this.policies.user;
     for (let i in policies) {
@@ -309,10 +309,26 @@ class PolicyEngine {
   * Returns the scope of the given message to restrict policy applicability.
   * @return {String} scope
   */
-  getScope(message) {
+  /*getScope(message) {
+    let _this = this;
     let scope = 'user';
+    if (message.type === 'subscribe') {
+      let runtimeURL = _this.pdp.runtimeRegistry.runtimeURL;
+      if (runtimeURL + '/sm' !== message.from) { // needed for the verification to be done in the reporter's policy engine and not in the subscriber's
+        let isFromSM = String(message.from.split('/').slice(-1)[0]) === 'sm';
+        let originRuntimeURLSplit = message.from.split('/');
+        originRuntimeURLSplit.splice(-1);
+        let originRuntimeURL = originRuntimeURLSplit.join(originRuntimeURLSplit);
+        let isThisRuntime = originRuntimeURL === runtimeURL;
+        let isToSubscription = String(message.to.split('/').slice(-1)[0]) === 'subscription';
+        if (isFromSM && !isThisRuntime && isToSubscription) {
+          scope = 'subscribe';
+        }
+      }
+    }
+
     return scope;
-  }
+  }*/
 
   /**
   * Returns the policies associated with a scope.
@@ -334,6 +350,7 @@ class PolicyEngine {
     }
     return policies;
   }
+
 }
 
 export default PolicyEngine;

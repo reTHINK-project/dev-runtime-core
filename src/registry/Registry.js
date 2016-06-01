@@ -26,7 +26,10 @@ import ObjectAllocation from '../syncher/ObjectAllocation';
 import HypertyInstance from './HypertyInstance';
 
 import {MessageFactory} from 'service-framework/dist/MessageFactory';
-import {divideURL, getUserEmailFromURL} from '../utils/utils.js';
+import {divideURL} from '../utils/utils.js';
+
+/*import IdentityManager from './IdentityManager';
+import Discovery from './Discovery';*/
 
 /**
 * Runtime Registry Interface
@@ -97,6 +100,15 @@ class Registry extends EventEmitter {
     let _this = this;
     _this._messageBus = messageBus;
 
+    _this._messageBus.addListener(_this.registryURL, function(msg) {
+
+      let userUrl = _this._getIdentityAssociated(msg.body.resource, msg.from);
+
+      let reply = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: {resource: userUrl}};
+
+      _this._messageBus.postMessage(reply);
+    });
+
     // also set up messageBus in the IdentityModule component
     // TODO redefine a better way to add the messageBus in the IdModule
     _this.idModule.messageBus = messageBus;
@@ -108,6 +120,39 @@ class Registry extends EventEmitter {
     //Install ObjectAllocation
     let objectAllocation = new ObjectAllocation(_this.registryURL + '/object-allocation', messageBus);
     _this.objectAllocation = objectAllocation;
+
+    /*let discovery = new Discovery(_this.registryURL, messageBus);
+    _this.discovery = discovery;
+
+    let identityManager = new IdentityManager('hyperty://localhost/833a6e52-515b-498b-a57b-e3daeece48d2', _this.runtimeURL, messageBus);
+    _this.identityManager = identityManager;*/
+  }
+
+  _getIdentityAssociated(type, hypertyURL) {
+    let _this = this;
+
+    for (let hyperty in _this.hypertiesList) {
+      let value = _this.hypertiesList[hyperty];
+      if (value._hypertyURL === hypertyURL) {
+        switch (type) {
+          case 'username':
+            return value._user.username;
+          case 'cn':
+            return value._user.cn;
+          case 'locale':
+            return value._user.locale;
+          case 'avatar':
+            return value._user.avatar;
+          case 'userURL':
+            return value._user.userURL;
+          case '.':
+            return value._user;
+          default:
+            return 'No information could be found';
+        }
+      }
+    }
+    return 'no identity found';
   }
 
   /**
@@ -116,96 +161,6 @@ class Registry extends EventEmitter {
   getAppSandbox() {
     let _this = this;
     return _this.appSandbox;
-  }
-
-  /**
-  * Function to query the Domain registry, with an user email.
-  * @param    {string}      identifier      user identifier
-  * @return  {string}       hypertyURL      the last hypertyURL allocated to the user identifier
-  */
-  getUserHyperty(identifier) {
-    let _this = this;
-    let identityURL;
-    let email;
-    if (identifier.indexOf('@') > -1) {
-      identityURL = 'user://' + identifier.substring(identifier.indexOf('@') + 1, identifier.length) + '/' + identifier.substring(0, identifier.indexOf('@'));
-      email = identifier;
-    } else {
-      identityURL = identifier;
-      email = getUserEmailFromURL(identifier);
-    }
-    let msg = {
-      type: 'read', from: _this.registryURL, to: 'domain://registry.' + _this._domain + '/', body: { resource: identityURL}
-    };
-
-    return new Promise(function(resolve, reject) {
-
-      _this._messageBus.postMessage(msg, (reply) => {
-        //console.log('MESSAGE', reply);
-
-        let hyperty;
-        let mostRecent;
-        let lastHyperty;
-        let value = reply.body.value;
-        console.log('reply', value);
-        for (hyperty in value) {
-          if (value[hyperty].lastModified !== undefined) {
-            if (mostRecent === undefined) {
-              mostRecent = new Date(value[hyperty].lastModified);
-              lastHyperty = hyperty;
-            } else {
-              let hypertyDate = new Date(value[hyperty].lastModified);
-              if (mostRecent.getTime() < hypertyDate.getTime()) {
-                mostRecent = hypertyDate;
-                lastHyperty = hyperty;
-              }
-            }
-          }
-
-        }
-        let hypertyURL = lastHyperty;
-
-        if (hypertyURL === undefined) {
-          return reject('User Hyperty not found');
-        }
-
-        let idPackage = {
-          id: email,
-          descriptor: value[hypertyURL].descriptor,
-          hypertyURL: hypertyURL
-        };
-
-        console.log('===> RegisterHyperty messageBundle: ', idPackage);
-        resolve(idPackage);
-      });
-    });
-  }
-
-  /**
-  * Function to query the Domain registry, with an user email.
-  * @param    {string}      identifier      user identifier
-  * @return  {string}       dataObjectURL      the last dataObjectURL allocated to the object identifier
-  */
-  getDataObject(identifier) {
-    let _this = this;
-
-    let msg = {
-      type: 'read', from: _this.registryURL, to: 'domain://registry.' + _this._domain + '/', body: { resource: 'dataObject://' + identifier}
-    };
-
-    return new Promise(function(resolve, reject) {
-
-      _this._messageBus.postMessage(msg, (reply) => {
-
-        let dataObjectUrl = reply.body.value.url;
-
-        if (dataObjectUrl) {
-          resolve(dataObjectUrl);
-        } else {
-          reject('DataObject name does not exist');
-        }
-      });
-    });
   }
 
   /**
@@ -221,6 +176,20 @@ class Registry extends EventEmitter {
     return new Promise(function(resolve, reject) {
       if (dataObject) {
         resolve(dataObject.reporter);
+      } else {
+        reject('No reporter was found');
+      }
+    });
+  }
+
+  getPreAuthSubscribers(dataObjectURL) {
+    let _this = this;
+
+    let dataObject = _this.dataObjectList[dataObjectURL];
+
+    return new Promise(function(resolve, reject) {
+      if (dataObject) {
+        resolve(dataObject.preAuth);
       } else {
         reject('No reporter was found');
       }
@@ -284,13 +253,13 @@ class Registry extends EventEmitter {
   * @param  {String}      dataObjectUrl        dataObjectUrl
   * @return {String}      dataObjectReporter         dataObjectReporter
   */
-  registerDataObject(identifier, dataObjectschema, dataObjectUrl, dataObjectReporter) {
+  registerDataObject(identifier, dataObjectschema, dataObjectUrl, dataObjectReporter, authorise) {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
 
       //message to register the new hyperty, within the domain registry
-      let messageValue = {name: identifier, schema: dataObjectschema, url: dataObjectUrl, expires: _this.expiresTime, reporter: dataObjectReporter};
+      let messageValue = {name: identifier, schema: dataObjectschema, url: dataObjectUrl, expires: _this.expiresTime, reporter: dataObjectReporter, preAuth: authorise};
 
       _this.dataObjectList[dataObjectUrl] = messageValue;
 
@@ -332,9 +301,9 @@ class Registry extends EventEmitter {
 
     return new Promise(function(resolve, reject) {
 
-      _this.idModule.loginWithRP('google', 'me').then(function(result) {
-        let email = result.email;
-        let identityURL = 'user://' + email.substring(email.indexOf('@') + 1, email.length) + '/' + email.substring(0, email.indexOf('@'));
+      _this.idModule.getIdentityAssertion().then(function(result) {
+        let userProfile = result.userProfile;
+        let identityURL = userProfile.userURL;
 
         if (_this._messageBus === undefined) {
           reject('MessageBus not found on registerStub');
@@ -359,7 +328,7 @@ class Registry extends EventEmitter {
               });
 
               let hyperty = new HypertyInstance(_this.identifier, _this.registryURL,
-              descriptor, adderessList[0], identityURL);
+              descriptor, adderessList[0], userProfile);
 
               _this.hypertiesList.push(hyperty);
 
