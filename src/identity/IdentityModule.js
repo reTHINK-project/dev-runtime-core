@@ -189,10 +189,8 @@ class IdentityModule {
           }, function(error) {
             reject(error);
           });
-
         }
       }
-
     });
   }
 
@@ -221,26 +219,37 @@ class IdentityModule {
           //let msgOpenIframe = {type: 'execute', from: _this._idmURL, to: _this._runtimeURL + '/gui-manager', body: {method: 'unhideAdminPage'}};
 
           let win = window.open(result.loginUrl, 'openIDrequest', 'width=800, height=600');
-          let pollTimer = setInterval(function() {
-            try {
+          if (window.cordova) {
+            win.addEventListener('loadstart', function(e){
+              let url = e.url;
+              let code = /\&code=(.+)$/.exec(url);
+              let error = /\&error=(.+)$/.exec(url);
 
-              if (win.closed) {
-                resolve(undefined);
-                clearInterval(pollTimer);
-              }
-
-              if (win.document.URL.indexOf('id_token') !== -1 || win.document.URL.indexOf(location.origin) !== -1) {
-                window.clearInterval(pollTimer);
-                let url =   win.document.URL;
-
+              if (code || error) {
                 win.close();
                 resolve(url);
               }
-            } catch (e) {
-              //console.log(e);
-            }
-          }, 500);
+            });
+          } else {
+            let pollTimer = setInterval(function() {
+              try {
+                if (win.closed) {
+                  reject('Some error occured when trying to get identity.');
+                  clearInterval(pollTimer);
+                }
 
+                if (win.document.URL.indexOf('id_token') !== -1 || win.document.URL.indexOf(location.origin) !== -1) {
+                  window.clearInterval(pollTimer);
+                  let url =   win.document.URL;
+
+                  win.close();
+                  resolve(url);
+                }
+              } catch (e) {
+                //console.log(e);
+              }
+            }, 500);
+          }
         } else if (result) {
 
           let assertionParsed = JSON.parse(atob(result.assertion));
