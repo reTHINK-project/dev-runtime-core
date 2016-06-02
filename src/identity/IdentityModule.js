@@ -40,7 +40,8 @@ class IdentityModule {
 
     if (!runtimeURL) throw new Error('runtimeURL is missing.');
 
-    _this._runtimeURL = runtimeURL + '/idm';
+    _this._runtimeURL = runtimeURL;
+    _this._idmURL = runtimeURL + '/idm';
 
     _this._domain = divideURL(_this._runtimeURL).domain;
 
@@ -72,11 +73,43 @@ class IdentityModule {
   /**
   * Function to return all the identities registered within a session by a user.
   * These identities are returned in an array containing a JSON package for each user identity.
-  * @return {Array<Identities>}         Array         Identities
+  * @return {Array<Identities>}         Identities
   */
   getIdentities() {
     let _this = this;
     return _this.identities;
+  }
+
+  /**
+  * Function to return the selected Identity within a session
+  * @return {Identity}        identity         identity
+  */
+  getCurrentIdentity() {
+    let _this = this;
+    return _this.currentIdentity;
+  }
+
+  /**
+  * Function to set the current Identity with a given Identity
+  * @param {Identity}        identity         identity
+  */
+  setCurrentIdentity(identity) {
+    let _this = this;
+    _this.currentIdentity = identity;
+  }
+
+  /**
+  * Function to remove the an identity from the Identities array
+  * @param {String}    userURL      userURL
+  */
+  deleteIdentity(userURL) {
+    let _this = this;
+
+    for (let identity in _this.identities) {
+      if (_this.identities[identity].identity === userURL) {
+        _this.identities.splice(identity, 1);
+      }
+    }
   }
 
   /**
@@ -92,10 +125,7 @@ class IdentityModule {
   }
 
   /**
-  * Function to request an ID Token from a user. If no token exists, the Identity Module
-  * will try to obtain one from an Identity Provider, and the user will be asked to authenticate
-  *  towards the Identity Provider.
-  * The function returns a promise with a token containing the user information.
+  * Function to login a user within the session, it will start the process to obtain an Identity from a user, including the request for an identity Assertion. The function returns a promise with the token received by the idpProxy.
   *
   * @param  {Identifier}      identifier      identifier
   * @param  {Scope}           scope           scope
@@ -105,7 +135,10 @@ class IdentityModule {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
-      _this.getIdentityAssertion().then(function(value) {
+
+      //TODO remove this verification and refactor this part
+      _this.currentIdentity = undefined;
+      _this.getIdentityAssertion('identifier', 'origin', 'hint', identifier).then(function(value) {
         console.log('loginWithRP');
         resolve(value);
       }, function(err) {
@@ -116,11 +149,11 @@ class IdentityModule {
   }
 
   /**
-  * Obtain an Identity Assertion
+  * Function that fetch an identityAssertion from a user.
   *
   * @return {IdAssertion}              IdAssertion
   */
-  getIdentityAssertion(identifier, origin, usernameHint, scope, idpDomain) {
+  getIdentityAssertion(identifier, origin, usernameHint, idpDomain) {
     let _this = this;
 
     return new Promise(function(resolve,reject) {
@@ -145,22 +178,24 @@ class IdentityModule {
 
           _this.generateAssertion('', origin, usernameHint, idpDomain).then(function(url) {
             _this.generateAssertion(url, origin, usernameHint, idpDomain).then(function(value) {
-              resolve(value);
+              if (value) {
+                resolve(value);
+              } else {
+                reject('Error on obtaining Identity');
+              }
             }, function(err) {
               reject(err);
             });
           }, function(error) {
             reject(error);
           });
-
         }
       }
-
     });
   }
 
   /**
-  * Generates an Identity Assertion
+  * Requests the IdpProxy from a given Domain for an identityAssertion
   *
   * @param  {DOMString} contents     contents
   * @param  {DOMString} origin       origin
@@ -174,61 +209,40 @@ class IdentityModule {
 
     return new Promise(function(resolve,reject) {
 
-      if (contents) {
-        message = {type:'execute', to: domain, from: _this._runtimeURL, body: {resource: 'identity', method: 'generateAssertion',
-               params: {contents: contents, origin: origin, usernameHint: usernameHint}}};
+      message = {type:'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'generateAssertion', params: {contents: contents, origin: origin, usernameHint: usernameHint}}};
 
-        _this._messageBus.postMessage(message, (res) => {
-          let result = res.body.value;
+      _this._messageBus.postMessage(message, (res) => {
+        let result = res.body.value;
 
-          if (result) {
-            result.identity = getUserURLFromEmail(result.info.email);
+        if (result.loginUrl) {
 
-            _this.identity.addIdentity(result);
+          //let msgOpenIframe = {type: 'execute', from: _this._idmURL, to: _this._runtimeURL + '/gui-manager', body: {method: 'unhideAdminPage'}};
 
-            //creation of a new JSON with the identity to send via messages
-            let newIdentity = {userProfile: {username: result.info.email, cn: result.infoToken.name}, idp: result.idp.domain, assertion: result.assertion, email: result.info.email, identity: result.identity, infoToken: result.infoToken};
-            result.messageInfo = newIdentity;
+          let win = window.open(result.loginUrl, 'openIDrequest', 'width=800, height=600');
+          if (window.cordova) {
+            win.addEventListener('loadstart', function(e){
+              let url = e.url;
+              let code = /\&code=(.+)$/.exec(url);
+              let error = /\&error=(.+)$/.exec(url);
 
-            _this.currentIdentity = newIdentity;
-            _this.identities.push(result);
-            resolve(newIdentity);
+              if (code || error) {
+                win.close();
+                resolve(url);
+              }
+            });
           } else {
-            reject('error on obtaining identity information');
-          }
-
-        });
-      } else {
-
-        message = {type:'execute', to: domain, from: _this._runtimeURL, body: {resource: 'identity', method: 'generateAssertion',
-        params: {contents: '', origin: origin, usernameHint: usernameHint}}};
-        _this._messageBus.postMessage(message, (result) => {
-
-          let urlToOpen = result.body.value.loginUrl;
-
-          if (!urlToOpen) {
-            return reject('Error: Invalid URL to obtain Identity');
-          } else {
-
-            //var msgOpenIframe = {type: 'execute', from: _this._runtimeURL, to: ''}
-
-            //Open a window with the URL received by the proxy
-            //TODO later swap any existing redirectURI in the url, for a specific one in the idModule
-            let win = window.open(urlToOpen, 'openIDrequest', 'width=800, height=600');
             let pollTimer = setInterval(function() {
               try {
-
                 if (win.closed) {
-                  reject('Some error occured.');
+                  reject('Some error occured when trying to get identity.');
                   clearInterval(pollTimer);
                 }
 
-                if (win.document.URL.indexOf('REDIRECT') !== -1 || win.document.URL.indexOf(location.origin) !== -1) {
+                if (win.document.URL.indexOf('id_token') !== -1 || win.document.URL.indexOf(location.origin) !== -1) {
                   window.clearInterval(pollTimer);
                   let url =   win.document.URL;
 
                   win.close();
-
                   resolve(url);
                 }
               } catch (e) {
@@ -236,9 +250,42 @@ class IdentityModule {
               }
             }, 500);
           }
-        });
-      }}
-    );
+        } else if (result) {
+
+          let assertionParsed = JSON.parse(atob(result.assertion));
+          let idToken;
+
+          //TODO remove the verification and remove the tokenIDJSON from the google idpProxy;
+          if (assertionParsed.tokenIDJSON) {
+            idToken = assertionParsed.tokenIDJSON;
+          } else {
+            idToken = assertionParsed;
+          }
+
+          if (idToken) {
+            result.identity = getUserURLFromEmail(idToken.email);
+
+            _this.identity.addIdentity(result);
+
+            // check if exists any infoToken in the result received
+            let infoToken = (result.infoToken) ? result.infoToken : {};
+            let userProfileBundle = {username: idToken.email, cn: idToken.name, avatar: infoToken.picture, locale: infoToken.locale, userURL: getUserURLFromEmail(idToken.email)};
+
+            //creation of a new JSON with the identity to send via messages
+            let newIdentity = {userProfile: userProfileBundle, idp: result.idp.domain, assertion: result.assertion, email: idToken.email, identity: result.identity, idToken: idToken, infoToken: infoToken};
+            result.messageInfo = newIdentity;
+
+            _this.currentIdentity = newIdentity;
+            _this.identities.push(result);
+            resolve(newIdentity);
+
+          }
+        } else {
+          reject('error on obtaining identity information');
+        }
+
+      });
+    });
   }
 
   /**
@@ -246,7 +293,7 @@ class IdentityModule {
   */
 
   /**
-  * Function to validate an identity assertion generated previously.
+  * Requests the IdpProxy from a given Domain to validate an IdentityAssertion
   * Returns a promise with the result from the validation.
   * @param  {DOMString} assertion
   * @param  {DOMString} origin       origin
@@ -257,7 +304,7 @@ class IdentityModule {
 
     let domain = _this._resolveDomain(idpDomain);
 
-    let message = {type:'EXECUTE', to: domain, from: _this._runtimeURL, body: {resource: 'identity', method: 'validateAssertion',
+    let message = {type:'EXECUTE', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'validateAssertion',
            params: {assertion: assertion, origin: origin}}};
 
     return new Promise(function(resolve, reject) {
@@ -269,6 +316,14 @@ class IdentityModule {
         }
       });
     });
+  }
+
+  /**
+  * Function that encrypts the messages to send and decrypts and validate the messages received.
+  * In case there is no session key established between the two users from the message, this function will start the communication with the other user acquire a session key.
+  **/
+  validateMessage(message) {
+    console.log(message);
   }
 
 }
