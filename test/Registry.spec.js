@@ -30,8 +30,17 @@ let identityModule = {
   }
 };
 
+let runtimeCatalogue = {
+  getDataSchemaDescriptor: () => {
+    return new Promise(function(resolve, reject) {
+      let dataschema = {sourcePackage: {sourceCode: {properties: {scheme: {constant: 'value'}}}}};
+      resolve(dataschema);
+    });
+  }
+};
+
 let getRegistry = new Promise(function(resolve) {
-  let registry = new Registry(runtimeURL, appSandbox, identityModule);
+  let registry = new Registry(runtimeURL, appSandbox, identityModule, runtimeCatalogue);
   resolve(registry);
 });
 
@@ -104,11 +113,15 @@ getRegistry.then(function(registry) {
       });
     });
 
-    describe('registerHyperty(sandbox, descriptor)', function() {
+    describe('registerHyperty(sandbox, descriptorURL, descriptor)', function() {
 
       it('should register an Hyperty', function(done) {
 
-        let descriptor = 'hyperty-catalogue://ua.pt/<catalogue-object-identifier>';
+        let descriptorURL = 'hyperty-catalogue://ua.pt/<catalogue-object-identifier>';
+        let descriptor = {
+          dataObjects: ['url'],
+          hypertyType: ['comm']
+        };
 
         registry.messageBus.addListener('domain://msg-node.ua.pt/hyperty-address-allocation', (msg) => {
           let message = {id: 1, type: 'response', from: 'domain://msg-node.ua.pt/hyperty-address-allocation', to: msg.from,
@@ -119,7 +132,7 @@ getRegistry.then(function(registry) {
           });
         });
 
-        expect(registry.registerHyperty(sandboxDummy, descriptor)).to.be.fulfilled.and.eventually.equal('hyperty-instance://ua.pt/1').and.notify(done);
+        expect(registry.registerHyperty(sandboxDummy, descriptorURL, descriptor)).to.be.fulfilled.and.eventually.equal('hyperty-instance://ua.pt/1').and.notify(done);
 
       });
     });

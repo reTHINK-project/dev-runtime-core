@@ -67,9 +67,9 @@ class Registry extends EventEmitter {
     _this.idModule = identityModule;
     _this.identifier = Math.floor((Math.random() * 10000) + 1);
 
-    // the expires in 21600s, represents 6 hours
+    // the expires in 3600, represents 1 hour
     //the expires is in seconds, unit of measure received by the domain registry
-    _this.expiresTime = 21600;
+    _this.expiresTime = 3600;
 
     _this.hypertiesListToRemove = {};
     _this.hypertiesList = [];
@@ -166,6 +166,25 @@ class Registry extends EventEmitter {
   }
 
   /**
+  * This function returns the user associated to the hyperty URL
+  * @param    {String}    hypertyURL      hyperty URL
+  * @return   {String}    userURL         user URL
+  */
+  getHypertyUser(hypertyURL) {
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+      for (let index in _this.hypertiesList) {
+        let hyperty = _this.hypertiesList[index];
+        if (hyperty.hypertyURL === hypertyURL) {
+          resolve(hyperty.user.userURL);
+        }
+      }
+      reject('hyperty not found');
+    });
+  }
+
+  /**
   * function to return the reporterURL associated with the dataobject URL
   * @param    {String}     dataObjectURL    dataObjectURL
   * @return   {String}     reporterURL      reporterURL
@@ -184,6 +203,11 @@ class Registry extends EventEmitter {
     });
   }
 
+  /**
+  * Function to return the list of pre authorised users received in the creation of a data object
+  * @param    {String}            dataObjectURL    dataObjectURL
+  * @return   {Array<String>}     preAuth         List of pre authorised users
+  */
   getPreAuthSubscribers(dataObjectURL) {
     let _this = this;
 

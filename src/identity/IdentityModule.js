@@ -81,6 +81,22 @@ class IdentityModule {
   }
 
   /**
+  * Function to return all the users URLs registered within a session
+  * These users URLs are returned in an array of strings.
+  * @return {Array<String>}         users
+  */
+  getUsersURLs() {
+    let _this = this;
+    let users = [];
+
+    for (let index in _this.identities) {
+      let identity = _this.identities[index];
+      users.push(identity.identity);
+    }
+    return users;
+  }
+
+  /**
   * Function to return the selected Identity within a session
   * @return {Identity}        identity         identity
   */
