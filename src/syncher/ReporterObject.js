@@ -222,7 +222,7 @@ class ReporterObject {
       //FLOW-OUT: message sent to local hyperty address Syncher -> _onForward
       let forwardMsg = {
         type: 'forward', from: _this._url, to: _this._owner,
-        body: { type: msg.type, from: hypertyURL, to: _this._url }
+        body: { type: msg.type, from: hypertyURL, to: _this._url, identity: msg.body.identity }
       };
 
       _this._bus.postMessage(forwardMsg, (reply) => {
