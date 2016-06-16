@@ -1,7 +1,6 @@
 //jshint browser:true, jquery: true
 
 import persistenceManager from '../persistence/PersistenceManager';
-import {divideURL} from '../utils/utils';
 import PEP from './PEP';
 import PDP from './PDP';
 
@@ -19,31 +18,11 @@ class PolicyEngine {
   * @param  {IdentityModule}    identityModule
   * @param  {Registry}          runtimeRegistry
   */
-  constructor(identityModule, runtimeRegistry) {
+  constructor(context) {
     let _this = this;
-    _this.isRuntimeCore = (identityModule & runtimeRegistry) === 0;
-    _this.pdp = new PDP(runtimeRegistry);
+    _this.context = context;
+    _this.pdp = new PDP(context);
     _this.pep = new PEP();
-    _this.idModule = identityModule;
-    _this.policies = _this.loadPolicies();
-  }
-
-  loadPolicies() {
-    //let _this = this;
-    persistenceManager.delete('policies');
-    let myPolicies = persistenceManager.get('policies');
-
-    /*if (myPolicies === undefined) {
-      let subscriptionPolicy = {
-        scope: 'application',
-        condition: 'subscription equals *',
-        authorise: true,
-        actions: []
-      };
-      _this.addPolicies([subscriptionPolicy]);
-      myPolicies = persistenceManager.get('policies');
-    }*/
-    return myPolicies;
   }
 
   /**
@@ -83,7 +62,7 @@ class PolicyEngine {
   * @param  {String}  policyID
   * @param  {String}  scope
   */
-  removePolicies(condition, scope) {
+  removePolicies(scope, condition) {
     let _this = this;
     let myPolicies = persistenceManager.get('policies');
 
@@ -92,11 +71,20 @@ class PolicyEngine {
       if (scope in myPolicies) {
         if (condition !== '*') {
           let policies = myPolicies[scope];
+          let typeOfCondition = typeof condition;
           for (let i in policies) {
-            if (policies[i].condition === condition) {
-              policies.splice(condition, 1);
-
-              break;
+            let typeOfPolicyCondition = typeof policies[i].condition;
+            if (typeOfCondition === typeOfPolicyCondition) {
+              if (typeOfCondition === 'string') {
+                if (policies[i].condition === condition) {
+                  policies.splice(condition, 1);
+                  break;
+                }
+              } else { //typeof condition = object (advanced policy)
+                if (_this.areEqualArrays(policies[i].condition, condition)) {
+                  policies.splice(i, 1);
+                }
+              }
             }
           }
         } else {
@@ -112,6 +100,24 @@ class PolicyEngine {
     }
   }
 
+  areEqualArrays(array1, array2) {
+    if (array1.length != array2.length) {
+      return false;
+    }
+
+    let numElements = array1.length;
+    for (let i = 0; i < numElements; i++) {
+      if (array1[i] instanceof Array && array2[i] instanceof Array) {
+        if (!array1[i].equals(array2[i])) {
+          return false;
+        }
+      }
+      else if (array1[i] != array2[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
   /**
   * This method is executed when a message is intercepted in the Message Bus. The first step is the
   * assignment of the identity associated with the message. The second step is the evaluation of the
@@ -128,73 +134,42 @@ class PolicyEngine {
       console.log('--- Policy Engine ---');
       console.log(message);
       message.body = message.body || {};
+      if (!_this.context.isToSetID(message.from, message.to)) {
+        _this.context.getIdentity(message.from).then(identity => {
+          message.body.identity = message.body.identity || identity;
+        }, function (error) {
+          reject(error);
+        });
+      }
 
-      let initialResultOk = _this.followsExpectedBehaviour(message);
-      if (initialResultOk === undefined) {
-        if (_this.isRuntimeCore) {
-          _this.idModule.getIdentityAssertion().then(identity => {
-            message.body.identity = message.body.identity || identity;
-          }, function(error) {
-            reject(error);
-          });
-        } else {
-
-          //TODO: obtain the identity from Domain Registry
-          console.log('obtain the identity from Domain Registry');
-        }
-
-        //let scope = _this.getScope(message);
+      let policiesResult = [true, []];
+      if (_this.context.isToVerify(message)) {
         let applicablePolicies = _this.getApplicablePolicies('*');
-        let policiesResult = _this.pdp.evaluate(message, applicablePolicies);
+        policiesResult = _this.pdp.evaluate(message, applicablePolicies);
+        message.body.auth = applicablePolicies.length !== 0;
         _this.pep.enforce(policiesResult[1]);
 
-        if (policiesResult[0]) {
-          message.body.auth = applicablePolicies.length !== 0;
-          resolve(message);
-        } else {
-          reject('Unauthorised message');
-        }
+        //_this.context.encryptMessage(message).then(msg) {}
+      }
 
+      if (policiesResult[0]) {
+        message.body.auth = message.body.auth || false;
+        resolve(message);
       } else {
-        if (initialResultOk) {
-          resolve(message);
-        } else {
-          reject('Intrinsic behaviour was not respected');
-        }
+        reject('Unauthorised message');
       }
     });
   }
 
-  /*
-  * IdProxy / IdModule
-  *   (1) Messages from the IDP Proxy must go to the ID Module.
-  *   (2) Messages to the IDP Proxy must come from the ID Module.
-  *   (3) Messages from the GUI must go to the ID Module.
-  *   (4) Messages to the GUI must come from the ID Module.
-  *
-  * DataObjects
-  *   (5) Updates must come from reporters
-  */
-  followsExpectedBehaviour(message) {
-    let _this = this;
-
-    let idpScheme = 'domain-idp';
-    let idmURL = _this.pdp.runtimeRegistry.runtimeURL + '/idm';
-
-    /* (1) */
-    if (divideURL(message.from).type === idpScheme) {
-      return message.to === idmURL;
+  getGroupsNames(scope) {
+    let myGroups = persistenceManager.get('groups') || {};
+    let groupsNames = [];
+    if (myGroups[scope] !== {}) {
+      for (let groupName in myGroups[scope]) {
+        groupsNames.push(groupName);
+      }
     }
-
-    /* (2) */
-    if (divideURL(message.to).type === idpScheme) {
-      return message.from === idmURL;
-    }
-  }
-
-  getGroupsNames() {
-    let _this = this;
-    return _this.pdp.getGroupsNames();
+    return groupsNames;
   }
 
   /**
@@ -202,25 +177,45 @@ class PolicyEngine {
   * @param  {String}  groupName
   * @return {Array}   group
   */
-  getList(groupName) {
-    let _this = this;
-    return _this.pdp.getList(groupName);
+  getList(scope, groupName) {
+    let myGroups = persistenceManager.get('groups') || {};
+    let members = [];
+    if (myGroups[scope] !== undefined && myGroups[scope][groupName] !== undefined) {
+      members = myGroups[scope][groupName];
+    }
+    return members;
   }
 
   /**
-  * Forwards a request for the creation of a group with the given name to the PDP.
+  * Creates a group with the given name.
   * @param  {String}  groupName
   */
-  createGroup(groupName) {
+  createList(scope, type, groupName) {
     let _this = this;
-    _this.pdp.createGroup(groupName);
+    let myGroups = persistenceManager.get('groups') || {};
+    if (myGroups[scope] === undefined) {
+      myGroups[scope] = {};
+    }
+    myGroups[scope][groupName] = [];
+    persistenceManager.set('groups', 0, myGroups);
+    let policy = {
+      authorise: false,
+      condition: type + ' in ' + groupName,
+      scope: scope,
+      actions: []
+    };
+    _this.addPolicies([policy]);
+
+    return myGroups;
   }
 
-  deleteGroup(groupName) {
+  deleteGroup(scope, groupName) {
     let _this = this;
-    _this.pdp.deleteGroup(groupName);
+    let myGroups = persistenceManager.get('groups') || {};
+    delete myGroups[scope][groupName];
+    persistenceManager.set('groups', 0, myGroups);
 
-    let policies = _this.policies.user;
+    let policies = _this.policies[scope];
     for (let i in policies) {
       let condition = policies[i].condition.split(' ');
       condition.shift();
@@ -233,54 +228,42 @@ class PolicyEngine {
   }
 
   /**
-  * Forwards a request to add a user to the group with the given name to the PDP.
+  * Adds the given user email to the group with the given name.
   * @param  {String}  userEmail
   * @param  {String}  groupName
   */
-  addToGroup(userEmail, groupName) {
+  addToList(scope, type, groupName, userEmail) {
     let _this = this;
-    _this.pdp.addToGroup(userEmail, groupName);
-  }
-
-  getGroupReachability(groupName) {
-    let _this = this;
-    let policies = _this.policies.user;
-    for (let i in policies) {
-      if (policies[i].condition === 'group ' + groupName) {
-        return policies[i].authorise;
-      }
+    let myGroups = persistenceManager.get('groups') || {};
+    if (myGroups[scope] === undefined) {
+      myGroups[scope] = {};
     }
-  }
-
-  changePolicy(condition, authorise) {
-    let _this = this;
-
-    let policies = _this.policies.user;
-    policies = policies || [];
-    for (let i in policies) {
-      if (policies[i].condition === condition) {
-        policies[i].authorise = authorise;
-        return;
-      }
+    if (myGroups[scope][groupName] === undefined) {
+      myGroups = _this.createList(scope, type, groupName);
     }
-    let newPolicy = {
-      scope: 'user',
-      condition: condition,
-      authorise: authorise,
-      actions: []
-    };
-
-    _this.addPolicies([newPolicy]);
+    if (myGroups[scope][groupName].indexOf(userEmail) === -1) {
+      myGroups[scope][groupName].push(userEmail);
+    }
+    persistenceManager.set('groups', 0, myGroups);
   }
 
   /**
-  * Forwards a request to remove a user from the group with the given name to the PDP.
+  * Removes the given user email from the group with the given name.
   * @param  {String}  userEmail
   * @param  {String}  groupName
   */
-  removeFromGroup(userEmail, groupName) {
+  removeFromGroup(scope, groupName, userEmail) {
     let _this = this;
-    _this.pdp.removeFromGroup(userEmail, groupName);
+    let myGroups = persistenceManager.get('groups') || {};
+    let group = myGroups[scope][groupName];
+
+    for (let i in group) {
+      if (group[i] === userEmail) {
+        group.splice(i, 1);
+        persistenceManager.set('groups', 0, myGroups);
+        break;
+      }
+    }
   }
 
   getTimeslots() {

@@ -1,5 +1,4 @@
-import persistenceManager from '../persistence/PersistenceManager';
-import {divideEmail} from '../utils/utils';
+import Operators from './Operators';
 
 /**
 * The Policy Decision Point (PDP) decides if a message is to be authorised by checking a set of
@@ -16,35 +15,10 @@ class PDP {
   * groups.
   * @param  {Registry}    muchruntimeRegistry
   */
-  constructor(runtimeRegistry) {
+  constructor(context) {
     let _this = this;
-    _this.runtimeRegistry = runtimeRegistry;
-    _this.systemVariables = _this.setSystemVariables();
-    _this.operations = _this.setOperations();
-  }
-
-  /* System variable's obtention, needed to verify a condition. */
-  setSystemVariables() {
-    let _this = this;
-    let systemVariables = {
-      source: (message) => { return message.body.identity.email; },
-      domain: (message) => { return divideEmail(message.body.identity.email).domain; },
-      time: () => { return _this.getCurrentTime(); },
-      weekday: () => { return String(new Date().getDay()); },
-      date: () => { return _this.getDate(); }
-    };
-    return systemVariables;
-  }
-
-  setOperations() {
-    let operations = {};
-
-    operations.betweenMinutes = '_this.isTimeBetween(value, parseInt(params[0]), parseInt(params[1]))';
-    operations.in = '_this.getList(params[0]).indexOf(value) != -1';
-    operations.between = 'value > params[0] && value < params[1]';
-    operations.equals = '(params[0] === \'*\') || value === params[0]';
-
-    return operations;
+    _this.context = context;
+    _this.operators = new Operators(context);
   }
 
   /**
@@ -62,125 +36,55 @@ class PDP {
     let actions = [];
     for (let i in policies) {
       let policy = policies[i];
-      let condition = policy.condition.split(' ');
+      let condition = policy.condition;
+      let verifiesCondition = false;
+      if (typeof condition === 'object') {
+          verifiesCondition = _this.verifiesAdvancedCondition(condition[0], condition[1], condition[2], policy.scope, message);
+      } else {
+        verifiesCondition = _this.verifiesSimpleCondition(condition, policy.scope, message);
+      }
 
-      let variable = condition[0];
-      let operation = condition[1];
-      let params = condition.slice(2);
-      let value = _this.systemVariables[variable](message);
-      let verifiesCondition = eval(_this.operations[operation]);
       if (verifiesCondition) {
         results.push(policy.authorise);
       }
 
       //actions.push(result[1]);
     }
-
     let authDecision = results.indexOf(false) === -1;
     return [authDecision, actions];
   }
 
-  getCurrentTime() {
-    let now = new Date();
-    return parseInt(String(now.getHours()) + now.getMinutes());
-  }
-
-  getDate() {
-    let date = new Date();
-    return date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear();
-  }
-
-  /**
-  * Verifies if the current time is between the given start and end times.
-  * @param {Number}     start
-  * @param {Number}     end
-  * @return {Boolean}   boolean
-  */
-  isTimeBetween(now, start, end) {
-    if (end < start) {
-      now = (now < start) ? now += 2400 : now;
-      end += 2400;
-    }
-    return (now > start && now < end);
-  }
-
-  getGroupsNames() {
-    let myGroups = persistenceManager.get('groups') || {};
-    let groupsNames = [];
-
-    if (myGroups !== {}) {
-      for (let groupName in myGroups) {
-        groupsNames.push(groupName);
-      }
-    }
-
-    return groupsNames;
-  }
-
-  /**
-  * Returns the group with the given group name.
-  * @param  {String}  groupName
-  * @return {Array}   group
-  */
-  getList(groupName) {
-    let myGroups = persistenceManager.get('groups') || {};
-    return (groupName in myGroups) ? myGroups[groupName] : [];
-  }
-
-  /**
-  * Creates a group with the given name.
-  * @param  {String}  groupName
-  */
-  createGroup(groupName) {
-    let myGroups = persistenceManager.get('groups') || {};
-    myGroups[groupName] = [];
-    persistenceManager.set('groups', 0, myGroups);
-    return myGroups;
-  }
-
-  /**
-  * Removes the group with the given name.
-  * @param  {String}  groupName
-  */
-  deleteGroup(groupName) {
-    let myGroups = persistenceManager.get('groups') || {};
-
-    delete myGroups[groupName];
-    persistenceManager.set('groups', 0, myGroups);
-  }
-
-  /**
-  * Adds the given user email to the group with the given name.
-  * @param  {String}  userEmail
-  * @param  {String}  groupName
-  */
-  addToGroup(userEmail, groupName) {
+  verifiesSimpleCondition(condition, scope, message) {
     let _this = this;
-    let myGroups = persistenceManager.get('groups') || {};
-    if (myGroups[groupName] === undefined) {
-      myGroups = _this.createGroup(groupName);
-      myGroups[groupName] = [];
+    let splitCondition = condition.split(' ');
+    let variable = splitCondition[0];
+    let operator = splitCondition[1];
+
+    let params;
+    if (operator === 'in') {
+        _this.context.group = {scope: scope, group: splitCondition[2]};
+        params = _this.context.group;
+    } else {
+      params = splitCondition.slice(2);
     }
-    myGroups[groupName].push(userEmail);
-    persistenceManager.set('groups', 0, myGroups);
+    _this.context[variable] = {message: message};
+    let value = _this.context[variable];
+    return _this.operators.operators[operator]([params, value]);
   }
 
-  /**
-  * Removes the given user email from the group with the given name.
-  * @param  {String}  userEmail
-  * @param  {String}  groupName
-  */
-  removeFromGroup(userEmail, groupName) {
-    let myGroups = persistenceManager.get('groups') || {};
-    let group = myGroups[groupName];
-
-    for (let i in group) {
-      if (group[i] === userEmail) {
-        group.splice(i, 1);
-        persistenceManager.set('groups', 0, myGroups);
-        break;
-      }
+  verifiesAdvancedCondition(operator, left, right, scope, message) {
+    let _this = this;
+    while (typeof left === 'object') {
+      left = _this.verifiesAdvancedCondition(left[0], left[1], left[2], scope, message);
     }
+    while (typeof right === 'object') {
+      right = _this.verifiesAdvancedCondition(right[0], right[1], right[2], scope, message);
+    }
+
+    let resultLeft = (typeof left === 'boolean') ? left : _this.verifiesSimpleCondition(left, scope, message);
+    let resultRight = (typeof right === 'boolean') ? right : _this.verifiesSimpleCondition(right, scope, message);
+
+    return _this.operators.operators[operator]([resultLeft, resultRight]);
   }
 }
 

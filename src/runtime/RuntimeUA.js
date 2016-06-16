@@ -31,6 +31,7 @@ import MessageBus from '../bus/MessageBus';
 import GraphConnector from '../graphconnector/GraphConnector';
 
 import SyncherManager from '../syncher/SyncherManager';
+import RuntimeCoreCtx from '../policy/context/RuntimeCoreCtx';
 
 import {divideURL, emptyObject} from '../utils/utils';
 
@@ -90,7 +91,7 @@ class RuntimeUA {
     _this.messageBus = new MessageBus(_this.registry);
 
     // Instantiate the Policy Engine
-    _this.policyEngine = new PolicyEngine(_this.identityModule, _this.registry);
+    _this.policyEngine = new PolicyEngine(new RuntimeCoreCtx(_this.identityModule, _this.registry));
 
     _this.messageBus.pipeline.handlers = [
 
