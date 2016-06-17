@@ -43,29 +43,40 @@ class RuntimeCoreCtx extends Context {
     return _this.idModule.getIdentityAssertion(from);
   }
 
-  isToSetID(from, to) {
+  isToSetID(message) {
     let _this = this;
+
+    if (message.body.identity) {
+      return false;
+    }
 
     let idpScheme = 'domain-idp';
     let idmURL = _this.runtimeRegistry.runtimeURL + '/idm';
 
-    if (divideURL(from).type === idpScheme) {
-      return to === idmURL;
+    if (divideURL(message.from).type === idpScheme) {
+      return message.to !== idmURL;
     }
-    if (divideURL(to).type === idpScheme) {
-      return from === idmURL;
+    if (divideURL(message.to).type === idpScheme) {
+      return message.from !== idmURL;
     }
 
-    return false;
+    return true;
   }
 
-  /*isToVerify(message) {
-    return _this.runtimeRegistry.isDataObjectURL(to);
-  }*/
+  isToVerify(message) {
+    //return _this.runtimeRegistry.isDataObjectURL(to);
+    return true;
+  }
 
-  encryptMessage(message) {
-    let _this = this;
-    //return _this.idModule.encryptMessage(message);
+  decrypt(message) {
+    /*let _this = this;
+    return _this.idModule.decryptMessage(message);*/
+    return message;
+  }
+
+  encrypt(message) {
+    /*let _this = this;
+    return _this.idModule.encryptMessage(message);*/
     return message;
   }
 }

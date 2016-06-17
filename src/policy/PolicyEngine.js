@@ -134,12 +134,9 @@ class PolicyEngine {
       console.log('--- Policy Engine ---');
       console.log(message);
       message.body = message.body || {};
-      if (!_this.context.isToSetID(message.from, message.to)) {
-        _this.context.getIdentity(message.from).then(identity => {
-          message.body.identity = message.body.identity || identity;
-        }, function (error) {
-          reject(error);
-        });
+      let isToSetID = _this.context.isToSetID(message);
+      if (!isToSetID) {
+        //_this.context.decrypt(message).then(message => { });
       }
 
       let policiesResult = [true, []];
@@ -148,10 +145,16 @@ class PolicyEngine {
         policiesResult = _this.pdp.evaluate(message, applicablePolicies);
         message.body.auth = applicablePolicies.length !== 0;
         _this.pep.enforce(policiesResult[1]);
-
-        //_this.context.encryptMessage(message).then(msg) {}
       }
 
+      if (isToSetID) {
+        _this.context.getIdentity(message.from).then(identity => {
+          message.body.identity = identity;
+          //_this.context.encrypt(message).then(message => {});
+        }, function (error) {
+          reject(error);
+        });
+      }
       if (policiesResult[0]) {
         message.body.auth = message.body.auth || false;
         resolve(message);
@@ -159,6 +162,27 @@ class PolicyEngine {
         reject('Unauthorised message');
       }
     });
+  }
+
+  /**
+  * Returns the policies associated with a scope.
+  * @param   {String} scope
+  * @return  {Array}  policies
+  */
+  getApplicablePolicies(scope) {
+    let _this = this;
+    let policiesTable = _this.policies;
+    let policies = [];
+    if (scope !== '*') {
+      if (policiesTable[scope] !== undefined) {
+        policies = policiesTable[scope];
+      }
+    } else {
+      for (let i in policiesTable) {
+        policies.push.apply(policies, policiesTable[i]);
+      }
+    }
+    return policies;
   }
 
   getGroupsNames(scope) {
@@ -286,52 +310,6 @@ class PolicyEngine {
         return policies[i];
       }
     }
-  }
-
-  /**
-  * Returns the scope of the given message to restrict policy applicability.
-  * @return {String} scope
-  */
-  /*getScope(message) {
-    let _this = this;
-    let scope = 'user';
-    if (message.type === 'subscribe') {
-      let runtimeURL = _this.pdp.runtimeRegistry.runtimeURL;
-      if (runtimeURL + '/sm' !== message.from) { // needed for the verification to be done in the reporter's policy engine and not in the subscriber's
-        let isFromSM = String(message.from.split('/').slice(-1)[0]) === 'sm';
-        let originRuntimeURLSplit = message.from.split('/');
-        originRuntimeURLSplit.splice(-1);
-        let originRuntimeURL = originRuntimeURLSplit.join(originRuntimeURLSplit);
-        let isThisRuntime = originRuntimeURL === runtimeURL;
-        let isToSubscription = String(message.to.split('/').slice(-1)[0]) === 'subscription';
-        if (isFromSM && !isThisRuntime && isToSubscription) {
-          scope = 'subscribe';
-        }
-      }
-    }
-
-    return scope;
-  }*/
-
-  /**
-  * Returns the policies associated with a scope.
-  * @param   {String} scope
-  * @return  {Array}  policies
-  */
-  getApplicablePolicies(scope) {
-    let _this = this;
-    let policiesTable = _this.policies;
-    let policies = [];
-    if (scope !== '*') {
-      if (policiesTable[scope] !== undefined) {
-        policies = policiesTable[scope];
-      }
-    } else {
-      for (let i in policiesTable) {
-        policies.push.apply(policies, policiesTable[i]);
-      }
-    }
-    return policies;
   }
 
 }
