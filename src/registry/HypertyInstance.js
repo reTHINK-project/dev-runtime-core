@@ -58,6 +58,11 @@ class HypertyInstance extends RegistryDataModel {
     let _this = this;
     return _this._descriptor;
   }
+
+  get objectName() {
+    let _this = this;
+    return _this._descriptor._objectName;
+  }
 }
 
 export default HypertyInstance;

@@ -1,6 +1,7 @@
 
-import {divideURL, getUserURLFromEmail} from '../utils/utils.js';
+import {divideURL, getUserURLFromEmail, getUserEmailFromURL} from '../utils/utils.js';
 import Identity from './Identity';
+import Crypto from './Crypto';
 
 /**
 *
@@ -49,6 +50,11 @@ class IdentityModule {
     _this.identities = [];
     let newIdentity = new Identity('guid','HUMAN');
     _this.identity = newIdentity;
+    _this.crypto = new Crypto();
+
+    // hashTable to store all the crypto information between two hyperties
+    _this.chatKeys = {};
+
   }
 
   /**
@@ -67,7 +73,24 @@ class IdentityModule {
   set messageBus(messageBus) {
     let _this = this;
     _this._messageBus = messageBus;
+  }
 
+  /**
+  * return the registry in this idModule
+  * @param {registry}           registry
+  */
+  get registry() {
+    let _this = this;
+    return _this._registry;
+  }
+
+  /**
+  * Set the registry in this idModule
+  * @param {registry}     reg
+  */
+  set registry(registry) {
+    let _this = this;
+    _this._registry = registry;
   }
 
   /**
@@ -80,18 +103,61 @@ class IdentityModule {
     return _this.identities;
   }
 
+
+  /**
+  * gets all the information from a given userURL
+  * @param  {String}  userURL     user url
+  * @return {JSON}    identity    identity bundle from the userURL
+  */
+  getIdentity(userURL) {
+    let _this = this;
+
+    for (let index in _this.identities) {
+
+      let identity = _this.identities[index];
+      if (identity.identity === userURL) {
+        return identity;
+      }
+    }
+
+    throw 'identity not found';
+  }
+
+  getIdentityOfHyperty(hypertyURL) {
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+
+      _this.registry.getHypertyOwner(hypertyURL).then((userURL) => {
+
+        for (let index in _this.identities) {
+          let identity = _this.identities[index];
+          if (identity.identity === userURL) {
+            return resolve(identity.messageInfo);
+          }
+        }
+      }, (err) => {
+        reject(err);
+      });
+    });
+  }
+
   /**
   * Function to return all the users URLs registered within a session
   * These users URLs are returned in an array of strings.
+  * @param  {Boolean}  emailFormat (Optional)   boolean to indicate to return in email format
   * @return {Array<String>}         users
   */
-  getUsersURLs() {
+  getUsersIDs(emailFormat) {
     let _this = this;
     let users = [];
 
+    //if request comes with the emailFormat option, then convert url to email format
+    let converter = (emailFormat) ? getUserEmailFromURL : (value) => {return value;};
+
     for (let index in _this.identities) {
       let identity = _this.identities[index];
-      users.push(identity.identity);
+      users.push(converter(identity.identity));
     }
     return users;
   }
@@ -192,18 +258,28 @@ class IdentityModule {
           return resolve(identityBundle);
         } else {
 
-          _this.generateAssertion('', origin, usernameHint, idpDomain).then(function(url) {
-            _this.generateAssertion(url, origin, usernameHint, idpDomain).then(function(value) {
-              if (value) {
-                resolve(value);
-              } else {
-                reject('Error on obtaining Identity');
-              }
-            }, function(err) {
-              reject(err);
-            });
-          }, function(error) {
-            reject(error);
+          let publicKey;
+          let userkeyPair;
+
+          //generates the RSA key pair
+          _this.crypto.generateRSAKeyPair().then(function(keyPair) {
+
+            publicKey = btoa(keyPair.public);
+            userkeyPair = keyPair;
+            return _this.generateAssertion(publicKey, origin, '', userkeyPair, idpDomain);
+
+          }).then(function(url) {
+            return _this.generateAssertion(publicKey, origin, url, userkeyPair, idpDomain);
+
+          }).then(function(value) {
+            if (value) {
+              resolve(value);
+            } else {
+              reject('Error on obtaining Identity');
+            }
+          }).catch(function(err) {
+            console.log(err);
+            reject(err);
           });
         }
       }
@@ -216,12 +292,15 @@ class IdentityModule {
   * @param  {DOMString} contents     contents
   * @param  {DOMString} origin       origin
   * @param  {DOMString} usernameHint usernameHint
+  * @param  {JSON}      keyPair       user keyPair
   * @return {IdAssertion}              IdAssertion
   */
-  generateAssertion(contents, origin, usernameHint, idpDomain) {
+  generateAssertion(contents, origin, usernameHint, keyPair, idpDomain) {
     let _this = this;
     let domain = _this._resolveDomain(idpDomain);
     let message;
+
+    console.log('generateAssertion');
 
     return new Promise(function(resolve,reject) {
 
@@ -234,9 +313,10 @@ class IdentityModule {
 
           //let msgOpenIframe = {type: 'execute', from: _this._idmURL, to: _this._runtimeURL + '/gui-manager', body: {method: 'unhideAdminPage'}};
 
+          console.log('loginURL ', result.loginUrl);
           let win = window.open(result.loginUrl, 'openIDrequest', 'width=800, height=600');
           if (window.cordova) {
-            win.addEventListener('loadstart', function(e){
+            win.addEventListener('loadstart', function(e) {
               let url = e.url;
               let code = /\&code=(.+)$/.exec(url);
               let error = /\&error=(.+)$/.exec(url);
@@ -288,8 +368,9 @@ class IdentityModule {
             let userProfileBundle = {username: idToken.email, cn: idToken.name, avatar: infoToken.picture, locale: infoToken.locale, userURL: getUserURLFromEmail(idToken.email)};
 
             //creation of a new JSON with the identity to send via messages
-            let newIdentity = {userProfile: userProfileBundle, idp: result.idp.domain, assertion: result.assertion, email: idToken.email, identity: result.identity, idToken: idToken, infoToken: infoToken};
+            let newIdentity = {userProfile: userProfileBundle, idp: result.idp.domain, assertion: result.assertion};
             result.messageInfo = newIdentity;
+            result.keyPair = keyPair;
 
             _this.currentIdentity = newIdentity;
             _this.identities.push(result);
@@ -334,14 +415,163 @@ class IdentityModule {
     });
   }
 
-  /**
-  * Function that encrypts the messages to send and decrypts and validate the messages received.
-  * In case there is no session key established between the two users from the message, this function will start the communication with the other user acquire a session key.
-  **/
-  validateMessage(message) {
-    console.log(message);
+  encryptMessage(message) {
+    let _this = this;
+
+    console.log('ENCRYPT MESSAGE ');
+
+    return new Promise(function(resolve, reject) {
+
+      resolve(message);
+      /*_this._registry.getHypertyOwner(message.from).then(function(userURL) {
+
+        let chatKeys = _this.chatKeys[message.to + message.from];
+        if (!chatKeys) {
+          chatKeys = _this._newChatCrypto(message, userURL);
+          _this.chatKeys[message.to + message.from] = chatKeys;
+          message.body.handshakePhase = 'startHandShake';
+        }
+
+        if (chatKeys.hypertyToSessionKey) {
+          //TODO apply symmetric cypher
+          resolve(message);
+
+        } else {
+          _this._handShakePhase(message, chatKeys).then(function(value) {
+            _this.chatKeys[message.to + message.from] = value.chatKeys;
+            resolve(value.message);
+          });
+        }
+
+      }).catch(function(err) { reject(err); });*/
+    });
+
   }
 
+  decryptMessage(message) {
+    let _this = this;
+
+    console.log('DECRYPT MESSAGE ');
+
+    return new Promise(function(resolve, reject) {
+
+      resolve(message);
+
+      /*_this._registry.getHypertyOwner(message.to).then(function(userURL) {
+
+        let chatKeys = _this.chatKeys[message.from + message.to];
+        if (!chatKeys) {
+          chatKeys = _this._newChatCrypto(message, userURL, 'decrypt');
+          _this.chatKeys[message.to + message.from] = chatKeys;
+        }
+
+        if (chatKeys.hypertyToSessionKey) {
+          //TODO apply symmetric cypher
+          resolve(message);
+
+        } else {
+          _this._handShakePhase(message, chatKeys).then(function(value) {
+            _this.chatKeys[message.from + message.to] = value.chatKeys;
+            resolve(value.message);
+          });
+        }
+      }).catch(function(err) { reject(err); });*/
+    });
+  }
+
+  _handShakePhase(message, chatKeys) {
+    let _this = this;
+    console.log('handshakeType');
+    console.log(message);
+
+    return new Promise(function(resolve,reject) {
+
+      let handshakeType = message.body.handshakePhase;
+      switch (handshakeType) {
+
+        case 'startHandShake':
+          /*message.type = 'handshake';
+          message.body.handshakePhase = 'senderHello';
+          chatKeys.keys.fromRandom = _this.crypto.generateRandom();
+          message.body.random = chatKeys.keys.fromRandom;
+          resolve({message: message, chatKeys: chatKeys});*/
+
+          break;
+        case 'senderHello':
+          /*message.body.handshakePhase = 'receiverHello';
+          chatKeys.keys.toRandom = _this.crypto.generateRandom();
+          let msg = { type: 'handshake', to: message.from, from: message.to,
+            body: { identity: chatKeys.messageInfo, random: chatKeys.keys.toRandom}};
+          resolve({message: msg, chatKeys: chatKeys});*/
+
+          break;
+        case 'receiverHello':
+
+          break;
+        case 'senderCertificate':
+
+          break;
+
+        case 'receiverFinishedMessage':
+
+          break;
+        case 'senderFinishedMessage':
+
+          break;
+        default:
+
+      }
+    });
+  }
+
+  _applicationData(message) {
+    let _this = this;
+  }
+
+  _newChatCrypto(message, userURL, receiver) {
+    let _this = this;
+
+    //check whether is the sender or the receiver to create a new chatCrypto
+    //to mantain consistency on the keys if the receiver create a new chatCrypto,
+    //then invert the fields
+    let from = (receiver) ? message.to : message.from;
+    let to = (receiver) ? message.from : message.to;
+
+    let userInfo = _this.getIdentity(userURL);
+
+    let newChatCrypto =
+    {
+      hypertyFrom:
+      {
+        hyperty: from,
+        userID: userInfo.messageInfo.userProfile.username,
+        privateKey: userInfo.keyPair.private,
+        publicKey: userInfo.keyPair.public,
+        assertion: userInfo.assertion,
+        messageInfo: userInfo.messageInfo
+      },
+      hypertyTo:
+      {
+        hyperty: to,
+        userID: undefined,
+        publicKey: undefined,
+        assertion: undefined
+      },
+      keys:
+      {
+        hypertyToSessionKey: undefined,
+        hypertyFromSessionKey: undefined,
+        hypertyToHashKey: undefined,
+        hypertyFromHashKey: undefined,
+        toRandom: undefined,
+        fromRandom: undefined,
+        premasterKey: undefined,
+        masterKey: undefined
+      }
+    };
+
+    return newChatCrypto;
+  }
 }
 
 export default IdentityModule;

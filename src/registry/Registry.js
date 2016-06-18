@@ -170,7 +170,7 @@ class Registry extends EventEmitter {
   * @param    {String}    hypertyURL      hyperty URL
   * @return   {String}    userURL         user URL
   */
-  getHypertyUser(hypertyURL) {
+  getHypertyOwner(hypertyURL) {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
@@ -181,6 +181,26 @@ class Registry extends EventEmitter {
         }
       }
       reject('hyperty not found');
+    });
+  }
+
+  /**
+  * returns the hyperty Name from a given hypertyURL
+  * @param    {String}    hypertyURL      hyperty URL
+  * @return   {String}    hypertyName     hyperty Name
+  */
+  getHypertyName(hypertyURL) {
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+
+      for (let index in _this.hypertiesList) {
+        let hyperty = _this.hypertiesList[index];
+        if (hyperty.hypertyURL === hypertyURL) {
+          return resolve(hyperty.objectName);
+        }
+      }
+      reject('No hyperty was found');
     });
   }
 
@@ -201,6 +221,18 @@ class Registry extends EventEmitter {
         reject('No reporter was found');
       }
     });
+  }
+
+  /**
+  * verify if the url received is a dataObjectURL registered in runtime registry
+  * @param    {String}     url            url format
+  * @return   {boolean}    boolean with the information if is dataObjectURL or not
+  */
+  isDataObjectURL(url) {
+    let _this = this;
+    let dataObject = _this.dataObjectList[url];
+
+    return (dataObject) ? true : false;
   }
 
   /**
@@ -273,6 +305,43 @@ class Registry extends EventEmitter {
   }
 
   /**
+  * register a new subscriber in the dataObject registered
+  * @param  {String}   dataObjectURL    dataObject URL
+  * @param  {String}   subscriberURL    subscriber URL
+  * @return {String}   result of the operation, if successful or not
+  */
+  registerSubscriber(dataObjectURL, subscriberURL) {
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+
+      let dataObject = _this.dataObjectList[dataObjectURL];
+
+      if (dataObject) {
+        dataObject.subscribers.push(subscriberURL);
+        _this.dataObjectList[dataObjectURL] = dataObject;
+        resolve('Subscriber successfully added');
+      } else {
+        reject('No dataObject was found');
+      }
+    });
+  }
+
+  /**
+  * get the subscribers registered within a dataObject
+  * @param  {String}          dataObjectURL    dataObject URL
+  * @param  {Array<String>}   Substribers List
+  */
+  getDataObjectSubscribers(dataObjectURL) {
+    let _this = this;
+    return new Promise(function(resolve, reject) {
+      let dataObject = _this.dataObjectList[dataObjectURL];
+
+      return (dataObject) ? resolve(dataObject.subscribers) : reject('No dataObject was found');
+    });
+  }
+
+  /**
   * To register a new Data Object in the runtime which returns the dataObjectURL allocated to the new Data Object.
   * @param  {String}      identifier            identifier
   * @param  {String}      dataObjectschema            dataObjectschema
@@ -285,7 +354,7 @@ class Registry extends EventEmitter {
     return new Promise(function(resolve, reject) {
 
       //message to register the new hyperty, within the domain registry
-      let messageValue = {name: identifier, schema: dataObjectschema, url: dataObjectUrl, expires: _this.expiresTime, reporter: dataObjectReporter, preAuth: authorise};
+      let messageValue = {name: identifier, schema: dataObjectschema, url: dataObjectUrl, expires: _this.expiresTime, reporter: dataObjectReporter, preAuth: authorise, subscribers: []};
 
       _this.dataObjectList[dataObjectUrl] = messageValue;
 

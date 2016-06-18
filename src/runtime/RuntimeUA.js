@@ -115,6 +115,9 @@ class RuntimeUA {
     // Register messageBus on Registry
     _this.registry.messageBus = _this.messageBus;
 
+    // Register registry on IdentityModule
+    _this.identityModule.registry = _this.registry;
+
     _this.registry.addEventListener('runtime:loadStub', function(domainURL) {
       _this.loadStub(domainURL).then(function() {
         _this.registry.trigger('runtime:stubLoaded', domainURL);

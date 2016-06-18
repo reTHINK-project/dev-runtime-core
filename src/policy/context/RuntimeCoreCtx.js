@@ -40,7 +40,7 @@ class RuntimeCoreCtx extends Context {
 
   getIdentity(from) {
     let _this = this;
-    return _this.idModule.getIdentityAssertion(from);
+    return _this.idModule.getIdentityOfHyperty(from);
   }
 
   isToSetID(message) {
@@ -69,15 +69,26 @@ class RuntimeCoreCtx extends Context {
   }
 
   decrypt(message) {
-    /*let _this = this;
-    return _this.idModule.decryptMessage(message);*/
-    return message;
+    let _this = this;
+
+    return new Promise(function(resolve,reject) {
+
+      _this.idModule.decryptMessage(message).then(function(msg) {
+        resolve(msg);
+      }, function(err) { reject(err); });
+    });
   }
 
   encrypt(message) {
-    /*let _this = this;
-    return _this.idModule.encryptMessage(message);*/
-    return message;
+    let _this = this;
+
+    return new Promise(function(resolve,reject) {
+
+      _this.idModule.encryptMessage(message).then(function(msg) {
+        resolve(msg);
+      }, function(err) { reject(err); });
+
+    });
   }
 }
 

@@ -50,6 +50,13 @@ getRegistry.then(function(registry) {
     let msgbus = new MessageBus(registry);
     registry.messageBus = msgbus;
 
+    registry.messageBus.addListener('domain://registry.ua.pt/', (msg) => {
+      let responseMessage = {id: msg.id, type: 'response', to: msg.from, from: msg.to,
+                              body: {code: 200}};
+
+      msgbus.postMessage(responseMessage);
+    });
+
     describe('constructor()', function() {
 
       it('depends of the MessageBus', function() {
@@ -119,6 +126,7 @@ getRegistry.then(function(registry) {
 
         let descriptorURL = 'hyperty-catalogue://ua.pt/<catalogue-object-identifier>';
         let descriptor = {
+          _objectName: 'hyperty-chat',
           dataObjects: ['url'],
           hypertyType: ['comm']
         };
@@ -200,6 +208,112 @@ getRegistry.then(function(registry) {
       });
     });
 
+    describe('getHypertyOwner(hypertyURL)', function() {
+      it('should return the user associated to the hyperty URL', function(done) {
+        let url = 'hyperty-instance://ua.pt/1';
+
+        expect(registry.getHypertyOwner(url).then(function(response) {
+          return response;
+        })).to.be.fulfilled.and.eventually.equal('user://gmail.com/openidtest10').and.notify(done);
+      });
+    });
+
+    describe('getHypertyName(hypertyURL)', function() {
+      it('should return the hyperty Name from a given hypertyURL', function(done) {
+        let url = 'hyperty-instance://ua.pt/1';
+
+        expect(registry.getHypertyName(url).then(function(response) {
+          return response;
+        })).to.be.fulfilled.and.eventually.equal('hyperty-chat').and.notify(done);
+      });
+    });
+
+    describe('registerDataObject(identifier, dataObjectschema, dataObjectUrl, dataObjectReporter, authorise)', function() {
+      it('should register a new Data Object in the runtime registry', function(done) {
+        let identifier = 'hello-chat';
+        let dataObjectschema = 'hyperty-catalogue://catalogue.localhost/.well-known/dataschema/Communication';
+        let dataObjectUrl = 'comm://localhost/9303b707-f301-4929-ad7d-65a89a356871';
+        let dataObjectReporter = 'hyperty://localhost/d692091f-192c-420c-a763-a180f13e626a';
+        let authorise = ['user://gmail.com/user15'];
+
+        expect(registry.registerDataObject(identifier, dataObjectschema, dataObjectUrl, dataObjectReporter, authorise).then(function(response) {
+          return response;
+        })).to.be.fulfilled.and.eventually.equal('ok').and.notify(done);
+      });
+    });
+
+    describe('isDataObjectURL(url)', function() {
+      it('should verify if the url received is a dataObjectURL registered in runtime registry', function() {
+        let dataObjectURL = 'comm://localhost/9303b707-f301-4929-ad7d-65a89a356871';
+        let fakedataObjectURL = 'comm://fake';
+
+        expect(registry.isDataObjectURL(dataObjectURL)).to.be.equal(true);
+
+        expect(registry.isDataObjectURL(fakedataObjectURL)).to.be.equal(false);
+      });
+    });
+
+    describe('getReporterURL(dataObjectURL)', function() {
+      it('should return the reporterURL associated with the dataobject URL', function(done) {
+        let dataObjectURL = 'comm://localhost/9303b707-f301-4929-ad7d-65a89a356871';
+        let fakedataObjectURL = 'comm://fake';
+
+        expect(registry.getReporterURL(dataObjectURL).then(function(response) {
+          return response;
+        })).to.be.fulfilled.and.eventually.equal('hyperty://localhost/d692091f-192c-420c-a763-a180f13e626a').and.notify(done);
+
+        expect(registry.getReporterURL(fakedataObjectURL).then(function(response) {
+          return response;
+        })).to.be.fulfilled.and.eventually.equal('No reporter was found').and.notify(done);
+      });
+    });
+
+    describe('getPreAuthSubscribers(dataObjectURL)', function() {
+      it('should return the list of pre authorised users', function(done) {
+        let dataObjectURL = 'comm://localhost/9303b707-f301-4929-ad7d-65a89a356871';
+        let fakedataObjectURL = 'comm://fake';
+
+        expect(registry.getPreAuthSubscribers(dataObjectURL).then(function(response) {
+          return response;
+        })).to.be.fulfilled.and.eventually.eql(['user://gmail.com/user15']).and.notify(done);
+
+        expect(registry.getPreAuthSubscribers(fakedataObjectURL).then(function(response) {
+          return response;
+        })).to.be.fulfilled.and.eventually.equal('No reporter was found').and.notify(done);
+      });
+    });
+
+    describe('registerSubscriber(dataObjectURL, subscriberURL)', function() {
+      it('should return the list of pre authorised users', function(done) {
+        let dataObjectURL = 'comm://localhost/9303b707-f301-4929-ad7d-65a89a356871';
+        let fakedataObjectURL = 'comm://fake';
+        let subscriberURL = 'hyperty://localhost/00-00-sub1';
+
+        expect(registry.registerSubscriber(dataObjectURL, subscriberURL).then(function(response) {
+          return response;
+        })).to.be.fulfilled.and.eventually.equal('Subscriber successfully added').and.notify(done);
+
+        expect(registry.registerSubscriber(fakedataObjectURL, subscriberURL).then(function(response) {
+          return response;
+        })).to.be.fulfilled.and.eventually.equal('No dataObject was found').and.notify(done);
+      });
+    });
+
+    describe('getDataObjectSubscribers(dataObjectURL)', function() {
+      it('should return the list of pre authorised users', function(done) {
+        let dataObjectURL = 'comm://localhost/9303b707-f301-4929-ad7d-65a89a356871';
+        let fakedataObjectURL = 'comm://fake';
+
+        expect(registry.getDataObjectSubscribers(dataObjectURL).then(function(response) {
+          return response;
+        })).to.be.fulfilled.and.eventually.eql(['hyperty://localhost/00-00-sub1']).and.notify(done);
+
+        expect(registry.getDataObjectSubscribers(fakedataObjectURL).then(function(response) {
+          return response;
+        })).to.be.fulfilled.and.eventually.equal('No dataObject was found').and.notify(done);
+      });
+    });
+
     describe('unregisterHyperty(url)', function() {
       it('should unregister an Hyperty', function(done) {
         let url = 'hyperty-instance://ua.pt/1';
@@ -209,6 +323,7 @@ getRegistry.then(function(registry) {
         })).to.be.fulfilled.and.eventually.equal('Hyperty successfully deleted').and.notify(done);
       });
     });
+
   });
 
 });

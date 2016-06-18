@@ -136,7 +136,7 @@ class PolicyEngine {
       message.body = message.body || {};
       let isToSetID = _this.context.isToSetID(message);
       if (!isToSetID) {
-        //_this.context.decrypt(message).then(message => { });
+        _this.context.decrypt(message).then(message => { resolve(message); });
       }
 
       let policiesResult = [true, []];
@@ -150,7 +150,7 @@ class PolicyEngine {
       if (isToSetID) {
         _this.context.getIdentity(message.from).then(identity => {
           message.body.identity = identity;
-          //_this.context.encrypt(message).then(message => {});
+          _this.context.encrypt(message).then(message => { resolve(message); });
         }, function (error) {
           reject(error);
         });
