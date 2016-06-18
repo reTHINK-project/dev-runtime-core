@@ -22,11 +22,11 @@ class PolicyEngine {
     let _this = this;
     _this.context = context;
     _this.pdp = new PDP(context);
-    _this.pep = new PEP();
+    _this.pep = new PEP(context);
   }
 
   /**
-  * Associates the given policies with a scope. The possible scopes are 'application', 'hyperty' and
+  * Associates the given policies with a scope. The possible scopes are 'global', 'hyperty' and
   * 'user'.
   * @param  {Policy[]}  policies
   * @param  {String}    scope
@@ -118,6 +118,7 @@ class PolicyEngine {
     }
     return true;
   }
+
   /**
   * This method is executed when a message is intercepted in the Message Bus. The first step is the
   * assignment of the identity associated with the message. The second step is the evaluation of the
@@ -144,7 +145,7 @@ class PolicyEngine {
         let applicablePolicies = _this.getApplicablePolicies('*');
         policiesResult = _this.pdp.evaluate(message, applicablePolicies);
         message.body.auth = applicablePolicies.length !== 0;
-        _this.pep.enforce(policiesResult[1]);
+        _this.pep.enforce(policiesResult);
       }
 
       if (isToSetID) {
@@ -171,17 +172,22 @@ class PolicyEngine {
   */
   getApplicablePolicies(scope) {
     let _this = this;
-    let policiesTable = _this.policies;
+    let myPolicies = persistenceManager.get('policies');
+    if (myPolicies === undefined) {
+      myPolicies = {};
+    }
     let policies = [];
+
     if (scope !== '*') {
-      if (policiesTable[scope] !== undefined) {
-        policies = policiesTable[scope];
+      if (myPolicies[scope] !== undefined) {
+        policies = myPolicies[scope];
       }
     } else {
-      for (let i in policiesTable) {
-        policies.push.apply(policies, policiesTable[i]);
+      for (let i in myPolicies) {
+        policies.push.apply(policies, myPolicies[i]);
       }
     }
+
     return policies;
   }
 
@@ -239,7 +245,12 @@ class PolicyEngine {
     delete myGroups[scope][groupName];
     persistenceManager.set('groups', 0, myGroups);
 
-    let policies = _this.policies[scope];
+    let myPolicies = persistenceManager.get('policies');
+    if (myPolicies === undefined) {
+      myPolicies = {};
+    }
+
+    let policies = myPolicies[scope];
     for (let i in policies) {
       let condition = policies[i].condition.split(' ');
       condition.shift();
@@ -249,6 +260,8 @@ class PolicyEngine {
         break;
       }
     }
+
+    persistenceManager.set('policies', 0, myPolicies);
   }
 
   /**

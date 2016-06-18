@@ -10,12 +10,22 @@ import persistenceManager from '../src/persistence/PersistenceManager';
 import PolicyEngine from '../src/policy/PolicyEngine';
 import RuntimeCoreCtx from '../src/policy/context/RuntimeCoreCtx';
 
+import {registerSubscriber} from '../src/registry/Registry';
+
 let runtimeRegistry = {
+  getPreAuthSubscribers: function() {
+    return ['hyperty://domain/hyperty-instance'];
+  },
+  registerSubscriber: () => {
+    return new Promise(function(resolve, reject) {
+      resolve('Subscriber successfully added');
+    });
+  },
   runtimeURL: 'runtime://localhost/7601'
 };
 
 let identityModule = {
-  getIdentityAssertion: () => {
+  getIdentityOfHyperty: () => {
     return new Promise(function(resolve, reject) {
       let token = {
         id: 'identity'
@@ -53,6 +63,7 @@ describe('Policy Engine', function() {
     let policyAnd = { actions: [], authorise: true, condition: ['and', 'source in coleagues', 'source in students'], scope: 'global' };
 
     it('stores an advanced policy', function() {
+      policyEngine.removePolicies('*', '*');
       policyEngine.addPolicies([policyOr]);
       expect(policyEngine.getApplicablePolicies('global')).to.be.eql([policyOr]);
     });
@@ -69,6 +80,18 @@ describe('Policy Engine', function() {
 
     it('condition is not verified when [and false true]', function() {
       expect(policyEngine.pdp.verifiesAdvancedCondition(policyAnd.condition[0], false, true, policyAnd.scope, message)).to.be.eql(false);
+    });
+
+    it('condition is verified when [not false]', function() {
+      let policyNot = { actions: [], authorise: true, condition: ['not', 'source in coleagues'], scope: 'global' };
+
+      expect(policyEngine.pdp.verifiesAdvancedCondition(policyNot.condition[0], policyNot.condition[1], undefined, policyNot.scope, message)).to.be.eql(true);
+    });
+
+    it('condition is not verified when [not true]', function() {
+      let policyNot = { actions: [], authorise: false, condition: ['not', 'source in students', 'source in students'], scope: 'global' };
+
+      expect(policyEngine.pdp.verifiesAdvancedCondition(policyNot.condition[0], policyNot.condition[1], undefined, policyNot.scope, message)).to.be.eql(false);
     });
 
     it('condition is not verified when [and [or false true] false]', function() {
@@ -376,6 +399,82 @@ describe('Policy Engine', function() {
       }), function(reject) {
         return reject;
       }).to.be.fulfilled.and.eventually.eql(outMessageFromAllowed).and.notify(done);
+    });
+  });
+
+  describe('data objects management', function() {
+    let subscribeMessage = {
+      body: { identity: { email: userEmail3 }, subscriber: 'hyperty://domain/hyperty-instance' }, id: 1, type: 'subscribe', from: 'runtime://localhost/7601/sm', to: 'comm://domain/data-object-url/subscription'
+    }
+
+    let allowedSubscribeMessage = {
+      body: { auth: true, identity: { email: userEmail3 }, subscriber: 'hyperty://domain/hyperty-instance' }, id: 1, type: 'subscribe', from: 'runtime://localhost/7601/sm', to: 'comm://domain/data-object-url/subscription'
+    }
+
+    it('rejects a subscription attempt, as the policy rejects all', function(done) {
+      persistenceManager.delete('policies');
+      let blockAnySubscriptionPolicy = {
+        scope: 'hyperty',
+        condition: 'subscription equals *',
+        authorise: false,
+        actions: [{method: 'registerSubscriber'}]
+      };
+      policyEngine.addPolicies([blockAnySubscriptionPolicy]);
+      expect(policyEngine.authorise(subscribeMessage).then(function(response) {
+        return response;
+      }), function(reject) {
+        return reject;
+      }).to.be.rejected.and.notify(done);
+    });
+
+    it('accepts a subscription attempt, as the policy rejects all', function(done) {
+      let acceptAnySubscriptionPolicy = {
+        scope: 'hyperty',
+        condition: 'subscription equals *',
+        authorise: true,
+        actions: [{method: 'registerSubscriber'}]
+      };
+
+      policyEngine.removePolicies('hyperty', 'subscription equals *');
+      policyEngine.addPolicies([acceptAnySubscriptionPolicy]);
+
+      expect(policyEngine.authorise(subscribeMessage).then(function(response) {
+        return response;
+      }), function(reject) {
+        return reject;
+      }).to.be.fulfilled.and.eventually.eql(allowedSubscribeMessage).and.notify(done);
+    });
+
+    it('accepts a subscription attempt, as the policy accepts preauthorised subscribers and is preauthorised', function(done) {
+      let acceptPreAuthSubscriptionPolicy = {
+        scope: 'hyperty',
+        condition: 'subscription in preauthorised',
+        authorise: true,
+        actions: [{method: 'registerSubscriber'}]
+      };
+
+      policyEngine.removePolicies('hyperty', 'subscription equals *');
+      policyEngine.addPolicies([acceptPreAuthSubscriptionPolicy]);
+      expect(policyEngine.authorise(subscribeMessage).then(function(response) {
+        return response;
+      }), function(reject) {
+        return reject;
+      }).to.be.fulfilled.and.eventually.eql(allowedSubscribeMessage).and.notify(done);
+    });
+
+    it('rejects a subscription attempt, as the policy rejects non-preauthorised subscriber and is not preauthorised', function(done) {
+      let blockPreAuthSubscriptionPolicy = { scope: 'hyperty', condition: ['not', 'subscription in preauthorised'], authorise: false, actions: [{method: 'registerSubscriber'}] };
+
+      let badSubscribeMessage = {
+        body: { identity: { email: userEmail3 }, subscriber: 'hyperty://domain/not-preauthorised-hyperty-instance' }, id: 1, type: 'subscribe', from: 'runtime://localhost/7601/sm', to: 'comm://domain/data-object-url/subscription'
+      };
+      policyEngine.removePolicies('hyperty', 'subscription in preauthorised')
+      policyEngine.addPolicies([blockPreAuthSubscriptionPolicy]);
+      expect(policyEngine.authorise(badSubscribeMessage).then(function(response) {
+        return response;
+      }), function(reject) {
+        return reject;
+      }).to.be.rejected.and.notify(done);
     });
   });
 

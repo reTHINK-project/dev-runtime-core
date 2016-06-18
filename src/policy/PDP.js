@@ -47,9 +47,17 @@ class PDP {
       if (verifiesCondition) {
         results.push(policy.authorise);
       }
-
-      //actions.push(result[1]);
+      if (policy.actions !== []) {
+        for (let i in policy.actions) {
+          let newAction = {
+            method: policy.actions[i].method,
+            params: message
+          };
+          actions.push(newAction);
+        }
+      }
     }
+
     let authDecision = results.indexOf(false) === -1;
     return [authDecision, actions];
   }
@@ -62,7 +70,7 @@ class PDP {
 
     let params;
     if (operator === 'in') {
-        _this.context.group = {scope: scope, group: splitCondition[2]};
+        _this.context.group = {scope: scope, group: splitCondition[2], destination: message.to};
         params = _this.context.group;
     } else {
       params = splitCondition.slice(2);
@@ -77,12 +85,18 @@ class PDP {
     while (typeof left === 'object') {
       left = _this.verifiesAdvancedCondition(left[0], left[1], left[2], scope, message);
     }
-    while (typeof right === 'object') {
-      right = _this.verifiesAdvancedCondition(right[0], right[1], right[2], scope, message);
+    if (right !== undefined) {
+      while (typeof right === 'object') {
+        right = _this.verifiesAdvancedCondition(right[0], right[1], right[2], scope, message);
+      }
     }
 
     let resultLeft = (typeof left === 'boolean') ? left : _this.verifiesSimpleCondition(left, scope, message);
-    let resultRight = (typeof right === 'boolean') ? right : _this.verifiesSimpleCondition(right, scope, message);
+
+    let resultRight;
+    if (right !== undefined) {
+      resultRight = (typeof right === 'boolean') ? right : _this.verifiesSimpleCondition(right, scope, message);
+    }
 
     return _this.operators.operators[operator]([resultLeft, resultRight]);
   }
