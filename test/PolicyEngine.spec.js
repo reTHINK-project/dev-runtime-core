@@ -6,25 +6,33 @@ chai.config.truncateThreshold = 0;
 let expect = chai.expect;
 chai.use(chaiAsPromised);
 
+import {divideURL} from '../src/utils/utils';
 import persistenceManager from '../src/persistence/PersistenceManager';
 import PolicyEngine from '../src/policy/PolicyEngine';
 import RuntimeCoreCtx from '../src/policy/context/RuntimeCoreCtx';
 
-import {registerSubscriber} from '../src/registry/Registry';
-
 let runtimeRegistry = {
-  getPreAuthSubscribers: function() {
+  getPreAuthSubscribers: () => {
     return ['hyperty://domain/hyperty-instance'];
   },
-  registerSubscriber: () => {
-    return new Promise(function(resolve, reject) {
-      resolve('Subscriber successfully added');
-    });
+  isDataObjectURL: (dataObjectURL) => {
+    return divideURL(dataObjectURL).type === 'comm';
   },
+  registerSubscriber: () => {},
   runtimeURL: 'runtime://localhost/7601'
 };
 
 let identityModule = {
+  decryptMessage: (message) => {
+    return new Promise(function(resolve, reject) {
+      resolve(message);
+    });
+  },
+  encryptMessage: (message) => {
+    return new Promise(function(resolve, reject) {
+      resolve(message);
+    });
+  },
   getIdentityOfHyperty: () => {
     return new Promise(function(resolve, reject) {
       let token = {
@@ -56,7 +64,7 @@ describe('Policy Engine', function() {
   };
 
   describe('advanced policies management', function() {
-    let message = { body: { identity: { email: 'student@gmail.com' } }, id: 1, type: 'read', from: 'hyperty://ua.pt/asdf', to: 'domain://registry.ua.pt/hyperty-instance/user' };
+    let message = { body: { identity: { email: 'student@gmail.com' } }, id: 1, type: 'read', from: 'hyperty://domain/hyperty-url', to: 'comm://domain/hyperty-instance' };
 
     let policyOr = { actions: [], authorise: true, condition: ['or', 'source in coleagues', 'source in students'], scope: 'global' };
 
@@ -197,8 +205,8 @@ describe('Policy Engine', function() {
   let messageWithoutID = {
     id: 1,
     type: 'read',
-    from: 'hyperty://ua.pt/asdf',
-    to: 'domain://registry.ua.pt/hyperty-instance/user'
+    from: 'hyperty://domain/hyperty-url',
+    to: 'comm://domain/hyperty-instance'
   };
 
   let messageWithID = {
@@ -210,8 +218,8 @@ describe('Policy Engine', function() {
     },
     id: 1,
     type: 'read',
-    from: 'hyperty://ua.pt/asdf',
-    to: 'domain://registry.ua.pt/hyperty-instance/user'
+    from: 'hyperty://domain/hyperty-url',
+    to: 'comm://domain/hyperty-instance'
   };
 
   describe('identity', function() {
@@ -241,8 +249,8 @@ describe('Policy Engine', function() {
     },
     id: 1,
     type: 'read',
-    from: 'hyperty://ua.pt/asdf',
-    to: 'domain://registry.ua.pt/hyperty-instance/user'
+    from: 'hyperty://domain/hyperty-url',
+    to: 'comm://domain/hyperty-instance'
   };
 
   describe('functionality: source', function() {
@@ -327,8 +335,8 @@ describe('Policy Engine', function() {
     },
     id: 1,
     type: 'read',
-    from: 'hyperty://ua.pt/asdf',
-    to: 'domain://registry.ua.pt/hyperty-instance/user'
+    from: 'hyperty://domain/hyperty-url',
+    to: 'comm://domain/hyperty-instance'
   };
 
   let outMessageFromAllowed = {
@@ -340,8 +348,8 @@ describe('Policy Engine', function() {
     },
     id: 1,
     type: 'read',
-    from: 'hyperty://ua.pt/asdf',
-    to: 'domain://registry.ua.pt/hyperty-instance/user'
+    from: 'hyperty://domain/hyperty-url',
+    to: 'comm://domain/hyperty-instance'
   };
 
   describe('functionality: domain', function() {

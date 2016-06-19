@@ -242,16 +242,13 @@ class Registry extends EventEmitter {
   */
   getPreAuthSubscribers(dataObjectURL) {
     let _this = this;
-
     let dataObject = _this.dataObjectList[dataObjectURL];
+    let preAuth = [];
 
-    return new Promise(function(resolve, reject) {
-      if (dataObject) {
-        resolve(dataObject.preAuth);
-      } else {
-        reject('No reporter was found');
-      }
-    });
+    if (dataObject) {
+      preAuth = dataObject.preAuth;
+    }
+    return preAuth;
   }
 
   /**
@@ -308,23 +305,15 @@ class Registry extends EventEmitter {
   * register a new subscriber in the dataObject registered
   * @param  {String}   dataObjectURL    dataObject URL
   * @param  {String}   subscriberURL    subscriber URL
-  * @return {String}   result of the operation, if successful or not
   */
   registerSubscriber(dataObjectURL, subscriberURL) {
     let _this = this;
+    let dataObject = _this.dataObjectList[dataObjectURL];
 
-    return new Promise(function(resolve, reject) {
-
-      let dataObject = _this.dataObjectList[dataObjectURL];
-
-      if (dataObject) {
-        dataObject.subscribers.push(subscriberURL);
-        _this.dataObjectList[dataObjectURL] = dataObject;
-        resolve('Subscriber successfully added');
-      } else {
-        reject('No dataObject was found');
-      }
-    });
+    if (dataObject) {
+      dataObject.subscribers.push(subscriberURL);
+      _this.dataObjectList[dataObjectURL] = dataObject;
+    }
   }
 
   /**
@@ -334,11 +323,13 @@ class Registry extends EventEmitter {
   */
   getDataObjectSubscribers(dataObjectURL) {
     let _this = this;
-    return new Promise(function(resolve, reject) {
-      let dataObject = _this.dataObjectList[dataObjectURL];
+    let dataObject = _this.dataObjectList[dataObjectURL];
 
-      return (dataObject) ? resolve(dataObject.subscribers) : reject('No dataObject was found');
-    });
+    if(dataObject) {
+      return dataObject.subscribers;
+    } else {
+      throw 'No dataObject was found';
+    }
   }
 
   /**

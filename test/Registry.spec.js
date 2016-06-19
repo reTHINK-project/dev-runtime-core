@@ -269,48 +269,25 @@ getRegistry.then(function(registry) {
     });
 
     describe('getPreAuthSubscribers(dataObjectURL)', function() {
-      it('should return the list of pre authorised users', function(done) {
+      it('should return the list of pre authorised users', function() {
         let dataObjectURL = 'comm://localhost/9303b707-f301-4929-ad7d-65a89a356871';
         let fakedataObjectURL = 'comm://fake';
 
-        expect(registry.getPreAuthSubscribers(dataObjectURL).then(function(response) {
-          return response;
-        })).to.be.fulfilled.and.eventually.eql(['user://gmail.com/user15']).and.notify(done);
+        expect(registry.getPreAuthSubscribers(dataObjectURL)).to.be.eql(['user://gmail.com/user15']);
 
-        expect(registry.getPreAuthSubscribers(fakedataObjectURL).then(function(response) {
-          return response;
-        })).to.be.fulfilled.and.eventually.equal('No reporter was found').and.notify(done);
-      });
-    });
-
-    describe('registerSubscriber(dataObjectURL, subscriberURL)', function() {
-      it('should return the list of pre authorised users', function(done) {
-        let dataObjectURL = 'comm://localhost/9303b707-f301-4929-ad7d-65a89a356871';
-        let fakedataObjectURL = 'comm://fake';
-        let subscriberURL = 'hyperty://localhost/00-00-sub1';
-
-        expect(registry.registerSubscriber(dataObjectURL, subscriberURL).then(function(response) {
-          return response;
-        })).to.be.fulfilled.and.eventually.equal('Subscriber successfully added').and.notify(done);
-
-        expect(registry.registerSubscriber(fakedataObjectURL, subscriberURL).then(function(response) {
-          return response;
-        })).to.be.fulfilled.and.eventually.equal('No dataObject was found').and.notify(done);
+        expect(registry.getPreAuthSubscribers(fakedataObjectURL)).to.be.eql([]);
       });
     });
 
     describe('getDataObjectSubscribers(dataObjectURL)', function() {
-      it('should return the list of pre authorised users', function(done) {
+      it('should return the list of pre authorised users', function() {
         let dataObjectURL = 'comm://localhost/9303b707-f301-4929-ad7d-65a89a356871';
         let fakedataObjectURL = 'comm://fake';
+        let subscriberURL = 'hyperty://localhost/00-00-sub1';
 
-        expect(registry.getDataObjectSubscribers(dataObjectURL).then(function(response) {
-          return response;
-        })).to.be.fulfilled.and.eventually.eql(['hyperty://localhost/00-00-sub1']).and.notify(done);
+        registry.registerSubscriber(dataObjectURL, subscriberURL);
 
-        expect(registry.getDataObjectSubscribers(fakedataObjectURL).then(function(response) {
-          return response;
-        })).to.be.fulfilled.and.eventually.equal('No dataObject was found').and.notify(done);
+        expect(registry.getDataObjectSubscribers(dataObjectURL)).to.be.eql(['hyperty://localhost/00-00-sub1']);
       });
     });
 

@@ -136,26 +136,53 @@ class PolicyEngine {
       console.log(message);
       message.body = message.body || {};
       let isToSetID = _this.context.isToSetID(message);
+      let result;
       if (!isToSetID) {
-        _this.context.decrypt(message).then(message => { resolve(message); });
-      }
-
-      let policiesResult = [true, []];
-      if (_this.context.isToVerify(message)) {
-        let applicablePolicies = _this.getApplicablePolicies('*');
-        policiesResult = _this.pdp.evaluate(message, applicablePolicies);
-        message.body.auth = applicablePolicies.length !== 0;
-        _this.pep.enforce(policiesResult);
-      }
-
-      if (isToSetID) {
-        _this.context.getIdentity(message.from).then(identity => {
+        _this.context.decrypt(message).then(message => {
+          result = _this.applyPolicies(message);
+          _this.decide(message, result.policiesResult).then(message => {
+            resolve(message);
+          }, function (error) {
+            reject(error);
+          });
+        }, function (error) {
+          reject(error);
+        });
+      } else {
+        result = _this.applyPolicies(message);
+        _this.context.getIdentity(message).then(identity => {
           message.body.identity = identity;
-          _this.context.encrypt(message).then(message => { resolve(message); });
+          _this.context.encrypt(message).then(message => {
+            _this.decide(message, result.policiesResult).then(message => {
+              resolve(message);
+            }, function (error) {
+              reject(error);
+            });
+          }, function (error) {
+            reject(error);
+          });
         }, function (error) {
           reject(error);
         });
       }
+    });
+  }
+
+  applyPolicies(message) {
+    let _this = this;
+    let policiesResult = [true, []];
+    if (_this.context.isToVerify(message)) {
+      let applicablePolicies = _this.getApplicablePolicies('*');
+      policiesResult = _this.pdp.evaluate(message, applicablePolicies);
+      message.body.auth = applicablePolicies.length !== 0;
+      _this.pep.enforce(policiesResult);
+    }
+
+    return { message: message, policiesResult: policiesResult };
+  }
+
+  decide(message, policiesResult) {
+    return new Promise( (resolve, reject) => {
       if (policiesResult[0]) {
         message.body.auth = message.body.auth || false;
         resolve(message);
@@ -163,6 +190,7 @@ class PolicyEngine {
         reject('Unauthorised message');
       }
     });
+
   }
 
   /**

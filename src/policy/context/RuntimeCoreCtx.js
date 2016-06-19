@@ -65,44 +65,45 @@ class RuntimeCoreCtx extends Context {
     return members;
   }
 
-  getIdentity(from) {
+  //TODO: if is from data object, identity is of the corresponding hyperty
+  getIdentity(message) {
     let _this = this;
-    return _this.idModule.getIdentityOfHyperty(from);
+    if (message.type === 'subscribe' || message.type === 'update') {
+      return _this.idModule.getIdentityOfHyperty(message.body.source);
+    } else {
+      return _this.idModule.getIdentityOfHyperty(message.from);
+    }
   }
 
   isToSetID(message) {
     let _this = this;
 
-    if (message.body.identity) {
+    if (message.body.identity || !_this.isToVerify(message)) {
       return false;
-    }
-
-    let idpScheme = 'domain-idp';
-    let idmURL = _this.runtimeRegistry.runtimeURL + '/idm';
-
-    if (divideURL(message.from).type === idpScheme) {
-      return message.to !== idmURL;
-    }
-    if (divideURL(message.to).type === idpScheme) {
-      return message.from !== idmURL;
     }
 
     return true;
   }
 
   isToVerify(message) {
-    //return _this.runtimeRegistry.isDataObjectURL(to);
-    return true;
+    let _this = this;
+    let isFromHyperty = divideURL(message.from).type === 'hyperty';
+    let isFromSM = message.from === _this.runtimeRegistry.runtimeURL + '/sm';
+    let isToHyperty = divideURL(message.to).type === 'hyperty';
+    let isToDataObject = _this.runtimeRegistry.isDataObjectURL(message.to);
+
+    return (isFromHyperty && isToDataObject) || (isFromSM && isToDataObject);
   }
 
   decrypt(message) {
     let _this = this;
 
     return new Promise(function(resolve,reject) {
-
       _this.idModule.decryptMessage(message).then(function(msg) {
         resolve(msg);
-      }, function(err) { reject(err); });
+      }, (error) => {
+        reject(err);
+      });
     });
   }
 
@@ -110,11 +111,11 @@ class RuntimeCoreCtx extends Context {
     let _this = this;
 
     return new Promise(function(resolve,reject) {
-
-      _this.idModule.encryptMessage(message).then(function(msg) {
+      _this.idModule.encryptMessage(message).then((msg) => {
         resolve(msg);
-      }, function(err) { reject(err); });
-
+      }, (error) => {
+        reject(error);
+      });
     });
   }
 
@@ -127,7 +128,7 @@ class RuntimeCoreCtx extends Context {
       let dataObjectURL = message.to.split('/');
       dataObjectURL.pop();
       dataObjectURL = dataObjectURL[0] + '//' + dataObjectURL[2] + '/' + dataObjectURL[3];
-      _this.runtimeRegistry.registerSubscriber(dataObjectURL, message.body.subscriber).then(message => { resolve(message); });
+      _this.runtimeRegistry.registerSubscriber(dataObjectURL, message.body.subscriber);
     }
   }
 }
