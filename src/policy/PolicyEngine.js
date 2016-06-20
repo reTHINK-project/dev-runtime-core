@@ -131,39 +131,45 @@ class PolicyEngine {
   authorise(message) {
     let _this = this;
 
-    return new Promise(function(resolve, reject) {
+    return new Promise((resolve, reject) => {
       console.log('--- Policy Engine ---');
       console.log(message);
       message.body = message.body || {};
-      let isToSetID = _this.context.isToSetID(message);
       let result;
-      if (!isToSetID) {
-        _this.context.decrypt(message).then(message => {
-          result = _this.applyPolicies(message);
-          _this.decide(message, result.policiesResult).then(message => {
-            resolve(message);
-          }, function (error) {
-            reject(error);
-          });
-        }, function (error) {
-          reject(error);
-        });
-      } else {
-        result = _this.applyPolicies(message);
-        _this.context.getIdentity(message).then(identity => {
-          message.body.identity = identity;
-          _this.context.encrypt(message).then(message => {
-            _this.decide(message, result.policiesResult).then(message => {
+      let isIncomingMessage = _this.context.isIncomingMessage(message);
+      let isToVerify = _this.context.isToVerify(message);
+
+      if (isToVerify) {
+        if (isIncomingMessage) {
+
+          _this.context.decrypt(message).then(message => {
+            result = _this.applyPolicies(message);
+            let messageAccepted = result.policiesResult[0];
+            if (messageAccepted) {
               resolve(message);
-            }, function (error) {
-              reject(error);
-            });
-          }, function (error) {
-            reject(error);
-          });
-        }, function (error) {
-          reject(error);
-        });
+            } else {
+              reject('Incoming message: blocked');
+            }
+          }, (error) => { reject(error); });
+
+        } else {
+
+          _this.context.getIdentity(message).then(identity => {
+            message.body.identity = identity;
+            result = _this.applyPolicies(message);
+            let messageAccepted = result.policiesResult[0];
+            if (messageAccepted) {
+              _this.context.encrypt(message).then(message => {
+                resolve(message);
+              }, (error) => { reject(error); });
+            } else {
+              reject('Outgoing message: blocked');
+            }
+          }, (error) => { reject(error); });
+
+        }
+      } else {
+        resolve(message);
       }
     });
   }
@@ -179,18 +185,6 @@ class PolicyEngine {
     }
 
     return { message: message, policiesResult: policiesResult };
-  }
-
-  decide(message, policiesResult) {
-    return new Promise( (resolve, reject) => {
-      if (policiesResult[0]) {
-        message.body.auth = message.body.auth || false;
-        resolve(message);
-      } else {
-        reject('Unauthorised message');
-      }
-    });
-
   }
 
   /**

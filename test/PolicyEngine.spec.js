@@ -18,6 +18,7 @@ let runtimeRegistry = {
   isDataObjectURL: (dataObjectURL) => {
     return divideURL(dataObjectURL).type === 'comm';
   },
+  registerSubscribedDataObject: () => {},
   registerSubscriber: () => {},
   runtimeURL: 'runtime://localhost/7601'
 };

@@ -65,34 +65,47 @@ class RuntimeCoreCtx extends Context {
     return members;
   }
 
-  //TODO: if is from data object, identity is of the corresponding hyperty
+  isIncomingMessage(message) {
+    return (message.body.identity) ? true : false;
+  }
+
   getIdentity(message) {
     let _this = this;
-    if (message.type === 'subscribe' || message.type === 'update') {
-      return _this.idModule.getIdentityOfHyperty(message.body.source);
-    } else {
-      return _this.idModule.getIdentityOfHyperty(message.from);
+
+    if (message.type === 'subscribe') {
+      return _this.idModule.getIdentityOfHyperty(message.body.subscriber);
     }
+    if (message.type === 'update') {
+      return _this.idModule.getIdentityOfHyperty(message.body.source);
+    }
+
+    return _this.idModule.getIdentityOfHyperty(message.from);
   }
 
   isToSetID(message) {
     let _this = this;
-
     if (message.body.identity || !_this.isToVerify(message)) {
       return false;
+    } else {
+      return true;
     }
-
-    return true;
   }
 
   isToVerify(message) {
     let _this = this;
-    let isFromHyperty = divideURL(message.from).type === 'hyperty';
-    let isFromSM = message.from === _this.runtimeRegistry.runtimeURL + '/sm';
-    let isToHyperty = divideURL(message.to).type === 'hyperty';
-    let isToDataObject = _this.runtimeRegistry.isDataObjectURL(message.to);
 
-    return (isFromHyperty && isToDataObject) || (isFromSM && isToDataObject);
+    let isFromHyperty = divideURL(message.from).type === 'hyperty';
+    let isToDataObject = _this._isDataObjectURL(message.to);
+    let isFromSM = (message.from === _this.runtimeRegistry.runtimeURL + '/sm');
+    let isToSubscription = (_this._getLastComponentOfURL(message.to) === 'subscription');
+    let isFromDataObject = _this._isDataObjectURL(message.from);
+    let isToHyperty = divideURL(message.to).type === 'hyperty';
+
+    if (isFromSM && isToSubscription) {
+      _this.runtimeRegistry.registerSubscribedDataObject(_this._getDataObjectURL(message.to));
+    }
+
+    return (isFromHyperty && isToDataObject) || (isFromSM && isToSubscription) || (isFromDataObject && isToDataObject) || (isFromHyperty && isToHyperty);
   }
 
   decrypt(message) {
@@ -102,7 +115,7 @@ class RuntimeCoreCtx extends Context {
       _this.idModule.decryptMessage(message).then(function(msg) {
         resolve(msg);
       }, (error) => {
-        reject(err);
+        reject(error);
       });
     });
   }
@@ -130,6 +143,22 @@ class RuntimeCoreCtx extends Context {
       dataObjectURL = dataObjectURL[0] + '//' + dataObjectURL[2] + '/' + dataObjectURL[3];
       _this.runtimeRegistry.registerSubscriber(dataObjectURL, message.body.subscriber);
     }
+  }
+
+  _getLastComponentOfURL(url) {
+    let split = url.split('/');
+    return split[split.length-1];
+  }
+
+  _getDataObjectURL(url) {
+    let splitURL = url.split('/');
+    return splitURL[0] + '//' + splitURL[2] + '/' + splitURL[3];
+  }
+
+  _isDataObjectURL(url) {
+    let _this = this;
+    let dataObjectURL = _this._getDataObjectURL(url);
+    return _this.runtimeRegistry.isDataObjectURL(dataObjectURL);
   }
 }
 
