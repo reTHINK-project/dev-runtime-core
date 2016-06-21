@@ -103,7 +103,6 @@ class IdentityModule {
     return _this.identities;
   }
 
-
   /**
   * gets all the information from a given userURL
   * @param  {String}  userURL     user url
@@ -264,7 +263,7 @@ class IdentityModule {
           //generates the RSA key pair
           _this.crypto.generateRSAKeyPair().then(function(keyPair) {
 
-            publicKey = btoa(keyPair.public);
+            publicKey = _this.crypto.encode(keyPair.public);
             userkeyPair = keyPair;
             return _this.generateAssertion(publicKey, origin, '', userkeyPair, idpDomain);
 
@@ -422,28 +421,40 @@ class IdentityModule {
 
     return new Promise(function(resolve, reject) {
 
-      resolve(message);
-      /*_this._registry.getHypertyOwner(message.from).then(function(userURL) {
+      //resolve(message);
+      _this._registry.getHypertyOwner(message.from).then(function(userURL) {
 
-        let chatKeys = _this.chatKeys[message.to + message.from];
+        let chatKeys = _this.chatKeys[message.from + message.to];
         if (!chatKeys) {
           chatKeys = _this._newChatCrypto(message, userURL);
-          _this.chatKeys[message.to + message.from] = chatKeys;
+          _this.chatKeys[message.from + message.to] = chatKeys;
           message.body.handshakePhase = 'startHandShake';
         }
 
-        if (chatKeys.hypertyToSessionKey) {
-          //TODO apply symmetric cypher
-          resolve(message);
+        if (chatKeys.keys.hypertyToSessionKey && message.type !== 'handshake') {
 
+          let iv = _this.crypto.generateIV();
+          _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, message.body.value, iv).then(encryptedValue => {
+            message.body.value = _this.crypto.encode(encryptedValue);
+            message.body.iv = _this.crypto.encode(iv);
+            console.log('Session keys created');
+            resolve(message);
+          });
+
+        } else if (message.type === 'handshake') {
+          console.log('else if');
+          resolve(message);
         } else {
+          console.log('else');
           _this._handShakePhase(message, chatKeys).then(function(value) {
-            _this.chatKeys[message.to + message.from] = value.chatKeys;
-            resolve(value.message);
+            _this.chatKeys[message.from + message.to] = value.chatKeys;
+
+            _this._messageBus.postMessage(value.message);
+            reject('encrypt handshake protocol phase ', message.id);
           });
         }
 
-      }).catch(function(err) { reject(err); });*/
+      });
     });
 
   }
@@ -455,27 +466,47 @@ class IdentityModule {
 
     return new Promise(function(resolve, reject) {
 
-      resolve(message);
+      /*if (message.to.includes('domain-idp://') || message.from.includes('domain-idp://') ||
+          message.to.includes('domain://msg-node.') || message.from.includes('domain://msg-node.') ||
+          message.to.includes(_this._runtimeURL) || message.from.includes(_this._runtimeURL)) {
+        console.log('decryptMessage ignored');
+        return resolve(message);
+      }*/
 
-      /*_this._registry.getHypertyOwner(message.to).then(function(userURL) {
+      //resolve(message);
 
-        let chatKeys = _this.chatKeys[message.from + message.to];
+      _this._registry.getHypertyOwner(message.to).then(function(userURL) {
+
+        let chatKeys = _this.chatKeys[message.to + message.from];
         if (!chatKeys) {
           chatKeys = _this._newChatCrypto(message, userURL, 'decrypt');
           _this.chatKeys[message.to + message.from] = chatKeys;
         }
 
-        if (chatKeys.hypertyToSessionKey) {
+        if (chatKeys.keys.hypertyToSessionKey && message.type !== 'handshake') {
           //TODO apply symmetric cypher
+          console.log('Session keys created, decrypt');
+
+          let iv = _this.crypto.decode(message.body.iv);
+          let data = _this.crypto.decode(message.body.value);
+
+          _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, data, iv).then(decrytedData => {
+            message.body.value = decrytedData;
+          });
+
           resolve(message);
 
         } else {
           _this._handShakePhase(message, chatKeys).then(function(value) {
-            _this.chatKeys[message.from + message.to] = value.chatKeys;
-            resolve(value.message);
+            _this.chatKeys[message.to + message.from] = value.chatKeys;
+            _this._messageBus.postMessage(value.message);
+            reject('decrypt handshake protocol phase ', message.id);
           });
         }
-      }).catch(function(err) { reject(err); });*/
+      }, function(rej) {
+        // TODO review this logic
+        resolve(rej);
+      }).catch(function(err) { reject(err); });
     });
   }
 
@@ -490,34 +521,184 @@ class IdentityModule {
       switch (handshakeType) {
 
         case 'startHandShake':
-          /*message.type = 'handshake';
-          message.body.handshakePhase = 'senderHello';
           chatKeys.keys.fromRandom = _this.crypto.generateRandom();
-          message.body.random = chatKeys.keys.fromRandom;
-          resolve({message: message, chatKeys: chatKeys});*/
+
+          let startHandShakeMsg = {
+            type: 'handshake',
+            to: message.to,
+            from: message.from,
+            body: {
+              handshakePhase: 'senderHello',
+              random: _this.crypto.encode(chatKeys.keys.fromRandom)
+            }
+          };
+          chatKeys.handshakeHistory.senderHello = startHandShakeMsg;
+          resolve({message: startHandShakeMsg, chatKeys: chatKeys});
 
           break;
         case 'senderHello':
-          /*message.body.handshakePhase = 'receiverHello';
+          console.log('senderHello');
+          chatKeys.handshakeHistory.senderHello = message;
+          chatKeys.keys.fromRandom = _this.crypto.decode(message.body.random);
           chatKeys.keys.toRandom = _this.crypto.generateRandom();
-          let msg = { type: 'handshake', to: message.from, from: message.to,
-            body: { identity: chatKeys.messageInfo, random: chatKeys.keys.toRandom}};
-          resolve({message: msg, chatKeys: chatKeys});*/
+          let senderHelloMsg = {
+            type: 'handshake',
+            to: message.from,
+            from: message.to,
+            body: {
+              handshakePhase: 'receiverHello',
+              random: _this.crypto.encode(chatKeys.keys.toRandom)
+            }
+          };
+          chatKeys.handshakeHistory.receiverHello = senderHelloMsg;
+          resolve({message: senderHelloMsg, chatKeys: chatKeys});
 
           break;
         case 'receiverHello':
+          console.log('receiverHello');
+          chatKeys.handshakeHistory.receiverHello = message;
+          _this.validateAssertion(message.body.identity.assertion).then((value) => {
+
+            //TODO send a signature
+
+            let receiverPublicKey = _this.crypto.decode(value.contents.nonce);
+            let premasterSecret = _this.crypto.generatePMS();
+            let toRandom = message.body.random;
+            chatKeys.hypertyTo.assertion = message.body.identity.assertion;
+            chatKeys.hypertyTo.publicKey = receiverPublicKey;
+            chatKeys.hypertyTo.userID    = value.contents.email;
+            chatKeys.keys.toRandom  = _this.crypto.decode(toRandom);
+            chatKeys.keys.premasterKey = premasterSecret;
+
+            let concatKey = _this.crypto.concatPMSwithRandoms(premasterSecret, chatKeys.keys.toRandom, chatKeys.keys.fromRandom);
+
+            _this.crypto.generateMasterSecret(concatKey, 'messageHistoric' + chatKeys.keys.toRandom + chatKeys.keys.fromRandom).then((masterKey) => {
+              chatKeys.keys.masterKey = masterKey;
+
+              _this.crypto.generateKeys(masterKey, 'key expansion' + chatKeys.keys.toRandom + chatKeys.keys.fromRandom).then((keys) => {
+
+                chatKeys.keys.hypertyToSessionKey = new Uint8Array(keys[0]);
+                chatKeys.keys.hypertyFromSessionKey = new Uint8Array(keys[1]);
+                chatKeys.keys.hypertyToHashKey = new Uint8Array(keys[2]);
+                chatKeys.keys.hypertyFromHashKey = new Uint8Array(keys[3]);
+                let iv = _this.crypto.generateIV();
+
+                _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, 'ok', iv).then((encryptedData) => {
+
+                  _this.crypto.encryptRSA(receiverPublicKey, premasterSecret).then((encryptedValue) => {
+                    console.log('encrypted', encryptedValue);
+                    let receiverHelloMsg = {
+                      type: 'handshake',
+                      to: message.from,
+                      from: message.to,
+                      body: {
+                        handshakePhase: 'senderCertificate',
+                        value: _this.crypto.encode(encryptedValue),
+                        encryptedData: _this.crypto.encode(encryptedData),
+                        iv: _this.crypto.encode(iv)
+                      }
+                    };
+                    chatKeys.handshakeHistory.senderCertificate = receiverHelloMsg;
+                    resolve({message: receiverHelloMsg, chatKeys: chatKeys});
+                  });
+                });
+              });
+            });
+
+          }, (error) => {
+            console.log(error);
+            reject('Error during authentication of identity');
+          });
 
           break;
         case 'senderCertificate':
+          console.log('senderCertificate');
+          chatKeys.handshakeHistory.senderCertificate = message;
+          let iv;
+
+          _this.validateAssertion(message.body.identity.assertion).then((value) => {
+            //TODO verify the signature
+            let encrypted = _this.crypto.decode(message.body.value);
+            let senderPublicKey = _this.crypto.decode(value.contents.nonce);
+            chatKeys.hypertyTo.assertion = message.body.identity.assertion;
+            chatKeys.hypertyTo.publicKey = senderPublicKey;
+            chatKeys.hypertyTo.userID    = value.contents.email;
+
+            return _this.crypto.decryptRSA(chatKeys.hypertyFrom.privateKey, encrypted);
+
+          }, (error) => {
+            console.log(error);
+            reject('Error during authentication of identity');
+
+            //obtain the PremasterKey using the private key
+          }).then(pms => {
+            chatKeys.keys.premasterKey = new Uint8Array(pms);
+            let concatKey = _this.crypto.concatPMSwithRandoms(chatKeys.keys.premasterKey, chatKeys.keys.toRandom, chatKeys.keys.fromRandom);
+
+            return _this.crypto.generateMasterSecret(concatKey, 'messageHistoric' + chatKeys.keys.toRandom + chatKeys.keys.fromRandom);
+
+            // generates the master keys from the Premaster key and the randoms
+          }).then(masterKey => {
+            chatKeys.keys.masterKey = masterKey;
+
+            return _this.crypto.generateKeys(masterKey, 'key expansion' + chatKeys.keys.toRandom + chatKeys.keys.fromRandom);
+
+            // generates the symmetric keys to be used in the symmetric encryption
+          }).then(keys => {
+            chatKeys.keys.hypertyFromSessionKey = new Uint8Array(keys[0]);
+            chatKeys.keys.hypertyToSessionKey = new Uint8Array(keys[1]);
+            chatKeys.keys.hypertyFromHashKey = new Uint8Array(keys[2]);
+            chatKeys.keys.hypertyToHashKey = new Uint8Array(keys[3]);
+            let iv = _this.crypto.decode(message.body.iv);
+            let data = _this.crypto.decode(message.body.encryptedData);
+
+            return _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, data, iv);
+
+          }).then(decryptedData => {
+            console.log('decryptedData', decryptedData);
+            iv = _this.crypto.generateIV();
+
+            return _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, 'ok!', iv);
+
+          }).then(encryptedValue => {
+            let receiverFinishedMessage = {
+              type: 'handshake',
+              to: message.from,
+              from: message.to,
+              body: {
+                handshakePhase: 'receiverFinishedMessage',
+                value: _this.crypto.encode(encryptedValue),
+                iv: _this.crypto.encode(iv)
+              }
+            };
+
+            chatKeys.handshakeHistory.receiverFinishedMessage = receiverFinishedMessage;
+            resolve({message: receiverFinishedMessage, chatKeys: chatKeys});
+          });
 
           break;
-
         case 'receiverFinishedMessage':
+          console.log('receiverFinishedMessage');
+          chatKeys.handshakeHistory.receiverFinishedMessage = message;
 
-          break;
-        case 'senderFinishedMessage':
+          iv = _this.crypto.decode(message.body.iv);
+          let data = _this.crypto.decode(message.body.value);
+          _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, data, iv).then(decryptedData => {
+            console.log('decryptedData', decryptedData);
 
+            let initialMessage = {
+              type: 'create',
+              to: message.from,
+              from: message.to,
+              body: {
+                value: chatKeys.initialMessage.body.value
+              }
+            };
+
+            resolve({message: initialMessage, chatKeys: chatKeys});
+          });
           break;
+
         default:
 
       }
@@ -567,7 +748,14 @@ class IdentityModule {
         fromRandom: undefined,
         premasterKey: undefined,
         masterKey: undefined
-      }
+      },
+      handshakeHistory: {
+        senderHello: undefined,
+        receiverHello: undefined,
+        senderCertificate: undefined,
+        receiverFinishedMessage: undefined
+      },
+      initialMessage: message
     };
 
     return newChatCrypto;
