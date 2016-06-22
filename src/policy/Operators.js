@@ -12,7 +12,7 @@ class Operators {
       in: (params) => { return params[0].indexOf(params[1]) > -1; },
       equals: (params) => { return params[0][0] === '*' || params[0][0] === params[1]; },
 
-      or: (params) => { return  params[0] || params[1]; },
+      or: (params) => { return params[0] || params[1]; },
       and: (params) => { return params[0] && params[1]; },
       not: (params) => { return !params[0]; }
     };

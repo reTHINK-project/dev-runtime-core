@@ -100,7 +100,7 @@ class PolicyEngine {
   }
 
   areEqualArrays(array1, array2) {
-    if (array1.length != array2.length) {
+    if (array1.length !== array2.length) {
       return false;
     }
 
@@ -110,8 +110,7 @@ class PolicyEngine {
         if (!array1[i].equals(array2[i])) {
           return false;
         }
-      }
-      else if (array1[i] != array2[i]) {
+      } else if (array1[i] !== array2[i]) {
         return false;
       }
     }

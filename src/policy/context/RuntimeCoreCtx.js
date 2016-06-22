@@ -1,12 +1,13 @@
-import Context from '../Context';
+import CommonCtx from './CommonCtx';
 import {divideURL} from '../../utils/utils';
 import persistenceManager from '../../persistence/PersistenceManager';
 
-class RuntimeCoreCtx extends Context {
+class RuntimeCoreCtx extends CommonCtx {
 
   constructor(idModule, runtimeRegistry) {
     super();
     let _this = this;
+    _this.policies = _this.loadPolicies();
     _this.idModule = idModule;
     _this.runtimeRegistry = runtimeRegistry;
   }
@@ -22,7 +23,7 @@ class RuntimeCoreCtx extends Context {
       actions: [{method: 'registerSubscriber'}]
     };
 
-    myPolicies['global'] = [acceptAnySubscriptionPolicy];
+    myPolicies.global = [acceptAnySubscriptionPolicy];
     persistenceManager.set('policies', 0, myPolicies);
 
     return myPolicies;
@@ -36,7 +37,7 @@ class RuntimeCoreCtx extends Context {
       console.log(message);
       message.body = message.body || {};
       let result;
-      let isIncomingMessage = _this.isIncomingMessage(message);
+      let isIncomingMessage = _this._isIncomingMessage(message);
       let isToVerify = _this.isToVerify(message);
 
       if (isToVerify) {
@@ -82,8 +83,17 @@ class RuntimeCoreCtx extends Context {
       dataObjectURL = dataObjectURL[0] + '//' + dataObjectURL[2];
       _this.groupAttribute = _this.runtimeRegistry.getPreAuthSubscribers(dataObjectURL);
     } else {
-    _this.groupAttribute = _this._getList(params.scope, params.group);
+      _this.groupAttribute = _this._getList(params.scope, params.group);
     }
+  }
+
+  _getList(scope, groupName) {
+    let myGroups = persistenceManager.get('groups') || {};
+    let members = [];
+    if (myGroups[scope] !== undefined && myGroups[scope][groupName] !== undefined) {
+      members = myGroups[scope][groupName];
+    }
+    return members;
   }
 
   set subscription(params) {
@@ -101,16 +111,7 @@ class RuntimeCoreCtx extends Context {
     return _this.subscriptionAttribute;
   }
 
-  _getList(scope, groupName) {
-    let myGroups = persistenceManager.get('groups') || {};
-    let members = [];
-    if (myGroups[scope] !== undefined && myGroups[scope][groupName] !== undefined) {
-      members = myGroups[scope][groupName];
-    }
-    return members;
-  }
-
-  isIncomingMessage(message) {
+  _isIncomingMessage(message) {
     return (message.body.identity) ? true : false;
   }
 
@@ -125,15 +126,6 @@ class RuntimeCoreCtx extends Context {
     }
 
     return _this.idModule.getIdentityOfHyperty(message.from);
-  }
-
-  isToSetID(message) {
-    let _this = this;
-    if (message.body.identity || !_this.isToVerify(message)) {
-      return false;
-    } else {
-      return true;
-    }
   }
 
   isToVerify(message) {
@@ -192,7 +184,7 @@ class RuntimeCoreCtx extends Context {
 
   _getLastComponentOfURL(url) {
     let split = url.split('/');
-    return split[split.length-1];
+    return split[split.length - 1];
   }
 
   _getDataObjectURL(url) {
