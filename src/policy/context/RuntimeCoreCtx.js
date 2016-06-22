@@ -9,7 +9,6 @@ class RuntimeCoreCtx extends Context {
     let _this = this;
     _this.idModule = idModule;
     _this.runtimeRegistry = runtimeRegistry;
-    _this.policies = _this.loadPolicies();
   }
 
   loadPolicies() {
@@ -27,6 +26,52 @@ class RuntimeCoreCtx extends Context {
     persistenceManager.set('policies', 0, myPolicies);
 
     return myPolicies;
+  }
+
+  authorise(message) {
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+      console.log('--- Policy Engine (Runtime Core) ---');
+      console.log(message);
+      message.body = message.body || {};
+      let result;
+      let isIncomingMessage = _this.isIncomingMessage(message);
+      let isToVerify = _this.isToVerify(message);
+
+      if (isToVerify) {
+        if (isIncomingMessage) {
+
+          _this.decrypt(message).then(message => {
+            result = _this.applyPolicies(message);
+            let messageAccepted = result.policiesResult[0];
+            if (messageAccepted) {
+              resolve(message);
+            } else {
+              reject('Incoming message: blocked');
+            }
+          }, (error) => { reject(error); });
+
+        } else {
+
+          _this.getIdentity(message).then(identity => {
+            message.body.identity = identity;
+            result = _this.applyPolicies(message);
+            let messageAccepted = result.policiesResult[0];
+            if (messageAccepted) {
+              _this.encrypt(message).then(message => {
+                resolve(message);
+              }, (error) => { reject(error); });
+            } else {
+              reject('Outgoing message: blocked');
+            }
+          }, (error) => { reject(error); });
+
+        }
+      } else {
+        resolve(message);
+      }
+    });
   }
 
   set group(params) {

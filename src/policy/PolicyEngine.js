@@ -13,16 +13,15 @@ class PolicyEngine {
   /**
   * This method is invoked by the RuntimeUA and instantiates the Policy Engine. A Policy Decision
   * Point (PDP) and a Policy Enforcement Point (PEP) are initialised for the evaluation of policies
-  * and the enforcement of additional actions, respectively. Adds a listener do the Message Bus to
-  * allow method invokation.
+  * and the enforcement of additional actions, respectively.
   * @param  {IdentityModule}    identityModule
   * @param  {Registry}          runtimeRegistry
   */
   constructor(context) {
     let _this = this;
     _this.context = context;
-    _this.pdp = new PDP(context);
-    _this.pep = new PEP(context);
+    _this.context.pdp = new PDP(context);
+    _this.context.pep = new PEP(context);
   }
 
   /**
@@ -130,87 +129,7 @@ class PolicyEngine {
   */
   authorise(message) {
     let _this = this;
-
-    return new Promise((resolve, reject) => {
-      console.log('--- Policy Engine ---');
-      console.log(message);
-      message.body = message.body || {};
-      let result;
-      let isIncomingMessage = _this.context.isIncomingMessage(message);
-      let isToVerify = _this.context.isToVerify(message);
-
-      if (isToVerify) {
-        if (isIncomingMessage) {
-
-          _this.context.decrypt(message).then(message => {
-            result = _this.applyPolicies(message);
-            let messageAccepted = result.policiesResult[0];
-            if (messageAccepted) {
-              resolve(message);
-            } else {
-              reject('Incoming message: blocked');
-            }
-          }, (error) => { reject(error); });
-
-        } else {
-
-          _this.context.getIdentity(message).then(identity => {
-            message.body.identity = identity;
-            result = _this.applyPolicies(message);
-            let messageAccepted = result.policiesResult[0];
-            if (messageAccepted) {
-              _this.context.encrypt(message).then(message => {
-                resolve(message);
-              }, (error) => { reject(error); });
-            } else {
-              reject('Outgoing message: blocked');
-            }
-          }, (error) => { reject(error); });
-
-        }
-      } else {
-        resolve(message);
-      }
-    });
-  }
-
-  applyPolicies(message) {
-    let _this = this;
-    let policiesResult = [true, []];
-    if (_this.context.isToVerify(message)) {
-      let applicablePolicies = _this.getApplicablePolicies('*');
-      policiesResult = _this.pdp.evaluate(message, applicablePolicies);
-      message.body.auth = applicablePolicies.length !== 0;
-      _this.pep.enforce(policiesResult);
-    }
-
-    return { message: message, policiesResult: policiesResult };
-  }
-
-  /**
-  * Returns the policies associated with a scope.
-  * @param   {String} scope
-  * @return  {Array}  policies
-  */
-  getApplicablePolicies(scope) {
-    let _this = this;
-    let myPolicies = persistenceManager.get('policies');
-    if (myPolicies === undefined) {
-      myPolicies = {};
-    }
-    let policies = [];
-
-    if (scope !== '*') {
-      if (myPolicies[scope] !== undefined) {
-        policies = myPolicies[scope];
-      }
-    } else {
-      for (let i in myPolicies) {
-        policies.push.apply(policies, myPolicies[i]);
-      }
-    }
-
-    return policies;
+    return _this.context.authorise(message);
   }
 
   getGroupsNames(scope) {

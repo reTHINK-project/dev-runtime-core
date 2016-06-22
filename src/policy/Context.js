@@ -1,9 +1,11 @@
 import {divideEmail} from '../utils/utils';
+import persistenceManager from '../persistence/PersistenceManager';
 
 class Context {
 
   constructor() {
     let _this = this;
+    _this.policies = _this.loadPolicies();
   }
 
   set date(now) {
@@ -60,6 +62,45 @@ class Context {
   get weekday() {
     let _this = this;
     return _this._weekdayAttribute;
+  }
+
+  applyPolicies(message) {
+    let _this = this;
+    let policiesResult = [true, []];
+    if (_this.isToVerify(message)) {
+      let applicablePolicies = _this.getApplicablePolicies('*');
+      policiesResult = _this.pdp.evaluate(message, applicablePolicies);
+      message.body.auth = applicablePolicies.length !== 0;
+      _this.pep.enforce(policiesResult);
+    }
+
+    return { message: message, policiesResult: policiesResult };
+  }
+
+  /**
+  * Returns the policies associated with a scope.
+  * @param   {String} scope
+  * @return  {Array}  policies
+  */
+  getApplicablePolicies(scope) {
+    let _this = this;
+    let myPolicies = persistenceManager.get('policies');
+    if (myPolicies === undefined) {
+      myPolicies = {};
+    }
+    let policies = [];
+
+    if (scope !== '*') {
+      if (myPolicies[scope] !== undefined) {
+        policies = myPolicies[scope];
+      }
+    } else {
+      for (let i in myPolicies) {
+        policies.push.apply(policies, myPolicies[i]);
+      }
+    }
+
+    return policies;
   }
 
   isToSetID(from, to) {
