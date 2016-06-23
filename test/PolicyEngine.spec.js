@@ -7,9 +7,11 @@ let expect = chai.expect;
 chai.use(chaiAsPromised);
 
 import {divideURL} from '../src/utils/utils';
-import persistenceManager from '../src/persistence/PersistenceManager';
+
+//import persistenceManager from '../src/persistence/PersistenceManager';
 import PolicyEngine from '../src/policy/PolicyEngine';
-import MessageNodeCtx from '../src/policy/context/MessageNodeCtx';
+
+//import MessageNodeCtx from '../src/policy/context/MessageNodeCtx';
 import RuntimeCoreCtx from '../src/policy/context/RuntimeCoreCtx';
 
 /*describe('Policy Engine with Message Node context', function() {
@@ -38,12 +40,12 @@ let runtimeRegistry = {
 
 let identityModule = {
   decryptMessage: (message) => {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function(resolve) {
       resolve(message);
     });
   },
   encryptMessage: (message) => {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function(resolve) {
       resolve(message);
     });
   },
@@ -180,7 +182,8 @@ describe('Policy Engine', function() {
     let groupName1 = 'groupA';
 
     it('creates a group', function() {
-      persistenceManager.delete('groups');
+      //persistenceManager.delete('groups');
+      policyEngine.deleteGroup('global', 'students');
       policyEngine.createList('global', 'group', groupName1);
       expect(policyEngine.getGroupsNames('global')).to.be.eql([groupName1]);
     });
@@ -427,14 +430,14 @@ describe('Policy Engine', function() {
   describe('data objects management', function() {
     let subscribeMessage = {
       body: { identity: { email: userEmail3 }, subscriber: 'hyperty://domain/hyperty-instance' }, id: 1, type: 'subscribe', from: 'runtime://localhost/7601/sm', to: 'comm://domain/data-object-url/subscription'
-    }
+    };
 
     let allowedSubscribeMessage = {
       body: { auth: true, identity: { email: userEmail3 }, subscriber: 'hyperty://domain/hyperty-instance' }, id: 1, type: 'subscribe', from: 'runtime://localhost/7601/sm', to: 'comm://domain/data-object-url/subscription'
-    }
+    };
 
     it('rejects a subscription attempt, as the policy rejects all', function(done) {
-      persistenceManager.delete('policies');
+      //persistenceManager.delete('policies');
       let blockAnySubscriptionPolicy = {
         scope: 'hyperty',
         condition: 'subscription equals *',
@@ -490,7 +493,7 @@ describe('Policy Engine', function() {
       let badSubscribeMessage = {
         body: { identity: { email: userEmail3 }, subscriber: 'hyperty://domain/not-preauthorised-hyperty-instance' }, id: 1, type: 'subscribe', from: 'runtime://localhost/7601/sm', to: 'comm://domain/data-object-url/subscription'
       };
-      policyEngine.removePolicies('hyperty', 'subscription in preauthorised')
+      policyEngine.removePolicies('hyperty', 'subscription in preauthorised');
       policyEngine.addPolicies([blockPreAuthSubscriptionPolicy]);
       expect(policyEngine.authorise(badSubscribeMessage).then(function(response) {
         return response;
@@ -500,5 +503,5 @@ describe('Policy Engine', function() {
     });
   });
 
-  persistenceManager.delete('policies');
+  //persistenceManager.delete('policies');
 });

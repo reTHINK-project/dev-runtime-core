@@ -1,6 +1,7 @@
 import CommonCtx from './CommonCtx';
 import {divideURL} from '../../utils/utils';
-import persistenceManager from '../../persistence/PersistenceManager';
+
+//import persistenceManager from '../../persistence/PersistenceManager';
 
 class RuntimeCoreCtx extends CommonCtx {
 
@@ -10,21 +11,15 @@ class RuntimeCoreCtx extends CommonCtx {
     _this.policies = _this.loadPolicies();
     _this.idModule = idModule;
     _this.runtimeRegistry = runtimeRegistry;
+    _this.groups = {};
   }
 
   loadPolicies() {
     //persistenceManager.delete('policies');
-    let myPolicies = persistenceManager.get('policies') || {};
+    //let myPolicies = persistenceManager.get('policies') || {};
+    let myPolicies = {};
 
-    let acceptAnySubscriptionPolicy = {
-      scope: 'global',
-      condition: 'subscription equals *',
-      authorise: true,
-      actions: [{method: 'registerSubscriber'}]
-    };
-
-    myPolicies.global = [acceptAnySubscriptionPolicy];
-    persistenceManager.set('policies', 0, myPolicies);
+    //persistenceManager.set('policies', 0, myPolicies);
 
     return myPolicies;
   }
@@ -83,12 +78,16 @@ class RuntimeCoreCtx extends CommonCtx {
       dataObjectURL = dataObjectURL[0] + '//' + dataObjectURL[2];
       _this.groupAttribute = _this.runtimeRegistry.getPreAuthSubscribers(dataObjectURL);
     } else {
+      console.log('params');
+      console.log(params);
       _this.groupAttribute = _this._getList(params.scope, params.group);
     }
   }
 
   _getList(scope, groupName) {
-    let myGroups = persistenceManager.get('groups') || {};
+    //let myGroups = persistenceManager.get('groups') || {};
+    let _this = this;
+    let myGroups = _this.groups;
     let members = [];
     if (myGroups[scope] !== undefined && myGroups[scope][groupName] !== undefined) {
       members = myGroups[scope][groupName];

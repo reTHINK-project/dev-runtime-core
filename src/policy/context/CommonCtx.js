@@ -1,6 +1,7 @@
 import Context from '../Context';
 import {divideEmail} from '../../utils/utils';
-import persistenceManager from '../../persistence/PersistenceManager';
+
+//import persistenceManager from '../../persistence/PersistenceManager';
 
 class CommonCtx extends Context {
 
@@ -25,7 +26,9 @@ class CommonCtx extends Context {
   * @return  {Array}  policies
   */
   getApplicablePolicies(scope) {
-    let myPolicies = persistenceManager.get('policies');
+    //let myPolicies = persistenceManager.get('policies');
+    let _this = this;
+    let myPolicies = _this.policies;
     if (myPolicies === undefined) {
       myPolicies = {};
     }

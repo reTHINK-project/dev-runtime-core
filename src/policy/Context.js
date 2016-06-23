@@ -1,5 +1,3 @@
-import persistenceManager from '../persistence/PersistenceManager';
-
 class Context {
 
   constructor() {
