@@ -24,6 +24,21 @@ class RuntimeCoreCtx extends CommonCtx {
     return myPolicies;
   }
 
+  addSubscriptionPolicy() {
+    let _this = this;
+    let policy = {
+      scope: 'global',
+      condition: 'subscription equals *',
+      authorise: true,
+      actions: [{method: 'registerSubscriber'}]
+    };
+
+    if (_this.policies[policy.scope] === undefined) {
+      _this.policies[policy.scope] = [];
+    }
+    _this.policies[policy.scope].push(policy);
+  }
+
   authorise(message) {
     let _this = this;
 
@@ -37,7 +52,6 @@ class RuntimeCoreCtx extends CommonCtx {
 
       if (isToVerify) {
         if (isIncomingMessage) {
-
           _this.decrypt(message).then(message => {
             result = _this.applyPolicies(message);
             let messageAccepted = result.policiesResult[0];
@@ -78,8 +92,6 @@ class RuntimeCoreCtx extends CommonCtx {
       dataObjectURL = dataObjectURL[0] + '//' + dataObjectURL[2];
       _this.groupAttribute = _this.runtimeRegistry.getPreAuthSubscribers(dataObjectURL);
     } else {
-      console.log('params');
-      console.log(params);
       _this.groupAttribute = _this._getList(params.scope, params.group);
     }
   }
@@ -132,16 +144,17 @@ class RuntimeCoreCtx extends CommonCtx {
 
     let isFromHyperty = divideURL(message.from).type === 'hyperty';
     let isToDataObject = _this._isDataObjectURL(message.to);
-    let isFromSM = (message.from === _this.runtimeRegistry.runtimeURL + '/sm');
+    let isFromLocalSM = (message.from === _this.runtimeRegistry.runtimeURL + '/sm');
+    let isFromRemoteSM = (_this._getLastComponentOfURL(message.from) === 'sm');
     let isToSubscription = (_this._getLastComponentOfURL(message.to) === 'subscription');
     let isFromDataObject = _this._isDataObjectURL(message.from);
     let isToHyperty = divideURL(message.to).type === 'hyperty';
 
-    if (isFromSM && isToSubscription) {
-      _this.runtimeRegistry.registerSubscribedDataObject(_this._getDataObjectURL(message.to));
+    if (isFromLocalSM && isToSubscription) {
+      _this.runtimeRegistry.registerSubscribedDataObject(_this._getDataObjectURL(message.to), message.body.subscriber);
     }
 
-    return (isFromHyperty && isToDataObject) || (isFromSM && isToSubscription) || (isFromDataObject && isToDataObject) || (isFromHyperty && isToHyperty);
+    return (isFromHyperty && isToDataObject) || (isFromLocalSM && isToSubscription) || (isFromRemoteSM && isToSubscription) || (isFromDataObject && isToDataObject) || (isFromHyperty && isToHyperty);
   }
 
   decrypt(message) {
@@ -173,6 +186,7 @@ class RuntimeCoreCtx extends CommonCtx {
     let _this = this;
     let to = message.to.split('/');
     let isDataObjectSubscription = to[4] === 'subscription';
+
     if (authDecision && isDataObjectSubscription) {
       let dataObjectURL = message.to.split('/');
       dataObjectURL.pop();
@@ -180,6 +194,19 @@ class RuntimeCoreCtx extends CommonCtx {
       _this.runtimeRegistry.registerSubscriber(dataObjectURL, message.body.subscriber);
     }
   }
+
+  /*doMutualAuthentication(message, authDecision) {
+    let _this = this;
+    let to = message.to.split('/');
+    let isDataObjectSubscription = to[4] === 'subscription';
+
+    if (authDecision && isDataObjectSubscription) {
+      let dataObjectURL = message.to.split('/');
+      dataObjectURL.pop();
+      dataObjectURL = dataObjectURL[0] + '//' + dataObjectURL[2] + '/' + dataObjectURL[3];
+      _this.runtimeRegistry.mutualAuthentication(dataObjectURL, message.body.subscriber);
+    }
+  }*/
 
   _getLastComponentOfURL(url) {
     let split = url.split('/');
