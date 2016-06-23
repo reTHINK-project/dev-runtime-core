@@ -21,23 +21,17 @@
 * limitations under the License.
 **/
 
-// Distribution file for minibus.js 
+// Distribution file for PolicyEngine.js 
 // version: 0.5.0
-// Last build: Thu Jun 23 2016 17:36:52 GMT+0100 (WEST)
+// Last build: Thu Jun 23 2016 17:37:11 GMT+0100 (WEST)
 
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.minibus = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-module.exports = { "default": require("core-js/library/fn/object/create"), __esModule: true };
-},{"core-js/library/fn/object/create":12}],2:[function(require,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.PolicyEngine = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/object/define-property"), __esModule: true };
-},{"core-js/library/fn/object/define-property":13}],3:[function(require,module,exports){
-module.exports = { "default": require("core-js/library/fn/object/get-prototype-of"), __esModule: true };
-},{"core-js/library/fn/object/get-prototype-of":14}],4:[function(require,module,exports){
-module.exports = { "default": require("core-js/library/fn/object/set-prototype-of"), __esModule: true };
-},{"core-js/library/fn/object/set-prototype-of":15}],5:[function(require,module,exports){
+},{"core-js/library/fn/object/define-property":7}],2:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/symbol"), __esModule: true };
-},{"core-js/library/fn/symbol":16}],6:[function(require,module,exports){
+},{"core-js/library/fn/symbol":8}],3:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/symbol/iterator"), __esModule: true };
-},{"core-js/library/fn/symbol/iterator":17}],7:[function(require,module,exports){
+},{"core-js/library/fn/symbol/iterator":9}],4:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -47,7 +41,7 @@ exports.default = function (instance, Constructor) {
     throw new TypeError("Cannot call a class as a function");
   }
 };
-},{}],8:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -75,59 +69,7 @@ exports.default = function () {
     return Constructor;
   };
 }();
-},{"../core-js/object/define-property":2}],9:[function(require,module,exports){
-"use strict";
-
-exports.__esModule = true;
-
-var _setPrototypeOf = require("../core-js/object/set-prototype-of");
-
-var _setPrototypeOf2 = _interopRequireDefault(_setPrototypeOf);
-
-var _create = require("../core-js/object/create");
-
-var _create2 = _interopRequireDefault(_create);
-
-var _typeof2 = require("../helpers/typeof");
-
-var _typeof3 = _interopRequireDefault(_typeof2);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = function (subClass, superClass) {
-  if (typeof superClass !== "function" && superClass !== null) {
-    throw new TypeError("Super expression must either be null or a function, not " + (typeof superClass === "undefined" ? "undefined" : (0, _typeof3.default)(superClass)));
-  }
-
-  subClass.prototype = (0, _create2.default)(superClass && superClass.prototype, {
-    constructor: {
-      value: subClass,
-      enumerable: false,
-      writable: true,
-      configurable: true
-    }
-  });
-  if (superClass) _setPrototypeOf2.default ? (0, _setPrototypeOf2.default)(subClass, superClass) : subClass.__proto__ = superClass;
-};
-},{"../core-js/object/create":1,"../core-js/object/set-prototype-of":4,"../helpers/typeof":11}],10:[function(require,module,exports){
-"use strict";
-
-exports.__esModule = true;
-
-var _typeof2 = require("../helpers/typeof");
-
-var _typeof3 = _interopRequireDefault(_typeof2);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = function (self, call) {
-  if (!self) {
-    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
-  }
-
-  return call && ((typeof call === "undefined" ? "undefined" : (0, _typeof3.default)(call)) === "object" || typeof call === "function") ? call : self;
-};
-},{"../helpers/typeof":11}],11:[function(require,module,exports){
+},{"../core-js/object/define-property":1}],6:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -149,48 +91,36 @@ exports.default = typeof _symbol2.default === "function" && _typeof(_iterator2.d
 } : function (obj) {
   return obj && typeof _symbol2.default === "function" && obj.constructor === _symbol2.default ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof(obj);
 };
-},{"../core-js/symbol":5,"../core-js/symbol/iterator":6}],12:[function(require,module,exports){
-require('../../modules/es6.object.create');
-var $Object = require('../../modules/_core').Object;
-module.exports = function create(P, D){
-  return $Object.create(P, D);
-};
-},{"../../modules/_core":23,"../../modules/es6.object.create":77}],13:[function(require,module,exports){
+},{"../core-js/symbol":2,"../core-js/symbol/iterator":3}],7:[function(require,module,exports){
 require('../../modules/es6.object.define-property');
 var $Object = require('../../modules/_core').Object;
 module.exports = function defineProperty(it, key, desc){
   return $Object.defineProperty(it, key, desc);
 };
-},{"../../modules/_core":23,"../../modules/es6.object.define-property":78}],14:[function(require,module,exports){
-require('../../modules/es6.object.get-prototype-of');
-module.exports = require('../../modules/_core').Object.getPrototypeOf;
-},{"../../modules/_core":23,"../../modules/es6.object.get-prototype-of":79}],15:[function(require,module,exports){
-require('../../modules/es6.object.set-prototype-of');
-module.exports = require('../../modules/_core').Object.setPrototypeOf;
-},{"../../modules/_core":23,"../../modules/es6.object.set-prototype-of":80}],16:[function(require,module,exports){
+},{"../../modules/_core":15,"../../modules/es6.object.define-property":67}],8:[function(require,module,exports){
 require('../../modules/es6.symbol');
 require('../../modules/es6.object.to-string');
 require('../../modules/es7.symbol.async-iterator');
 require('../../modules/es7.symbol.observable');
 module.exports = require('../../modules/_core').Symbol;
-},{"../../modules/_core":23,"../../modules/es6.object.to-string":81,"../../modules/es6.symbol":83,"../../modules/es7.symbol.async-iterator":84,"../../modules/es7.symbol.observable":85}],17:[function(require,module,exports){
+},{"../../modules/_core":15,"../../modules/es6.object.to-string":68,"../../modules/es6.symbol":70,"../../modules/es7.symbol.async-iterator":71,"../../modules/es7.symbol.observable":72}],9:[function(require,module,exports){
 require('../../modules/es6.string.iterator');
 require('../../modules/web.dom.iterable');
 module.exports = require('../../modules/_wks-ext').f('iterator');
-},{"../../modules/_wks-ext":74,"../../modules/es6.string.iterator":82,"../../modules/web.dom.iterable":86}],18:[function(require,module,exports){
+},{"../../modules/_wks-ext":64,"../../modules/es6.string.iterator":69,"../../modules/web.dom.iterable":73}],10:[function(require,module,exports){
 module.exports = function(it){
   if(typeof it != 'function')throw TypeError(it + ' is not a function!');
   return it;
 };
-},{}],19:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 module.exports = function(){ /* empty */ };
-},{}],20:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 var isObject = require('./_is-object');
 module.exports = function(it){
   if(!isObject(it))throw TypeError(it + ' is not an object!');
   return it;
 };
-},{"./_is-object":39}],21:[function(require,module,exports){
+},{"./_is-object":31}],13:[function(require,module,exports){
 // false -> Array#indexOf
 // true  -> Array#includes
 var toIObject = require('./_to-iobject')
@@ -212,16 +142,16 @@ module.exports = function(IS_INCLUDES){
     } return !IS_INCLUDES && -1;
   };
 };
-},{"./_to-index":66,"./_to-iobject":68,"./_to-length":69}],22:[function(require,module,exports){
+},{"./_to-index":56,"./_to-iobject":58,"./_to-length":59}],14:[function(require,module,exports){
 var toString = {}.toString;
 
 module.exports = function(it){
   return toString.call(it).slice(8, -1);
 };
-},{}],23:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 var core = module.exports = {version: '2.4.0'};
 if(typeof __e == 'number')__e = core; // eslint-disable-line no-undef
-},{}],24:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 // optional / simple context binding
 var aFunction = require('./_a-function');
 module.exports = function(fn, that, length){
@@ -242,18 +172,18 @@ module.exports = function(fn, that, length){
     return fn.apply(that, arguments);
   };
 };
-},{"./_a-function":18}],25:[function(require,module,exports){
+},{"./_a-function":10}],17:[function(require,module,exports){
 // 7.2.1 RequireObjectCoercible(argument)
 module.exports = function(it){
   if(it == undefined)throw TypeError("Can't call method on  " + it);
   return it;
 };
-},{}],26:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 // Thank's IE8 for his funny defineProperty
 module.exports = !require('./_fails')(function(){
   return Object.defineProperty({}, 'a', {get: function(){ return 7; }}).a != 7;
 });
-},{"./_fails":31}],27:[function(require,module,exports){
+},{"./_fails":23}],19:[function(require,module,exports){
 var isObject = require('./_is-object')
   , document = require('./_global').document
   // in old IE typeof document.createElement is 'object'
@@ -261,12 +191,12 @@ var isObject = require('./_is-object')
 module.exports = function(it){
   return is ? document.createElement(it) : {};
 };
-},{"./_global":32,"./_is-object":39}],28:[function(require,module,exports){
+},{"./_global":24,"./_is-object":31}],20:[function(require,module,exports){
 // IE 8- don't enum bug keys
 module.exports = (
   'constructor,hasOwnProperty,isPrototypeOf,propertyIsEnumerable,toLocaleString,toString,valueOf'
 ).split(',');
-},{}],29:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 // all enumerable object keys, includes symbols
 var getKeys = require('./_object-keys')
   , gOPS    = require('./_object-gops')
@@ -282,7 +212,7 @@ module.exports = function(it){
     while(symbols.length > i)if(isEnum.call(it, key = symbols[i++]))result.push(key);
   } return result;
 };
-},{"./_object-gops":53,"./_object-keys":56,"./_object-pie":57}],30:[function(require,module,exports){
+},{"./_object-gops":45,"./_object-keys":48,"./_object-pie":49}],22:[function(require,module,exports){
 var global    = require('./_global')
   , core      = require('./_core')
   , ctx       = require('./_ctx')
@@ -344,7 +274,7 @@ $export.W = 32;  // wrap
 $export.U = 64;  // safe
 $export.R = 128; // real proto method for `library` 
 module.exports = $export;
-},{"./_core":23,"./_ctx":24,"./_global":32,"./_hide":34}],31:[function(require,module,exports){
+},{"./_core":15,"./_ctx":16,"./_global":24,"./_hide":26}],23:[function(require,module,exports){
 module.exports = function(exec){
   try {
     return !!exec();
@@ -352,17 +282,17 @@ module.exports = function(exec){
     return true;
   }
 };
-},{}],32:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 // https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
 var global = module.exports = typeof window != 'undefined' && window.Math == Math
   ? window : typeof self != 'undefined' && self.Math == Math ? self : Function('return this')();
 if(typeof __g == 'number')__g = global; // eslint-disable-line no-undef
-},{}],33:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 var hasOwnProperty = {}.hasOwnProperty;
 module.exports = function(it, key){
   return hasOwnProperty.call(it, key);
 };
-},{}],34:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 var dP         = require('./_object-dp')
   , createDesc = require('./_property-desc');
 module.exports = require('./_descriptors') ? function(object, key, value){
@@ -371,29 +301,29 @@ module.exports = require('./_descriptors') ? function(object, key, value){
   object[key] = value;
   return object;
 };
-},{"./_descriptors":26,"./_object-dp":48,"./_property-desc":59}],35:[function(require,module,exports){
+},{"./_descriptors":18,"./_object-dp":40,"./_property-desc":50}],27:[function(require,module,exports){
 module.exports = require('./_global').document && document.documentElement;
-},{"./_global":32}],36:[function(require,module,exports){
+},{"./_global":24}],28:[function(require,module,exports){
 module.exports = !require('./_descriptors') && !require('./_fails')(function(){
   return Object.defineProperty(require('./_dom-create')('div'), 'a', {get: function(){ return 7; }}).a != 7;
 });
-},{"./_descriptors":26,"./_dom-create":27,"./_fails":31}],37:[function(require,module,exports){
+},{"./_descriptors":18,"./_dom-create":19,"./_fails":23}],29:[function(require,module,exports){
 // fallback for non-array-like ES3 and non-enumerable old V8 strings
 var cof = require('./_cof');
 module.exports = Object('z').propertyIsEnumerable(0) ? Object : function(it){
   return cof(it) == 'String' ? it.split('') : Object(it);
 };
-},{"./_cof":22}],38:[function(require,module,exports){
+},{"./_cof":14}],30:[function(require,module,exports){
 // 7.2.2 IsArray(argument)
 var cof = require('./_cof');
 module.exports = Array.isArray || function isArray(arg){
   return cof(arg) == 'Array';
 };
-},{"./_cof":22}],39:[function(require,module,exports){
+},{"./_cof":14}],31:[function(require,module,exports){
 module.exports = function(it){
   return typeof it === 'object' ? it !== null : typeof it === 'function';
 };
-},{}],40:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 'use strict';
 var create         = require('./_object-create')
   , descriptor     = require('./_property-desc')
@@ -407,7 +337,7 @@ module.exports = function(Constructor, NAME, next){
   Constructor.prototype = create(IteratorPrototype, {next: descriptor(1, next)});
   setToStringTag(Constructor, NAME + ' Iterator');
 };
-},{"./_hide":34,"./_object-create":47,"./_property-desc":59,"./_set-to-string-tag":62,"./_wks":75}],41:[function(require,module,exports){
+},{"./_hide":26,"./_object-create":39,"./_property-desc":50,"./_set-to-string-tag":52,"./_wks":65}],33:[function(require,module,exports){
 'use strict';
 var LIBRARY        = require('./_library')
   , $export        = require('./_export')
@@ -478,13 +408,13 @@ module.exports = function(Base, NAME, Constructor, next, DEFAULT, IS_SET, FORCED
   }
   return methods;
 };
-},{"./_export":30,"./_has":33,"./_hide":34,"./_iter-create":40,"./_iterators":43,"./_library":45,"./_object-gpo":54,"./_redefine":60,"./_set-to-string-tag":62,"./_wks":75}],42:[function(require,module,exports){
+},{"./_export":22,"./_has":25,"./_hide":26,"./_iter-create":32,"./_iterators":35,"./_library":37,"./_object-gpo":46,"./_redefine":51,"./_set-to-string-tag":52,"./_wks":65}],34:[function(require,module,exports){
 module.exports = function(done, value){
   return {value: value, done: !!done};
 };
-},{}],43:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 module.exports = {};
-},{}],44:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 var getKeys   = require('./_object-keys')
   , toIObject = require('./_to-iobject');
 module.exports = function(object, el){
@@ -495,9 +425,9 @@ module.exports = function(object, el){
     , key;
   while(length > index)if(O[key = keys[index++]] === el)return key;
 };
-},{"./_object-keys":56,"./_to-iobject":68}],45:[function(require,module,exports){
+},{"./_object-keys":48,"./_to-iobject":58}],37:[function(require,module,exports){
 module.exports = true;
-},{}],46:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 var META     = require('./_uid')('meta')
   , isObject = require('./_is-object')
   , has      = require('./_has')
@@ -551,7 +481,7 @@ var meta = module.exports = {
   getWeak:  getWeak,
   onFreeze: onFreeze
 };
-},{"./_fails":31,"./_has":33,"./_is-object":39,"./_object-dp":48,"./_uid":72}],47:[function(require,module,exports){
+},{"./_fails":23,"./_has":25,"./_is-object":31,"./_object-dp":40,"./_uid":62}],39:[function(require,module,exports){
 // 19.1.2.2 / 15.2.3.5 Object.create(O [, Properties])
 var anObject    = require('./_an-object')
   , dPs         = require('./_object-dps')
@@ -592,7 +522,7 @@ module.exports = Object.create || function create(O, Properties){
   } else result = createDict();
   return Properties === undefined ? result : dPs(result, Properties);
 };
-},{"./_an-object":20,"./_dom-create":27,"./_enum-bug-keys":28,"./_html":35,"./_object-dps":49,"./_shared-key":63}],48:[function(require,module,exports){
+},{"./_an-object":12,"./_dom-create":19,"./_enum-bug-keys":20,"./_html":27,"./_object-dps":41,"./_shared-key":53}],40:[function(require,module,exports){
 var anObject       = require('./_an-object')
   , IE8_DOM_DEFINE = require('./_ie8-dom-define')
   , toPrimitive    = require('./_to-primitive')
@@ -609,7 +539,7 @@ exports.f = require('./_descriptors') ? Object.defineProperty : function defineP
   if('value' in Attributes)O[P] = Attributes.value;
   return O;
 };
-},{"./_an-object":20,"./_descriptors":26,"./_ie8-dom-define":36,"./_to-primitive":71}],49:[function(require,module,exports){
+},{"./_an-object":12,"./_descriptors":18,"./_ie8-dom-define":28,"./_to-primitive":61}],41:[function(require,module,exports){
 var dP       = require('./_object-dp')
   , anObject = require('./_an-object')
   , getKeys  = require('./_object-keys');
@@ -623,7 +553,7 @@ module.exports = require('./_descriptors') ? Object.defineProperties : function 
   while(length > i)dP.f(O, P = keys[i++], Properties[P]);
   return O;
 };
-},{"./_an-object":20,"./_descriptors":26,"./_object-dp":48,"./_object-keys":56}],50:[function(require,module,exports){
+},{"./_an-object":12,"./_descriptors":18,"./_object-dp":40,"./_object-keys":48}],42:[function(require,module,exports){
 var pIE            = require('./_object-pie')
   , createDesc     = require('./_property-desc')
   , toIObject      = require('./_to-iobject')
@@ -640,7 +570,7 @@ exports.f = require('./_descriptors') ? gOPD : function getOwnPropertyDescriptor
   } catch(e){ /* empty */ }
   if(has(O, P))return createDesc(!pIE.f.call(O, P), O[P]);
 };
-},{"./_descriptors":26,"./_has":33,"./_ie8-dom-define":36,"./_object-pie":57,"./_property-desc":59,"./_to-iobject":68,"./_to-primitive":71}],51:[function(require,module,exports){
+},{"./_descriptors":18,"./_has":25,"./_ie8-dom-define":28,"./_object-pie":49,"./_property-desc":50,"./_to-iobject":58,"./_to-primitive":61}],43:[function(require,module,exports){
 // fallback for IE11 buggy Object.getOwnPropertyNames with iframe and window
 var toIObject = require('./_to-iobject')
   , gOPN      = require('./_object-gopn').f
@@ -661,7 +591,7 @@ module.exports.f = function getOwnPropertyNames(it){
   return windowNames && toString.call(it) == '[object Window]' ? getWindowNames(it) : gOPN(toIObject(it));
 };
 
-},{"./_object-gopn":52,"./_to-iobject":68}],52:[function(require,module,exports){
+},{"./_object-gopn":44,"./_to-iobject":58}],44:[function(require,module,exports){
 // 19.1.2.7 / 15.2.3.4 Object.getOwnPropertyNames(O)
 var $keys      = require('./_object-keys-internal')
   , hiddenKeys = require('./_enum-bug-keys').concat('length', 'prototype');
@@ -669,9 +599,9 @@ var $keys      = require('./_object-keys-internal')
 exports.f = Object.getOwnPropertyNames || function getOwnPropertyNames(O){
   return $keys(O, hiddenKeys);
 };
-},{"./_enum-bug-keys":28,"./_object-keys-internal":55}],53:[function(require,module,exports){
+},{"./_enum-bug-keys":20,"./_object-keys-internal":47}],45:[function(require,module,exports){
 exports.f = Object.getOwnPropertySymbols;
-},{}],54:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 // 19.1.2.9 / 15.2.3.2 Object.getPrototypeOf(O)
 var has         = require('./_has')
   , toObject    = require('./_to-object')
@@ -685,7 +615,7 @@ module.exports = Object.getPrototypeOf || function(O){
     return O.constructor.prototype;
   } return O instanceof Object ? ObjectProto : null;
 };
-},{"./_has":33,"./_shared-key":63,"./_to-object":70}],55:[function(require,module,exports){
+},{"./_has":25,"./_shared-key":53,"./_to-object":60}],47:[function(require,module,exports){
 var has          = require('./_has')
   , toIObject    = require('./_to-iobject')
   , arrayIndexOf = require('./_array-includes')(false)
@@ -703,7 +633,7 @@ module.exports = function(object, names){
   }
   return result;
 };
-},{"./_array-includes":21,"./_has":33,"./_shared-key":63,"./_to-iobject":68}],56:[function(require,module,exports){
+},{"./_array-includes":13,"./_has":25,"./_shared-key":53,"./_to-iobject":58}],48:[function(require,module,exports){
 // 19.1.2.14 / 15.2.3.14 Object.keys(O)
 var $keys       = require('./_object-keys-internal')
   , enumBugKeys = require('./_enum-bug-keys');
@@ -711,20 +641,9 @@ var $keys       = require('./_object-keys-internal')
 module.exports = Object.keys || function keys(O){
   return $keys(O, enumBugKeys);
 };
-},{"./_enum-bug-keys":28,"./_object-keys-internal":55}],57:[function(require,module,exports){
+},{"./_enum-bug-keys":20,"./_object-keys-internal":47}],49:[function(require,module,exports){
 exports.f = {}.propertyIsEnumerable;
-},{}],58:[function(require,module,exports){
-// most Object methods by ES6 should accept primitives
-var $export = require('./_export')
-  , core    = require('./_core')
-  , fails   = require('./_fails');
-module.exports = function(KEY, exec){
-  var fn  = (core.Object || {})[KEY] || Object[KEY]
-    , exp = {};
-  exp[KEY] = exec(fn);
-  $export($export.S + $export.F * fails(function(){ fn(1); }), 'Object', exp);
-};
-},{"./_core":23,"./_export":30,"./_fails":31}],59:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 module.exports = function(bitmap, value){
   return {
     enumerable  : !(bitmap & 1),
@@ -733,35 +652,9 @@ module.exports = function(bitmap, value){
     value       : value
   };
 };
-},{}],60:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 module.exports = require('./_hide');
-},{"./_hide":34}],61:[function(require,module,exports){
-// Works with __proto__ only. Old v8 can't work with null proto objects.
-/* eslint-disable no-proto */
-var isObject = require('./_is-object')
-  , anObject = require('./_an-object');
-var check = function(O, proto){
-  anObject(O);
-  if(!isObject(proto) && proto !== null)throw TypeError(proto + ": can't set as prototype!");
-};
-module.exports = {
-  set: Object.setPrototypeOf || ('__proto__' in {} ? // eslint-disable-line
-    function(test, buggy, set){
-      try {
-        set = require('./_ctx')(Function.call, require('./_object-gopd').f(Object.prototype, '__proto__').set, 2);
-        set(test, []);
-        buggy = !(test instanceof Array);
-      } catch(e){ buggy = true; }
-      return function setPrototypeOf(O, proto){
-        check(O, proto);
-        if(buggy)O.__proto__ = proto;
-        else set(O, proto);
-        return O;
-      };
-    }({}, false) : undefined),
-  check: check
-};
-},{"./_an-object":20,"./_ctx":24,"./_is-object":39,"./_object-gopd":50}],62:[function(require,module,exports){
+},{"./_hide":26}],52:[function(require,module,exports){
 var def = require('./_object-dp').f
   , has = require('./_has')
   , TAG = require('./_wks')('toStringTag');
@@ -769,20 +662,20 @@ var def = require('./_object-dp').f
 module.exports = function(it, tag, stat){
   if(it && !has(it = stat ? it : it.prototype, TAG))def(it, TAG, {configurable: true, value: tag});
 };
-},{"./_has":33,"./_object-dp":48,"./_wks":75}],63:[function(require,module,exports){
+},{"./_has":25,"./_object-dp":40,"./_wks":65}],53:[function(require,module,exports){
 var shared = require('./_shared')('keys')
   , uid    = require('./_uid');
 module.exports = function(key){
   return shared[key] || (shared[key] = uid(key));
 };
-},{"./_shared":64,"./_uid":72}],64:[function(require,module,exports){
+},{"./_shared":54,"./_uid":62}],54:[function(require,module,exports){
 var global = require('./_global')
   , SHARED = '__core-js_shared__'
   , store  = global[SHARED] || (global[SHARED] = {});
 module.exports = function(key){
   return store[key] || (store[key] = {});
 };
-},{"./_global":32}],65:[function(require,module,exports){
+},{"./_global":24}],55:[function(require,module,exports){
 var toInteger = require('./_to-integer')
   , defined   = require('./_defined');
 // true  -> String#at
@@ -800,7 +693,7 @@ module.exports = function(TO_STRING){
       : TO_STRING ? s.slice(i, i + 2) : (a - 0xd800 << 10) + (b - 0xdc00) + 0x10000;
   };
 };
-},{"./_defined":25,"./_to-integer":67}],66:[function(require,module,exports){
+},{"./_defined":17,"./_to-integer":57}],56:[function(require,module,exports){
 var toInteger = require('./_to-integer')
   , max       = Math.max
   , min       = Math.min;
@@ -808,34 +701,34 @@ module.exports = function(index, length){
   index = toInteger(index);
   return index < 0 ? max(index + length, 0) : min(index, length);
 };
-},{"./_to-integer":67}],67:[function(require,module,exports){
+},{"./_to-integer":57}],57:[function(require,module,exports){
 // 7.1.4 ToInteger
 var ceil  = Math.ceil
   , floor = Math.floor;
 module.exports = function(it){
   return isNaN(it = +it) ? 0 : (it > 0 ? floor : ceil)(it);
 };
-},{}],68:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 // to indexed object, toObject with fallback for non-array-like ES3 strings
 var IObject = require('./_iobject')
   , defined = require('./_defined');
 module.exports = function(it){
   return IObject(defined(it));
 };
-},{"./_defined":25,"./_iobject":37}],69:[function(require,module,exports){
+},{"./_defined":17,"./_iobject":29}],59:[function(require,module,exports){
 // 7.1.15 ToLength
 var toInteger = require('./_to-integer')
   , min       = Math.min;
 module.exports = function(it){
   return it > 0 ? min(toInteger(it), 0x1fffffffffffff) : 0; // pow(2, 53) - 1 == 9007199254740991
 };
-},{"./_to-integer":67}],70:[function(require,module,exports){
+},{"./_to-integer":57}],60:[function(require,module,exports){
 // 7.1.13 ToObject(argument)
 var defined = require('./_defined');
 module.exports = function(it){
   return Object(defined(it));
 };
-},{"./_defined":25}],71:[function(require,module,exports){
+},{"./_defined":17}],61:[function(require,module,exports){
 // 7.1.1 ToPrimitive(input [, PreferredType])
 var isObject = require('./_is-object');
 // instead of the ES6 spec version, we didn't implement @@toPrimitive case
@@ -848,13 +741,13 @@ module.exports = function(it, S){
   if(!S && typeof (fn = it.toString) == 'function' && !isObject(val = fn.call(it)))return val;
   throw TypeError("Can't convert object to primitive value");
 };
-},{"./_is-object":39}],72:[function(require,module,exports){
+},{"./_is-object":31}],62:[function(require,module,exports){
 var id = 0
   , px = Math.random();
 module.exports = function(key){
   return 'Symbol('.concat(key === undefined ? '' : key, ')_', (++id + px).toString(36));
 };
-},{}],73:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 var global         = require('./_global')
   , core           = require('./_core')
   , LIBRARY        = require('./_library')
@@ -864,9 +757,9 @@ module.exports = function(name){
   var $Symbol = core.Symbol || (core.Symbol = LIBRARY ? {} : global.Symbol || {});
   if(name.charAt(0) != '_' && !(name in $Symbol))defineProperty($Symbol, name, {value: wksExt.f(name)});
 };
-},{"./_core":23,"./_global":32,"./_library":45,"./_object-dp":48,"./_wks-ext":74}],74:[function(require,module,exports){
+},{"./_core":15,"./_global":24,"./_library":37,"./_object-dp":40,"./_wks-ext":64}],64:[function(require,module,exports){
 exports.f = require('./_wks');
-},{"./_wks":75}],75:[function(require,module,exports){
+},{"./_wks":65}],65:[function(require,module,exports){
 var store      = require('./_shared')('wks')
   , uid        = require('./_uid')
   , Symbol     = require('./_global').Symbol
@@ -878,7 +771,7 @@ var $exports = module.exports = function(name){
 };
 
 $exports.store = store;
-},{"./_global":32,"./_shared":64,"./_uid":72}],76:[function(require,module,exports){
+},{"./_global":24,"./_shared":54,"./_uid":62}],66:[function(require,module,exports){
 'use strict';
 var addToUnscopables = require('./_add-to-unscopables')
   , step             = require('./_iter-step')
@@ -913,31 +806,13 @@ Iterators.Arguments = Iterators.Array;
 addToUnscopables('keys');
 addToUnscopables('values');
 addToUnscopables('entries');
-},{"./_add-to-unscopables":19,"./_iter-define":41,"./_iter-step":42,"./_iterators":43,"./_to-iobject":68}],77:[function(require,module,exports){
-var $export = require('./_export')
-// 19.1.2.2 / 15.2.3.5 Object.create(O [, Properties])
-$export($export.S, 'Object', {create: require('./_object-create')});
-},{"./_export":30,"./_object-create":47}],78:[function(require,module,exports){
+},{"./_add-to-unscopables":11,"./_iter-define":33,"./_iter-step":34,"./_iterators":35,"./_to-iobject":58}],67:[function(require,module,exports){
 var $export = require('./_export');
 // 19.1.2.4 / 15.2.3.6 Object.defineProperty(O, P, Attributes)
 $export($export.S + $export.F * !require('./_descriptors'), 'Object', {defineProperty: require('./_object-dp').f});
-},{"./_descriptors":26,"./_export":30,"./_object-dp":48}],79:[function(require,module,exports){
-// 19.1.2.9 Object.getPrototypeOf(O)
-var toObject        = require('./_to-object')
-  , $getPrototypeOf = require('./_object-gpo');
+},{"./_descriptors":18,"./_export":22,"./_object-dp":40}],68:[function(require,module,exports){
 
-require('./_object-sap')('getPrototypeOf', function(){
-  return function getPrototypeOf(it){
-    return $getPrototypeOf(toObject(it));
-  };
-});
-},{"./_object-gpo":54,"./_object-sap":58,"./_to-object":70}],80:[function(require,module,exports){
-// 19.1.3.19 Object.setPrototypeOf(O, proto)
-var $export = require('./_export');
-$export($export.S, 'Object', {setPrototypeOf: require('./_set-proto').set});
-},{"./_export":30,"./_set-proto":61}],81:[function(require,module,exports){
-
-},{}],82:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 'use strict';
 var $at  = require('./_string-at')(true);
 
@@ -955,7 +830,7 @@ require('./_iter-define')(String, 'String', function(iterated){
   this._i += point.length;
   return {value: point, done: false};
 });
-},{"./_iter-define":41,"./_string-at":65}],83:[function(require,module,exports){
+},{"./_iter-define":33,"./_string-at":55}],70:[function(require,module,exports){
 'use strict';
 // ECMAScript 6 symbols shim
 var global         = require('./_global')
@@ -1191,11 +1066,11 @@ setToStringTag($Symbol, 'Symbol');
 setToStringTag(Math, 'Math', true);
 // 24.3.3 JSON[@@toStringTag]
 setToStringTag(global.JSON, 'JSON', true);
-},{"./_an-object":20,"./_descriptors":26,"./_enum-keys":29,"./_export":30,"./_fails":31,"./_global":32,"./_has":33,"./_hide":34,"./_is-array":38,"./_keyof":44,"./_library":45,"./_meta":46,"./_object-create":47,"./_object-dp":48,"./_object-gopd":50,"./_object-gopn":52,"./_object-gopn-ext":51,"./_object-gops":53,"./_object-keys":56,"./_object-pie":57,"./_property-desc":59,"./_redefine":60,"./_set-to-string-tag":62,"./_shared":64,"./_to-iobject":68,"./_to-primitive":71,"./_uid":72,"./_wks":75,"./_wks-define":73,"./_wks-ext":74}],84:[function(require,module,exports){
+},{"./_an-object":12,"./_descriptors":18,"./_enum-keys":21,"./_export":22,"./_fails":23,"./_global":24,"./_has":25,"./_hide":26,"./_is-array":30,"./_keyof":36,"./_library":37,"./_meta":38,"./_object-create":39,"./_object-dp":40,"./_object-gopd":42,"./_object-gopn":44,"./_object-gopn-ext":43,"./_object-gops":45,"./_object-keys":48,"./_object-pie":49,"./_property-desc":50,"./_redefine":51,"./_set-to-string-tag":52,"./_shared":54,"./_to-iobject":58,"./_to-primitive":61,"./_uid":62,"./_wks":65,"./_wks-define":63,"./_wks-ext":64}],71:[function(require,module,exports){
 require('./_wks-define')('asyncIterator');
-},{"./_wks-define":73}],85:[function(require,module,exports){
+},{"./_wks-define":63}],72:[function(require,module,exports){
 require('./_wks-define')('observable');
-},{"./_wks-define":73}],86:[function(require,module,exports){
+},{"./_wks-define":63}],73:[function(require,module,exports){
 require('./es6.array.iterator');
 var global        = require('./_global')
   , hide          = require('./_hide')
@@ -1209,161 +1084,107 @@ for(var collections = ['NodeList', 'DOMTokenList', 'MediaList', 'StyleSheetList'
   if(proto && !proto[TO_STRING_TAG])hide(proto, TO_STRING_TAG, NAME);
   Iterators[NAME] = Iterators.Array;
 }
-},{"./_global":32,"./_hide":34,"./_iterators":43,"./_wks":75,"./es6.array.iterator":76}],87:[function(require,module,exports){
-'use strict';Object.defineProperty(exports,"__esModule",{value:true});var _classCallCheck2=require('babel-runtime/helpers/classCallCheck');var _classCallCheck3=_interopRequireDefault(_classCallCheck2);var _createClass2=require('babel-runtime/helpers/createClass');var _createClass3=_interopRequireDefault(_createClass2);function _interopRequireDefault(obj){return obj&&obj.__esModule?obj:{default:obj};} /**
-* Copyright 2016 PT Inovação e Sistemas SA
-* Copyright 2016 INESC-ID
-* Copyright 2016 QUOBIS NETWORKS SL
-* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
-* Copyright 2016 ORANGE SA
-* Copyright 2016 Deutsche Telekom AG
-* Copyright 2016 Apizee
-* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-**/ /**
-* @author micaelpedrosa@gmail.com
-* Minimal interface and implementation to send and receive messages. It can be reused in many type of components.
-* Components that need a message system should receive this class as a dependency or extend it.
-* Extensions should implement the following private methods: _onPostMessage and _registerExternalListener
-*/var Bus=function(){ /* private
-  _msgId: number;
-  _subscriptions: <url: MsgListener[]>
+},{"./_global":24,"./_hide":26,"./_iterators":35,"./_wks":65,"./es6.array.iterator":66}],74:[function(require,module,exports){
+'use strict';Object.defineProperty(exports,"__esModule",{value:true});var _classCallCheck2=require('babel-runtime/helpers/classCallCheck');var _classCallCheck3=_interopRequireDefault(_classCallCheck2);var _createClass2=require('babel-runtime/helpers/createClass');var _createClass3=_interopRequireDefault(_createClass2);function _interopRequireDefault(obj){return obj&&obj.__esModule?obj:{default:obj};}var Operators=function(){function Operators(){(0,_classCallCheck3.default)(this,Operators);var _this=this;_this.operators=_this.setOperators();}(0,_createClass3.default)(Operators,[{key:'setOperators',value:function setOperators(){var _this=this;var operators={between:function between(params){return _this.isBetween(params[0][0],params[0][1],params[1]);},in:function _in(params){return params[0].indexOf(params[1])>-1;},equals:function equals(params){return params[0][0]==='*'||params[0][0]===params[1];},or:function or(params){return params[0]||params[1];},and:function and(params){return params[0]&&params[1];},not:function not(params){return !params[0];}};return operators;} /**
+  * Verifies if the current time is between the given start and end times.
+  * @param {Number}     start
+  * @param {Number}     end
+  * @return {Boolean}   boolean
+  */},{key:'isBetween',value:function isBetween(start,end,now){start=parseInt(start);end=parseInt(end);if(end<start){now=now<start?now+=2400:now;end+=2400;}return now>start&&now<end;}}]);return Operators;}();exports.default=Operators;module.exports=exports['default'];
 
-  _responseTimeOut: number
-  _responseCallbacks: <url+id: (msg) => void>
+},{"babel-runtime/helpers/classCallCheck":4,"babel-runtime/helpers/createClass":5}],75:[function(require,module,exports){
+'use strict';Object.defineProperty(exports,"__esModule",{value:true});var _typeof2=require('babel-runtime/helpers/typeof');var _typeof3=_interopRequireDefault(_typeof2);var _classCallCheck2=require('babel-runtime/helpers/classCallCheck');var _classCallCheck3=_interopRequireDefault(_classCallCheck2);var _createClass2=require('babel-runtime/helpers/createClass');var _createClass3=_interopRequireDefault(_createClass2);var _Operators=require('./Operators');var _Operators2=_interopRequireDefault(_Operators);function _interopRequireDefault(obj){return obj&&obj.__esModule?obj:{default:obj};} /**
+* The Policy Decision Point (PDP) decides if a message is to be authorised by checking a set of
+* policies. The resource to be verified is specified in the first word of the 'condition' field of
+* a Policy object. The implementation that verifies if the message is compliant with a policy is
+* specified in a hashtable to allow dynamic definition of the implementation, providing
+* extensibility to the Policy Engine functionalities.
+*/var PDP=function(){ /**
+  * This method is invoked by the Policy Engine and instantiates the Policy Decision Point. It
+  * initialises or loads from the Persistence Manager the object 'myGroups' to store the user's
+  * groups.
+  * @param  {Registry}    muchruntimeRegistry
+  */function PDP(context){(0,_classCallCheck3.default)(this,PDP);var _this=this;_this.context=context;_this.operators=new _Operators2.default(context);} /**
+  * Verifies if the given message is compliant with the given policies. If one of the policies
+  * evaluates to 'false', then the message is not authorised. Returns the final authorisation
+  * decision and a set of actions that policies may require.
+  * @param {Message}  message
+  * @param {URL}      hypertyToVerify
+  * @param {Array}    policies
+  * @return {Array}   [authDecision, actions]
+  */(0,_createClass3.default)(PDP,[{key:'evaluate',value:function evaluate(message,policies){console.log('in evaluate');var _this=this;var results=[true];var actions=[];for(var i in policies){var policy=policies[i];var condition=policy.condition;var verifiesCondition=false;if((typeof condition==='undefined'?'undefined':(0,_typeof3.default)(condition))==='object'){verifiesCondition=_this.verifiesAdvancedCondition(condition[0],condition[1],condition[2],policy.scope,message);}else {verifiesCondition=_this.verifiesSimpleCondition(condition,policy.scope,message);}if(verifiesCondition){results.push(policy.authorise);}console.log('after verifiesCondition');if(policy.actions!==[]){for(var _i in policy.actions){var newAction={method:policy.actions[_i].method,params:message};actions.push(newAction);}}}var authDecision=results.indexOf(false)===-1;return [authDecision,actions];}},{key:'verifiesSimpleCondition',value:function verifiesSimpleCondition(condition,scope,message){console.log('in verifiesSimpleCondition');var _this=this;var splitCondition=condition.split(' ');var variable=splitCondition[0];var operator=splitCondition[1];var params=void 0;if(operator==='in'){_this.context.group={scope:scope,group:splitCondition[2],destination:message.to};params=_this.context.group;}else {params=splitCondition.slice(2);}_this.context[variable]={message:message};var value=_this.context[variable];console.log('before leaving verifiesSimpleCondition');return _this.operators.operators[operator]([params,value]);}},{key:'verifiesAdvancedCondition',value:function verifiesAdvancedCondition(operator,left,right,scope,message){var _this=this;while((typeof left==='undefined'?'undefined':(0,_typeof3.default)(left))==='object'){left=_this.verifiesAdvancedCondition(left[0],left[1],left[2],scope,message);}if(right!==undefined){while((typeof right==='undefined'?'undefined':(0,_typeof3.default)(right))==='object'){right=_this.verifiesAdvancedCondition(right[0],right[1],right[2],scope,message);}}var resultLeft=typeof left==='boolean'?left:_this.verifiesSimpleCondition(left,scope,message);var resultRight=void 0;if(right!==undefined){resultRight=typeof right==='boolean'?right:_this.verifiesSimpleCondition(right,scope,message);}return _this.operators.operators[operator]([resultLeft,resultRight]);}}]);return PDP;}();exports.default=PDP;module.exports=exports['default'];
 
-  */function Bus(){(0,_classCallCheck3.default)(this,Bus);var _this=this;_this._msgId=0;_this._subscriptions={};_this._responseTimeOut=5000; //default to 3s
-_this._responseCallbacks={};_this._registerExternalListener();} /**
-  * Register listener to receive message when "msg.to === url".
-  * Special url "*" for default listener is accepted to intercept all messages.
-  * @param {URL} url Address to intercept, tha is in the message "to"
-  * @param {Listener} listener listener
-  * @return {MsgListener} instance of MsgListener
-  */(0,_createClass3.default)(Bus,[{key:'addListener',value:function addListener(url,listener){var _this=this;var item=new MsgListener(_this._subscriptions,url,listener);var itemList=_this._subscriptions[url];if(!itemList){itemList=[];_this._subscriptions[url]=itemList;}itemList.push(item);return item;} /**
-   * Manually add a response listener. Only one listener per message ID should exist.
-   * ATENTION, there is no timeout for this listener.
-   * The listener should be removed with a removeResponseListener, failing to do this will result in a unreleased memory problem.
-   * @param {URL} url Origin address of the message sent, "msg.from".
-   * @param {number} msgId Message ID that is returned from the postMessage.
-   * @param {Function} responseListener Callback function for the response
-   */},{key:'addResponseListener',value:function addResponseListener(url,msgId,responseListener){this._responseCallbacks[url+msgId]=responseListener;} /**
-   * Remove the response listener.
-   * @param {URL} url Origin address of the message sent, "msg.from".
-   * @param {number} msgId  Message ID that is returned from the postMessage
-   */},{key:'removeResponseListener',value:function removeResponseListener(url,msgId){delete this._responseCallbacks[url+msgId];} /**
-   * Remove all existent listeners for the URL
-   * @param  {URL} url Address registered
-   */},{key:'removeAllListenersOf',value:function removeAllListenersOf(url){delete this._subscriptions[url];} /**
-   * Helper method to bind listeners (in both directions) into other MiniBus target.
-   * @param  {URL} outUrl Outbound URL, register listener for url in direction "this -> target"
-   * @param  {URL} inUrl Inbound URL, register listener for url in direction "target -> this"
-   * @param  {MiniBus} target The other target MiniBus
-   * @return {Bound} an object that contains the properties [thisListener, targetListener] and the unbind method.
-   */},{key:'bind',value:function bind(outUrl,inUrl,target){var _this2=this;var _this=this;var thisListn=_this.addListener(outUrl,function(msg){target.postMessage(msg);});var targetListn=target.addListener(inUrl,function(msg){_this.postMessage(msg);});return {thisListener:thisListn,targetListener:targetListn,unbind:function unbind(){_this2.thisListener.remove();_this2.targetListener.remove();}};} //publish on default listeners
-},{key:'_publishOnDefault',value:function _publishOnDefault(msg){ //is there any "*" (default) listeners?
-var itemList=this._subscriptions['*'];if(itemList){this._publishOn(itemList,msg);}} //publish on a subscription list.
-},{key:'_publishOn',value:function _publishOn(itemList,msg){itemList.forEach(function(sub){sub._callback(msg);});}},{key:'_responseCallback',value:function _responseCallback(inMsg,responseCallback){var _this=this; //automatic management of response handlers
-if(responseCallback){(function(){var responseId=inMsg.from+inMsg.id;_this._responseCallbacks[responseId]=responseCallback;setTimeout(function(){var responseFun=_this._responseCallbacks[responseId];delete _this._responseCallbacks[responseId];if(responseFun){var errorMsg={id:inMsg.id,type:'response',body:{code:408,desc:'Response timeout!',value:inMsg}};responseFun(errorMsg);}},_this._responseTimeOut);})();}}},{key:'_onResponse',value:function _onResponse(msg){var _this=this;if(msg.type==='response'){var responseId=msg.to+msg.id;var responseFun=_this._responseCallbacks[responseId]; //if it's a provisional response, don't delete response listener
-if(msg.body.code>=200){delete _this._responseCallbacks[responseId];}if(responseFun){responseFun(msg);return true;}}return false;} //receive messages from external interface
-},{key:'_onMessage',value:function _onMessage(msg){var _this=this;if(!_this._onResponse(msg)){var itemList=_this._subscriptions[msg.to];if(itemList){_this._publishOn(itemList,msg);}else {_this._publishOnDefault(msg);}}}},{key:'_genId',value:function _genId(inMsg){ //TODO: how do we manage message ID's? Should it be a global runtime counter, or per URL address?
-//Global counter will not work, because there will be multiple MiniBus instances!
-//Per URL, can be a lot of data to maintain!
-//Maybe a counter per MiniBus instance. This is the assumed solution for now.
-if(!inMsg.id||inMsg.id===0){this._msgId++;inMsg.id=this._msgId;}} /**
-  * Send messages to local listeners, or if not exists to external listeners.
-  * It's has an optional mechanism for automatic management of response handlers.
-  * The response handler will be unregistered after receiving the response, or after response timeout (default to 3s).
-  * @param  {Message} msg Message to send. Message ID is automatically added to the message.
-  * @param  {Function} responseCallback Optional parameter, if the developer what's automatic response management.
-  * @return {number} Returns the message ID, in case it should be needed for manual management of the response handler.
-  */},{key:'postMessage',value:function postMessage(inMsg,responseCallback){} /**
-   * Not public available, used by the class extension implementation, to process messages from the public "postMessage" without a registered listener.
-   * Used to send the message to an external interface, like a WebWorker, IFrame, etc.
-   * @param  {Message.Message} msg Message
-   */},{key:'_onPostMessage',value:function _onPostMessage(msg){} /*implementation will send message to external system*/ /**
-   * Not public available, used by the class extension implementation, to process all messages that enter the MiniBus from an external interface, like a WebWorker, IFrame, etc.
-   * This method is called one time in the constructor to register external listeners.
-   * The implementation will probably call the "_onMessage" method to publish in the local listeners.
-   * DO NOT call "postMessage", there is a danger that the message enters in a cycle!
-   */},{key:'_registerExternalListener',value:function _registerExternalListener(){ /*implementation will register external listener and call "this._onMessage(msg)" */}}]);return Bus;}();var MsgListener=function(){ /* private
-  _subscriptions: <string: MsgListener[]>;
-  _url: string;
-  _callback: (msg) => void;
-  */function MsgListener(subscriptions,url,callback){(0,_classCallCheck3.default)(this,MsgListener);var _this=this;_this._subscriptions=subscriptions;_this._url=url;_this._callback=callback;}(0,_createClass3.default)(MsgListener,[{key:'remove', /**
-   * Remove this listener from the Bus
-   */value:function remove(){var _this=this;var subs=_this._subscriptions[_this._url];if(subs){var index=subs.indexOf(_this);subs.splice(index,1); //if there are no listeners, remove the subscription entirely.
-if(subs.length===0){delete _this._subscriptions[_this._url];}}}},{key:'url',get:function get(){return this._url;}}]);return MsgListener;}();exports.default=Bus;module.exports=exports['default'];
+},{"./Operators":74,"babel-runtime/helpers/classCallCheck":4,"babel-runtime/helpers/createClass":5,"babel-runtime/helpers/typeof":6}],76:[function(require,module,exports){
+"use strict";Object.defineProperty(exports,"__esModule",{value:true});var _classCallCheck2=require("babel-runtime/helpers/classCallCheck");var _classCallCheck3=_interopRequireDefault(_classCallCheck2);var _createClass2=require("babel-runtime/helpers/createClass");var _createClass3=_interopRequireDefault(_createClass2);function _interopRequireDefault(obj){return obj&&obj.__esModule?obj:{default:obj};}var PEP=function(){function PEP(context){(0,_classCallCheck3.default)(this,PEP);var _this=this;_this.context=context;}(0,_createClass3.default)(PEP,[{key:"enforce",value:function enforce(result){var _this=this;var authDecision=result[0];var actions=result[1];for(var i in actions){_this.context[actions[i].method](actions[i].params,authDecision);}} /*sendAutomaticMessage() {}
 
-},{"babel-runtime/helpers/classCallCheck":7,"babel-runtime/helpers/createClass":8}],88:[function(require,module,exports){
-'use strict';Object.defineProperty(exports,"__esModule",{value:true});var _getPrototypeOf=require('babel-runtime/core-js/object/get-prototype-of');var _getPrototypeOf2=_interopRequireDefault(_getPrototypeOf);var _classCallCheck2=require('babel-runtime/helpers/classCallCheck');var _classCallCheck3=_interopRequireDefault(_classCallCheck2);var _createClass2=require('babel-runtime/helpers/createClass');var _createClass3=_interopRequireDefault(_createClass2);var _possibleConstructorReturn2=require('babel-runtime/helpers/possibleConstructorReturn');var _possibleConstructorReturn3=_interopRequireDefault(_possibleConstructorReturn2);var _inherits2=require('babel-runtime/helpers/inherits');var _inherits3=_interopRequireDefault(_inherits2);var _Bus2=require('./Bus');var _Bus3=_interopRequireDefault(_Bus2);function _interopRequireDefault(obj){return obj&&obj.__esModule?obj:{default:obj};} /**
-* @author micaelpedrosa@gmail.com
-* Message BUS Interface is an extension of the Bus
-* It is used mainly in the internal sandbox routing.
-*/var MiniBus=function(_Bus){(0,_inherits3.default)(MiniBus,_Bus);function MiniBus(){(0,_classCallCheck3.default)(this,MiniBus);return (0,_possibleConstructorReturn3.default)(this,(0,_getPrototypeOf2.default)(MiniBus).call(this));} /**
-   * Post a message for routing. Message is routed directly to the external routing _onPostMessage.
-   * @param  {Message} inMsg            JSON with mandatory Message structure {id, type, from, to}
-   * @param  {Callback} responseCallback Optional callback if a response is expected from the request. A response will be always sent, even if it is a "Timeout".
-   * @return {number}                  the Message id
-   */(0,_createClass3.default)(MiniBus,[{key:'postMessage',value:function postMessage(inMsg,responseCallback){var _this=this;_this._genId(inMsg);_this._responseCallback(inMsg,responseCallback); //always send to external (to core MessageBus)
-_this._onPostMessage(inMsg);return inMsg.id;} //internal method used when a message is received by an external routing system
-},{key:'_onMessage',value:function _onMessage(msg){var _this=this;if(!_this._onResponse(msg)){var itemList=_this._subscriptions[msg.to];if(itemList){_this._publishOn(itemList,msg);if(!msg.to.startsWith('hyperty')){_this._publishOnDefault(msg);}}else {_this._publishOnDefault(msg);}}}}]);return MiniBus;}(_Bus3.default); /**
-* Copyright 2016 PT Inovação e Sistemas SA
-* Copyright 2016 INESC-ID
-* Copyright 2016 QUOBIS NETWORKS SL
-* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
-* Copyright 2016 ORANGE SA
-* Copyright 2016 Deutsche Telekom AG
-* Copyright 2016 Apizee
-* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-**/exports.default=MiniBus;module.exports=exports['default'];
+  forwardToID() {}
 
-},{"./Bus":87,"babel-runtime/core-js/object/get-prototype-of":3,"babel-runtime/helpers/classCallCheck":7,"babel-runtime/helpers/createClass":8,"babel-runtime/helpers/inherits":9,"babel-runtime/helpers/possibleConstructorReturn":10}],89:[function(require,module,exports){
-'use strict';Object.defineProperty(exports,"__esModule",{value:true});var _MiniBus=require('./bus/MiniBus');var _MiniBus2=_interopRequireDefault(_MiniBus);function _interopRequireDefault(obj){return obj&&obj.__esModule?obj:{default:obj};}exports.default=_MiniBus2.default; /**
-* Copyright 2016 PT Inovação e Sistemas SA
-* Copyright 2016 INESC-ID
-* Copyright 2016 QUOBIS NETWORKS SL
-* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
-* Copyright 2016 ORANGE SA
-* Copyright 2016 Deutsche Telekom AG
-* Copyright 2016 Apizee
-* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-**/module.exports=exports['default'];
+  forwardToHyperty() {}*/}]);return PEP;}();exports.default=PEP;module.exports=exports['default'];
 
-},{"./bus/MiniBus":88}]},{},[89])(89)
+},{"babel-runtime/helpers/classCallCheck":4,"babel-runtime/helpers/createClass":5}],77:[function(require,module,exports){
+'use strict';Object.defineProperty(exports,"__esModule",{value:true});var _typeof2=require('babel-runtime/helpers/typeof');var _typeof3=_interopRequireDefault(_typeof2);var _classCallCheck2=require('babel-runtime/helpers/classCallCheck');var _classCallCheck3=_interopRequireDefault(_classCallCheck2);var _createClass2=require('babel-runtime/helpers/createClass');var _createClass3=_interopRequireDefault(_createClass2);var _PEP=require('./PEP');var _PEP2=_interopRequireDefault(_PEP);var _PDP=require('./PDP');var _PDP2=_interopRequireDefault(_PDP);function _interopRequireDefault(obj){return obj&&obj.__esModule?obj:{default:obj};} /**
+* The Policy Engine intercepts all the messages sent through the Message Bus and applies the
+* policies defined by the service provider and the user.
+*/ //jshint browser:true, jquery: true
+//import persistenceManager from '../persistence/PersistenceManager';
+var PolicyEngine=function(){ /**
+  * This method is invoked by the RuntimeUA and instantiates the Policy Engine. A Policy Decision
+  * Point (PDP) and a Policy Enforcement Point (PEP) are initialised for the evaluation of policies
+  * and the enforcement of additional actions, respectively.
+  * @param  {IdentityModule}    identityModule
+  * @param  {Registry}          runtimeRegistry
+  */function PolicyEngine(context){(0,_classCallCheck3.default)(this,PolicyEngine);var _this=this;_this.context=context;_this.context.policyEngine=_this;_this.context.pdp=new _PDP2.default(context);_this.context.pep=new _PEP2.default(context);var acceptAnySubscriptionPolicy={scope:'global',condition:'subscription equals *',authorise:true,actions:[{method:'registerSubscriber'}]};_this.addPolicies([acceptAnySubscriptionPolicy]);} /**
+  * Associates the given policies with a scope. The possible scopes are 'global', 'hyperty' and
+  * 'user'.
+  * @param  {Policy[]}  policies
+  * @param  {String}    scope
+  */(0,_createClass3.default)(PolicyEngine,[{key:'addPolicies',value:function addPolicies(newPolicies){var _this=this; //let myPolicies = persistenceManager.get('policies');
+var myPolicies=_this.context.policies;if(myPolicies===undefined){myPolicies={};}for(var i in newPolicies){var newPolicy=newPolicies[i];var scope=newPolicy.scope;if(myPolicies[scope]===undefined){myPolicies[scope]=[];}for(var j in myPolicies[scope]){var existingPolicy=myPolicies[scope][j];if(existingPolicy.condition===newPolicy.condition){_this.removePolicies(newPolicies[i].condition);break;}}myPolicies[scope].push(newPolicies[i]);} //persistenceManager.set('policies', 0, myPolicies);
+_this.context.policies=myPolicies;} /**
+  * Removes the policy with the given ID from the given scope. If policyID is '*', removes all policies associated with the given scope.
+  * @param  {String}  policyID
+  * @param  {String}  scope
+  */},{key:'removePolicies',value:function removePolicies(scope,condition){var _this=this; //let myPolicies = persistenceManager.get('policies');
+var myPolicies=_this.context.policies;if(scope!=='*'){if(scope in myPolicies){if(condition!=='*'){var policies=myPolicies[scope];var typeOfCondition=typeof condition==='undefined'?'undefined':(0,_typeof3.default)(condition);for(var i in policies){var typeOfPolicyCondition=(0,_typeof3.default)(policies[i].condition);if(typeOfCondition===typeOfPolicyCondition){if(typeOfCondition==='string'){if(policies[i].condition===condition){policies.splice(condition,1);break;}}else { //typeof condition = object (advanced policy)
+if(_this.areEqualArrays(policies[i].condition,condition)){policies.splice(i,1);}}}}}else {delete myPolicies[scope];} //persistenceManager.set('policies', 0, myPolicies);
+_this.context.policies=myPolicies;}}else { //persistenceManager.delete('policies');
+_this.context.policies={};}}},{key:'areEqualArrays',value:function areEqualArrays(array1,array2){if(array1.length!==array2.length){return false;}var numElements=array1.length;for(var i=0;i<numElements;i++){if(array1[i] instanceof Array&&array2[i] instanceof Array){if(!array1[i].equals(array2[i])){return false;}}else if(array1[i]!==array2[i]){return false;}}return true;} /**
+  * This method is executed when a message is intercepted in the Message Bus. The first step is the
+  * assignment of the identity associated with the message. The second step is the evaluation of the
+  * applicable policies in order to obtain an authorisation decision: if a policy evaluates to
+  * false, then the message is unauthorised. The third step is the enforcement of the actions that
+  * policies may require. Finally, the message is stamped as authorised or not and is returned to
+  * the Message Bus, where it will be forwarded or blocked.
+  * @param  {Message}  message
+  */},{key:'authorise',value:function authorise(message){var _this=this;return _this.context.authorise(message);}},{key:'getGroupsNames',value:function getGroupsNames(scope){ //let myGroups = persistenceManager.get('groups') || {};
+var _this=this;var myGroups=_this.context.groups;var groupsNames=[];if(myGroups[scope]!=={}){for(var groupName in myGroups[scope]){groupsNames.push(groupName);}}return groupsNames;} /**
+  * Retrieves the group with the given group name from the PDP.
+  * @param  {String}  groupName
+  * @return {Array}   group
+  */},{key:'getList',value:function getList(scope,groupName){ //let myGroups = persistenceManager.get('groups') || {};
+var _this=this;var myGroups=_this.context.groups;var members=[];if(myGroups[scope]!==undefined&&myGroups[scope][groupName]!==undefined){members=myGroups[scope][groupName];}return members;} /**
+  * Creates a group with the given name.
+  * @param  {String}  groupName
+  */},{key:'createList',value:function createList(scope,type,groupName){var _this=this; //let myGroups = persistenceManager.get('groups') || {};
+var myGroups=_this.context.groups;if(myGroups[scope]===undefined){myGroups[scope]={};}myGroups[scope][groupName]=[]; //persistenceManager.set('groups', 0, myGroups);
+var policy={authorise:false,condition:type+' in '+groupName,scope:scope,actions:[]};_this.addPolicies([policy]);return myGroups;}},{key:'deleteGroup',value:function deleteGroup(scope,groupName){var _this=this; //let myGroups = persistenceManager.get('groups') || {};
+var myGroups=_this.context.groups;delete myGroups[scope][groupName]; //persistenceManager.set('groups', 0, myGroups);
+//let myPolicies = persistenceManager.get('policies');
+var myPolicies=_this.context.policies;if(myPolicies===undefined){myPolicies={};}var policies=myPolicies[scope];for(var i in policies){var condition=policies[i].condition.split(' ');condition.shift();var groupInPolicy=condition.join(' ');if(groupInPolicy===groupName){delete policies[i];break;}} //persistenceManager.set('policies', 0, myPolicies);
+} /**
+  * Adds the given user email to the group with the given name.
+  * @param  {String}  userEmail
+  * @param  {String}  groupName
+  */},{key:'addToList',value:function addToList(scope,type,groupName,userEmail){var _this=this; //let myGroups = persistenceManager.get('groups') || {};
+var myGroups=_this.context.groups;if(myGroups[scope]===undefined){myGroups[scope]={};}if(myGroups[scope][groupName]===undefined){myGroups=_this.createList(scope,type,groupName);}if(myGroups[scope][groupName].indexOf(userEmail)===-1){myGroups[scope][groupName].push(userEmail);} //persistenceManager.set('groups', 0, myGroups);
+} /**
+  * Removes the given user email from the group with the given name.
+  * @param  {String}  userEmail
+  * @param  {String}  groupName
+  */},{key:'removeFromGroup',value:function removeFromGroup(scope,groupName,userEmail){var _this=this; //let myGroups = persistenceManager.get('groups') || {};
+var myGroups=_this.context.groups;var group=myGroups[scope][groupName];for(var i in group){if(group[i]===userEmail){group.splice(i,1); //persistenceManager.set('groups', 0, myGroups);
+break;}}}},{key:'getTimeslots',value:function getTimeslots(){var _this=this;var policies=_this.context.policies.user;var timeRestrictions=[];for(var i in policies){if(policies[i].condition.split(' ')[0]==='time'){timeRestrictions.push(policies[i].condition);}}return timeRestrictions;}},{key:'getTimeslotById',value:function getTimeslotById(condition){var _this=this;var policies=_this.context.policies.user;for(var i in policies){if(policies[i].condition===condition){return policies[i];}}}}]);return PolicyEngine;}();exports.default=PolicyEngine;module.exports=exports['default'];
+
+},{"./PDP":75,"./PEP":76,"babel-runtime/helpers/classCallCheck":4,"babel-runtime/helpers/createClass":5,"babel-runtime/helpers/typeof":6}]},{},[77])(77)
 });
-//# sourceMappingURL=minibus.js.map
+//# sourceMappingURL=PolicyEngine.js.map

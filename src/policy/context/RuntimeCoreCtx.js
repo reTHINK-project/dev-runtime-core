@@ -1,32 +1,73 @@
-import Context from '../Context';
+import CommonCtx from './CommonCtx';
 import {divideURL} from '../../utils/utils';
-import persistenceManager from '../../persistence/PersistenceManager';
 
-class RuntimeCoreCtx extends Context {
+//import persistenceManager from '../../persistence/PersistenceManager';
+
+class RuntimeCoreCtx extends CommonCtx {
 
   constructor(idModule, runtimeRegistry) {
     super();
     let _this = this;
+    _this.policies = _this.loadPolicies();
     _this.idModule = idModule;
     _this.runtimeRegistry = runtimeRegistry;
-    _this.policies = _this.loadPolicies();
+    _this.groups = {};
   }
 
   loadPolicies() {
     //persistenceManager.delete('policies');
-    let myPolicies = persistenceManager.get('policies') || {};
+    //let myPolicies = persistenceManager.get('policies') || {};
+    let myPolicies = {};
 
-    let acceptAnySubscriptionPolicy = {
-      scope: 'global',
-      condition: 'subscription equals *',
-      authorise: true,
-      actions: [{method: 'registerSubscriber'}]
-    };
-
-    myPolicies['global'] = [acceptAnySubscriptionPolicy];
-    persistenceManager.set('policies', 0, myPolicies);
+    //persistenceManager.set('policies', 0, myPolicies);
 
     return myPolicies;
+  }
+
+  authorise(message) {
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+      console.log('--- Policy Engine (Runtime Core) ---');
+      console.log(message);
+      message.body = message.body || {};
+      let result;
+      let isIncomingMessage = _this._isIncomingMessage(message);
+      let isToVerify = _this.isToVerify(message);
+
+      if (isToVerify) {
+        if (isIncomingMessage) {
+
+          _this.decrypt(message).then(message => {
+            result = _this.applyPolicies(message);
+            let messageAccepted = result.policiesResult[0];
+            if (messageAccepted) {
+              resolve(message);
+            } else {
+              reject('Incoming message: blocked');
+            }
+          }, (error) => { reject(error); });
+
+        } else {
+
+          _this.getIdentity(message).then(identity => {
+            message.body.identity = identity;
+            result = _this.applyPolicies(message);
+            let messageAccepted = result.policiesResult[0];
+            if (messageAccepted) {
+              _this.encrypt(message).then(message => {
+                resolve(message);
+              }, (error) => { reject(error); });
+            } else {
+              reject('Outgoing message: blocked');
+            }
+          }, (error) => { reject(error); });
+
+        }
+      } else {
+        resolve(message);
+      }
+    });
   }
 
   set group(params) {
@@ -37,8 +78,21 @@ class RuntimeCoreCtx extends Context {
       dataObjectURL = dataObjectURL[0] + '//' + dataObjectURL[2];
       _this.groupAttribute = _this.runtimeRegistry.getPreAuthSubscribers(dataObjectURL);
     } else {
-    _this.groupAttribute = _this._getList(params.scope, params.group);
+      console.log('params');
+      console.log(params);
+      _this.groupAttribute = _this._getList(params.scope, params.group);
     }
+  }
+
+  _getList(scope, groupName) {
+    //let myGroups = persistenceManager.get('groups') || {};
+    let _this = this;
+    let myGroups = _this.groups;
+    let members = [];
+    if (myGroups[scope] !== undefined && myGroups[scope][groupName] !== undefined) {
+      members = myGroups[scope][groupName];
+    }
+    return members;
   }
 
   set subscription(params) {
@@ -56,16 +110,7 @@ class RuntimeCoreCtx extends Context {
     return _this.subscriptionAttribute;
   }
 
-  _getList(scope, groupName) {
-    let myGroups = persistenceManager.get('groups') || {};
-    let members = [];
-    if (myGroups[scope] !== undefined && myGroups[scope][groupName] !== undefined) {
-      members = myGroups[scope][groupName];
-    }
-    return members;
-  }
-
-  isIncomingMessage(message) {
+  _isIncomingMessage(message) {
     return (message.body.identity) ? true : false;
   }
 
@@ -80,15 +125,6 @@ class RuntimeCoreCtx extends Context {
     }
 
     return _this.idModule.getIdentityOfHyperty(message.from);
-  }
-
-  isToSetID(message) {
-    let _this = this;
-    if (message.body.identity || !_this.isToVerify(message)) {
-      return false;
-    } else {
-      return true;
-    }
   }
 
   isToVerify(message) {
@@ -147,7 +183,7 @@ class RuntimeCoreCtx extends Context {
 
   _getLastComponentOfURL(url) {
     let split = url.split('/');
-    return split[split.length-1];
+    return split[split.length - 1];
   }
 
   _getDataObjectURL(url) {

@@ -7,9 +7,24 @@ let expect = chai.expect;
 chai.use(chaiAsPromised);
 
 import {divideURL} from '../src/utils/utils';
-import persistenceManager from '../src/persistence/PersistenceManager';
+
+//import persistenceManager from '../src/persistence/PersistenceManager';
 import PolicyEngine from '../src/policy/PolicyEngine';
+
+//import MessageNodeCtx from '../src/policy/context/MessageNodeCtx';
 import RuntimeCoreCtx from '../src/policy/context/RuntimeCoreCtx';
+
+/*describe('Policy Engine with Message Node context', function() {
+  let policyEngine = new PolicyEngine(new MessageNodeCtx());
+
+  let message = { body: { identity: { email: 'user@domain' } }, id: 1, type: 'subscribe', from: 'hyperty://domain/hyperty-url', to: 'comm://domain/hyperty-instance' };
+
+  describe('authorisation', function() {
+    it('message evaluates to true', function() {
+      expect(policyEngine.authorise(message)).to.be.eql(true);
+    });
+  });
+});*/
 
 let runtimeRegistry = {
   getPreAuthSubscribers: () => {
@@ -25,12 +40,12 @@ let runtimeRegistry = {
 
 let identityModule = {
   decryptMessage: (message) => {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function(resolve) {
       resolve(message);
     });
   },
   encryptMessage: (message) => {
-    return new Promise(function(resolve, reject) {
+    return new Promise(function(resolve) {
       resolve(message);
     });
   },
@@ -74,33 +89,33 @@ describe('Policy Engine', function() {
     it('stores an advanced policy', function() {
       policyEngine.removePolicies('*', '*');
       policyEngine.addPolicies([policyOr]);
-      expect(policyEngine.getApplicablePolicies('global')).to.be.eql([policyOr]);
+      expect(policyEngine.context.getApplicablePolicies('global')).to.be.eql([policyOr]);
     });
 
     it('deletes an advanced policy', function() {
       policyEngine.removePolicies(policyOr.scope, policyOr.condition);
-      expect(policyEngine.getApplicablePolicies('global')).to.be.eql([]);
+      expect(policyEngine.context.getApplicablePolicies('global')).to.be.eql([]);
     });
 
     it('condition is verified when [or false true]', function() {
       policyEngine.addToList('global', 'source', 'students', 'student@gmail.com');
-      expect(policyEngine.pdp.verifiesAdvancedCondition(policyOr.condition[0], policyOr.condition[1], policyOr.condition[2], policyOr.scope, message)).to.be.eql(true);
+      expect(policyEngine.context.pdp.verifiesAdvancedCondition(policyOr.condition[0], policyOr.condition[1], policyOr.condition[2], policyOr.scope, message)).to.be.eql(true);
     });
 
     it('condition is not verified when [and false true]', function() {
-      expect(policyEngine.pdp.verifiesAdvancedCondition(policyAnd.condition[0], false, true, policyAnd.scope, message)).to.be.eql(false);
+      expect(policyEngine.context.pdp.verifiesAdvancedCondition(policyAnd.condition[0], false, true, policyAnd.scope, message)).to.be.eql(false);
     });
 
     it('condition is verified when [not false]', function() {
       let policyNot = { actions: [], authorise: true, condition: ['not', 'source in coleagues'], scope: 'global' };
 
-      expect(policyEngine.pdp.verifiesAdvancedCondition(policyNot.condition[0], policyNot.condition[1], undefined, policyNot.scope, message)).to.be.eql(true);
+      expect(policyEngine.context.pdp.verifiesAdvancedCondition(policyNot.condition[0], policyNot.condition[1], undefined, policyNot.scope, message)).to.be.eql(true);
     });
 
     it('condition is not verified when [not true]', function() {
       let policyNot = { actions: [], authorise: false, condition: ['not', 'source in students', 'source in students'], scope: 'global' };
 
-      expect(policyEngine.pdp.verifiesAdvancedCondition(policyNot.condition[0], policyNot.condition[1], undefined, policyNot.scope, message)).to.be.eql(false);
+      expect(policyEngine.context.pdp.verifiesAdvancedCondition(policyNot.condition[0], policyNot.condition[1], undefined, policyNot.scope, message)).to.be.eql(false);
     });
 
     it('condition is not verified when [and [or false true] false]', function() {
@@ -110,7 +125,7 @@ describe('Policy Engine', function() {
         condition: ['and', ['or', 'source in blockedEmails', 'source in students'], 'source in coleagues'],
         scope: 'global'
       };
-      expect(policyEngine.pdp.verifiesAdvancedCondition(policyAndOr.condition[0], policyAndOr.condition[1], policyAndOr.condition[2], policyAndOr.scope, message)).to.be.eql(false);
+      expect(policyEngine.context.pdp.verifiesAdvancedCondition(policyAndOr.condition[0], policyAndOr.condition[1], policyAndOr.condition[2], policyAndOr.scope, message)).to.be.eql(false);
     });
 
     it('condition is verified when [or true [and false true]]', function() {
@@ -120,44 +135,44 @@ describe('Policy Engine', function() {
         condition: ['or', 'source in students', ['and', 'source in students', 'source in coleagues']],
         scope: 'global'
       };
-      expect(policyEngine.pdp.verifiesAdvancedCondition(policyAndOr.condition[0], true, policyAndOr.condition[2], policyAndOr.scope, message)).to.be.eql(true);
+      expect(policyEngine.context.pdp.verifiesAdvancedCondition(policyAndOr.condition[0], true, policyAndOr.condition[2], policyAndOr.scope, message)).to.be.eql(true);
     });
   });
 
   describe('policies management', function() {
     it('associates a policy with the user scope', function() {
       policyEngine.addPolicies([policy1]);
-      expect(policyEngine.getApplicablePolicies('user')).to.be.eql([policy1]);
+      expect(policyEngine.context.getApplicablePolicies('user')).to.be.eql([policy1]);
     });
 
     it('associates a second policy with the user scope', function() {
       policyEngine.addPolicies([policy2]);
-      expect(policyEngine.getApplicablePolicies('user')).to.be.eql([policy1, policy2]);
+      expect(policyEngine.context.getApplicablePolicies('user')).to.be.eql([policy1, policy2]);
     });
 
     it('removes an existing policy associated with the user scope', function() {
       policyEngine.removePolicies('user', 'source in blockedEmails');
-      expect(policyEngine.getApplicablePolicies('user')).to.be.eql([policy2]);
+      expect(policyEngine.context.getApplicablePolicies('user')).to.be.eql([policy2]);
     });
 
     it('tries to remove a policy that does not exist with the user scope', function() {
       policyEngine.removePolicies('user', 'block-08-20');
-      expect(policyEngine.getApplicablePolicies('user')).to.be.eql([policy2]);
+      expect(policyEngine.context.getApplicablePolicies('user')).to.be.eql([policy2]);
     });
 
     it('removes all policies associated with the application scope', function() {
       policyEngine.removePolicies('application', '*');
-      expect(policyEngine.getApplicablePolicies('application')).to.be.eql([]);
+      expect(policyEngine.context.getApplicablePolicies('application')).to.be.eql([]);
     });
 
     it('removes all policies associated with the user scope', function() {
       policyEngine.removePolicies('user', '*');
-      expect(policyEngine.getApplicablePolicies('user')).to.be.eql([]);
+      expect(policyEngine.context.getApplicablePolicies('user')).to.be.eql([]);
     });
 
     it('removes all policies', function() {
       policyEngine.removePolicies('*', '*');
-      expect(policyEngine.getApplicablePolicies('*')).to.be.eql([]);
+      expect(policyEngine.context.getApplicablePolicies('*')).to.be.eql([]);
     });
   });
 
@@ -167,7 +182,8 @@ describe('Policy Engine', function() {
     let groupName1 = 'groupA';
 
     it('creates a group', function() {
-      persistenceManager.delete('groups');
+      //persistenceManager.delete('groups');
+      policyEngine.deleteGroup('global', 'students');
       policyEngine.createList('global', 'group', groupName1);
       expect(policyEngine.getGroupsNames('global')).to.be.eql([groupName1]);
     });
@@ -276,7 +292,7 @@ describe('Policy Engine', function() {
     };
 
     it('rejects the message as it is received in a blocked timeslot', function(done) {
-      policyEngine.pdp.context.time = 1530;
+      policyEngine.context.pdp.context.time = 1530;
       policyEngine.removePolicies('*', '*');
       policyEngine.addPolicies([timePolicy]);
       expect(policyEngine.authorise(messageWithID).then(function(response) {
@@ -287,7 +303,7 @@ describe('Policy Engine', function() {
     });
 
     it('accepts the message as it is received in a timeslot not blocked', function(done) {
-      policyEngine.pdp.context.time = 1700;
+      policyEngine.context.pdp.context.time = 1700;
       expect(policyEngine.authorise(messageWithID).then(function(response) {
         return response;
       }), function(reject) {
@@ -305,7 +321,7 @@ describe('Policy Engine', function() {
     };
 
     it('rejects the message as it is received in a blocked date', function(done) {
-      policyEngine.pdp.context.date = '01/01/2016';
+      policyEngine.context.pdp.context.date = '01/01/2016';
       policyEngine.removePolicies('*', '*');
       policyEngine.addPolicies([datePolicy]);
       policyEngine.addToList('global', 'date', 'blockedDates', '01/01/2016');
@@ -317,7 +333,7 @@ describe('Policy Engine', function() {
     });
 
     it('accepts the message as it is received in a date not blocked', function(done) {
-      policyEngine.pdp.context.date = '02/01/2016';
+      policyEngine.context.pdp.context.date = '02/01/2016';
       expect(policyEngine.authorise(messageWithID).then(function(response) {
         return response;
       }), function(reject) {
@@ -390,7 +406,7 @@ describe('Policy Engine', function() {
     };
 
     it('rejects the message as it is received in a blocked weekday', function(done) {
-      policyEngine.pdp.context.weekday =  '0';
+      policyEngine.context.pdp.context.weekday =  '0';
       policyEngine.removePolicies('*', '*');
       policyEngine.addPolicies([weekdayPolicy]);
       policyEngine.addToList('global', 'weekday', 'blockedWeekdays', '0');
@@ -402,7 +418,7 @@ describe('Policy Engine', function() {
     });
 
     it('allows the message as it comes from a weekday that is not blocked', function(done) {
-      policyEngine.pdp.context.weekday = '1';
+      policyEngine.context.pdp.context.weekday = '1';
       expect(policyEngine.authorise(messageFromAllowed).then(function(response) {
         return response;
       }), function(reject) {
@@ -414,14 +430,14 @@ describe('Policy Engine', function() {
   describe('data objects management', function() {
     let subscribeMessage = {
       body: { identity: { email: userEmail3 }, subscriber: 'hyperty://domain/hyperty-instance' }, id: 1, type: 'subscribe', from: 'runtime://localhost/7601/sm', to: 'comm://domain/data-object-url/subscription'
-    }
+    };
 
     let allowedSubscribeMessage = {
       body: { auth: true, identity: { email: userEmail3 }, subscriber: 'hyperty://domain/hyperty-instance' }, id: 1, type: 'subscribe', from: 'runtime://localhost/7601/sm', to: 'comm://domain/data-object-url/subscription'
-    }
+    };
 
     it('rejects a subscription attempt, as the policy rejects all', function(done) {
-      persistenceManager.delete('policies');
+      //persistenceManager.delete('policies');
       let blockAnySubscriptionPolicy = {
         scope: 'hyperty',
         condition: 'subscription equals *',
@@ -477,7 +493,7 @@ describe('Policy Engine', function() {
       let badSubscribeMessage = {
         body: { identity: { email: userEmail3 }, subscriber: 'hyperty://domain/not-preauthorised-hyperty-instance' }, id: 1, type: 'subscribe', from: 'runtime://localhost/7601/sm', to: 'comm://domain/data-object-url/subscription'
       };
-      policyEngine.removePolicies('hyperty', 'subscription in preauthorised')
+      policyEngine.removePolicies('hyperty', 'subscription in preauthorised');
       policyEngine.addPolicies([blockPreAuthSubscriptionPolicy]);
       expect(policyEngine.authorise(badSubscribeMessage).then(function(response) {
         return response;
@@ -487,5 +503,5 @@ describe('Policy Engine', function() {
     });
   });
 
-  persistenceManager.delete('policies');
+  //persistenceManager.delete('policies');
 });

@@ -1,6 +1,6 @@
 //jshint browser:true, jquery: true
 
-import persistenceManager from '../persistence/PersistenceManager';
+//import persistenceManager from '../persistence/PersistenceManager';
 import PEP from './PEP';
 import PDP from './PDP';
 
@@ -13,16 +13,25 @@ class PolicyEngine {
   /**
   * This method is invoked by the RuntimeUA and instantiates the Policy Engine. A Policy Decision
   * Point (PDP) and a Policy Enforcement Point (PEP) are initialised for the evaluation of policies
-  * and the enforcement of additional actions, respectively. Adds a listener do the Message Bus to
-  * allow method invokation.
+  * and the enforcement of additional actions, respectively.
   * @param  {IdentityModule}    identityModule
   * @param  {Registry}          runtimeRegistry
   */
   constructor(context) {
     let _this = this;
     _this.context = context;
-    _this.pdp = new PDP(context);
-    _this.pep = new PEP(context);
+    _this.context.policyEngine = _this;
+    _this.context.pdp = new PDP(context);
+    _this.context.pep = new PEP(context);
+
+    let acceptAnySubscriptionPolicy = {
+      scope: 'global',
+      condition: 'subscription equals *',
+      authorise: true,
+      actions: [{method: 'registerSubscriber'}]
+    };
+
+    _this.addPolicies([acceptAnySubscriptionPolicy]);
   }
 
   /**
@@ -33,7 +42,9 @@ class PolicyEngine {
   */
   addPolicies(newPolicies) {
     let _this = this;
-    let myPolicies = persistenceManager.get('policies');
+
+    //let myPolicies = persistenceManager.get('policies');
+    let myPolicies = _this.context.policies;
     if (myPolicies === undefined) {
       myPolicies = {};
     }
@@ -53,8 +64,9 @@ class PolicyEngine {
       }
       myPolicies[scope].push(newPolicies[i]);
     }
-    persistenceManager.set('policies', 0, myPolicies);
-    _this.policies = myPolicies;
+
+    //persistenceManager.set('policies', 0, myPolicies);
+    _this.context.policies = myPolicies;
   }
 
   /**
@@ -64,8 +76,9 @@ class PolicyEngine {
   */
   removePolicies(scope, condition) {
     let _this = this;
-    let myPolicies = persistenceManager.get('policies');
 
+    //let myPolicies = persistenceManager.get('policies');
+    let myPolicies = _this.context.policies;
     if (scope !== '*') {
 
       if (scope in myPolicies) {
@@ -90,18 +103,19 @@ class PolicyEngine {
         } else {
           delete myPolicies[scope];
         }
-        persistenceManager.set('policies', 0, myPolicies);
-        _this.policies = myPolicies;
+
+        //persistenceManager.set('policies', 0, myPolicies);
+        _this.context.policies = myPolicies;
       }
 
     } else {
-      persistenceManager.delete('policies');
-      _this.policies = {};
+      //persistenceManager.delete('policies');
+      _this.context.policies = {};
     }
   }
 
   areEqualArrays(array1, array2) {
-    if (array1.length != array2.length) {
+    if (array1.length !== array2.length) {
       return false;
     }
 
@@ -111,8 +125,7 @@ class PolicyEngine {
         if (!array1[i].equals(array2[i])) {
           return false;
         }
-      }
-      else if (array1[i] != array2[i]) {
+      } else if (array1[i] !== array2[i]) {
         return false;
       }
     }
@@ -130,91 +143,13 @@ class PolicyEngine {
   */
   authorise(message) {
     let _this = this;
-
-    return new Promise((resolve, reject) => {
-      console.log('--- Policy Engine ---');
-      console.log(message);
-      message.body = message.body || {};
-      let result;
-      let isIncomingMessage = _this.context.isIncomingMessage(message);
-      let isToVerify = _this.context.isToVerify(message);
-
-      if (isToVerify) {
-        if (isIncomingMessage) {
-
-          _this.context.decrypt(message).then(message => {
-            result = _this.applyPolicies(message);
-            let messageAccepted = result.policiesResult[0];
-            if (messageAccepted) {
-              resolve(message);
-            } else {
-              reject('Incoming message: blocked');
-            }
-          }, (error) => { reject(error); });
-
-        } else {
-
-          _this.context.getIdentity(message).then(identity => {
-            message.body.identity = identity;
-            result = _this.applyPolicies(message);
-            let messageAccepted = result.policiesResult[0];
-            if (messageAccepted) {
-              _this.context.encrypt(message).then(message => {
-                resolve(message);
-              }, (error) => { reject(error); });
-            } else {
-              reject('Outgoing message: blocked');
-            }
-          }, (error) => { reject(error); });
-
-        }
-      } else {
-        resolve(message);
-      }
-    });
-  }
-
-  applyPolicies(message) {
-    let _this = this;
-    let policiesResult = [true, []];
-    if (_this.context.isToVerify(message)) {
-      let applicablePolicies = _this.getApplicablePolicies('*');
-      policiesResult = _this.pdp.evaluate(message, applicablePolicies);
-      message.body.auth = applicablePolicies.length !== 0;
-      _this.pep.enforce(policiesResult);
-    }
-
-    return { message: message, policiesResult: policiesResult };
-  }
-
-  /**
-  * Returns the policies associated with a scope.
-  * @param   {String} scope
-  * @return  {Array}  policies
-  */
-  getApplicablePolicies(scope) {
-    let _this = this;
-    let myPolicies = persistenceManager.get('policies');
-    if (myPolicies === undefined) {
-      myPolicies = {};
-    }
-    let policies = [];
-
-    if (scope !== '*') {
-      if (myPolicies[scope] !== undefined) {
-        policies = myPolicies[scope];
-      }
-    } else {
-      for (let i in myPolicies) {
-        policies.push.apply(policies, myPolicies[i]);
-      }
-    }
-
-    return policies;
+    return _this.context.authorise(message);
   }
 
   getGroupsNames(scope) {
-    let myGroups = persistenceManager.get('groups') || {};
+    //let myGroups = persistenceManager.get('groups') || {};
+    let _this = this;
+    let myGroups = _this.context.groups;
     let groupsNames = [];
     if (myGroups[scope] !== {}) {
       for (let groupName in myGroups[scope]) {
@@ -230,7 +165,9 @@ class PolicyEngine {
   * @return {Array}   group
   */
   getList(scope, groupName) {
-    let myGroups = persistenceManager.get('groups') || {};
+    //let myGroups = persistenceManager.get('groups') || {};
+    let _this = this;
+    let myGroups = _this.context.groups;
     let members = [];
     if (myGroups[scope] !== undefined && myGroups[scope][groupName] !== undefined) {
       members = myGroups[scope][groupName];
@@ -244,12 +181,15 @@ class PolicyEngine {
   */
   createList(scope, type, groupName) {
     let _this = this;
-    let myGroups = persistenceManager.get('groups') || {};
+
+    //let myGroups = persistenceManager.get('groups') || {};
+    let myGroups = _this.context.groups;
     if (myGroups[scope] === undefined) {
       myGroups[scope] = {};
     }
     myGroups[scope][groupName] = [];
-    persistenceManager.set('groups', 0, myGroups);
+
+    //persistenceManager.set('groups', 0, myGroups);
     let policy = {
       authorise: false,
       condition: type + ' in ' + groupName,
@@ -263,11 +203,15 @@ class PolicyEngine {
 
   deleteGroup(scope, groupName) {
     let _this = this;
-    let myGroups = persistenceManager.get('groups') || {};
-    delete myGroups[scope][groupName];
-    persistenceManager.set('groups', 0, myGroups);
 
-    let myPolicies = persistenceManager.get('policies');
+    //let myGroups = persistenceManager.get('groups') || {};
+    let myGroups = _this.context.groups;
+    delete myGroups[scope][groupName];
+
+    //persistenceManager.set('groups', 0, myGroups);
+
+    //let myPolicies = persistenceManager.get('policies');
+    let myPolicies = _this.context.policies;
     if (myPolicies === undefined) {
       myPolicies = {};
     }
@@ -283,7 +227,7 @@ class PolicyEngine {
       }
     }
 
-    persistenceManager.set('policies', 0, myPolicies);
+    //persistenceManager.set('policies', 0, myPolicies);
   }
 
   /**
@@ -293,7 +237,9 @@ class PolicyEngine {
   */
   addToList(scope, type, groupName, userEmail) {
     let _this = this;
-    let myGroups = persistenceManager.get('groups') || {};
+
+    //let myGroups = persistenceManager.get('groups') || {};
+    let myGroups = _this.context.groups;
     if (myGroups[scope] === undefined) {
       myGroups[scope] = {};
     }
@@ -303,7 +249,8 @@ class PolicyEngine {
     if (myGroups[scope][groupName].indexOf(userEmail) === -1) {
       myGroups[scope][groupName].push(userEmail);
     }
-    persistenceManager.set('groups', 0, myGroups);
+
+    //persistenceManager.set('groups', 0, myGroups);
   }
 
   /**
@@ -313,13 +260,16 @@ class PolicyEngine {
   */
   removeFromGroup(scope, groupName, userEmail) {
     let _this = this;
-    let myGroups = persistenceManager.get('groups') || {};
+
+    //let myGroups = persistenceManager.get('groups') || {};
+    let myGroups = _this.context.groups;
     let group = myGroups[scope][groupName];
 
     for (let i in group) {
       if (group[i] === userEmail) {
         group.splice(i, 1);
-        persistenceManager.set('groups', 0, myGroups);
+
+        //persistenceManager.set('groups', 0, myGroups);
         break;
       }
     }
@@ -327,7 +277,7 @@ class PolicyEngine {
 
   getTimeslots() {
     let _this = this;
-    let policies = _this.policies.user;
+    let policies = _this.context.policies.user;
     let timeRestrictions = [];
     for (let i in policies) {
       if (policies[i].condition.split(' ')[0] === 'time') {
@@ -339,7 +289,7 @@ class PolicyEngine {
 
   getTimeslotById(condition) {
     let _this = this;
-    let policies = _this.policies.user;
+    let policies = _this.context.policies.user;
     for (let i in policies) {
       if (policies[i].condition === condition) {
         return policies[i];

@@ -15,11 +15,11 @@ class PEP {
     }
   }
 
-  sendAutomaticMessage() {}
+  /*sendAutomaticMessage() {}
 
   forwardToID() {}
 
-  forwardToHyperty() {}
+  forwardToHyperty() {}*/
 
 }
 

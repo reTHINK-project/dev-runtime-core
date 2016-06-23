@@ -31,6 +31,7 @@ class PDP {
   * @return {Array}   [authDecision, actions]
   */
   evaluate(message, policies) {
+    console.log('in evaluate');
     let _this = this;
     let results = [true];
     let actions = [];
@@ -39,7 +40,7 @@ class PDP {
       let condition = policy.condition;
       let verifiesCondition = false;
       if (typeof condition === 'object') {
-          verifiesCondition = _this.verifiesAdvancedCondition(condition[0], condition[1], condition[2], policy.scope, message);
+        verifiesCondition = _this.verifiesAdvancedCondition(condition[0], condition[1], condition[2], policy.scope, message);
       } else {
         verifiesCondition = _this.verifiesSimpleCondition(condition, policy.scope, message);
       }
@@ -47,6 +48,7 @@ class PDP {
       if (verifiesCondition) {
         results.push(policy.authorise);
       }
+      console.log('after verifiesCondition');
       if (policy.actions !== []) {
         for (let i in policy.actions) {
           let newAction = {
@@ -63,6 +65,7 @@ class PDP {
   }
 
   verifiesSimpleCondition(condition, scope, message) {
+    console.log('in verifiesSimpleCondition');
     let _this = this;
     let splitCondition = condition.split(' ');
     let variable = splitCondition[0];
@@ -70,13 +73,14 @@ class PDP {
 
     let params;
     if (operator === 'in') {
-        _this.context.group = {scope: scope, group: splitCondition[2], destination: message.to};
-        params = _this.context.group;
+      _this.context.group = {scope: scope, group: splitCondition[2], destination: message.to};
+      params = _this.context.group;
     } else {
       params = splitCondition.slice(2);
     }
     _this.context[variable] = {message: message};
     let value = _this.context[variable];
+    console.log('before leaving verifiesSimpleCondition');
     return _this.operators.operators[operator]([params, value]);
   }
 
