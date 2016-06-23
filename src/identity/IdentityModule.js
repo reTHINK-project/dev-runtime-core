@@ -52,6 +52,9 @@ class IdentityModule {
     _this.identity = newIdentity;
     _this.crypto = new Crypto();
 
+    //stores the association of the dataObject and the Hyperty registered within
+    _this.dataObjectsIdentity = {};
+
     // hashTable to store all the crypto information between two hyperties
     _this.chatKeys = {};
 
@@ -421,17 +424,31 @@ class IdentityModule {
 
     return new Promise(function(resolve, reject) {
 
+      if ((message.to.includes(_this._runtimeURL) || message.from.includes(_this._runtimeURL) ||
+          message.to.includes('comm://') || message.from.includes('comm://') ||
+          message.to.includes('hyperty://') || message.from.includes('hyperty://')) && message.type !== 'handshake') {
+        console.log('encryptMessage ignored');
+        return resolve(message);
+      }
+
+      /*if (message.to.includes('comm://') && message.from.includes('hyperty://')) {
+        _this._getHypertyFromDataObject(message.to).then(hypertyURL => {
+          console.log('EHEHHE encrypt ', hypertyURL);
+        });*/
+
       //resolve(message);
       _this._registry.getHypertyOwner(message.from).then(function(userURL) {
 
+        // check if exists any keys between two users
         let chatKeys = _this.chatKeys[message.from + message.to];
         if (!chatKeys) {
           chatKeys = _this._newChatCrypto(message, userURL);
+          console.log('createChatKey encrypt', message.from + message.to);
           _this.chatKeys[message.from + message.to] = chatKeys;
           message.body.handshakePhase = 'startHandShake';
         }
 
-        if (chatKeys.keys.hypertyToSessionKey && message.type !== 'handshake') {
+        if (chatKeys.authenticated && message.type !== 'handshake') {
 
           let iv = _this.crypto.generateIV();
           _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, message.body.value, iv).then(encryptedValue => {
@@ -466,12 +483,18 @@ class IdentityModule {
 
     return new Promise(function(resolve, reject) {
 
-      /*if (message.to.includes('domain-idp://') || message.from.includes('domain-idp://') ||
-          message.to.includes('domain://msg-node.') || message.from.includes('domain://msg-node.') ||
-          message.to.includes(_this._runtimeURL) || message.from.includes(_this._runtimeURL)) {
+      if ((message.to.includes(_this._runtimeURL) || message.from.includes(_this._runtimeURL) ||
+          message.to.includes('comm://') || message.from.includes('comm://') ||
+          message.to.includes('hyperty://') || message.from.includes('hyperty://')) && message.type !== 'handshake') {
         console.log('decryptMessage ignored');
+
+        if (message.to.includes('comm://') && message.from.includes('hyperty://')) {
+          _this._getHypertyFromDataObject(message.to).then(hypertyURL => {
+            console.log('EHEHHE ', hypertyURL);
+          });
+        }
         return resolve(message);
-      }*/
+      }
 
       //resolve(message);
 
@@ -480,10 +503,11 @@ class IdentityModule {
         let chatKeys = _this.chatKeys[message.to + message.from];
         if (!chatKeys) {
           chatKeys = _this._newChatCrypto(message, userURL, 'decrypt');
+          console.log('createChatKey decrypt', message.to + message.from);
           _this.chatKeys[message.to + message.from] = chatKeys;
         }
 
-        if (chatKeys.keys.hypertyToSessionKey && message.type !== 'handshake') {
+        if (chatKeys.authenticated && message.type !== 'handshake') {
           //TODO apply symmetric cypher
           console.log('Session keys created, decrypt');
 
@@ -498,15 +522,103 @@ class IdentityModule {
 
         } else {
           _this._handShakePhase(message, chatKeys).then(function(value) {
-            _this.chatKeys[message.to + message.from] = value.chatKeys;
-            _this._messageBus.postMessage(value.message);
-            reject('decrypt handshake protocol phase ', message.id);
+
+            if (value === 'handShakeEnd') {
+              reject('decrypt handshake protocol phase ');
+
+            } else {
+              _this.chatKeys[message.to + message.from] = value.chatKeys;
+              _this._messageBus.postMessage(value.message);
+              reject('decrypt handshake protocol phase ');
+            }
           });
         }
       }, function(rej) {
         // TODO review this logic
         resolve(rej);
       }).catch(function(err) { reject(err); });
+    });
+  }
+
+  mutualAuthentication(sender, receiver) {
+    let _this = this;
+
+    let reporterURL = _this.registry.getReporterURLSynchonous(sender);
+    if (reporterURL) {
+      sender = reporterURL;
+    }
+
+    let msg = {
+      to: receiver,
+      from: sender,
+      callback: undefined,
+      body: {handshakePhase: 'startHandShake', ignore: 'ignoreMessage'}
+    };
+
+    return new Promise(function(resolve, reject) {
+      let chatKeys = _this.chatKeys[sender + receiver];
+      _this._registry.getHypertyOwner(sender).then(function(userURL) {
+
+        if (!chatKeys) {
+          console.log('createChatKey mutual', sender + receiver);
+
+          let resolved = function(value) {
+            resolve(value);
+          };
+          msg.callback = resolved;
+
+          chatKeys = _this._newChatCrypto(msg, userURL);
+          _this.chatKeys[sender + receiver] = chatKeys;
+        }
+
+        if (chatKeys.authenticated) {
+          console.log('mutual authentication already done');
+
+          resolve('mutual authentication succeeded');
+        } else {
+
+          _this._handShakePhase(msg, chatKeys);
+        }
+      });
+    });
+
+  }
+
+  _getHypertyFromDataObject(dataObjectURL) {
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+
+      let splitedURL = dataObjectURL.split('/');
+      let finalURL = splitedURL[0] + '//' + splitedURL[2] + '/' + splitedURL[3];
+
+      // check if is the creator of the hyperty
+      let reporterURL = _this.registry.getReporterURLSynchonous(finalURL);
+
+      if (reporterURL) {
+        resolve(reporterURL);
+      } else {
+
+        let storedReporterURL = _this.dataObjectsIdentity[finalURL];
+
+        if (storedReporterURL) {
+          resolve(storedReporterURL);
+        } else {
+
+          let subscriberHyperty = _this.registry.getDataObjectSubscriberHyperty(dataObjectURL);
+
+          if (subscriberHyperty) {
+            resolve(subscriberHyperty);
+          } else {
+            _this.registry.discoverDataObjectPerURL(finalURL, splitedURL[2]).then(dataObject => {
+              _this.dataObjectsIdentity[finalURL] = dataObject.reporter;
+              resolve(dataObject.reporter);
+            }, err => {
+              reject(err);
+            });
+          }
+        }
+      }
     });
   }
 
@@ -533,7 +645,14 @@ class IdentityModule {
             }
           };
           chatKeys.handshakeHistory.senderHello = startHandShakeMsg;
-          resolve({message: startHandShakeMsg, chatKeys: chatKeys});
+
+          // check if was the encrypt function or the mutual authentication that request the
+          // start of the handShakePhase.
+          if (chatKeys.initialMessage) {resolve({message: startHandShakeMsg, chatKeys: chatKeys});
+          } else {
+            _this.chatKeys[message.from + message.to] = chatKeys;
+            _this._messageBus.postMessage(startHandShakeMsg);
+          }
 
           break;
         case 'senderHello':
@@ -673,6 +792,7 @@ class IdentityModule {
             };
 
             chatKeys.handshakeHistory.receiverFinishedMessage = receiverFinishedMessage;
+            chatKeys.authenticated = true;
             resolve({message: receiverFinishedMessage, chatKeys: chatKeys});
           });
 
@@ -680,22 +800,31 @@ class IdentityModule {
         case 'receiverFinishedMessage':
           console.log('receiverFinishedMessage');
           chatKeys.handshakeHistory.receiverFinishedMessage = message;
+          chatKeys.authenticated = true;
 
           iv = _this.crypto.decode(message.body.iv);
           let data = _this.crypto.decode(message.body.value);
           _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, data, iv).then(decryptedData => {
             console.log('decryptedData', decryptedData);
 
-            let initialMessage = {
-              type: 'create',
-              to: message.from,
-              from: message.to,
-              body: {
-                value: chatKeys.initialMessage.body.value
-              }
-            };
+            // check if there is an initial message that was blocked and is to send, or not
+            if (chatKeys.initialMessage) {
+              let initialMessage = {
+                type: 'create',
+                to: message.from,
+                from: message.to,
+                body: {
+                  value: chatKeys.initialMessage.body.value
+                }
+              };
 
-            resolve({message: initialMessage, chatKeys: chatKeys});
+              resolve({message: initialMessage, chatKeys: chatKeys});
+            } else {
+              let callback = chatKeys.callback;
+              console.log('callback worked?');
+              callback('handShakeEnd');
+              resolve('handShakeEnd');
+            }
           });
           break;
 
@@ -705,10 +834,13 @@ class IdentityModule {
     });
   }
 
-  _applicationData(message) {
-    let _this = this;
-  }
-
+  /**
+  * generates the initial structure for the keys between two users
+  * @param {JSON}    message              initial message that triggers the mutual authentication
+  * @param {String}  userURL              userURL
+  * @param {boolean} receiver(Optional)  indicates if is the sender or the receiver that creates a new chat crypto
+  * @return {JSON} newChatCrypto  new JSON structure for the chat crypto
+  */
   _newChatCrypto(message, userURL, receiver) {
     let _this = this;
 
@@ -755,7 +887,9 @@ class IdentityModule {
         senderCertificate: undefined,
         receiverFinishedMessage: undefined
       },
-      initialMessage: message
+      initialMessage: (message.body.ignore) ? undefined : message,
+      callback: message.callback,
+      authenticated: false
     };
 
     return newChatCrypto;
