@@ -20,18 +20,9 @@ class PolicyEngine {
   constructor(context) {
     let _this = this;
     _this.context = context;
-    _this.context.policyEngine = _this;
     _this.context.pdp = new PDP(context);
     _this.context.pep = new PEP(context);
-
-    let acceptAnySubscriptionPolicy = {
-      scope: 'global',
-      condition: 'subscription equals *',
-      authorise: true,
-      actions: [{method: 'registerSubscriber'}]
-    };
-
-    _this.addPolicies([acceptAnySubscriptionPolicy]);
+    _this.context.addSubscriptionPolicy();
   }
 
   /**

@@ -19,6 +19,16 @@ class Context {
     }
   }
 
+  static addSubscriptionPolicy() {
+    if (this === Context) {
+      throw new TypeError('Can not call static abstract method addSubscriptionPolicy.');
+    } else if (this.addSubscriptionPolicy === Context.addSubscriptionPolicy) {
+      throw new TypeError('Please implement static abstract method addSubscriptionPolicy.');
+    } else {
+      throw new TypeError('Do not call static abstract method addSubscriptionPolicy from child.');
+    }
+  }
+
   static isToVerify() {
     if (this === Context) {
       throw new TypeError('Can not call static abstract method isToVerify.');

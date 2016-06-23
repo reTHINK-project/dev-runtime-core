@@ -13,6 +13,10 @@ class MessageNodeCtx extends CommonCtx {
     return {};
   }
 
+  addSubscriptionPolicy() {
+    return null;
+  }
+
   isToVerify(message) {
     let _this = this;
 

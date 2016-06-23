@@ -76,7 +76,7 @@ class Registry extends EventEmitter {
     _this.protostubsList = {};
     _this.idpProxyList = {};
     _this.dataObjectList = {};
-    _this.subscribedDataObjectList = [];
+    _this.subscribedDataObjectList = {};
     _this.sandboxesList = {sandbox: {}, appSandbox: {} };
     _this.pepList = {};
 
@@ -232,7 +232,7 @@ class Registry extends EventEmitter {
   isDataObjectURL(url) {
     let _this = this;
     let dataObject = _this.dataObjectList[url];
-    let subscribedDataObject = _this.subscribedDataObjectList.includes(url);
+    let subscribedDataObject = _this.subscribedDataObjectList[url];
     return (dataObject || subscribedDataObject) ? true : false;
   }
 
@@ -240,9 +240,11 @@ class Registry extends EventEmitter {
   * register a desired dataObject to subscribe
   * @param    {String}    dataObjectURL      dataObject URL
   */
-  registerSubscribedDataObject(dataObjectURL) {
+  registerSubscribedDataObject(dataObjectURL, hypertyURL) {
     let _this = this;
-    _this.subscribedDataObjectList.push(dataObjectURL);
+    if (_this.subscribedDataObjectList[dataObjectURL] === undefined) {
+      _this.subscribedDataObjectList[dataObjectURL] = hypertyURL;
+    }
   }
 
   /**
