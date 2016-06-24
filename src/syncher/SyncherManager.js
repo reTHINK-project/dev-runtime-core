@@ -24,6 +24,7 @@ import { divideURL } from '../utils/utils';
 import ObjectAllocation from './ObjectAllocation';
 import ReporterObject from './ReporterObject';
 import ObserverObject from './ObserverObject';
+import tv4 from '../utils/tv4';
 
 import {MessageFactory} from 'service-framework/dist/MessageFactory';
 
@@ -100,6 +101,22 @@ class SyncherManager {
       let childrens = properties.children ? properties.children.constant : [];
 
       console.log('Scheme: ', scheme);
+
+      // schema validation
+      let obj = msg.body.value;
+      let schema = descriptor.sourcePackage.sourceCode;
+      console.log("validating object:", obj, "\r\nagainst schema:", schema);
+      var result = tv4.validateResult(obj, schema);
+
+      // check result and throw error if invalid
+      if (!result.valid) {
+        console.error("object validation failed!", result.error.message);
+
+        // TODO this should throw an error
+        //throw new Error("object validation failed:", result.error.message);
+      } else {
+        console.log("object validation succeeded", result);
+      }
 
       //request address allocation of a new object from the msg-node
       _this._allocator.create(domain, scheme, 1).then((allocated) => {
