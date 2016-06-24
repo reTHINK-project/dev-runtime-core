@@ -34,7 +34,6 @@ class PolicyEngine {
   addPolicies(newPolicies) {
     let _this = this;
 
-    //let myPolicies = persistenceManager.get('policies');
     let myPolicies = _this.context.policies;
     if (myPolicies === undefined) {
       myPolicies = {};
@@ -56,7 +55,6 @@ class PolicyEngine {
       myPolicies[scope].push(newPolicies[i]);
     }
 
-    //persistenceManager.set('policies', 0, myPolicies);
     _this.context.policies = myPolicies;
   }
 
@@ -68,7 +66,6 @@ class PolicyEngine {
   removePolicies(scope, condition) {
     let _this = this;
 
-    //let myPolicies = persistenceManager.get('policies');
     let myPolicies = _this.context.policies;
     if (scope !== '*') {
 
@@ -95,12 +92,10 @@ class PolicyEngine {
           delete myPolicies[scope];
         }
 
-        //persistenceManager.set('policies', 0, myPolicies);
         _this.context.policies = myPolicies;
       }
 
     } else {
-      //persistenceManager.delete('policies');
       _this.context.policies = {};
     }
   }
@@ -138,7 +133,6 @@ class PolicyEngine {
   }
 
   getGroupsNames(scope) {
-    //let myGroups = persistenceManager.get('groups') || {};
     let _this = this;
     let myGroups = _this.context.groups;
     let groupsNames = [];
@@ -156,7 +150,6 @@ class PolicyEngine {
   * @return {Array}   group
   */
   getList(scope, groupName) {
-    //let myGroups = persistenceManager.get('groups') || {};
     let _this = this;
     let myGroups = _this.context.groups;
     let members = [];
@@ -173,14 +166,12 @@ class PolicyEngine {
   createList(scope, type, groupName) {
     let _this = this;
 
-    //let myGroups = persistenceManager.get('groups') || {};
     let myGroups = _this.context.groups;
     if (myGroups[scope] === undefined) {
       myGroups[scope] = {};
     }
     myGroups[scope][groupName] = [];
 
-    //persistenceManager.set('groups', 0, myGroups);
     let policy = {
       authorise: false,
       condition: type + ' in ' + groupName,
@@ -195,13 +186,9 @@ class PolicyEngine {
   deleteGroup(scope, groupName) {
     let _this = this;
 
-    //let myGroups = persistenceManager.get('groups') || {};
     let myGroups = _this.context.groups;
     delete myGroups[scope][groupName];
 
-    //persistenceManager.set('groups', 0, myGroups);
-
-    //let myPolicies = persistenceManager.get('policies');
     let myPolicies = _this.context.policies;
     if (myPolicies === undefined) {
       myPolicies = {};
@@ -217,8 +204,6 @@ class PolicyEngine {
         break;
       }
     }
-
-    //persistenceManager.set('policies', 0, myPolicies);
   }
 
   /**
@@ -229,7 +214,6 @@ class PolicyEngine {
   addToList(scope, type, groupName, userEmail) {
     let _this = this;
 
-    //let myGroups = persistenceManager.get('groups') || {};
     let myGroups = _this.context.groups;
     if (myGroups[scope] === undefined) {
       myGroups[scope] = {};
@@ -241,7 +225,6 @@ class PolicyEngine {
       myGroups[scope][groupName].push(userEmail);
     }
 
-    //persistenceManager.set('groups', 0, myGroups);
   }
 
   /**
@@ -252,15 +235,12 @@ class PolicyEngine {
   removeFromGroup(scope, groupName, userEmail) {
     let _this = this;
 
-    //let myGroups = persistenceManager.get('groups') || {};
     let myGroups = _this.context.groups;
     let group = myGroups[scope][groupName];
 
     for (let i in group) {
       if (group[i] === userEmail) {
         group.splice(i, 1);
-
-        //persistenceManager.set('groups', 0, myGroups);
         break;
       }
     }

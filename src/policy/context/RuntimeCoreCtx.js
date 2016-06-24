@@ -15,13 +15,7 @@ class RuntimeCoreCtx extends CommonCtx {
   }
 
   loadPolicies() {
-    //persistenceManager.delete('policies');
-    //let myPolicies = persistenceManager.get('policies') || {};
-    let myPolicies = {};
-
-    //persistenceManager.set('policies', 0, myPolicies);
-
-    return myPolicies;
+    return {};
   }
 
   addSubscriptionPolicy() {
@@ -30,6 +24,7 @@ class RuntimeCoreCtx extends CommonCtx {
       scope: 'global',
       condition: 'subscription equals *',
       authorise: true,
+      //actions: [{method: 'registerSubscriber'}, {method:'doMutualAuthentication'}]
       actions: [{method: 'registerSubscriber'}]
     };
 
@@ -97,7 +92,6 @@ class RuntimeCoreCtx extends CommonCtx {
   }
 
   _getList(scope, groupName) {
-    //let myGroups = persistenceManager.get('groups') || {};
     let _this = this;
     let myGroups = _this.groups;
     let members = [];
@@ -195,7 +189,7 @@ class RuntimeCoreCtx extends CommonCtx {
     }
   }
 
-  /*doMutualAuthentication(message, authDecision) {
+  doMutualAuthentication(message, authDecision) {
     let _this = this;
     let to = message.to.split('/');
     let isDataObjectSubscription = to[4] === 'subscription';
@@ -204,9 +198,9 @@ class RuntimeCoreCtx extends CommonCtx {
       let dataObjectURL = message.to.split('/');
       dataObjectURL.pop();
       dataObjectURL = dataObjectURL[0] + '//' + dataObjectURL[2] + '/' + dataObjectURL[3];
-      _this.runtimeRegistry.mutualAuthentication(dataObjectURL, message.body.subscriber);
+      _this.idModule.mutualAuthentication(dataObjectURL, message.body.subscriber);
     }
-  }*/
+  }
 
   _getLastComponentOfURL(url) {
     let split = url.split('/');
