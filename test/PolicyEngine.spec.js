@@ -7,24 +7,97 @@ let expect = chai.expect;
 chai.use(chaiAsPromised);
 
 import {divideURL} from '../src/utils/utils';
-
-//import persistenceManager from '../src/persistence/PersistenceManager';
+import MessageNodeCtx from '../src/policy/context/MessageNodeCtx';
 import PolicyEngine from '../src/policy/PolicyEngine';
-
-//import MessageNodeCtx from '../src/policy/context/MessageNodeCtx';
 import RuntimeCoreCtx from '../src/policy/context/RuntimeCoreCtx';
 
-/*describe('Policy Engine with Message Node context', function() {
+/* POLICIES */
+let datePolicy = { scope: 'global', condition: 'date in blockedDates', authorise: false, actions: [] };
+
+let domainPolicy = { scope: 'global', condition: 'domain in blockedDomains', authorise: false, actions: [] };
+
+let sourcePolicy = { actions: [], authorise: false, condition: 'source in blockedEmails', scope: 'user' };
+
+let timePolicy = { scope: 'global', condition: 'time between 1400 1700', authorise: false, actions: [] };
+
+let weekdayPolicy = { scope: 'global', condition: 'weekday in blockedWeekdays', authorise: false, actions: [] };
+
+/* MESSAGES */
+let message = { body: { identity: { userProfile: { username: 'user@domain' } } }, id: 1, type: 'subscribe', from: 'hyperty://domain/hyperty-url', to: 'comm://domain/hyperty-instance' };
+
+let messageFromBlocked = { body: { identity: { userProfile: { username: 'user@blockedDomain' } } }, id: 1, type: 'subscribe', from: 'hyperty://domain/hyperty-url', to: 'comm://domain/hyperty-instance' };
+
+describe('Policy Engine with Message Node context', function() {
   let policyEngine = new PolicyEngine(new MessageNodeCtx());
 
-  let message = { body: { identity: { email: 'user@domain' } }, id: 1, type: 'subscribe', from: 'hyperty://domain/hyperty-url', to: 'comm://domain/hyperty-instance' };
+  it('authorises a valid message', function() {
+    expect(policyEngine.authorise(message)).to.be.eql(true);
+  });
 
-  describe('authorisation', function() {
-    it('message evaluates to true', function() {
+  describe('functionality: date', function() {
+    it('rejects the message as it is received in a blocked date', function() {
+      policyEngine.context.pdp.context.date = '01/01/2016';
+      policyEngine.addPolicies([datePolicy]);
+      policyEngine.addToList('global', 'date', 'blockedDates', '01/01/2016');
+      expect(policyEngine.authorise(message)).to.be.eql(false);
+    });
+  });
+
+  describe('functionality: domain', function() {
+    it('rejects the message as it comes from a blocked domain', function() {
+      policyEngine.removePolicies('*', '*');
+      policyEngine.addPolicies([domainPolicy]);
+      policyEngine.addToList('global', 'domain', 'blockedDomains', 'blockedDomain');
+      expect(policyEngine.authorise(messageFromBlocked)).to.be.eql(false);
+    });
+
+    it('allows the message as it comes from a domain that is not blocked', function() {
       expect(policyEngine.authorise(message)).to.be.eql(true);
     });
   });
-});*/
+
+  describe('functionality: source', function() {
+    it('rejects the message as it comes from a blocked source', function() {
+      policyEngine.removePolicies('*', '*');
+      policyEngine.addPolicies([sourcePolicy]);
+      policyEngine.addToList('global', 'source', 'blockedEmails', 'user@blockedDomain');
+      expect(policyEngine.authorise(messageFromBlocked)).to.be.eql(false);
+    });
+
+    it('allows the message as it comes from a source that is not blocked', function() {
+      expect(policyEngine.authorise(message)).to.be.eql(true);
+    });
+  });
+
+  describe('functionality: time of the day', function() {
+    it('rejects the message as it is received in a blocked timeslot', function() {
+      policyEngine.removePolicies('*', '*');
+      policyEngine.addPolicies([timePolicy]);
+      policyEngine.context.time = 1500;
+      expect(policyEngine.authorise(message)).to.be.eql(false);
+    });
+
+    it('accepts the message as it is received in a timeslot not blocked', function() {
+      policyEngine.context.time = 1701;
+      expect(policyEngine.authorise(message)).to.be.eql(true);
+    });
+  });
+
+  describe('functionality: weekday', function() {
+    it('rejects the message as it is received in a blocked weekday', function() {
+      policyEngine.context.weekday =  '0';
+      policyEngine.removePolicies('*', '*');
+      policyEngine.addPolicies([weekdayPolicy]);
+      policyEngine.addToList('global', 'weekday', 'blockedWeekdays', '0');
+      expect(policyEngine.authorise(message)).to.be.eql(false);
+    });
+
+    it('allows the message as it comes from a weekday that is not blocked', function() {
+      policyEngine.context.weekday = '1';
+      expect(policyEngine.authorise(message)).to.be.eql(true);
+    });
+  });
+});
 
 let runtimeRegistry = {
   getPreAuthSubscribers: () => {
@@ -50,28 +123,14 @@ let identityModule = {
     });
   },
   getIdentityOfHyperty: () => {
-    return new Promise(function(resolve, reject) {
-      let token = {
-        id: 'identity'
-      };
-      if (!token) {
-        reject('token not found');
-      } else {
-        resolve(token);
-      }
+    return new Promise(function(resolve) {
+      resolve({ userProfile: {username: 'user@domain' } });
     });
   }
 };
 
 describe('Policy Engine', function() {
   let policyEngine = new PolicyEngine(new RuntimeCoreCtx(identityModule, runtimeRegistry));
-  let policy1 = {
-    actions: [],
-    authorise: false,
-    condition: 'source in blockedEmails',
-    scope: 'user'
-  };
-
   let policy2 = {
     actions: [],
     authorise: false,
@@ -80,7 +139,7 @@ describe('Policy Engine', function() {
   };
 
   describe('advanced policies management', function() {
-    let message = { body: { identity: { email: 'student@gmail.com' } }, id: 1, type: 'read', from: 'hyperty://domain/hyperty-url', to: 'comm://domain/hyperty-instance' };
+    let message = { body: { identity: { userProfile: { username: 'student@gmail.com' } } }, id: 1, type: 'read', from: 'hyperty://domain/hyperty-url', to: 'comm://domain/hyperty-instance' };
 
     let policyOr = { actions: [], authorise: true, condition: ['or', 'source in coleagues', 'source in students'], scope: 'global' };
 
@@ -141,13 +200,13 @@ describe('Policy Engine', function() {
 
   describe('policies management', function() {
     it('associates a policy with the user scope', function() {
-      policyEngine.addPolicies([policy1]);
-      expect(policyEngine.context.getApplicablePolicies('user')).to.be.eql([policy1]);
+      policyEngine.addPolicies([sourcePolicy]);
+      expect(policyEngine.context.getApplicablePolicies('user')).to.be.eql([sourcePolicy]);
     });
 
     it('associates a second policy with the user scope', function() {
       policyEngine.addPolicies([policy2]);
-      expect(policyEngine.context.getApplicablePolicies('user')).to.be.eql([policy1, policy2]);
+      expect(policyEngine.context.getApplicablePolicies('user')).to.be.eql([sourcePolicy, policy2]);
     });
 
     it('removes an existing policy associated with the user scope', function() {
@@ -226,18 +285,7 @@ describe('Policy Engine', function() {
     to: 'comm://domain/hyperty-instance'
   };
 
-  let messageWithID = {
-    body: {
-      auth: false,
-      identity: {
-        id: 'identity'
-      }
-    },
-    id: 1,
-    type: 'read',
-    from: 'hyperty://domain/hyperty-url',
-    to: 'comm://domain/hyperty-instance'
-  };
+  let messageWithID = { body: { auth: false, identity: { userProfile: { username: 'user@domain' } } }, id: 1, type: 'read', from: 'hyperty://domain/hyperty-url', to: 'comm://domain/hyperty-instance' };
 
   describe('identity', function() {
     it('should add an identity in the message body', function(done) {
@@ -258,41 +306,30 @@ describe('Policy Engine', function() {
     });
   });
 
-  let messageFromBlocked = {
-    body: {
-      identity: {
-        email: userEmail1
-      }
-    },
-    id: 1,
-    type: 'read',
-    from: 'hyperty://domain/hyperty-url',
-    to: 'comm://domain/hyperty-instance'
-  };
-
   describe('functionality: source', function() {
     it('rejects the message as it comes from a blocked source', function(done) {
       policyEngine.removePolicies('*', '*');
-      policyEngine.addPolicies([policy1]);
-      policyEngine.addToList('global', 'source', 'blockedEmails', userEmail1);
+      policyEngine.addPolicies([sourcePolicy]);
+      policyEngine.addToList('global', 'source', 'blockedEmails', 'user@blockedDomain');
       expect(policyEngine.authorise(messageFromBlocked).then(function(response) {
         return response;
       }), function(reject) {
         return reject;
       }).to.be.rejected.and.notify(done);
     });
+
+    it('allows the message as it comes from a source that is not blocked', function(done) {
+      expect(policyEngine.authorise(message).then(function(response) {
+        return response;
+      }), function(reject) {
+        return reject;
+      }).to.be.fulfilled.and.eventually.eql(message).and.notify(done);
+    });
   });
 
   describe('functionality: time of the day', function() {
-    let timePolicy = {
-      scope: 'application',
-      condition: 'time between 2300 1600',
-      authorise: false,
-      actions: []
-    };
-
     it('rejects the message as it is received in a blocked timeslot', function(done) {
-      policyEngine.context.pdp.context.time = 1530;
+      policyEngine.context.time = 1530;
       policyEngine.removePolicies('*', '*');
       policyEngine.addPolicies([timePolicy]);
       expect(policyEngine.authorise(messageWithID).then(function(response) {
@@ -313,13 +350,6 @@ describe('Policy Engine', function() {
   });
 
   describe('functionality: date', function() {
-    let datePolicy = {
-      scope: 'global',
-      condition: 'date in blockedDates',
-      authorise: false,
-      actions: []
-    };
-
     it('rejects the message as it is received in a blocked date', function(done) {
       policyEngine.context.pdp.context.date = '01/01/2016';
       policyEngine.removePolicies('*', '*');
@@ -345,11 +375,7 @@ describe('Policy Engine', function() {
   let userEmail3 = 'openidtest10@microsoft.com';
 
   let messageFromAllowed = {
-    body: {
-      identity: {
-        email: userEmail3
-      }
-    },
+    body: { identity: { userProfile: { username: userEmail3 } } },
     id: 1,
     type: 'read',
     from: 'hyperty://domain/hyperty-url',
@@ -357,30 +383,14 @@ describe('Policy Engine', function() {
   };
 
   let outMessageFromAllowed = {
-    body: {
-      auth: true,
-      identity: {
-        email: userEmail3
-      }
-    },
-    id: 1,
-    type: 'read',
-    from: 'hyperty://domain/hyperty-url',
-    to: 'comm://domain/hyperty-instance'
+    body: { auth: true, identity: { userProfile: { username: userEmail3 } } }, id: 1, type: 'read', from: 'hyperty://domain/hyperty-url', to: 'comm://domain/hyperty-instance'
   };
 
   describe('functionality: domain', function() {
-    let domainPolicy = {
-      scope: 'global',
-      condition: 'domain in blockedDomains',
-      authorise: false,
-      actions: []
-    };
-
     it('rejects the message as it comes from a blocked domain', function(done) {
       policyEngine.removePolicies('*', '*');
       policyEngine.addPolicies([domainPolicy]);
-      policyEngine.addToList('global', 'domain', 'blockedDomains', 'gmail.com');
+      policyEngine.addToList('global', 'domain', 'blockedDomains', 'blockedDomain');
       expect(policyEngine.authorise(messageFromBlocked).then(function(response) {
         return response;
       }), function(reject) {
@@ -398,13 +408,6 @@ describe('Policy Engine', function() {
   });
 
   describe('functionality: weekday', function() {
-    let weekdayPolicy = {
-      scope: 'global',
-      condition: 'weekday in blockedWeekdays',
-      authorise: false,
-      actions: []
-    };
-
     it('rejects the message as it is received in a blocked weekday', function(done) {
       policyEngine.context.pdp.context.weekday =  '0';
       policyEngine.removePolicies('*', '*');
@@ -428,12 +431,10 @@ describe('Policy Engine', function() {
   });
 
   describe('data objects management', function() {
-    let subscribeMessage = {
-      body: { identity: { email: userEmail3 }, subscriber: 'hyperty://domain/hyperty-instance' }, id: 1, type: 'subscribe', from: 'runtime://localhost/7601/sm', to: 'comm://domain/data-object-url/subscription'
-    };
+    let subscribeMessage = { body: { identity: { userProfile: { username: userEmail3 } }, subscriber: 'hyperty://domain/hyperty-instance' }, id: 1, type: 'subscribe', from: 'runtime://localhost/7601/sm', to: 'comm://domain/data-object-url/subscription' };
 
     let allowedSubscribeMessage = {
-      body: { auth: true, identity: { email: userEmail3 }, subscriber: 'hyperty://domain/hyperty-instance' }, id: 1, type: 'subscribe', from: 'runtime://localhost/7601/sm', to: 'comm://domain/data-object-url/subscription'
+      body: { auth: true, identity: { userProfile: { username: userEmail3 } }, subscriber: 'hyperty://domain/hyperty-instance' }, id: 1, type: 'subscribe', from: 'runtime://localhost/7601/sm', to: 'comm://domain/data-object-url/subscription'
     };
 
     it('rejects a subscription attempt, as the policy rejects all', function(done) {
@@ -490,9 +491,8 @@ describe('Policy Engine', function() {
     it('rejects a subscription attempt, as the policy rejects non-preauthorised subscriber and is not preauthorised', function(done) {
       let blockPreAuthSubscriptionPolicy = { scope: 'hyperty', condition: ['not', 'subscription in preauthorised'], authorise: false, actions: [{method: 'registerSubscriber'}] };
 
-      let badSubscribeMessage = {
-        body: { identity: { email: userEmail3 }, subscriber: 'hyperty://domain/not-preauthorised-hyperty-instance' }, id: 1, type: 'subscribe', from: 'runtime://localhost/7601/sm', to: 'comm://domain/data-object-url/subscription'
-      };
+      let badSubscribeMessage = { body: { identity: { userProfile: { username: userEmail3 } }, subscriber: 'hyperty://domain/not-preauthorised-hyperty-instance' }, id: 1, type: 'subscribe', from: 'runtime://localhost/7601/sm', to: 'comm://domain/data-object-url/subscription' };
+
       policyEngine.removePolicies('hyperty', 'subscription in preauthorised');
       policyEngine.addPolicies([blockPreAuthSubscriptionPolicy]);
       expect(policyEngine.authorise(badSubscribeMessage).then(function(response) {
@@ -503,5 +503,4 @@ describe('Policy Engine', function() {
     });
   });
 
-  //persistenceManager.delete('policies');
 });

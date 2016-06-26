@@ -33,6 +33,7 @@ class Operators {
       now = (now < start) ? now += 2400 : now;
       end += 2400;
     }
+
     return (now > start && now < end);
   }
 

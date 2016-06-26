@@ -138,7 +138,7 @@ function prependLicense(clean) {
  */
 gulp.task('dist', function() {
 
-  return gulp.src(['src/sandbox.js', 'src/minibus.js', 'src/runtime/RuntimeUA.js', 'src/policy/PolicyEngine.js'])
+  return gulp.src(['src/sandbox.js', 'src/minibus.js', 'src/runtime/RuntimeUA.js', 'src/policy/PolicyEngine.js', 'src/policy/context/MessageNodeCtx.js'])
   .pipe(dist());
 
 });
@@ -233,7 +233,7 @@ function transpile(opts) {
     .pipe(source(filename))
     .pipe(buffer())
     .pipe(sourcemaps.init({loadMaps: true}))
-    .pipe(uglify())
+    //.pipe(uglify())
     .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest(opts.destination))
     .on('end', function() {

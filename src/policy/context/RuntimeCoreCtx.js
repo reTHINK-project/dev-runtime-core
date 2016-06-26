@@ -8,10 +8,8 @@ class RuntimeCoreCtx extends CommonCtx {
   constructor(idModule, runtimeRegistry) {
     super();
     let _this = this;
-    _this.policies = _this.loadPolicies();
     _this.idModule = idModule;
     _this.runtimeRegistry = runtimeRegistry;
-    _this.groups = {};
   }
 
   loadPolicies() {
@@ -38,7 +36,7 @@ class RuntimeCoreCtx extends CommonCtx {
     let _this = this;
 
     return new Promise((resolve, reject) => {
-      console.log('--- Policy Engine (Runtime Core) ---');
+      console.log('--- Policy Engine ---');
       console.log(message);
       message.body = message.body || {};
       let result;
@@ -89,16 +87,6 @@ class RuntimeCoreCtx extends CommonCtx {
     } else {
       _this.groupAttribute = _this._getList(params.scope, params.group);
     }
-  }
-
-  _getList(scope, groupName) {
-    let _this = this;
-    let myGroups = _this.groups;
-    let members = [];
-    if (myGroups[scope] !== undefined && myGroups[scope][groupName] !== undefined) {
-      members = myGroups[scope][groupName];
-    }
-    return members;
   }
 
   set subscription(params) {

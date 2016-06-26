@@ -5,8 +5,6 @@ class MessageNodeCtx extends CommonCtx {
 
   constructor() {
     super();
-    let _this = this;
-    _this.policies = _this.loadPolicies();
   }
 
   loadPolicies() {
@@ -17,26 +15,22 @@ class MessageNodeCtx extends CommonCtx {
     return null;
   }
 
-  isToVerify(message) {
+  set group(params) {
     let _this = this;
+    _this.groupAttribute = _this._getList(params.scope, params.group);
+  }
 
-    let isFromHyperty = divideURL(message.from).type === 'hyperty';
-    let isFromSM = (message.from === _this.runtimeRegistry.runtimeURL + '/sm');
-    let isToSubscription = (_this._getLastComponentOfURL(message.to) === 'subscription');
-    let isToHyperty = divideURL(message.to).type === 'hyperty';
-
-    return (isFromSM && isToSubscription) || (isFromHyperty && isToHyperty);
+  get group() {
+    let _this = this;
+    return _this.groupAttribute;
   }
 
   authorise(message) {
     let _this = this;
-    console.log('--- Policy Engine (Message Node)---');
-    console.log(message);
     message.body = message.body || {};
     let result;
 
     let isToVerify = _this.isToVerify(message);
-
     if (isToVerify) {
 
       result = _this.applyPolicies(message);
@@ -46,6 +40,10 @@ class MessageNodeCtx extends CommonCtx {
     } else {
       return true;
     }
+  }
+
+  isToVerify(message) {
+    return true;
   }
 }
 

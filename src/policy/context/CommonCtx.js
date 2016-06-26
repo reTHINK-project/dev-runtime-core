@@ -7,6 +7,9 @@ class CommonCtx extends Context {
 
   constructor() {
     super();
+    let _this = this;
+    _this.policies = _this.loadPolicies();
+    _this.groups = {};
   }
 
   applyPolicies(message) {
@@ -16,7 +19,6 @@ class CommonCtx extends Context {
     policiesResult = _this.pdp.evaluate(message, applicablePolicies);
     message.body.auth = applicablePolicies.length !== 0;
     _this.pep.enforce(policiesResult);
-
     return { message: message, policiesResult: policiesResult };
   }
 
@@ -56,12 +58,12 @@ class CommonCtx extends Context {
 
   set domain(params) {
     let _this = this;
-    _this._domainAttribute = divideEmail(params.message.body.identity.email).domain;
+    _this._domainAttribute = divideEmail(params.message.body.identity.userProfile.username).domain;
   }
 
   set source(params) {
     let _this = this;
-    _this._sourceAttribute = params.message.body.identity.email;
+    _this._sourceAttribute = params.message.body.identity.userProfile.username;
   }
 
   set time(now) {
@@ -118,9 +120,23 @@ class CommonCtx extends Context {
     return day + '/' + month + '/' + date.getFullYear();
   }
 
+  _getList(scope, groupName) {
+    let _this = this;
+    let myGroups = _this.groups;
+    let members = [];
+    if (myGroups[scope] !== undefined && myGroups[scope][groupName] !== undefined) {
+      members = myGroups[scope][groupName];
+    }
+    return members;
+  }
+
   _getTime() {
     let now = new Date();
-    return parseInt(String(now.getHours()) + now.getMinutes());
+    let minutes = String(now.getMinutes());
+    if (minutes.length === 1) {
+      minutes = '0' + minutes;
+    }
+    return parseInt(String(now.getHours()) + minutes);
   }
 
   _getWeekDay() {
