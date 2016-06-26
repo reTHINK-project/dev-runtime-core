@@ -22,8 +22,7 @@ class RuntimeCoreCtx extends CommonCtx {
       scope: 'global',
       condition: 'subscription equals *',
       authorise: true,
-      //actions: [{method: 'registerSubscriber'}, {method:'doMutualAuthentication'}]
-      actions: [{method: 'registerSubscriber'}]
+      actions: [{method: 'registerSubscriber'}, {method:'doMutualAuthentication'}]
     };
 
     if (_this.policies[policy.scope] === undefined) {
@@ -40,20 +39,36 @@ class RuntimeCoreCtx extends CommonCtx {
       console.log(message);
       message.body = message.body || {};
       let result;
-      let isIncomingMessage = _this._isIncomingMessage(message);
       let isToVerify = _this.isToVerify(message);
-
+      let isIncomingMessage = _this._isIncomingMessage(message);
+      let isToCypher = _this._isToCypherModule(message);
       if (isToVerify) {
         if (isIncomingMessage) {
-          _this.decrypt(message).then(message => {
+          if (isToCypher) {
+
+            _this.decrypt(message).then(message => {
+              result = _this.applyPolicies(message);
+              let messageAccepted = result.policiesResult[0];
+              message = result.message;
+              if (messageAccepted) {
+                resolve(message);
+              } else {
+                reject('Message blocked');
+              }
+            }, (error) => { reject(error); });
+
+          } else {
+
             result = _this.applyPolicies(message);
             let messageAccepted = result.policiesResult[0];
+            message = result.message;
             if (messageAccepted) {
               resolve(message);
             } else {
-              reject('Incoming message: blocked');
+              reject('Message blocked');
             }
-          }, (error) => { reject(error); });
+
+          }
 
         } else {
 
@@ -61,12 +76,17 @@ class RuntimeCoreCtx extends CommonCtx {
             message.body.identity = identity;
             result = _this.applyPolicies(message);
             let messageAccepted = result.policiesResult[0];
+            message = result.message;
             if (messageAccepted) {
-              _this.encrypt(message).then(message => {
+              if (isToCypher) {
+                _this.encrypt(message).then(message => {
+                  resolve(message);
+                }, (error) => { reject(error); });
+              } else {
                 resolve(message);
-              }, (error) => { reject(error); });
+              }
             } else {
-              reject('Outgoing message: blocked');
+              reject('Message blocked');
             }
           }, (error) => { reject(error); });
 
@@ -139,6 +159,17 @@ class RuntimeCoreCtx extends CommonCtx {
     return (isFromHyperty && isToDataObject) || (isFromLocalSM && isToSubscription) || (isFromRemoteSM && isToSubscription) || (isFromDataObject && isToDataObject) || (isFromHyperty && isToHyperty);
   }
 
+  _isToCypherModule(message) {
+    let _this = this;
+    let isCreate = message.type === 'create';
+    let isFromHyperty = divideURL(message.from).type === 'hyperty';
+    let isToHyperty = divideURL(message.to).type === 'hyperty';
+    let isToDataObject = _this._isDataObjectURL(message.to);
+    let isHandshake = message.type === 'handshake';
+
+    return (isCreate && isFromHyperty && isToHyperty) || (isCreate && isFromHyperty && isToDataObject) || isHandshake;
+  }
+
   decrypt(message) {
     let _this = this;
 
@@ -186,7 +217,7 @@ class RuntimeCoreCtx extends CommonCtx {
       let dataObjectURL = message.to.split('/');
       dataObjectURL.pop();
       dataObjectURL = dataObjectURL[0] + '//' + dataObjectURL[2] + '/' + dataObjectURL[3];
-      _this.idModule.mutualAuthentication(dataObjectURL, message.body.subscriber);
+      _this.idModule.doMutualAuthentication(dataObjectURL, message.body.subscriber);
     }
   }
 

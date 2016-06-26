@@ -1,5 +1,4 @@
 import CommonCtx from './CommonCtx';
-import {divideURL} from '../../utils/utils';
 
 class MessageNodeCtx extends CommonCtx {
 
@@ -42,7 +41,7 @@ class MessageNodeCtx extends CommonCtx {
     }
   }
 
-  isToVerify(message) {
+  isToVerify() {
     return true;
   }
 }
