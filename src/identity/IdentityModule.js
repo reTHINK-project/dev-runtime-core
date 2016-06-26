@@ -424,9 +424,18 @@ class IdentityModule {
 
     return new Promise(function(resolve, reject) {
 
-      if ((message.to.includes(_this._runtimeURL) || message.from.includes(_this._runtimeURL) ||
+      let isTypeOfUpdate = message.type === 'update';
+      let isFromHyperty = divideURL(message.from).type === 'hyperty';
+      let isToHyperty = divideURL(message.to).type === 'hyperty';
+      let isFromDataObject = _this.registry.isDataObjectURL(message.from);
+      let isToDataObject = _this.registry.isDataObjectURL(message.to);
+      let isFromRuntime = message.from.includes(_this._runtimeURL);
+      let isToRuntime = message.to.includes(_this._runtimeURL);
+      let ishandShakeType = message.type === 'handshake';
+
+      if (isFromRuntime || isToRuntime ||
           message.to.includes('comm://') || message.from.includes('comm://') ||
-          message.to.includes('hyperty://') || message.from.includes('hyperty://')) && message.type !== 'handshake') {
+          message.to.includes('hyperty://') || message.from.includes('hyperty://') && !ishandShakeType) {
         console.log('encryptMessage ignored');
         return resolve(message);
       }
@@ -463,7 +472,7 @@ class IdentityModule {
           resolve(message);
         } else {
           console.log('else');
-          _this._handShakePhase(message, chatKeys).then(function(value) {
+          _this._doHandShakePhase(message, chatKeys).then(function(value) {
             _this.chatKeys[message.from + message.to] = value.chatKeys;
 
             _this._messageBus.postMessage(value.message);
@@ -483,6 +492,14 @@ class IdentityModule {
 
     return new Promise(function(resolve, reject) {
 
+      let isFromHyperty = divideURL(message.from).type === 'hyperty';
+      let isToHyperty = divideURL(message.to).type === 'hyperty';
+      let isFromDataObject = _this.registry.isDataObjectURL(message.from);
+      let isToDataObject = _this.registry.isDataObjectURL(message.to);
+      let isFromRuntime = message.from.includes(_this._runtimeURL);
+      let isToRuntime = message.to.includes(_this._runtimeURL);
+      let ishandShakeType = message.type === 'handshake';
+
       if ((message.to.includes(_this._runtimeURL) || message.from.includes(_this._runtimeURL) ||
           message.to.includes('comm://') || message.from.includes('comm://') ||
           message.to.includes('hyperty://') || message.from.includes('hyperty://')) && message.type !== 'handshake') {
@@ -490,7 +507,7 @@ class IdentityModule {
 
         if (message.to.includes('comm://') && message.from.includes('hyperty://')) {
           _this._getHypertyFromDataObject(message.to).then(hypertyURL => {
-            console.log('EHEHHE ', hypertyURL);
+            console.log('DECRYPT ChatCommunication? ', hypertyURL);
           });
         }
         return resolve(message);
@@ -521,7 +538,7 @@ class IdentityModule {
           resolve(message);
 
         } else {
-          _this._handShakePhase(message, chatKeys).then(function(value) {
+          _this._doHandShakePhase(message, chatKeys).then(function(value) {
 
             if (value === 'handShakeEnd') {
               reject('decrypt handshake protocol phase ');
@@ -540,7 +557,7 @@ class IdentityModule {
     });
   }
 
-  mutualAuthentication(sender, receiver) {
+  doMutualAuthentication(sender, receiver) {
     let _this = this;
 
     let reporterURL = _this.registry.getReporterURLSynchonous(sender);
@@ -577,13 +594,18 @@ class IdentityModule {
           resolve('mutual authentication succeeded');
         } else {
 
-          _this._handShakePhase(msg, chatKeys);
+          _this._doHandShakePhase(msg, chatKeys);
         }
       });
     });
 
   }
 
+  /**
+  * returns the reporter associated to the dataObject URL
+  * @param   {String}   dataObjectURL         dataObject url
+  * @return   {String}  reporter              dataObject url reporter
+  */
   _getHypertyFromDataObject(dataObjectURL) {
     let _this = this;
 
@@ -599,17 +621,22 @@ class IdentityModule {
         resolve(reporterURL);
       } else {
 
+        // check if there is already an association from an hypertyURL to the dataObject
         let storedReporterURL = _this.dataObjectsIdentity[finalURL];
 
         if (storedReporterURL) {
           resolve(storedReporterURL);
         } else {
 
+          // check if there is any hyperty that subscribed the dataObjectURL
           let subscriberHyperty = _this.registry.getDataObjectSubscriberHyperty(dataObjectURL);
 
           if (subscriberHyperty) {
             resolve(subscriberHyperty);
           } else {
+
+            // search in domain registry for the hyperty associated to the dataObject
+            // search in case is a subscriber who wants to know the reporter
             _this.registry.discoverDataObjectPerURL(finalURL, splitedURL[2]).then(dataObject => {
               _this.dataObjectsIdentity[finalURL] = dataObject.reporter;
               resolve(dataObject.reporter);
@@ -622,7 +649,7 @@ class IdentityModule {
     });
   }
 
-  _handShakePhase(message, chatKeys) {
+  _doHandShakePhase(message, chatKeys) {
     let _this = this;
     console.log('handshakeType');
     console.log(message);
@@ -630,6 +657,8 @@ class IdentityModule {
     return new Promise(function(resolve,reject) {
 
       let handshakeType = message.body.handshakePhase;
+      let iv;
+      let value = {};
       switch (handshakeType) {
 
         case 'startHandShake':
@@ -641,10 +670,10 @@ class IdentityModule {
             from: message.from,
             body: {
               handshakePhase: 'senderHello',
-              random: _this.crypto.encode(chatKeys.keys.fromRandom)
+              value: _this.crypto.encode(chatKeys.keys.fromRandom)
             }
           };
-          chatKeys.handshakeHistory.senderHello = startHandShakeMsg;
+          chatKeys.handshakeHistory.senderHello = _this._filterMessageToHash(startHandShakeMsg, undefined, chatKeys.hypertyFrom.messageInfo);
 
           // check if was the encrypt function or the mutual authentication that request the
           // start of the handShakePhase.
@@ -657,8 +686,8 @@ class IdentityModule {
           break;
         case 'senderHello':
           console.log('senderHello');
-          chatKeys.handshakeHistory.senderHello = message;
-          chatKeys.keys.fromRandom = _this.crypto.decode(message.body.random);
+          chatKeys.handshakeHistory.senderHello = _this._filterMessageToHash(message);
+          chatKeys.keys.fromRandom = _this.crypto.decode(message.body.value);
           chatKeys.keys.toRandom = _this.crypto.generateRandom();
           let senderHelloMsg = {
             type: 'handshake',
@@ -666,23 +695,25 @@ class IdentityModule {
             from: message.to,
             body: {
               handshakePhase: 'receiverHello',
-              random: _this.crypto.encode(chatKeys.keys.toRandom)
+              value: _this.crypto.encode(chatKeys.keys.toRandom)
             }
           };
-          chatKeys.handshakeHistory.receiverHello = senderHelloMsg;
+          chatKeys.handshakeHistory.receiverHello = _this._filterMessageToHash(senderHelloMsg, undefined, chatKeys.hypertyFrom.messageInfo);
           resolve({message: senderHelloMsg, chatKeys: chatKeys});
 
           break;
+
         case 'receiverHello':
           console.log('receiverHello');
-          chatKeys.handshakeHistory.receiverHello = message;
+          chatKeys.handshakeHistory.receiverHello = _this._filterMessageToHash(message);
+
           _this.validateAssertion(message.body.identity.assertion).then((value) => {
 
             //TODO send a signature
 
             let receiverPublicKey = _this.crypto.decode(value.contents.nonce);
             let premasterSecret = _this.crypto.generatePMS();
-            let toRandom = message.body.random;
+            let toRandom = message.body.value;
             chatKeys.hypertyTo.assertion = message.body.identity.assertion;
             chatKeys.hypertyTo.publicKey = receiverPublicKey;
             chatKeys.hypertyTo.userID    = value.contents.email;
@@ -691,39 +722,44 @@ class IdentityModule {
 
             let concatKey = _this.crypto.concatPMSwithRandoms(premasterSecret, chatKeys.keys.toRandom, chatKeys.keys.fromRandom);
 
-            _this.crypto.generateMasterSecret(concatKey, 'messageHistoric' + chatKeys.keys.toRandom + chatKeys.keys.fromRandom).then((masterKey) => {
-              chatKeys.keys.masterKey = masterKey;
+            return _this.crypto.generateMasterSecret(concatKey, 'messageHistoric' + chatKeys.keys.toRandom + chatKeys.keys.fromRandom);
 
-              _this.crypto.generateKeys(masterKey, 'key expansion' + chatKeys.keys.toRandom + chatKeys.keys.fromRandom).then((keys) => {
+              //generate the master key
+          }).then((masterKey) => {
+            chatKeys.keys.masterKey = masterKey;
 
-                chatKeys.keys.hypertyToSessionKey = new Uint8Array(keys[0]);
-                chatKeys.keys.hypertyFromSessionKey = new Uint8Array(keys[1]);
-                chatKeys.keys.hypertyToHashKey = new Uint8Array(keys[2]);
-                chatKeys.keys.hypertyFromHashKey = new Uint8Array(keys[3]);
-                let iv = _this.crypto.generateIV();
+            return _this.crypto.generateKeys(masterKey, 'key expansion' + chatKeys.keys.toRandom + chatKeys.keys.fromRandom);
 
-                _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, 'ok', iv).then((encryptedData) => {
+            //generate the symmetric and hash keys
+          }).then((keys) => {
 
-                  _this.crypto.encryptRSA(receiverPublicKey, premasterSecret).then((encryptedValue) => {
-                    console.log('encrypted', encryptedValue);
-                    let receiverHelloMsg = {
-                      type: 'handshake',
-                      to: message.from,
-                      from: message.to,
-                      body: {
-                        handshakePhase: 'senderCertificate',
-                        value: _this.crypto.encode(encryptedValue),
-                        encryptedData: _this.crypto.encode(encryptedData),
-                        iv: _this.crypto.encode(iv)
-                      }
-                    };
-                    chatKeys.handshakeHistory.senderCertificate = receiverHelloMsg;
-                    resolve({message: receiverHelloMsg, chatKeys: chatKeys});
-                  });
-                });
-              });
+            chatKeys.keys.hypertyToSessionKey = new Uint8Array(keys[0]);
+            chatKeys.keys.hypertyFromSessionKey = new Uint8Array(keys[1]);
+            chatKeys.keys.hypertyToHashKey = new Uint8Array(keys[2]);
+            chatKeys.keys.hypertyFromHashKey = new Uint8Array(keys[3]);
+            iv = _this.crypto.generateIV();
+
+            return _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, 'ok', iv);
+
+            //encrypt the data
+          }).then((encryptedData) => {
+
+            _this.crypto.encryptRSA(chatKeys.hypertyTo.publicKey, chatKeys.keys.premasterKey).then((encryptedValue) => {
+              console.log('encrypted', encryptedValue);
+              let receiverHelloMsg = {
+                 type: 'handshake',
+                 to: message.from,
+                 from: message.to,
+                 body: {
+                   handshakePhase: 'senderCertificate',
+                   value: _this.crypto.encode(encryptedValue),
+                   encryptedData: _this.crypto.encode(encryptedData),
+                   iv: _this.crypto.encode(iv)
+                 }
+               };
+              chatKeys.handshakeHistory.senderCertificate = _this._filterMessageToHash(receiverHelloMsg, 'ok' + iv, chatKeys.hypertyFrom.messageInfo);
+              resolve({message: receiverHelloMsg, chatKeys: chatKeys});
             });
-
           }, (error) => {
             console.log(error);
             reject('Error during authentication of identity');
@@ -732,8 +768,6 @@ class IdentityModule {
           break;
         case 'senderCertificate':
           console.log('senderCertificate');
-          chatKeys.handshakeHistory.senderCertificate = message;
-          let iv;
 
           _this.validateAssertion(message.body.identity.assertion).then((value) => {
             //TODO verify the signature
@@ -751,6 +785,7 @@ class IdentityModule {
 
             //obtain the PremasterKey using the private key
           }).then(pms => {
+
             chatKeys.keys.premasterKey = new Uint8Array(pms);
             let concatKey = _this.crypto.concatPMSwithRandoms(chatKeys.keys.premasterKey, chatKeys.keys.toRandom, chatKeys.keys.fromRandom);
 
@@ -768,30 +803,33 @@ class IdentityModule {
             chatKeys.keys.hypertyToSessionKey = new Uint8Array(keys[1]);
             chatKeys.keys.hypertyFromHashKey = new Uint8Array(keys[2]);
             chatKeys.keys.hypertyToHashKey = new Uint8Array(keys[3]);
-            let iv = _this.crypto.decode(message.body.iv);
+            iv = _this.crypto.decode(message.body.iv);
             let data = _this.crypto.decode(message.body.encryptedData);
 
             return _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, data, iv);
 
           }).then(decryptedData => {
             console.log('decryptedData', decryptedData);
+            chatKeys.handshakeHistory.senderCertificate = _this._filterMessageToHash(message, decryptedData + iv);
+
             iv = _this.crypto.generateIV();
+            value.iv = _this.crypto.encode(iv);
 
             return _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, 'ok!', iv);
 
           }).then(encryptedValue => {
+            value.value = _this.crypto.encode(encryptedValue);
             let receiverFinishedMessage = {
               type: 'handshake',
               to: message.from,
               from: message.to,
               body: {
                 handshakePhase: 'receiverFinishedMessage',
-                value: _this.crypto.encode(encryptedValue),
-                iv: _this.crypto.encode(iv)
+                value: btoa(JSON.stringify(value))
               }
             };
 
-            chatKeys.handshakeHistory.receiverFinishedMessage = receiverFinishedMessage;
+            chatKeys.handshakeHistory.receiverFinishedMessage = _this._filterMessageToHash(receiverFinishedMessage, 'ok!' + iv, chatKeys.hypertyFrom.messageInfo);
             chatKeys.authenticated = true;
             resolve({message: receiverFinishedMessage, chatKeys: chatKeys});
           });
@@ -799,13 +837,16 @@ class IdentityModule {
           break;
         case 'receiverFinishedMessage':
           console.log('receiverFinishedMessage');
-          chatKeys.handshakeHistory.receiverFinishedMessage = message;
           chatKeys.authenticated = true;
 
-          iv = _this.crypto.decode(message.body.iv);
-          let data = _this.crypto.decode(message.body.value);
+          value = JSON.parse(atob(message.body.value));
+
+          iv = _this.crypto.decode(value.iv);
+          let data = _this.crypto.decode(value.value);
+
           _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, data, iv).then(decryptedData => {
             console.log('decryptedData', decryptedData);
+            chatKeys.handshakeHistory.receiverFinishedMessage = _this._filterMessageToHash(message, decryptedData + iv);
 
             // check if there is an initial message that was blocked and is to send, or not
             if (chatKeys.initialMessage) {
@@ -832,6 +873,27 @@ class IdentityModule {
 
       }
     });
+  }
+
+  /**
+  * filter the messages to hash, by removing some fields not generated by the runtime core
+  * @param {Message}  message                     message
+  * @param {String}  decryptedValue (Optional)    value from body.value in case it originally comes encrypted
+  * @param {JSON}  identity(Optional)    add the hyperty identity associated in case is not added to the initial message
+  * @return {Message}  new message filtered
+  */
+  _filterMessageToHash(message, decryptedValue, identity) {
+
+    return {
+      type: message.type,
+      from: message.from,
+      to:   message.to,
+      body: {
+        identity: identity || message.body.identity,
+        value: decryptedValue || message.body.value,
+        handshakePhase: message.body.handshakePhase
+      }
+    };
   }
 
   /**
