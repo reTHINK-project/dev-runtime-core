@@ -220,23 +220,29 @@ class Registry extends EventEmitter {
   }
 
   /**
-  * returns the hyperty Name from a given hypertyURL
-  * @param    {String}    hypertyURL      hyperty URL
+  * returns the hyperty Name from a given url. This url could be from a dataObject or hyperty
+  * @param    {String}    url      hyperty or dataObject URL
   * @return   {String}    hypertyName     hyperty Name
   */
-  getHypertyName(hypertyURL) {
+  getHypertyName(url) {
     let _this = this;
 
-    return new Promise(function(resolve, reject) {
+    let isHypertyURL = divideURL(url).type === 'hyperty';
 
-      for (let index in _this.hypertiesList) {
-        let hyperty = _this.hypertiesList[index];
-        if (hyperty.hypertyURL === hypertyURL) {
-          return resolve(hyperty.objectName);
-        }
+    //value to be returned in the end
+    let hypertyName;
+
+    //if is not an hyperty, check if is a dataObject and obtain his reporter
+    let hypertyURL = (isHypertyURL) ? hypertyURL = url : _this.getReporterURLSynchonous(url);
+
+    for (let index in _this.hypertiesList) {
+      let hyperty = _this.hypertiesList[index];
+      if (hyperty.hypertyURL === hypertyURL) {
+        hypertyName = hyperty.objectName;
+        break;
       }
-      reject('No hyperty was found');
-    });
+    }
+    return hypertyName;
   }
 
   /**

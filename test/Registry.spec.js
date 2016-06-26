@@ -133,14 +133,14 @@ getRegistry.then(function(registry) {
 
         registry.messageBus.addListener('domain://msg-node.ua.pt/hyperty-address-allocation', (msg) => {
           let message = {id: 1, type: 'response', from: 'domain://msg-node.ua.pt/hyperty-address-allocation', to: msg.from,
-          body: {code: 200, value: {allocated: ['hyperty-instance://ua.pt/1']}}};
+          body: {code: 200, value: {allocated: ['hyperty://ua.pt/1']}}};
 
           registry.messageBus.postMessage(message, (reply) => {
             console.log('Reply: ', reply);
           });
         });
 
-        expect(registry.registerHyperty(sandboxDummy, descriptorURL, descriptor)).to.be.fulfilled.and.eventually.equal('hyperty-instance://ua.pt/1').and.notify(done);
+        expect(registry.registerHyperty(sandboxDummy, descriptorURL, descriptor)).to.be.fulfilled.and.eventually.equal('hyperty://ua.pt/1').and.notify(done);
 
       });
     });
@@ -157,7 +157,7 @@ getRegistry.then(function(registry) {
       });
 
       it('should get a sandbox from a specific hypertyIstance', function(done) {
-        let hypertyInstance = 'hyperty-instance://ua.pt/1';
+        let hypertyInstance = 'hyperty://ua.pt/1';
 
         expect(registry.getSandbox(hypertyInstance).then(function(response) {
           return response;
@@ -210,7 +210,7 @@ getRegistry.then(function(registry) {
 
     describe('getHypertyOwner(hypertyURL)', function() {
       it('should return the user associated to the hyperty URL', function(done) {
-        let url = 'hyperty-instance://ua.pt/1';
+        let url = 'hyperty://ua.pt/1';
 
         expect(registry.getHypertyOwner(url).then(function(response) {
           return response;
@@ -219,12 +219,10 @@ getRegistry.then(function(registry) {
     });
 
     describe('getHypertyName(hypertyURL)', function() {
-      it('should return the hyperty Name from a given hypertyURL', function(done) {
-        let url = 'hyperty-instance://ua.pt/1';
+      it('should return the hyperty Name from a given hypertyURL', function() {
+        let url = 'hyperty://ua.pt/1';
 
-        expect(registry.getHypertyName(url).then(function(response) {
-          return response;
-        })).to.be.fulfilled.and.eventually.equal('hyperty-chat').and.notify(done);
+        expect(registry.getHypertyName(url)).to.be.equal('hyperty-chat');
       });
     });
 
@@ -293,7 +291,7 @@ getRegistry.then(function(registry) {
 
     describe('unregisterHyperty(url)', function() {
       it('should unregister an Hyperty', function(done) {
-        let url = 'hyperty-instance://ua.pt/1';
+        let url = 'hyperty://ua.pt/1';
 
         expect(registry.unregisterHyperty(url).then(function(response) {
           return response;
