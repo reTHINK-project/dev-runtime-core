@@ -9,26 +9,44 @@ class Crypto {
 
   }
 
+  /**
+  * encode a byteArray value in base 64 encode
+  * @param   {byteArray}    value    byteArray value
+  * @return  {string}   encoded value
+  */
+  encode(value) {
+    return btoa(value);
+  }
+
+  /**
+  * decode a base64 value in a new Uint8Array
+  * @param   {string}    value    value encoded in base 64
+  * @return  {byteArray} decodedValue
+  */
+  decode(value) {
+    return new Uint8Array(JSON.parse('[' + atob(value) + ']'));
+  }
+
   encryptRSA(pubKey, data) {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
-      _this._importRSAencryptKey(pubKey).then(function(publicKey) {
+      _this._importRSAencryptKey(new Uint8Array(pubKey)).then(function(publicKey) {
 
         crypto.subtle.encrypt(
             {
               name: 'RSA-OAEP'
             },
             publicKey, //from generateKey or importKey above
-            _this._utf8Encode(data) //ArrayBuffer of data you want to encrypt
+            data //ArrayBuffer of data you want to encrypt
         )
         .then(function(encrypted) {
           //returns an ArrayBuffer containing the encrypted data
-          console.log(new Uint8Array(encrypted));
+          console.log('crypto-encryptRSA', new Uint8Array(encrypted));
           resolve(new Uint8Array(encrypted));
 
         }).catch(function(err) {
-          console.log(err);
+          console.log('crypto-encryptRSA', err);
           reject(err);
         });
 
@@ -53,13 +71,13 @@ class Crypto {
         )
         .then(function(decrypted) {
 
-          let decryptedData = _this._utf8Decode(new Uint8Array(decrypted));
+          let decryptedData = new Uint8Array(decrypted);
 
-          console.log(decryptedData);
+          console.log('crypto-decryptRSA', decryptedData);
           resolve(decryptedData);
 
         }).catch(function(err) {
-          console.log(err);
+          console.log('crypto-decryptRSA', err);
           reject(err);
         });
       });
@@ -82,11 +100,11 @@ class Crypto {
         )
         .then(function(signature) {
           //returns an ArrayBuffer containing the signature
-          console.log(new Uint8Array(signature));
+          console.log('crypto-signRSA', new Uint8Array(signature));
           resolve(new Uint8Array(signature));
 
         }).catch(function(err) {
-          console.log(err);
+          console.log('crypto-signRSA', err);
           reject(err);
         });
 
@@ -111,11 +129,11 @@ class Crypto {
         )
         .then(function(isvalid) {
           //returns a boolean on whether the signature is true or not
-          console.log(isvalid);
+          console.log('crypto-verifyRSA', isvalid);
           resolve(isvalid);
 
         }).catch(function(err) {
-          console.log(err);
+          console.log('crypto-verifyRSA', err);
           reject(err);
         });
 
@@ -142,11 +160,11 @@ class Crypto {
         )
         .then(function(encrypted) {
           //returns an ArrayBuffer containing the encrypted data
-          console.log(new Uint8Array(encrypted));
+          console.log('crypto-encryptAES', new Uint8Array(encrypted));
           resolve(new Uint8Array(encrypted));
 
         }).catch(function(err) {
-          console.log(err);
+          console.log('crypto-encryptAES', err);
           reject(err);
         });
 
@@ -172,11 +190,11 @@ class Crypto {
         .then(function(decrypted) {
 
           let decodedData = _this._utf8Decode(new Uint8Array(decrypted));
-          console.log(decodedData);
+          console.log('crypto-decryptAES', decodedData);
           resolve(decodedData);
 
         }).catch(function(err) {
-          console.log(err);
+          console.log('crypto-decryptAES', err);
           reject(err);
         });
 
@@ -206,12 +224,13 @@ class Crypto {
         _this._utf8Encode(data) //ArrayBuffer of data you want to sign
         )
         .then(function(signature) {
-          console.log(signature);
+          console.log('crypto-hashHMAC', signature);
 
           //returns an ArrayBuffer containing the signature
           resolve(new Uint8Array(signature));
 
         }).catch(function(err) {
+          console.log('crypto-hashHMAC', err);
           reject(err);
         });
       });
@@ -242,11 +261,11 @@ class Crypto {
         )
         .then(function(isvalid) {
           //returns a boolean on whether the signature is true or not
-          console.log(isvalid);
+          console.log('crypto-verifyHMAC', isvalid);
           resolve(isvalid);
 
         }).catch(function(err) {
-          console.error(err);
+          console.error('crypto-verifyHMAC', err);
           reject(err);
         });
 
@@ -276,23 +295,21 @@ class Crypto {
       ).then(function(key) {
         //returns a keypair object
         console.log(key);
-        console.log(key.publicKey);
-        console.log(key.privateKey);
 
         crypto.subtle.exportKey(
           'spki', //can be 'jwk' (public or private), 'spki' (public only), or 'pkcs8' (private only)
           key.publicKey //can be a publicKey or privateKey, as long as extractable was true
         ).then(function(publicKey) {
           //returns the exported key data
-          console.log(new Uint8Array(publicKey));
           keyPair.public  = new Uint8Array(publicKey);
           return crypto.subtle.exportKey(
             'pkcs8', //can be 'jwk' (public or private), 'spki' (public only), or 'pkcs8' (private only)
             key.privateKey //can be a publicKey or privateKey, as long as extractable was true
           );
         }).then(function(privateKey) {
-          console.log(new Uint8Array(privateKey));
           keyPair.private  = new Uint8Array(privateKey);
+          console.log('crypto-generateRSAKeyPair', keyPair);
+
           resolve(keyPair);
 
         }).catch(function(err) {
@@ -305,6 +322,19 @@ class Crypto {
         reject(err);
       });
     });
+  }
+
+  /**
+  * Generates a 128 bit random value.
+  * @return {byteArray}  array    random value
+  */
+  generateIV() {
+    let _this = this;
+
+    let array = new  Uint8Array(16);
+    crypto.getRandomValues(array);
+
+    return array;
   }
 
   /**
@@ -353,21 +383,25 @@ class Crypto {
       let key = new Uint8Array(48);
       let seed = data;
 
-      _this.hashHMAC(hmacKey, seed).then(function(keypart0) {
+      _this._digest(hmacKey).then((digestedKey) => {
 
-        //copy the first 32 bytes into the key
-        for (let i = 0; i < 32; i++) { key[i] = keypart0[i]; }
-        return _this.hashHMAC(hmacKey, seed + keypart0);
+        _this.hashHMAC(digestedKey, seed).then(function(keypart0) {
 
-      }).then(function(keypart1) {
+          //copy the first 32 bytes into the key
+          for (let i = 0; i < 32; i++) { key[i] = keypart0[i]; }
+          return _this.hashHMAC(digestedKey, seed + keypart0);
 
-        //copy the first 16 bytes to the key remaining 16 bytes
-        for (let i = 0; i < 16; i++) { key[i + 32] = keypart1[i]; }
-        resolve(key);
+        }).then(function(keypart1) {
 
-      }).catch(function(err) {
-        console.log(err);
-        reject(err);
+          //copy the first 16 bytes to the key remaining 16 bytes
+          for (let i = 0; i < 16; i++) { key[i + 32] = keypart1[i]; }
+          console.log('crypto-generateMasterSecret', key);
+          resolve(key);
+
+        }).catch(function(err) {
+          console.log('crypto-generateMasterSecret', err);
+          reject(err);
+        });
       });
 
     });
@@ -404,10 +438,11 @@ class Crypto {
       }).then(function(keypart3) {
         key.push(keypart3);
 
+        console.log('crypto-generateKeys', key);
         resolve(key);
 
       }).catch(function(err) {
-        console.log(err);
+        console.log('crypto-generateKeys', err);
         reject(err);
       });
 
@@ -431,11 +466,11 @@ class Crypto {
       )
       .then(function(privateKey) {
         //returns a publicKey (or privateKey if you are importing a private key)
-        console.log(privateKey);
+        console.log('crypto-_importRSAsignKey', privateKey);
         resolve(privateKey);
 
       }).catch(function(err) {
-        console.error(err);
+        console.error('crypto-_importRSAsignKey', err);
         reject(err);
       });
     });
@@ -457,11 +492,11 @@ class Crypto {
       )
       .then(function(publicKey) {
         //returns a publicKey (or privateKey if you are importing a private key)
-        console.log(publicKey);
+        console.log('crypto-_importRSAverifyKey', publicKey);
         resolve(publicKey);
 
       }).catch(function(err) {
-        console.error(err);
+        console.error('crypto-_importRSAverifyKey', err);
         reject(err);
       });
     });
@@ -484,11 +519,12 @@ class Crypto {
       )
       .then(function(publicKey) {
         //returns a publicKey (or privateKey if you are importing a private key)
-        console.log(publicKey);
+        console.log('crypto-_importRSAencryptKey', publicKey);
         resolve(publicKey);
 
       }).catch(function(err) {
-        console.error(err);
+        console.error('crypto-_importRSAencryptKey', err);
+        reject(err);
       });
     });
   }
@@ -510,14 +546,37 @@ class Crypto {
       )
       .then(function(privateKey) {
         //returns a publicKey (or privateKey if you are importing a private key)
-        console.log(privateKey);
+        console.log('crypto-_importRSAdecryptKey', privateKey);
         resolve(privateKey);
 
       }).catch(function(err) {
-        console.error(err);
+        console.error('crypto-_importRSAdecryptKey', err);
         reject(err);
       });
     });
+  }
+
+  concatPMSwithRandoms(pms, toRandom, fromRandom) {
+    let _this = this;
+
+    let finalKey = new Uint8Array(pms.length + toRandom.length + fromRandom.length);
+
+    // add PremasterKey
+    for (let i = 0; i < pms.length; i++) {
+      finalKey[i] = pms[i];
+    }
+
+    //add to random
+    for (let i = 0; i < toRandom.length; i++) {
+      finalKey[i + pms.length] = pms[i];
+    }
+
+    //add from random
+    for (let i = 0; i < fromRandom.length; i++) {
+      finalKey[i + pms.length + toRandom.length] = pms[i];
+    }
+
+    return finalKey;
   }
 
   _generate256bitKey() {
@@ -533,25 +592,54 @@ class Crypto {
   * @return {JSON}       key              key ready to be used in the HMAC cryptographic function
   */
   _importHMACkey(arrayBuffer) {
+    let _this = this;
+
     return new Promise(function(resolve, reject) {
-      crypto.subtle.importKey(
-      'raw', //can be 'jwk' or 'raw'
-      arrayBuffer,
-      {   //this is the algorithm options
-        name: 'HMAC',
-        hash: {name: 'SHA-256'}, //can be 'SHA-1', 'SHA-256', 'SHA-384', or 'SHA-512'
-        length: 256 //optional, if you want your key length to differ from the hash function's block length
-      },
-      true, //whether the key is extractable (i.e. can be used in exportKey)
-      ['sign', 'verify'] //can be any combination of 'sign' and 'verify'
-      ).then(function(key) {
-        //returns the symmetric key
-        console.log(key);
-        resolve(key);
+
+      _this._digest(arrayBuffer).then((key) => {
+
+        crypto.subtle.importKey(
+        'raw', //can be 'jwk' or 'raw'
+        key,
+        {   //this is the algorithm options
+          name: 'HMAC',
+          hash: {name: 'SHA-256'}, //can be 'SHA-1', 'SHA-256', 'SHA-384', or 'SHA-512'
+          length: 256 //optional, if you want your key length to differ from the hash function's block length
+        },
+        true, //whether the key is extractable (i.e. can be used in exportKey)
+        ['sign', 'verify'] //can be any combination of 'sign' and 'verify'
+        ).then(function(key) {
+          //returns the symmetric key
+          console.log('crypto-_importHMACkey', key);
+          resolve(key);
+        })
+        .catch(function(err) {
+          reject(err);
+        });
+      });
+    });
+  }
+
+  _digest(value) {
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+      crypto.subtle.digest(
+          {
+            name: 'SHA-256'
+          },
+          value //The data you want to hash as an ArrayBuffer
+      )
+      .then(function(hash) {
+        //returns the hash as an ArrayBuffer
+        console.log('crypto-digest', new Uint8Array(hash));
+        resolve(new Uint8Array(hash));
       })
       .catch(function(err) {
+        console.error(err);
         reject(err);
       });
+
     });
   }
 
@@ -568,11 +656,11 @@ class Crypto {
       )
       .then(function(key) {
         //returns the symmetric key
-        console.log(key);
+        console.log('crypto-importAESkey', key);
         resolve(key);
       })
       .catch(function(err) {
-        console.error(err);
+        console.error('crypto-importAESkey', err);
         reject(err);
       });
     });

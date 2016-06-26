@@ -159,6 +159,40 @@ class Registry extends EventEmitter {
   }
 
   /**
+  * query the domain registry for information from a dataObject URL
+  * @param  {String}   url            dataObject URL
+  * @return {JSON}     dataObject     data object
+  */
+  discoverDataObjectPerURL(url, domain) {
+    let _this = this;
+    let activeDomain;
+
+    if (!domain) {
+      activeDomain = _this._domain;
+    } else {
+      activeDomain = domain;
+    }
+
+    let msg = {
+      type: 'read', from: _this.registryURL, to: 'domain://registry.' + activeDomain + '/', body: { resource: url, search:'dataObjectPerURL'}
+    };
+
+    return new Promise(function(resolve, reject) {
+
+      _this._messageBus.postMessage(msg, (reply) => {
+
+        let dataObject = reply.body.value;
+
+        if (dataObject) {
+          resolve(dataObject);
+        } else {
+          reject('DataObject not found');
+        }
+      });
+    });
+  }
+
+  /**
   * This function is used to return the sandbox instance where the Application is executing. It is assumed there is just one App per Runtime instance.
   */
   getAppSandbox() {
@@ -225,6 +259,19 @@ class Registry extends EventEmitter {
   }
 
   /**
+  * function to return the reporterURL associated with the dataobject URL. no promise returned
+  * @param    {String}     dataObjectURL    dataObjectURL
+  * @return   {String}     reporterURL      reporterURL
+  */
+  getReporterURLSynchonous(dataObjectURL) {
+    let _this = this;
+
+    let dataObject = _this.dataObjectList[dataObjectURL];
+
+    return (dataObject) ? dataObject.reporter : undefined;
+  }
+
+  /**
   * verify if the url received is a dataObjectURL registered in runtime registry
   * @param    {String}     url            url format
   * @return   {boolean}    boolean with the information if is dataObjectURL or not
@@ -234,6 +281,17 @@ class Registry extends EventEmitter {
     let dataObject = _this.dataObjectList[url];
     let subscribedDataObject = _this.subscribedDataObjectList[url];
     return (dataObject || subscribedDataObject) ? true : false;
+  }
+
+  /**
+  * returns the hyperty URL that subscribed the dataObject
+  * @param    {String}     url            url format
+  * @return   {String}    Hyperty URL subscribed to the URL
+  */
+  getDataObjectSubscriberHyperty(url) {
+    let _this = this;
+
+    return _this.subscribedDataObjectList[url];
   }
 
   /**
@@ -337,7 +395,7 @@ class Registry extends EventEmitter {
     let _this = this;
     let dataObject = _this.dataObjectList[dataObjectURL];
 
-    if(dataObject) {
+    if (dataObject) {
       return dataObject.subscribers;
     } else {
       throw 'No dataObject was found';
