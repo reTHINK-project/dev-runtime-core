@@ -420,7 +420,8 @@ class IdentityModule {
   encryptMessage(message) {
     let _this = this;
 
-    console.log('ENCRYPT MESSAGE ');
+    console.log('encrypt message ');
+    console.log(message);
 
     return new Promise(function(resolve, reject) {
 
@@ -431,11 +432,10 @@ class IdentityModule {
       let isToDataObject = _this.registry.isDataObjectURL(message.to);
       let isFromRuntime = message.from.includes(_this._runtimeURL);
       let isToRuntime = message.to.includes(_this._runtimeURL);
-      let ishandShakeType = message.type === 'handshake';
+      let isHandShakeType = message.type === 'handshake';
 
       if (isFromRuntime || isToRuntime ||
-          message.to.includes('comm://') || message.from.includes('comm://') ||
-          message.to.includes('hyperty://') || message.from.includes('hyperty://') && !ishandShakeType) {
+          message.to.includes('comm://') || message.from.includes('comm://')) {
         console.log('encryptMessage ignored');
         return resolve(message);
       }
@@ -488,21 +488,15 @@ class IdentityModule {
   decryptMessage(message) {
     let _this = this;
 
-    console.log('DECRYPT MESSAGE ');
+    console.log('decrypt message ');
 
     return new Promise(function(resolve, reject) {
 
       let isFromHyperty = divideURL(message.from).type === 'hyperty';
       let isToHyperty = divideURL(message.to).type === 'hyperty';
-      let isFromDataObject = _this.registry.isDataObjectURL(message.from);
-      let isToDataObject = _this.registry.isDataObjectURL(message.to);
-      let isFromRuntime = message.from.includes(_this._runtimeURL);
-      let isToRuntime = message.to.includes(_this._runtimeURL);
-      let ishandShakeType = message.type === 'handshake';
+      let isHandShakeType = message.type === 'handshake';
 
-      if ((message.to.includes(_this._runtimeURL) || message.from.includes(_this._runtimeURL) ||
-          message.to.includes('comm://') || message.from.includes('comm://') ||
-          message.to.includes('hyperty://') || message.from.includes('hyperty://')) && message.type !== 'handshake') {
+      /*if ((message.to.includes('comm://') || isFromHyperty) && !isHandShakeType) {
         console.log('decryptMessage ignored');
 
         if (message.to.includes('comm://') && message.from.includes('hyperty://')) {
@@ -511,54 +505,66 @@ class IdentityModule {
           });
         }
         return resolve(message);
+      } else*/
+      if (isFromHyperty && isToHyperty) {
+        console.log('decrypt hyperty to hyperty');
+
+        _this._registry.getHypertyOwner(message.to).then(function(userURL) {
+
+          let chatKeys = _this.chatKeys[message.to + message.from];
+          if (!chatKeys) {
+            chatKeys = _this._newChatCrypto(message, userURL, 'decrypt');
+            _this.chatKeys[message.to + message.from] = chatKeys;
+          }
+
+          if (chatKeys.authenticated && !isHandShakeType) {
+            let iv = _this.crypto.decode(message.body.iv);
+            let data = _this.crypto.decode(message.body.value);
+            _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, data, iv).then(decrytedData => {
+              message.body.value = decrytedData;
+            });
+            resolve(message);
+
+          } else {
+            _this._doHandShakePhase(message, chatKeys).then(function(value) {
+
+              //if it was started by doMutualAuthentication then ends the message
+              if (value === 'handShakeEnd') {
+                reject('decrypt handshake protocol phase ');
+
+              // if was started by a message, then resend that message
+              } else {
+                _this.chatKeys[message.to + message.from] = value.chatKeys;
+                _this._messageBus.postMessage(value.message);
+                reject('decrypt handshake protocol phase ');
+              }
+            });
+          }
+        }, function(rej) {
+          // TODO review this logic
+          console.log('here?');
+          resolve(rej);
+        }).catch(function(err) { reject(err); });
+      } else if (isFromHyperty) {
+        console.log('dataObject decrypt');
+        _this._getHypertyFromDataObject(message.to).then(hypertyURL => {
+          console.log('DECRYPT ChatCommunication? ', hypertyURL);
+          resolve(message);
+        });
+      } else {
+        reject('wrong message to decrypt');
       }
 
-      _this._registry.getHypertyOwner(message.to).then(function(userURL) {
-
-        let chatKeys = _this.chatKeys[message.to + message.from];
-        if (!chatKeys) {
-          chatKeys = _this._newChatCrypto(message, userURL, 'decrypt');
-          console.log('createChatKey decrypt', message.to + message.from);
-          _this.chatKeys[message.to + message.from] = chatKeys;
-        }
-
-        if (chatKeys.authenticated && message.type !== 'handshake') {
-          console.log('Session keys created, decrypt');
-
-          let iv = _this.crypto.decode(message.body.iv);
-          let data = _this.crypto.decode(message.body.value);
-
-          _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, data, iv).then(decrytedData => {
-            message.body.value = decrytedData;
-          });
-
-          resolve(message);
-
-        } else {
-          _this._doHandShakePhase(message, chatKeys).then(function(value) {
-
-            if (value === 'handShakeEnd') {
-              reject('decrypt handshake protocol phase ');
-
-            } else {
-              _this.chatKeys[message.to + message.from] = value.chatKeys;
-              _this._messageBus.postMessage(value.message);
-              reject('decrypt handshake protocol phase ');
-            }
-          });
-        }
-      }, function(rej) {
-        // TODO review this logic
-        resolve(rej);
-      }).catch(function(err) { reject(err); });
     });
   }
 
   doMutualAuthentication(sender, receiver) {
     let _this = this;
+    let dataObjectURL;
 
     let reporterURL = _this.registry.getReporterURLSynchonous(sender);
     if (reporterURL) {
+      dataObjectURL = sender;
       sender = reporterURL;
     }
 
@@ -574,20 +580,18 @@ class IdentityModule {
       _this._registry.getHypertyOwner(sender).then(function(userURL) {
 
         if (!chatKeys) {
-          console.log('createChatKey mutual', sender + receiver);
-
+          // callback to resolve when finish the mutual authentication
           let resolved = function(value) {
             resolve(value);
           };
           msg.callback = resolved;
+          msg.dataObjectURL = dataObjectURL;
 
           chatKeys = _this._newChatCrypto(msg, userURL);
           _this.chatKeys[sender + receiver] = chatKeys;
         }
 
         if (chatKeys.authenticated) {
-          console.log('mutual authentication already done');
-
           resolve('mutual authentication succeeded');
         } else {
 
@@ -889,7 +893,7 @@ class IdentityModule {
             console.log('decryptedData', decryptedData);
             chatKeys.handshakeHistory.receiverFinishedMessage = _this._filterMessageToHash(message, decryptedData + iv);
 
-            // check if there is an initial message that was blocked and is to send, or not
+            // check if there was an initial message that was blocked and send it
             if (chatKeys.initialMessage) {
               let initialMessage = {
                 type: 'create',
@@ -909,7 +913,13 @@ class IdentityModule {
             }
           });
           break;
+        case 'senderChatSession':
 
+          break;
+
+        case 'receiverChatSession':
+
+          break;
         default:
 
       }
