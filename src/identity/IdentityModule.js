@@ -61,6 +61,9 @@ class IdentityModule {
     // hashTable to store the symmetric keys to be used in the chat group
     _this.dataObjectSessionKeys = {};
 
+    //failsafe to enable/disable all the criptographic functions
+    _this.isToUseEncryption = true;
+
   }
 
   /**
@@ -316,9 +319,6 @@ class IdentityModule {
 
         if (result.loginUrl) {
 
-          //let msgOpenIframe = {type: 'execute', from: _this._idmURL, to: _this._runtimeURL + '/gui-manager', body: {method: 'unhideAdminPage'}};
-
-          console.log('loginURL ', result.loginUrl);
           let win = window.open(result.loginUrl, 'openIDrequest', 'width=800, height=600');
           if (window.cordova) {
             win.addEventListener('loadstart', function(e) {
@@ -424,9 +424,14 @@ class IdentityModule {
     let _this = this;
 
     console.log('encrypt message ');
-    console.log(message);
 
     return new Promise(function(resolve, reject) {
+
+      //if is not to apply encryption, then returns resolve
+      if (!_this.isToUseEncryption) {
+        console.log('encryption disabled');
+        return resolve(message);
+      }
 
       let splitedToURL = message.to.split('/');
       let dataObjectURL = splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3];
@@ -529,6 +534,12 @@ class IdentityModule {
     console.log('decrypt message ');
 
     return new Promise(function(resolve, reject) {
+
+      //if is not to apply encryption, then returns resolve
+      if (!_this.isToUseEncryption) {
+        console.log('decryption disabled');
+        return resolve(message);
+      }
 
       let splitedToURL = message.to.split('/');
       let dataObjectURL = splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3];
@@ -636,6 +647,13 @@ class IdentityModule {
     };
 
     return new Promise(function(resolve, reject) {
+
+      //if is not to apply encryption, then returns resolve
+      if (!_this.isToUseEncryption) {
+        console.log('mutualAuthenticaton disabled');
+        return resolve('mutualAuthenticaton skiped');
+      }
+
       let chatKeys = _this.chatKeys[sender + receiver];
       _this._registry.getHypertyOwner(sender).then(function(userURL) {
 
@@ -654,9 +672,16 @@ class IdentityModule {
 
         if (chatKeys.authenticated) {
 
-          // TODO restart the process of exchange the session for a specific dataObjectURL
+          let startSessionKeyExchange = {
+            to: sender,
+            from: receiver
+          };
+          chatKeys.dataObjectURL = dataObjectURL;
+          _this._sendReporterSessionKey(startSessionKeyExchange, chatKeys).then(value => {
 
-          resolve('mutual authentication succeeded');
+            _this._messageBus.postMessage(value.message);
+            resolve('exchange of chat sessionKey initiated');
+          });
         } else {
 
           _this._doHandShakePhase(msg, chatKeys);
@@ -924,43 +949,8 @@ class IdentityModule {
 
               //sends the sessionKey to the subscriber hyperty
             } else {
-              let sessionKeyBundle = _this.dataObjectSessionKeys[chatKeys.dataObjectURL];
-              let reporterSessionKeyMsg;
-              let valueToEncrypt;
-
-              //if there is not yet a session Key, generates a new one
-              if (!sessionKeyBundle) {
-                sessionKey = _this.crypto.generateRandom();
-                _this.dataObjectSessionKeys[chatKeys.dataObjectURL] = {sessionKey: sessionKey, isToEncrypt: true};
-              } else {
-                sessionKey = sessionKeyBundle.sessionKey;
-              }
-
-              valueToEncrypt = JSON.stringify({value: _this.crypto.encode(sessionKey), dataObjectURL: chatKeys.dataObjectURL});
-
-              iv = _this.crypto.generateIV();
-              value.iv = _this.crypto.encode(iv);
-              _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, valueToEncrypt, iv).then(encryptedValue => {
-
-                reporterSessionKeyMsg = {
-                  type: 'handshake',
-                  to: message.from,
-                  from: message.to,
-                  body: {
-                    handshakePhase: 'reporterSessionKey',
-                    value: _this.crypto.encode(encryptedValue)
-                  }
-                };
-
-                let filteredMessage = _this._filterMessageToHash(reporterSessionKeyMsg, valueToEncrypt + iv, chatKeys.hypertyFrom.messageInfo);
-
-                return _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, filteredMessage);
-              }).then(hashedMessage => {
-
-                let valueWithHash = btoa(JSON.stringify({value: reporterSessionKeyMsg.body.value, hash: _this.crypto.encode(hashedMessage), iv: value.iv}));
-
-                reporterSessionKeyMsg.body.value = valueWithHash;
-                resolve({message: reporterSessionKeyMsg, chatKeys: chatKeys});
+              _this._sendReporterSessionKey(message, chatKeys).then(value => {
+                resolve(value);
               });
             }
           });
@@ -1043,6 +1033,54 @@ class IdentityModule {
         default:
           reject(message);
       }
+    });
+  }
+
+  _sendReporterSessionKey(message, chatKeys) {
+    let _this = this;
+    let sessionKeyBundle = _this.dataObjectSessionKeys[chatKeys.dataObjectURL];
+    let reporterSessionKeyMsg;
+    let valueToEncrypt;
+    let sessionKey;
+    let iv;
+    let value = {};
+
+    return new Promise(function(resolve, reject) {
+
+      //if there is not yet a session Key, generates a new one
+      if (!sessionKeyBundle) {
+        sessionKey = _this.crypto.generateRandom();
+        _this.dataObjectSessionKeys[chatKeys.dataObjectURL] = {sessionKey: sessionKey, isToEncrypt: true};
+      } else {
+        sessionKey = sessionKeyBundle.sessionKey;
+      }
+
+      valueToEncrypt = JSON.stringify({value: _this.crypto.encode(sessionKey), dataObjectURL: chatKeys.dataObjectURL});
+
+      iv = _this.crypto.generateIV();
+      value.iv = _this.crypto.encode(iv);
+      _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, valueToEncrypt, iv).then(encryptedValue => {
+
+        reporterSessionKeyMsg = {
+          type: 'handshake',
+          to: message.from,
+          from: message.to,
+          body: {
+            handshakePhase: 'reporterSessionKey',
+            value: _this.crypto.encode(encryptedValue)
+          }
+        };
+
+        let filteredMessage = _this._filterMessageToHash(reporterSessionKeyMsg, valueToEncrypt + iv, chatKeys.hypertyFrom.messageInfo);
+
+        return _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, filteredMessage);
+      }).then(hashedMessage => {
+
+        let valueWithHash = btoa(JSON.stringify({value: reporterSessionKeyMsg.body.value, hash: _this.crypto.encode(hashedMessage), iv: value.iv}));
+
+        reporterSessionKeyMsg.body.value = valueWithHash;
+        resolve({message: reporterSessionKeyMsg, chatKeys: chatKeys});
+      });
     });
   }
 
