@@ -58,6 +58,9 @@ class IdentityModule {
     // hashTable to store all the crypto information between two hyperties
     _this.chatKeys = {};
 
+    // hashTable to store the symmetric keys to be used in the chat group
+    _this.dataObjectSessionKeys = {};
+
   }
 
   /**
@@ -425,64 +428,99 @@ class IdentityModule {
 
     return new Promise(function(resolve, reject) {
 
-      let isTypeOfUpdate = message.type === 'update';
+      let splitedToURL = message.to.split('/');
+      let dataObjectURL = splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3];
+
+      let isToDataObject = _this.registry.isDataObjectURL(dataObjectURL);
       let isFromHyperty = divideURL(message.from).type === 'hyperty';
       let isToHyperty = divideURL(message.to).type === 'hyperty';
-      let isFromDataObject = _this.registry.isDataObjectURL(message.from);
-      let isToDataObject = _this.registry.isDataObjectURL(message.to);
-      let isFromRuntime = message.from.includes(_this._runtimeURL);
-      let isToRuntime = message.to.includes(_this._runtimeURL);
       let isHandShakeType = message.type === 'handshake';
 
-      if (isFromRuntime || isToRuntime ||
-          message.to.includes('comm://') || message.from.includes('comm://')) {
-        console.log('encryptMessage ignored');
-        return resolve(message);
-      }
+      if (isFromHyperty && isToHyperty) {
+        _this._registry.getHypertyOwner(message.from).then(function(userURL) {
 
-      /*if (message.to.includes('comm://') && message.from.includes('hyperty://')) {
-        _this._getHypertyFromDataObject(message.to).then(hypertyURL => {
-          console.log('EHEHHE encrypt ', hypertyURL);
-        });*/
+          // check if exists any keys between two users
+          let chatKeys = _this.chatKeys[message.from + message.to];
+          if (!chatKeys) {
+            chatKeys = _this._newChatCrypto(message, userURL);
+            console.log('createChatKey encrypt', message.from + message.to);
+            _this.chatKeys[message.from + message.to] = chatKeys;
+            message.body.handshakePhase = 'startHandShake';
+          }
 
-      //resolve(message);
-      _this._registry.getHypertyOwner(message.from).then(function(userURL) {
+          if (chatKeys.authenticated && !isHandShakeType) {
 
-        // check if exists any keys between two users
-        let chatKeys = _this.chatKeys[message.from + message.to];
-        if (!chatKeys) {
-          chatKeys = _this._newChatCrypto(message, userURL);
-          console.log('createChatKey encrypt', message.from + message.to);
-          _this.chatKeys[message.from + message.to] = chatKeys;
-          message.body.handshakePhase = 'startHandShake';
-        }
+            let iv = _this.crypto.generateIV();
+            _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, message.body.value, iv).then(encryptedValue => {
+              let value = {iv: _this.crypto.encode(iv), value: _this.crypto.encode(encryptedValue)};
+              message.body.value = btoa(JSON.stringify(value));
+              resolve(message);
+            });
 
-        if (chatKeys.authenticated && message.type !== 'handshake') {
-
-          let iv = _this.crypto.generateIV();
-          _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, message.body.value, iv).then(encryptedValue => {
-            message.body.value = _this.crypto.encode(encryptedValue);
-            message.body.iv = _this.crypto.encode(iv);
-            console.log('Session keys created');
+            // if is a handshake message, just resolve it
+          } else if (isHandShakeType) {
             resolve(message);
-          });
 
-        } else if (message.type === 'handshake') {
-          console.log('else if');
-          resolve(message);
+            // else, starts a new handshake protocol
+          } else {
+            _this._doHandShakePhase(message, chatKeys).then(function(value) {
+              _this.chatKeys[message.from + message.to] = value.chatKeys;
+
+              _this._messageBus.postMessage(value.message);
+              reject('encrypt handshake protocol phase ');
+            });
+          }
+
+        });
+
+      //if from hyperty to a dataObjectURL
+      } else if (isFromHyperty && isToDataObject) {
+        console.log('dataObject encrypt');
+
+        let DataObjectKey = _this.dataObjectSessionKeys[dataObjectURL];
+
+        //check if there is already a session key for the chat room
+        if (DataObjectKey) {
+
+          // and if is to apply encryption, encrypt the messages
+          if (DataObjectKey.isToEncrypt) {
+            console.log('applyencryption');
+            let iv = _this.crypto.generateIV();
+
+            _this.crypto.encryptAES(DataObjectKey.sessionKey, _this.crypto.encode(JSON.stringify(message.body.value)), iv).then(encryptedValue => {
+
+              let newValue = btoa(JSON.stringify({value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv)}));
+
+              message.body.value = newValue;
+              resolve(message);
+
+              //TODO apply an hash of the message
+            });
+
+          // if not, just send the message
+          } else {
+            resolve(message);
+          }
+
+          // start the generation of a new session Key
         } else {
-          console.log('else');
-          _this._doHandShakePhase(message, chatKeys).then(function(value) {
-            _this.chatKeys[message.from + message.to] = value.chatKeys;
+          let isHypertyReporter = _this.registry.getReporterURLSynchonous(dataObjectURL);
 
-            _this._messageBus.postMessage(value.message);
-            reject('encrypt handshake protocol phase ', message.id);
-          });
+          // if the hyperty is the reporter of the dataObject then generates a session key
+          if (isHypertyReporter && isHypertyReporter === message.from) {
+            let sessionKey = _this.crypto.generateRandom();
+            _this.dataObjectSessionKeys[dataObjectURL] = {sessionKey: sessionKey, isToEncrypt: true};
+
+            //TODO encrypts the message and send it
+
+          } else {
+            reject('No session keys to encrypt found');
+          }
         }
-
-      });
+      } else {
+        reject('wrong message to decrypt');
+      }
     });
-
   }
 
   decryptMessage(message) {
@@ -492,20 +530,15 @@ class IdentityModule {
 
     return new Promise(function(resolve, reject) {
 
+      let splitedToURL = message.to.split('/');
+      let dataObjectURL = splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3];
+
+      let isToDataObject = _this.registry.isDataObjectURL(dataObjectURL);
       let isFromHyperty = divideURL(message.from).type === 'hyperty';
       let isToHyperty = divideURL(message.to).type === 'hyperty';
       let isHandShakeType = message.type === 'handshake';
 
-      /*if ((message.to.includes('comm://') || isFromHyperty) && !isHandShakeType) {
-        console.log('decryptMessage ignored');
-
-        if (message.to.includes('comm://') && message.from.includes('hyperty://')) {
-          _this._getHypertyFromDataObject(message.to).then(hypertyURL => {
-            console.log('DECRYPT ChatCommunication? ', hypertyURL);
-          });
-        }
-        return resolve(message);
-      } else*/
+      //is is hyperty to hyperty communication
       if (isFromHyperty && isToHyperty) {
         console.log('decrypt hyperty to hyperty');
 
@@ -518,17 +551,18 @@ class IdentityModule {
           }
 
           if (chatKeys.authenticated && !isHandShakeType) {
-            let iv = _this.crypto.decode(message.body.iv);
-            let data = _this.crypto.decode(message.body.value);
-            _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, data, iv).then(decrytedData => {
-              message.body.value = decrytedData;
+            let value = JSON.parse(atob(message.body.value));
+            let iv = _this.crypto.decode(value.iv);
+            let data = _this.crypto.decode(value.value);
+            _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, data, iv).then(decryptedData => {
+              message.body.value = decryptedData;
+              resolve(message);
             });
-            resolve(message);
 
-          } else {
+          } else if (isHandShakeType) {
             _this._doHandShakePhase(message, chatKeys).then(function(value) {
 
-              //if it was started by doMutualAuthentication then ends the message
+              //if it was started by doMutualAuthentication then ends the protocol
               if (value === 'handShakeEnd') {
                 reject('decrypt handshake protocol phase ');
 
@@ -539,18 +573,43 @@ class IdentityModule {
                 reject('decrypt handshake protocol phase ');
               }
             });
+          } else {
+            reject('wrong message do decrypt');
           }
-        }, function(rej) {
-          // TODO review this logic
-          console.log('here?');
-          resolve(rej);
         }).catch(function(err) { reject(err); });
-      } else if (isFromHyperty) {
+
+        //if from hyperty to a dataObjectURL
+      } else if (isFromHyperty && isToDataObject) {
         console.log('dataObject decrypt');
-        _this._getHypertyFromDataObject(message.to).then(hypertyURL => {
-          console.log('DECRYPT ChatCommunication? ', hypertyURL);
+
+        let dataObjectKey = _this.dataObjectSessionKeys[dataObjectURL];
+
+        if (dataObjectKey) {
+
+          //check if is to apply encryption
+          if (dataObjectKey.isToEncrypt) {
+            let parsedValue = JSON.parse(atob(message.body.value));
+            let iv = _this.crypto.decode(parsedValue.iv);
+            let encryptedValue = _this.crypto.decode(parsedValue.value);
+
+            _this.crypto.decryptAES(dataObjectKey.sessionKey, encryptedValue, iv).then(decryptedValue => {
+              let parsedValue = JSON.parse(atob(decryptedValue));
+              console.log('decrypted Value,', parsedValue);
+              message.body.value = parsedValue;
+              resolve(message);
+            });
+
+          //if not, just return the message
+          } else {
+            resolve(message);
+          }
+
+        } else {
           resolve(message);
-        });
+
+          //reject('no sessionKey for chat room found');
+        }
+
       } else {
         reject('wrong message to decrypt');
       }
@@ -562,6 +621,7 @@ class IdentityModule {
     let _this = this;
     let dataObjectURL;
 
+    // check if the sender is a dataObject and if so stores that value
     let reporterURL = _this.registry.getReporterURLSynchonous(sender);
     if (reporterURL) {
       dataObjectURL = sender;
@@ -582,6 +642,7 @@ class IdentityModule {
         if (!chatKeys) {
           // callback to resolve when finish the mutual authentication
           let resolved = function(value) {
+            console.log('callback value:', value);
             resolve(value);
           };
           msg.callback = resolved;
@@ -592,6 +653,9 @@ class IdentityModule {
         }
 
         if (chatKeys.authenticated) {
+
+          // TODO restart the process of exchange the session for a specific dataObjectURL
+
           resolve('mutual authentication succeeded');
         } else {
 
@@ -600,54 +664,6 @@ class IdentityModule {
       });
     });
 
-  }
-
-  /**
-  * returns the reporter associated to the dataObject URL
-  * @param   {String}   dataObjectURL         dataObject url
-  * @return   {String}  reporter              dataObject url reporter
-  */
-  _getHypertyFromDataObject(dataObjectURL) {
-    let _this = this;
-
-    return new Promise(function(resolve, reject) {
-
-      let splitedURL = dataObjectURL.split('/');
-      let finalURL = splitedURL[0] + '//' + splitedURL[2] + '/' + splitedURL[3];
-
-      // check if is the creator of the hyperty
-      let reporterURL = _this.registry.getReporterURLSynchonous(finalURL);
-
-      if (reporterURL) {
-        resolve(reporterURL);
-      } else {
-
-        // check if there is already an association from an hypertyURL to the dataObject
-        let storedReporterURL = _this.dataObjectsIdentity[finalURL];
-
-        if (storedReporterURL) {
-          resolve(storedReporterURL);
-        } else {
-
-          // check if there is any hyperty that subscribed the dataObjectURL
-          let subscriberHyperty = _this.registry.getDataObjectSubscriberHyperty(dataObjectURL);
-
-          if (subscriberHyperty) {
-            resolve(subscriberHyperty);
-          } else {
-
-            // search in domain registry for the hyperty associated to the dataObject
-            // search in case is a subscriber who wants to know the reporter
-            _this.registry.discoverDataObjectPerURL(finalURL, splitedURL[2]).then(dataObject => {
-              _this.dataObjectsIdentity[finalURL] = dataObject.reporter;
-              resolve(dataObject.reporter);
-            }, err => {
-              reject(err);
-            });
-          }
-        }
-      }
-    });
   }
 
   _doHandShakePhase(message, chatKeys) {
@@ -684,7 +700,7 @@ class IdentityModule {
             _this._messageBus.postMessage(startHandShakeMsg);
           }
 
-          break;
+        break;
         case 'senderHello':
           console.log('senderHello');
           chatKeys.handshakeHistory.senderHello = _this._filterMessageToHash(message);
@@ -702,7 +718,7 @@ class IdentityModule {
           chatKeys.handshakeHistory.receiverHello = _this._filterMessageToHash(senderHelloMsg, undefined, chatKeys.hypertyFrom.messageInfo);
           resolve({message: senderHelloMsg, chatKeys: chatKeys});
 
-          break;
+        break;
 
         case 'receiverHello':
           console.log('receiverHello');
@@ -790,7 +806,7 @@ class IdentityModule {
 
           }, error => reject(error));
 
-          break;
+        break;
         case 'senderCertificate':
           console.log('senderCertificate');
           let receivedValue = JSON.parse(atob(message.body.value));
@@ -879,7 +895,7 @@ class IdentityModule {
             resolve({message: receiverFinishedMessage, chatKeys: chatKeys});
           });
 
-          break;
+        break;
         case 'receiverFinishedMessage':
           console.log('receiverFinishedMessage');
           chatKeys.authenticated = true;
@@ -905,23 +921,173 @@ class IdentityModule {
               };
 
               resolve({message: initialMessage, chatKeys: chatKeys});
+
+              //sends the sessionKey to the subscriber hyperty
             } else {
-              let callback = chatKeys.callback;
-              console.log('callback worked?');
-              callback('handShakeEnd');
-              resolve('handShakeEnd');
+              let sessionKeyBundle = _this.dataObjectSessionKeys[chatKeys.dataObjectURL];
+              let reporterSessionKeyMsg;
+              let valueToEncrypt;
+
+              //if there is not yet a session Key, generates a new one
+              if (!sessionKeyBundle) {
+                sessionKey = _this.crypto.generateRandom();
+                _this.dataObjectSessionKeys[chatKeys.dataObjectURL] = {sessionKey: sessionKey, isToEncrypt: true};
+              } else {
+                sessionKey = sessionKeyBundle.sessionKey;
+              }
+
+              valueToEncrypt = JSON.stringify({value: _this.crypto.encode(sessionKey), dataObjectURL: chatKeys.dataObjectURL});
+
+              iv = _this.crypto.generateIV();
+              value.iv = _this.crypto.encode(iv);
+              _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, valueToEncrypt, iv).then(encryptedValue => {
+
+                reporterSessionKeyMsg = {
+                  type: 'handshake',
+                  to: message.from,
+                  from: message.to,
+                  body: {
+                    handshakePhase: 'reporterSessionKey',
+                    value: _this.crypto.encode(encryptedValue)
+                  }
+                };
+
+                let filteredMessage = _this._filterMessageToHash(reporterSessionKeyMsg, valueToEncrypt + iv, chatKeys.hypertyFrom.messageInfo);
+
+                return _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, filteredMessage);
+              }).then(hashedMessage => {
+
+                let valueWithHash = btoa(JSON.stringify({value: reporterSessionKeyMsg.body.value, hash: _this.crypto.encode(hashedMessage), iv: value.iv}));
+
+                reporterSessionKeyMsg.body.value = valueWithHash;
+                resolve({message: reporterSessionKeyMsg, chatKeys: chatKeys});
+              });
             }
           });
-          break;
-        case 'senderChatSession':
+        break;
+        case 'reporterSessionKey':
+          console.log('reporterSessionKey');
 
-          break;
+          let valueIVandHash = JSON.parse(atob(message.body.value));
+          let hash = _this.crypto.decode(valueIVandHash.hash);
+          iv = _this.crypto.decode(valueIVandHash.iv);
+          let encryptedValue = _this.crypto.decode(valueIVandHash.value);
+          let parsedValue;
+          let sessionKey;
+          let dataObjectURL;
+          let receiverAcknowledgeMsg;
 
-        case 'receiverChatSession':
+          _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, encryptedValue, iv).then(decryptedValue => {
 
-          break;
+            parsedValue = JSON.parse(decryptedValue);
+            sessionKey = _this.crypto.decode(parsedValue.value);
+            dataObjectURL = parsedValue.dataObjectURL;
+
+            let messageToHash = _this._filterMessageToHash(message, decryptedValue + iv);
+
+            return _this.crypto.verifyHMAC(chatKeys.keys.hypertyToHashKey, messageToHash, hash);
+
+          }).then(hashResult => {
+
+            console.log('hash successfully validated ', hashResult);
+
+            _this.dataObjectSessionKeys[dataObjectURL] =  {sessionKey: sessionKey, isToEncrypt: true};
+
+            iv = _this.crypto.generateIV();
+            value.iv = _this.crypto.encode(iv);
+
+            return _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, 'ok!!', iv);
+          }).then(encryptedValue => {
+
+            receiverAcknowledgeMsg = {
+              type: 'handshake',
+              to: message.from,
+              from: message.to,
+              body: {
+                handshakePhase: 'receiverAcknowledge'
+              }
+            };
+
+            value.value = _this.crypto.encode(encryptedValue);
+            let messageToHash = _this._filterMessageToHash(receiverAcknowledgeMsg, 'ok!!' + iv, chatKeys.hypertyFrom.messageInfo);
+
+            return _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, messageToHash);
+          }).then(hashedMessage => {
+            let finalValue = btoa(JSON.stringify({value: value.value, hash: _this.crypto.encode(hashedMessage), iv: value.iv}));
+
+            receiverAcknowledgeMsg.body.value = finalValue;
+            resolve({message: receiverAcknowledgeMsg, chatKeys: chatKeys});
+          });
+
+        break;
+        case 'receiverAcknowledge':
+          console.log('receiverAcknowledge');
+
+          let receivedvalueIVandHash = JSON.parse(atob(message.body.value));
+          let receivedHash = _this.crypto.decode(receivedvalueIVandHash.hash);
+          iv = _this.crypto.decode(receivedvalueIVandHash.iv);
+          let receivedEncryptedValue = _this.crypto.decode(receivedvalueIVandHash.value);
+
+          _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, receivedEncryptedValue, iv).then(decryptedValue => {
+
+            let filteredMessage = _this._filterMessageToHash(message, decryptedValue + iv);
+            return _this.crypto.verifyHMAC(chatKeys.keys.hypertyToHashKey, filteredMessage, receivedHash);
+          }).then(hashResult => {
+            console.log('hashResult ', hashResult);
+            let callback = chatKeys.callback;
+            callback('handShakeEnd');
+            resolve('handShakeEnd');
+          });
+
+        break;
         default:
+          reject(message);
+      }
+    });
+  }
 
+  /**
+  * returns the reporter associated to the dataObject URL
+  * @param   {String}   dataObjectURL         dataObject url
+  * @return   {String}  reporter              dataObject url reporter
+  */
+  _getHypertyFromDataObject(dataObjectURL) {
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+
+      let splitedURL = dataObjectURL.split('/');
+      let finalURL = splitedURL[0] + '//' + splitedURL[2] + '/' + splitedURL[3];
+
+      // check if is the creator of the hyperty
+      let reporterURL = _this.registry.getReporterURLSynchonous(finalURL);
+
+      if (reporterURL) {
+        resolve(reporterURL);
+      } else {
+        // check if there is already an association from an hypertyURL to the dataObject
+        let storedReporterURL = _this.dataObjectsIdentity[finalURL];
+
+        if (storedReporterURL) {
+          resolve(storedReporterURL);
+        } else {
+          // check if there is any hyperty that subscribed the dataObjectURL
+          let subscriberHyperty = _this.registry.getDataObjectSubscriberHyperty(dataObjectURL);
+
+          if (subscriberHyperty) {
+            resolve(subscriberHyperty);
+          } else {
+
+            // search in domain registry for the hyperty associated to the dataObject
+            // search in case is a subscriber who wants to know the reporter
+            _this.registry.discoverDataObjectPerURL(finalURL, splitedURL[2]).then(dataObject => {
+              _this.dataObjectsIdentity[finalURL] = dataObject.reporter;
+              resolve(dataObject.reporter);
+            }, err => {
+              reject(err);
+            });
+          }
+        }
       }
     });
   }
@@ -1002,7 +1168,8 @@ class IdentityModule {
       },
       initialMessage: (message.body.ignore) ? undefined : message,
       callback: message.callback,
-      authenticated: false
+      authenticated: false,
+      dataObjectURL: message.dataObjectURL
     };
 
     return newChatCrypto;

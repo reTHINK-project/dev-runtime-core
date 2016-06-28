@@ -262,7 +262,7 @@ class Crypto {
         .then(function(isvalid) {
           //returns a boolean on whether the signature is true or not
           console.log('crypto-verifyHMAC', isvalid);
-          resolve(isvalid);
+          (isvalid) ? resolve(isvalid) : reject(isvalid);
 
         }).catch(function(err) {
           console.error('crypto-verifyHMAC', err);
