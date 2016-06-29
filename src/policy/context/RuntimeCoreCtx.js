@@ -1,8 +1,6 @@
 import CommonCtx from './CommonCtx';
 import {divideURL} from '../../utils/utils';
 
-//import persistenceManager from '../../persistence/PersistenceManager';
-
 class RuntimeCoreCtx extends CommonCtx {
 
   constructor(idModule, runtimeRegistry) {
@@ -31,6 +29,38 @@ class RuntimeCoreCtx extends CommonCtx {
     _this.policies[policy.scope].push(policy);
   }
 
+  /**
+  * Returns the policies associated with a scope.
+  * @param   {String} scope
+  * @return  {Array}  policies
+  */
+  getApplicablePolicies(message) {
+    let _this = this;
+    let myPolicies = _this.policies;
+    let policies = [];
+
+    /*let id = message.body.identity.userProfile.username;
+    let hypertyName = _this.runtimeRegistry.getHypertyName(message.from);
+
+    if (myPolicies[id] !== undefined) {
+      policies.push.apply(policies, myPolicies[id]);
+    }
+
+    if (myPolicies[hypertyName] !== undefined) {
+      policies.push.apply(policies, myPolicies[hypertyName]);
+    }
+
+    if (myPolicies.global !== undefined) {
+      policies.push.apply(policies, myPolicies.global);
+    }*/
+
+    for (let i in myPolicies) {
+      policies.push.apply(policies, myPolicies[i]);
+    }
+
+    return policies;
+  }
+
   authorise(message) {
     let _this = this;
 
@@ -42,7 +72,9 @@ class RuntimeCoreCtx extends CommonCtx {
       let isToVerify = _this.isToVerify(message);
       let isIncomingMessage = _this._isIncomingMessage(message);
       let isToCypher = _this._isToCypherModule(message);
+
       if (isToVerify) {
+        console.log('IM VERIFYING YOU!');
         if (isIncomingMessage) {
           if (isToCypher) {
 
@@ -141,6 +173,7 @@ class RuntimeCoreCtx extends CommonCtx {
     return _this.idModule.getIdentityOfHyperty(message.from);
   }
 
+  //TODO: verify if scheme is not 'runtime', 'hyperty-runtime' or 'domain' instead of verifying if is data object
   isToVerify(message) {
     let _this = this;
 
