@@ -74,7 +74,6 @@ class RuntimeCoreCtx extends CommonCtx {
       let isToCypher = _this._isToCypherModule(message);
 
       if (isToVerify) {
-        console.log('IM VERIFYING YOU!');
         if (isIncomingMessage) {
           if (isToCypher) {
 

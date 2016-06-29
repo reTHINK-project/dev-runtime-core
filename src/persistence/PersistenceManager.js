@@ -20,7 +20,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 **/
-import localStorage from 'universal-localstorage'
+import localStorage from './universal-localstorage'
 
 const persistenceManager = {
     set: (key, version, value) => {
