@@ -1,6 +1,6 @@
 import Context from '../Context';
 import {divideURL} from '../../utils/utils';
-import persistenceManager from '../../persistence/PersistenceManager';
+import persistenceManager from 'service-framework/dist/PersistenceManager';
 
 class RuntimeCoreCtx extends Context {
 

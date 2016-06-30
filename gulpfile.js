@@ -223,7 +223,7 @@ function transpile(opts) {
     .transform(babel, {
       compact: true,
       presets: ['es2015', 'stage-0'],
-      plugins: ['add-module-exports', 'babel-polyfill', 'transform-runtime', 'transform-regenerator']
+      plugins: ['add-module-exports', 'transform-runtime', 'transform-regenerator']
     })
     .bundle()
     .on('error', function(err) {
