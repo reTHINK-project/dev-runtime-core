@@ -64,6 +64,10 @@ class IdentityModule {
     //failsafe to enable/disable all the criptographic functions
     _this.isToUseEncryption = true;
 
+    // verification of nodeJS, and in case it is nodeJS then disable encryption
+    // TODO improve later, this exists because the crypto lib uses browser cryptographic methods
+    _this.isToUseEncryption = (window) ? true : false;
+
   }
 
   /**
@@ -455,6 +459,7 @@ class IdentityModule {
 
           if (chatKeys.authenticated && !isHandShakeType) {
 
+            //TODO apply the message HASH just like in done in the handshake phase
             let iv = _this.crypto.generateIV();
             _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, message.body.value, iv).then(encryptedValue => {
               let value = {iv: _this.crypto.encode(iv), value: _this.crypto.encode(encryptedValue)};
@@ -482,24 +487,36 @@ class IdentityModule {
       } else if (isFromHyperty && isToDataObject) {
         console.log('dataObject encrypt');
 
-        let DataObjectKey = _this.dataObjectSessionKeys[dataObjectURL];
+        let dataObjectKey = _this.dataObjectSessionKeys[dataObjectURL];
+
+        //if no key exists, create a new one if is the reporter of dataObject
+        if (!dataObjectKey) {
+          let isHypertyReporter = _this.registry.getReporterURLSynchonous(dataObjectURL);
+
+          // if the hyperty is the reporter of the dataObject then generates a session key
+          if (isHypertyReporter && isHypertyReporter === message.from) {
+
+            let sessionKey = _this.crypto.generateRandom();
+            _this.dataObjectSessionKeys[dataObjectURL] = {sessionKey: sessionKey, isToEncrypt: true};
+
+            dataObjectKey = _this.dataObjectSessionKeys[dataObjectURL];
+          }
+        }
 
         //check if there is already a session key for the chat room
-        if (DataObjectKey) {
+        if (dataObjectKey) {
 
           // and if is to apply encryption, encrypt the messages
-          if (DataObjectKey.isToEncrypt) {
-            console.log('applyencryption');
+          if (dataObjectKey.isToEncrypt) {
             let iv = _this.crypto.generateIV();
 
-            _this.crypto.encryptAES(DataObjectKey.sessionKey, _this.crypto.encode(JSON.stringify(message.body.value)), iv).then(encryptedValue => {
+            _this.crypto.encryptAES(dataObjectKey.sessionKey, _this.crypto.encode(JSON.stringify(message.body.value)), iv).then(encryptedValue => {
 
               let newValue = btoa(JSON.stringify({value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv)}));
 
+              //TODO apply the message HASH just like in done in the handshake phase
               message.body.value = newValue;
               resolve(message);
-
-              //TODO apply an hash of the message
             });
 
           // if not, just send the message
@@ -509,21 +526,8 @@ class IdentityModule {
 
           // start the generation of a new session Key
         } else {
-          let isHypertyReporter = _this.registry.getReporterURLSynchonous(dataObjectURL);
-
-          // if the hyperty is the reporter of the dataObject then generates a session key
-          if (isHypertyReporter && isHypertyReporter === message.from) {
-            let sessionKey = _this.crypto.generateRandom();
-            _this.dataObjectSessionKeys[dataObjectURL] = {sessionKey: sessionKey, isToEncrypt: true};
-
-            //TODO encrypts the message and send it
-
-          } else {
-            reject('No session keys to encrypt found');
-          }
+          reject('wrong message to decrypt');
         }
-      } else {
-        reject('wrong message to decrypt');
       }
     });
   }
@@ -551,7 +555,7 @@ class IdentityModule {
 
       //is is hyperty to hyperty communication
       if (isFromHyperty && isToHyperty) {
-        console.log('decrypt hyperty to hyperty');
+        //console.log('decrypt hyperty to hyperty');
 
         _this._registry.getHypertyOwner(message.to).then(function(userURL) {
 
@@ -566,6 +570,7 @@ class IdentityModule {
             let iv = _this.crypto.decode(value.iv);
             let data = _this.crypto.decode(value.value);
             _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, data, iv).then(decryptedData => {
+              console.log('decrypted value ', decryptedData);
               message.body.value = decryptedData;
               resolve(message);
             });
@@ -591,7 +596,7 @@ class IdentityModule {
 
         //if from hyperty to a dataObjectURL
       } else if (isFromHyperty && isToDataObject) {
-        console.log('dataObject decrypt');
+        //console.log('dataObject decrypt');
 
         let dataObjectKey = _this.dataObjectSessionKeys[dataObjectURL];
 
@@ -693,8 +698,8 @@ class IdentityModule {
 
   _doHandShakePhase(message, chatKeys) {
     let _this = this;
-    console.log('handshakeType');
-    console.log(message);
+
+    //console.log('handshakeType');
 
     return new Promise(function(resolve,reject) {
 
@@ -727,10 +732,12 @@ class IdentityModule {
 
         break;
         case 'senderHello':
+
           console.log('senderHello');
           chatKeys.handshakeHistory.senderHello = _this._filterMessageToHash(message);
           chatKeys.keys.fromRandom = _this.crypto.decode(message.body.value);
           chatKeys.keys.toRandom = _this.crypto.generateRandom();
+
           let senderHelloMsg = {
             type: 'handshake',
             to: message.from,
@@ -744,14 +751,12 @@ class IdentityModule {
           resolve({message: senderHelloMsg, chatKeys: chatKeys});
 
         break;
-
         case 'receiverHello':
+
           console.log('receiverHello');
           chatKeys.handshakeHistory.receiverHello = _this._filterMessageToHash(message);
 
           _this.validateAssertion(message.body.identity.assertion).then((value) => {
-
-            //TODO send a signature
 
             let receiverPublicKey = _this.crypto.decode(value.contents.nonce);
             let premasterSecret = _this.crypto.generatePMS();
@@ -833,6 +838,7 @@ class IdentityModule {
 
         break;
         case 'senderCertificate':
+
           console.log('senderCertificate');
           let receivedValue = JSON.parse(atob(message.body.value));
 
@@ -887,7 +893,8 @@ class IdentityModule {
             return _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, data, iv);
 
           }).then(decryptedData => {
-            console.log('decryptedData', decryptedData);
+            //console.log('decryptedData', decryptedData);
+
             chatKeys.handshakeHistory.senderCertificate = _this._filterMessageToHash(message, decryptedData + iv);
 
             let hashReceived = _this.crypto.decode(receivedValue.hash);
@@ -896,13 +903,14 @@ class IdentityModule {
 
           }).then(verifiedHash  => {
 
-            console.log('result of hash verification ', verifiedHash);
+            //console.log('result of hash verification ', verifiedHash);
 
             iv = _this.crypto.generateIV();
             value.iv = _this.crypto.encode(iv);
 
             return _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, 'ok!', iv);
 
+            // TODO apply hash, just like is done in the previous step message
           }).then(encryptedValue => {
             value.value = _this.crypto.encode(encryptedValue);
             let receiverFinishedMessage = {
@@ -922,6 +930,7 @@ class IdentityModule {
 
         break;
         case 'receiverFinishedMessage':
+
           console.log('receiverFinishedMessage');
           chatKeys.authenticated = true;
 
@@ -945,6 +954,8 @@ class IdentityModule {
                 }
               };
 
+              // TODO apply hash, just like is done in the previous step message
+
               resolve({message: initialMessage, chatKeys: chatKeys});
 
               //sends the sessionKey to the subscriber hyperty
@@ -954,8 +965,10 @@ class IdentityModule {
               });
             }
           });
+
         break;
         case 'reporterSessionKey':
+
           console.log('reporterSessionKey');
 
           let valueIVandHash = JSON.parse(atob(message.body.value));
@@ -979,7 +992,7 @@ class IdentityModule {
 
           }).then(hashResult => {
 
-            console.log('hash successfully validated ', hashResult);
+            //console.log('hash successfully validated ', hashResult);
 
             _this.dataObjectSessionKeys[dataObjectURL] =  {sessionKey: sessionKey, isToEncrypt: true};
 
@@ -1011,6 +1024,7 @@ class IdentityModule {
 
         break;
         case 'receiverAcknowledge':
+
           console.log('receiverAcknowledge');
 
           let receivedvalueIVandHash = JSON.parse(atob(message.body.value));

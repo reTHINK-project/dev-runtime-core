@@ -84,6 +84,13 @@ class Registry extends EventEmitter {
     _this.sandboxesList.appSandbox[runtimeURL] = appSandbox;
     let msgFactory = new MessageFactory('false', '{}');
     _this.messageFactory = msgFactory;
+
+    /*if (window) {
+      window.onbeforeunload = function(e) {
+        _this.unregisterAllHyperties();
+        window.alert('hello?');
+      };
+    }*/
   }
 
   /**
@@ -105,9 +112,10 @@ class Registry extends EventEmitter {
 
     _this._messageBus.addListener(_this.registryURL, function(msg) {
 
-      let userUrl = _this._getIdentityAssociated(msg.body.resource, msg.from);
+      let userUrl = _this._getIdentityAssociated(msg.body.resource, msg.body.criteria);
 
       let reply = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: {resource: userUrl}};
+      reply.body.code = (userUrl) ? 200 : 404;
 
       _this._messageBus.postMessage(reply);
     });
@@ -151,11 +159,11 @@ class Registry extends EventEmitter {
           case '.':
             return value._user;
           default:
-            return 'No information could be found';
+            return '';
         }
       }
     }
-    return 'no identity found';
+    return '';
   }
 
   /**
@@ -328,12 +336,36 @@ class Registry extends EventEmitter {
   }
 
   /**
-  *  function to delete an hypertyInstance in the Domain Registry
+  * send requests to unregister all hyperties registered in domain registry
+  * @return   {Promise}     return a promise if the result of unregistration all hyperties
+  */
+  unregisterAllHyperties() {
+    let _this = this;
+
+    let unregisterResults = [];
+
+    return new Promise(function(resolve,reject) {
+
+      for (let index in _this.hypertiesList) {
+        let hyperty = _this.hypertiesList[index];
+        let result = _this.unregisterHypertyInstance(hyperty.user.userURL, hyperty.hypertyURL);
+        unregisterResults.push(result);
+      }
+
+      Promise.all(unregisterResults).then(() => {
+
+        resolve('successfully unregistered all hyperties');
+      }, error => { reject(error);});
+    });
+  }
+
+  /**
+  *  function to unregister an hypertyInstance in the Domain Registry
   *  @param   {String}      user        user url
   *  @param   {String}      hypertyInstance   HypertyInsntance url
   *
   */
-  deleteHypertyInstance(user, hypertyInstance) {
+  unregisterHypertyInstance(user, hypertyInstance) {
     //TODO working but the user
     let _this = this;
 
@@ -342,7 +374,7 @@ class Registry extends EventEmitter {
                    body: { value: {user: user, hypertyURL: hypertyInstance }}};
 
     _this._messageBus.postMessage(message, (reply) => {
-      console.log('delete hyperty Reply', reply);
+      console.log('unregister hyperty Reply', reply);
     });
   }
 
@@ -358,7 +390,7 @@ class Registry extends EventEmitter {
                    body: { value: {name: name}}};
 
     _this._messageBus.postMessage(message, (reply) => {
-      console.log('delete hyperty Reply', reply);
+      console.log('unregister dataObject Reply', reply);
     });
   }
 
