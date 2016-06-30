@@ -31,7 +31,8 @@
   "homepage": "https://rethink-project.eu/",
   "dependencies": {
     "gulp-sourcemaps": "^1.6.0",
-    "gulp-util": "^3.0.7"
+    "gulp-util": "^3.0.7",
+    "node-localstorage": "1.3.0"
   },
   "devDependencies": {
     "array.observe": "0.0.1",
@@ -68,6 +69,7 @@
     "karma-mocha": "^0.2.2",
     "karma-mocha-reporter": "^2.0.1",
     "karma-phantomjs-launcher": "^1.0.0",
+    "mocha": "2.5.3",
     "object.observe": "^0.2.6",
     "phantomjs-prebuilt": "^2.1.7",
     "service-framework": "github:rethink-project/dev-service-framework#develop",
