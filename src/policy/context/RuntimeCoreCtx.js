@@ -1,8 +1,6 @@
 import CommonCtx from './CommonCtx';
 import {divideURL} from '../../utils/utils';
 
-//import persistenceManager from 'service-framework/dist/PersistenceManager';
-
 class RuntimeCoreCtx extends CommonCtx {
 
   constructor(idModule, runtimeRegistry) {
@@ -13,22 +11,26 @@ class RuntimeCoreCtx extends CommonCtx {
   }
 
   loadPolicies() {
+    let _this = this;
+
+    if (!_this.subsPolicies) {
+      let policy = {
+        scope: 'global',
+        condition: 'subscription equals *',
+        authorise: true,
+        actions: [{method: 'registerSubscriber'}, {method:'doMutualAuthentication'}]
+      };
+      _this.subsPolicies = {};
+      _this.subsPolicies[policy.scope] = policy;
+    }
+
     return {};
   }
 
-  addSubscriptionPolicy() {
+  _isFromRemoteSM(from) {
     let _this = this;
-    let policy = {
-      scope: 'global',
-      condition: 'subscription equals *',
-      authorise: true,
-      actions: [{method: 'registerSubscriber'}, {method:'doMutualAuthentication'}]
-    };
-
-    if (_this.policies[policy.scope] === undefined) {
-      _this.policies[policy.scope] = [];
-    }
-    _this.policies[policy.scope].push(policy);
+    let splitFrom = from.split('://');
+    return splitFrom[0] === 'runtime' && from !== _this.runtimeRegistry.runtimeURL + '/sm';
   }
 
   /**
@@ -41,6 +43,24 @@ class RuntimeCoreCtx extends CommonCtx {
     let myPolicies = _this.policies;
     let policies = [];
 
+    if (message.type === 'subscribe' && _this._isFromRemoteSM(message.from)) {
+      let dataObject = message.body.resource;
+      if (_this.subsPolicies[dataObject]) {
+        policies.push(_this.subsPolicies[dataObject]);
+      } else {
+        let hyperty = _this.runtimeRegistry.getHypertyName(_this._getURL(message.to));
+        if (_this.subsPolicies[hyperty]) {
+          policies.push(_this.subsPolicies[hyperty]);
+        } else {
+          let owner = _this.runtimeRegistry.getHypertyOwner(hyperty);
+          if (_this.subsPolicies[owner]) {
+            policies.push(_this.subsPolicies[owner]);
+          } else {
+            policies.push(_this.subsPolicies.global);
+          }
+        }
+      }
+    }
     /*let id = message.body.identity.userProfile.username;
     let hypertyName = _this.runtimeRegistry.getHypertyName(message.from);
 
@@ -74,7 +94,6 @@ class RuntimeCoreCtx extends CommonCtx {
       let isToVerify = _this.isToVerify(message);
       let isIncomingMessage = _this._isIncomingMessage(message);
       let isToCypher = _this._isToCypherModule(message);
-
       if (isToVerify) {
         if (isIncomingMessage) {
           if (isToCypher) {

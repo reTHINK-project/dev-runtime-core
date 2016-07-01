@@ -23,7 +23,6 @@ class PolicyEngine {
     _this.context = context;
     _this.context.pdp = new PDP(context);
     _this.context.pep = new PEP(context);
-    _this.context.addSubscriptionPolicy();
   }
 
   /**

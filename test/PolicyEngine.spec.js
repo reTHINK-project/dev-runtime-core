@@ -171,6 +171,8 @@ describe('Policy Engine with Runtime Core context', () => {
 
   describe('identity', () => {
     it('should add an identity in the message body', (done) => {
+      let message = { body: { auth: false, identity: { userProfile: { username: 'user@domain' } } }, id: 1, type: 'subscribe', from: 'hyperty://domain/hyperty-url', to: 'comm://domain/hyperty-instance' };
+      policyEngine.removePolicies('*', '*');
       expect(policyEngine.authorise(noIdMessage).then((message) => {
         return message;
       }), (error) => {

@@ -10,10 +10,6 @@ class MessageNodeCtx extends CommonCtx {
     return {};
   }
 
-  addSubscriptionPolicy() {
-    return null;
-  }
-
   /**
   * Returns the policies associated with a scope.
   * @param   {String} scope
