@@ -224,6 +224,7 @@ class RuntimeCoreCtx extends CommonCtx {
     return schemasToIgnore.indexOf(fromSchema) === -1 || schemasToIgnore.indexOf(toSchema) === -1;
   }
 
+  //TODO use schemasToIgnore instead
   _isToCypherModule(message) {
     let _this = this;
     let isCreate = message.type === 'create';

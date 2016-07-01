@@ -448,9 +448,10 @@ class IdentityModule {
     console.log('encrypt message ');
 
     return new Promise(function(resolve, reject) {
+      let isHandShakeType = message.type === 'handshake';
 
       //if is not to apply encryption, then returns resolve
-      if (!_this.isToUseEncryption) {
+      if (!_this.isToUseEncryption && !isHandShakeType) {
         console.log('encryption disabled');
         return resolve(message);
       }
@@ -461,7 +462,7 @@ class IdentityModule {
       let isToDataObject = _this.registry.isDataObjectURL(dataObjectURL);
       let isFromHyperty = divideURL(message.from).type === 'hyperty';
       let isToHyperty = divideURL(message.to).type === 'hyperty';
-      let isHandShakeType = message.type === 'handshake';
+
 
       if (isFromHyperty && isToHyperty) {
         let userURL = _this._registry.getHypertyOwner(message.from);
@@ -556,9 +557,10 @@ class IdentityModule {
     console.log('decrypt message ');
 
     return new Promise(function(resolve, reject) {
+      let isHandShakeType = message.type === 'handshake';
 
       //if is not to apply encryption, then returns resolve
-      if (!_this.isToUseEncryption) {
+      if (!_this.isToUseEncryption && !isHandShakeType) {
         console.log('decryption disabled');
         return resolve(message);
       }
@@ -569,7 +571,7 @@ class IdentityModule {
       let isToDataObject = _this.registry.isDataObjectURL(dataObjectURL);
       let isFromHyperty = divideURL(message.from).type === 'hyperty';
       let isToHyperty = divideURL(message.to).type === 'hyperty';
-      let isHandShakeType = message.type === 'handshake';
+
 
       //is is hyperty to hyperty communication
       if (isFromHyperty && isToHyperty) {
@@ -654,6 +656,7 @@ class IdentityModule {
   }
 
   doMutualAuthentication(sender, receiver) {
+    console.log('doMutualAuthentication: ', sender, receiver);
     let _this = this;
     let dataObjectURL;
 
@@ -675,12 +678,6 @@ class IdentityModule {
 
       if (!sender || !receiver) {
         return reject('sender or receiver missing on doMutualAuthentication');
-      }
-
-      //if is not to apply encryption, then returns resolve
-      if (!_this.isToUseEncryption) {
-        console.log('mutualAuthenticaton disabled');
-        return resolve('mutualAuthenticaton skiped');
       }
 
       let chatKeys = _this.chatKeys[sender + receiver];
