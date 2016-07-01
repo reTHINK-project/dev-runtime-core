@@ -206,28 +206,14 @@ class Registry extends EventEmitter {
   * @return   {String}    userURL         user URL
   */
   getHypertyOwner(hypertyURL) {
-    let _this = this;
 
-    return new Promise(function(resolve, reject) {
-      for (let index in _this.hypertiesList) {
-        let hyperty = _this.hypertiesList[index];
-        if (hyperty.hypertyURL === hypertyURL) {
-          resolve(hyperty.user.userURL);
-        }
-      }
-      console.log('hypertyURL ', hypertyURL);
-      reject('hyperty not found');
-    });
-  }
-
-  getHypertyOwnerSync(hypertyURL) {
     let _this = this;
     let userURL;
 
     for (let index in _this.hypertiesList) {
       let hyperty = _this.hypertiesList[index];
       if (hyperty.hypertyURL === hypertyURL) {
-        return userURL = hyperty.user.userURL;
+        userURL = hyperty.user.userURL;
       }
     }
     return userURL;

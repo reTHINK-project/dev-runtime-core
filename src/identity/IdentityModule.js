@@ -140,7 +140,7 @@ class IdentityModule {
 
     return new Promise(function(resolve, reject) {
 
-      let userURL = _this._registry.getHypertyOwnerSync(hypertyURL);
+      let userURL = _this._registry.getHypertyOwner(hypertyURL);
       if (userURL) {
 
         for (let index in _this.identities) {
@@ -447,7 +447,7 @@ class IdentityModule {
       let isHandShakeType = message.type === 'handshake';
 
       if (isFromHyperty && isToHyperty) {
-        let userURL = _this._registry.getHypertyOwnerSync(message.from);
+        let userURL = _this._registry.getHypertyOwner(message.from);
         if (userURL) {
 
           // check if exists any keys between two users
@@ -557,7 +557,7 @@ class IdentityModule {
       //is is hyperty to hyperty communication
       if (isFromHyperty && isToHyperty) {
         //console.log('decrypt hyperty to hyperty');
-        let userURL = _this._registry.getHypertyOwnerSync(message.to);
+        let userURL = _this._registry.getHypertyOwner(message.to);
         if (userURL) {
 
           let chatKeys = _this.chatKeys[message.to + message.from];
@@ -667,7 +667,7 @@ class IdentityModule {
       }
 
       let chatKeys = _this.chatKeys[sender + receiver];
-      let userURL = _this._registry.getHypertyOwnerSync(sender);
+      let userURL = _this._registry.getHypertyOwner(sender);
 
       if (userURL) {
 
