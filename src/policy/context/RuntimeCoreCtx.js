@@ -78,14 +78,11 @@ class RuntimeCoreCtx extends CommonCtx {
       if (isToVerify) {
         if (isIncomingMessage) {
           if (isToCypher) {
-
             _this.decrypt(message).then(message => {
               result = _this.applyPolicies(message);
               let messageAccepted = result.policiesResult[0];
               message = result.message;
               if (messageAccepted) {
-                console.log('--- Policy Engine END ---');
-                console.log(message);
                 resolve(message);
               } else {
                 reject('Message blocked');
@@ -97,8 +94,6 @@ class RuntimeCoreCtx extends CommonCtx {
             let messageAccepted = result.policiesResult[0];
             message = result.message;
             if (messageAccepted) {
-              console.log('--- Policy Engine END ---');
-              console.log(message);
               resolve(message);
             } else {
               reject('Message blocked');
@@ -106,10 +101,7 @@ class RuntimeCoreCtx extends CommonCtx {
           }
         } else {
           let isToSetID = _this._isToSetID(message);
-          console.log('isToSetID?');
-          console.log(isToSetID);
           if (isToSetID) {
-            console.log('ASKING FOR IDENTITY');
             _this.getIdentity(message).then(identity => {
               message.body.identity = identity;
               result = _this.applyPolicies(message);
@@ -121,8 +113,6 @@ class RuntimeCoreCtx extends CommonCtx {
                     resolve(message);
                   }, (error) => { reject(error); });
                 } else {
-                  console.log('--- Policy Engine END ---');
-                  console.log(message);
                   resolve(message);
                 }
               } else {
@@ -134,8 +124,6 @@ class RuntimeCoreCtx extends CommonCtx {
             let messageAccepted = result.policiesResult[0];
             message = result.message;
             if (messageAccepted) {
-              console.log('--- Policy Engine END ---');
-              console.log(message);
               resolve(message);
             } else {
               reject('Message blocked');
@@ -143,8 +131,6 @@ class RuntimeCoreCtx extends CommonCtx {
           }
         }
       } else {
-        console.log('--- Policy Engine END ---');
-        console.log(message);
         resolve(message);
       }
     });
@@ -154,10 +140,6 @@ class RuntimeCoreCtx extends CommonCtx {
     let schemasToIgnore = ['domain-idp', 'runtime', 'domain'];
     let splitFrom = (message.from).split('://');
     let fromSchema = splitFrom[0];
-    console.log('from schema: ' + fromSchema);
-
-    console.log('schemasToIgnore.indexOf(fromSchema) === -1');
-    console.log(schemasToIgnore.indexOf(fromSchema) === -1);
 
     return schemasToIgnore.indexOf(fromSchema) === -1;
   }
@@ -205,7 +187,6 @@ class RuntimeCoreCtx extends CommonCtx {
       return _this.idModule.getIdentityOfHyperty(message.body.source);
     }
     let from = _this._getURL(message.from);
-    console.log('getting id of ' + from);
     return _this.idModule.getIdentityOfHyperty(from);
   }
 
@@ -213,14 +194,8 @@ class RuntimeCoreCtx extends CommonCtx {
     let schemasToIgnore = ['domain-idp', 'runtime', 'domain'];
     let splitFrom = (message.from).split('://');
     let fromSchema = splitFrom[0];
-    console.log('from schema: ' + fromSchema);
     let splitTo = (message.to).split('://');
     let toSchema =  splitTo[0];
-    console.log('to schema: ' + toSchema);
-    console.log('schemasToIgnore.indexOf(fromSchema) === -1');
-    console.log(schemasToIgnore.indexOf(fromSchema) === -1);
-    console.log('schemasToIgnore.indexOf(toSchema) === -1');
-    console.log(schemasToIgnore.indexOf(toSchema) === -1);
     if (fromSchema === message.from || toSchema === message.to) {
       return false;
     }
