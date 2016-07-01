@@ -1,6 +1,7 @@
 //jshint browser:true, jquery: true
 
-//import persistenceManager from '../persistence/PersistenceManager';
+//import persistenceManager from 'service-framework/dist/PersistenceManager';
+
 import PEP from './PEP';
 import PDP from './PDP';
 

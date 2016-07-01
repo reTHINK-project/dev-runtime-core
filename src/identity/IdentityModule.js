@@ -129,18 +129,34 @@ class IdentityModule {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
+      let splitURL = hypertyURL.split('://');
+      if (splitURL[0] !== 'hyperty') {
+        _this._getHypertyFromDataObject(hypertyURL).then((hypertyURL) => {
+          _this.registry.getHypertyOwner(hypertyURL).then((userURL) => {
 
-      _this.registry.getHypertyOwner(hypertyURL).then((userURL) => {
+            for (let index in _this.identities) {
+              let identity = _this.identities[index];
+              if (identity.identity === userURL) {
+                return resolve(identity.messageInfo);
+              }
+            }
+          }, (err) => {
+            reject(err);
+          });
+        });
+      } else {
+        _this.registry.getHypertyOwner(hypertyURL).then((userURL) => {
 
-        for (let index in _this.identities) {
-          let identity = _this.identities[index];
-          if (identity.identity === userURL) {
-            return resolve(identity.messageInfo);
+          for (let index in _this.identities) {
+            let identity = _this.identities[index];
+            if (identity.identity === userURL) {
+              return resolve(identity.messageInfo);
+            }
           }
-        }
-      }, (err) => {
-        reject(err);
-      });
+        }, (err) => {
+          reject(err);
+        });
+      }
     });
   }
 

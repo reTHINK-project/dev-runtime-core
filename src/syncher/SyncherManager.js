@@ -172,7 +172,7 @@ class SyncherManager {
       //FLOW-OUT: send invites to list of remote Syncher -> _onRemoteCreate -> onNotification
       _this._bus.postMessage({
         type: 'create', from: objSubscriptorURL, to: hypertyURL,
-        body: { source: msg.from, value: msg.body.value, schema: msg.body.schema }
+        body: { identity: msg.body.identity, source: msg.from, value: msg.body.value, schema: msg.body.schema }
       });
     });
   }
@@ -220,7 +220,7 @@ class SyncherManager {
       //FLOW-OUT: subscribe message to the msg-node, registering listeners on the broker
       let nodeSubscribeMsg = {
         type: 'subscribe', from: _this._url, to: 'domain://msg-node.' + domain + '/sm',
-        body: { subscribe: subscriptions, source: hypertyURL }
+        body: { identity: msg.body.identity, subscribe: subscriptions, source: hypertyURL }
       };
 
       //subscribe in msg-node
@@ -237,7 +237,7 @@ class SyncherManager {
           //FLOW-OUT: subscribe message to remote ReporterObject -> _onRemoteSubscribe
           let objSubscribeMsg = {
             type: 'subscribe', from: _this._url, to: objURLSubscription,
-            body: { subscriber: hypertyURL }
+            body: { identity: nodeSubscribeMsg.body.identity, subscriber: hypertyURL }
           };
 
           //subscribe to reporter SM

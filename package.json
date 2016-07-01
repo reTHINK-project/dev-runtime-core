@@ -46,7 +46,7 @@
     "base64-url": "^1.2.2",
     "bip39": "^2.2.0",
     "bitcoinjs-lib": "^2.2.0",
-    "browserify": "^13.0.0",
+    "browserify": "^13.0.1",
     "chai": "^3.5.0",
     "chai-as-promised": "^5.3.0",
     "expect": "^1.18.0",
