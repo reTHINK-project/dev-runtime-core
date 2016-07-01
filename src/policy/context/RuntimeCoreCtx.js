@@ -48,10 +48,12 @@ class RuntimeCoreCtx extends CommonCtx {
       if (_this.subsPolicies[dataObject]) {
         policies.push(_this.subsPolicies[dataObject]);
       } else {
-        let hyperty = _this.runtimeRegistry.getHypertyName(_this._getURL(message.to));
-        if (_this.subsPolicies[hyperty]) {
-          policies.push(_this.subsPolicies[hyperty]);
+        let hypertyName = _this.runtimeRegistry.getHypertyName(_this._getURL(message.to));
+        if (_this.subsPolicies[hypertyName]) {
+          policies.push(_this.subsPolicies[hypertyName]);
         } else {
+          //TODO: change name
+          let hyperty = _this.runtimeRegistry.getReporterURLSynchonous(_this._getURL(message.to));
           let owner = _this.runtimeRegistry.getHypertyOwner(hyperty);
           if (_this.subsPolicies[owner]) {
             policies.push(_this.subsPolicies[owner]);

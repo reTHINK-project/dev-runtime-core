@@ -15,6 +15,7 @@ class MessageNodeCtx extends CommonCtx {
   * @param   {String} scope
   * @return  {Array}  policies
   */
+
   //TODO: can policies depend on the hyperty name? Domain Registry interaction
   getApplicablePolicies() {
     let _this = this;
