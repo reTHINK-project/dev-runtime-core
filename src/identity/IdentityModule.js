@@ -62,11 +62,11 @@ class IdentityModule {
     _this.dataObjectSessionKeys = {};
 
     //failsafe to enable/disable all the criptographic functions
-    _this.isToUseEncryption = true;
+    _this.isToUseEncryption = false;
 
     // verification of nodeJS, and in case it is nodeJS then disable encryption
     // TODO improve later, this exists because the crypto lib uses browser cryptographic methods
-    _this.isToUseEncryption = (window) ? true : false;
+    //_this.isToUseEncryption = (window) ? true : false;
 
   }
 
@@ -140,7 +140,8 @@ class IdentityModule {
 
     return new Promise(function(resolve, reject) {
 
-      _this.registry.getHypertyOwner(hypertyURL).then((userURL) => {
+      let userURL = _this._registry.getHypertyOwnerSync(hypertyURL);
+      if (userURL) {
 
         for (let index in _this.identities) {
           let identity = _this.identities[index];
@@ -148,9 +149,9 @@ class IdentityModule {
             return resolve(identity.messageInfo);
           }
         }
-      }, (err) => {
-        reject(err);
-      });
+      } else {
+        reject('Error on getIdentityOfHyperty, no owner found');
+      }
     });
   }
 
@@ -446,7 +447,8 @@ class IdentityModule {
       let isHandShakeType = message.type === 'handshake';
 
       if (isFromHyperty && isToHyperty) {
-        _this._registry.getHypertyOwner(message.from).then(function(userURL) {
+        let userURL = _this._registry.getHypertyOwnerSync(message.from);
+        if (userURL) {
 
           // check if exists any keys between two users
           let chatKeys = _this.chatKeys[message.from + message.to];
@@ -480,8 +482,7 @@ class IdentityModule {
               reject('encrypt handshake protocol phase ');
             });
           }
-
-        });
+        }
 
       //if from hyperty to a dataObjectURL
       } else if (isFromHyperty && isToDataObject) {
@@ -556,8 +557,8 @@ class IdentityModule {
       //is is hyperty to hyperty communication
       if (isFromHyperty && isToHyperty) {
         //console.log('decrypt hyperty to hyperty');
-
-        _this._registry.getHypertyOwner(message.to).then(function(userURL) {
+        let userURL = _this._registry.getHypertyOwnerSync(message.to);
+        if (userURL) {
 
           let chatKeys = _this.chatKeys[message.to + message.from];
           if (!chatKeys) {
@@ -592,7 +593,9 @@ class IdentityModule {
           } else {
             reject('wrong message do decrypt');
           }
-        }).catch(function(err) { reject(err); });
+        } else {
+          reject('error on decrypt message');
+        }
 
         //if from hyperty to a dataObjectURL
       } else if (isFromHyperty && isToDataObject) {
@@ -653,6 +656,10 @@ class IdentityModule {
 
     return new Promise(function(resolve, reject) {
 
+      if (!sender || !receiver) {
+        return reject('sender or receiver missing on doMutualAuthentication');
+      }
+
       //if is not to apply encryption, then returns resolve
       if (!_this.isToUseEncryption) {
         console.log('mutualAuthenticaton disabled');
@@ -660,7 +667,9 @@ class IdentityModule {
       }
 
       let chatKeys = _this.chatKeys[sender + receiver];
-      _this._registry.getHypertyOwner(sender).then(function(userURL) {
+      let userURL = _this._registry.getHypertyOwnerSync(sender);
+
+      if (userURL) {
 
         if (!chatKeys) {
           // callback to resolve when finish the mutual authentication
@@ -691,7 +700,9 @@ class IdentityModule {
 
           _this._doHandShakePhase(msg, chatKeys);
         }
-      });
+      } else {
+        reject('error on doMutualAuthentication');
+      }
     });
 
   }
