@@ -15,38 +15,11 @@ class CommonCtx extends Context {
   applyPolicies(message) {
     let _this = this;
     let policiesResult = [true, []];
-    let applicablePolicies = _this.getApplicablePolicies('*');
+    let applicablePolicies = _this.getApplicablePolicies(message);
     policiesResult = _this.pdp.evaluate(message, applicablePolicies);
     message.body.auth = applicablePolicies.length !== 0;
     _this.pep.enforce(policiesResult);
     return { message: message, policiesResult: policiesResult };
-  }
-
-  /**
-  * Returns the policies associated with a scope.
-  * @param   {String} scope
-  * @return  {Array}  policies
-  */
-  getApplicablePolicies(scope) {
-    //let myPolicies = persistenceManager.get('policies');
-    let _this = this;
-    let myPolicies = _this.policies;
-    if (myPolicies === undefined) {
-      myPolicies = {};
-    }
-    let policies = [];
-
-    if (scope !== '*') {
-      if (myPolicies[scope] !== undefined) {
-        policies = myPolicies[scope];
-      }
-    } else {
-      for (let i in myPolicies) {
-        policies.push.apply(policies, myPolicies[i]);
-      }
-    }
-
-    return policies;
   }
 
   set date(now) {

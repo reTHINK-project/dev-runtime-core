@@ -10,8 +10,23 @@ class MessageNodeCtx extends CommonCtx {
     return {};
   }
 
-  addSubscriptionPolicy() {
-    return null;
+  /**
+  * Returns the policies associated with a scope.
+  * @param   {String} scope
+  * @return  {Array}  policies
+  */
+
+  //TODO: can policies depend on the hyperty name? Domain Registry interaction
+  getApplicablePolicies() {
+    let _this = this;
+    let myPolicies = _this.policies;
+    let policies = [];
+
+    for (let i in myPolicies) {
+      policies.push.apply(policies, myPolicies[i]);
+    }
+
+    return policies;
   }
 
   set group(params) {
@@ -41,6 +56,7 @@ class MessageNodeCtx extends CommonCtx {
     }
   }
 
+  //TODO: verify if scheme is not 'runtime', 'hyperty-runtime' or 'domain'
   isToVerify() {
     return true;
   }

@@ -1,6 +1,7 @@
 //jshint browser:true, jquery: true
 
-//import persistenceManager from '../persistence/PersistenceManager';
+//import persistenceManager from 'service-framework/dist/PersistenceManager';
+
 import PEP from './PEP';
 import PDP from './PDP';
 
@@ -22,7 +23,6 @@ class PolicyEngine {
     _this.context = context;
     _this.context.pdp = new PDP(context);
     _this.context.pep = new PEP(context);
-    _this.context.addSubscriptionPolicy();
   }
 
   /**
@@ -65,8 +65,8 @@ class PolicyEngine {
   */
   removePolicies(scope, condition) {
     let _this = this;
-
     let myPolicies = _this.context.policies;
+
     if (scope !== '*') {
 
       if (scope in myPolicies) {
@@ -78,7 +78,7 @@ class PolicyEngine {
             if (typeOfCondition === typeOfPolicyCondition) {
               if (typeOfCondition === 'string') {
                 if (policies[i].condition === condition) {
-                  policies.splice(condition, 1);
+                  policies.splice(i, 1);
                   break;
                 }
               } else { //typeof condition = object (advanced policy)
@@ -190,9 +190,6 @@ class PolicyEngine {
     delete myGroups[scope][groupName];
 
     let myPolicies = _this.context.policies;
-    if (myPolicies === undefined) {
-      myPolicies = {};
-    }
 
     let policies = myPolicies[scope];
     for (let i in policies) {

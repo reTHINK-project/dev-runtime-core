@@ -1,8 +1,6 @@
 import CommonCtx from './CommonCtx';
 import {divideURL} from '../../utils/utils';
 
-//import persistenceManager from '../../persistence/PersistenceManager';
-
 class RuntimeCoreCtx extends CommonCtx {
 
   constructor(idModule, runtimeRegistry) {
@@ -13,22 +11,78 @@ class RuntimeCoreCtx extends CommonCtx {
   }
 
   loadPolicies() {
+    let _this = this;
+
+    if (!_this.subsPolicies) {
+      let policy = {
+        scope: 'global',
+        condition: 'subscription equals *',
+        authorise: true,
+        actions: [{method: 'registerSubscriber'}, {method:'doMutualAuthentication'}]
+      };
+      _this.subsPolicies = {};
+      _this.subsPolicies[policy.scope] = policy;
+    }
+
     return {};
   }
 
-  addSubscriptionPolicy() {
+  _isFromRemoteSM(from) {
     let _this = this;
-    let policy = {
-      scope: 'global',
-      condition: 'subscription equals *',
-      authorise: true,
-      actions: [{method: 'registerSubscriber'}, {method:'doMutualAuthentication'}]
-    };
+    let splitFrom = from.split('://');
+    return splitFrom[0] === 'runtime' && from !== _this.runtimeRegistry.runtimeURL + '/sm';
+  }
 
-    if (_this.policies[policy.scope] === undefined) {
-      _this.policies[policy.scope] = [];
+  /**
+  * Returns the policies associated with a scope.
+  * @param   {String} scope
+  * @return  {Array}  policies
+  */
+  getApplicablePolicies(message) {
+    let _this = this;
+    let myPolicies = _this.policies;
+    let policies = [];
+
+    if (message.type === 'subscribe' && _this._isFromRemoteSM(message.from)) {
+      let dataObject = message.body.resource;
+      if (_this.subsPolicies[dataObject]) {
+        policies.push(_this.subsPolicies[dataObject]);
+      } else {
+        let hypertyName = _this.runtimeRegistry.getHypertyName(_this._getURL(message.to));
+        if (_this.subsPolicies[hypertyName]) {
+          policies.push(_this.subsPolicies[hypertyName]);
+        } else {
+          //TODO: change name
+          let hyperty = _this.runtimeRegistry.getReporterURLSynchonous(_this._getURL(message.to));
+          let owner = _this.runtimeRegistry.getHypertyOwner(hyperty);
+          if (_this.subsPolicies[owner]) {
+            policies.push(_this.subsPolicies[owner]);
+          } else {
+            policies.push(_this.subsPolicies.global);
+          }
+        }
+      }
     }
-    _this.policies[policy.scope].push(policy);
+    /*let id = message.body.identity.userProfile.username;
+    let hypertyName = _this.runtimeRegistry.getHypertyName(message.from);
+
+    if (myPolicies[id] !== undefined) {
+      policies.push.apply(policies, myPolicies[id]);
+    }
+
+    if (myPolicies[hypertyName] !== undefined) {
+      policies.push.apply(policies, myPolicies[hypertyName]);
+    }
+
+    if (myPolicies.global !== undefined) {
+      policies.push.apply(policies, myPolicies.global);
+    }*/
+
+    for (let i in myPolicies) {
+      policies.push.apply(policies, myPolicies[i]);
+    }
+
+    return policies;
   }
 
   authorise(message) {
@@ -45,7 +99,6 @@ class RuntimeCoreCtx extends CommonCtx {
       if (isToVerify) {
         if (isIncomingMessage) {
           if (isToCypher) {
-
             _this.decrypt(message).then(message => {
               result = _this.applyPolicies(message);
               let messageAccepted = result.policiesResult[0];
@@ -58,7 +111,6 @@ class RuntimeCoreCtx extends CommonCtx {
             }, (error) => { reject(error); });
 
           } else {
-
             result = _this.applyPolicies(message);
             let messageAccepted = result.policiesResult[0];
             message = result.message;
@@ -67,34 +119,50 @@ class RuntimeCoreCtx extends CommonCtx {
             } else {
               reject('Message blocked');
             }
-
           }
-
         } else {
-
-          _this.getIdentity(message).then(identity => {
-            message.body.identity = identity;
+          let isToSetID = _this._isToSetID(message);
+          if (isToSetID) {
+            _this.getIdentity(message).then(identity => {
+              message.body.identity = identity;
+              result = _this.applyPolicies(message);
+              let messageAccepted = result.policiesResult[0];
+              message = result.message;
+              if (messageAccepted) {
+                if (isToCypher) {
+                  _this.encrypt(message).then(message => {
+                    resolve(message);
+                  }, (error) => { reject(error); });
+                } else {
+                  resolve(message);
+                }
+              } else {
+                reject('Message blocked');
+              }
+            }, (error) => { reject(error); });
+          } else {
             result = _this.applyPolicies(message);
             let messageAccepted = result.policiesResult[0];
             message = result.message;
             if (messageAccepted) {
-              if (isToCypher) {
-                _this.encrypt(message).then(message => {
-                  resolve(message);
-                }, (error) => { reject(error); });
-              } else {
-                resolve(message);
-              }
+              resolve(message);
             } else {
               reject('Message blocked');
             }
-          }, (error) => { reject(error); });
-
+          }
         }
       } else {
         resolve(message);
       }
     });
+  }
+
+  _isToSetID(message) {
+    let schemasToIgnore = ['domain-idp', 'runtime', 'domain'];
+    let splitFrom = (message.from).split('://');
+    let fromSchema = splitFrom[0];
+
+    return schemasToIgnore.indexOf(fromSchema) === -1;
   }
 
   set group(params) {
@@ -128,35 +196,32 @@ class RuntimeCoreCtx extends CommonCtx {
     return (message.body.identity) ? true : false;
   }
 
+  _getURL(url) {
+    let splitURL = url.split('/');
+    return splitURL[0] + '//' + splitURL[2] + '/' + splitURL[3];
+  }
+
+  //TODO: verify if is hyperty or data object
   getIdentity(message) {
     let _this = this;
 
-    if (message.type === 'subscribe') {
-      return _this.idModule.getIdentityOfHyperty(message.body.subscriber);
-    }
     if (message.type === 'update') {
       return _this.idModule.getIdentityOfHyperty(message.body.source);
     }
-
-    return _this.idModule.getIdentityOfHyperty(message.from);
+    let from = _this._getURL(message.from);
+    return _this.idModule.getIdentityOfHyperty(from);
   }
 
   isToVerify(message) {
-    let _this = this;
-
-    let isFromHyperty = divideURL(message.from).type === 'hyperty';
-    let isToDataObject = _this._isDataObjectURL(message.to);
-    let isFromLocalSM = (message.from === _this.runtimeRegistry.runtimeURL + '/sm');
-    let isFromRemoteSM = (_this._getLastComponentOfURL(message.from) === 'sm');
-    let isToSubscription = (_this._getLastComponentOfURL(message.to) === 'subscription');
-    let isFromDataObject = _this._isDataObjectURL(message.from);
-    let isToHyperty = divideURL(message.to).type === 'hyperty';
-
-    if (isFromLocalSM && isToSubscription) {
-      _this.runtimeRegistry.registerSubscribedDataObject(_this._getDataObjectURL(message.to), message.body.subscriber);
+    let schemasToIgnore = ['domain-idp', 'runtime', 'domain'];
+    let splitFrom = (message.from).split('://');
+    let fromSchema = splitFrom[0];
+    let splitTo = (message.to).split('://');
+    let toSchema =  splitTo[0];
+    if (fromSchema === message.from || toSchema === message.to) {
+      return false;
     }
-
-    return (isFromHyperty && isToDataObject) || (isFromLocalSM && isToSubscription) || (isFromRemoteSM && isToSubscription) || (isFromDataObject && isToDataObject) || (isFromHyperty && isToHyperty);
+    return schemasToIgnore.indexOf(fromSchema) === -1 || schemasToIgnore.indexOf(toSchema) === -1;
   }
 
   _isToCypherModule(message) {
@@ -226,14 +291,10 @@ class RuntimeCoreCtx extends CommonCtx {
     return split[split.length - 1];
   }
 
-  _getDataObjectURL(url) {
-    let splitURL = url.split('/');
-    return splitURL[0] + '//' + splitURL[2] + '/' + splitURL[3];
-  }
-
+   //TODO use schemasToIgnore instead
   _isDataObjectURL(url) {
     let _this = this;
-    let dataObjectURL = _this._getDataObjectURL(url);
+    let dataObjectURL = _this._getURL(url);
     return _this.runtimeRegistry.isDataObjectURL(dataObjectURL);
   }
 }
