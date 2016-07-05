@@ -250,8 +250,14 @@ class IdentityModule {
         //if it is browser, then create a fake identity
         if (!window) {
           let randomNumber = Math.floor((Math.random() * 10000) + 1);
-          let identityBundle = {assertion: 'assertion', email: 'nodejs-' + randomNumber + '@nodejs.com', identity: 'user://nodejs-' + randomNumber, idp:'nodejs', infoToken: {
-            email:'nodejs-' + randomNumber + '@nodejs.com'
+          let identityBundle = {
+            assertion: 'assertion',
+            idp:'nodejs',
+            userProfile: {
+            avatar: 'https://lh3.googleusercontent.com/-WaCrjVMMV-Q/AAAAAAAAAAI/AAAAAAAAAAs/8OlVqCpSB9c/photo.jpg',
+            cn: 'test nodejs',
+            username: 'nodejs-' + randomNumber + '@nodejs.com',
+            userURL: 'user://nodejs.com/nodejs-' + randomNumber
           }};
           _this.currentIdentity = identityBundle;
           _this.identities.push(identityBundle);
