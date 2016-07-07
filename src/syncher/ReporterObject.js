@@ -70,13 +70,13 @@ class ReporterObject {
    * @param  {string} address - URL to register the listeners
    * @return {Promise} Return Promise OK or error
    */
-  forwardSubscribe(address) {
+  forwardSubscribe(addresses) {
     let _this = this;
 
     //FLOW-OUT: message sent to the msg-node SubscriptionManager component
     let nodeSubscribeMsg = {
       type: 'subscribe', from: _this._parent._url, to: 'domain://msg-node.' + _this._domain + '/sm',
-      body: { subscribe: [address], source: _this._owner }
+      body: { subscribe: addresses, source: _this._owner }
     };
 
     return new Promise((resolve, reject) => {
@@ -84,7 +84,7 @@ class ReporterObject {
         console.log('forward-subscribe-response(reporter): ', reply);
         if (reply.body.code === 200) {
           let newForward = _this._bus.addForward(_this._url, _this._owner);
-          _this._forwards[address] = newForward;
+          _this._forwards[addresses[0]] = newForward;
           resolve();
         } else {
           reject('Error on msg-node subscription: ' + reply.body.desc);
