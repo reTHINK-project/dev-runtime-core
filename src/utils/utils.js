@@ -136,3 +136,11 @@ export function convertToUserURL(identifier) {
     return getUserURLFromEmail(identifier);
   }
 }
+
+export function isDataObjectURL(url) {
+  let schemasToIgnore = ['domain-idp', 'runtime', 'domain', 'hyperty'];
+  let splitURL = (url).split('://');
+  let urlSchema = splitURL[0];
+
+  return schemasToIgnore.indexOf(urlSchema) === -1;
+}

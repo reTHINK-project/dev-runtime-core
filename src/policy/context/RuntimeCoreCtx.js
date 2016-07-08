@@ -1,5 +1,5 @@
 import CommonCtx from './CommonCtx';
-import {divideURL} from '../../utils/utils';
+import {divideURL, isDataObjectURL} from '../../utils/utils';
 
 class RuntimeCoreCtx extends CommonCtx {
 
@@ -208,8 +208,13 @@ class RuntimeCoreCtx extends CommonCtx {
     if (message.type === 'update') {
       return _this.idModule.getIdentityOfHyperty(message.body.source);
     }
+
+    if (message.type === 'response' && message.body.source !== undefined) {
+      return _this.idModule.getIdentityOfHyperty(message.body.source);
+    }
+
     let from = _this._getURL(message.from);
-    return _this.idModule.getIdentityOfHyperty(from);
+    return _this.idModule.getIdentityOfHyperty(_this._getURL(from));
   }
 
   isToVerify(message) {
@@ -226,11 +231,10 @@ class RuntimeCoreCtx extends CommonCtx {
 
   //TODO use schemasToIgnore instead
   _isToCypherModule(message) {
-    let _this = this;
     let isCreate = message.type === 'create';
     let isFromHyperty = divideURL(message.from).type === 'hyperty';
     let isToHyperty = divideURL(message.to).type === 'hyperty';
-    let isToDataObject = _this._isDataObjectURL(message.to);
+    let isToDataObject = isDataObjectURL(message.to);
     let isHandshake = message.type === 'handshake';
 
     return (isCreate && isFromHyperty && isToHyperty) || (isCreate && isFromHyperty && isToDataObject) || isHandshake;
@@ -290,13 +294,6 @@ class RuntimeCoreCtx extends CommonCtx {
   _getLastComponentOfURL(url) {
     let split = url.split('/');
     return split[split.length - 1];
-  }
-
-   //TODO use schemasToIgnore instead
-  _isDataObjectURL(url) {
-    let _this = this;
-    let dataObjectURL = _this._getURL(url);
-    return _this.runtimeRegistry.isDataObjectURL(dataObjectURL);
   }
 }
 

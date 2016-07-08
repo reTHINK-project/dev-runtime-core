@@ -278,18 +278,6 @@ class Registry extends EventEmitter {
   }
 
   /**
-  * verify if the url received is a dataObjectURL registered in runtime registry
-  * @param    {String}     url            url format
-  * @return   {boolean}    boolean with the information if is dataObjectURL or not
-  */
-  isDataObjectURL(url) {
-    let _this = this;
-    let dataObject = _this.dataObjectList[url];
-    let subscribedDataObject = _this.subscribedDataObjectList[url];
-    return (dataObject || subscribedDataObject) ? true : false;
-  }
-
-  /**
   * returns the hyperty URL that subscribed the dataObject
   * @param    {String}     url            url format
   * @return   {String}    Hyperty URL subscribed to the URL

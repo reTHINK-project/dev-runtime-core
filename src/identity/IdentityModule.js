@@ -1,5 +1,5 @@
 
-import {divideURL, getUserURLFromEmail, getUserEmailFromURL} from '../utils/utils.js';
+import {divideURL, getUserURLFromEmail, getUserEmailFromURL, isDataObjectURL} from '../utils/utils.js';
 import Identity from './Identity';
 import Crypto from './Crypto';
 
@@ -62,7 +62,7 @@ class IdentityModule {
     _this.dataObjectSessionKeys = {};
 
     //failsafe to enable/disable all the criptographic functions
-    _this.isToUseEncryption = false;
+    _this.isToUseEncryption = true;
 
     // verification of nodeJS, and in case it is nodeJS then disable encryption
     // TODO improve later, this exists because the crypto lib uses browser cryptographic methods
@@ -459,7 +459,7 @@ class IdentityModule {
       let splitedToURL = message.to.split('/');
       let dataObjectURL = splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3];
 
-      let isToDataObject = _this.registry.isDataObjectURL(dataObjectURL);
+      let isToDataObject = isDataObjectURL(dataObjectURL);
       let isFromHyperty = divideURL(message.from).type === 'hyperty';
       let isToHyperty = divideURL(message.to).type === 'hyperty';
 
@@ -568,7 +568,7 @@ class IdentityModule {
       let splitedToURL = message.to.split('/');
       let dataObjectURL = splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3];
 
-      let isToDataObject = _this.registry.isDataObjectURL(dataObjectURL);
+      let isToDataObject = isDataObjectURL(dataObjectURL);
       let isFromHyperty = divideURL(message.from).type === 'hyperty';
       let isToHyperty = divideURL(message.to).type === 'hyperty';
 

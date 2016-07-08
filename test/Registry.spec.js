@@ -209,12 +209,9 @@ getRegistry.then(function(registry) {
     });
 
     describe('getHypertyOwner(hypertyURL)', function() {
-      it('should return the user associated to the hyperty URL', function(done) {
+      it('should return the user associated to the hyperty URL', function() {
         let url = 'hyperty://ua.pt/1';
-
-        expect(registry.getHypertyOwner(url).then(function(response) {
-          return response;
-        })).to.be.fulfilled.and.eventually.equal('user://gmail.com/openidtest10').and.notify(done);
+        expect(registry.getHypertyOwner(url)).to.be.eql('user://gmail.com/openidtest10');
       });
     });
 
@@ -237,17 +234,6 @@ getRegistry.then(function(registry) {
         expect(registry.registerDataObject(identifier, dataObjectschema, dataObjectUrl, dataObjectReporter, authorise).then(function(response) {
           return response;
         })).to.be.fulfilled.and.eventually.equal('ok').and.notify(done);
-      });
-    });
-
-    describe('isDataObjectURL(url)', function() {
-      it('should verify if the url received is a dataObjectURL registered in runtime registry', function() {
-        let dataObjectURL = 'comm://localhost/9303b707-f301-4929-ad7d-65a89a356871';
-        let fakedataObjectURL = 'comm://fake';
-
-        expect(registry.isDataObjectURL(dataObjectURL)).to.be.equal(true);
-
-        expect(registry.isDataObjectURL(fakedataObjectURL)).to.be.equal(false);
       });
     });
 
