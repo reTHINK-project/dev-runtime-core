@@ -469,11 +469,11 @@ class IdentityModule {
         if (userURL) {
 
           // check if exists any keys between two users
-          let chatKeys = _this.chatKeys[message.from + message.to];
+          let chatKeys = _this.chatKeys[message.from + '<->' + message.to];
           if (!chatKeys) {
             chatKeys = _this._newChatCrypto(message, userURL);
             console.log('createChatKey encrypt', message.from + message.to);
-            _this.chatKeys[message.from + message.to] = chatKeys;
+            _this.chatKeys[message.from + '<->' + message.to] = chatKeys;
             message.body.handshakePhase = 'startHandShake';
           }
 
@@ -494,7 +494,7 @@ class IdentityModule {
             // else, starts a new handshake protocol
           } else {
             _this._doHandShakePhase(message, chatKeys).then(function(value) {
-              _this.chatKeys[message.from + message.to] = value.chatKeys;
+              _this.chatKeys[message.from + '<->' + message.to] = value.chatKeys;
 
               _this._messageBus.postMessage(value.message);
               reject('encrypt handshake protocol phase ');
@@ -504,7 +504,7 @@ class IdentityModule {
 
       //if from hyperty to a dataObjectURL
       } else if (isFromHyperty && isToDataObject) {
-        console.log('dataObject encrypt');
+        console.log('dataObject value to encrypt: ', message.body.value);
 
         let dataObjectKey = _this.dataObjectSessionKeys[dataObjectURL];
 
@@ -579,10 +579,10 @@ class IdentityModule {
         let userURL = _this._registry.getHypertyOwner(message.to);
         if (userURL) {
 
-          let chatKeys = _this.chatKeys[message.to + message.from];
+          let chatKeys = _this.chatKeys[message.to + '<->' + message.from];
           if (!chatKeys) {
             chatKeys = _this._newChatCrypto(message, userURL, 'decrypt');
-            _this.chatKeys[message.to + message.from] = chatKeys;
+            _this.chatKeys[message.to + '<->' + message.from] = chatKeys;
           }
 
           if (chatKeys.authenticated && !isHandShakeType) {
@@ -604,7 +604,7 @@ class IdentityModule {
 
               // if was started by a message, then resend that message
               } else {
-                _this.chatKeys[message.to + message.from] = value.chatKeys;
+                _this.chatKeys[message.to + '<->' + message.from] = value.chatKeys;
                 _this._messageBus.postMessage(value.message);
                 reject('decrypt handshake protocol phase ');
               }
@@ -618,7 +618,7 @@ class IdentityModule {
 
         //if from hyperty to a dataObjectURL
       } else if (isFromHyperty && isToDataObject) {
-        //console.log('dataObject decrypt');
+        console.log('dataObject value to decrypt: ', message.body);
 
         let dataObjectKey = _this.dataObjectSessionKeys[dataObjectURL];
 
@@ -680,7 +680,7 @@ class IdentityModule {
         return reject('sender or receiver missing on doMutualAuthentication');
       }
 
-      let chatKeys = _this.chatKeys[sender + receiver];
+      let chatKeys = _this.chatKeys[sender + '<->' + receiver];
       let userURL = _this._registry.getHypertyOwner(sender);
 
       if (userURL) {
@@ -695,7 +695,7 @@ class IdentityModule {
           msg.dataObjectURL = dataObjectURL;
 
           chatKeys = _this._newChatCrypto(msg, userURL);
-          _this.chatKeys[sender + receiver] = chatKeys;
+          _this.chatKeys[sender + '<->' + receiver] = chatKeys;
         }
 
         if (chatKeys.authenticated) {
@@ -751,7 +751,7 @@ class IdentityModule {
           // start of the handShakePhase.
           if (chatKeys.initialMessage) {resolve({message: startHandShakeMsg, chatKeys: chatKeys});
           } else {
-            _this.chatKeys[message.from + message.to] = chatKeys;
+            _this.chatKeys[message.from + '<->' + message.to] = chatKeys;
             _this._messageBus.postMessage(startHandShakeMsg);
           }
 
