@@ -380,11 +380,12 @@ class GraphConnector {
     let found = false;
     for (let i = 0; i < this.globalRegistryRecord.userIDs.length; i++) {
       if (this.globalRegistryRecord.userIDs == userID) {
-        found = true;
+        found = false;
       }
     }
     if (!found) {
       this.globalRegistryRecord.userIDs.push(userID);
+      found = true;
     }
     return found;
   }

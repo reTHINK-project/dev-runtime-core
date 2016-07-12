@@ -120,7 +120,7 @@ getRegistry.then(function(registry) {
 
       it('Adding user ID to contact', function() {
         let result = graphConnector.addUserID("facebook/john");
-        expect(result).to.equal(false);
+        expect(result).to.equal(true);
       });
 
       it('Removing user ID to contact', function() {
