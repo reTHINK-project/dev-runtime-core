@@ -373,6 +373,7 @@ class GraphConnector {
   /**
    * Adds a UserID for the user.
    * @param  {string}     userID          The UserID for a Domain Registry to add for the user.
+   * @returns  {boolean}   true if the userID exists and the user ID will not be added, false otherwise.
    */
   addUserID(userID) {
     // check if already inside
@@ -383,20 +384,25 @@ class GraphConnector {
       }
     }
     if (!found) {
-      this.globalRegistryRecord.userIDs.push(userID);
+      this.globalRegistryRecord.userIDs.push(userID);console.log("Added");
     }
+    return found;
   }
 
   /**
    * Removes a UserID for the user.
    * @param  {string}     userID          The UserID to remove.
+   * @returns  {boolean}   true if the userID exists and deleted, false otherwise.
    */
   removeUserID(userID) {
+    let found = false;
     for (let i = 0; i < this.globalRegistryRecord.userIDs.length; i++) {
       if (this.globalRegistryRecord.userIDs == userID) {
         this.globalRegistryRecord.userIDs.splice(i, 1);
+        found = true;
       }
     }
+    return found;
   }
 
   /**
@@ -464,6 +470,14 @@ class GraphConnector {
       }
     }
     return rtnArray;
+  }
+
+  /**
+   * Gets all the contacts.
+   * @returns  {array}   All the contacts. The format is: Contacts<GraphConnectorContactData>.
+   */
+  getAllContacts() {
+    return this.contacts;
   }
 
   /**
