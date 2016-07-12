@@ -423,14 +423,12 @@ class GraphConnector {
     for (let i = 0; i < this.contacts.length; i++) {
       if (this.contacts[i].guid == guid) {
         this.contacts.splice(i, 1);
-        status= true;
+        status=true;
       }
-
     }
-
+    return status;
     // re-calculate BF1hop
     this.calculateBloomFilter1Hop();
-    return status;
   }
 
   /**
@@ -455,23 +453,30 @@ class GraphConnector {
    * @param  {string}   name    First or last name to look for in the contact list.
    * @returns  {array}   matchingContacts       Contacts matching the given name. The format is: Contacts<GraphConnectorContactData>.
    */
-  getContact(name) {
-    // TODO: optimize, e.g., find misspelled people
-    let rtnArray = [];
+    getContact(name) {
+      // TODO: optimize, e.g., find misspelled people
+      let rtnArray = [];
+      let fname,lname;
+          let tmp ="(?="+name+")+[A-Za-z]*\\w";
+      let patt =  new RegExp(tmp,"ig");
     for (let i = 0; i < this.contacts.length; i++) {
-      if (this.contacts[i].firstName == name || this.contacts[i].lastName == name) {
-        rtnArray.push(this.contacts[i]);
+        fname = this.contacts[i].firstName;
+        lname = this.contacts[i].lastName;
+
+        if (patt.test(fname) || patt.test(lname)) {
+          rtnArray.push(this.contacts[i]);
+        }
       }
+        
+      return rtnArray;
     }
-    return rtnArray;
-  }
 
   /**
    * Checks, if the given GUID is known and returns a list of contacs that are direct connections as well as a list of contacts that (most likely) know the given contact.
    * @param  {string}     guid      GUID of the contact to look for.
    * @returns  {array}    relatedContacts     List of related direct contacts and of related friends-of-friends contacts.The format is: RelatedContacts<Direct<GraphConnectorContactData>,FoF<GraphConnectorContactData>>.
    */
-  checkGUID(guid) {
+  checkGUID(guid) { 
     let directContactsArray = [];
     let fofContactsArray = [];
     for (let i = 0; i < this.contacts.length; i++) {

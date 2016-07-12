@@ -99,10 +99,10 @@ getRegistry.then(function(registry) {
 
       });
       
-
     it('get contact by first name', function() {
-        let result = graphConnector.getContact('Alice');
-        expect(result.length).to.equal(1);
+        let result = graphConnector.getContact('land');
+        expect(result.length).to.equal(2);
+        result = graphConnector.getContact('Alice');
         expect(result[0]).to.eql(expected);
       });
 
@@ -149,7 +149,7 @@ getRegistry.then(function(registry) {
         expect(graphConnector.contactsBloomFilter1Hop.test('123')).to.equal(true);
 
         // set private
-        graphConnector.getContact('Alice')[0].privateContact = true;
+        graphConnector.GraphConnectorContactData('Alice')[0].privateContact = true;
         graphConnector.calculateBloomFilter1Hop();
         expect(graphConnector.contactsBloomFilter1Hop.test('123')).to.equal(false);
 
