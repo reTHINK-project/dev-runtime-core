@@ -103,19 +103,24 @@ class SyncherManager {
       console.log('Scheme: ', scheme);
 
       // schema validation
-      let obj = msg.body.value;
-      let schema = descriptor.sourcePackage.sourceCode;
-      console.log("validating object:", obj, "\r\nagainst schema:", schema);
-      var result = tv4.validateResult(obj, schema);
+      console.log("running object validation...");
+      try {
+        let obj = msg.body.value;
+        let schema = descriptor.sourcePackage.sourceCode;
+        var result = tv4.validateMultiple(obj, schema);
 
-      // check result and throw error if invalid
-      if (!result.valid) {
-        console.error("object validation failed!", result.error.message);
+        // check result and throw error if invalid
+        if (!result.valid) {
+          console.warn("object validation failed!", JSON.stringify(result.errors, null, 2));
+          console.debug("object:", JSON.stringify(obj, null, 2), "\r\nschema:", JSON.stringify(schema, null, 2));
 
-        // TODO this should throw an error
-        //throw new Error("object validation failed:", result.error.message);
-      } else {
-        console.log("object validation succeeded", result);
+          // TODO this should throw an error
+          //throw new Error("object validation failed:", result.error.message);
+        } else {
+          console.log("object validation succeeded", result);
+        }
+      } catch (e) {
+        console.warn("Error during object validation:", e);
       }
 
       //request address allocation of a new object from the msg-node
