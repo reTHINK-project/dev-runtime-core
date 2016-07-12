@@ -125,21 +125,6 @@ getRegistry.then(function(registry) {
         expect(directContacts[0]).to.eql(expected);
       });
 
-      it('get list of contacts', function() {
-        let result = graphConnector.getAllContacts();
-        expect(result.length).to.equal(graphConnector.contacts.length);
-      });
-
-      it('Adding user ID to contact', function() {
-        let result = graphConnector.addUserID("facebook/john");
-        expect(result).to.equal(false);
-      });
-
-      it('Removing user ID to contact', function() {
-        let result = graphConnector.removeUserID("facebook/john");
-        expect(result).to.equal(true);
-      });
-
       it('test direct contacts bloom filter', function() {
 
         graphConnector.calculateBloomFilter1Hop();
