@@ -69,23 +69,43 @@ getRegistry.then(function(registry) {
       }
       graphConnector.addContact('123', 'Alice', 'Wonderland');
       var expected = new GraphConnectorContactData('123', 'Alice', 'Wonderland');
+      var expectedEdit =  new GraphConnectorContactData('1234', 'Joey', 'Wunderlander');
 
       it('create new GraphConnector with random contacts', function() {
         expect(graphConnector.contacts.length).to.equal(300);
       });
 
       it('remove some contacts from GraphConnector', function() {
+        let status;
         for (let j = 0; j < remGUIDArr.length; j++) {
-          graphConnector.removeContact(remGUIDArr[j]);
-        }
+          status= graphConnector.removeContact(remGUIDArr[j]);
+          expect(status).to.equal(true);
+        } 
+        status= graphConnector.removeContact("4321");
+        expect(status).to.equal(false);
         expect(graphConnector.contacts.length).to.equal(270);
       });
 
-      it('get contact by first name', function() {
+    it('editing contact (GUID, lname,fname)', function() {
+          graphConnector.addContact('4321', 'Joe', 'Wunderland');
+
+        let result = graphConnector.editContact('4321','Joe','Wunderland','1234');
+        expect(result[0].guid).to.equal(expectedEdit.guid);
+        result = graphConnector.editContact('1234','Joey','Wunderland','1234');
+        expect(result[0].fname).to.equal(expectedEdit.fname);
+        result = graphConnector.editContact('1234','Joey','Wunderlander','1234');
+        expect(result[0].lname).to.equal(expectedEdit.lname);
+
+
+      });
+      
+
+    it('get contact by first name', function() {
         let result = graphConnector.getContact('Alice');
         expect(result.length).to.equal(1);
         expect(result[0]).to.eql(expected);
       });
+
 
       it('get contact by last name', function() {
         let result = graphConnector.getContact('Wonderland');
