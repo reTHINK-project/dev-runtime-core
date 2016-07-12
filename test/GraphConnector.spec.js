@@ -113,6 +113,21 @@ getRegistry.then(function(registry) {
         expect(result[0]).to.eql(expected);
       });
 
+      it('get list of contacts', function() {
+        let result = graphConnector.getAllContacts();
+        expect(result.length).to.equal(graphConnector.contacts.length);
+      });
+
+      it('Adding user ID to contact', function() {
+        let result = graphConnector.addUserID("facebook/john");
+        expect(result).to.equal(false);
+      });
+
+      it('Removing user ID to contact', function() {
+        let result = graphConnector.removeUserID("facebook/john");
+        expect(result).to.equal(true);
+      });
+
       it('check GUID when in direct contacts', function() {
 
         // Format is: RelatedContacts<Direct<GraphConnectorContactData>,FoF<GraphConnectorContactData>>
