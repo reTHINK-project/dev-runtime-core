@@ -248,7 +248,36 @@ class IdentityModule {
 
         //CHECK whether is browser environment or nodejs
         //if it is browser, then create a fake identity
-        if (!window) {
+
+        try {
+          if (window) {
+
+            let publicKey;
+            let userkeyPair;
+
+            //generates the RSA key pair
+            _this.crypto.generateRSAKeyPair().then(function(keyPair) {
+
+              publicKey = btoa(keyPair.public);
+              userkeyPair = keyPair;
+              return _this.generateAssertion(publicKey, origin, '', userkeyPair, idpDomain);
+
+            }).then(function(url) {
+              return _this.generateAssertion(publicKey, origin, url, userkeyPair, idpDomain);
+
+            }).then(function(value) {
+              if (value) {
+                resolve(value);
+              } else {
+                reject('Error on obtaining Identity');
+              }
+            }).catch(function(err) {
+              console.log(err);
+              reject(err);
+            });
+          }
+        } catch (error) {
+          console.log('getIdentityAssertion for nodejs');
           let randomNumber = Math.floor((Math.random() * 10000) + 1);
           let identityBundle = {
             assertion: 'assertion',
@@ -262,31 +291,6 @@ class IdentityModule {
           _this.currentIdentity = identityBundle;
           _this.identities.push(identityBundle);
           return resolve(identityBundle);
-        } else {
-
-          let publicKey;
-          let userkeyPair;
-
-          //generates the RSA key pair
-          _this.crypto.generateRSAKeyPair().then(function(keyPair) {
-
-            publicKey = btoa(keyPair.public);
-            userkeyPair = keyPair;
-            return _this.generateAssertion(publicKey, origin, '', userkeyPair, idpDomain);
-
-          }).then(function(url) {
-            return _this.generateAssertion(publicKey, origin, url, userkeyPair, idpDomain);
-
-          }).then(function(value) {
-            if (value) {
-              resolve(value);
-            } else {
-              reject('Error on obtaining Identity');
-            }
-          }).catch(function(err) {
-            console.log(err);
-            reject(err);
-          });
         }
       }
     });
