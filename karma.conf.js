@@ -19,7 +19,7 @@ module.exports = function(config) {
       'node_modules/array.observe/array-observe.js',
       'node_modules/service-framework/dist/service-framework.js',
       'src/**/*.js',
-      'test/**/*.spec.js'
+      'test/**/GraphConnector.spec.js'
     ],
 
     // Define the root
@@ -27,7 +27,7 @@ module.exports = function(config) {
 
     // list of files to exclude
     exclude: [
-      'test/**/GraphConnector.spec.js'
+      //'test/**/GraphConnector.spec.js'
     ],
 
     // preprocess matching files before serving them to the browser

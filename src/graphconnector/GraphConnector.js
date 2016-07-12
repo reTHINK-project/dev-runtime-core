@@ -289,6 +289,30 @@ class GraphConnector {
     });
   }
 
+
+ editContact(guidOrg,firstName,lastName,guid){
+
+    let rtnArray = [];
+
+     for (let i = 0; i < this.contacts.length; i++) {
+      if (this.contacts[i].guid == guidOrg) {
+        if (this.contacts[i].firstName != firstName) {
+          this.contacts[i].firstName= firstName;
+          rtnArray.push(this.contacts[i]);
+        }else if(this.contacts[i].lastName != lastName){
+          this.contacts[i].lastName = lastName;
+          rtnArray.push(this.contacts[i]);
+
+        }else if(this.contacts[i].guid != guid){
+          this.contacts[i].guid = guid;
+          rtnArray.push(this.contacts[i]);
+
+        }
+      }
+    }
+
+    return rtnArray;
+  }
   /**
    * Queries the Global Registry for a given GUID.
    * Returns a Graph Connector Contact Data as a Promise.
@@ -395,14 +419,18 @@ class GraphConnector {
    */
   removeContact(guid) {
     // remove from contacts
+    let status=false;
     for (let i = 0; i < this.contacts.length; i++) {
       if (this.contacts[i].guid == guid) {
         this.contacts.splice(i, 1);
+        status= true;
       }
+
     }
 
     // re-calculate BF1hop
     this.calculateBloomFilter1Hop();
+    return status;
   }
 
   /**
