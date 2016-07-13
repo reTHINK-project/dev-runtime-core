@@ -99,10 +99,29 @@ getRegistry.then(function(registry) {
 
       });
       
+<<<<<<< Updated upstream
     it('get contact by first name', function() {
         let result = graphConnector.getContact('land');
         expect(result.length).to.equal(2);
         result = graphConnector.getContact('Alice');
+=======
+      it('Adding a groupname to a contact', function() {
+        graphConnector.addContact('123456','john', 'snow');
+        let result = graphConnector.addGroupName('123456', 'Winterfell');
+        expect(result).to.equal(true);
+      });
+
+      it('removing a groupname to a contact', function() {
+        graphConnector.addContact('123456','john', 'snow');
+        let result = graphConnector.removeGroupName('123456', 'Winterfell');
+        let contact = graphConnector.getContact('john');
+        expect(result).to.equal(true);
+      });
+
+      it('get contact by first name', function() {
+        let result = graphConnector.getContact('Alice');
+        expect(result.length).to.equal(1);
+>>>>>>> Stashed changes
         expect(result[0]).to.eql(expected);
       });
 

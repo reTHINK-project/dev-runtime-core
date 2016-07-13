@@ -416,8 +416,50 @@ class GraphConnector {
 
     // TODO: what if two contacts have the same GUID?
     // TODO: reject invalid GUIDs
+    let newContact = new GraphConnectorContactData(guid, firstName, lastName);
 
-    this.contacts.push(new GraphConnectorContactData(guid, firstName, lastName));
+    this.contacts.push(newContact);
+    //console.log("Inside graphconnector.js value of groupname"+newContact.groups[0]);
+  }
+  /**
+   * Adds a groupName to a contact.
+   * @param  {string}   guid          GUID of the new contact.
+   * @param  {string}   groupName     Group Name of the contact
+   * @returns  {boolean}  Success if the group name is successfully added
+   */
+  addGroupName(guid, groupName) {
+    let success = false;
+    if (groupName !== 'undefined') {
+    for (let i = 0; i < this.contacts.length; i++) {
+      if (this.contacts[i].guid == guid) {
+          this.contacts[i].groups.push(groupName);
+          success = true;
+      }
+    }
+  }
+      return success;
+  }
+  /**
+   * Removes a groupName of a contact.
+   * @param  {string}   guid          GUID of the new contact.
+   * @param  {string}   groupName     Group Name of the contact
+   * @returns  {boolean}  Success if the group name is successfully added
+   */
+  removeGroupName(guid, groupName) {
+    let success = false;
+    if (groupName !== 'undefined') {
+    for (let i = 0; i < this.contacts.length; i++) {
+      if (this.contacts[i].guid == guid) {
+        for (var j = 0; j < this.contacts[i].groups.length; j++) {
+          if(this.contacts[i].groups[j] == groupName) {
+            this.contacts[i].groups.splice(j,1);
+          }
+          success = true;
+        };
+      }
+    }
+  }
+      return success;
   }
 
   /**
