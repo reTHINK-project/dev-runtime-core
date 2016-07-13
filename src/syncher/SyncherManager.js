@@ -129,13 +129,17 @@ class SyncherManager {
 
         console.log('ALLOCATOR CREATE:', allocated);
 
+        let subscriptionURL = objURL + '/subscription';
+
+        console.log('Subscription URL', subscriptionURL);
+
         //To register the dataObject in the runtimeRegistry
         _this._registry.registerDataObject(msg.body.value.name, msg.body.value.schema, objURL, msg.body.value.reporter, msg.body.authorise).then(function(resolve) {
           console.log('DataObject successfully registered', resolve);
 
           //all OK -> create reporter and register listeners
           let reporter = new ReporterObject(_this, owner, objURL);
-          reporter.forwardSubscribe(objURL).then(() => {
+          reporter.forwardSubscribe([objURL,subscriptionURL]).then(() => {
             reporter.addChildrens(childrens).then(() => {
               _this._reporters[objURL] = reporter;
 
