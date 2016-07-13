@@ -153,4 +153,7 @@ Run the command:
 ```shell
 # The distribution file will be compacted and uglified;
 gulp dist
+
+# in development mode
+gulp dist --development
 ```

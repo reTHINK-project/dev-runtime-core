@@ -138,8 +138,21 @@ function prependLicense(clean) {
  */
 gulp.task('dist', function() {
 
+  var debug = argv.development ? true : false;
+
+  if (debug) {
+    gutil.log(gutil.colors.blue('The files will be compiled in debug mode'));
+    gutil.log('The generated files will include the source maps inside');
+  } else {
+    gutil.log(gutil.colors.blue('The files will be compiled in production mode'));
+    gutil.log('The generated files will be uglified, minified, the sourcemaps files will be created separated');
+  }
+
   return gulp.src(['src/sandbox.js', 'src/minibus.js', 'src/runtime/RuntimeUA.js', 'src/policy/PolicyEngine.js', 'src/policy/context/MessageNodeCtx.js'])
-  .pipe(dist());
+  .pipe(dist(debug))
+  .on('end', function() {
+    gutil.log('All the files are created');
+  });
 
 });
 
@@ -150,7 +163,7 @@ function dist(debug) {
   return through.obj(function(file, enc, cb) {
 
     if (file.isNull()) {
-      return cb(new Error('Fil is null'));
+      return cb(new Error('File is null'));
     }
 
     if (file.isStream()) {
@@ -161,10 +174,18 @@ function dist(debug) {
 
     var opts = {
       configuration: {},
-      debug: false,
+      debug: debug,
       standalone: filename === 'RuntimeUA' ? 'Runtime' : filename,
       destination: __dirname + '/dist'
     };
+
+    if (debug) {
+      opts.sourceMaps = true;
+      opts.compact = false;
+    } else {
+      opts.sourceMaps = false;
+      opts.compact = true;
+    }
 
     gutil.log(gutil.colors.yellow('Make a distribution file from', filename + '.js'));
 
@@ -210,18 +231,24 @@ function transpile(opts) {
     var fileObject = path.parse(file.path);
     var filename = fileObject.base === 'RuntimeUA.js' ? 'Runtime.js' : fileObject.base;
     var args = {};
+    var babelArgs = {};
 
     var environment = argv.production || process.env.NODE_ENV;
     process.env.environment = environment ? 'production' : 'development';
 
     args.entries = [file.path];
     args.extensions = extensions;
+
     if (opts.debug) args.debug = opts.debug;
     if (opts.standalone) args.standalone = opts.standalone;
 
+    if (opts.sourceMaps) babelArgs.sourceMaps = opts.sourceMaps;
+    if (opts.compact) babelArgs.compact = opts.compact;
+
     return browserify(args)
     .transform(babel, {
-      compact: true,
+      compact: babelArgs.compact,
+      sourceMaps: babelArgs.sourceMaps,
       presets: ['es2015', 'stage-0'],
       plugins: ['add-module-exports', 'transform-runtime', 'transform-regenerator']
     })
@@ -232,9 +259,9 @@ function transpile(opts) {
     })
     .pipe(source(filename))
     .pipe(buffer())
-    .pipe(sourcemaps.init({loadMaps: true}))
-    .pipe(uglify())
-    .pipe(sourcemaps.write('./'))
+    .pipe(gulpif(!opts.debug, sourcemaps.init({loadMaps: true})))
+    .pipe(gulpif(!opts.debug, uglify()))
+    .pipe(gulpif(!opts.debug, sourcemaps.write('./')))
     .pipe(gulp.dest(opts.destination))
     .on('end', function() {
       file.contents = fs.readFileSync(opts.destination + '/' + filename);
