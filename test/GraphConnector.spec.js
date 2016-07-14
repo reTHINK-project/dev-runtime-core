@@ -101,9 +101,22 @@ getRegistry.then(function(registry) {
       
       it('Adding a groupname to a contact', function() {
         graphConnector.addContact('123456','john', 'snow');
+        
+      
+        graphConnector.addGroupName('123456', 'Fallfall');
         let result = graphConnector.addGroupName('123456', 'Winterfell');
         expect(result).to.equal(true);
       });
+
+      it('geting all contacts with same groupName',function() {
+          
+          graphConnector.addGroupName('123456', 'Summerfall');
+          graphConnector.addGroupName('1234', 'Summerfall');
+          let res = graphConnector.getGroup('Summerfall');
+          console.log(res.length);
+          expect(res.length).to.equal(2);
+      });
+
 
       it('removing a groupname to a contact', function() {
         graphConnector.addContact('123456','john', 'snow');
@@ -111,6 +124,19 @@ getRegistry.then(function(registry) {
         let contact = graphConnector.getContact('john');
         expect(result).to.equal(true);
       });
+
+
+      it('ading a residenceLocation to a contact', function() {
+       
+        let contact = graphConnector.addLocation('123456','Berlin');
+        expect(contact).to.equal(true);
+      });
+
+      it('removing a residenceLocation',function(){
+         let result = graphConnector.removeLocation('123456','Berlin');
+      });
+
+
 
       it('get contact by first name', function() {
         let result = graphConnector.getContact('Alice');

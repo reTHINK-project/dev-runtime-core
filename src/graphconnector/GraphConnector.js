@@ -421,6 +421,73 @@ class GraphConnector {
     this.contacts.push(newContact);
     //console.log("Inside graphconnector.js value of groupname"+newContact.groups[0]);
   }
+
+
+
+
+
+
+ /**
+   * Adds a groupName to a contact.
+   * @param  {string}   guid          GUID of the contact.
+   * @param  {string}   locationName    location  of the contact
+   * @returns  {boolean}  Success if the group name is successfully added
+   */
+  removeLocation(guid, locationName) {
+    let success = false;
+    if (locationName !== 'undefined') {
+    for (let i = 0; i < this.contacts.length; i++) {
+      if (this.contacts[i].guid == guid) {
+        if(this.contacts[i].residenceLocation == locationName){
+          
+          this.contacts[i].residenceLocation=''
+          success = true;
+
+        }
+      }
+    }
+  }
+      return success;
+  }
+
+  /**
+   * Adds a groupName to a contact.
+   * @param  {string}   guid          GUID of the contact.
+   * @param  {string}   locationName    location  of the contact
+   * @returns  {boolean}  Success if the group name is successfully added
+   */
+  addLocation(guid, locationName) {
+    let success = false;
+    if (locationName !== 'undefined') {
+      for (let i = 0; i < this.contacts.length; i++) {
+        if (this.contacts[i].guid == guid) {
+            this.contacts[i].residenceLocation=locationName;
+            success = true;
+        }
+      }
+    }
+      return success;
+  }
+
+/**
+   * gets all contacts with given groupTag.
+   * @param  {string}   groupName    of the contact
+   * @returns  {array}   matchingContacts       Contacts matching the given groupName. The format is: Contacts<GraphConnectorContactData>.
+   */
+  getGroup(groupName){
+    let rtnArray = [];
+    if (groupName !== 'undefined') {
+      for (let i = 0; i < this.contacts.length; i++) {
+        for (let j=0; j<this.contacts[i].groups.length; j++) {
+            if(this.contacts[i].groups[j] == groupName){   
+              rtnArray.push(this.contact[i]);
+              console.log(this.contact[i]);
+            }
+        }
+      }
+   }
+   return rtnArray;
+  }
   /**
    * Adds a groupName to a contact.
    * @param  {string}   guid          GUID of the new contact.
