@@ -289,7 +289,14 @@ class GraphConnector {
     });
   }
 
-
+  /**
+   * Edit the values for a specific user
+   * @param  {string}     guidOrg          GUID of the user.
+   * @param  {string}     firstName          First name of the user.
+   * @param  {string}     lastName          Last name of the user.
+   * @param  {string}     guid          new guid of the user.
+   * @returns  {array}   Returns the array which contains the contact with new values
+   */
  editContact(guidOrg,firstName,lastName,guid){
 
     let rtnArray = [];
@@ -310,9 +317,9 @@ class GraphConnector {
         }
       }
     }
-
     return rtnArray;
   }
+
   /**
    * Queries the Global Registry for a given GUID.
    * Returns a Graph Connector Contact Data as a Promise.
@@ -412,23 +419,17 @@ class GraphConnector {
    * @param  {string}   firstName     First name of the new contact.
    * @param  {string}   lastname      Last name of the new contact.
    */
+
   addContact(guid, firstName, lastName) {
 
     // TODO: what if two contacts have the same GUID?
     // TODO: reject invalid GUIDs
     let newContact = new GraphConnectorContactData(guid, firstName, lastName);
-
     this.contacts.push(newContact);
-    //console.log("Inside graphconnector.js value of groupname"+newContact.groups[0]);
   }
 
-
-
-
-
-
  /**
-   * Adds a groupName to a contact.
+   * Removes a location for a user
    * @param  {string}   guid          GUID of the contact.
    * @param  {string}   locationName    location  of the contact
    * @returns  {boolean}  Success if the group name is successfully added
@@ -451,7 +452,7 @@ class GraphConnector {
   }
 
   /**
-   * Adds a groupName to a contact.
+   * Adds a location for a user
    * @param  {string}   guid          GUID of the contact.
    * @param  {string}   locationName    location  of the contact
    * @returns  {boolean}  Success if the group name is successfully added
@@ -488,6 +489,7 @@ class GraphConnector {
    }
    return rtnArray;
   }
+  
   /**
    * Adds a groupName to a contact.
    * @param  {string}   guid          GUID of the new contact.
@@ -506,6 +508,7 @@ class GraphConnector {
   }
       return success;
   }
+
   /**
    * Removes a groupName of a contact.
    * @param  {string}   guid          GUID of the new contact.
