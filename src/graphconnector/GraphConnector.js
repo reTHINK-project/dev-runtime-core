@@ -475,21 +475,23 @@ class GraphConnector {
    * @param  {string}   groupName    of the contact
    * @returns  {array}   matchingContacts       Contacts matching the given groupName. The format is: Contacts<GraphConnectorContactData>.
    */
-  getGroup(groupName){
-    let rtnArray = [];
-    if (groupName !== 'undefined') {
-      for (let i = 0; i < this.contacts.length; i++) {
-        for (let j=0; j<this.contacts[i].groups.length; j++) {
-            if(this.contacts[i].groups[j] == groupName){   
-              rtnArray.push(this.contact[i]);
-              console.log(this.contact[i]);
+    getGroup(groupName){
+        let x='';
+        let rtnArray = [];
+        if (groupName !== 'undefined') {
+          for (let i = 0; i < this.contacts.length; i++) {
+            if(this.contacts[i].groups !== 'undefined' && this.contacts[i].groups.length > 0){
+              x= this.contacts[i].groups.length;
+              for (let j=0 ; j < x; j++) {
+                if(this.contacts[i].groups[j] == groupName){   
+                  rtnArray.push(this.contacts[i]);
+                }
+              }
             }
-        }
+          }
+          return rtnArray;
+       }
       }
-   }
-   return rtnArray;
-  }
-  
   /**
    * Adds a groupName to a contact.
    * @param  {string}   guid          GUID of the new contact.
