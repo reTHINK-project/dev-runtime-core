@@ -7,7 +7,7 @@ var pandoc = require('gulp-pandoc');
 var fs = require('fs');
 
 // Task and dependencies to distribute for all environments;
-var babel = require('babelify');
+var babelify = require('babelify');
 var browserify = require('browserify');
 var buffer = require('vinyl-buffer');
 var source = require('vinyl-source-stream');
@@ -181,10 +181,8 @@ function dist(debug) {
 
     if (debug) {
       opts.sourceMaps = true;
-      opts.compact = false;
     } else {
       opts.sourceMaps = false;
-      opts.compact = true;
     }
 
     gutil.log(gutil.colors.yellow('Make a distribution file from', filename + '.js'));
@@ -236,22 +234,20 @@ function transpile(opts) {
     var environment = argv.production || process.env.NODE_ENV;
     process.env.environment = environment ? 'production' : 'development';
 
-    args.entries = [file.path];
     args.extensions = extensions;
 
     if (opts.debug) args.debug = opts.debug;
     if (opts.standalone) args.standalone = opts.standalone;
 
     if (opts.sourceMaps) babelArgs.sourceMaps = opts.sourceMaps;
-    if (opts.compact) babelArgs.compact = opts.compact;
 
-    return browserify(args)
-    .transform(babel, {
-      compact: babelArgs.compact,
-      sourceMaps: babelArgs.sourceMaps,
-      presets: ['es2015', 'stage-0'],
-      plugins: ['add-module-exports', 'transform-runtime', 'transform-regenerator']
-    })
+    var ug = true;
+    if (filename === 'Runtime.js' && opts.debug) {
+      ug = false;
+    }
+
+    return browserify(file.path, args)
+    .transform(babelify)
     .bundle()
     .on('error', function(err) {
       gutil.log(gutil.colors.red(err));
@@ -259,9 +255,9 @@ function transpile(opts) {
     })
     .pipe(source(filename))
     .pipe(buffer())
-    .pipe(gulpif(!opts.debug, sourcemaps.init({loadMaps: true})))
-    .pipe(gulpif(!opts.debug, uglify()))
-    .pipe(gulpif(!opts.debug, sourcemaps.write('./')))
+    .pipe(gulpif(ug, sourcemaps.init({loadMaps: true})))
+    .pipe(gulpif(ug, uglify()))
+    .pipe(gulpif(ug, sourcemaps.write('./')))
     .pipe(gulp.dest(opts.destination))
     .on('end', function() {
       file.contents = fs.readFileSync(opts.destination + '/' + filename);
