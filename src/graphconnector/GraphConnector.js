@@ -299,24 +299,23 @@ class GraphConnector {
    */
  editContact(guidOrg,firstName,lastName,guid){
 
-    let rtnArray = [];
+  let rtnArray = [];
 
-     for (let i = 0; i < this.contacts.length; i++) {
-      if (this.contacts[i].guid == guidOrg) {
-        if (this.contacts[i].firstName != firstName) {
+  for (let i = 0; i < this.contacts.length; i++) {
+    if (this.contacts[i].guid == guidOrg) {
+      if (this.contacts[i].firstName != firstName) {
           this.contacts[i].firstName= firstName;
           rtnArray.push(this.contacts[i]);
-        }else if(this.contacts[i].lastName != lastName){
+      }else if(this.contacts[i].lastName != lastName){
           this.contacts[i].lastName = lastName;
           rtnArray.push(this.contacts[i]);
 
-        }else if(this.contacts[i].guid != guid){
+      }else if(this.contacts[i].guid != guid){
           this.contacts[i].guid = guid;
           rtnArray.push(this.contacts[i]);
-
-        }
       }
     }
+  }
     return rtnArray;
   }
 
@@ -430,25 +429,20 @@ class GraphConnector {
 
  /**
    * Removes a location for a user
-   * @param  {string}   guid          GUID of the contact.
-   * @param  {string}   locationName    location  of the contact
-   * @returns  {boolean}  Success if the group name is successfully added
+   * @param  {string}   guid    GUID of the contact.
+   * @returns  {boolean}  True if the group name is successfully deleted, false otherwise.
    */
-  removeLocation(guid, locationName) {
+  removeLocation(guid){
     let success = false;
-    if (locationName !== 'undefined') {
     for (let i = 0; i < this.contacts.length; i++) {
       if (this.contacts[i].guid == guid) {
-        if(this.contacts[i].residenceLocation == locationName){
-          
-          this.contacts[i].residenceLocation=''
+        if(this.contacts[i].residenceLocation != ''){
+          this.contacts[i].residenceLocation='';
           success = true;
-
         }
       }
     }
-  }
-      return success;
+    return success;
   }
 
   /**
@@ -457,17 +451,19 @@ class GraphConnector {
    * @param  {string}   locationName    location  of the contact
    * @returns  {boolean}  Success if the group name is successfully added
    */
-  addLocation(guid, locationName) {
+  setLocation(guid, locationName) {
     let success = false;
     if (locationName !== 'undefined') {
       for (let i = 0; i < this.contacts.length; i++) {
         if (this.contacts[i].guid == guid) {
+          if(!this.contacts[i].residenceLocation){
             this.contacts[i].residenceLocation=locationName;
             success = true;
+          }
         }
       }
     }
-      return success;
+    return success;
   }
 
 /**
@@ -515,7 +511,7 @@ class GraphConnector {
    * Removes a groupName of a contact.
    * @param  {string}   guid          GUID of the new contact.
    * @param  {string}   groupName     Group Name of the contact
-   * @returns  {boolean}  Success if the group name is successfully added
+   * @returns  {boolean}  True  if the group name is successfully added
    */
   removeGroupName(guid, groupName) {
     let success = false;
@@ -586,7 +582,7 @@ class GraphConnector {
       // TODO: optimize, e.g., find misspelled people
       let rtnArray = [];
       let fname,lname;
-          let tmp ="(?="+name+")+[A-Za-z]*\\w";
+          let tmp ="(?="+name+")+[a-z]*\\w";
       let patt =  new RegExp(tmp,"ig");
     for (let i = 0; i < this.contacts.length; i++) {
         fname = this.contacts[i].firstName;

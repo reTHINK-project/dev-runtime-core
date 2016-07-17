@@ -113,9 +113,8 @@ getRegistry.then(function(registry) {
           graphConnector.addGroupName('123456', 'Summerfall');
           graphConnector.addGroupName('1234', 'Summerfall');
           let res = graphConnector.getGroup('Summerfall');
-          console.log(res.length);
           expect(res.length).to.equal(2);
-      });
+        });
 
 
       it('removing a groupname to a contact', function() {
@@ -126,14 +125,19 @@ getRegistry.then(function(registry) {
       });
 
 
-      it('ading a residenceLocation to a contact', function() {
-       
-        let contact = graphConnector.addLocation('123456','Berlin');
+      it('adding a residenceLocation to a contact', function() {
+        let contact = graphConnector.setLocation('123456','Berlin');
         expect(contact).to.equal(true);
+        contact = graphConnector.setLocation('123456','Berlin');
+        expect(contact).to.equal(false);
       });
 
       it('removing a residenceLocation',function(){
-         let result = graphConnector.removeLocation('123456','Berlin');
+        let result = graphConnector.removeLocation('123456');
+        expect(result).to.equal(true);
+        result = graphConnector.removeLocation('123456');
+        expect(result).to.equal(false);
+
       });
 
 
@@ -202,7 +206,7 @@ getRegistry.then(function(registry) {
         expect(graphConnector.contactsBloomFilter1Hop.test('123')).to.equal(true);
 
         // set private
-        graphConnector.GraphConnectorContactData('Alice')[0].privateContact = true;
+        graphConnector.getContact('Alice')[0].privateContact = true;
         graphConnector.calculateBloomFilter1Hop();
         expect(graphConnector.contactsBloomFilter1Hop.test('123')).to.equal(false);
 
