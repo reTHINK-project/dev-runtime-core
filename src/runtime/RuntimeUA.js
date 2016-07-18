@@ -195,7 +195,7 @@ class RuntimeUA {
       console.info('Get hyperty descriptor for :', hypertyDescriptorURL);
       return _this.runtimeCatalogue.getHypertyDescriptor(hypertyDescriptorURL).then(function(hypertyDescriptor) {
         // at this point, we have completed "step 2 and 3" as shown in https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md
-        console.info('1: return hyperty descriptor', hypertyDescriptor);
+        console.info('1: return hyperty descriptor');
 
         // hyperty contains the full path of the catalogue URL, e.g.
         // catalogue.rethink.eu/.well-known/..........
@@ -664,6 +664,28 @@ class RuntimeUA {
         })
         .catch(errorReason);
 
+      });
+
+    });
+
+  }
+
+  /**
+   * Used to close all the runtime; Unregister all hyperties;
+   * @return {Promise<Boolean>} result of the close method, with true or false to the operation success;
+   */
+  close() {
+    let _this = this;
+
+    console.info('Unregister all hyperties');
+    return new Promise(function(resolve, reject) {
+
+      _this.registry.unregisterAllHyperties().then(function(result) {
+        console.info('All the hyperties are unregisted with Success:', result);
+        resolve(true);
+      }).catch(function(reason) {
+        console.error('Failed to unregister the hyperties', reason);
+        reject(false);
       });
 
     });
