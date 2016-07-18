@@ -101,15 +101,13 @@ getRegistry.then(function(registry) {
       
       it('Adding a groupname to a contact', function() {
         graphConnector.addContact('123456','john', 'snow');
-        
-      
-        graphConnector.addGroupName('123456', 'Fallfall');
-        let result = graphConnector.addGroupName('123456', 'Winterfell');
-        expect(result).to.equal(true);
+        let resultTrue = graphConnector.addGroupName('123456', 'Winterfell');
+        let resultFalse = graphConnector.addGroupName('123456789', 'Winterfell');
+        expect(resultTrue).to.equal(true);
+        expect(resultFalse).to.equal(false);
       });
 
-      it('geting all contacts with same groupName',function() {
-          
+      it('getting all contacts with same groupName', function() {
           graphConnector.addGroupName('123456', 'Summerfall');
           graphConnector.addGroupName('1234', 'Summerfall');
           let res = graphConnector.getGroup('Summerfall');
@@ -117,11 +115,12 @@ getRegistry.then(function(registry) {
         });
 
 
-      it('removing a groupname to a contact', function() {
+      it('removing a groupname of a contact', function() {
         graphConnector.addContact('123456','john', 'snow');
-        let result = graphConnector.removeGroupName('123456', 'Winterfell');
-        let contact = graphConnector.getContact('john');
-        expect(result).to.equal(true);
+        let resultTrue = graphConnector.removeGroupName('123456', 'Winterfell');
+        let resultFalse = graphConnector.removeGroupName('123456789', 'Winterfell');
+        expect(resultTrue).to.equal(true);
+        expect(resultFalse).to.equal(false);
       });
 
 
@@ -161,13 +160,17 @@ getRegistry.then(function(registry) {
       });
 
       it('Adding user ID to contact', function() {
-        let result = graphConnector.addUserID("facebook/john");
-        expect(result).to.equal(true);
+        let resultTrue = graphConnector.addUserID("facebook/john");
+        let resultFalse =  graphConnector.addUserID("facebook/john");
+        expect(resultTrue).to.equal(true);
+        expect(resultFalse).to.equal(false);
       });
 
       it('Removing user ID to contact', function() {
-        let result = graphConnector.removeUserID("facebook/john");
-        expect(result).to.equal(true);
+        let resultTrue = graphConnector.removeUserID("facebook/john");
+        let resultFalse = graphConnector.removeUserID("facebook/john");
+        expect(resultTrue).to.equal(true);
+        expect(resultFalse).to.equal(false);
       });
 
       it('check GUID when in direct contacts', function() {
