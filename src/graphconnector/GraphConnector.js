@@ -297,27 +297,26 @@ class GraphConnector {
    * @param  {string}     guid          new guid of the user.
    * @returns  {array}   Returns the array which contains the contact with new values
    */
- editContact(guidOrg,firstName,lastName,guid){
+   editContact(guidOrg,firstName,lastName,guid) {
 
-  let rtnArray = [];
+     let rtnArray = [];
 
-  for (let i = 0; i < this.contacts.length; i++) {
-    if (this.contacts[i].guid == guidOrg) {
-      if (this.contacts[i].firstName != firstName) {
-          this.contacts[i].firstName= firstName;
-          rtnArray.push(this.contacts[i]);
-      }else if(this.contacts[i].lastName != lastName){
-          this.contacts[i].lastName = lastName;
-          rtnArray.push(this.contacts[i]);
-
-      }else if(this.contacts[i].guid != guid){
-          this.contacts[i].guid = guid;
-          rtnArray.push(this.contacts[i]);
-      }
-    }
-  }
-    return rtnArray;
-  }
+     for (let i = 0; i < this.contacts.length; i++) {
+       if (this.contacts[i].guid == guidOrg) {
+         if (this.contacts[i].firstName != firstName) {
+           this.contacts[i].firstName = firstName;
+           rtnArray.push(this.contacts[i]);
+         } else if (this.contacts[i].lastName != lastName) {
+           this.contacts[i].lastName = lastName;
+           rtnArray.push(this.contacts[i]);
+         } else if (this.contacts[i].guid != guid) {
+           this.contacts[i].guid = guid;
+           rtnArray.push(this.contacts[i]);
+         }
+       }
+     }
+     return rtnArray;
+   }
 
   /**
    * Queries the Global Registry for a given GUID.
@@ -430,12 +429,12 @@ class GraphConnector {
    * @param  {string}   guid    GUID of the contact.
    * @returns  {boolean}  True if the group name is successfully deleted, false otherwise.
    */
-  removeLocation(guid){
+  removeLocation(guid) {
     let success = false;
     for (let i = 0; i < this.contacts.length; i++) {
       if (this.contacts[i].guid == guid) {
-        if(this.contacts[i].residenceLocation != ''){
-          this.contacts[i].residenceLocation='';
+        if (this.contacts[i].residenceLocation != '') {
+          this.contacts[i].residenceLocation = '';
           success = true;
         }
       }
@@ -454,8 +453,8 @@ class GraphConnector {
     if (locationName !== 'undefined') {
       for (let i = 0; i < this.contacts.length; i++) {
         if (this.contacts[i].guid == guid) {
-          if(!this.contacts[i].residenceLocation){
-            this.contacts[i].residenceLocation=locationName;
+          if (!this.contacts[i].residenceLocation) {
+            this.contacts[i].residenceLocation = locationName;
             success = true;
           }
         }
@@ -470,12 +469,12 @@ class GraphConnector {
    * @returns  {array}   matchingContacts       Contacts matching the given groupName. The format is: Contacts<GraphConnectorContactData>.
    */
 
-  getGroup(groupName){
+  getGroup(groupName) {
     let rtnArray = [];
     if (groupName !== 'undefined') {
       for (let i = 0; i < this.contacts.length; i++) {
-        for (let j=0; j < this.contacts[i].groups.length; j++) {
-          if(this.contacts[i].groups[j] == groupName){
+        for (let j = 0; j < this.contacts[i].groups.length; j++) {
+          if (this.contacts[i].groups[j] == groupName) {
             rtnArray.push(this.contacts[i]);
           }
         }
@@ -500,7 +499,7 @@ class GraphConnector {
         }
       }
     }
-      return success;
+    return success;
   }
 
   /**
@@ -516,8 +515,8 @@ class GraphConnector {
       for (let i = 0; i < this.contacts.length; i++) {
         if (this.contacts[i].guid == guid) {
           for (var j = 0; j < this.contacts[i].groups.length; j++) {
-            if(this.contacts[i].groups[j] == groupName) {
-              this.contacts[i].groups.splice(j,1);
+            if (this.contacts[i].groups[j] == groupName) {
+              this.contacts[i].groups.splice(j, 1);
             }
             success = true;
           };
@@ -541,14 +540,15 @@ class GraphConnector {
    */
   removeContact(guid) {
     // remove from contacts
-    let status=false;
+    let status = false;
     for (let i = 0; i < this.contacts.length; i++) {
       if (this.contacts[i].guid == guid) {
         this.contacts.splice(i, 1);
-        status=true;
+        status = true;
       }
     }
     return status;
+
     // re-calculate BF1hop
     this.calculateBloomFilter1Hop();
   }
@@ -578,10 +578,11 @@ class GraphConnector {
     getContact(name) {
       // TODO: optimize, e.g., find misspelled people
       let rtnArray = [];
-      let fname,lname;
-          let tmp ="(?="+name+")+[a-z]*\\w";
-      let patt =  new RegExp(tmp,"ig");
-    for (let i = 0; i < this.contacts.length; i++) {
+      let fname;
+      let lname;
+      let tmp = '(?=' + name + ')+[a-z]*\\w';
+      let patt =  new RegExp(tmp, 'ig');
+      for (let i = 0; i < this.contacts.length; i++) {
         fname = this.contacts[i].firstName;
         lname = this.contacts[i].lastName;
 
