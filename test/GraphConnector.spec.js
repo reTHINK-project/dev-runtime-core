@@ -153,10 +153,10 @@ getRegistry.then(function(registry) {
 
 
       it('get contact by last name', function() {
-        graphConnector.addContact('kkk', 'fgh', 'Joe');
-        graphConnector.addContact('lll', 'ghi', 'Joey');
-        graphConnector.addContact('uuu', 'hij', 'Joeyi');
-        let result = graphConnector.getContact('Joe')
+        graphConnector.addContact('kkk', 'fgh', 'Joky');
+        graphConnector.addContact('lll', 'ghi', 'Jokyus');
+        graphConnector.addContact('uuu', 'hij', 'Jokyi');
+        let result = graphConnector.getContact('Jok')
         expect(result.length).to.equal(3);
         ///expect(result[0]).to.eql(expected);
       });
