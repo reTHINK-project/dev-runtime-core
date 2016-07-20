@@ -1074,7 +1074,10 @@ class IdentityModule {
           }).then(hashResult => {
             console.log('hashResult ', hashResult);
             let callback = chatKeys.callback;
-            callback('handShakeEnd');
+
+            if (callback) {
+              callback('handShakeEnd');
+            }
             resolve('handShakeEnd');
           });
 
