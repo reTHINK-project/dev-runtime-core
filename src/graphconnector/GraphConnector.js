@@ -1223,7 +1223,7 @@ class GraphConnector {
   }
 
   /**
-   * Gets contacts by name.
+   * returns the list of contacts which matches the search string "name". Ex. "Joh" will return users with first or last name "John" or "Aljohanas".
    * @param  {string}   name    First or last name to look for in the contact list.
    * @returns  {array}   matchingContacts       Contacts matching the given name. The format is: Contacts<GraphConnectorContactData>.
    */
@@ -1232,8 +1232,8 @@ class GraphConnector {
       let rtnArray = [];
       let fname;
       let lname;
-      let tmp = '(?=' + name + ')+[a-z]*\\w';
-      let patt =  new RegExp(tmp, 'ig');
+      //let tmp = '(?=' + name + ')+[a-z]*\\w';
+      let patt =  new RegExp(name, 'i');
       for (let i = 0; i < this.contacts.length; i++) {
         fname = this.contacts[i].firstName;
         lname = this.contacts[i].lastName;

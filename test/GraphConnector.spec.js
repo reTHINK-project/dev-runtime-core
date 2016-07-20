@@ -142,16 +142,22 @@ getRegistry.then(function(registry) {
 
 
       it('get contact by first name', function() {
-        let result = graphConnector.getContact('Alice');
-        expect(result.length).to.equal(1);
-        expect(result[0]).to.eql(expected);
+        graphConnector.addContact('kkk', 'Ishantiw', 'abc');
+        graphConnector.addContact('lll', 'Ishanti', 'bcd');
+        graphConnector.addContact('uuu', 'Ishantiwari', 'cde');
+        let result = graphConnector.getContact('Ishan');
+        expect(result.length).to.equal(3);
+        //expect(result[0]).to.eql(expected);
       });
 
 
       it('get contact by last name', function() {
-        let result = graphConnector.getContact('Wonderland');
-        expect(result.length).to.equal(1);
-        expect(result[0]).to.eql(expected);
+        graphConnector.addContact('kkk', 'fgh', 'Joe');
+        graphConnector.addContact('lll', 'ghi', 'Joey');
+        graphConnector.addContact('uuu', 'hij', 'Joeyi');
+        let result = graphConnector.getContact('Joe')
+        expect(result.length).to.equal(3);
+        ///expect(result[0]).to.eql(expected);
       });
 
       it('get list of contacts', function() {
