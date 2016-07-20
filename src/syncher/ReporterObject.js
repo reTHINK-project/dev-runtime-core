@@ -194,7 +194,7 @@ class ReporterObject {
 
     _this._bus.postMessage({
       id: msg.id, type: 'response', from: msg.to, to: _this._url,
-      body: { code: msg.body.code, source: msg.from }
+      body: { code: msg.body.code, identity: msg.body.identity, source: msg.from }
     });
   }
 
