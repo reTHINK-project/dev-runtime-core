@@ -379,19 +379,18 @@ class GraphConnector {
   /**
    * Adds a UserID for the user.
    * @param  {string}     userID          The UserID for a Domain Registry to add for the user.
-   * @returns  {boolean}   true if the userID exists and the user ID will not be added, false otherwise.
+   * @returns  {boolean}   returns false if the userID exists and the user ID will not be added, true otherwise.
    */
   addUserID(userID) {
     // check if already inside
-    let found = false;
+    let found = true;
     for (let i = 0; i < this.globalRegistryRecord.userIDs.length; i++) {
-      if (this.globalRegistryRecord.userIDs == userID) {
+      if (this.globalRegistryRecord.userIDs[i] == userID) {
         found = false;
       }
     }
-    if (!found) {
+    if (found) {
       this.globalRegistryRecord.userIDs.push(userID);
-      found = true;
     }
     return found;
   }
@@ -418,7 +417,6 @@ class GraphConnector {
    * @param  {string}   firstName     First name of the new contact.
    * @param  {string}   lastname      Last name of the new contact.
    */
-
   addContact(guid, firstName, lastName) {
 
     // TODO: what if two contacts have the same GUID?
@@ -471,23 +469,21 @@ class GraphConnector {
    * @param  {string}   groupName    of the contact
    * @returns  {array}   matchingContacts       Contacts matching the given groupName. The format is: Contacts<GraphConnectorContactData>.
    */
-    getGroup(groupName){
-        let x='';
-        let rtnArray = [];
-        if (groupName !== 'undefined') {
-          for (let i = 0; i < this.contacts.length; i++) {
-            if(this.contacts[i].groups !== 'undefined' && this.contacts[i].groups.length > 0){
-              x= this.contacts[i].groups.length;
-              for (let j=0 ; j < x; j++) {
-                if(this.contacts[i].groups[j] == groupName){   
-                  rtnArray.push(this.contacts[i]);
-                }
-              }
-            }
+
+  getGroup(groupName){
+    let rtnArray = [];
+    if (groupName !== 'undefined') {
+      for (let i = 0; i < this.contacts.length; i++) {
+        for (let j=0; j < this.contacts[i].groups.length; j++) {
+          if(this.contacts[i].groups[j] == groupName){
+            rtnArray.push(this.contacts[i]);
           }
-          return rtnArray;
-       }
+        }
       }
+    }
+    return rtnArray;
+  }
+
   /**
    * Adds a groupName to a contact.
    * @param  {string}   guid          GUID of the new contact.
@@ -497,13 +493,13 @@ class GraphConnector {
   addGroupName(guid, groupName) {
     let success = false;
     if (groupName !== 'undefined') {
-    for (let i = 0; i < this.contacts.length; i++) {
-      if (this.contacts[i].guid == guid) {
+      for (let i = 0; i < this.contacts.length; i++) {
+        if (this.contacts[i].guid == guid) {
           this.contacts[i].groups.push(groupName);
           success = true;
+        }
       }
     }
-  }
       return success;
   }
 
@@ -512,22 +508,23 @@ class GraphConnector {
    * @param  {string}   guid          GUID of the new contact.
    * @param  {string}   groupName     Group Name of the contact
    * @returns  {boolean}  True  if the group name is successfully added
+
    */
   removeGroupName(guid, groupName) {
     let success = false;
     if (groupName !== 'undefined') {
-    for (let i = 0; i < this.contacts.length; i++) {
-      if (this.contacts[i].guid == guid) {
-        for (var j = 0; j < this.contacts[i].groups.length; j++) {
-          if(this.contacts[i].groups[j] == groupName) {
-            this.contacts[i].groups.splice(j,1);
-          }
-          success = true;
-        };
+      for (let i = 0; i < this.contacts.length; i++) {
+        if (this.contacts[i].guid == guid) {
+          for (var j = 0; j < this.contacts[i].groups.length; j++) {
+            if(this.contacts[i].groups[j] == groupName) {
+              this.contacts[i].groups.splice(j,1);
+            }
+            success = true;
+          };
+        }
       }
     }
-  }
-      return success;
+    return success;
   }
 
   /**
@@ -592,7 +589,7 @@ class GraphConnector {
           rtnArray.push(this.contacts[i]);
         }
       }
-        
+
       return rtnArray;
     }
 
@@ -601,7 +598,7 @@ class GraphConnector {
    * @param  {string}     guid      GUID of the contact to look for.
    * @returns  {array}    relatedContacts     List of related direct contacts and of related friends-of-friends contacts.The format is: RelatedContacts<Direct<GraphConnectorContactData>,FoF<GraphConnectorContactData>>.
    */
-  checkGUID(guid) { 
+  checkGUID(guid) {
     let directContactsArray = [];
     let fofContactsArray = [];
     for (let i = 0; i < this.contacts.length; i++) {
