@@ -387,26 +387,29 @@ class GraphConnector {
    * @param  {string}     guid          new guid of the user.
    * @returns  {array}   Returns the array which contains the contact with new values
    */
-   editContact(guidOrg,firstName,lastName,guid) {
+  editContact(guidOrg,firstName,lastName,guid){
 
-     let rtnArray = [];
+  let rtnArray = [];
+  let status;
+  let tmpFname,tmpLname,tmpGuid;
+  for (let i = 0; i < this.contacts.length; i++) {
+    if (this.contacts[i].guid == guidOrg) {
 
-     for (let i = 0; i < this.contacts.length; i++) {
-       if (this.contacts[i].guid == guidOrg) {
-         if (this.contacts[i].firstName != firstName) {
-           this.contacts[i].firstName = firstName;
-           rtnArray.push(this.contacts[i]);
-         } else if (this.contacts[i].lastName != lastName) {
-           this.contacts[i].lastName = lastName;
-           rtnArray.push(this.contacts[i]);
-         } else if (this.contacts[i].guid != guid) {
-           this.contacts[i].guid = guid;
-           rtnArray.push(this.contacts[i]);
-         }
-       }
-     }
-     return rtnArray;
-   }
+      tmpGuid= this.contacts[i].guid;
+      tmpLname= this.contacts[i].lastName;
+      tmpFname= this.contacts[i].firstName;
+
+      (tmpFname == firstName) ? ( this.contacts[i].firstName = tmpFname) : this.contacts[i].firstName =firstName;
+      (tmpLname == lastName) ? (this.contacts[i].lastName = tmpLname) : this.contacts[i].lastName =lastName;
+      (guidOrg == guid) ? ( this.contacts[i].guid = guidOrg) : this.contacts[i].guid =guid;
+        
+
+        rtnArray.push(this.contacts[i]);
+      
+    }
+  }
+    return rtnArray;
+  }
 
   /**
    * Queries the Global Registry for a given GUID.

@@ -87,8 +87,9 @@ getRegistry.then(function(registry) {
       });
 
     it('editing contact (GUID, lname,fname)', function() {
-          graphConnector.addContact('4321', 'Joe', 'Wunderland');
-
+        graphConnector.addContact('4321', 'eoJ', 'Landwunder');
+        let res = graphConnector.editContact('4321', 'Joe', 'Wunderland','4321')
+        
         let result = graphConnector.editContact('4321','Joe','Wunderland','1234');
         expect(result[0].guid).to.equal(expectedEdit.guid);
         result = graphConnector.editContact('1234','Joey','Wunderland','1234');
