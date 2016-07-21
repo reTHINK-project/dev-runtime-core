@@ -4,12 +4,14 @@ var gulp = require('gulp');
 var exec = require('child_process').exec;
 var jsdoc = require('gulp-jsdoc3');
 var pandoc = require('gulp-pandoc');
+var fs = require('fs');
 
 // Task and dependencies to distribute for all environments;
-var babel = require('babelify');
+var babelify = require('babelify');
 var browserify = require('browserify');
 var buffer = require('vinyl-buffer');
 var source = require('vinyl-source-stream');
+var sourcemaps = require('gulp-sourcemaps');
 var replace = require('gulp-replace');
 var insert = require('gulp-insert');
 var uglify = require('gulp-uglify');
@@ -18,8 +20,11 @@ var argv = require('yargs').argv;
 var through = require('through2');
 var path = require('path');
 var gulpif = require('gulp-if');
-var Base64 = require('js-base64').Base64;
-var fs = require('fs');
+var gutil = require('gulp-util');
+var extensions = ['.js', '.json'];
+
+var git = require('gulp-git');
+var prompt = require('gulp-prompt');
 
 var pkg = require('./package.json');
 
@@ -126,343 +131,143 @@ function prependLicense(clean) {
 
 }
 
-gulp.task('runtime', function() {
-
-  var compact = argv.compact;
-  if (!compact) compact = false;
-
-  return browserify({
-    entries: ['./src/runtime/RuntimeUA.js'],
-    standalone: 'RuntimeUA',
-    debug: compact
-  })
-  .transform(babel, {
-    compact: compact,
-    presets: ['es2015', 'stage-0'],
-    plugins: ['add-module-exports']
-  })
-  .bundle()
-  .on('error', function(err) {
-    console.error(err);
-    this.emit('end');
-  })
-  .pipe(source('RuntimeUA.js'))
-  .pipe(buffer())
-  .pipe(gulpif(compact, uglify()))
-  .pipe(gulpif(compact, insert.prepend(license + '// Runtime User Agent \n\n// version: {{version}}\n\n')))
-  .pipe(gulpif(compact, replace('{{version}}', pkg.version)))
-  .pipe(gulp.dest('./dist'));
-
-});
-
-gulp.task('minibus', function() {
-
-  var compact = argv.compact;
-  if (!compact) compact = false;
-
-  var descriptionNote = '/**\n' +
-  '* Minimal interface and implementation to send and receive messages. It can be reused in many type of components.\n' +
-  '* Components that need a message system should receive this class as a dependency or extend it.\n' +
-  '* Extensions should implement the following private methods: _onPostMessage and _registerExternalListener.\n' +
-  '*/\n';
-
-  return browserify({
-    entries: ['./src/minibus.js'],
-    standalone: 'MiniBus',
-    debug: compact
-  })
-  .transform(babel, {
-    compact: compact,
-    presets: ['es2015', 'stage-0'],
-    plugins: ['add-module-exports']
-  })
-  .bundle()
-  .on('error', function(err) {
-    console.error(err);
-    this.emit('end');
-  })
-  .pipe(source('minibus.js'))
-  .pipe(buffer())
-  .pipe(gulpif(compact, uglify()))
-  .pipe(gulpif(compact, insert.prepend(descriptionNote + '// version: {{version}}\n\n')))
-  .pipe(gulpif(compact, replace('{{version}}', pkg.version)))
-  .pipe(gulp.dest('./dist'));
-
-});
-
-gulp.task('sandbox', function() {
-
-  var descriptionNote = '/**\n' +
-  '* @author micaelpedrosa@gmail.com\n' +
-  '* Base class to implement external sandbox component\n' +
-  '*/\n\n';
-
-  var compact = argv.compact;
-  if (!compact) compact = false;
-
-  return browserify({
-    entries: ['./src/sandbox.js'],
-    standalone: 'sandbox',
-    debug: compact
-  })
-  .transform(babel, {
-    compact: compact,
-    presets: ['es2015', 'stage-0'],
-    plugins: ['add-module-exports']
-  })
-  .bundle()
-  .on('error', function(err) {
-    console.error(err);
-    this.emit('end');
-  })
-  .pipe(source('sandbox.js'))
-  .pipe(buffer())
-  .pipe(gulpif(compact, uglify()))
-  .pipe(gulpif(compact, insert.prepend(descriptionNote + '// version: {{version}}\n\n')))
-  .pipe(gulpif(compact, replace('{{version}}', pkg.version)))
-  .pipe(gulp.dest('./dist'));
-
-});
-
 /**
  * Make 3 distriution files
  * By default the compact mode is true;
  * How to use: gulp dist --compact false | true;
  */
-gulp.task('dist', ['runtime', 'minibus', 'sandbox']);
+gulp.task('dist', function() {
 
-/**
- * Compile on specific file from ES6 to ES5
- * @param  {string} 'compile' task name
- *
- * How to use: gulp compile --file=path/to/file;
- */
-gulp.task('compile', function() {
+  var debug = argv.development ? true : false;
 
-  var filename = argv.file;
-  var path;
-
-  if (!filename) {
-    this.emit('end');
+  if (debug) {
+    gutil.log(gutil.colors.blue('The files will be compiled in debug mode'));
+    gutil.log('The generated files will include the source maps inside');
   } else {
-    var splitIndex = filename.lastIndexOf('/') + 1;
-    path = filename.substr(0, splitIndex);
-    filename = filename.substr(splitIndex).replace('.js', '');
+    gutil.log(gutil.colors.blue('The files will be compiled in production mode'));
+    gutil.log('The generated files will be uglified, minified, the sourcemaps files will be created separated');
   }
 
-  console.log('Converting ' + filename + ' on ' + path + ' to ES5');
-
-  var bundler = browserify(path + filename, {
-    standalone: 'activate',
-    debug: true
-  }).transform(babel);
-
-  function rebundle() {
-    return bundler.bundle()
-      .on('error', function(err) {
-        console.error(err);
-        this.emit('end');
-      })
-      .pipe(source(filename + '.ES5.js'))
-      .pipe(buffer())
-      .pipe(uglify())
-      .pipe(gulp.dest(path));
-  }
-
-  return rebundle();
+  return gulp.src(['src/sandbox.js', 'src/minibus.js', 'src/runtime/RuntimeUA.js', 'src/policy/PolicyEngine.js', 'src/policy/context/MessageNodeCtx.js'])
+  .pipe(dist(debug))
+  .on('end', function() {
+    gutil.log('All the files are created');
+  });
 
 });
 
-function encode(filename, descriptorName, configuration, isDefault) {
+function dist(debug) {
 
-  var descriptor = fs.readFileSync('resources/descriptors/' + descriptorName + '.json', 'utf8');
-  var json = JSON.parse(descriptor);
+  if (!debug) debug = false;
 
   return through.obj(function(file, enc, cb) {
 
     if (file.isNull()) {
-      return cb(null, file);
+      return cb(new Error('File is null'));
     }
+
     if (file.isStream()) {
       return cb(new Error('Streaming not supported'));
     }
 
-    var encoded = Base64.encode(file.contents);
-    var value = 'default';
+    var filename = path.basename(file.path, '.js');
 
-    if (isDefault) {
-      value = 'default';
+    var opts = {
+      configuration: {},
+      debug: debug,
+      standalone: filename === 'RuntimeUA' ? 'Runtime' : filename,
+      destination: __dirname + '/dist'
+    };
+
+    if (debug) {
+      opts.sourceMaps = true;
     } else {
-      value = filename;
+      opts.sourceMaps = false;
     }
 
-    if (!json.hasOwnProperty(value)) {
-      var newObject = {};
-      json[value] = newObject;
-      json[value].sourcePackage = {};
-    }
+    gutil.log(gutil.colors.yellow('Make a distribution file from', filename + '.js'));
 
-    var language = 'javascript';
-    if (descriptorName === 'DataSchemas') {
-      language = 'JSON-Schema';
-    }
+    gulp.src([file.path])
+    .pipe(transpile(opts))
+    .pipe(mark())
+    .pipe(gulp.dest(__dirname + '/dist'))
+    .on('error', function(error) {
+      gutil.log(gutil.colors.red(error));
+    })
+    .on('end', function() {
+      gutil.log('> ' + gutil.colors.green('Distribution ') + gutil.colors.white(filename) + gutil.colors.green(' done!'));
+      cb();
+    });
+  });
 
-    json[value].cguid = Math.floor(Math.random() + 1);
-    json[value].type = descriptorName;
-    json[value].version = '0.1';
-    json[value].description = 'Description of ' + filename;
-    json[value].objectName = filename;
-    json[value].configuration = configuration;
-    json[value].sourcePackageURL = '/sourcePackage';
-    json[value].sourcePackage.sourceCode = encoded;
-    json[value].sourcePackage.sourceCodeClassname = filename;
-    json[value].sourcePackage.encoding = 'base64';
-    json[value].sourcePackage.signature = '';
-    json[value].language = language;
-    json[value].signature = '';
-    json[value].messageSchemas = '';
-    json[value].dataObjects = [];
-    json[value].accessControlPolicy = 'somePolicy';
+}
 
-    var newDescriptor = new Buffer(JSON.stringify(json, null, 2));
-    console.log(value);
-    cb(null, newDescriptor);
+function mark() {
+
+  return through.obj(function(file, enc, cb) {
+
+    var fileObject = path.parse(file.path);
+
+    gulp.src([file.path])
+    .pipe(insert.prepend(license + '// Distribution file for {{package}} \n// version: {{version}}\n// Last build: {{date}}\n\n'))
+    .pipe(replace('{{version}}', pkg.version))
+    .pipe(replace('{{package}}', fileObject.name + '.js'))
+    .pipe(replace('{{date}}', new Date()))
+    .pipe(gulp.dest(__dirname + '/dist'))
+    .on('end', function() {
+      cb();
+    });
 
   });
 
 }
 
-function resource(file, configuration, isDefault) {
+function transpile(opts) {
 
-  var filename = file;
-  var splitIndex = filename.lastIndexOf('/') + 1;
-  var extension = filename.substr(filename.lastIndexOf('.') + 1);
+  return through.obj(function(file, enc, cb) {
 
-  switch (extension) {
-    case 'js':
-      filename = filename.substr(splitIndex).replace('.js', '');
-      break;
-    case 'json':
-      filename = filename.substr(splitIndex).replace('.json', '');
-      break;
-  }
+    var fileObject = path.parse(file.path);
+    var filename = fileObject.base === 'RuntimeUA.js' ? 'Runtime.js' : fileObject.base;
+    var args = {};
+    var babelArgs = {};
 
-  var descriptorName;
-  if (filename.indexOf('Hyperty') !== -1) {
-    descriptorName = 'Hyperties';
-  } else if (filename.indexOf('ProtoStub') !== -1) {
-    descriptorName = 'ProtoStubs';
-  } else if (filename.indexOf('DataSchema')) {
-    descriptorName = 'DataSchemas';
-  }
+    var environment = argv.production || process.env.NODE_ENV;
+    process.env.environment = environment ? 'production' : 'development';
 
-  console.log('DATA:', descriptorName);
+    args.extensions = extensions;
 
-  if (extension === 'js') {
-    return browserify({
-      entries: ['resources/' + filename + '.js'],
-      standalone: 'activate',
-      debug: false
-    })
-    .transform(babel)
+    if (opts.debug) args.debug = opts.debug;
+    if (opts.standalone) args.standalone = opts.standalone;
+
+    if (opts.sourceMaps) babelArgs.sourceMaps = opts.sourceMaps;
+
+    var ug = true;
+    if (filename === 'Runtime.js' && opts.debug) {
+      ug = false;
+    }
+
+    return browserify(file.path, args)
+    .transform(babelify)
     .bundle()
-    .pipe(source('bundle.js'))
-    .pipe(gulp.dest('resources/'))
+    .on('error', function(err) {
+      gutil.log(gutil.colors.red(err));
+      this.emit('end');
+    })
+    .pipe(source(filename))
     .pipe(buffer())
-    .pipe(encode(filename, descriptorName, configuration, isDefault))
-    .pipe(source(descriptorName + '.json'))
-    .pipe(gulp.dest('resources/descriptors/'));
-  } else if (extension === 'json') {
+    .pipe(gulpif(ug, sourcemaps.init({loadMaps: true})))
+    .pipe(gulpif(ug, uglify()))
+    .pipe(gulpif(ug, sourcemaps.write('./')))
+    .pipe(gulp.dest(opts.destination))
+    .on('end', function() {
+      file.contents = fs.readFileSync(opts.destination + '/' + filename);
+      file.path = opts.destination + '/' + filename;
+      cb(null, file);
+    });
 
-    return gulp.src(['resources/' + filename + '.json'])
-    .pipe(gulp.dest('resources/'))
-    .pipe(buffer())
-    .pipe(encode(filename, descriptorName, configuration, isDefault))
-    .pipe(source(descriptorName + '.json'))
-    .pipe(gulp.dest('resources/descriptors/'));
-
-  }
-
-}
-
-gulp.task('watch', function() {
-
-  return gulp.watch(['src/runtime/RuntimeUA.js'], ['runtime']);
-
-  // watcher.on('change', function(event) {
-  //
-  //   if (event.type === 'deleted') return;
-  //   console.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
-  //   resource(event.path);
-  //
-  // });
-
-});
-
-gulp.task('encode', function(done) {
-
-  var files = [];
-  var dirFiles = fs.readdirSync('resources');
-  files = dirFiles.filter(isFile);
-  files = files.map(function(file) {
-    return 'resources/' + file;
   });
 
-  function isFile(file) {
-    if (file.indexOf('Hyperty') !== -1 || file.indexOf('ProtoStub') !== -1 || file.indexOf('DataSchema') !== -1) {
-      return fs.statSync('resources/' + file).isFile();
-    }
-  }
-
-  gulp.src('./', {buffer:false})
-    .pipe(prompt.prompt([{
-      type: 'list',
-      name: 'file',
-      message: 'File to be converted:',
-      choices: files
-    },
-    {
-      type: 'input',
-      name: 'configuration',
-      message: 'ProtoStub Configuration, use something like:\n{"url": "wss://msg-node.localhost:9090/ws"}\nConfiguration:',
-      validate: function(value) {
-        try {
-          JSON.parse(value);
-          return true;
-        } catch (e) {
-          console.error('Check your configuration JSON\nShould be something like:\n{"url": "wss://msg-node.localhost:9090/ws"}');
-          return false;
-        }
-      }
-    },
-    {
-      type: 'list',
-      name: 'defaultFile',
-      message: 'This will be a default file to be loaded?',
-      choices: ['yes', 'no']
-    }], function(res) {
-
-      fs.access(res.file, fs.R_OK | fs.W_OK, function(err) {
-        if (err) done(new Error('No such file or directory'));
-        return;
-      });
-
-      var configuration = JSON.parse(res.configuration);
-
-      var isDefault = true;
-      if (res.defaultFile === 'no' || res.defaultFile === 'n') {
-        isDefault = false;
-      }
-
-      if (res.file) {
-        resource(res.file, configuration, isDefault);
-      }
-    })
-  );
-
-});
-
-//gulp.task('encode', ['watch']);
+}
 
 /**
  * Bumping version number and tagging the repository with it.
@@ -505,9 +310,6 @@ gulp.task('test', function(done) {
     singleRun: true
   }, done).start();
 });
-
-var git = require('gulp-git');
-var prompt = require('gulp-prompt');
 
 // Run git add
 gulp.task('add', ['test'], function() {

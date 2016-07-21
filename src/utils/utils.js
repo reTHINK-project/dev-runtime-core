@@ -40,6 +40,8 @@
  */
 export function divideURL(url) {
 
+  if (!url) throw Error('URL is needed to split');
+
   // let re = /([a-zA-Z-]*)?:\/\/(?:\.)?([-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b)*(\/[\/\d\w\.-]*)*(?:[\?])*(.+)*/gi;
   let re = /([a-zA-Z-]*):\/\/(?:\.)?([-a-zA-Z0-9@:%._\+~#=]{2,256})([-a-zA-Z0-9@:%._\+~#=\/]*)/gi;
   let subst = '$1,$2,$3';
@@ -55,6 +57,17 @@ export function divideURL(url) {
     type: parts[0],
     domain: parts[1],
     identity: parts[2]
+  };
+
+  return result;
+}
+
+export function divideEmail(email) {
+  let indexOfAt = email.indexOf('@');
+
+  let result = {
+    username: email.substring(0, indexOfAt),
+    domain: email.substring(indexOfAt + 1, email.length)
   };
 
   return result;
@@ -97,4 +110,37 @@ export function getUserURLFromEmail(userEmail) {
 export function getUserEmailFromURL(userURL) {
   let url = divideURL(userURL);
   return url.identity.replace('/', '') + '@' + url.domain; // identity field has '/exampleID' instead of 'exampleID'
+}
+
+
+/**
+ * Check if the user identifier is already in the URL format, if not, convert to URL format
+ * @param  {string}   identifier  user identifier
+ * @return {string}   userURL    the user URL
+ */
+export function convertToUserURL(identifier) {
+
+  // check if the identifier is already in the url format
+  if (identifier.substring(0, 7) === 'user://') {
+    let dividedURL = divideURL(identifier);
+
+    //check if the url is well formated
+    if (dividedURL.domain && dividedURL.identity) {
+      return identifier;
+    } else {
+      throw 'userURL with wrong format';
+    }
+
+  //if not, convert the user email to URL format
+  } else {
+    return getUserURLFromEmail(identifier);
+  }
+}
+
+export function isDataObjectURL(url) {
+  let schemasToIgnore = ['domain-idp', 'runtime', 'domain', 'hyperty'];
+  let splitURL = (url).split('://');
+  let urlSchema = splitURL[0];
+
+  return schemasToIgnore.indexOf(urlSchema) === -1;
 }

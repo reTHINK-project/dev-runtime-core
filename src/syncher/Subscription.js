@@ -9,6 +9,8 @@ class Subscription {
     _this._deleteListener = bus.addListener(changeURL, (msg) => {
       if (msg.type === 'delete') {
         console.log('Subscription-DELETE: ', msg);
+
+        //FLOW-OUT: message sent to all subscribers
         let deleteMessageToHyperty = {
           type: 'delete', from: msg.from, to: owner,
           body: { resource: url }

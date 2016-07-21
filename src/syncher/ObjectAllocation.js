@@ -53,6 +53,7 @@ class ObjectAllocation {
   create(domain, scheme, number) {
     let _this = this;
 
+    //FLOW-OUT: message sent to msg-node ObjectAllocationManager component
     let msg = {
       type: 'create', from: _this._url, to: 'domain://msg-node.' + domain + '/object-address-allocation',
       body: { scheme: scheme, value: { number: number } }

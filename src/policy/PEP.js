@@ -1,14 +1,25 @@
 class PEP {
 
-  constructor() {}
+  constructor(context) {
+    let _this = this;
+    _this.context = context;
+  }
 
-  enforce() {}
+  enforce(result) {
+    let _this = this;
+    let authDecision = result[0];
+    let actions = result[1];
 
-  sendAutomaticMessage() {}
+    for (let i in actions) {
+      _this.context[actions[i].method](actions[i].params, authDecision);
+    }
+  }
+
+  /*sendAutomaticMessage() {}
 
   forwardToID() {}
 
-  forwardToHyperty() {}
+  forwardToHyperty() {}*/
 
 }
 

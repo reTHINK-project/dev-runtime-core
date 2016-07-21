@@ -20,6 +20,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 **/
+
 /**
 * @author micaelpedrosa@gmail.com
 * Minimal interface and implementation to send and receive messages. It can be reused in many type of components.
@@ -255,6 +256,9 @@ class MsgListener {
 
   get url() { return this._url; }
 
+  /**
+   * Remove this listener from the Bus
+   */
   remove() {
     let _this = this;
 

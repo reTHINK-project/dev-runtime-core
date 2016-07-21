@@ -28,9 +28,10 @@ import RegistryDataModel from './RegistryDataModel';
 */
 class HypertyInstance extends RegistryDataModel {
 
-  constructor(id, url, descriptor, hypertyURL, user, guid, runtime, context) {
-    super(id, url, descriptor);
+  constructor(id, url, descriptorURL,descriptor, hypertyURL, user, guid, runtime, context) {
+    super(id, url, descriptorURL);
     let _this = this;
+    _this._descriptor = descriptor;
     _this._hypertyURL = hypertyURL;
     _this._user = user;
     _this._guid = guid;
@@ -51,6 +52,16 @@ class HypertyInstance extends RegistryDataModel {
   get hypertyURL() {
     let _this = this;
     return _this._hypertyURL;
+  }
+
+  get descriptor() {
+    let _this = this;
+    return _this._descriptor;
+  }
+
+  get objectName() {
+    let _this = this;
+    return _this._descriptor._objectName;
   }
 }
 

@@ -24,8 +24,9 @@ import { divideURL } from '../utils/utils';
 import ObjectAllocation from './ObjectAllocation';
 import ReporterObject from './ReporterObject';
 import ObserverObject from './ObserverObject';
+import tv4 from '../utils/tv4';
 
-import {MessageFactory} from 'service-framework';
+import {MessageFactory} from 'service-framework/dist/MessageFactory';
 
 /**
  * @author micaelpedrosa@gmail.com
@@ -80,6 +81,7 @@ class SyncherManager {
 
   get url() { return this._url; }
 
+  //FLOW-IN: message received from Syncher -> create
   _onCreate(msg) {
 
     let _this = this;
@@ -93,45 +95,79 @@ class SyncherManager {
 
     //get schema from catalogue and parse -> (scheme, children)
     _this._catalog.getDataSchemaDescriptor(msg.body.schema).then((descriptor) => {
+
       let properties = descriptor.sourcePackage.sourceCode.properties;
       let scheme = properties.scheme ? properties.scheme.constant : 'resource';
       let childrens = properties.children ? properties.children.constant : [];
 
+      console.log('Scheme: ', scheme);
+
+      // schema validation
+      console.log("running object validation...");
+      try {
+        let obj = msg.body.value;
+        let schema = descriptor.sourcePackage.sourceCode;
+        var result = tv4.validateMultiple(obj, schema);
+
+        // check result and throw error if invalid
+        if (!result.valid) {
+          console.warn("object validation failed!", JSON.stringify(result.errors, null, 2));
+          console.debug("object:", JSON.stringify(obj, null, 2), "\r\nschema:", JSON.stringify(schema, null, 2));
+
+          // TODO this should throw an error
+          //throw new Error("object validation failed:", result.error.message);
+        } else {
+          console.log("object validation succeeded", result);
+        }
+      } catch (e) {
+        console.warn("Error during object validation:", e);
+      }
+
+      //request address allocation of a new object from the msg-node
       _this._allocator.create(domain, scheme, 1).then((allocated) => {
         let objURL = allocated[0];
 
+        console.log('ALLOCATOR CREATE:', allocated);
+
+        let subscriptionURL = objURL + '/subscription';
+
+        console.log('Subscription URL', subscriptionURL);
+
         //To register the dataObject in the runtimeRegistry
-        _this._registry.registerDataObject(msg.body.value.communication.name, 'scheme', objURL, 'dataObjectReporter').then(function(resolve) {
+        _this._registry.registerDataObject(msg.body.value.name, msg.body.value.schema, objURL, msg.body.value.reporter, msg.body.authorise).then(function(resolve) {
           console.log('DataObject successfully registered', resolve);
 
+          //all OK -> create reporter and register listeners
           let reporter = new ReporterObject(_this, owner, objURL);
-          reporter.addChildrens(childrens).then(() => {
-            _this._reporters[objURL] = reporter;
+          reporter.forwardSubscribe([objURL,subscriptionURL]).then(() => {
+            reporter.addChildrens(childrens).then(() => {
+              _this._reporters[objURL] = reporter;
 
-            //all ok, send response
-            _this._bus.postMessage({
-              id: msg.id, type: 'response', from: msg.to, to: owner,
-              body: { code: 200, resource: objURL, childrenResources: childrens }
-            });
+              //FLOW-OUT: message response to Syncher -> create
+              _this._bus.postMessage({
+                id: msg.id, type: 'response', from: msg.to, to: owner,
+                body: { code: 200, resource: objURL, childrenResources: childrens }
+              });
 
-            //send create to all observers, responses will be deliver to the Hyperty owner?
-            //schedule for next cycle needed, because the Reporter should be available.
-            setTimeout(() => {
-              _this._authorise(msg, objURL);
+              //send create to all observers, responses will be deliver to the Hyperty owner?
+              //schedule for next cycle needed, because the Reporter should be available.
+              setTimeout(() => {
+                //will invite other hyperties
+                _this._authorise(msg, objURL);
+              });
             });
           });
-
         }, function(error) {
           console.error(error);
         });
 
       });
-    }).catch(() => {
-      /*{
+    }).catch((reason) => {
+      //FLOW-OUT: error message response to Syncher -> create
+      let responseMsg = {
         id: msg.id, type: 'response', from: msg.to, to: owner,
         body: { code: 500, desc: reason }
-      }*/
-      let responseMsg = _this._mf.createMessageResponse(msg, 500);
+      };
 
       _this._bus.postMessage(responseMsg);
     });
@@ -142,13 +178,15 @@ class SyncherManager {
     let objSubscriptorURL = objURL + '/subscription';
 
     msg.body.authorise.forEach((hypertyURL) => {
+      //FLOW-OUT: send invites to list of remote Syncher -> _onRemoteCreate -> onNotification
       _this._bus.postMessage({
         type: 'create', from: objSubscriptorURL, to: hypertyURL,
-        body: { source: msg.from, value: msg.body.value, schema: msg.body.schema }
+        body: { identity: msg.body.identity, source: msg.from, value: msg.body.value, schema: msg.body.schema }
       });
     });
   }
 
+  //FLOW-IN: message received from DataObjectReporter -> delete
   _onDelete(msg) {
     let _this = this;
 
@@ -167,6 +205,7 @@ class SyncherManager {
     }
   }
 
+  //FLOW-IN: message received from local Syncher -> subscribe
   _onLocalSubscribe(msg) {
     let _this = this;
 
@@ -187,10 +226,10 @@ class SyncherManager {
       subscriptions.push(objURL + '/changes');
       childrens.forEach((child) => subscriptions.push(childBaseURL + child));
 
-      //subscribe msg for the domain node
+      //FLOW-OUT: subscribe message to the msg-node, registering listeners on the broker
       let nodeSubscribeMsg = {
         type: 'subscribe', from: _this._url, to: 'domain://msg-node.' + domain + '/sm',
-        body: { subscribe: subscriptions, source: hypertyURL }
+        body: { identity: msg.body.identity, subscribe: subscriptions, source: hypertyURL }
       };
 
       //subscribe in msg-node
@@ -198,15 +237,16 @@ class SyncherManager {
         console.log('node-subscribe-response(observer): ', reply);
         if (reply.body.code === 200) {
 
-          //send provisional response
+          //FLOW-OUT: reply with provisional response
           _this._bus.postMessage({
             id: msg.id, type: 'response', from: msg.to, to: hypertyURL,
             body: { code: 100, childrenResources: childrens }
           });
 
+          //FLOW-OUT: subscribe message to remote ReporterObject -> _onRemoteSubscribe
           let objSubscribeMsg = {
             type: 'subscribe', from: _this._url, to: objURLSubscription,
-            body: { subscriber: hypertyURL }
+            body: { identity: nodeSubscribeMsg.body.identity, subscriber: hypertyURL }
           };
 
           //subscribe to reporter SM
@@ -220,6 +260,7 @@ class SyncherManager {
                 _this._observers[objURL] = observer;
               }
 
+              //register hyperty subscription
               observer.addSubscription(hypertyURL);
 
               //forward to hyperty:
@@ -241,6 +282,7 @@ class SyncherManager {
     });
   }
 
+  //FLOW-IN: message received from local DataObjectObserver -> unsubscribe
   _onLocalUnSubscribe(msg) {
     let _this = this;
 

@@ -1,6 +1,6 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import persistenceManager from '../src/persistence/PersistenceManager';
+import persistenceManager from 'service-framework/dist/PersistenceManager';
 
 let expect = chai.expect;
 let localStorage = window.localStorage

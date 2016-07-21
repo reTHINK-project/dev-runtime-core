@@ -26,12 +26,12 @@
 */
 class RegistryDataModel {
 
-  constructor(id, url, descriptor, startingTime, lastModified, status, stubs, stubsConfiguration) {
+  constructor(id, url, descriptorURL, startingTime, lastModified, status, stubs, stubsConfiguration) {
     let _this = this;
 
     _this._id = id;
     _this._url = url;
-    _this._descriptor = descriptor;
+    _this._descriptorURL = descriptorURL;
     _this._startingTime = startingTime;
     _this._lastModified = lastModified;
     _this._status = status;
@@ -51,7 +51,7 @@ class RegistryDataModel {
 
   get descriptor() {
     let _this = this;
-    return _this._descriptor;
+    return _this._descriptorURL;
   }
 
 }

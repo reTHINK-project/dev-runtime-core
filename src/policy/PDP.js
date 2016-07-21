@@ -1,4 +1,4 @@
-import {getUserEmailFromURL} from '../utils/utils.js';
+import Operators from './Operators';
 
 /**
 * The Policy Decision Point (PDP) decides if a message is to be authorised by checking a set of
@@ -13,96 +13,12 @@ class PDP {
   * This method is invoked by the Policy Engine and instantiates the Policy Decision Point. It
   * initialises or loads from the Persistence Manager the object 'myGroups' to store the user's
   * groups.
-  * @param  {Registry}    runtimeRegistry
+  * @param  {Registry}    muchruntimeRegistry
   */
-  constructor(runtimeRegistry) {
+  constructor(context) {
     let _this = this;
-    _this.runtimeRegistry = runtimeRegistry;
-    _this.objectsReporters = {};
-    _this.myGroups = {}; // TODO: load from the Persistence Manager
-    _this.getPoliciesImplementation();
-  }
-
-  getPoliciesImplementation() {
-    let _this = this;
-    _this.policiesImplementation = {};
-    _this.policiesImplementation.group = 'result[0] = _this.isInGroup(getUserEmailFromURL(message.body.identity), condition[1]) ? policy.authorise : !policy.authorise;';
-    _this.policiesImplementation.time = 'result[0] = _this.isTimeBetween(condition[1], condition[2]) ? policy.authorise : !policy.authorise;';
-    _this.policiesImplementation.sync = 'result[0] = _this.isReporterOfObject(message.from, message.body.source) ? policy.authorise : !policy.authorise;';
-  }
-
-  addObject(objectURL, reporterURL) {
-    let _this = this;
-    _this.objectsReporters[objectURL] = reporterURL;
-  }
-
-  getGroupsNames() {
-    let _this = this;
-    let myGroups = _this.myGroups;
-    let groupsNames = [];
-    for (let groupName in myGroups) {
-      groupsNames.push(groupName);
-    }
-    return groupsNames;
-  }
-
-  /**
-  * Returns the group with the given group name.
-  * @param  {String}  groupName
-  * @return {Array}   group
-  */
-  getGroup(groupName) {
-    let _this = this;
-    return (groupName in _this.myGroups) ? _this.myGroups[groupName] : [];
-  }
-
-  /**
-  * Creates a group with the given name.
-  * @param  {String}  groupName
-  */
-  createGroup(groupName) {
-    let _this = this;
-    _this.myGroups[groupName] = [];
-  }
-
-  /**
-  * Removes the group with the given name.
-  * @param  {String}  groupName
-  */
-  removeGroup(groupName) {
-    let _this = this;
-    delete _this.myGroups[groupName];
-  }
-
-  /**
-  * Adds the given user email to the group with the given name.
-  * @param  {String}  userEmail
-  * @param  {String}  groupName
-  */
-  addToGroup(userEmail, groupName) {
-    let _this = this;
-    let group = _this.myGroups[groupName];
-    if (group === undefined) {
-      _this.createGroup(groupName);
-      group = _this.getGroup(groupName);
-    }
-    group.push(userEmail);
-  }
-
-  /**
-  * Removes the given user email from the group with the given name.
-  * @param  {String}  userEmail
-  * @param  {String}  groupName
-  */
-  removeFromGroup(userEmail, groupName) {
-    let _this = this;
-    let group = _this.myGroups[groupName];
-    for (let i in group) {
-      if (group[i] === userEmail) {
-        group.splice(i, 1);
-        break;
-      }
-    }
+    _this.context = context;
+    _this.operators = new Operators(context);
   }
 
   /**
@@ -114,75 +30,75 @@ class PDP {
   * @param {Array}    policies
   * @return {Array}   [authDecision, actions]
   */
-  evaluate(message, hypertyToVerify, policies) {
+  evaluate(message, policies) {
     let _this = this;
     let results = [true];
     let actions = [];
-
     for (let i in policies) {
       let policy = policies[i];
-      let result = [];
-      let condition = policy.condition.split(' ');
-      let resource = condition[0];
-      eval(_this.policiesImplementation[resource]);
-      results.push(result[0]);
-      actions.push(result[1]); // TODO: do actions depend on the final authorisation decision?
+      let condition = policy.condition;
+      let verifiesCondition = false;
+      if (typeof condition === 'object') {
+        verifiesCondition = _this.verifiesAdvancedCondition(condition[0], condition[1], condition[2], policy.scope, message);
+      } else {
+        verifiesCondition = _this.verifiesSimpleCondition(condition, policy.scope, message);
+      }
+
+      if (verifiesCondition) {
+        results.push(policy.authorise);
+      }
+      if (policy.actions !== []) {
+        for (let i in policy.actions) {
+          let newAction = {
+            method: policy.actions[i].method,
+            params: message
+          };
+          actions.push(newAction);
+        }
+      }
     }
 
     let authDecision = results.indexOf(false) === -1;
     return [authDecision, actions];
   }
 
-  /**
-  * Verifies if the given hyperty URL corresponds to an email that is in the group with the given
-  * name.
-  * @param {URL}        hypertyURL
-  * @param {String}     groupName
-  * @return {Boolean}   boolean
-  */
-  isInGroup(userEmail, groupName) {
+  verifiesSimpleCondition(condition, scope, message) {
     let _this = this;
-    let group = _this.myGroups[groupName];
-    return group.indexOf(userEmail) > -1;
-  }
+    let splitCondition = condition.split(' ');
+    let variable = splitCondition[0];
+    let operator = splitCondition[1];
 
-  /**
-  * Verifies if the current time is between the given start and end times.
-  * @param {Number}     start
-  * @param {Number}     end
-  * @return {Boolean}   boolean
-  */
-  isTimeBetween(start, end) {
-    let _this = this;
-    let now = new Date();
-    let nowMinutes = _this.getMinutes(parseInt(now.getHours()) + ':' + now.getMinutes());
-    let startMinutes = _this.getMinutes(start);
-    let endMinutes = _this.getMinutes(end);
-    if (endMinutes > startMinutes) {
-      return (nowMinutes > startMinutes && nowMinutes < endMinutes);
+    let params;
+    if (operator === 'in') {
+      _this.context.group = {scope: scope, group: splitCondition[2], destination: message.to};
+      params = _this.context.group;
     } else {
-      if (nowMinutes < startMinutes) {
-        nowMinutes += 24 * 60;
-      }
-      endMinutes += 24 * 60;
-      return (nowMinutes > startMinutes && nowMinutes < endMinutes);
+      params = splitCondition.slice(2);
     }
+    _this.context[variable] = {message: message};
+    let value = _this.context[variable];
+    return _this.operators.operators[operator]([params, value]);
   }
 
-  /**
-  * Returns the number of minutes that correspond to the given time in the format <HOURS>:<MINUTES>.
-  * @param {Number}   time
-  * @return {Number}  minutes
-  */
-  getMinutes(time) {
-    let timeSplit = time.split(':');
-    return parseInt(timeSplit[0]) * 60 + parseInt(timeSplit[1]);
-  }
-
-  /* var update = {type:'update', from: 'hello://hybroker.rethink.ptinovacao.pt/c10007a6-45cb-4962-90ae-fa915b7b4f94', to: 'hello://hybroker.rethink.ptinovacao.pt/c10007a6-45cb-4962-90ae-fa915b7b4f94/changes', body: {source: 'hyperty://hybroker.rethink.ptinovacao.pt/a94743d1-f308-42fb-9ad9-4c12d1e9c25'}};*/
-  isReporterOfObject(objectURL, hypertyURL) {
+  verifiesAdvancedCondition(operator, left, right, scope, message) {
     let _this = this;
-    return (_this.objectsReporters[objectURL] === hypertyURL);
+    while (typeof left === 'object') {
+      left = _this.verifiesAdvancedCondition(left[0], left[1], left[2], scope, message);
+    }
+    if (right !== undefined) {
+      while (typeof right === 'object') {
+        right = _this.verifiesAdvancedCondition(right[0], right[1], right[2], scope, message);
+      }
+    }
+
+    let resultLeft = (typeof left === 'boolean') ? left : _this.verifiesSimpleCondition(left, scope, message);
+
+    let resultRight;
+    if (right !== undefined) {
+      resultRight = (typeof right === 'boolean') ? right : _this.verifiesSimpleCondition(right, scope, message);
+    }
+
+    return _this.operators.operators[operator]([resultLeft, resultRight]);
   }
 }
 

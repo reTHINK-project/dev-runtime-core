@@ -1,3 +1,7 @@
+//jshint browser:true, jquery: true
+
+//import persistenceManager from 'service-framework/dist/PersistenceManager';
+
 import PEP from './PEP';
 import PDP from './PDP';
 
@@ -10,34 +14,108 @@ class PolicyEngine {
   /**
   * This method is invoked by the RuntimeUA and instantiates the Policy Engine. A Policy Decision
   * Point (PDP) and a Policy Enforcement Point (PEP) are initialised for the evaluation of policies
-  * and the enforcement of additional actions, respectively. Adds a listener do the Message Bus to
-  * allow method invokation.
-  * @param  {MessageBus}        messageBus
+  * and the enforcement of additional actions, respectively.
   * @param  {IdentityModule}    identityModule
   * @param  {Registry}          runtimeRegistry
   */
-  constructor(messageBus, identityModule, runtimeRegistry) {
+  constructor(context) {
     let _this = this;
-    _this.messageBus = messageBus;
-    _this.idModule = identityModule;
-    _this.pdp = new PDP(runtimeRegistry);
-    _this.pep = new PEP();
-    _this.policies = {};
-
-    /* TODO: add this policy when deploying the runtime */
-    _this.addObserverPolicy();
+    _this.context = context;
+    _this.context.pdp = new PDP(context);
+    _this.context.pep = new PEP(context);
   }
 
-  addObserverPolicy() {
+  /**
+  * Associates the given policies with a scope. The possible scopes are 'global', 'hyperty' and
+  * 'user'.
+  * @param  {Policy[]}  policies
+  * @param  {String}    scope
+  */
+  addPolicies(newPolicies) {
     let _this = this;
-    let policy = {
-      id: 'block-observer-changes',
-      scope: 'global',
-      condition: 'sync update reporter',
-      authorise: true,
-      actions: []
-    };
-    _this.addPolicies([policy], 'objectManagement');
+
+    let myPolicies = _this.context.policies;
+    if (myPolicies === undefined) {
+      myPolicies = {};
+    }
+
+    for (let i in newPolicies) {
+      let newPolicy = newPolicies[i];
+      let scope = newPolicy.scope;
+      if (myPolicies[scope] === undefined) {
+        myPolicies[scope] = [];
+      }
+      for (let j in myPolicies[scope]) {
+        let existingPolicy = myPolicies[scope][j];
+        if (existingPolicy.condition === newPolicy.condition) {
+          _this.removePolicies(newPolicies[i].condition);
+          break;
+        }
+      }
+      myPolicies[scope].push(newPolicies[i]);
+    }
+
+    _this.context.policies = myPolicies;
+  }
+
+  /**
+  * Removes the policy with the given ID from the given scope. If policyID is '*', removes all policies associated with the given scope.
+  * @param  {String}  policyID
+  * @param  {String}  scope
+  */
+  removePolicies(scope, condition) {
+    let _this = this;
+    let myPolicies = _this.context.policies;
+
+    if (scope !== '*') {
+
+      if (scope in myPolicies) {
+        if (condition !== '*') {
+          let policies = myPolicies[scope];
+          let typeOfCondition = typeof condition;
+          for (let i in policies) {
+            let typeOfPolicyCondition = typeof policies[i].condition;
+            if (typeOfCondition === typeOfPolicyCondition) {
+              if (typeOfCondition === 'string') {
+                if (policies[i].condition === condition) {
+                  policies.splice(i, 1);
+                  break;
+                }
+              } else { //typeof condition = object (advanced policy)
+                if (_this.areEqualArrays(policies[i].condition, condition)) {
+                  policies.splice(i, 1);
+                }
+              }
+            }
+          }
+        } else {
+          delete myPolicies[scope];
+        }
+
+        _this.context.policies = myPolicies;
+      }
+
+    } else {
+      _this.context.policies = {};
+    }
+  }
+
+  areEqualArrays(array1, array2) {
+    if (array1.length !== array2.length) {
+      return false;
+    }
+
+    let numElements = array1.length;
+    for (let i = 0; i < numElements; i++) {
+      if (array1[i] instanceof Array && array2[i] instanceof Array) {
+        if (!array1[i].equals(array2[i])) {
+          return false;
+        }
+      } else if (array1[i] !== array2[i]) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /**
@@ -51,209 +129,19 @@ class PolicyEngine {
   */
   authorise(message) {
     let _this = this;
-    return new Promise(function(resolve, reject) {
-
-      //TODO turn it later into a policy
-      if (message.from === 'domain://google.com' || message.to === 'domain://google.com') {
-        message.authorised = true;
-        return resolve(message);
-      }
-
-      _this.idModule.loginWithRP('google identity', 'scope').then(function(value) {
-        let assertedID = _this.idModule.getIdentities();
-
-        if (!message.hasOwnProperty('body')) {
-          message.body = {};
-        }
-
-        let hypertyToVerify;
-        if (!message.body.hasOwnProperty('identity')) {
-          message.body.identity = assertedID[0].identity;
-          message.body.idToken = value;
-          hypertyToVerify = message.to;
-        } else {
-          hypertyToVerify = message.from;
-        }
-
-        if (_this.isObjectCreation(message)) {
-          _this.addObject(message.body.resource, message.to);
-        } else {
-          if (_this.isObjectSubscription(message)) {
-            let objectURL = message.from.substring(0, message.from.length - 13);
-            let reporterURL = message.body.value.data.communication.owner;
-            _this.addObject(objectURL, reporterURL);
-          }
-        }
-
-        let scope = _this.getScope(message);
-        let applicablePolicies = [];
-        if (message.to !== 'domain://localhost/policies-gui' && message.from !== 'domain://localhost/policies-gui') {
-          applicablePolicies = _this.getApplicablePolicies(scope);
-        }
-        let policiesResult = _this.pdp.evaluate(message, hypertyToVerify, applicablePolicies);
-        _this.pep.enforce(policiesResult[1]);
-        if (policiesResult[0]) {
-          message.authorised = true;
-          if (message.to === 'domain://localhost/policy-engine') {
-            _this.processMessage(message);
-          }
-          resolve(message);
-        } else {
-          message.authorised = false;
-          reject('Unauthorised message');
-        }
-      }, function(error) {
-        reject(error);
-      });
-    });
+    return _this.context.authorise(message);
   }
 
-  /*var create = {type:'response', from: 'runtime://hybroker.rethink.ptinovacao.pt/7465/sm', to: 'hyperty://hybroker.rethink.ptinovacao.pt/a94743d1-f308-42fb-9ad9-4c12d1e9c25', body: {resource: 'hello://hybroker.rethink.ptinovacao.pt/c10007a6-45cb-4962-90ae-fa915b7b4f94'}};*/
-  isObjectCreation(message) {
-    let isResponse = message.type === 'response';
-    let isFromSM = String(message.from.split('/').slice(-1)[0]) === 'sm';
-    let hasObjectURL = message.body.resource !== undefined;
-    return isResponse && isFromSM && hasObjectURL;
-  }
-
-  addObject(objectURL, reporterURL) {
+  getGroupsNames(scope) {
     let _this = this;
-    _this.pdp.addObject(objectURL, reporterURL);
-  }
-
-  isObjectSubscription(message) {
-    return String(message.from.split('/').slice(-1)[0]) === 'subscription';
-  }
-
-  /**
-  * Invokes the method specified in the message aimed at the Policy Engine.
-  * @param  {Message}    message
-  */
-  processMessage(message) {
-    let _this = this;
-    let method = message.body.method;
-    let params = message.body.params;
-
-    switch (method) {
-      case 'addPolicies':
-        _this.addPolicies(params.policies, params.scope);
-        _this.sendResponse(message, 200);
-        break;
-      case 'removePolicies':
-        _this.removePolicies(params.policyID, params.scope);
-        _this.sendResponse(message, 200);
-        break;
-      case 'getGroupsNames':
-        let groupsNames = _this.getGroupsNames();
-        _this.sendGroup(message, groupsNames);
-        break;
-      case 'getGroup':
-        let group = _this.getGroup(params.groupName);
-        _this.sendGroup(message, group);
-        break;
-      case 'createGroup':
-        _this.createGroup(params.groupName);
-        _this.sendResponse(message, 200);
-        break;
-      case 'removeGroup':
-        _this.removeGroup(params.groupName);
-        _this.sendResponse(message, 200);
-        break;
-      case 'addToGroup':
-        _this.addToGroup(params.userEmail, params.groupName);
-        _this.sendResponse(message, 200);
-        break;
-      case 'removeFromGroup':
-        _this.removeFromGroup(params.userEmail, params.groupName);
-        _this.sendResponse(message, 200);
-        break;
-      case 'getTimeRestrictions':
-        let timeRestrictions = _this.getTimeRestrictions();
-        _this.sendGroup(message, timeRestrictions);
-        break;
-      case 'getTimeRestrictionById':
-        let timeRestriction = _this.getTimeRestrictionById(params.policyID);
-        _this.sendGroup(message, timeRestriction);
-        break;
-      case 'changeTimePolicy':
-        _this.changeTimePolicy(params.policyID, params.authorise);
-        _this.sendResponse(message, 200);
-    }
-  }
-
-  /**
-  * Sends a response to the message origin.
-  * @param  {Message}   message
-  * @param  {Number}    httpCode
-  */
-  sendResponse(message, httpCode) {
-    let _this = this;
-    let response = {id: message.id, type: 'response', to: message.from, from: message.to, body: {code: httpCode}};
-    _this.messageBus.postMessage(response);
-  }
-
-  /**
-  * Sends the requested group to the message origin.
-  * @param  {Message}   message
-  * @param  {Array}     group
-  */
-  sendGroup(message, group) {
-    let _this = this;
-    let response = {id: message.id, type: 'response', to: message.from, from: message.to, body: {code: 200, method: message.body.method, value: group}};
-    _this.messageBus.postMessage(response);
-  }
-
-  /**
-  * Associates the given policies with a scope. The possible scopes are 'application', 'hyperty' and
-  * 'user'.
-  * @param  {Policy[]}  policies
-  * @param  {String}    scope
-  */
-  addPolicies(policies, scope) {
-    let _this = this;
-    for (let i in policies) { // TODO: conflict detection
-      if (_this.policies[scope] === undefined) {
-        _this.policies[scope] = [];
-      }
-      for (let policy in _this.policies[scope]) {
-        if (_this.policies[scope][policy].id === policies[i].id) {
-          _this.removePolicies(policies[i].id, 'user');
-          break;
-        }
-      }
-      _this.policies[scope].push(policies[i]);
-    }
-  }
-
-  /**
-  * Removes the policy with the given ID from the given scope. If policyID is '*', removes all policies associated with the given scope.
-  * @param  {String}  policyID
-  * @param  {String}  scope
-  */
-  removePolicies(policyID, scope) {
-    let _this = this;
-    let allPolicies = _this.policies;
-
-    if (scope in allPolicies) {
-      if (policyID !== '*') {
-        let policies = allPolicies[scope];
-        let numPolicies = policies.length;
-
-        for (let policy = 0; policy < numPolicies; policy++) {
-          if (policies[policy].id === policyID) {
-            policies.splice(policy, 1);
-            break;
-          }
-        }
-      } else {
-        delete _this.policies[scope];
+    let myGroups = _this.context.groups;
+    let groupsNames = [];
+    if (myGroups[scope] !== {}) {
+      for (let groupName in myGroups[scope]) {
+        groupsNames.push(groupName);
       }
     }
-  }
-
-  getGroupsNames() {
-    let _this = this;
-    return _this.pdp.getGroupsNames();
+    return groupsNames;
   }
 
   /**
@@ -261,48 +149,103 @@ class PolicyEngine {
   * @param  {String}  groupName
   * @return {Array}   group
   */
-  getGroup(groupName) {
+  getList(scope, groupName) {
     let _this = this;
-    return _this.pdp.getGroup(groupName);
+    let myGroups = _this.context.groups;
+    let members = [];
+    if (myGroups[scope] !== undefined && myGroups[scope][groupName] !== undefined) {
+      members = myGroups[scope][groupName];
+    }
+    return members;
   }
 
   /**
-  * Forwards a request for the creation of a group with the given name to the PDP.
+  * Creates a group with the given name.
   * @param  {String}  groupName
   */
-  createGroup(groupName) {
+  createList(scope, type, groupName) {
     let _this = this;
-    _this.pdp.createGroup(groupName);
+
+    let myGroups = _this.context.groups;
+    if (myGroups[scope] === undefined) {
+      myGroups[scope] = {};
+    }
+    myGroups[scope][groupName] = [];
+
+    let policy = {
+      authorise: false,
+      condition: type + ' in ' + groupName,
+      scope: scope,
+      actions: []
+    };
+    _this.addPolicies([policy]);
+
+    return myGroups;
   }
 
-  removeGroup(groupName) {
+  deleteGroup(scope, groupName) {
     let _this = this;
-    _this.pdp.removeGroup(groupName);
+
+    let myGroups = _this.context.groups;
+    delete myGroups[scope][groupName];
+
+    let myPolicies = _this.context.policies;
+
+    let policies = myPolicies[scope];
+    for (let i in policies) {
+      let condition = policies[i].condition.split(' ');
+      condition.shift();
+      let groupInPolicy = condition.join(' ');
+      if (groupInPolicy === groupName) {
+        delete policies[i];
+        break;
+      }
+    }
   }
 
   /**
-  * Forwards a request to add a user to the group with the given name to the PDP.
+  * Adds the given user email to the group with the given name.
   * @param  {String}  userEmail
   * @param  {String}  groupName
   */
-  addToGroup(userEmail, groupName) {
+  addToList(scope, type, groupName, userEmail) {
     let _this = this;
-    _this.pdp.addToGroup(userEmail, groupName);
+
+    let myGroups = _this.context.groups;
+    if (myGroups[scope] === undefined) {
+      myGroups[scope] = {};
+    }
+    if (myGroups[scope][groupName] === undefined) {
+      myGroups = _this.createList(scope, type, groupName);
+    }
+    if (myGroups[scope][groupName].indexOf(userEmail) === -1) {
+      myGroups[scope][groupName].push(userEmail);
+    }
+
   }
 
   /**
-  * Forwards a request to remove a user from the group with the given name to the PDP.
+  * Removes the given user email from the group with the given name.
   * @param  {String}  userEmail
   * @param  {String}  groupName
   */
-  removeFromGroup(userEmail, groupName) {
+  removeFromGroup(scope, groupName, userEmail) {
     let _this = this;
-    _this.pdp.removeFromGroup(userEmail, groupName);
+
+    let myGroups = _this.context.groups;
+    let group = myGroups[scope][groupName];
+
+    for (let i in group) {
+      if (group[i] === userEmail) {
+        group.splice(i, 1);
+        break;
+      }
+    }
   }
 
-  getTimeRestrictions() {
+  getTimeslots() {
     let _this = this;
-    let policies = _this.policies.user;
+    let policies = _this.context.policies.user;
     let timeRestrictions = [];
     for (let i in policies) {
       if (policies[i].condition.split(' ')[0] === 'time') {
@@ -312,70 +255,16 @@ class PolicyEngine {
     return timeRestrictions;
   }
 
-  getTimeRestrictionById(id) {
+  getTimeslotById(condition) {
     let _this = this;
-    let policies = _this.policies.user;
+    let policies = _this.context.policies.user;
     for (let i in policies) {
-      if (policies[i].id === id) {
+      if (policies[i].condition === condition) {
         return policies[i];
       }
     }
   }
 
-  changeTimePolicy(id, authorise) {
-    let _this = this;
-    let policies = _this.policies.user;
-    for (let i in policies) {
-      if (policies[i].id === id) {
-        policies[i].authorise = authorise;
-      }
-    }
-  }
-
-  /**
-  * Returns the scope of the given message to restrict policy applicability.
-  * @return {String} scope
-  */
-  getScope(message) {
-    let _this = this;
-    let scope;
-    if (_this.isObjectUpdate(message)) {
-      scope = 'objectManagement';
-    } else {
-      scope = 'user';
-    }
-    return scope;
-  }
-
-  isObjectUpdate(message) {
-    let isForChanges = (message.to === message.from + '/changes');
-    if (message.type === 'update' && isForChanges) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  /**
-  * Returns the policies associated with a scope.
-  * @param   {String} scope
-  * @return  {Array}  policies
-  */
-  getApplicablePolicies(scope) {
-    let _this = this;
-    let policiesTable = _this.policies;
-    let policies = [];
-    if (scope !== '*') {
-      if (policiesTable[scope] !== undefined) {
-        policies = policiesTable[scope];
-      }
-    } else {
-      for (let i in policiesTable) {
-        policies.push.apply(policies, policiesTable[i]);
-      }
-    }
-    return policies;
-  }
 }
 
 export default PolicyEngine;
