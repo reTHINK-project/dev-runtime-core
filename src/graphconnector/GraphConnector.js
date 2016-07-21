@@ -551,10 +551,11 @@ class GraphConnector {
         status = true;
       }
     }
-    return status;
 
     // re-calculate BF1hop
     this.calculateBloomFilter1Hop();
+
+    return status;
   }
 
   /**
