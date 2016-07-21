@@ -78,30 +78,27 @@ getRegistry.then(function(registry) {
       it('remove some contacts from GraphConnector', function() {
         let status;
         for (let j = 0; j < remGUIDArr.length; j++) {
-          status= graphConnector.removeContact(remGUIDArr[j]);
+          status = graphConnector.removeContact(remGUIDArr[j]);
           expect(status).to.equal(true);
-        } 
-        status= graphConnector.removeContact("4321");
+        }
+        status = graphConnector.removeContact('4321');
         expect(status).to.equal(false);
         expect(graphConnector.contacts.length).to.equal(270);
       });
 
-    it('editing contact (GUID, lname,fname)', function() {
+      it('editing contact (GUID, lname,fname)', function() {
         graphConnector.addContact('4321', 'eoJ', 'Landwunder');
-        let res = graphConnector.editContact('4321', 'Joe', 'Wunderland','4321')
-        
-        let result = graphConnector.editContact('4321','Joe','Wunderland','1234');
+        let res = graphConnector.editContact('4321', 'Joe', 'Wunderland', '4321');
+        let result = graphConnector.editContact('4321', 'Joe', 'Wunderland', '1234');
         expect(result[0].guid).to.equal(expectedEdit.guid);
-        result = graphConnector.editContact('1234','Joey','Wunderland','1234');
+        result = graphConnector.editContact('1234', 'Joey', 'Wunderland', '1234');
         expect(result[0].fname).to.equal(expectedEdit.fname);
-        result = graphConnector.editContact('1234','Joey','Wunderlander','1234');
+        result = graphConnector.editContact('1234', 'Joey', 'Wunderlander', '1234');
         expect(result[0].lname).to.equal(expectedEdit.lname);
-
-
       });
-      
+
       it('Adding a groupname to a contact', function() {
-        graphConnector.addContact('123456','john', 'snow');
+        graphConnector.addContact('123456', 'john', 'snow');
         let resultTrue = graphConnector.addGroupName('123456', 'Winterfell');
         let resultFalse = graphConnector.addGroupName('123456789', 'Winterfell');
         expect(resultTrue).to.equal(true);
@@ -115,32 +112,28 @@ getRegistry.then(function(registry) {
           expect(res.length).to.equal(2);
         });
 
-
       it('removing a groupname of a contact', function() {
-        graphConnector.addContact('123456','john', 'snow');
+        graphConnector.addContact('123456', 'john', 'snow');
         let resultTrue = graphConnector.removeGroupName('123456', 'Winterfell');
         let resultFalse = graphConnector.removeGroupName('123456789', 'Winterfell');
         expect(resultTrue).to.equal(true);
         expect(resultFalse).to.equal(false);
       });
 
-
       it('adding a residenceLocation to a contact', function() {
+
         let contact = graphConnector.setLocation('123456','Berlin');
         expect(contact).to.equal(true);
-        contact = graphConnector.setLocation('123456','Berlin');
+        contact = graphConnector.setLocation('123456', 'Berlin');
         expect(contact).to.equal(false);
       });
 
-      it('removing a residenceLocation',function(){
+      it('removing a residenceLocation', function() {
         let result = graphConnector.removeLocation('123456');
         expect(result).to.equal(true);
         result = graphConnector.removeLocation('123456');
         expect(result).to.equal(false);
-
       });
-
-
 
       it('get contact by first name', function() {
         graphConnector.addContact('kkk', 'Ishantiw', 'abc');
@@ -148,16 +141,17 @@ getRegistry.then(function(registry) {
         graphConnector.addContact('uuu', 'Ishantiwari', 'cde');
         let result = graphConnector.getContact('Ishan');
         expect(result.length).to.equal(3);
+
         //expect(result[0]).to.eql(expected);
       });
-
 
       it('get contact by last name', function() {
         graphConnector.addContact('kkk', 'fgh', 'Joky');
         graphConnector.addContact('lll', 'ghi', 'Jokyus');
         graphConnector.addContact('uuu', 'hij', 'Jokyi');
-        let result = graphConnector.getContact('Jok')
+        let result = graphConnector.getContact('Jok');
         expect(result.length).to.equal(3);
+
         ///expect(result[0]).to.eql(expected);
       });
 
@@ -167,15 +161,15 @@ getRegistry.then(function(registry) {
       });
 
       it('Adding user ID to contact', function() {
-        let resultTrue = graphConnector.addUserID("facebook/john");
-        let resultFalse =  graphConnector.addUserID("facebook/john");
+        let resultTrue = graphConnector.addUserID('facebook/john');
+        let resultFalse =  graphConnector.addUserID('facebook/john');
         expect(resultTrue).to.equal(true);
         expect(resultFalse).to.equal(false);
       });
 
       it('Removing user ID to contact', function() {
-        let resultTrue = graphConnector.removeUserID("facebook/john");
-        let resultFalse = graphConnector.removeUserID("facebook/john");
+        let resultTrue = graphConnector.removeUserID('facebook/john');
+        let resultFalse = graphConnector.removeUserID('facebook/john');
         expect(resultTrue).to.equal(true);
         expect(resultFalse).to.equal(false);
       });
