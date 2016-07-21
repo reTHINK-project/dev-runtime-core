@@ -86,6 +86,74 @@ getRegistry.then(function(registry) {
         expect(graphConnector.contacts.length).to.equal(270);
       });
 
+      it('check GUID when in direct contacts', function() {
+
+        // Format is: RelatedContacts<Direct<GraphConnectorContactData>,FoF<GraphConnectorContactData>>
+        let result = graphConnector.checkGUID('123');
+        let directContacts = result[0];
+        let fofs = result [1];
+        expect(result.length).to.equal(2);
+        expect(directContacts.length).to.equal(1);
+        expect(fofs.length).to.equal(0);
+        expect(directContacts[0]).to.eql(expected);
+      });
+
+      it('test direct contacts bloom filter', function() {
+
+        graphConnector.calculateBloomFilter1Hop();
+
+        for (let i = 0; i < remGUIDArr.length; i++) {
+          let result = graphConnector.contactsBloomFilter1Hop.test(remGUIDArr[i]);
+          if (result) console.log(contacts);
+          expect(result).to.equal(false);
+        }
+
+        let resultAlice = graphConnector.contactsBloomFilter1Hop.test('123');
+        expect(resultAlice).to.equal(true);
+        expect(graphConnector.contactsBloomFilter1Hop.test('absdgdghdftgh')).to.equal(false);
+        graphConnector.removeContact('123');
+        expect(graphConnector.contactsBloomFilter1Hop.test('123')).to.equal(false);
+      });
+
+      it('test privacy setting for contacts', function() {
+
+        graphConnector.addContact('123', 'Alice', 'Wonderland');
+        graphConnector.calculateBloomFilter1Hop();
+        expect(graphConnector.contactsBloomFilter1Hop.test('123')).to.equal(true);
+
+        // set private
+        graphConnector.getContact('Alice')[0].privateContact = true;
+        graphConnector.calculateBloomFilter1Hop();
+        expect(graphConnector.contactsBloomFilter1Hop.test('123')).to.equal(false);
+
+      });
+
+      it('check GUID when in friend-of-friend connection', function() {
+
+        let bf = new BloomFilter(
+          431328,   // number of bits to allocate.
+          10        // number of hash functions.
+        );
+
+        bf.add('george');
+        bf.add('jerry');
+        bf.add('elaine');
+        graphConnector.getContact('Alice')[0].contactsBloomFilter1Hop = bf;
+
+        let result = graphConnector.checkGUID('george');
+        let directContacts = result[0];
+        let fofs = result [1];
+        expect(result.length).to.equal(2);
+        expect(directContacts.length).to.equal(0);
+        expect(fofs.length).to.equal(1);
+
+        // connection through Alice
+        expect(fofs[0].firstName).to.eql('Alice');
+        expect(fofs[0].lastName).to.eql('Wonderland');
+        expect(fofs[0].guid).to.eql('123');
+
+      });
+
       it('editing contact (GUID, lname,fname)', function() {
         graphConnector.addContact('4321', 'eoJ', 'Landwunder');
         let res = graphConnector.editContact('4321', 'Joe', 'Wunderland', '4321');
@@ -172,74 +240,6 @@ getRegistry.then(function(registry) {
         let resultFalse = graphConnector.removeUserID('facebook/john');
         expect(resultTrue).to.equal(true);
         expect(resultFalse).to.equal(false);
-      });
-
-      it('check GUID when in direct contacts', function() {
-
-        // Format is: RelatedContacts<Direct<GraphConnectorContactData>,FoF<GraphConnectorContactData>>
-        let result = graphConnector.checkGUID('123');
-        let directContacts = result[0];
-        let fofs = result [1];
-        expect(result.length).to.equal(2);
-        expect(directContacts.length).to.equal(1);
-        expect(fofs.length).to.equal(0);
-        expect(directContacts[0]).to.eql(expected);
-      });
-
-      it('test direct contacts bloom filter', function() {
-
-        graphConnector.calculateBloomFilter1Hop();
-
-        for (let i = 0; i < remGUIDArr.length; i++) {
-          let result = graphConnector.contactsBloomFilter1Hop.test(remGUIDArr[i]);
-          expect(result).to.equal(false);
-        }
-
-        let resultAlice = graphConnector.contactsBloomFilter1Hop.test('123');
-        expect(resultAlice).to.equal(true);
-        expect(graphConnector.contactsBloomFilter1Hop.test('absdgdghdftgh')).to.equal(false);
-        graphConnector.removeContact('123');
-        expect(graphConnector.contactsBloomFilter1Hop.test('123')).to.equal(false);
-
-      });
-
-      it('test privacy setting for contacts', function() {
-
-        graphConnector.addContact('123', 'Alice', 'Wonderland');
-        graphConnector.calculateBloomFilter1Hop();
-        expect(graphConnector.contactsBloomFilter1Hop.test('123')).to.equal(true);
-
-        // set private
-        graphConnector.getContact('Alice')[0].privateContact = true;
-        graphConnector.calculateBloomFilter1Hop();
-        expect(graphConnector.contactsBloomFilter1Hop.test('123')).to.equal(false);
-
-      });
-
-      it('check GUID when in friend-of-friend connection', function() {
-
-        let bf = new BloomFilter(
-          431328,   // number of bits to allocate.
-          10        // number of hash functions.
-        );
-
-        bf.add('george');
-        bf.add('jerry');
-        bf.add('elaine');
-        graphConnector.getContact('Alice')[0].contactsBloomFilter1Hop = bf;
-
-        let result = graphConnector.checkGUID('george');
-        let directContacts = result[0];
-        let fofs = result [1];
-        expect(result.length).to.equal(2);
-        expect(directContacts.length).to.equal(0);
-        expect(fofs.length).to.equal(1);
-
-        // connection through Alice
-        expect(fofs[0].firstName).to.eql('Alice');
-        expect(fofs[0].lastName).to.eql('Wonderland');
-        expect(fofs[0].guid).to.eql('123');
-
       });
 
       it('bloom filter tests', function() {
