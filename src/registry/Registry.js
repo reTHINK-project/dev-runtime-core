@@ -556,6 +556,12 @@ class Registry extends EventEmitter {
 
                 _this._messageBus.postMessage(message, (reply) => {
                   console.log('===> RegisterHyperty Reply: ', reply);
+
+                  if (reply.body.code === 200) {
+                    resolve(adderessList[0]);
+                  } else {
+                    reject('Failed to register an Hyperty');
+                  }
                 });
 
                 //timer to keep the registration alive
@@ -577,7 +583,7 @@ class Registry extends EventEmitter {
                 console.log('Hyperty Schemas', filteredDataSchemas);
                 console.log('Hyperty resources', resources);
 
-                resolve(adderessList[0]);
+
               });
 
             }).catch(function(reason) {
