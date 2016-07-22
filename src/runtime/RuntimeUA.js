@@ -30,13 +30,11 @@ import PolicyEngine from '../policy/PolicyEngine';
 import MessageBus from '../bus/MessageBus';
 
 import Loader from './Loader';
+
 // import GraphConnector from '../graphconnector/GraphConnector';
 
 import SyncherManager from '../syncher/SyncherManager';
 import RuntimeCoreCtx from '../policy/context/RuntimeCoreCtx';
-
-import {divideURL, emptyObject} from '../utils/utils';
-
 /**
  * Runtime User Agent Interface will process all the dependecies of the core runtime;
  * @author Vitor Silva [vitor-t-silva@telecom.pt]
@@ -90,7 +88,10 @@ class RuntimeUA {
     let appSandbox = runtimeFactory.createAppSandbox();
 
     // Instantiate the Registry Module
-    _this.registry = new Registry(runtimeURL, appSandbox, _this.identityModule, _this.runtimeCatalogue, _this.loader);
+    _this.registry = new Registry(runtimeURL, appSandbox, _this.identityModule, _this.runtimeCatalogue);
+
+    // Set the loader to load Hyperties, Stubs and IdpProxies
+    _this.registry.loader = _this.loader;
 
     // Instantiate the Message Bus
     _this.messageBus = new MessageBus(_this.registry);
@@ -123,24 +124,6 @@ class RuntimeUA {
     // Register registry on IdentityModule
     _this.identityModule.registry = _this.registry;
 
-    _this.registry.addEventListener('runtime:loadStub', function(domainURL) {
-      _this.loadStub(domainURL).then(function() {
-        _this.registry.trigger('runtime:stubLoaded', domainURL);
-      }).catch(function(reason) {
-        console.error('Failed to deploy the ProtocolStub component ', reason);
-      });
-
-    });
-
-    _this.registry.addEventListener('runtime:loadIdpProxy', function(domainURL) {
-      _this.loadIdpProxy(domainURL).then(function() {
-        _this.registry.trigger('runtime:idpProxyLoaded', domainURL);
-      }).catch(function(reason) {
-        console.error('Failed to deploy the IDP Proxy component ', reason);
-      });
-
-    });
-
     // Use sandbox factory to use specific methods
     // and set the message bus to the factory
     runtimeFactory.messageBus = _this.messageBus;
@@ -150,8 +133,10 @@ class RuntimeUA {
 
     // Set into loader the needed components;
     _this.loader.registry = _this.registry;
+    _this.loader.runtimeURL = _this.runtimeURL;
     _this.loader.messageBus = _this.messageBus;
     _this.loader.runtimeCatalogue = _this.runtimeCatalogue;
+    _this.loader.runtimeFactory = _this.runtimeFactory;
 
     // Instantiate the Graph Connector
     // _this.graphConnector = new GraphConnector(_this.runtimeURL, _this.messageBus);
@@ -203,13 +188,20 @@ class RuntimeUA {
   */
   loadStub(protostubURL) {
 
-    let _this = this;
+    if (!protostubURL) throw new Error('ProtoStub descriptor url parameter is needed');
 
-    if (!protostubURL) throw new Error('domain parameter is needed');
+    return new Promise((resolve, reject) => {
 
-    return new Promise(function(resolve, reject) {
+      this.loader.loadStub(protostubURL)
+      .then((result) => {
+        resolve(result);
+      })
+      .catch((reason) => {
+        reject(reason);
+      });
 
     });
+
   }
 
   /**

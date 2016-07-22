@@ -86,6 +86,16 @@ class Registry extends EventEmitter {
     _this.messageFactory = msgFactory;
   }
 
+  set loader(loader) {
+    let _this = this;
+    _this._loader = loader;
+  }
+
+  get loader() {
+    let _this = this;
+    return _this._loader;
+  }
+
   /**
   * return the messageBus in this Registry
   * @param {MessageBus}           messageBus
@@ -556,6 +566,12 @@ class Registry extends EventEmitter {
 
                 _this._messageBus.postMessage(message, (reply) => {
                   console.log('===> RegisterHyperty Reply: ', reply);
+
+                  if (reply.body.code === 200) {
+                    resolve(adderessList[0]);
+                  } else {
+                    reject('Failed to register an Hyperty');
+                  }
                 });
 
                 //timer to keep the registration alive
@@ -577,7 +593,7 @@ class Registry extends EventEmitter {
                 console.log('Hyperty Schemas', filteredDataSchemas);
                 console.log('Hyperty resources', resources);
 
-                resolve(adderessList[0]);
+
               });
 
             }).catch(function(reason) {
@@ -892,26 +908,45 @@ class Registry extends EventEmitter {
         request  = _this.protostubsList[domainUrl];
       }
 
-      _this.addEventListener('runtime:stubLoaded', function(domainUrl) {
-        request  = _this.protostubsList[domainUrl];
-        console.info('Resolved Protostub: ', request);
-        resolve(request);
-      });
-
-      _this.addEventListener('runtime:idpProxyLoaded', function(domainUrl) {
-        request  = _this.idpProxyList[domainUrl];
-        console.info('Resolved IDPProxy: ', request);
-        resolve(request);
-      });
+      // _this.addEventListener('runtime:stubLoaded', function(domainUrl) {
+      //   request  = _this.protostubsList[domainUrl];
+      //   console.info('Resolved Protostub: ', request);
+      //   resolve(request);
+      // });
+      //
+      // _this.addEventListener('runtime:idpProxyLoaded', function(domainUrl) {
+      //   request  = _this.idpProxyList[domainUrl];
+      //   console.info('Resolved IDPProxy: ', request);
+      //   resolve(request);
+      // });
 
       if (request !== undefined) {
         console.info('Resolved: ', request);
         resolve(request);
       } else {
         if (type === 'domain-idp') {
-          _this.trigger('runtime:loadIdpProxy', domainUrl);
+          // _this.trigger('runtime:loadIdpProxy', domainUrl);
+
+          _this._loader.loadIdpProxy(domainUrl).then((result) => {
+            request  = _this.idpProxyList[domainUrl];
+            console.info('Resolved IDPProxy: ', request, result);
+            resolve(request);
+          }).catch((reason) => {
+            console.error('Error resolving IDPProxy: ', reason);
+            reject(reason);
+          });
+
         } else {
-          _this.trigger('runtime:loadStub', domainUrl);
+          // _this.trigger('runtime:loadStub', domainUrl);
+
+          _this._loader.loadStub(domainUrl).then((result) => {
+            request  = _this.protostubsList[domainUrl];
+            console.info('Resolved Protostub: ', request, result);
+            resolve(request);
+          }).catch((reason) => {
+            console.error('Error resolving Protostub: ', reason);
+            reject(reason);
+          });
         }
 
       }
