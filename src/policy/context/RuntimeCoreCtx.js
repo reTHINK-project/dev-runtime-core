@@ -213,15 +213,9 @@ class RuntimeCoreCtx extends CommonCtx {
       return _this.idModule.getIdentityOfHyperty(message.body.source);
     }
 
-    console.log('divideURL(from).type');
-    console.log(divideURL(message.from).type);
     if (divideURL(message.from).type === 'hyperty') {
-      console.log('in if');
-      console.log('getting identity of ' + message.from);
       return _this.idModule.getIdentityOfHyperty(message.from);
     } else {
-      console.log('in else');
-      console.log('getting identity of ' + _this._getURL(message.from));
       return _this.idModule.getIdentityOfHyperty(_this._getURL(message.from));
     }
   }
