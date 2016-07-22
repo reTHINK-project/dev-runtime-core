@@ -103,21 +103,20 @@ class SyncherManager {
       console.log('Scheme: ', scheme);
 
       // schema validation
-      console.log("running object validation...");
+      console.log("Running object validation...");
       try {
         let obj = msg.body.value;
         let schema = descriptor.sourcePackage.sourceCode;
         var result = tv4.validateMultiple(obj, schema);
 
-        // check result and throw error if invalid
-        if (!result.valid) {
-          console.warn("object validation failed!", JSON.stringify(result.errors, null, 2));
-          console.debug("object:", JSON.stringify(obj, null, 2), "\r\nschema:", JSON.stringify(schema, null, 2));
+        // warn about failed object validation if validation failed or schema contains $refs
+        if (!result.valid || (result.missing && result.missing.length > 0)) {
+          console.warn("Object validation " + (result.valid ? "succeeded, but schema contained references:" : "failed:"), JSON.stringify(result, null, 2));
+          console.debug("Object:", JSON.stringify(obj, null, 2), "\r\nSchema:", JSON.stringify(schema, null, 2));
 
-          // TODO this should throw an error
-          //throw new Error("object validation failed:", result.error.message);
+          // TODO maybe change handling and enforce Error
         } else {
-          console.log("object validation succeeded", result);
+          console.log("Object validation succeeded");
         }
       } catch (e) {
         console.warn("Error during object validation:", e);
