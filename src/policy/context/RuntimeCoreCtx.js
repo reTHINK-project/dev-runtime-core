@@ -213,8 +213,17 @@ class RuntimeCoreCtx extends CommonCtx {
       return _this.idModule.getIdentityOfHyperty(message.body.source);
     }
 
-    let from = _this._getURL(message.from);
-    return _this.idModule.getIdentityOfHyperty(_this._getURL(from));
+    console.log('divideURL(from).type');
+    console.log(divideURL(message.from).type);
+    if (divideURL(message.from).type === 'hyperty') {
+      console.log('in if');
+      console.log('getting identity of ' + message.from);
+      return _this.idModule.getIdentityOfHyperty(message.from);
+    } else {
+      console.log('in else');
+      console.log('getting identity of ' + _this._getURL(message.from));
+      return _this.idModule.getIdentityOfHyperty(_this._getURL(message.from));
+    }
   }
 
   isToVerify(message) {
@@ -268,12 +277,16 @@ class RuntimeCoreCtx extends CommonCtx {
   registerSubscriber(message, authDecision) {
     let _this = this;
     let to = message.to.split('/');
-    let isDataObjectSubscription = to[4] === 'subscription';
+    let subsIndex = to.indexOf('subscription');
+    let isDataObjectSubscription = subsIndex !== -1;
 
     if (authDecision && isDataObjectSubscription) {
-      let dataObjectURL = message.to.split('/');
-      dataObjectURL.pop();
-      dataObjectURL = dataObjectURL[0] + '//' + dataObjectURL[2] + '/' + dataObjectURL[3];
+      to.pop();
+      let dataObjectURL = to[0] + '//' + to[2] + '/' + to[3];
+      if (to[subsIndex - 1] !== undefined) {
+        dataObjectURL += '/' + to[subsIndex - 1];
+      }
+      console.log('registering ' + dataObjectURL);
       _this.runtimeRegistry.registerSubscriber(dataObjectURL, message.body.subscriber);
     }
   }
@@ -281,12 +294,16 @@ class RuntimeCoreCtx extends CommonCtx {
   doMutualAuthentication(message, authDecision) {
     let _this = this;
     let to = message.to.split('/');
-    let isDataObjectSubscription = to[4] === 'subscription';
+    let subsIndex = to.indexOf('subscription');
+    let isDataObjectSubscription = subsIndex !== -1;
 
     if (authDecision && isDataObjectSubscription) {
-      let dataObjectURL = message.to.split('/');
-      dataObjectURL.pop();
-      dataObjectURL = dataObjectURL[0] + '//' + dataObjectURL[2] + '/' + dataObjectURL[3];
+      to.pop();
+      let dataObjectURL = to[0] + '//' + to[2] + '/' + to[3];
+      if (to.length > 4) {
+        dataObjectURL = to[0] + '//' + to[2] + '/' + to[3] + '/' + to[4];
+      }
+      console.log('doing mutual authentication ' + dataObjectURL);
       _this.idModule.doMutualAuthentication(dataObjectURL, message.body.subscriber);
     }
   }
