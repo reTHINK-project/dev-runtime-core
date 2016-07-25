@@ -455,4 +455,10 @@ describe('Policy Engine with Runtime Core context', () => {
     });
   });
 
+  describe('initial filtering', () => {
+    it('message that loads an hyperty should not be validated by policies', () => {
+      let loadMessage = { id: 2, from: 'hyperty-runtime://sandbox/external', to: 'hyperty-runtime://sandbox/internal', type: 'create' };
+      expect(policyEngine.context.isToVerify(loadMessage)).to.be.eql(false);
+    });
+  });
 });
