@@ -291,30 +291,32 @@ class GraphConnector {
 
   /**
    * Edit the values for a specific user
-   * @param  {string}     guidOrg          GUID of the user.
+   * @param  {string}     guidOld          GUID of the user.
    * @param  {string}     firstName          First name of the user.
    * @param  {string}     lastName          Last name of the user.
-   * @param  {string}     guid          new guid of the user.
+   * @param  {string}     guidNew          new guid of the user.
+   * @param  {boolean}     privStatus          true if the user is private
    * @returns  {array}   Returns the array which contains the contact with new values
    */
-   editContact(guidOrg,firstName,lastName,guid) {
+   editContact(guidOld, firstName, lastName, guidNew, privStatus) {
 
      let rtnArray = [];
-     let status;
      let tmpFname;
      let tmpLname;
      let tmpGuid;
-
+     let tmpPrivStatus;
      for (let i = 0; i < this.contacts.length; i++) {
-       if (this.contacts[i].guid == guidOrg) {
+       if (this.contacts[i].guid == guidOld) {
 
          tmpGuid = this.contacts[i].guid;
          tmpLname = this.contacts[i].lastName;
          tmpFname = this.contacts[i].firstName;
+         tmpPrivStatus = this.contacts[i].privateContact;
 
          (tmpFname == firstName) ? (this.contacts[i].firstName = tmpFname) : this.contacts[i].firstName = firstName;
          (tmpLname == lastName) ? (this.contacts[i].lastName = tmpLname) : this.contacts[i].lastName = lastName;
-         (guidOrg == guid) ? (this.contacts[i].guid = guidOrg) : this.contacts[i].guid = guid;
+         (guidOld == guidNew) ? (this.contacts[i].guid = guidOld) : this.contacts[i].guid = guidNew;
+         (tmpPrivStatus == privStatus) ? (this.contacts[i].privateContact = tmpPrivStatus) : this.contacts[i].privateContact = privStatus;
 
          rtnArray.push(this.contacts[i]);
        }
@@ -538,39 +540,6 @@ class GraphConnector {
     return this.contacts;
   }
 
-  /**
-   * Update the GUID of a particular contact
-   * @param  {string}   guidOld     Old GUID of the contact which needs to be changed.
-   * @param  {string}   guidNew     new GUID of the contact.
-   * @returns  boolean  returns true if the contact is found and the guid is changed to new guid, otherwise returns false.
-   */
-  updateContactGUID(guidOld, guidNew) {
-    let success = false;
-    for (let i = 0; i < this.contacts.length; i++) {
-      if (this.contacts[i].guid == guidOld) {
-        this.contacts[i].guid = guidNew;
-        success = true;
-      }
-    }
-    return success;
-  }
-
-  /**
-   * Sets the privacy of the contact by setting if the contact is private or not.
-   * @param  {string}   guid         GUID of the new contact.
-   * @param  {boolean}   status     Privacy of the contact to be set to true or false
-   * @returns  {boolean}  Success if the group name is successfully added
-   */
-  setPrivacy(guid, status) {
-    let success = false;
-    for (let i = 0; i < this.contacts.length; i++) {
-      if (this.contacts[i].guid == guid) {
-        this.contacts[i].privateContact = status;
-        success = true;
-      }
-    }
-    return success;
-  }
   /**
    * Remove a contact from the Graph Connector.
    * @param  {string}     guid      GUID of the user to be removed.
