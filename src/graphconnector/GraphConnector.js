@@ -1191,6 +1191,39 @@ class GraphConnector {
   }
 
   /**
+   * Update the GUID of a particular contact
+   * @param  {string}   guidOld     Old GUID of the contact which needs to be changed.
+   * @param  {string}   guidNew     new GUID of the contact.
+   * @returns  boolean  returns true if the contact is found and the guid is changed to new guid, otherwise returns false.
+   */
+  updateContactGUID(guidOld, guidNew) {
+    let success = false;
+    for (let i = 0; i < this.contacts.length; i++) {
+      if (this.contacts[i].guid == guidOld) {
+        this.contacts[i].guid = guidNew;
+        success = true;
+      }
+    }
+    return success;
+  }
+
+  /**
+   * Sets the privacy of the contact by setting if the contact is private or not.
+   * @param  {string}   guid         GUID of the new contact.
+   * @param  {boolean}   status     Privacy of the contact to be set to true or false
+   * @returns  {boolean}  Success if the group name is successfully added
+   */
+  setPrivacy(guid, status) {
+    let success = false;
+    for (let i = 0; i < this.contacts.length; i++) {
+      if (this.contacts[i].guid == guid) {
+        this.contacts[i].privateContact = status;
+        success = true;
+      }
+    }
+    return success;
+  }
+  /**
    * Remove a contact from the Graph Connector.
    * @param  {string}     guid      GUID of the user to be removed.
    */
