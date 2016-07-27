@@ -154,15 +154,18 @@ getRegistry.then(function(registry) {
 
       });
 
-      it('editing contact (GUID, lname,fname)', function() {
+      it('editing contact (GUID, lname, fname, privacyStatus)', function() {
+        expectedEdit.privateContact = true;
         graphConnector.addContact('4321', 'eoJ', 'Landwunder');
-        let res = graphConnector.editContact('4321', 'Joe', 'Wunderland', '4321');
-        let result = graphConnector.editContact('4321', 'Joe', 'Wunderland', '1234');
+        let res = graphConnector.editContact('4321', 'Joe', 'Wunderland', '4321', true);
+        let result = graphConnector.editContact('4321', 'Joe', 'Wunderland', '1234', true);
         expect(result[0].guid).to.equal(expectedEdit.guid);
-        result = graphConnector.editContact('1234', 'Joey', 'Wunderland', '1234');
+        result = graphConnector.editContact('1234', 'Joey', 'Wunderland', '1234', true);
         expect(result[0].fname).to.equal(expectedEdit.fname);
-        result = graphConnector.editContact('1234', 'Joey', 'Wunderlander', '1234');
+        result = graphConnector.editContact('1234', 'Joey', 'Wunderlander', '1234', true);
         expect(result[0].lname).to.equal(expectedEdit.lname);
+        result = graphConnector.editContact('1234', 'Joey', 'Wunderlander', '1234', true);
+        expect(result[0].privateContact).to.equal(expectedEdit.privateContact);
       });
 
       it('Adding a groupname to a contact', function() {
@@ -238,27 +241,6 @@ getRegistry.then(function(registry) {
       it('Removing user ID to contact', function() {
         let resultTrue = graphConnector.removeUserID('facebook/john');
         let resultFalse = graphConnector.removeUserID('facebook/john');
-        expect(resultTrue).to.equal(true);
-        expect(resultFalse).to.equal(false);
-      });
-
-      it('updating the GUID of a contact', function() {
-        let guidOld = 'oldguid123';
-        let guidNew = 'newguid123';
-        graphConnector.addContact(guidOld, 'king', 'slayer');
-        let resultTrue = graphConnector.updateContactGUID(guidOld, guidNew) ;
-        let resultFalse = graphConnector.updateContactGUID(guidOld, guidNew);
-        expect(resultTrue).to.equal(true);
-        expect(resultFalse).to.equal(false);
-      });
-
-      it('setting the privacy of the contact', function() {
-        let status = true;
-        let guidTrue = 'privacytesting123';
-        let guidFalse = 'privacytesting123Negative';
-        graphConnector.addContact(guidTrue, 'ramsay', 'snow');
-        let resultTrue = graphConnector.setPrivacy(guidTrue, status);
-        let resultFalse = graphConnector.setPrivacy(guidFalse, status);
         expect(resultTrue).to.equal(true);
         expect(resultFalse).to.equal(false);
       });
