@@ -217,7 +217,7 @@ getRegistry.then(function(registry) {
         graphConnector.addContact('kkk', 'fgh', 'Joky');
         graphConnector.addContact('lll', 'ghi', 'Jokyus');
         graphConnector.addContact('uuu', 'hij', 'Jokyi');
-        let result = graphConnector.getContact('Jok');
+        let result = graphConnector.getContact('Joky');
         expect(result.length).to.equal(3);
 
         ///expect(result[0]).to.eql(expected);
@@ -238,6 +238,27 @@ getRegistry.then(function(registry) {
       it('Removing user ID to contact', function() {
         let resultTrue = graphConnector.removeUserID('facebook/john');
         let resultFalse = graphConnector.removeUserID('facebook/john');
+        expect(resultTrue).to.equal(true);
+        expect(resultFalse).to.equal(false);
+      });
+
+      it('updating the GUID of a contact', function() {
+        let guidOld = 'oldguid123';
+        let guidNew = 'newguid123';
+        graphConnector.addContact(guidOld, 'king', 'slayer');
+        let resultTrue = graphConnector.updateContactGUID(guidOld, guidNew) ;
+        let resultFalse = graphConnector.updateContactGUID(guidOld, guidNew);
+        expect(resultTrue).to.equal(true);
+        expect(resultFalse).to.equal(false);
+      });
+
+      it('setting the privacy of the contact', function() {
+        let status = true;
+        let guidTrue = 'privacytesting123';
+        let guidFalse = 'privacytesting123Negative';
+        graphConnector.addContact(guidTrue, 'ramsay', 'snow');
+        let resultTrue = graphConnector.setPrivacy(guidTrue, status);
+        let resultFalse = graphConnector.setPrivacy(guidFalse, status);
         expect(resultTrue).to.equal(true);
         expect(resultFalse).to.equal(false);
       });
