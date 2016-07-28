@@ -85,9 +85,9 @@ class GraphConnector {
   setOwnerName(fname,lname){
     let status=false;
     if(fname != 'undefined'){
-        this.globalRegistryRecord.firstName=fname;
+        this.firstName=fname;
       if(lname !='undefined'){
-        this.globalRegistryRecord.lastName = lname;
+        this.lastName = lname;
       }
     status=true;
     }
@@ -479,14 +479,18 @@ class GraphConnector {
   setLocation(guid, locationName) {
     let success = false;
     if (locationName !== 'undefined') {
-      for (let i = 0; i < this.contacts.length; i++) {
-        if (this.contacts[i].guid == guid){
-          if (!this.contacts[i].residenceLocation) {
-            this.contacts[i].residenceLocation = locationName;
-            success = true;
+      if (this.globalRegistryRecord.guid == guid) {
+        this.residenceLocation= locationName;
+        success = true;
+      }else {
+        for (let i = 0; i < this.contacts.length; i++) {
+          if (this.contacts[i].guid == guid){
+              this.contacts[i].residenceLocation = locationName;
+              success = true;
           }
         }
       }
+     
     }
     return success;
   }
@@ -581,7 +585,6 @@ class GraphConnector {
           if(this.groups[z]== groupName){
             this.groups.splice(z,1);
             success=true;
-           // console.info('Removing group from the owner');
           }
         }
       }else{
@@ -672,6 +675,26 @@ class GraphConnector {
     }
 
 
+  /**
+    Sets active atribute of globalRegistryRecord.
+    @returns {boolean} true if set succesfully , false otherwise  
+  */
+ 
+  setActive(boolean){   
+    if(typeof boolean === 'boolean'){
+      this.globalRegistryRecord.active=boolean;
+      return true;
+    } 
+    return false;
+  }
+ /**
+    Returns the globalRegistryRecord for the owner.
+    @returns {array}   
+  */
+
+  getGlobalRegistryRecord(){
+    return this.globalRegistryRecord;
+  }
 
 
   /**

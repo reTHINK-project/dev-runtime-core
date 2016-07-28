@@ -232,12 +232,11 @@ getRegistry.then(function(registry) {
         expect(resultFalse).to.equal(false);
       });
 
-      it('adding a residenceLocation to a contact', function() {
+      it('adding a residenceLocation to a contact and to owner', function() {
         let contact = graphConnector.setLocation('123456', 'Berlin');
-
         expect(contact).to.equal(true);
-        contact = graphConnector.setLocation('123456', 'Berlin');
-        expect(contact).to.equal(false);
+        contact = graphConnector.setLocation('1234567890qwertz', 'Honolulu');
+        expect(contact).to.equal(true);
       });
 
       it('removing a residenceLocation', function() {
@@ -246,6 +245,17 @@ getRegistry.then(function(registry) {
         result = graphConnector.removeLocation('123456');
         expect(result).to.equal(false);
       });
+
+
+      it('checking setActive() ', function() {
+        let result = graphConnector.setActive(true);
+        expect(result).to.equal(true);
+        result = graphConnector.setActive(false);
+        expect(result).to.equal(true);
+        
+      });
+
+
 
       it('get contact by first name', function() {
         graphConnector.addContact('kkk', 'Ishantiw', 'abc');
