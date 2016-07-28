@@ -70,6 +70,9 @@ getRegistry.then(function(registry) {
       graphConnector.addContact('123', 'Alice', 'Wonderland');
       var expected = new GraphConnectorContactData('123', 'Alice', 'Wonderland');
       var expectedEdit =  new GraphConnectorContactData('1234', 'Joey', 'Wunderlander');
+      //adding GUID for the owner for testing purposes
+      graphConnector.globalRegistryRecord.guid= '1234567890qwertz';
+
 
       it('create new GraphConnector with random contacts', function() {
         expect(graphConnector.contacts.length).to.equal(300);
@@ -191,7 +194,6 @@ getRegistry.then(function(registry) {
       });
 
       it('Adding and removing groupname to owner', function() {
-          let x= graphConnector.setGuidToOwner('1234567890qwertz');
           let res=graphConnector.addGroupName('1234567890qwertz', 'Winterfell');
           expect(res).to.equal(true);
           res = graphConnector.removeGroupName("1234567890qwertz","Winterfell");
