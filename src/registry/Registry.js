@@ -351,8 +351,8 @@ class Registry extends EventEmitter {
     let _this = this;
 
     let message = { type: 'delete', from: _this.registryURL,
-                   to: 'domain://registry.' + _this._domain + '/',
-                   body: { value: {user: user, hypertyURL: hypertyInstance }}};
+                    to: 'domain://registry.' + _this._domain + '/',
+                    body: { value: {user: user, hypertyURL: hypertyInstance }}};
 
     _this._messageBus.postMessage(message, (reply) => {
       console.log('unregister hyperty Reply', reply);
@@ -367,8 +367,8 @@ class Registry extends EventEmitter {
     let _this = this;
 
     let message = { type: 'delete', from: _this.registryURL,
-                   to: 'domain://registry.' + _this._domain + '/',
-                   body: { value: {name: name}}};
+                    to: 'domain://registry.' + _this._domain + '/',
+                    body: { value: {name: name}}};
 
     _this._messageBus.postMessage(message, (reply) => {
       console.log('unregister dataObject Reply', reply);
@@ -582,7 +582,6 @@ class Registry extends EventEmitter {
 
                 console.log('Hyperty Schemas', filteredDataSchemas);
                 console.log('Hyperty resources', resources);
-
 
               });
 
@@ -819,6 +818,7 @@ class Registry extends EventEmitter {
   */
   onEvent(event) {
     // TODO body...
+    console.log('onEvent');
   }
 
   /**
