@@ -202,8 +202,9 @@ getRegistry.then(function(registry) {
       it('getting all contacts with same groupName', function() {
           graphConnector.addGroupName('123456', 'Summerfall');
           graphConnector.addGroupName('1234', 'Summerfall');
+          graphConnector.addGroupName('1234567890qwertz','Summerfall')
           let res = graphConnector.getGroup('Summerfall');
-          expect(res.length).to.equal(2);
+          expect(res.length).to.equal(3);
         });
 
       it('getting all the group names of the user', function() {

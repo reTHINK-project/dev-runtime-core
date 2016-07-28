@@ -79,15 +79,15 @@ class GraphConnector {
 
   /**
   * Sets the first name and last name of the owner.
-  * @param {fname,lname}      
+  * @param {fname,[...lname]}      
   */
 
   setOwnerName(fname,lname){
     let status=false;
     if(fname != 'undefined'){
-      this.firstName=fname;
+        this.globalRegistryRecord.firstName=fname;
       if(lname !='undefined'){
-        this.lastName = lname;
+        this.globalRegistryRecord.lastName = lname;
       }
     status=true;
     }
@@ -491,10 +491,10 @@ class GraphConnector {
     return success;
   }
 
+
 /**
-   * gets all contacts with given groupTag.
-   * @param  {string}   groupName    of the contact
-   * @returns  {array}   matchingContacts       Contacts matching the given groupName. The format is: Contacts<GraphConnectorContactData>.
+   * gets all stored groupNames.
+   * @returns  {array}   all groupNames.
    */
 
   getGroupNames(){
@@ -512,9 +512,24 @@ class GraphConnector {
     return rtnArray;
   }
 
+
+  /**
+   * gets all contacts with given groupTag.
+   * @param  {string}   groupName    of the contact
+   * @returns  {array}   matchingContacts    Contacts matching the given groupName. The format is: Contacts<GraphConnectorContactData>.
+   */
+
+
   getGroup(groupName){
     let rtnArray = [];
+    let ownerTmp;
     if (groupName !== 'undefined'){
+      for (var k = 0; k < this.groups.length; k++) {
+         if(this.groups[k]==groupName){
+            ownerTmp = new GraphConnectorContactData(this.globalRegistryRecord.guid, this.globalRegistryRecord.firstName, this.globalRegistryRecord.lastName);
+            rtnArray.push(ownerTmp);
+         }
+      };
       for (let i = 0; i < this.contacts.length; i++) {
         for (let j = 0; j < this.contacts[i].groups.length; j++) {
           if (this.contacts[i].groups[j] == groupName) {
@@ -549,7 +564,11 @@ class GraphConnector {
     }
     return success;
   }
-
+  /** 
+      Sets a guid for the owner
+      @param  {string}   guid          GUID of the owner
+      
+  */
   setGuidToOwner(guid){
     this.globalRegistryRecord.guid= guid;
     return this.globalRegistryRecord.guid;
