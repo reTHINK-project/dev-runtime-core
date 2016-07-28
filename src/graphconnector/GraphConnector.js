@@ -78,6 +78,25 @@ class GraphConnector {
   }
 
   /**
+  * Sets the first name and last name of the owner.
+  * @param {fname,lname}      
+  */
+
+  setOwnerName(fname,lname){
+    let status=false;
+    if(fname != 'undefined'){
+      this.firstName=fname;
+      if(lname !='undefined'){
+        this.lastName = lname;
+      }
+    status=true;
+    }
+    return status;
+  }
+
+
+
+  /**
    * Generates a GUID and returns a mnemonic from which the GUID can be re-created later.
    * @returns  {string}    mnemonic      A string with 16 words.
    */
@@ -395,7 +414,9 @@ class GraphConnector {
       }
     }
     if (found) {
-      this.globalRegistryRecord.userIDs.push(userID);
+      this.globalRegistryRecord.userIDs.push(userID);      
+      this.globalRegistryRecord.lastUpdate= new Date().toISOString();
+
     }
     return found;
   }
@@ -410,6 +431,7 @@ class GraphConnector {
     for (let i = 0; i < this.globalRegistryRecord.userIDs.length; i++) {
       if (this.globalRegistryRecord.userIDs == userID) {
         this.globalRegistryRecord.userIDs.splice(i, 1);
+        this.globalRegistryRecord.lastUpdate= new Date().toISOString();
         found = true;
       }
     }
@@ -458,7 +480,7 @@ class GraphConnector {
     let success = false;
     if (locationName !== 'undefined') {
       for (let i = 0; i < this.contacts.length; i++) {
-        if (this.contacts[i].guid == guid) {
+        if (this.contacts[i].guid == guid){
           if (!this.contacts[i].residenceLocation) {
             this.contacts[i].residenceLocation = locationName;
             success = true;
@@ -475,9 +497,24 @@ class GraphConnector {
    * @returns  {array}   matchingContacts       Contacts matching the given groupName. The format is: Contacts<GraphConnectorContactData>.
    */
 
-  getGroup(groupName) {
+  getGroupNames(){
+    let rtnSet = new Set();
+    for (let i = 0; i < this.contacts.length; i++){
+      for (let j = 0; j < this.contacts[i].groups.length; j++) {
+        rtnSet.add(this.contacts[i].groups[j]);
+      }
+    }
+    for(let k=0; k<this.groups.length; k++){
+      rtnSet.add(this.groups[k]);
+    }
+   
+    let rtnArray = Array.from(rtnSet);
+    return rtnArray;
+  }
+
+  getGroup(groupName){
     let rtnArray = [];
-    if (groupName !== 'undefined') {
+    if (groupName !== 'undefined'){
       for (let i = 0; i < this.contacts.length; i++) {
         for (let j = 0; j < this.contacts[i].groups.length; j++) {
           if (this.contacts[i].groups[j] == groupName) {
@@ -498,14 +535,24 @@ class GraphConnector {
   addGroupName(guid, groupName) {
     let success = false;
     if (groupName !== 'undefined') {
-      for (let i = 0; i < this.contacts.length; i++) {
-        if (this.contacts[i].guid == guid) {
-          this.contacts[i].groups.push(groupName);
-          success = true;
+      if (guid == this.globalRegistryRecord.guid) {
+          this.groups.push(groupName);
+          success=true;
+      }else{
+        for (let i = 0; i < this.contacts.length; i++) {
+          if (this.contacts[i].guid == guid) {
+            this.contacts[i].groups.push(groupName);
+            success = true;
+          }
         }
       }
     }
     return success;
+  }
+
+  setGuidToOwner(guid){
+    this.globalRegistryRecord.guid= guid;
+    return this.globalRegistryRecord.guid;
   }
 
   /**
@@ -518,16 +565,27 @@ class GraphConnector {
   removeGroupName(guid, groupName) {
     let success = false;
     if (groupName !== 'undefined') {
-      for (let i = 0; i < this.contacts.length; i++) {
-        if (this.contacts[i].guid == guid) {
-          for (var j = 0; j < this.contacts[i].groups.length; j++) {
-            if (this.contacts[i].groups[j] == groupName) {
-              this.contacts[i].groups.splice(j, 1);
-            }
-            success = true;
-          };
+      if (guid == this.globalRegistryRecord.guid) {
+        for (let z = 0; z < this.groups.length; z++) {
+          if(this.groups[z]== groupName){
+            this.groups.splice(z,1);
+            success=true;
+           // console.info('Removing group from the owner');
+          }
+        }
+      }else{
+        for (let i = 0; i < this.contacts.length; i++) {
+          if (this.contacts[i].guid == guid) {
+            for (var j = 0; j < this.contacts[i].groups.length; j++) {
+              if (this.contacts[i].groups[j] == groupName) {
+                this.contacts[i].groups.splice(j, 1);
+              }
+              success = true;
+            };
+          }
         }
       }
+
     }
     return success;
   }
@@ -601,6 +659,9 @@ class GraphConnector {
 
       return rtnArray;
     }
+
+
+
 
   /**
    * Checks, if the given GUID is known and returns a list of contacs that are direct connections as well as a list of contacts that (most likely) know the given contact.
