@@ -564,15 +564,7 @@ class GraphConnector {
     }
     return success;
   }
-  /** 
-      Sets a guid for the owner
-      @param  {string}   guid          GUID of the owner
-      
-  */
-  setGuidToOwner(guid){
-    this.globalRegistryRecord.guid= guid;
-    return this.globalRegistryRecord.guid;
-  }
+
 
   /**
    * Removes a groupName of a contact.
