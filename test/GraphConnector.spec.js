@@ -187,14 +187,27 @@ getRegistry.then(function(registry) {
         let resultFalse = graphConnector.addGroupName('123456789', 'Winterfell');
         expect(resultTrue).to.equal(true);
         expect(resultFalse).to.equal(false);
+        resultFalse=graphConnector.addGroupName('123456789', 'Winterfell');
+        expect(resultFalse).to.equal(false);
       });
 
       it('Adding and removing groupname to owner', function() {
         let res = graphConnector.addGroupName('1234567890qwertz', 'Winterfell');
         expect(res).to.equal(true);
-        res = graphConnector.removeGroupName('1234567890qwertz', 'Winterfell');
+        res = graphConnector.addGroupName('1234567890qwertz', 'Winterfell');
+        expect(res).to.equal(false);
+        res=graphConnector.removeGroupName('1234567890qwertz', 'Winterfell');
         expect(res).to.equal(true);
       });
+
+
+      it('adding a residenceLocation to a contact and to owner', function() {
+        let contact = graphConnector.setLocation('123456', 'Berlin');
+        expect(contact).to.equal(true);
+        contact = graphConnector.setLocation('1234567890qwertz', 'Honolulu');
+        expect(contact).to.equal(true);
+      });
+
 
       it('getting all contacts with same groupName', function() {
           graphConnector.addGroupName('123456', 'Summerfall');
@@ -223,12 +236,7 @@ getRegistry.then(function(registry) {
         expect(resultFalse).to.equal(false);
       });
 
-      it('adding a residenceLocation to a contact and to owner', function() {
-        let contact = graphConnector.setLocation('123456', 'Berlin');
-        expect(contact).to.equal(true);
-        contact = graphConnector.setLocation('1234567890qwertz', 'Honolulu');
-        expect(contact).to.equal(true);
-      });
+      
 
       it('removing a residenceLocation', function() {
         let result = graphConnector.removeLocation('123456');
@@ -242,8 +250,8 @@ getRegistry.then(function(registry) {
         expect(result).to.equal(true);
         result = graphConnector.setActive(false);
         expect(result).to.equal(true);
-
       });
+
 
       it('get contact by first name', function() {
         graphConnector.addContact('kkk', 'Ishantiw', 'abc');

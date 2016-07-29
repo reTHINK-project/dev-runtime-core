@@ -85,9 +85,9 @@ class GraphConnector {
 
   setOwnerName(fname, lname) {
     let status = false;
-    if (fname != 'undefined') {
+    if (typeof fname !== 'undefined') {
       this.firstName = fname;
-      if (lname != 'undefined') {
+      if (typeof lname !== 'undefined') {
         this.lastName = lname;
       }
       status = true;
@@ -450,11 +450,16 @@ class GraphConnector {
    */
   removeLocation(guid) {
     let success = false;
+    if (this.globalRegistryRecord.guid == guid) {
+      this.residenceLocation = '';
+      success=true;
+    }else{
     for (let i = 0; i < this.contacts.length; i++) {
       if (this.contacts[i].guid == guid) {
         if (this.contacts[i].residenceLocation != '') {
           this.contacts[i].residenceLocation = '';
           success = true;
+          }
         }
       }
     }
@@ -516,10 +521,13 @@ class GraphConnector {
     if (groupName !== 'undefined') {
       for (var k = 0; k < this.groups.length; k++) {
         if (this.groups[k] == groupName) {
-          ownerTmp = new GraphConnectorContactData(this.globalRegistryRecord.guid, this.globalRegistryRecord.firstName, this.globalRegistryRecord.lastName);
+          ownerTmp = new GraphConnectorContactData(this.globalRegistryRecord.guid, this.firstName, this.lastName);
+          (typeof this.residenceLocation == 'undefined') ? ownerTmp.residenceLocation = '' : ownerTmp.residenceLocation=this.residenceLocation;
+          ownerTmp.userIDs = this.globalRegistryRecord.userIDs
+          ownerTmp.groups =this.groups;
           rtnArray.push(ownerTmp);
         }
-      };
+      }
       for (let i = 0; i < this.contacts.length; i++) {
         for (let j = 0; j < this.contacts[i].groups.length; j++) {
           if (this.contacts[i].groups[j] == groupName) {
@@ -541,13 +549,17 @@ class GraphConnector {
     let success = false;
     if (groupName !== 'undefined') {
       if (guid == this.globalRegistryRecord.guid) {
-        this.groups.push(groupName);
-        success = true;
+        if(!this.groups.includes(groupName)) {
+          this.groups.push(groupName);
+          success = true;
+        }
       } else {
         for (let i = 0; i < this.contacts.length; i++) {
           if (this.contacts[i].guid == guid) {
-            this.contacts[i].groups.push(groupName);
-            success = true;
+            if (!this.contacts[i].groups.includes(groupName)) {
+              this.contacts[i].groups.push(groupName);
+              success = true;
+            }
           }
         }
       }
@@ -579,11 +591,10 @@ class GraphConnector {
                 this.contacts[i].groups.splice(j, 1);
               }
               success = true;
-            };
+            }
           }
         }
       }
-
     }
     return success;
   }
