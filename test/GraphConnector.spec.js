@@ -70,9 +70,9 @@ getRegistry.then(function(registry) {
       graphConnector.addContact('123', 'Alice', 'Wonderland');
       var expected = new GraphConnectorContactData('123', 'Alice', 'Wonderland');
       var expectedEdit =  new GraphConnectorContactData('1234', 'Joey', 'Wunderlander');
-      //adding GUID for the owner for testing purposes
-      graphConnector.globalRegistryRecord.guid= '1234567890qwertz';
 
+      //adding GUID for the owner for testing purposes
+      graphConnector.globalRegistryRecord.guid = '1234567890qwertz';
 
       it('create new GraphConnector with random contacts', function() {
         expect(graphConnector.contacts.length).to.equal(300);
@@ -101,18 +101,14 @@ getRegistry.then(function(registry) {
         expect(directContacts[0]).to.eql(expected);
       });
 
-       it('setting first and last name of the owner', function() {
+      it('setting first and last name of the owner', function() {
 
-        let result = graphConnector.setOwnerName('Tom','Sawyer');    
+        let result = graphConnector.setOwnerName('Tom', 'Sawyer');
         expect(result).to.equal(true);
-        result=graphConnector.setOwnerName('Tom')
+        result = graphConnector.setOwnerName('Tom');
         expect(result).to.equal(true);
 
       });
-
-
-     
-
 
       it('test direct contacts bloom filter', function() {
 
@@ -194,35 +190,30 @@ getRegistry.then(function(registry) {
       });
 
       it('Adding and removing groupname to owner', function() {
-          let res=graphConnector.addGroupName('1234567890qwertz', 'Winterfell');
-          expect(res).to.equal(true);
-          res = graphConnector.removeGroupName("1234567890qwertz","Winterfell");
-          expect(res).to.equal(true);
-          });
-
+        let res = graphConnector.addGroupName('1234567890qwertz', 'Winterfell');
+        expect(res).to.equal(true);
+        res = graphConnector.removeGroupName('1234567890qwertz', 'Winterfell');
+        expect(res).to.equal(true);
+      });
 
       it('getting all contacts with same groupName', function() {
           graphConnector.addGroupName('123456', 'Summerfall');
           graphConnector.addGroupName('1234', 'Summerfall');
-          graphConnector.addGroupName('1234567890qwertz','Summerfall')
+          graphConnector.addGroupName('1234567890qwertz', 'Summerfall');
           let res = graphConnector.getGroup('Summerfall');
           expect(res.length).to.equal(3);
         });
 
       it('getting all the group names of the user', function() {
 
-        let result=graphConnector.getGroupNames();
-        //graphConnector.tempMethod();  
+        let result = graphConnector.getGroupNames();
         expect(result.length).to.equal(2);
         graphConnector.addGroupName('1234', 'SSummerfall');
-        result=graphConnector.getGroupNames();
+        result = graphConnector.getGroupNames();
         expect(result.length).to.equal(3);
-        graphConnector.removeGroupName('1234','SSummerfall')
+        graphConnector.removeGroupName('1234', 'SSummerfall');
 
-
- 
-        });
-       
+      });
 
       it('removing a groupname of a contact', function() {
         graphConnector.addContact('123456', 'john', 'snow');
@@ -246,16 +237,13 @@ getRegistry.then(function(registry) {
         expect(result).to.equal(false);
       });
 
-
       it('checking setActive() ', function() {
         let result = graphConnector.setActive(true);
         expect(result).to.equal(true);
         result = graphConnector.setActive(false);
         expect(result).to.equal(true);
-        
+
       });
-
-
 
       it('get contact by first name', function() {
         graphConnector.addContact('kkk', 'Ishantiw', 'abc');

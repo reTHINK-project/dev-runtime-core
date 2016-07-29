@@ -79,22 +79,21 @@ class GraphConnector {
 
   /**
   * Sets the first name and last name of the owner.
-  * @param {fname,[...lname]}      
+  * @param  {string}     fname     The owner's first name.
+  * @param  {string}     lname     The owner's last name.
   */
 
-  setOwnerName(fname,lname){
-    let status=false;
-    if(fname != 'undefined'){
-        this.firstName=fname;
-      if(lname !='undefined'){
+  setOwnerName(fname, lname) {
+    let status = false;
+    if (fname != 'undefined') {
+      this.firstName = fname;
+      if (lname != 'undefined') {
         this.lastName = lname;
       }
-    status=true;
+      status = true;
     }
     return status;
   }
-
-
 
   /**
    * Generates a GUID and returns a mnemonic from which the GUID can be re-created later.
@@ -309,33 +308,25 @@ class GraphConnector {
   }
 
   /**
-   * Edit the values for a specific user
-   * @param  {string}     guidOld          GUID of the user.
-   * @param  {string}     firstName          First name of the user.
-   * @param  {string}     lastName          Last name of the user.
-   * @param  {string}     guidNew          new guid of the user.
-   * @param  {boolean}     privStatus          true if the user is private
+   * Edit the values for a specific contact.
+   * @param  {string}     guidOld          GUID to identify the contact to edit.
+   * @param  {string}     firstName          First name of the contact.
+   * @param  {string}     lastName          Last name of the contact.
+   * @param  {string}     guidNew          New guid of the contact.
+   * @param  {boolean}     privStatus          Boolean value to set the private status of the contact.
    * @returns  {array}   Returns the array which contains the contact with new values
    */
    editContact(guidOld, firstName, lastName, guidNew, privStatus) {
 
      let rtnArray = [];
-     let tmpFname;
-     let tmpLname;
-     let tmpGuid;
-     let tmpPrivStatus;
+
      for (let i = 0; i < this.contacts.length; i++) {
        if (this.contacts[i].guid == guidOld) {
 
-         tmpGuid = this.contacts[i].guid;
-         tmpLname = this.contacts[i].lastName;
-         tmpFname = this.contacts[i].firstName;
-         tmpPrivStatus = this.contacts[i].privateContact;
-
-         (tmpFname == firstName) ? (this.contacts[i].firstName = tmpFname) : this.contacts[i].firstName = firstName;
-         (tmpLname == lastName) ? (this.contacts[i].lastName = tmpLname) : this.contacts[i].lastName = lastName;
-         (guidOld == guidNew) ? (this.contacts[i].guid = guidOld) : this.contacts[i].guid = guidNew;
-         (tmpPrivStatus == privStatus) ? (this.contacts[i].privateContact = tmpPrivStatus) : this.contacts[i].privateContact = privStatus;
+         this.contacts[i].firstName = firstName;
+         this.contacts[i].lastName = lastName;
+         this.contacts[i].guid = guidNew;
+         this.contacts[i].privateContact = privStatus;
 
          rtnArray.push(this.contacts[i]);
        }
@@ -414,8 +405,8 @@ class GraphConnector {
       }
     }
     if (found) {
-      this.globalRegistryRecord.userIDs.push(userID);      
-      this.globalRegistryRecord.lastUpdate= new Date().toISOString();
+      this.globalRegistryRecord.userIDs.push(userID);
+      this.globalRegistryRecord.lastUpdate = new Date().toISOString();
 
     }
     return found;
@@ -431,7 +422,7 @@ class GraphConnector {
     for (let i = 0; i < this.globalRegistryRecord.userIDs.length; i++) {
       if (this.globalRegistryRecord.userIDs == userID) {
         this.globalRegistryRecord.userIDs.splice(i, 1);
-        this.globalRegistryRecord.lastUpdate= new Date().toISOString();
+        this.globalRegistryRecord.lastUpdate = new Date().toISOString();
         found = true;
       }
     }
@@ -453,7 +444,7 @@ class GraphConnector {
   }
 
  /**
-   * Removes a location for a user
+   * Removes a location for a user identified by a given GUID.
    * @param  {string}   guid    GUID of the contact.
    * @returns  {boolean}  True if the group name is successfully deleted, false otherwise.
    */
@@ -471,7 +462,7 @@ class GraphConnector {
   }
 
   /**
-   * Adds a location for a user
+   * Adds a location for a user identified by a given GUID.
    * @param  {string}   guid          GUID of the contact.
    * @param  {string}   locationName    location  of the contact
    * @returns  {boolean}  Success if the group name is successfully added
@@ -480,59 +471,54 @@ class GraphConnector {
     let success = false;
     if (locationName !== 'undefined') {
       if (this.globalRegistryRecord.guid == guid) {
-        this.residenceLocation= locationName;
+        this.residenceLocation = locationName;
         success = true;
-      }else {
+      } else {
         for (let i = 0; i < this.contacts.length; i++) {
-          if (this.contacts[i].guid == guid){
-              this.contacts[i].residenceLocation = locationName;
-              success = true;
+          if (this.contacts[i].guid == guid) {
+            this.contacts[i].residenceLocation = locationName;
+            success = true;
           }
         }
       }
-     
+
     }
     return success;
   }
 
-
-/**
-   * gets all stored groupNames.
-   * @returns  {array}   all groupNames.
+  /**
+   * Returns all unique group names.
+   * @returns  {array}   Array containing all unique group names.
    */
-
-  getGroupNames(){
+  getGroupNames() {
     let rtnSet = new Set();
-    for (let i = 0; i < this.contacts.length; i++){
+    for (let i = 0; i < this.contacts.length; i++) {
       for (let j = 0; j < this.contacts[i].groups.length; j++) {
         rtnSet.add(this.contacts[i].groups[j]);
       }
     }
-    for(let k=0; k<this.groups.length; k++){
+    for (let k = 0; k < this.groups.length; k++) {
       rtnSet.add(this.groups[k]);
     }
-   
+
     let rtnArray = Array.from(rtnSet);
     return rtnArray;
   }
 
-
   /**
-   * gets all contacts with given groupTag.
-   * @param  {string}   groupName    of the contact
-   * @returns  {array}   matchingContacts    Contacts matching the given groupName. The format is: Contacts<GraphConnectorContactData>.
+   * Returns all contacts with a given group name, including the owner if applicable.
+   * @param  {string}   groupName    Name of the group to return.
+   * @returns  {array}   matchingContacts    Contacts matching the given group name. The format is: Contacts<GraphConnectorContactData>.
    */
-
-
-  getGroup(groupName){
+  getGroup(groupName) {
     let rtnArray = [];
     let ownerTmp;
-    if (groupName !== 'undefined'){
+    if (groupName !== 'undefined') {
       for (var k = 0; k < this.groups.length; k++) {
-         if(this.groups[k]==groupName){
-            ownerTmp = new GraphConnectorContactData(this.globalRegistryRecord.guid, this.globalRegistryRecord.firstName, this.globalRegistryRecord.lastName);
-            rtnArray.push(ownerTmp);
-         }
+        if (this.groups[k] == groupName) {
+          ownerTmp = new GraphConnectorContactData(this.globalRegistryRecord.guid, this.globalRegistryRecord.firstName, this.globalRegistryRecord.lastName);
+          rtnArray.push(ownerTmp);
+        }
       };
       for (let i = 0; i < this.contacts.length; i++) {
         for (let j = 0; j < this.contacts[i].groups.length; j++) {
@@ -546,18 +532,18 @@ class GraphConnector {
   }
 
   /**
-   * Adds a groupName to a contact.
-   * @param  {string}   guid          GUID of the new contact.
-   * @param  {string}   groupName     Group Name of the contact
-   * @returns  {boolean}  Success if the group name is successfully added
+   * Adds a group to a contact identified by a GUID.
+   * @param  {string}   guid          GUID of the contact.
+   * @param  {string}   groupName     Group Name to be added to the contact.
+   * @returns  {boolean}  Success if the group name is successfully added.
    */
   addGroupName(guid, groupName) {
     let success = false;
     if (groupName !== 'undefined') {
       if (guid == this.globalRegistryRecord.guid) {
-          this.groups.push(groupName);
-          success=true;
-      }else{
+        this.groups.push(groupName);
+        success = true;
+      } else {
         for (let i = 0; i < this.contacts.length; i++) {
           if (this.contacts[i].guid == guid) {
             this.contacts[i].groups.push(groupName);
@@ -569,25 +555,23 @@ class GraphConnector {
     return success;
   }
 
-
   /**
-   * Removes a groupName of a contact.
-   * @param  {string}   guid          GUID of the new contact.
-   * @param  {string}   groupName     Group Name of the contact
-   * @returns  {boolean}  True  if the group name is successfully added
-
+   * Removes a group for a contact, identified by a GUID.
+   * @param  {string}   guid          GUID of the contact.
+   * @param  {string}   groupName     Group name to be removed for the contact.
+   * @returns  {boolean}  Success if the group name is successfully removed.
    */
   removeGroupName(guid, groupName) {
     let success = false;
     if (groupName !== 'undefined') {
       if (guid == this.globalRegistryRecord.guid) {
         for (let z = 0; z < this.groups.length; z++) {
-          if(this.groups[z]== groupName){
-            this.groups.splice(z,1);
-            success=true;
+          if (this.groups[z] == groupName) {
+            this.groups.splice(z, 1);
+            success = true;
           }
         }
-      }else{
+      } else {
         for (let i = 0; i < this.contacts.length; i++) {
           if (this.contacts[i].guid == guid) {
             for (var j = 0; j < this.contacts[i].groups.length; j++) {
@@ -605,7 +589,7 @@ class GraphConnector {
   }
 
   /**
-   * Gets all the contacts.
+   * Returns all the contacts, excluding the owner.
    * @returns  {array}   All the contacts. The format is: Contacts<GraphConnectorContactData>.
    */
   getAllContacts() {
@@ -613,7 +597,7 @@ class GraphConnector {
   }
 
   /**
-   * Remove a contact from the Graph Connector.
+   * Removes a contact from the Graph Connector.
    * @param  {string}     guid      GUID of the user to be removed.
    */
   removeContact(guid) {
@@ -650,7 +634,7 @@ class GraphConnector {
   }
 
   /**
-   * returns the list of contacts which matches the search string "name". Ex. "Joh" will return users with first or last name "John" or "Aljohanas".
+   * Returns the list of contacts which matches the search string "name". Ex. "Joh" will return users with first or last name "John" or "Aljohanas".
    * @param  {string}   name    First or last name to look for in the contact list.
    * @returns  {array}   matchingContacts       Contacts matching the given name. The format is: Contacts<GraphConnectorContactData>.
    */
@@ -660,7 +644,6 @@ class GraphConnector {
       let fname;
       let lname;
 
-      //let tmp = '(?=' + name + ')+[a-z]*\\w';
       let patt =  new RegExp(name, 'i');
       for (let i = 0; i < this.contacts.length; i++) {
         fname = this.contacts[i].firstName;
@@ -674,28 +657,25 @@ class GraphConnector {
       return rtnArray;
     }
 
-
   /**
-    Sets active atribute of globalRegistryRecord.
-    @returns {boolean} true if set succesfully , false otherwise  
+    Sets active attribute of the GlobalRegistryRecord.
+    @returns {boolean} True if set succesfully, false otherwise.
   */
- 
-  setActive(boolean){   
-    if(typeof boolean === 'boolean'){
-      this.globalRegistryRecord.active=boolean;
+  setActive(boolean) {
+    if (typeof boolean === 'boolean') {
+      this.globalRegistryRecord.active = boolean;
       return true;
-    } 
+    }
     return false;
   }
+
  /**
     Returns the globalRegistryRecord for the owner.
-    @returns {array}   
+    @returns {array}
   */
-
-  getGlobalRegistryRecord(){
+  getGlobalRegistryRecord() {
     return this.globalRegistryRecord;
   }
-
 
   /**
    * Checks, if the given GUID is known and returns a list of contacs that are direct connections as well as a list of contacts that (most likely) know the given contact.
