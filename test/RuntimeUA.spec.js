@@ -20,67 +20,53 @@ import {RuntimeCatalogueLocal} from 'service-framework/dist/RuntimeCatalogue';
 
 import { divideURL } from '../src/utils/utils';
 
+import Loader from '../src/runtime/Loader';
+
 import RuntimeFactory from './resources/RuntimeFactory';
 
 // Testing runtimeUA;
 describe('RuntimeUA', function() {
 
   // Only for testing
-  let runtimeURL = 'runtime://sp.domain/123';
   let runtimeFactory = new RuntimeFactory();
   let runtime = new RuntimeUA(runtimeFactory, 'sp.domain');
 
   // Testing with the Local Runtime and Catalogue
   runtime.runtimeCatalogue = new RuntimeCatalogueLocal(runtimeFactory);
 
+  runtime.loader = new Loader();
+  runtime.loader.registry = runtime.registry;
+  runtime.loader.runtimeURL = runtime.runtimeURL;
+  runtime.loader.messageBus = runtime.messageBus;
+  runtime.loader.runtimeCatalogue = runtime.runtimeCatalogue;
+  runtime.loader.runtimeFactory = runtime.runtimeFactory;
+
   before(function() {
 
     let Hyperties = {
       HelloHyperty: {
-        cguid:'20',
-        type:'0',
-        version:'0.1',
-        description: 'description of Hello Hyperty',
-        objectName:'HelloHyperty',
-        sourcePackageURL: '/sourcePackage',
         sourcePackage: {
           sourceCode: '',
           sourceCodeClassname: 'HelloHyperty',
           encoding: 'UTF-8',
           signature: ''
         },
-        language:'Javascript ECMA5',
-        signature: '',
-        messageSchemas:'',
-        configuration:'',
-        constraints:'',
-        hypertyCapabilities: '',
-        protocolCapabilities: '',
-        policies: '',
-        dataObjects:[]
-      },
-      WorldHyperty:{
-        cguid:'2',
-        type:'0',
-        version:'0.1',
-        description: 'description of World Hyperty',
-        objectName:'WorldHyperty',
+        cguid: 10003,
+        version: 0.1,
+        description: 'Description of GroupChat',
+        objectName: 'HelloHyperty',
+        configuration: {},
+        hypertyType: [
+          'chat'
+        ],
         sourcePackageURL: '/sourcePackage',
-        sourcePackage: {
-          sourceCode: '',
-          sourceCodeClassname: 'WorldHyperty',
-          encoding: 'UTF-8',
-          signature: ''
-        },
-        language:'Javascript ECMA5',
+        language: 'javascript',
         signature: '',
-        messageSchemas:'',
-        configuration:'',
-        constraints:'',
-        hypertyCapabilities: '',
-        protocolCapabilities: '',
-        policies: '',
-        dataObjects:[]
+        messageSchemas: '',
+        dataObjects: [
+          'https://catalogue.sp.domain/.well-known/dataschema/Communication'
+        ],
+        accessControlPolicy: 'somePolicy'
       }
     };
 
@@ -113,6 +99,7 @@ describe('RuntimeUA', function() {
     };
 
     sinon.stub(runtime.runtimeCatalogue, '_createHyperty', function(_this, rawHyperty) {
+      console.log('getHypertyDescriptor: ', _this);
       return rawHyperty;
     });
 
@@ -157,18 +144,19 @@ describe('RuntimeUA', function() {
       return _this.getDescriptor(idpProxyURL, runtime.runtimeCatalogue._createIdpProxy);
     });
 
-    sinon.stub(runtime.runtimeCatalogue, 'getDescriptor', function(url, createFunc) {
-
-      let dividedURL = divideURL(url);
-      let identity = dividedURL.identity;
-
-      if (!identity) {
-        identity = 'default';
-      } else {
-        identity = identity.substring(identity.lastIndexOf('/') + 1);
-      }
+    sinon.stub(runtime.runtimeCatalogue, 'getDescriptor', (url, createFunc) => {
 
       return new Promise(function(resolve, reject) {
+        console.log(url, createFunc);
+
+        let dividedURL = divideURL(url);
+        let identity = dividedURL.identity;
+
+        if (!identity) {
+          identity = 'default';
+        } else {
+          identity = identity.substring(identity.lastIndexOf('/') + 1);
+        }
 
         let result;
 
@@ -179,7 +167,7 @@ describe('RuntimeUA', function() {
             reject(e);
           }
 
-        } else if (url.includes('ProtoStubs') || url.includes('protostub')) {
+        } else if (!(url.includes('Hyperties') || url.includes('Hyperty')) || url.includes('ProtoStubs') || url.includes('protostub')) {
           try {
             result = ProtoStubs[identity];
           } catch (e) {
@@ -202,33 +190,6 @@ describe('RuntimeUA', function() {
     sinon.stub(runtime.registry, 'registerHyperty')
     .returns(new Promise(function(resolve, reject) {
       resolve('hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d');
-    }));
-
-    sinon.stub(runtime.registry, 'discoverProtostub')
-    .returns(new Promise(function(resolve, reject) {
-      let stubDescriptor = ProtoStubs['default'];
-      stubDescriptor.configuration = JSON.stringify(stubDescriptor.configuration);
-      resolve(stubDescriptor);
-    }));
-
-    sinon.stub(runtime.registry, 'registerStub')
-    .returns(new Promise(function(resolve, reject) {
-      resolve('msg-node.sp.domain/protostub/8541');
-    }));
-
-    sinon.stub(runtime.registry, 'getSandbox')
-    .returns(new Promise(function(resolve, reject) {
-      resolve(runtimeFactory.createSandbox());
-    }));
-
-    sinon.stub(runtime.registry, 'getAppSandbox')
-    .returns(new Promise(function(resolve, reject) {
-      resolve(runtimeFactory.createAppSandbox());
-    }));
-
-    sinon.stub(runtime.messageBus, 'addListener')
-    .returns(new Promise(function(resolve, reject) {
-      resolve();
     }));
 
   });
@@ -276,7 +237,7 @@ describe('RuntimeUA', function() {
   describe('loadHyperty(hypertyDescriptorURL)', function() {
 
     it('should throw when given no arguments', function(done) {
-      let hypertyDescriptorURL = 'hyperty-catalogue://sp.domain/.well-known/hyperty/HelloHyperty';
+      let hypertyDescriptorURL = 'hyperty-catalogue://catalogue.sp.domain/.well-known/hyperty/HelloHyperty';
       let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL);
 
       expect(loadHyperty)
@@ -286,7 +247,7 @@ describe('RuntimeUA', function() {
 
     it('should be a Promise', function(done) {
 
-      let hypertyDescriptorURL = 'hyperty-catalogue://sp.domain/.well-known/hyperty/HelloHyperty';
+      let hypertyDescriptorURL = 'hyperty-catalogue://catalogue.sp.domain/.well-known/hyperty/HelloHyperty';
       let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL);
 
       expect(loadHyperty)
@@ -298,9 +259,8 @@ describe('RuntimeUA', function() {
 
     it('should be deployed', function(done) {
 
-      let hypertyDescriptorURL = 'hyperty-catalogue://sp.domain/.well-known/hyperty/HelloHyperty';
+      let hypertyDescriptorURL = 'hyperty-catalogue://catalogue.sp.domain/.well-known/hyperty/HelloHyperty';
       let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL);
-
       let hypertyResolved = ['runtimeHypertyURL', 'status'];
 
       expect(loadHyperty).to.be.fulfilled
@@ -341,6 +301,36 @@ describe('RuntimeUA', function() {
       let stubResolved = ['runtimeProtoStubURL', 'status'];
 
       expect(loadStubPromise).to.be.fulfilled
+      .and.eventually.to.have.all.keys(stubResolved)
+      .and.notify(done);
+    });
+
+  });
+
+  describe('loadIdpProxy(google.com)', function() {
+
+    it('should throw when given no arguments', function(done) {
+      let domain = 'google.com';
+      let loadIdpPromise = runtime.loadIdpProxy(domain);
+
+      expect(loadIdpPromise).to.be.fulfilled.and.notify(done);
+    });
+
+    it('should be a Promise', function(done) {
+      let domain = 'google.com';
+      let loadIdpPromise = runtime.loadIdpProxy(domain);
+
+      expect(loadIdpPromise).to.be.fulfilled
+      .to.be.instanceof(Promise)
+      .and.notify(done);
+    });
+
+    it('should be deployed', function(done) {
+      let domain = 'google.com';
+      let loadIdpPromise = runtime.loadIdpProxy(domain);
+      let stubResolved = ['runtimeIdpProxyURL', 'status'];
+
+      expect(loadIdpPromise).to.be.fulfilled
       .and.eventually.to.have.all.keys(stubResolved)
       .and.notify(done);
     });
