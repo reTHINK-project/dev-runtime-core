@@ -2,6 +2,7 @@
 import {divideURL, getUserURLFromEmail, getUserEmailFromURL, isDataObjectURL} from '../utils/utils.js';
 import Identity from './Identity';
 import Crypto from './Crypto';
+import GuiFake from './GuiFake';
 
 /**
 *
@@ -42,7 +43,8 @@ class IdentityModule {
     if (!runtimeURL) throw new Error('runtimeURL is missing.');
 
     _this._runtimeURL = runtimeURL;
-    _this._idmURL = runtimeURL + '/idm';
+    _this._idmURL = _this._runtimeURL + '/idm';
+    _this._guiURL = _this._runtimeURL + '/identity-gui';
 
     _this._domain = divideURL(_this._runtimeURL).domain;
 
@@ -70,6 +72,18 @@ class IdentityModule {
 
   }
 
+  test(string) {
+    let _this = this;
+    let message = {type:'create', to: _this._guiURL, from: _this._idmURL, body: {value: string}};
+
+    let id = _this._messageBus.postMessage(message);
+
+    _this._messageBus.addResponseListener(_this._idmURL, id, msg => {
+      console.log('here!!', msg.body.value);
+      _this._messageBus.removeResponseListener(_this._idmURL, id);
+    });
+  }
+
   /**
   * return the messageBus in this Registry
   * @param {MessageBus}           messageBus
@@ -86,6 +100,10 @@ class IdentityModule {
   set messageBus(messageBus) {
     let _this = this;
     _this._messageBus = messageBus;
+
+    //TODO remove later with the proper GUI message listener
+    let guiFake = new GuiFake(_this._guiURL, _this._messageBus);
+    _this.guiFake = guiFake;
   }
 
   /**
@@ -456,7 +474,6 @@ class IdentityModule {
     let _this = this;
 
     console.log('encrypt message ');
-    console.log('message.to', message.to);
 
     return new Promise(function(resolve, reject) {
       let isHandShakeType = message.type === 'handshake';
@@ -627,6 +644,7 @@ class IdentityModule {
 
               _this.crypto.verifyHMAC(chatKeys.keys.hypertyToHashKey, filteredMessage, hash).then(result => {
                 //console.log('result of hash verification! ', result);
+                message.body.assertedIdentity = true;
                 resolve(message);
               });
             });
@@ -676,16 +694,20 @@ class IdentityModule {
 
               _this.crypto.verifyHMAC(dataObjectKey.sessionKey, filteredMessage, hash).then(result => {
                 //console.log('result of hash verification! ', result);
+
+                message.body.assertedIdentity = true;
                 resolve(message);
               });
             });
 
           //if not, just return the message
           } else {
+            message.body.assertedIdentity = true;
             resolve(message);
           }
 
         } else {
+          message.body.assertedIdentity = true;
           resolve(message);
 
           //reject('no sessionKey for chat room found');
