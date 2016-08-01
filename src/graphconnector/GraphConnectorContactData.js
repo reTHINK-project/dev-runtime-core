@@ -38,6 +38,7 @@ class GraphConnectorContactData {
       this._firstName = firstName;
       this._lastName = lastName;
       this._privateContact = false;
+      this._contactsBloomFilter1Hop;
       this._lastSyncBloomFilter1Hop = new Date(0).toISOString();
       this._lastSyncDomainUserIDs = new Date(0).toISOString();
       this._residenceLocation;
