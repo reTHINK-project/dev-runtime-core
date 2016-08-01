@@ -668,6 +668,27 @@ class GraphConnector {
       return rtnArray;
     }
 
+
+
+    addTimeout(){ 
+      let diff = 15; //this is the difference in minutes you want from this.globalRegistryRecord.timeout's time.
+      let tmp = new Date();
+      if(this.globalRegistryRecord.timeout) { //shoudl we also check if the previous date is acctualy from the past?
+        tmp= new Date(this.globalRegistryRecord.timeout + diff*60000)
+        this.globalRegistryRecord.timeout = tmpDate.toISOString();
+        console.log(''+this.globalRegistryRecord.timeout)      
+        return true;
+      }else {
+        tmp.setMinutes(tmp.getMinutes() + diff );
+        this.globalRegistryRecord.timeout = tmp.toISOString();
+        return true;
+      }
+
+
+    }
+
+
+
   /**
     Sets active attribute of the GlobalRegistryRecord.
     @returns {boolean} True if set succesfully, false otherwise.

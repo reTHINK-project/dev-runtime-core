@@ -166,6 +166,12 @@ getRegistry.then(function(registry) {
 
       });
 
+       it('setTimeout test', function() {
+        let res = graphConnector.addTimeout();
+        expect(res).to.equal(true); 
+        console.log(graphConnector.globalRegistryRecord.timeout);
+      });
+
       it('editing contact (GUID, lname, fname, privacyStatus)', function() {
         expectedEdit.privateContact = true;
         graphConnector.addContact('4321', 'eoJ', 'Landwunder');
