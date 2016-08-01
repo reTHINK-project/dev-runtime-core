@@ -1,119 +1,102 @@
-import Context from '../Context';
 import {divideEmail} from '../../utils/utils';
 
-//import persistenceManager from '../../persistence/PersistenceManager';
-
-class CommonCtx extends Context {
+class CommonCtx {
 
   constructor() {
-    super();
-    let _this = this;
-    _this.policies = _this.loadPolicies();
-    _this.groups = {};
+    this.serviceProviderPolicies = {};
+    this.defaultBehavior = true;
+    this.groups = {};
   }
 
-  applyPolicies(message) {
-    let _this = this;
-    let policiesResult = [true, []];
-    let applicablePolicies = _this.getApplicablePolicies(message);
-    policiesResult = _this.pdp.evaluate(message, applicablePolicies);
-    message.body.auth = applicablePolicies.length !== 0;
-    _this.pep.enforce(policiesResult);
-    return { message: message, policiesResult: policiesResult };
+  get defaultBehavior() {
+    return this._defaultBehavior;
+  }
+
+  get serviceProviderPolicies() {
+    return this._serviceProviderPolicies;
+  }
+
+  set defaultBehavior(behavior) {
+    this._defaultBehavior = behavior;
+  }
+
+  set serviceProviderPolicies(policies) {
+    this._serviceProviderPolicies = policies;
   }
 
   set date(now) {
-    let _this = this;
     if (!now.message) {
-      _this._dateAttribute = (typeof now === 'string') ? now : _this._getDate();
+      if (typeof now === 'string') {
+        this._date = now;
+      } else {
+        let date = new Date();
+        let day = String(date.getDate());
+        if (day.length === 1) {
+          day = '0' + day;
+        }
+        let month = String(date.getMonth() + 1);
+        if (month.length === 1) {
+          month = '0' + month;
+        }
+
+        this._date = day + '/' + month + '/' + date.getFullYear();
+      }
     }
   }
 
   set domain(params) {
-    let _this = this;
-    _this._domainAttribute = divideEmail(params.message.body.identity.userProfile.username).domain;
+    this._domain = divideEmail(params.message.body.identity.userProfile.username).domain;
   }
 
   set source(params) {
-    let _this = this;
-    _this._sourceAttribute = params.message.body.identity.userProfile.username;
+    this._source = params.message.body.identity.userProfile.username;
   }
 
   set time(now) {
-    let _this = this;
     if (!now.message) {
-      _this._timeAttribute = (now) ? now : _this._getTime();
+      if (now) {
+        this._time = now;
+      } else {
+        let now = new Date();
+        let minutes = String(now.getMinutes());
+        if (minutes.length === 1) {
+          minutes = '0' + minutes;
+        }
+        this._time = parseInt(String(now.getHours()) + minutes);
+      }
     }
   }
 
   set weekday(now) {
-    let _this = this;
     if (!now.message) {
-      _this._weekdayAttribute = (now) ? now : _this._getWeekDay();
+      if (now) {
+        this._weekday = now;
+      } else {
+        this._weekday = String(new Date().getDay());
+      }
     }
   }
 
   get date() {
-    let _this = this;
-    return _this._dateAttribute;
+    return this._date;
   }
 
   get domain() {
-    let _this = this;
-    return _this._domainAttribute;
+    return this._domain;
   }
 
   get source() {
     let _this = this;
-    return _this._sourceAttribute;
+    return _this._source;
   }
 
   get time() {
     let _this = this;
-    return _this._timeAttribute;
+    return _this._time;
   }
 
   get weekday() {
-    let _this = this;
-    return _this._weekdayAttribute;
-  }
-
-  _getDate() {
-    let date = new Date();
-    let day = String(date.getDate());
-    if (day.length === 1) {
-      day = '0' + day;
-    }
-
-    let month = String(date.getMonth() + 1);
-    if (month.length === 1) {
-      month = '0' + month;
-    }
-
-    return day + '/' + month + '/' + date.getFullYear();
-  }
-
-  _getList(scope, groupName) {
-    let _this = this;
-    let myGroups = _this.groups;
-    let members = [];
-    if (myGroups[scope] !== undefined && myGroups[scope][groupName] !== undefined) {
-      members = myGroups[scope][groupName];
-    }
-    return members;
-  }
-
-  _getTime() {
-    let now = new Date();
-    let minutes = String(now.getMinutes());
-    if (minutes.length === 1) {
-      minutes = '0' + minutes;
-    }
-    return parseInt(String(now.getHours()) + minutes);
-  }
-
-  _getWeekDay() {
-    return String(new Date().getDay());
+    return this._weekday;
   }
 
 }

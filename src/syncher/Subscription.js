@@ -13,7 +13,7 @@ class Subscription {
         //FLOW-OUT: message sent to all subscribers
         let deleteMessageToHyperty = {
           type: 'delete', from: msg.from, to: owner,
-          body: { resource: url }
+          body: { identity: msg.body.identity, resource: url }
         };
 
         //send delete to hyperty
