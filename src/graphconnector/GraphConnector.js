@@ -452,14 +452,12 @@ class GraphConnector {
     let success = false;
     if (this.globalRegistryRecord.guid == guid) {
       this.residenceLocation = '';
-      success=true;
-    }else{
-    for (let i = 0; i < this.contacts.length; i++) {
-      if (this.contacts[i].guid == guid) {
-        if (this.contacts[i].residenceLocation != '') {
+      success = true;
+    } else {
+      for (let i = 0; i < this.contacts.length; i++) {
+        if (this.contacts[i].guid == guid) {
           this.contacts[i].residenceLocation = '';
           success = true;
-          }
         }
       }
     }
@@ -474,7 +472,7 @@ class GraphConnector {
    */
   setLocation(guid, locationName) {
     let success = false;
-    if (locationName !== 'undefined') {
+    if (typeof locationName !== 'undefined') {
       if (this.globalRegistryRecord.guid == guid) {
         this.residenceLocation = locationName;
         success = true;
@@ -518,13 +516,16 @@ class GraphConnector {
   getGroup(groupName) {
     let rtnArray = [];
     let ownerTmp;
-    if (groupName !== 'undefined') {
+    if (typeof groupName !== 'undefined') {
       for (var k = 0; k < this.groups.length; k++) {
         if (this.groups[k] == groupName) {
           ownerTmp = new GraphConnectorContactData(this.globalRegistryRecord.guid, this.firstName, this.lastName);
-          (typeof this.residenceLocation == 'undefined') ? ownerTmp.residenceLocation = '' : ownerTmp.residenceLocation=this.residenceLocation;
-          ownerTmp.userIDs = this.globalRegistryRecord.userIDs
-          ownerTmp.groups =this.groups;
+          (typeof this.residenceLocation == 'undefined') ? ownerTmp.residenceLocation = '' : ownerTmp.residenceLocation = this.residenceLocation;
+          ownerTmp.userIDs = this.globalRegistryRecord.userIDs;
+          ownerTmp.groups = this.groups;
+          ownerTmp.contactsBloomFilter1Hop = this.contactsBloomFilter1Hop;
+          ownerTmp._lastSyncBloomFilter1Hop = this.lastCalculationBloomFilter1Hop;
+          ownerTmp._lastSyncDomainUserIDs = this.globalRegistryRecord.lastUpdate;
           rtnArray.push(ownerTmp);
         }
       }
@@ -547,9 +548,9 @@ class GraphConnector {
    */
   addGroupName(guid, groupName) {
     let success = false;
-    if (groupName !== 'undefined') {
+    if (typeof groupName !== 'undefined') {
       if (guid == this.globalRegistryRecord.guid) {
-        if(!this.groups.includes(groupName)) {
+        if (!this.groups.includes(groupName)) {
           this.groups.push(groupName);
           success = true;
         }
@@ -575,7 +576,7 @@ class GraphConnector {
    */
   removeGroupName(guid, groupName) {
     let success = false;
-    if (groupName !== 'undefined') {
+    if (typeof groupName !== 'undefined') {
       if (guid == this.globalRegistryRecord.guid) {
         for (let z = 0; z < this.groups.length; z++) {
           if (this.groups[z] == groupName) {

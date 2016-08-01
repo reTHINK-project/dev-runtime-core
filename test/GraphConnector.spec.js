@@ -187,7 +187,7 @@ getRegistry.then(function(registry) {
         let resultFalse = graphConnector.addGroupName('123456789', 'Winterfell');
         expect(resultTrue).to.equal(true);
         expect(resultFalse).to.equal(false);
-        resultFalse=graphConnector.addGroupName('123456789', 'Winterfell');
+        resultFalse = graphConnector.addGroupName('123456789', 'Winterfell');
         expect(resultFalse).to.equal(false);
       });
 
@@ -196,10 +196,9 @@ getRegistry.then(function(registry) {
         expect(res).to.equal(true);
         res = graphConnector.addGroupName('1234567890qwertz', 'Winterfell');
         expect(res).to.equal(false);
-        res=graphConnector.removeGroupName('1234567890qwertz', 'Winterfell');
+        res = graphConnector.removeGroupName('1234567890qwertz', 'Winterfell');
         expect(res).to.equal(true);
       });
-
 
       it('adding a residenceLocation to a contact and to owner', function() {
         let contact = graphConnector.setLocation('123456', 'Berlin');
@@ -207,7 +206,6 @@ getRegistry.then(function(registry) {
         contact = graphConnector.setLocation('1234567890qwertz', 'Honolulu');
         expect(contact).to.equal(true);
       });
-
 
       it('getting all contacts with same groupName', function() {
           graphConnector.addGroupName('123456', 'Summerfall');
@@ -236,12 +234,10 @@ getRegistry.then(function(registry) {
         expect(resultFalse).to.equal(false);
       });
 
-      
-
       it('removing a residenceLocation', function() {
         let result = graphConnector.removeLocation('123456');
         expect(result).to.equal(true);
-        result = graphConnector.removeLocation('123456');
+        result = graphConnector.removeLocation('1234567noValidGUID');
         expect(result).to.equal(false);
       });
 
@@ -251,7 +247,6 @@ getRegistry.then(function(registry) {
         result = graphConnector.setActive(false);
         expect(result).to.equal(true);
       });
-
 
       it('get contact by first name', function() {
         graphConnector.addContact('kkk', 'Ishantiw', 'abc');
