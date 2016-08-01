@@ -723,11 +723,10 @@ describe('SyncherManager', function() {
         if (msg.from === runtimeURL + '/sm') {
           expect(msg.to).to.eql('domain://msg-node.h1.domain/object-address-allocation');
           expect(msg.body.resource).to.eql(objURL);
+        }
 
-          // TODO: check if the notifyEvent it is really called;
-          // expect(deleted).to.eql(true);
-
-          done();
+        if (msg.from === objURL + '/subscription') {
+          deleted = true;
         }
       }
     };
@@ -743,8 +742,9 @@ describe('SyncherManager', function() {
           console.log('subscribe: ', doo.url);
         });
       } else if (notifyEvent.type === 'delete') {
-        deleted = true;
         notifyEvent.ack(100);
+        expect(deleted).to.eql(true);
+        done();
       }
     });
 
@@ -758,8 +758,8 @@ describe('SyncherManager', function() {
         setTimeout(() => {
           expect(sync1.reporters[dor.url]).to.eql(dor);
           dor.delete();
-          // delete sync1.reporters[dor.url];
-          // expect(sync1.reporters[dor.url]).to.be.empty;
+          delete sync1.reporters[dor.url];
+          expect(sync1.reporters[dor.url]).to.be.empty;
           console.log('reporter-deleted');
         }, 100);
 
