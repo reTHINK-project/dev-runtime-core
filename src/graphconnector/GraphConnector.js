@@ -628,6 +628,18 @@ class GraphConnector {
     return status;
   }
 
+  updateBloomFilter1HopContact(guid, bf) {
+    let success = false;
+    for (let i = 0; i < this.contacts.length; i++) {
+      if (this.contacts[i].guid == guid) {
+        this.contacts[i].contactsBloomFilter1Hop = bf;
+        this.contacts[i].lastCalculationBloomFilter1Hop = new Date().toISOString();
+        success = true;
+      }
+    }
+    return success;
+  }
+
   /**
    * Calculates the Bloom filter containing all non-private contacts.
    */
