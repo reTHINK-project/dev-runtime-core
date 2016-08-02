@@ -382,6 +382,12 @@ class GraphConnector {
              let queriedContact = new GraphConnectorContactData(dataJSON.guid, '', '');
              if (typeof dataJSON.userIDs != 'undefined' && dataJSON.userIDs != null) {
                queriedContact.userIDs = dataJSON.userIDs;
+               for (let i = 0; i < this.contacts.length; i++) {
+                 if (this.contacts[i].guid == guid) {
+                  this.contacts[i].userIDs = dataJSON.userIDs;
+                  this.contacts[i].lastSyncDomainUserIDs = new Date().toISOString();
+                 }
+               }
              }
              resolve(queriedContact);
            }
@@ -628,12 +634,11 @@ class GraphConnector {
     return status;
   }
 
-  updateBloomFilter1HopContact(guid, bf) {
+  setBloomFilter1HopContact(guid, bf) {
     let success = false;
     for (let i = 0; i < this.contacts.length; i++) {
       if (this.contacts[i].guid == guid) {
         this.contacts[i].contactsBloomFilter1Hop = bf;
-        this.contacts[i].lastCalculationBloomFilter1Hop = new Date().toISOString();
         success = true;
       }
     }

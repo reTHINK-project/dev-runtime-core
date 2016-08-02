@@ -166,7 +166,7 @@ getRegistry.then(function(registry) {
 
       });
 
-      it('updating bloom filter of a given contact', function() {
+      it('setting bloom filter of a given contact', function() {
         let bf = new BloomFilter(
           431328,   // number of bits to allocate.
           10        // number of hash functions.
@@ -176,7 +176,7 @@ getRegistry.then(function(registry) {
         bf.add('elaine');
         let tmpGUID = '0987xyz7y7fyft87gf6f76';
         graphConnector.addContact(tmpGUID,'bloom123','test');
-        graphConnector.updateBloomFilter1HopContact(tmpGUID, bf);
+        graphConnector.setBloomFilter1HopContact(tmpGUID, bf);
         expect((graphConnector.getContact('bloom123')[0].contactsBloomFilter1Hop)).to.eql(bf);
       });
 
