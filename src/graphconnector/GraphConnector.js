@@ -688,13 +688,13 @@ class GraphConnector {
 
 
 
-    addTimeout(){ 
+    addTimeout(){
       let diff = 15; //this is the difference in minutes you want from this.globalRegistryRecord.timeout's time.
       let tmp = new Date();
       if(this.globalRegistryRecord.timeout) { //shoudl we also check if the previous date is acctualy from the past?
         tmp= new Date(this.globalRegistryRecord.timeout + diff*60000)
         this.globalRegistryRecord.timeout = tmpDate.toISOString();
-        console.log(''+this.globalRegistryRecord.timeout)      
+        console.log(''+this.globalRegistryRecord.timeout)
         return true;
       }else {
         tmp.setMinutes(tmp.getMinutes() + diff );
@@ -714,10 +714,39 @@ class GraphConnector {
   setActive(boolean) {
     if (typeof boolean === 'boolean') {
       this.globalRegistryRecord.active = boolean;
+      this.globalRegistryRecord.lastUpdate = new Date().toISOString();
       return true;
     }
     return false;
   }
+
+  /**
+    Sets revoked attribute of the GlobalRegistryRecord.
+    @returns {boolean} True if set succesfully, false otherwise.
+  */
+  setRevoked(boolean) {
+    if (typeof boolean === 'boolean') {
+      this.globalRegistryRecord.revoked = boolean;
+      this.globalRegistryRecord.lastUpdate = new Date().toISOString();
+      return true;
+    }
+    return false;
+  }
+
+
+    /**
+      Sets Timeout attribute of the GlobalRegistryRecord.
+      @returns {boolean} True if set succesfully, false otherwise.
+    */
+    setTimeout(Timeout) {
+
+      if (typeof timeout == "undefined" && Timeout instanceof Date) {
+        this.globalRegistryRecord.timeout = Timeout.toISOString();
+        this.globalRegistryRecord.lastUpdate = new Date().toISOString();
+        return true;
+      }
+      return false;
+    }
 
  /**
     Returns the globalRegistryRecord for the owner.

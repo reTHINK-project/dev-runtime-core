@@ -182,7 +182,7 @@ getRegistry.then(function(registry) {
 
        it('setTimeout test', function() {
         let res = graphConnector.addTimeout();
-        expect(res).to.equal(true); 
+        expect(res).to.equal(true);
         console.log(graphConnector.globalRegistryRecord.timeout);
       });
 
@@ -266,6 +266,22 @@ getRegistry.then(function(registry) {
         expect(result).to.equal(true);
         result = graphConnector.setActive(false);
         expect(result).to.equal(true);
+      });
+
+      it('checking setRevoked() ', function() {
+        let result = graphConnector.setRevoked(true);
+        expect(result).to.equal(true);
+        result = graphConnector.setRevoked(false);
+        expect(result).to.equal(true);
+      });
+
+      it('checking setTimeout() ', function() {
+        let timeout = new Date();
+        timeout.setMonth(timeout.getMonth() + 120);
+        let result = graphConnector.setTimeout(timeout);
+        expect(result).to.equal(true);
+        result = graphConnector.setTimeout('just string');
+        expect(result).to.equal(false);
       });
 
       it('get contact by first name', function() {
