@@ -178,6 +178,11 @@ getRegistry.then(function(registry) {
         graphConnector.addContact(tmpGUID,'bloom123','test');
         graphConnector.setBloomFilter1HopContact(tmpGUID, bf);
         expect((graphConnector.getContact('bloom123')[0].contactsBloomFilter1Hop)).to.eql(bf);
+        //Testing for setting UserIDs and lastSyncDomainUserIDs
+        graphConnector.queryGlobalRegistry(tmpGUID);
+        let lastSyncDate = graphConnector.getContact('bloom123')[0].lastSyncDomainUserIDs;
+        if(typeof lastSyncDate != 'undefined')
+        console.log("Last Sync Date has been set "+lastSyncDate);
       });
 
        it('setTimeout test', function() {
