@@ -634,6 +634,12 @@ class GraphConnector {
     return status;
   }
 
+  /**
+   * Sets the bloomfilter of a contact.
+   * @param  {string}     guid      GUID of the contact to set the bloom filter.
+   * @param  {BloomFilter}     bf      BloomFilter object.
+   * @returns {boolean} success if the contact guid is found and the bloom filter is set
+   */
   setBloomFilter1HopContact(guid, bf) {
     let success = false;
     for (let i = 0; i < this.contacts.length; i++) {

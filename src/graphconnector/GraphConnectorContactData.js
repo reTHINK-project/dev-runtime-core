@@ -144,6 +144,14 @@ class GraphConnectorContactData {
     }
 
     /**
+     * Returns the last Sync Bloom Filter date for the contact.
+     * @returns  {String}   lastSyncBloomFilter1Hop   last Sync Bloom Filter date for the contact.
+     */
+    get lastSyncBloomFilter1Hop() {
+      return this._lastSyncBloomFilter1Hop;
+    }
+
+    /**
      * Returns the geohash of the residence location.
      * @returns  {String}     geohash        Geohash of the residence location.
      */
