@@ -28,10 +28,10 @@ import Registry from '../registry/Registry';
 import IdentityModule from '../identity/IdentityModule';
 import PEP from '../policy/PEP';
 import MessageBus from '../bus/MessageBus';
-
 import Loader from './Loader';
 import { runtimeConfiguration } from './runtimeConfiguration';
-// import GraphConnector from '../graphconnector/GraphConnector';
+import GraphConnector from '../graphconnector/GraphConnector';
+
 
 import SyncherManager from '../syncher/SyncherManager';
 import RuntimeCoreCtx from '../policy/context/RuntimeCoreCtx';
@@ -170,7 +170,7 @@ class RuntimeUA {
     _this.loader.runtimeFactory = _this.runtimeFactory;
 
     // Instantiate the Graph Connector
-    // _this.graphConnector = new GraphConnector(_this.runtimeURL, _this.messageBus);
+    _this.graphConnector = new GraphConnector(_this.runtimeURL, _this.messageBus);
 
   }
 
