@@ -336,6 +336,7 @@ class GraphConnector {
 
   /**
    * Queries the Global Registry for a given GUID.
+   * Adds the UserID information from the Global Registry to a contact, if the given GUID matches a user in the contacts.
    * Returns a Graph Connector Contact Data as a Promise.
    * @param  {string}   guid  The GUID to query the Global Registry for
    * @returns   {Promise}   Promise   Graph Connector Contact Data containing UserIDs.
@@ -382,12 +383,13 @@ class GraphConnector {
              let queriedContact = new GraphConnectorContactData(dataJSON.guid, '', '');
              if (typeof dataJSON.userIDs != 'undefined' && dataJSON.userIDs != null) {
                queriedContact.userIDs = dataJSON.userIDs;
-               for (let i = 0; i < this.contacts.length; i++) {
-                 if (this.contacts[i].guid == guid) {
-                   this.contacts[i].userIDs = dataJSON.userIDs;
-                   this.contacts[i].lastSyncDomainUserIDs = new Date().toISOString();
+
+               for (let i = 0; i < _this.contacts.length; i++) {
+                 if (_this.contacts[i].guid == guid) {
+                   _this.contacts[i].userIDs = dataJSON.userIDs;
                  }
                }
+
              }
              resolve(queriedContact);
            }
