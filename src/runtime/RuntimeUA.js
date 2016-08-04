@@ -28,7 +28,7 @@ import Registry from '../registry/Registry';
 import IdentityModule from '../identity/IdentityModule';
 import PolicyEngine from '../policy/PolicyEngine';
 import MessageBus from '../bus/MessageBus';
-// import GraphConnector from '../graphconnector/GraphConnector';
+import GraphConnector from '../graphconnector/GraphConnector';
 
 import SyncherManager from '../syncher/SyncherManager';
 import RuntimeCoreCtx from '../policy/context/RuntimeCoreCtx';
@@ -144,7 +144,7 @@ class RuntimeUA {
     _this.syncherManager = new SyncherManager(_this.runtimeURL, _this.messageBus, _this.registry, _this.runtimeCatalogue);
 
     // Instantiate the Graph Connector
-    // _this.graphConnector = new GraphConnector(_this.runtimeURL, _this.messageBus);
+    _this.graphConnector = new GraphConnector(_this.runtimeURL, _this.messageBus);
 
   }
 
