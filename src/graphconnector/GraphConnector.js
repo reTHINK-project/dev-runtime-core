@@ -384,8 +384,8 @@ class GraphConnector {
                queriedContact.userIDs = dataJSON.userIDs;
                for (let i = 0; i < this.contacts.length; i++) {
                  if (this.contacts[i].guid == guid) {
-                  this.contacts[i].userIDs = dataJSON.userIDs;
-                  this.contacts[i].lastSyncDomainUserIDs = new Date().toISOString();
+                   this.contacts[i].userIDs = dataJSON.userIDs;
+                   this.contacts[i].lastSyncDomainUserIDs = new Date().toISOString();
                  }
                }
              }
@@ -692,30 +692,10 @@ class GraphConnector {
       return rtnArray;
     }
 
-
-
-    addTimeout(){
-      let diff = 15; //this is the difference in minutes you want from this.globalRegistryRecord.timeout's time.
-      let tmp = new Date();
-      if(this.globalRegistryRecord.timeout) { //shoudl we also check if the previous date is acctualy from the past?
-        tmp= new Date(this.globalRegistryRecord.timeout + diff*60000)
-        this.globalRegistryRecord.timeout = tmpDate.toISOString();
-        console.log(''+this.globalRegistryRecord.timeout)
-        return true;
-      }else {
-        tmp.setMinutes(tmp.getMinutes() + diff );
-        this.globalRegistryRecord.timeout = tmp.toISOString();
-        return true;
-      }
-
-
-    }
-
-
-
   /**
-    Sets active attribute of the GlobalRegistryRecord.
-    @returns {boolean} True if set succesfully, false otherwise.
+   * Sets active attribute of the GlobalRegistryRecord.
+   * @param  {boolean}   boolean    Value to set the active flag of the GlobalRegistryRecord to.
+   * @returns {boolean} True if set succesfully, false otherwise.
   */
   setActive(boolean) {
     if (typeof boolean === 'boolean') {
@@ -727,8 +707,9 @@ class GraphConnector {
   }
 
   /**
-    Sets revoked attribute of the GlobalRegistryRecord.
-    @returns {boolean} True if set succesfully, false otherwise.
+   * Sets revoked attribute of the GlobalRegistryRecord.
+   * @param  {boolean}   boolean    Value to set the revoked flag of the GlobalRegistryRecord to.
+   * @returns {boolean} True if set succesfully, false otherwise.
   */
   setRevoked(boolean) {
     if (typeof boolean === 'boolean') {
@@ -739,14 +720,13 @@ class GraphConnector {
     return false;
   }
 
-
     /**
-      Sets Timeout attribute of the GlobalRegistryRecord.
-      @returns {boolean} True if set succesfully, false otherwise.
+     * Sets Timeout attribute of the GlobalRegistryRecord.
+     * @param  {Date}   Date    Date to set the timeout of the GlobalRegistryRecord to.
+     * @returns {boolean} True if set succesfully, false otherwise.
     */
     setTimeout(Timeout) {
-
-      if (typeof timeout == "undefined" && Timeout instanceof Date) {
+      if (typeof timeout == 'undefined' && Timeout instanceof Date) {
         this.globalRegistryRecord.timeout = Timeout.toISOString();
         this.globalRegistryRecord.lastUpdate = new Date().toISOString();
         return true;
