@@ -103,7 +103,7 @@ class SyncherManager {
       console.log('Scheme: ', scheme);
 
       // schema validation
-      console.log("Running object validation...");
+      console.log('Running object validation...');
       try {
         let obj = msg.body.value;
         let schema = descriptor.sourcePackage.sourceCode;
@@ -121,13 +121,13 @@ class SyncherManager {
 
         // print more details about validation if it fails or schema contains $refs
         if (!result.valid || (result.missing.length > 0)) {
-          console.warn("Object validation " + (result.valid ? "succeeded, but schema contained references:" : "failed:"), JSON.stringify(result, null, 2));
-          console.debug("Object:", JSON.stringify(obj, null, 2), "\r\nSchema:", JSON.stringify(schema, null, 2));
+          console.warn('Object validation ' + (result.valid ? 'succeeded, but schema contained references:' : 'failed:'), JSON.stringify(result, null, 2));
+          console.debug('Object:', JSON.stringify(obj, null, 2), '\r\nSchema:', JSON.stringify(schema, null, 2));
         } else {
-          console.log("Object validation succeeded");
+          console.log('Object validation succeeded');
         }
       } catch (e) {
-        console.warn("Error during object validation:", e);
+        console.warn('Error during object validation:', e);
       }
 
       //request address allocation of a new object from the msg-node
@@ -141,7 +141,8 @@ class SyncherManager {
         console.log('Subscription URL', subscriptionURL);
 
         //To register the dataObject in the runtimeRegistry
-        _this._registry.registerDataObject(msg.body.value.name, msg.body.value.schema, objURL, msg.body.value.reporter, msg.body.authorise).then(function(resolve) {
+        console.info('Register Object: ', msg.body.value.name, msg.body.value.schema, objURL, msg.body.value.reporter, msg.body.value.resources);
+        _this._registry.registerDataObject(msg.body.value.name, msg.body.value.schema, objURL, msg.body.value.reporter, msg.body.value.resources).then(function(resolve) {
           console.log('DataObject successfully registered', resolve);
 
           //all OK -> create reporter and register listeners
