@@ -142,7 +142,7 @@ class SyncherManager {
 
         //To register the dataObject in the runtimeRegistry
         console.info('Register Object: ', msg.body.value.name, msg.body.value.schema, objURL, msg.body.value.reporter, msg.body.value.resources);
-        _this._registry.registerDataObject(msg.body.value.name, msg.body.value.schema, objURL, msg.body.value.reporter, msg.body.value.resources).then(function(resolve) {
+        _this._registry.registerDataObject(msg.body.value.name, msg.body.value.schema, objURL, msg.body.value.reporter, msg.body.value.resources, msg.body.authorise).then(function(resolve) {
           console.log('DataObject successfully registered', resolve);
 
           //all OK -> create reporter and register listeners

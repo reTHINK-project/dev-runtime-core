@@ -72,15 +72,28 @@ class IdentityModule {
 
   }
 
-  test(string) {
+  identityRequestToGUI(identities) {
     let _this = this;
-    let message = {type:'create', to: _this._guiURL, from: _this._idmURL, body: {value: string}};
 
-    let id = _this._messageBus.postMessage(message);
+    return new Promise(function(resolve,reject) {
 
-    _this._messageBus.addResponseListener(_this._idmURL, id, msg => {
-      console.log('here!!', msg.body.value);
-      _this._messageBus.removeResponseListener(_this._idmURL, id);
+      let message = {type:'create', to: _this._guiURL, from: _this._idmURL, body: {value: identities}};
+
+      let id = _this._messageBus.postMessage(message);
+
+      //add listener without timout
+      _this._messageBus.addResponseListener(_this._idmURL, id, msg => {
+        _this._messageBus.removeResponseListener(_this._idmURL, id);
+
+        if (msg.body.code === 200) {
+          let selectedIdentity = msg.body.value;
+
+          console.log('selectedIdentity: ', selectedIdentity.identity);
+          resolve(selectedIdentity);
+        } else {
+          reject('error on requesting an identity to the GUI');
+        }
+      });
     });
   }
 
