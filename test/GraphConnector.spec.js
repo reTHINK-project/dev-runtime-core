@@ -98,6 +98,19 @@ getRegistry.then(function(registry) {
         expect(directContacts[0]).to.eql(expected);
       });
 
+       it('setting first and last name of the owner', function() {
+
+        let result = graphConnector.setOwnerName('Tom','Sawyer');    
+        expect(result).to.equal(true);
+        result=graphConnector.setOwnerName('Tom')
+        expect(result).to.equal(true);
+
+      });
+
+
+     
+
+
       it('test direct contacts bloom filter', function() {
 
         graphConnector.calculateBloomFilter1Hop();
@@ -166,6 +179,7 @@ getRegistry.then(function(registry) {
       });
 
       it('Adding a groupname to a contact', function() {
+
         graphConnector.addContact('123456', 'john', 'snow');
         let resultTrue = graphConnector.addGroupName('123456', 'Winterfell');
         let resultFalse = graphConnector.addGroupName('123456789', 'Winterfell');
@@ -173,12 +187,36 @@ getRegistry.then(function(registry) {
         expect(resultFalse).to.equal(false);
       });
 
+      it('Adding and removing groupname to owner', function() {
+          let x= graphConnector.setGuidToOwner('1234567890qwertz');
+          let res=graphConnector.addGroupName('1234567890qwertz', 'Winterfell');
+          expect(res).to.equal(true);
+          res = graphConnector.removeGroupName("1234567890qwertz","Winterfell");
+          expect(res).to.equal(true);
+          });
+
+
       it('getting all contacts with same groupName', function() {
           graphConnector.addGroupName('123456', 'Summerfall');
           graphConnector.addGroupName('1234', 'Summerfall');
           let res = graphConnector.getGroup('Summerfall');
           expect(res.length).to.equal(2);
         });
+
+      it('getting all the group names of the user', function() {
+
+        let result=graphConnector.getGroupNames();
+        //graphConnector.tempMethod();  
+        expect(result.length).to.equal(2);
+        graphConnector.addGroupName('1234', 'SSummerfall');
+        result=graphConnector.getGroupNames();
+        expect(result.length).to.equal(3);
+        graphConnector.removeGroupName('1234','SSummerfall')
+
+
+ 
+        });
+       
 
       it('removing a groupname of a contact', function() {
         graphConnector.addContact('123456', 'john', 'snow');
