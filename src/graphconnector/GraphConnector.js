@@ -728,7 +728,8 @@ class GraphConnector {
      * @returns {boolean} True if set succesfully, false otherwise.
     */
     setTimeout(Timeout) {
-      if (typeof timeout == 'undefined' && Timeout instanceof Date) {
+      let now = new Date();
+      if (typeof Timeout == 'object' && Timeout instanceof Date && Timeout > now ) {
         this.globalRegistryRecord.timeout = Timeout.toISOString();
         this.globalRegistryRecord.lastUpdate = new Date().toISOString();
         return true;
