@@ -272,8 +272,7 @@ getRegistry.then(function(registry) {
       });
 
       it('checking setTimeout() ', function() {
-
-        let timeout = new Date("October 13, 2017 11:13:00");
+        let timeout = new Date('October 13, 2017 11:13:00');
         timeout.setMonth(timeout.getMonth() + 120);
         let result = graphConnector.setTimeout(timeout);
         expect(result).to.equal(true);

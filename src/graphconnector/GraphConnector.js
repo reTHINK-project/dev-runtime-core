@@ -729,7 +729,7 @@ class GraphConnector {
     */
     setTimeout(Timeout) {
       let now = new Date();
-      if (typeof Timeout == 'object' && Timeout instanceof Date && Timeout > now ) {
+      if (typeof Timeout == 'object' && Timeout instanceof Date && Timeout > now) {
         this.globalRegistryRecord.timeout = Timeout.toISOString();
         this.globalRegistryRecord.lastUpdate = new Date().toISOString();
         return true;
