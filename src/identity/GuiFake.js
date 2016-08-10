@@ -14,8 +14,9 @@ class GuiFake {
 
     _this._messageBus.addListener(_this._url, msg => {
 
-      console.log('here!');
-      let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: {value: msg.body.value +  '-changed'}};
+      let identities = msg.body.value;
+
+      let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: {value: identities[0]}};
 
       // to test on the identity side the listener without the timeout
       // can represent the time the user takes to choose and identity
