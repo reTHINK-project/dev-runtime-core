@@ -335,6 +335,40 @@ class GraphConnector {
    }
 
   /**
+   * To check whether the GUID already exist.
+   * @param  {string}     guid        GUID which needs to be checked.
+   * @returns  {boolean}   Returns true if the GUID exist
+   */
+   guidExist(guid){
+
+    let success = false;
+
+    for (let i = 0; i < this.contacts.length; i++) {
+       if (this.contacts[i].guid == guid || this.globalRegistryRecord.guid == guid) {
+
+         success = true;  
+       }
+     } 
+     return success;
+   }
+  
+  /**
+   * To return the owner.
+   * @returns  {GraphConnectorContactData}   Returns the owner.
+   */
+   getOwner(){
+
+    let owner = new GraphConnectorContactData(this.globalRegistryRecord.guid, this.firstName, this.lastName);
+
+    owner.groups = this.groups;
+    owner.lastCalculationBloomFilter1Hop = this.lastCalculationBloomFilter1Hop;
+    owner.residenceLocation =  this.residenceLocation;
+    owner.contactsBloomFilter1Hop = this.contactsBloomFilter1Hop;
+
+    return owner;
+   }
+
+  /**
    * Queries the Global Registry for a given GUID.
    * Adds the UserID information from the Global Registry to a contact, if the given GUID matches a user in the contacts.
    * Returns a Graph Connector Contact Data as a Promise.
@@ -447,8 +481,13 @@ class GraphConnector {
 
     // TODO: what if two contacts have the same GUID?
     // TODO: reject invalid GUIDs
-    let newContact = new GraphConnectorContactData(guid, firstName, lastName);
-    this.contacts.push(newContact);
+    let success = false;
+    if(!this.guidExist(guid)){
+      let newContact = new GraphConnectorContactData(guid, firstName, lastName);
+      this.contacts.push(newContact);
+      success = true;
+    } 
+    return success;
   }
 
  /**

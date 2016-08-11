@@ -292,9 +292,9 @@ getRegistry.then(function(registry) {
       });
 
       it('get contact by last name', function() {
-        graphConnector.addContact('kkk', 'fgh', 'Joky');
-        graphConnector.addContact('lll', 'ghi', 'Jokyus');
-        graphConnector.addContact('uuu', 'hij', 'Jokyi');
+        graphConnector.addContact('kkklast', 'fgh', 'Joky');
+        graphConnector.addContact('llllast', 'ghi', 'Jokyus');
+        graphConnector.addContact('uuulast', 'hij', 'Jokyi');
         let result = graphConnector.getContact('Joky');
         expect(result.length).to.equal(3);
 
@@ -318,6 +318,27 @@ getRegistry.then(function(registry) {
         let resultFalse = graphConnector.removeUserID('facebook/john');
         expect(resultTrue).to.equal(true);
         expect(resultFalse).to.equal(false);
+      });
+
+      it('Guid exists or not', function() {
+        graphConnector.addContact('guidcheck123', 'guidTest', 'guid');
+        let resultTrue = graphConnector.guidExist('guidcheck123');
+        let resultFalse = graphConnector.guidExist('guidcheck321');
+        expect(resultTrue).to.equal(true);
+        expect(resultFalse).to.equal(false);
+      });
+
+      it('returning the owner', function() {
+        let owner = graphConnector.getOwner();
+        owner.firstName= "TestingOwner";
+        expect(owner.firstName).to.equal("TestingOwner");
+      });
+
+      it('adding a new contact', function() {
+        let success = graphConnector.addContact('testingAdd123', 'TestingAdd', 'addcontact');
+        let unsuccess = graphConnector.addContact('testingAdd123', 'TestingAddfail', 'addcontactfail');
+        expect(success).to.equal(true);
+        expect(unsuccess).to.equal(false);
       });
 
       it('bloom filter tests', function() {
