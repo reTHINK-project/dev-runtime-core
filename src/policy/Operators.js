@@ -18,7 +18,7 @@ class Operators {
   }
 
   equals(params) {
-    return params[0] === '*' || params[0] === params[1];
+    return params[0] == '*' || params[0] == params[1];
   }
 
   in(params) {

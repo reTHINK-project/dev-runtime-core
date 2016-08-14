@@ -9,42 +9,24 @@ class Condition {
     this.operators = new Operators();
   }
 
-  get attribute() {
-    return this._attribute;
-  }
-
-  get operator() {
-    return this._operator;
-  }
-
-  get params() {
-    return this._params;
-  }
-
-  set attribute(attribute) {
-    this._attribute = attribute;
-  }
-
-  set operator(operator) {
-    this._operator = operator;
-  }
-
-  set params(params) {
-    this._params = params;
-  }
-
   isApplicable(context, message) {
     context[this.attribute] = { message: message };
     let value = context[this.attribute];
-
-    if (this.operator === 'in') { // source in preauth
+    let tempParam;
+    if (this.params === 'preauth') {
       let dataObjectURL = message.to.split('/');
       dataObjectURL.pop();
       dataObjectURL = dataObjectURL[0] + '//' + dataObjectURL[2];
-      this.params = context.runtimeRegistry.getPreAuthSubscribers(dataObjectURL);
+      tempParam = context.runtimeRegistry.getPreAuthSubscribers(dataObjectURL);
     }
-
-    return this.operators[this.operator]([this.params, value]);
+    if (this.operator === 'in') {
+      tempParam = context.policyEngine.getGroup(this.params);
+    }
+    if (!tempParam) {
+      return this.operators[this.operator]([this.params, value]);
+    } else {
+      return this.operators[this.operator]([tempParam, value]);
+    }
   }
 
 }

@@ -1,5 +1,6 @@
 import CommonCtx from './CommonCtx';
-import {divideURL, isDataObjectURL} from '../../utils/utils';
+import Condition from '../conditions/Condition';
+import {divideURL, getUserEmailFromURL, isDataObjectURL} from '../../utils/utils';
 import persistenceManager from 'service-framework/dist/PersistenceManager';
 import Rule from '../Rule';
 import UserPolicy from '../policies/UserPolicy';
@@ -12,44 +13,16 @@ class RuntimeCoreCtx extends CommonCtx {
     this.idModule = idModule;
     this.runtimeRegistry = runtimeRegistry;
     this.activeUserPolicy = undefined;
+    this.serviceProviderPolicies = {};
     this.userPolicies = {};
-  }
-
-  get activeUserPolicy() {
-    return this._activeUserPolicy;
   }
 
   get dataObjectScheme() {
     return this._dataObjectScheme;
   }
 
-  get idModule() {
-    return this._idModule;
-  }
-
-  get policies() {
-    let policies = persistenceManager.get('policies');
-
-    if (policies === undefined) {
-      policies = {};
-    }
-    return policies;
-  }
-
-  get policyEngine() {
-    return this._policyEngine;
-  }
-
-  get runtimeRegistry() {
-    return this._runtimeRegistry;
-  }
-
   get subscription() {
     return this._subscription;
-  }
-
-  set activeUserPolicy(policy) {
-    this._activeUserPolicy = policy;
   }
 
   set dataObjectScheme(params) {
@@ -59,26 +32,6 @@ class RuntimeCoreCtx extends CommonCtx {
     } else {
       this._dataObjectScheme = undefined;
     }
-  }
-
-  set idModule(idModule) {
-    this._idModule = idModule;
-  }
-
-  set policies(policies) {
-    persistenceManager.set('policies', '0', policies);
-  }
-
-  set policyEngine(policyEngine) {
-    this._policyEngine = policyEngine;
-    let acceptAnySubscriptionRule = new Rule(true, new SubscriptionCondition('subscription', 'equals', '*'), 'global', 'global');
-    let policy = new UserPolicy('My policy', [acceptAnySubscriptionRule], ['registerSubscriber', 'doMutualAuthentication']);
-    this._policyEngine.addPolicy('USER', 'My policy', policy);
-    this.activeUserPolicy = 'My policy';
-  }
-
-  set runtimeRegistry(registry) {
-    this._runtimeRegistry = registry;
   }
 
   set subscription(params) {
@@ -111,6 +64,12 @@ class RuntimeCoreCtx extends CommonCtx {
                 message.body.auth = false;
               }
               if (result) {
+                let isSubscription = message.type === 'subscribe';
+                let isFromRemoteSM = _this.isFromRemoteSM(message.from);
+                if (isSubscription & isFromRemoteSM) {
+                  _this.registerSubscriber(message);
+                  _this.doMutualAuthentication(message);
+                }
                 message.body.auth = (message.body.auth === undefined) ? true : message.body.auth;
                 resolve(message);
               } else {
@@ -130,6 +89,12 @@ class RuntimeCoreCtx extends CommonCtx {
               message.body.auth = false;
             }
             if (result) {
+              let isSubscription = message.type === 'subscribe';
+              let isFromRemoteSM = _this.isFromRemoteSM(message.from);
+              if (isSubscription & isFromRemoteSM) {
+                _this.registerSubscriber(message);
+                _this.doMutualAuthentication(message);
+              }
               message.body.auth = (message.body.auth === undefined) ? true : message.body.auth;
               resolve(message);
             } else {
@@ -207,20 +172,18 @@ class RuntimeCoreCtx extends CommonCtx {
     });
   }
 
-  doMutualAuthentication(message, authDecision) {
-    if (authDecision) {
-      let to = message.to.split('/');
-      let subsIndex = to.indexOf('subscription');
-      let isDataObjectSubscription = subsIndex !== -1;
-      let isFromRemoteSM = this.isFromRemoteSM(message.from);
-      if (isDataObjectSubscription & isFromRemoteSM) {
-        to.pop();
-        let dataObjectURL = to[0] + '//' + to[2] + '/' + to[3];
-        if (to.length > 4) {
-          dataObjectURL = to[0] + '//' + to[2] + '/' + to[3] + '/' + to[4];
-        }
-        this.idModule.doMutualAuthentication(dataObjectURL, message.body.subscriber);
+  doMutualAuthentication(message) {
+    let to = message.to.split('/');
+    let subsIndex = to.indexOf('subscription');
+    let isDataObjectSubscription = subsIndex !== -1;
+    let isFromRemoteSM = this.isFromRemoteSM(message.from);
+    if (isDataObjectSubscription & isFromRemoteSM) {
+      to.pop();
+      let dataObjectURL = to[0] + '//' + to[2] + '/' + to[3];
+      if (to.length > 4) {
+        dataObjectURL = to[0] + '//' + to[2] + '/' + to[3] + '/' + to[4];
       }
+      this.idModule.doMutualAuthentication(dataObjectURL, message.body.subscriber);
     }
   }
 
@@ -234,6 +197,31 @@ class RuntimeCoreCtx extends CommonCtx {
         reject(error);
       });
     });
+  }
+
+  getMyEmails() {
+    let identities = this.idModule.getIdentities();
+    let emails = [];
+
+    for (let i in identities) {
+      emails.push(getUserEmailFromURL(identities[i].identity));
+    }
+
+    return emails;
+  }
+
+  getMyHyperties() {
+    let hyperties = this.runtimeRegistry.hypertiesList;
+    let hypertiesNames = [];
+
+    for (let i in hyperties) {
+      let hypertyName = hyperties[i].objectName;
+      if (hypertiesNames.indexOf(hypertyName) === -1) {
+        hypertiesNames.push(hypertyName);
+      }
+    }
+
+    return hypertiesNames;
   }
 
   getServiceProviderPolicy(message, isIncoming) {
@@ -310,27 +298,83 @@ class RuntimeCoreCtx extends CommonCtx {
     return (isCreate && isFromHyperty && isToHyperty) || (isCreate && isFromHyperty && isToDataObject) || isHandshake;
   }
 
-  registerSubscriber(message, authDecision) {
-    if (authDecision) {
-      let to = message.to.split('/');
-      let subsIndex = to.indexOf('subscription');
-      let isDataObjectSubscription = subsIndex !== -1;
-      let isFromRemoteSM = this.isFromRemoteSM(message.from);
+  loadActivePolicy() {
+    this.activeUserPolicy = persistenceManager.get('rethink:activePolicy');
+  }
 
-      if (isDataObjectSubscription & isFromRemoteSM) {
-        to.pop();
-        let dataObjectURL = to[0] + '//' + to[2] + '/' + to[3];
-        if (to.length > 4) {
-          dataObjectURL = to[0] + '//' + to[2] + '/' + to[3] + '/' + to[4];
+  loadGroups() {
+    let groups = persistenceManager.get('rethink:groups');
+    if (groups != undefined) {
+      this.groups = groups;
+    }
+  }
+
+  loadSPPolicies() {
+    let policies = persistenceManager.get('rethink:spPolicies');
+    if (policies !== undefined) {
+      this.serviceProviderPolicies = policies;
+    }
+  }
+
+  loadUserPolicies() {
+    let policies = persistenceManager.get('rethink:userPolicies');
+
+    if (policies !== undefined) {
+      for (let i in policies) {
+        let rulesPE = [];
+        let rules = policies[i].rules;
+        for (let j in rules) {
+          let condition;
+          if (rules[j].condition.attribute === 'subscription') {
+            condition = new SubscriptionCondition(rules[j].condition.attribute, rules[j].condition.operator, rules[j].condition.params);
+          } else {
+            condition = new Condition(rules[j].condition.attribute, rules[j].condition.operator, rules[j].condition.params);
+          }
+          rulesPE.push(new Rule(rules[j].authorise, condition, rules[j].priority, rules[j].scope, rules[j].target));
         }
-        this.runtimeRegistry.registerSubscriber(dataObjectURL, message.body.subscriber);
+        this.userPolicies[i] = new UserPolicy(policies[i].key, rulesPE, policies[i].actions, policies[i].combiningAlgorithm);
       }
+    }
+  }
+
+  registerSubscriber(message) {
+    let to = message.to.split('/');
+    let subsIndex = to.indexOf('subscription');
+    let isDataObjectSubscription = subsIndex !== -1;
+    let isFromRemoteSM = this.isFromRemoteSM(message.from);
+
+    if (isDataObjectSubscription & isFromRemoteSM) {
+      to.pop();
+      let dataObjectURL = to[0] + '//' + to[2] + '/' + to[3];
+      if (to.length > 4) {
+        dataObjectURL = to[0] + '//' + to[2] + '/' + to[3] + '/' + to[4];
+      }
+      this.runtimeRegistry.registerSubscriber(dataObjectURL, message.body.subscriber);
     }
   }
 
   _getLastComponentOfURL(url) {
     let split = url.split('/');
     return split[split.length - 1];
+  }
+
+  saveActivePolicy() {
+    persistenceManager.set('rethink:activePolicy', 0, this.activeUserPolicy);
+  }
+
+  saveGroups() {
+    persistenceManager.set('rethink:groups', 0, this.groups);
+  }
+
+  savePolicies(source) {
+    switch(source) {
+      case 'USER':
+        persistenceManager.set('rethink:userPolicies', 0, this.userPolicies);
+        break;
+      case 'SERVICE_PROVIDER':
+        persistenceManager.set('rethink:spPolicies', 0, this.serviceProviderPolicies);
+        break;
+    }
   }
 
 }

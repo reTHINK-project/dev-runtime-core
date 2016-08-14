@@ -1,45 +1,31 @@
 import PEP from './PEP';
 import PDP from './PDP';
+import UserPolicy from './policies/UserPolicy';
 
 class PolicyEngine {
 
   constructor(context) {
     this.context = context;
-    this.context.policyEngine = this;
+    context.policyEngine = this;
+    context.loadActivePolicy();
+    context.loadGroups();
+    context.loadSPPolicies();
+    context.loadUserPolicies();
     this.pdp = new PDP(context);
     this.pep = new PEP(context);
-  }
-
-  get context() {
-    return this._context;
-  }
-
-  get pdp() {
-    return this._pdp;
-  }
-
-  get pep() {
-    return this._pep;
-  }
-
-  set context(context) {
-    this._context = context;
-  }
-
-  set pdp(pdp) {
-    this._pdp = pdp;
-  }
-
-  set pep(pep) {
-    this._pep = pep;
   }
 
   addPolicy(source, key, policy) {
     if (source === 'SERVICE_PROVIDER') {
       this.context.serviceProviderPolicies[key] = policy;
+      this.context.savePolicies(source);
     } else {
       if (source === 'USER') {
+        if (!policy) {
+          policy = new UserPolicy(key, [], []);
+        }
         this.context.userPolicies[key] = policy;
+        this.context.savePolicies(source);
       } else {
         throw Error('Unknown policy source: ' + source);
       }
@@ -57,11 +43,18 @@ class PolicyEngine {
       } else {
         if (source === 'USER') {
           delete this.context.userPolicies[key];
+          if (key === this.context.activeUserPolicy) {
+            this.context.activeUserPolicy = undefined;
+          }
         } else {
           throw Error('Unknown policy source: ' + source);
         }
       }
     }
+
+    this.context.savePolicies('USER');
+    this.context.savePolicies('SERVICE_PROVIDER');
+    this.context.saveActivePolicy();
   }
 
   removeRule(key, rule) {
@@ -73,23 +66,23 @@ class PolicyEngine {
     return _this.context.authorise(message);
   }
 
-  getGroupsNames(scope, target) {
+  getGroupsNames() {
     let myGroups = this.context.groups;
     let groupsNames = [];
-    if (myGroups[scope][target] !== undefined) {
-      for (let groupName in myGroups[scope][target]) {
+    if (myGroups !== undefined) {
+      for (let groupName in myGroups) {
         groupsNames.push(groupName);
       }
     }
     return groupsNames;
   }
 
-  getGroup(scope, target, groupName) {
+  getGroup(groupName) {
     let myGroups = this.context.groups;
     let members = [];
 
-    if (myGroups[scope] !== undefined && myGroups[scope][target] !== undefined && myGroups[scope][target][groupName] !== undefined) {
-      members = myGroups[scope][target][groupName];
+    if (myGroups[groupName] !== undefined) {
+      members = myGroups[groupName];
     }
 
     return members;
@@ -99,21 +92,14 @@ class PolicyEngine {
   * Creates a group with the given name.
   * @param  {String}  groupName
   */
-  createGroup(scope, target, groupName) {
-    let myGroups = this.context.groups;
-
-    if (myGroups[scope] === undefined) {
-      myGroups[scope] = {};
-    }
-    if (myGroups[scope][target] === undefined) {
-      myGroups[scope][target] = {};
-    }
-
-    myGroups[scope][target][groupName] = [];
+  createGroup(groupName) {
+    this.context.groups[groupName] = [];
+    this.context.saveGroups();
   }
 
-  deleteGroup(scope, target, groupName) {
-    delete this.context.groups[scope][target][groupName];
+  deleteGroup(groupName) {
+    delete this.context.groups[groupName];
+    this.context.saveGroups();
   }
 
   /**
@@ -121,27 +107,23 @@ class PolicyEngine {
   * @param  {String}  userEmail
   * @param  {String}  groupName
   */
-  addToGroup(scope, target, groupName, userEmail) {
+  addToGroup(groupName, userEmail) {
     let myGroups = this.context.groups;
-    if (myGroups[scope] === undefined) {
-      myGroups[scope] = {};
-    }
-    if (myGroups[scope][target] === undefined) {
-      myGroups[scope][target] = {};
-    }
-    if (myGroups[scope][target][groupName] === undefined) {
-      this.createGroup(scope, target, groupName);
-    }
-    if (myGroups[scope][target][groupName].indexOf(userEmail) === -1) {
-      myGroups[scope][target][groupName].push(userEmail);
+    if (myGroups[groupName] !== undefined) {
+      if (myGroups[groupName].indexOf(userEmail) === -1) {
+        myGroups[groupName].push(userEmail);
+        this.context.saveGroups();
+      }
+    } else {
+      throw Error('Group "' + groupName + '" does not exist!');
     }
   }
 
-  removeFromGroup(scope, target, groupName, userEmail) {
-    let myGroups = this.context.groups;
-    let group = myGroups[scope][target][groupName];
+  removeFromGroup(groupName, userEmail) {
+    let group = this.context.groups[groupName];
 
     group.splice(group.indexOf(userEmail), 1);
+    this.context.saveGroups();
   }
 
 }

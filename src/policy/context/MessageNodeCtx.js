@@ -4,6 +4,7 @@ class MessageNodeCtx extends CommonCtx {
 
   constructor() {
     super();
+    this.serviceProviderPolicies = {}; //TODO: how to load them?
   }
 
   authorise(message) {
@@ -36,6 +37,14 @@ class MessageNodeCtx extends CommonCtx {
     }
   }
 
+  loadActivePolicy() { }
+
+  loadGroups() { }
+
+  loadSPPolicies() { }
+
+  loadUserPolicies() { }
+
   getServiceProviderPolicy() {
     let policy;
 
@@ -51,6 +60,10 @@ class MessageNodeCtx extends CommonCtx {
   _isToVerify() {
     return true;
   }
+
+  saveActivePolicy() {}
+
+  savePolicies() {}
 }
 
 export default MessageNodeCtx;

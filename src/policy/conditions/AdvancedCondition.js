@@ -8,14 +8,6 @@ class AdvancedCondition {
     this.condition = condition;
   }
 
-  get condition() {
-    return this._condition;
-  }
-
-  set condition(condition) {
-    this._condition = condition;
-  }
-
   isApplicable(context, message, operator, left, right) {
     if (!operator) {
       operator = this.condition[0];

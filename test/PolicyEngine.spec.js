@@ -26,22 +26,28 @@ let andNotCondition = new AdvancedCondition(['and', new Condition('source', 'equ
 let orNotCondition = new AdvancedCondition(['or', ['not', new Condition('domain', 'equals', 'domain1')], new Condition('source', 'equals', 'user1@domain1')]);
 
 /********** RULES **********/
-let simpleRule = new Rule(false, simpleCondition, 'global', 'global');
-let acceptAnySubscriptionRule = new Rule(true, new SubscriptionCondition('subscription', 'equals', '*'), 'global', 'global');
-let acceptPreAuthSubscriptionRule = new Rule(true, new SubscriptionCondition('subscription', 'in', 'preauthorised'), 'global', 'global');
-let blockAnySubscriptionRule = new Rule(false, new SubscriptionCondition('subscription', 'equals', '*'), 'global', 'global');
-let blockPreAuthSubscriptionRule = new Rule(false, new AdvancedCondition(['not', new SubscriptionCondition('subscription', 'in', 'preauthorised')]), 'global', 'global');
-let dataObjectSchemeRule = new Rule(false, new Condition('dataObjectScheme', 'equals', 'comm'), 'global', 'global');
-let dateRule = new Rule(false, new Condition('date', 'equals', '01/01/2016'), 'global', 'global');
-let domainRule = new Rule(false, new Condition('domain', 'equals', 'blockedDomain'), 'global', 'global');
-let sourceRule = new Rule(false, new Condition('source', 'equals', 'user@blockedDomain'), 'global', 'global');
-let timeRule = new Rule(false, new Condition('time', 'between', [1400, 1700]), 'global', 'global');
-let weekdayRule = new Rule(false, new Condition('weekday', 'equals', '0'), 'global', 'global');
+let simpleRule = new Rule(false, simpleCondition, 0, 'global', 'global');
+let acceptAnySubscriptionRule = new Rule(true, new SubscriptionCondition('subscription', 'equals', '*'), 0, 'global', 'global');
+let acceptPreAuthSubscriptionRule = new Rule(true, new SubscriptionCondition('subscription', 'in', 'preauthorised'), 0, 'global', 'global');
+let blockAnySubscriptionRule = new Rule(false, new SubscriptionCondition('subscription', 'equals', '*'), 0, 'global', 'global');
+let blockPreAuthSubscriptionRule = new Rule(false, new AdvancedCondition(['not', new SubscriptionCondition('subscription', 'in', 'preauthorised')]), 0, 'global', 'global');
+let dataObjectSchemeRule = new Rule(false, new Condition('dataObjectScheme', 'equals', 'comm'), 0, 'global', 'global');
+let dateRule = new Rule(false, new Condition('date', 'equals', '01/01/2016'), 0, 'global', 'global');
+let domainRule = new Rule(false, new Condition('domain', 'equals', 'blockedDomain'), 0, 'global', 'global');
+let sourceRule = new Rule(false, new Condition('source', 'equals', 'user@blockedDomain'), 0, 'global', 'global');
+let sourceRuleForConn = new Rule(false, new Condition('source', 'equals', 'user@blockedDomain'), 0, 'hyperty', 'Connector');
+let sourceRuleForUser1 = new Rule(false, new Condition('source', 'equals', 'user@blockedDomain'), 0, 'user', 'user1@work');
+let timeRule = new Rule(false, new Condition('time', 'between', [1400, 1700]), 0, 'global', 'global');
+let weekdayRule = new Rule(false, new Condition('weekday', 'equals', '0'), 0, 'global', 'global');
 
 /********** POLICIES **********/
 let sourcePolicy = new ServiceProviderPolicy('HypertyChat', [simpleRule], []);
 
 /********** MESSAGES **********/
+let messageFromChat = { body: { identity: { userProfile: { username: 'user@blockedDomain' } } }, id: 1, type: 'subscribe', from: 'hyperty://domain/hyperty-123', to: 'hyperty://domain/hyperty-456' };
+
+let messageFromConn = { body: { identity: { userProfile: { username: 'user@blockedDomain' } } }, id: 1, type: 'subscribe', from: 'hyperty://domain/hyperty-789', to: 'hyperty://domain/hyperty-012' };
+
 let messageFromUser1 = { body: { identity: { userProfile: { username: 'user1@domain1' } } }, id: 1, type: 'subscribe', from: 'scheme://domain/data-object-instance', to: 'comm://domain/data-object-instance' };
 
 let messageFromUser2 = { body: { identity: { userProfile: { username: 'user2@domain2' } } }, id: 1, type: 'subscribe', from: 'scheme://domain/data-object-instance', to: 'comm://domain/data-object-instance' };
@@ -59,6 +65,8 @@ let allowedSubscribeMessage = { body: { auth: true, identity: { userProfile: { u
 let badSubscribeMessage = { body: { identity: { userProfile: { username: 'user@domain' } }, subscriber: 'hyperty://domain/not-preauthorised-hyperty-instance' }, id: 1, type: 'subscribe', from: 'runtime://localhost/7600/sm', to: 'comm://domain/data-object-url/subscription' };
 
 /********** TESTS **********/
+let runtimeCtx = new RuntimeCoreCtx();
+
 describe('Policies management', () => {
   describe('conditions management', () => {
     it('creates a simple condition', () => {
@@ -67,10 +75,10 @@ describe('Policies management', () => {
       expect(simpleCondition.params).to.be.eql('user1@domain1');
     });
     it('returns condition is applicable', () => {
-      expect(simpleCondition.isApplicable(new RuntimeCoreCtx(), messageFromUser1)).to.be.eql(true);
+      expect(simpleCondition.isApplicable(runtimeCtx, messageFromUser1)).to.be.eql(true);
     });
     it('returns condition is not applicable', () => {
-      expect(simpleCondition.isApplicable(new RuntimeCoreCtx(), messageFromUser2)).to.be.eql(false);
+      expect(simpleCondition.isApplicable(runtimeCtx, messageFromUser2)).to.be.eql(false);
     });
 
     it('creates an advanced condition - "and"', () => {
@@ -81,11 +89,11 @@ describe('Policies management', () => {
     });
 
     it('correctly returns "and" condition is applicable', () => {
-      expect(andCondition.isApplicable(new RuntimeCoreCtx(), messageFromUser1)).to.be.eql(true);
+      expect(andCondition.isApplicable(runtimeCtx, messageFromUser1)).to.be.eql(true);
     });
 
     it('correctly returns "and" condition is not applicable', () => {
-      expect(andCondition.isApplicable(new RuntimeCoreCtx(), messageFromUser2)).to.be.eql(false);
+      expect(andCondition.isApplicable(runtimeCtx, messageFromUser2)).to.be.eql(false);
     });
 
     it('creates an advanced condition - "or"', () => {
@@ -93,11 +101,11 @@ describe('Policies management', () => {
     });
 
     it('correctly returns "or" condition is applicable', () => {
-      expect(orCondition.isApplicable(new RuntimeCoreCtx(), messageFromUser1)).to.be.eql(true);
+      expect(orCondition.isApplicable(runtimeCtx, messageFromUser1)).to.be.eql(true);
     });
 
     it('correctly returns "or" condition is not applicable', () => {
-      expect(orCondition.isApplicable(new RuntimeCoreCtx(), messageFromUser2)).to.be.eql(false);
+      expect(orCondition.isApplicable(runtimeCtx, messageFromUser2)).to.be.eql(false);
     });
 
     it('creates an advanced condition - "not"', () => {
@@ -105,19 +113,19 @@ describe('Policies management', () => {
     });
 
     it('correctly returns "not" condition is applicable', () => {
-      expect(notCondition.isApplicable(new RuntimeCoreCtx(), messageFromUser1)).to.be.eql(true);
+      expect(notCondition.isApplicable(runtimeCtx, messageFromUser1)).to.be.eql(true);
     });
 
     it('correctly returns "not" condition is not applicable', () => {
-      expect(notCondition.isApplicable(new RuntimeCoreCtx(), messageFromUser2)).to.be.eql(false);
+      expect(notCondition.isApplicable(runtimeCtx, messageFromUser2)).to.be.eql(false);
     });
 
     it('correctly returns "and not" condition is not applicable', () => {
-      expect(andNotCondition.isApplicable(new RuntimeCoreCtx(), messageFromUser1)).to.be.eql(false);
+      expect(andNotCondition.isApplicable(runtimeCtx, messageFromUser1)).to.be.eql(false);
     });
 
     it('correctly returns "or not" condition is applicable', () => {
-      expect(orNotCondition.isApplicable(new RuntimeCoreCtx(), messageFromUser1)).to.be.eql(true);
+      expect(orNotCondition.isApplicable(runtimeCtx, messageFromUser1)).to.be.eql(true);
     });
   });
 
@@ -129,10 +137,10 @@ describe('Policies management', () => {
       expect(simpleRule.target).to.be.eql('global');
     });
     it('evaluates a simple rule to false', () => {
-      expect(simpleRule.evaluate(new RuntimeCoreCtx(), messageFromUser1)).to.be.eql(false);
+      expect(simpleRule.evaluate(runtimeCtx, messageFromUser1)).to.be.eql(false);
     });
     it('evaluates a simple rule to "Not Applicable"', () => {
-      expect(simpleRule.evaluate(new RuntimeCoreCtx(), messageFromUser2)).to.be.eql('Not Applicable');
+      expect(simpleRule.evaluate(runtimeCtx, messageFromUser2)).to.be.eql('Not Applicable');
     });
   });
 
@@ -143,10 +151,10 @@ describe('Policies management', () => {
       expect(sourcePolicy.rules).to.be.eql([simpleRule]);
     });
     it('evaluates a service provider policy to false', () => {
-      expect(sourcePolicy.evaluate(new RuntimeCoreCtx(), messageFromUser1)).to.be.eql(false);
+      expect(sourcePolicy.evaluate(runtimeCtx, messageFromUser1)).to.be.eql(false);
     });
     it('evaluates a service provider policy to "Not Applicable"', () => {
-      expect(sourcePolicy.evaluate(new RuntimeCoreCtx(), messageFromUser2)).to.be.eql('Not Applicable');
+      expect(sourcePolicy.evaluate(runtimeCtx, messageFromUser2)).to.be.eql('Not Applicable');
     });
   });
 });
@@ -156,8 +164,16 @@ describe('Policy Engine with Runtime Core context', () => {
     getPreAuthSubscribers: () => {
       return ['hyperty://domain/hyperty-instance'];
     },
-    getHypertyName: () => {
-      return 'HypertyChat';
+    getHypertyName: (hypertyURL) => {
+      if (hypertyURL === 'hyperty://domain/hyperty-123') {
+        return 'HypertyChat';
+      }
+      if (hypertyURL === 'hyperty://domain/hyperty-789') {
+        return 'Connector';
+      }
+    },
+    getReporterURLSynchonous: (hypertyURL) => {
+      return 'hyperty://domain/hyperty-url';
     },
     isDataObjectURL: (dataObjectURL) => {
       let splitURL = dataObjectURL.split('://');
@@ -174,6 +190,7 @@ describe('Policy Engine with Runtime Core context', () => {
         resolve(message);
       });
     },
+    doMutualAuthentication: () => {},
     encryptMessage: (message) => {
       return new Promise((resolve) => {
         resolve(message);
@@ -214,6 +231,8 @@ describe('Policy Engine with Runtime Core context', () => {
   });
 
   describe('policies management', () => {
+    policyEngine.removePolicy('*');
+
     it('adds a service provider policy to the engine', () => {
       policyEngine.context.activeUserPolicy = undefined;
       policyEngine.addPolicy('SERVICE_PROVIDER', 'HypertyChat', sourcePolicy);
@@ -257,6 +276,26 @@ describe('Policy Engine with Runtime Core context', () => {
       expect(policyEngine.context.serviceProviderPolicies).to.be.eql({});
       expect(policyEngine.context.userPolicies).to.be.eql({});
       expect(policyEngine.context.activeUserPolicy).to.be.eql(undefined);
+    });
+
+    it('does not apply a rule as it is not its target', (done) => {
+      policyEngine.addPolicy('USER', 'My policy', new UserPolicy('My policy', [sourceRuleForConn], []));
+      policyEngine.context.activeUserPolicy = 'My policy';
+      expect(policyEngine.authorise(messageFromChat).then((message) => {
+        return message;
+      }), (error) => {
+        return error;
+      }).to.be.fulfilled.and.eventually.eql(messageFromChat).and.notify(done);
+    });
+
+    it('applies a rule as it is its target', (done) => {
+      policyEngine.addPolicy('USER', 'My policy', new UserPolicy('My policy', [sourceRuleForConn], []));
+      policyEngine.context.activeUserPolicy = 'My policy';
+      expect(policyEngine.authorise(messageFromConn).then((message) => {
+        return message;
+      }), (error) => {
+        return error;
+      }).to.be.rejected.and.notify(done);
     });
   });
 
@@ -302,7 +341,7 @@ describe('Policy Engine with Runtime Core context', () => {
     });
   });
 
-  describe('functionality: time of the day', () => {
+  /*describe('functionality: time of the day', () => {
     it('rejects the message as it is received in a blocked timeslot', (done) => {
       policyEngine.context.time = 1530;
       policyEngine.removePolicy('*');
@@ -346,7 +385,7 @@ describe('Policy Engine with Runtime Core context', () => {
         return error;
       }).to.be.fulfilled.and.eventually.eql(message).and.notify(done);
     });
-  });
+  });*/
 
   describe('functionality: domain', () => {
     it('rejects the message as it comes from a blocked domain', (done) => {
@@ -369,7 +408,7 @@ describe('Policy Engine with Runtime Core context', () => {
     });
   });
 
-  describe('functionality: weekday', () => {
+  /*describe('functionality: weekday', () => {
     it('rejects the message as it is received in a blocked weekday', (done) => {
       policyEngine.context.weekday =  '0';
       policyEngine.removePolicy('*');
@@ -390,7 +429,7 @@ describe('Policy Engine with Runtime Core context', () => {
         return error;
       }).to.be.fulfilled.and.eventually.eql(message).and.notify(done);
     });
-  });
+  });*/
 
   describe('data objects management', () => {
     it('rejects a subscription attempt, as the policy rejects all', (done) => {
@@ -428,7 +467,7 @@ describe('Policy Engine with Runtime Core context', () => {
 
     it('rejects a subscription attempt, as the policy rejects non-preauthorised subscriber and is not preauthorised', (done) => {
       policyEngine.removePolicy('*');
-      policyEngine.addPolicy('USER', 'My policy', [blockPreAuthSubscriptionRule], ['registerSubscriber']);
+      policyEngine.addPolicy('USER', 'My policy', new UserPolicy('My policy', [blockPreAuthSubscriptionRule], ['registerSubscriber']));
       policyEngine.context.activeUserPolicy = 'My policy';
       expect(policyEngine.authorise(badSubscribeMessage).then((message) => {
         return message;
@@ -439,38 +478,45 @@ describe('Policy Engine with Runtime Core context', () => {
   });
 
   describe('groups management', () => {
+    let groups = policyEngine.context.groups;
+    for (let i in groups) {
+      policyEngine.deleteGroup(i);
+    }
+
     it('creates a group', () => {
-      policyEngine.createGroup('global', 'global', 'groupA');
-      expect(policyEngine.getGroupsNames('global', 'global')).to.be.eql(['groupA']);
+      policyEngine.createGroup('groupA');
+      expect(policyEngine.getGroupsNames()).to.be.eql(['groupA']);
     });
 
     it('creates a second group', () => {
-      policyEngine.createGroup('global', 'global', 'groupB');
-      expect(policyEngine.getGroupsNames('global', 'global')).to.be.eql(['groupA', 'groupB']);
+      policyEngine.createGroup('groupB');
+      expect(policyEngine.getGroupsNames()).to.be.eql(['groupA', 'groupB']);
     });
 
     it('adds an email to a group', () => {
-      policyEngine.addToGroup('global', 'global', 'groupA', 'user1@domain');
-      expect(policyEngine.getGroup('global', 'global', 'groupA')).to.be.eql(['user1@domain']);
+      policyEngine.addToGroup('groupA', 'user1@domain');
+      expect(policyEngine.getGroup('groupA')).to.be.eql(['user1@domain']);
     });
 
     it('adds a second email to a group', () => {
-      policyEngine.addToGroup('global', 'global', 'groupA', 'user2@domain');
-      expect(policyEngine.getGroup('global', 'global', 'groupA')).to.be.eql(['user1@domain', 'user2@domain']);
+      policyEngine.addToGroup('groupA', 'user2@domain');
+      expect(policyEngine.getGroup('groupA')).to.be.eql(['user1@domain', 'user2@domain']);
     });
 
     it('removes a user from a group', () => {
-      policyEngine.removeFromGroup('global', 'global', 'groupA', 'user1@domain');
-      expect(policyEngine.getGroup('global', 'global', 'groupA')).to.be.eql(['user2@domain']);
+      policyEngine.removeFromGroup('groupA', 'user1@domain');
+      expect(policyEngine.getGroup('groupA')).to.be.eql(['user2@domain']);
     });
 
     it('deletes a group', () => {
-      policyEngine.deleteGroup('global', 'global', 'groupA');
-      expect(policyEngine.getGroup('global', 'global', 'groupA')).to.be.eql([]);
-      expect(policyEngine.getGroupsNames('global', 'global')).to.be.eql(['groupB']);
+      policyEngine.deleteGroup('groupA');
+      expect(policyEngine.getGroup('groupA')).to.be.eql([]);
+      expect(policyEngine.getGroupsNames()).to.be.eql(['groupB']);
     });
   });
+  policyEngine.removePolicy('*');
 });
+
 describe('Policy Engine with Message Node context', () => {
   let policyEngine = new PolicyEngine(new MessageNodeCtx());
 
@@ -478,14 +524,14 @@ describe('Policy Engine with Message Node context', () => {
     expect(policyEngine.authorise(message)).to.be.eql(true);
   });
 
-  describe('functionality: date', () => {
+  /*describe('functionality: date', () => {
     it('rejects the message as it is received in a blocked date', () => {
       policyEngine.context.date = '01/01/2016';
       policyEngine.removePolicy('*');
       policyEngine.addPolicy('SERVICE_PROVIDER', 'My policy', new ServiceProviderPolicy('My policy', [dateRule], []));
       expect(policyEngine.authorise(message)).to.be.eql(false);
     });
-  });
+  });*/
 
   describe('functionality: domain', () => {
     it('rejects the message as it comes from a blocked domain', () => {
@@ -500,7 +546,7 @@ describe('Policy Engine with Message Node context', () => {
     });
   });
 
-  describe('functionality: time of the day', () => {
+  /*describe('functionality: time of the day', () => {
     it('rejects the message as it is received in a blocked timeslot', () => {
       policyEngine.context.time = 1530;
       policyEngine.removePolicy('*');
@@ -528,5 +574,5 @@ describe('Policy Engine with Message Node context', () => {
       policyEngine.context.weekday = '1';
       expect(policyEngine.authorise(message)).to.be.eql(true);
     });
-  });
+  });*/
 });
