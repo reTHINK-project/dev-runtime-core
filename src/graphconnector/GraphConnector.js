@@ -322,16 +322,31 @@ class GraphConnector {
 
      for (let i = 0; i < this.contacts.length; i++) {
        if (this.contacts[i].guid == guidOld) {
+         if(guidOld == guidNew) {
 
-         this.contacts[i].firstName = firstName;
-         this.contacts[i].lastName = lastName;
-         this.contacts[i].guid = guidNew;
-         this.contacts[i].privateContact = privStatus;
+           this.contacts[i].firstName = firstName;
+           this.contacts[i].lastName = lastName;
+           this.contacts[i].guid = guidOld;
+           this.contacts[i].privateContact = privStatus;
 
-         rtnArray.push(this.contacts[i]);
+           rtnArray.push(this.contacts[i]);
+
+         } else {
+
+           if(!this.guidExist(guidNew)) {
+
+             this.contacts[i].firstName = firstName;
+             this.contacts[i].lastName = lastName;
+             this.contacts[i].guid = guidNew;
+             this.contacts[i].privateContact = privStatus;
+
+             rtnArray.push(this.contacts[i]);
+
+           }
+         }
        }
      }
-     return rtnArray;
+    return rtnArray;
    }
 
   /**
