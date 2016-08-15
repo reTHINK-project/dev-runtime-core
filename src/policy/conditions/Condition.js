@@ -13,14 +13,15 @@ class Condition {
     context[this.attribute] = { message: message };
     let value = context[this.attribute];
     let tempParam;
-    if (this.params === 'preauth') {
-      let dataObjectURL = message.to.split('/');
-      dataObjectURL.pop();
-      dataObjectURL = dataObjectURL[0] + '//' + dataObjectURL[2];
-      tempParam = context.runtimeRegistry.getPreAuthSubscribers(dataObjectURL);
-    }
     if (this.operator === 'in') {
-      tempParam = context.policyEngine.getGroup(this.params);
+      if (this.params === 'preauthorised') {
+        let dataObjectURL = message.to.split('/');
+        dataObjectURL.pop();
+        dataObjectURL = dataObjectURL[0] + '//' + dataObjectURL[2];
+        tempParam = context.runtimeRegistry.getPreAuthSubscribers(dataObjectURL);
+      } else {
+        tempParam = context.policyEngine.getGroup(this.params);
+      }
     }
     if (!tempParam) {
       return this.operators[this.operator]([this.params, value]);

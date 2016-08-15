@@ -32,9 +32,11 @@ class PDP {
 
   applyPolicies(message, policies) {
     let result = this.evaluateSPPolicy(message, policies.serviceProviderPolicy);
+
     if (this.context instanceof RuntimeCoreCtx && (result || result === 'Not Applicable')) {
       result = this.evaluateUserPolicy(message, policies.userPolicy);
     }
+
     return result;
   }
 
@@ -55,6 +57,7 @@ class PDP {
 
     if (title !== undefined) {
       let policy = this.context.userPolicies[title];
+      
       if (policy) {
         result = policy.evaluate(this.context, message);
       } else {

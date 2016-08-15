@@ -87,7 +87,6 @@ class Rule {
 
         return 'Not Applicable';
     }
-
     if (this.condition.isApplicable(context, message, this.scope, this.target)) {
       return this.authorise;
     } else {
