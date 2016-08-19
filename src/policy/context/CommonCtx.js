@@ -1,119 +1,79 @@
-import Context from '../Context';
 import {divideEmail} from '../../utils/utils';
 
-//import persistenceManager from '../../persistence/PersistenceManager';
-
-class CommonCtx extends Context {
+class CommonCtx {
 
   constructor() {
-    super();
-    let _this = this;
-    _this.policies = _this.loadPolicies();
-    _this.groups = {};
+    this.defaultBehavior = true;
+    this.groups = {};
   }
 
-  applyPolicies(message) {
-    let _this = this;
-    let policiesResult = [true, []];
-    let applicablePolicies = _this.getApplicablePolicies(message);
-    policiesResult = _this.pdp.evaluate(message, applicablePolicies);
-    message.body.auth = applicablePolicies.length !== 0;
-    _this.pep.enforce(policiesResult);
-    return { message: message, policiesResult: policiesResult };
+  get defaultBehavior() {
+    return this._defaultBehavior;
+  }
+
+  set defaultBehavior(behavior) {
+    this._defaultBehavior = behavior;
   }
 
   set date(now) {
-    let _this = this;
-    if (!now.message) {
-      _this._dateAttribute = (typeof now === 'string') ? now : _this._getDate();
-    }
-  }
-
-  set domain(params) {
-    let _this = this;
-    _this._domainAttribute = divideEmail(params.message.body.identity.userProfile.username).domain;
-  }
-
-  set source(params) {
-    let _this = this;
-    _this._sourceAttribute = params.message.body.identity.userProfile.username;
-  }
-
-  set time(now) {
-    let _this = this;
-    if (!now.message) {
-      _this._timeAttribute = (now) ? now : _this._getTime();
-    }
-  }
-
-  set weekday(now) {
-    let _this = this;
-    if (!now.message) {
-      _this._weekdayAttribute = (now) ? now : _this._getWeekDay();
-    }
-  }
-
-  get date() {
-    let _this = this;
-    return _this._dateAttribute;
-  }
-
-  get domain() {
-    let _this = this;
-    return _this._domainAttribute;
-  }
-
-  get source() {
-    let _this = this;
-    return _this._sourceAttribute;
-  }
-
-  get time() {
-    let _this = this;
-    return _this._timeAttribute;
-  }
-
-  get weekday() {
-    let _this = this;
-    return _this._weekdayAttribute;
-  }
-
-  _getDate() {
     let date = new Date();
     let day = String(date.getDate());
     if (day.length === 1) {
       day = '0' + day;
     }
-
     let month = String(date.getMonth() + 1);
     if (month.length === 1) {
       month = '0' + month;
     }
 
-    return day + '/' + month + '/' + date.getFullYear();
+    this._date = day + '/' + month + '/' + date.getFullYear();
   }
 
-  _getList(scope, groupName) {
-    let _this = this;
-    let myGroups = _this.groups;
-    let members = [];
-    if (myGroups[scope] !== undefined && myGroups[scope][groupName] !== undefined) {
-      members = myGroups[scope][groupName];
+  set domain(params) {
+    if (params.message.body.identity !== undefined) {
+      this._domain = divideEmail(params.message.body.identity.userProfile.username).domain;
     }
-    return members;
   }
 
-  _getTime() {
-    let now = new Date();
+  set source(params) {
+    if (params.message.body.identity !== undefined) {
+      this._source = params.message.body.identity.userProfile.username;
+    }
+  }
+
+  set time(now) {
+    now = new Date();
     let minutes = String(now.getMinutes());
     if (minutes.length === 1) {
       minutes = '0' + minutes;
     }
-    return parseInt(String(now.getHours()) + minutes);
+    this._time = parseInt(String(now.getHours()) + minutes);
   }
 
-  _getWeekDay() {
-    return String(new Date().getDay());
+  set weekday(now) {
+    this._weekday = String(new Date().getDay());
+  }
+
+  get date() {
+    return this._date;
+  }
+
+  get domain() {
+    return this._domain;
+  }
+
+  get source() {
+    let _this = this;
+    return _this._source;
+  }
+
+  get time() {
+    let _this = this;
+    return _this._time;
+  }
+
+  get weekday() {
+    return this._weekday;
   }
 
 }

@@ -361,8 +361,8 @@ class Registry extends EventEmitter {
     let _this = this;
 
     let message = { type: 'delete', from: _this.registryURL,
-                   to: 'domain://registry.' + _this._domain + '/',
-                   body: { value: {user: user, hypertyURL: hypertyInstance }}};
+                    to: 'domain://registry.' + _this._domain + '/',
+                    body: { value: {user: user, url: hypertyInstance }}};
 
     _this._messageBus.postMessage(message, (reply) => {
       console.log('unregister hyperty Reply', reply);
@@ -377,8 +377,8 @@ class Registry extends EventEmitter {
     let _this = this;
 
     let message = { type: 'delete', from: _this.registryURL,
-                   to: 'domain://registry.' + _this._domain + '/',
-                   body: { value: {name: name}}};
+                    to: 'domain://registry.' + _this._domain + '/',
+                    body: { value: {name: name}}};
 
     _this._messageBus.postMessage(message, (reply) => {
       console.log('unregister dataObject Reply', reply);
@@ -433,18 +433,24 @@ class Registry extends EventEmitter {
 
   /**
   * To register a new Data Object in the runtime which returns the dataObjectURL allocated to the new Data Object.
-  * @param  {String}      identifier            identifier
+  * @param  {String}      identifier                  identifier
   * @param  {String}      dataObjectschema            dataObjectschema
-  * @param  {String}      dataObjectUrl        dataObjectUrl
-  * @return {String}      dataObjectReporter         dataObjectReporter
+  * @param  {String}      dataObjectUrl               dataObjectUrl
+  * @param {String}      dataObjectReporter           dataObjectReporter
+  * @param  {Array}     resources                     dataObject resources
+  * @param  {Array}     authorise                     list of pre authorised authorised IDs
   */
-  registerDataObject(identifier, dataObjectschema, dataObjectUrl, dataObjectReporter, authorise) {
+  registerDataObject(identifier, dataObjectschema, dataObjectUrl, dataObjectReporter, resources, authorise) {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
 
+      let dataScheme = [];
+      let filteredDataScheme = dataObjectUrl.split(':');
+      dataScheme.push(filteredDataScheme[0]);
+
       //message to register the new hyperty, within the domain registry
-      let messageValue = {name: identifier, schema: dataObjectschema, url: dataObjectUrl, expires: _this.expiresTime, reporter: dataObjectReporter, preAuth: authorise, subscribers: []};
+      let messageValue = {name: identifier, resources: resources, dataSchemes: dataScheme, schema: dataObjectschema, url: dataObjectUrl, expires: _this.expiresTime, reporter: dataObjectReporter, preAuth: authorise, subscribers: []};
 
       _this.dataObjectList[dataObjectUrl] = messageValue;
 
@@ -512,11 +518,6 @@ class Registry extends EventEmitter {
 
               });
 
-              let hyperty = new HypertyInstance(_this.identifier, _this.registryURL,
-              descriptorURL, descriptor, adderessList[0], userProfile);
-
-              _this.hypertiesList.push(hyperty);
-
               //check whether the received sanbox e ApplicationSandbox or a normal sandbox
               if (sandbox.type === 'app') {
                 _this.sandboxesList.appSandbox[adderessList[0]] = sandbox;
@@ -554,8 +555,15 @@ class Registry extends EventEmitter {
                   filteredDataSchemas.push(dataSchema.sourcePackage.sourceCode.properties.scheme.constant);
                 }
 
+                let hyperty = new HypertyInstance(_this.identifier, _this.registryURL,
+                descriptorURL, descriptor, adderessList[0], userProfile);
+
+                hyperty._resources = resources;
+                hyperty._dataSchemes = filteredDataSchemas;
+                _this.hypertiesList.push(hyperty);
+
                 //message to register the new hyperty, within the domain registry
-                let messageValue = {user: identityURL,  hypertyDescriptorURL: descriptorURL, hypertyURL: adderessList[0], expires: _this.expiresTime, resources: resources, dataSchemes: filteredDataSchemas};
+                let messageValue = {user: identityURL,  descriptor: descriptorURL, url: adderessList[0], expires: _this.expiresTime, resources: resources, dataSchemes: filteredDataSchemas};
 
                 let message = _this.messageFactory.createCreateMessageRequest(
                   _this.registryURL,
@@ -592,7 +600,6 @@ class Registry extends EventEmitter {
 
                 console.log('Hyperty Schemas', filteredDataSchemas);
                 console.log('Hyperty resources', resources);
-
 
               });
 
@@ -829,6 +836,7 @@ class Registry extends EventEmitter {
   */
   onEvent(event) {
     // TODO body...
+    console.log('onEvent');
   }
 
   /**

@@ -8,6 +8,7 @@ var fs = require('fs');
 
 // Task and dependencies to distribute for all environments;
 var babelify = require('babelify');
+var babel = require('gulp-babel');
 var browserify = require('browserify');
 var buffer = require('vinyl-buffer');
 var source = require('vinyl-source-stream');
@@ -136,7 +137,7 @@ function prependLicense(clean) {
  * By default the compact mode is true;
  * How to use: gulp dist --compact false | true;
  */
-gulp.task('dist', function() {
+gulp.task('dist', ['6to5'], function() {
 
   var debug = argv.development ? true : false;
 
@@ -148,10 +149,44 @@ gulp.task('dist', function() {
     gutil.log('The generated files will be uglified, minified, the sourcemaps files will be created separated');
   }
 
-  return gulp.src(['src/sandbox.js', 'src/minibus.js', 'src/runtime/RuntimeUA.js', 'src/policy/PolicyEngine.js', 'src/policy/context/MessageNodeCtx.js'])
+  var file = 'src/runtime/RuntimeUA.js';
+
+  return gulp.src([file])
   .pipe(dist(debug))
   .on('end', function() {
-    gutil.log('All the files are created');
+
+    var command = 'browserify ' + file + ' -t babelify -s Runtime -o dist/NodeRuntime.js --node';
+    if (debug) {
+      command += ' --debug';
+    }
+    gutil.log(command);
+    exec(command, function(err) {
+      if (err) return err;
+      gutil.log('All the files are created');
+    });
+  });
+
+});
+
+gulp.task('6to5', function() {
+
+  return gulp.src(['src/**/*.js'])
+  .pipe(sourcemaps.init())
+  .pipe(babel({
+    sourceMaps: 'both',
+    compact: true,
+    presets: ['es2015'],
+    plugins: ['add-module-exports']
+  })).on('error', function(err) {
+    gutil.log(gutil.colors.red(err));
+    this.emit('end');
+  })
+  .pipe(uglify())
+  .pipe(sourcemaps.write('.'))
+  // .pipe(mark())
+  .pipe(gulp.dest('dist'))
+  .on('end', function() {
+    gutil.log('Distribution files done');
   });
 
 });
@@ -247,9 +282,7 @@ function transpile(opts) {
     }
 
     return browserify(file.path, args)
-    .transform(babelify, {
-      sourceMaps: true
-    })
+    .transform(babelify)
     .bundle()
     .on('error', function(err) {
       gutil.log(gutil.colors.red(err));
