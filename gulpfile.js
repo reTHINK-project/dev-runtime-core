@@ -161,9 +161,14 @@ gulp.task('dist', ['6to5'], function() {
     }
     gutil.log(command);
     exec(command, function(err) {
-      if (err) return err;
+      if (err) {
+        gutil.log(gutil.colors.green('Need install browserify npm install -g browserify'));
+        gutil.log(err.message);
+        return err;
+      }
       gutil.log('All the files are created');
     });
+
   });
 
 });
@@ -183,7 +188,6 @@ gulp.task('6to5', function() {
   })
   .pipe(uglify())
   .pipe(sourcemaps.write('.'))
-  // .pipe(mark())
   .pipe(gulp.dest('dist'))
   .on('end', function() {
     gutil.log('Distribution files done');
