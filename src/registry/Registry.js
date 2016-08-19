@@ -454,12 +454,14 @@ class Registry extends EventEmitter {
 
       _this.dataObjectList[dataObjectUrl] = messageValue;
 
-      let message = _this.messageFactory.createCreateMessageRequest(
+      /*let message = _this.messageFactory.createCreateMessageRequest(
         _this.registryURL,
         'domain://registry.' + _this.registryDomain + '/',
         messageValue,
         'policy'
-      );
+      );*/
+
+      let message = {type:'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: messageValue, policy: 'policy'}};
 
       _this._messageBus.postMessage(message, (reply) => {
         console.log('===> registerDataObject Reply: ', reply);
@@ -565,12 +567,14 @@ class Registry extends EventEmitter {
                 //message to register the new hyperty, within the domain registry
                 let messageValue = {user: identityURL,  descriptor: descriptorURL, url: adderessList[0], expires: _this.expiresTime, resources: resources, dataSchemes: filteredDataSchemas};
 
-                let message = _this.messageFactory.createCreateMessageRequest(
+                /*let message = _this.messageFactory.createCreateMessageRequest(
                   _this.registryURL,
                   'domain://registry.' + _this.registryDomain + '/',
                   messageValue,
                   'policy'
-                );
+                );*/
+
+                let message = {type:'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: messageValue, policy: 'policy'}};
 
                 _this._messageBus.postMessage(message, (reply) => {
                   console.log('===> RegisterHyperty Reply: ', reply);
@@ -586,12 +590,13 @@ class Registry extends EventEmitter {
                 // the time is defined by a little less than half of the expires time defined
                 let keepAliveTimer = setInterval(function() {
 
-                  let message = _this.messageFactory.createCreateMessageRequest(
+                  /*let message = _this.messageFactory.createCreateMessageRequest(
                     _this.registryURL,
                     'domain://registry.' + _this.registryDomain + '/',
                     messageValue,
                     'policy'
-                  );
+                  );*/
+                  let message = {type:'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: messageValue, policy: 'policy'}};
 
                   _this._messageBus.postMessage(message, (reply) => {
                     console.log('===> KeepAlive Reply: ', reply);
