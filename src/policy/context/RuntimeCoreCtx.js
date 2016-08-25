@@ -1,20 +1,21 @@
 import CommonCtx from './CommonCtx';
 import Condition from '../conditions/Condition';
 import {divideURL, getUserEmailFromURL, isDataObjectURL} from '../../utils/utils';
-import persistenceManager from 'service-framework/dist/PersistenceManager';
 import Rule from '../Rule';
 import UserPolicy from '../policies/UserPolicy';
 import SubscriptionCondition from '../conditions/SubscriptionCondition';
 
 class RuntimeCoreCtx extends CommonCtx {
 
-  constructor(idModule, runtimeRegistry) {
+  constructor(idModule, runtimeRegistry, persistenceManager) {
     super();
     this.idModule = idModule;
     this.runtimeRegistry = runtimeRegistry;
     this.activeUserPolicy = undefined;
     this.serviceProviderPolicies = {};
     this.userPolicies = {};
+
+    this.persistenceManager = persistenceManager;
   }
 
   get dataObjectScheme() {
@@ -299,25 +300,25 @@ class RuntimeCoreCtx extends CommonCtx {
   }
 
   loadActivePolicy() {
-    this.activeUserPolicy = persistenceManager.get('rethink:activePolicy');
+    this.activeUserPolicy = this.persistenceManager.get('rethink:activePolicy');
   }
 
   loadGroups() {
-    let groups = persistenceManager.get('rethink:groups');
+    let groups = this.persistenceManager.get('rethink:groups');
     if (groups != undefined) {
       this.groups = groups;
     }
   }
 
   loadSPPolicies() {
-    let policies = persistenceManager.get('rethink:spPolicies');
+    let policies = this.persistenceManager.get('rethink:spPolicies');
     if (policies !== undefined) {
       this.serviceProviderPolicies = policies;
     }
   }
 
   loadUserPolicies() {
-    let policies = persistenceManager.get('rethink:userPolicies');
+    let policies = this.persistenceManager.get('rethink:userPolicies');
 
     if (policies !== undefined) {
       for (let i in policies) {
@@ -359,20 +360,20 @@ class RuntimeCoreCtx extends CommonCtx {
   }
 
   saveActivePolicy() {
-    persistenceManager.set('rethink:activePolicy', 0, this.activeUserPolicy);
+    this.persistenceManager.set('rethink:activePolicy', 0, this.activeUserPolicy);
   }
 
   saveGroups() {
-    persistenceManager.set('rethink:groups', 0, this.groups);
+    this.persistenceManager.set('rethink:groups', 0, this.groups);
   }
 
   savePolicies(source) {
     switch(source) {
       case 'USER':
-        persistenceManager.set('rethink:userPolicies', 0, this.userPolicies);
+        this.persistenceManager.set('rethink:userPolicies', 0, this.userPolicies);
         break;
       case 'SERVICE_PROVIDER':
-        persistenceManager.set('rethink:spPolicies', 0, this.serviceProviderPolicies);
+        this.persistenceManager.set('rethink:spPolicies', 0, this.serviceProviderPolicies);
         break;
     }
   }

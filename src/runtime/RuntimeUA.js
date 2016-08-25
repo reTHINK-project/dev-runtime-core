@@ -65,6 +65,7 @@ class RuntimeUA {
 
     _this.runtimeFactory = runtimeFactory;
     _this.runtimeCatalogue = runtimeFactory.createRuntimeCatalogue();
+    _this.persistenceManager = runtimeFactory.persistenceManager();
 
     // Prepare the loader to load the hyperties, protostubs and idpproxy;
     _this.loader = new Loader();
@@ -97,7 +98,7 @@ class RuntimeUA {
     _this.messageBus = new MessageBus(_this.registry);
 
     // Instantiate the Policy Engine
-    _this.policyEngine = new PolicyEngine(new RuntimeCoreCtx(_this.identityModule, _this.registry));
+    _this.policyEngine = new PolicyEngine(new RuntimeCoreCtx(_this.identityModule, _this.registry, _this.persistenceManager));
 
     _this.messageBus.pipeline.handlers = [
 

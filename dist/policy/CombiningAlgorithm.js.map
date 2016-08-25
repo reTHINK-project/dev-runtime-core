@@ -1,1 +1,0 @@
-{"version":3,"sources":["policy/CombiningAlgorithm.js"],"names":["CombiningAlgorithm"],"mappings":"2QAAMA,sFAISA","file":"policy/CombiningAlgorithm.js","sourcesContent":["class CombiningAlgorithm {\n\n}\n\nexport default CombiningAlgorithm;\n"],"sourceRoot":"/source/"}
