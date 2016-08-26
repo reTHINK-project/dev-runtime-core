@@ -1,5 +1,5 @@
 import Operators from './Operators';
-import RuntimeCoreCtx from './context/RuntimeCoreCtx';
+
 /**
 * The Policy Decision Point (PDP) decides if a message is to be authorised by checking a set of
 * policies. The resource to be verified is specified in the first word of the 'condition' field of
@@ -32,9 +32,11 @@ class PDP {
 
   applyPolicies(message, policies) {
     let result = this.evaluateSPPolicy(message, policies.serviceProviderPolicy);
-
-    if (this.context instanceof RuntimeCoreCtx && (result || result === 'Not Applicable')) {
-      result = this.evaluateUserPolicy(message, policies.userPolicy);
+    if (result || result === undefined || result === 'Not Applicable') {
+      let userResult = this.evaluateUserPolicy(message, policies.userPolicy);
+      if (userResult !== undefined) {
+        result = userResult;
+      }
     }
 
     return result;
@@ -45,8 +47,6 @@ class PDP {
 
     if (policy) {
       result = policy.evaluate(this.context, message);
-    } else {
-      result = 'Not Applicable';
     }
 
     return result;
@@ -57,14 +57,10 @@ class PDP {
 
     if (title !== undefined) {
       let policy = this.context.userPolicies[title];
-      
+
       if (policy) {
         result = policy.evaluate(this.context, message);
-      } else {
-        result = 'Not Applicable';
       }
-    } else {
-      result = 'Not Applicable';
     }
 
     return result;
