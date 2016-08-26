@@ -17,6 +17,7 @@ class UserPolicy extends Policy {
       switch (type) {
         case 'advanced':
           condition = new AdvancedCondition(condition);
+          break;
         case 'simple':
           condition = new Condition(condition[0], condition[1], condition[2]);
           break;
