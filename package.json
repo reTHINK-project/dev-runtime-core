@@ -1,6 +1,6 @@
 {
   "name": "runtime-core",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "core runtime development",
   "main": "./dist/Runtime.js",
   "directories": {
@@ -61,7 +61,7 @@
     "gulp-pandoc": "^0.2.2",
     "gulp-prompt": "^0.2.0",
     "gulp-replace": "^0.5.4",
-    "gulp-uglify": "^1.5.3",
+    "gulp-uglify": "^2.0.0",
     "hex64": "^0.4.0",
     "jsrsasign": "^5.0.9",
     "karma": "^0.13.22",
@@ -73,7 +73,7 @@
     "mocha": "2.5.3",
     "object.observe": "^0.2.6",
     "phantomjs-prebuilt": "^2.1.7",
-    "service-framework": "github:rethink-project/dev-service-framework#develop",
+    "service-framework": "github:rethink-project/dev-service-framework",
     "sinon": "^1.17.3",
     "sinon-chai": "^2.8.0",
     "sjcl": "^1.0.3",
