@@ -378,6 +378,7 @@ class GraphConnector {
      owner.lastCalculationBloomFilter1Hop = this.lastCalculationBloomFilter1Hop;
      owner.residenceLocation =  this.residenceLocation;
      owner.contactsBloomFilter1Hop = this.contactsBloomFilter1Hop;
+     owner.userIDs = this.globalRegistryRecord.userIDs ;
 
      return owner;
    }
