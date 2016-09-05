@@ -22,20 +22,37 @@
 **/
 
 // Distribution file for PolicyEngine.js 
+<<<<<<< HEAD
 // version: 0.5.1
 <<<<<<< HEAD
 // Last build: Thu Aug 04 2016 12:41:15 GMT+0200 (W. Europe Daylight Time)
 =======
 // Last build: Mon Sep 05 2016 17:01:42 GMT+0200 (W. Europe Daylight Time)
 >>>>>>> adding set/get ContactUserID
+=======
+// version: 0.6.0
+// Last build: Mon Sep 05 2016 19:17:57 GMT+0200 (W. Europe Daylight Time)
+>>>>>>> updated dist files
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.PolicyEngine = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+module.exports = { "default": require("core-js/library/fn/json/stringify"), __esModule: true };
+},{"core-js/library/fn/json/stringify":16}],2:[function(require,module,exports){
+module.exports = { "default": require("core-js/library/fn/object/create"), __esModule: true };
+},{"core-js/library/fn/object/create":17}],3:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/object/define-property"), __esModule: true };
-},{"core-js/library/fn/object/define-property":7}],2:[function(require,module,exports){
+},{"core-js/library/fn/object/define-property":18}],4:[function(require,module,exports){
+module.exports = { "default": require("core-js/library/fn/object/get-own-property-descriptor"), __esModule: true };
+},{"core-js/library/fn/object/get-own-property-descriptor":19}],5:[function(require,module,exports){
+module.exports = { "default": require("core-js/library/fn/object/get-prototype-of"), __esModule: true };
+},{"core-js/library/fn/object/get-prototype-of":20}],6:[function(require,module,exports){
+module.exports = { "default": require("core-js/library/fn/object/keys"), __esModule: true };
+},{"core-js/library/fn/object/keys":21}],7:[function(require,module,exports){
+module.exports = { "default": require("core-js/library/fn/object/set-prototype-of"), __esModule: true };
+},{"core-js/library/fn/object/set-prototype-of":22}],8:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/symbol"), __esModule: true };
-},{"core-js/library/fn/symbol":8}],3:[function(require,module,exports){
+},{"core-js/library/fn/symbol":23}],9:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/symbol/iterator"), __esModule: true };
-},{"core-js/library/fn/symbol/iterator":9}],4:[function(require,module,exports){
+},{"core-js/library/fn/symbol/iterator":24}],10:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -45,7 +62,7 @@ exports.default = function (instance, Constructor) {
     throw new TypeError("Cannot call a class as a function");
   }
 };
-},{}],5:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -73,7 +90,98 @@ exports.default = function () {
     return Constructor;
   };
 }();
-},{"../core-js/object/define-property":1}],6:[function(require,module,exports){
+},{"../core-js/object/define-property":3}],12:[function(require,module,exports){
+"use strict";
+
+exports.__esModule = true;
+
+var _getPrototypeOf = require("../core-js/object/get-prototype-of");
+
+var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+
+var _getOwnPropertyDescriptor = require("../core-js/object/get-own-property-descriptor");
+
+var _getOwnPropertyDescriptor2 = _interopRequireDefault(_getOwnPropertyDescriptor);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = function get(object, property, receiver) {
+  if (object === null) object = Function.prototype;
+  var desc = (0, _getOwnPropertyDescriptor2.default)(object, property);
+
+  if (desc === undefined) {
+    var parent = (0, _getPrototypeOf2.default)(object);
+
+    if (parent === null) {
+      return undefined;
+    } else {
+      return get(parent, property, receiver);
+    }
+  } else if ("value" in desc) {
+    return desc.value;
+  } else {
+    var getter = desc.get;
+
+    if (getter === undefined) {
+      return undefined;
+    }
+
+    return getter.call(receiver);
+  }
+};
+},{"../core-js/object/get-own-property-descriptor":4,"../core-js/object/get-prototype-of":5}],13:[function(require,module,exports){
+"use strict";
+
+exports.__esModule = true;
+
+var _setPrototypeOf = require("../core-js/object/set-prototype-of");
+
+var _setPrototypeOf2 = _interopRequireDefault(_setPrototypeOf);
+
+var _create = require("../core-js/object/create");
+
+var _create2 = _interopRequireDefault(_create);
+
+var _typeof2 = require("../helpers/typeof");
+
+var _typeof3 = _interopRequireDefault(_typeof2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = function (subClass, superClass) {
+  if (typeof superClass !== "function" && superClass !== null) {
+    throw new TypeError("Super expression must either be null or a function, not " + (typeof superClass === "undefined" ? "undefined" : (0, _typeof3.default)(superClass)));
+  }
+
+  subClass.prototype = (0, _create2.default)(superClass && superClass.prototype, {
+    constructor: {
+      value: subClass,
+      enumerable: false,
+      writable: true,
+      configurable: true
+    }
+  });
+  if (superClass) _setPrototypeOf2.default ? (0, _setPrototypeOf2.default)(subClass, superClass) : subClass.__proto__ = superClass;
+};
+},{"../core-js/object/create":2,"../core-js/object/set-prototype-of":7,"../helpers/typeof":15}],14:[function(require,module,exports){
+"use strict";
+
+exports.__esModule = true;
+
+var _typeof2 = require("../helpers/typeof");
+
+var _typeof3 = _interopRequireDefault(_typeof2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = function (self, call) {
+  if (!self) {
+    throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+  }
+
+  return call && ((typeof call === "undefined" ? "undefined" : (0, _typeof3.default)(call)) === "object" || typeof call === "function") ? call : self;
+};
+},{"../helpers/typeof":15}],15:[function(require,module,exports){
 "use strict";
 
 exports.__esModule = true;
@@ -95,36 +203,63 @@ exports.default = typeof _symbol2.default === "function" && _typeof(_iterator2.d
 } : function (obj) {
   return obj && typeof _symbol2.default === "function" && obj.constructor === _symbol2.default ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof(obj);
 };
-},{"../core-js/symbol":2,"../core-js/symbol/iterator":3}],7:[function(require,module,exports){
+},{"../core-js/symbol":8,"../core-js/symbol/iterator":9}],16:[function(require,module,exports){
+var core  = require('../../modules/_core')
+  , $JSON = core.JSON || (core.JSON = {stringify: JSON.stringify});
+module.exports = function stringify(it){ // eslint-disable-line no-unused-vars
+  return $JSON.stringify.apply($JSON, arguments);
+};
+},{"../../modules/_core":30}],17:[function(require,module,exports){
+require('../../modules/es6.object.create');
+var $Object = require('../../modules/_core').Object;
+module.exports = function create(P, D){
+  return $Object.create(P, D);
+};
+},{"../../modules/_core":30,"../../modules/es6.object.create":84}],18:[function(require,module,exports){
 require('../../modules/es6.object.define-property');
 var $Object = require('../../modules/_core').Object;
 module.exports = function defineProperty(it, key, desc){
   return $Object.defineProperty(it, key, desc);
 };
-},{"../../modules/_core":15,"../../modules/es6.object.define-property":67}],8:[function(require,module,exports){
+},{"../../modules/_core":30,"../../modules/es6.object.define-property":85}],19:[function(require,module,exports){
+require('../../modules/es6.object.get-own-property-descriptor');
+var $Object = require('../../modules/_core').Object;
+module.exports = function getOwnPropertyDescriptor(it, key){
+  return $Object.getOwnPropertyDescriptor(it, key);
+};
+},{"../../modules/_core":30,"../../modules/es6.object.get-own-property-descriptor":86}],20:[function(require,module,exports){
+require('../../modules/es6.object.get-prototype-of');
+module.exports = require('../../modules/_core').Object.getPrototypeOf;
+},{"../../modules/_core":30,"../../modules/es6.object.get-prototype-of":87}],21:[function(require,module,exports){
+require('../../modules/es6.object.keys');
+module.exports = require('../../modules/_core').Object.keys;
+},{"../../modules/_core":30,"../../modules/es6.object.keys":88}],22:[function(require,module,exports){
+require('../../modules/es6.object.set-prototype-of');
+module.exports = require('../../modules/_core').Object.setPrototypeOf;
+},{"../../modules/_core":30,"../../modules/es6.object.set-prototype-of":89}],23:[function(require,module,exports){
 require('../../modules/es6.symbol');
 require('../../modules/es6.object.to-string');
 require('../../modules/es7.symbol.async-iterator');
 require('../../modules/es7.symbol.observable');
 module.exports = require('../../modules/_core').Symbol;
-},{"../../modules/_core":15,"../../modules/es6.object.to-string":68,"../../modules/es6.symbol":70,"../../modules/es7.symbol.async-iterator":71,"../../modules/es7.symbol.observable":72}],9:[function(require,module,exports){
+},{"../../modules/_core":30,"../../modules/es6.object.to-string":90,"../../modules/es6.symbol":92,"../../modules/es7.symbol.async-iterator":93,"../../modules/es7.symbol.observable":94}],24:[function(require,module,exports){
 require('../../modules/es6.string.iterator');
 require('../../modules/web.dom.iterable');
 module.exports = require('../../modules/_wks-ext').f('iterator');
-},{"../../modules/_wks-ext":64,"../../modules/es6.string.iterator":69,"../../modules/web.dom.iterable":73}],10:[function(require,module,exports){
+},{"../../modules/_wks-ext":81,"../../modules/es6.string.iterator":91,"../../modules/web.dom.iterable":95}],25:[function(require,module,exports){
 module.exports = function(it){
   if(typeof it != 'function')throw TypeError(it + ' is not a function!');
   return it;
 };
-},{}],11:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 module.exports = function(){ /* empty */ };
-},{}],12:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 var isObject = require('./_is-object');
 module.exports = function(it){
   if(!isObject(it))throw TypeError(it + ' is not an object!');
   return it;
 };
-},{"./_is-object":31}],13:[function(require,module,exports){
+},{"./_is-object":46}],28:[function(require,module,exports){
 // false -> Array#indexOf
 // true  -> Array#includes
 var toIObject = require('./_to-iobject')
@@ -146,16 +281,16 @@ module.exports = function(IS_INCLUDES){
     } return !IS_INCLUDES && -1;
   };
 };
-},{"./_to-index":56,"./_to-iobject":58,"./_to-length":59}],14:[function(require,module,exports){
+},{"./_to-index":73,"./_to-iobject":75,"./_to-length":76}],29:[function(require,module,exports){
 var toString = {}.toString;
 
 module.exports = function(it){
   return toString.call(it).slice(8, -1);
 };
-},{}],15:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 var core = module.exports = {version: '2.4.0'};
 if(typeof __e == 'number')__e = core; // eslint-disable-line no-undef
-},{}],16:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 // optional / simple context binding
 var aFunction = require('./_a-function');
 module.exports = function(fn, that, length){
@@ -176,18 +311,18 @@ module.exports = function(fn, that, length){
     return fn.apply(that, arguments);
   };
 };
-},{"./_a-function":10}],17:[function(require,module,exports){
+},{"./_a-function":25}],32:[function(require,module,exports){
 // 7.2.1 RequireObjectCoercible(argument)
 module.exports = function(it){
   if(it == undefined)throw TypeError("Can't call method on  " + it);
   return it;
 };
-},{}],18:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 // Thank's IE8 for his funny defineProperty
 module.exports = !require('./_fails')(function(){
   return Object.defineProperty({}, 'a', {get: function(){ return 7; }}).a != 7;
 });
-},{"./_fails":23}],19:[function(require,module,exports){
+},{"./_fails":38}],34:[function(require,module,exports){
 var isObject = require('./_is-object')
   , document = require('./_global').document
   // in old IE typeof document.createElement is 'object'
@@ -195,12 +330,12 @@ var isObject = require('./_is-object')
 module.exports = function(it){
   return is ? document.createElement(it) : {};
 };
-},{"./_global":24,"./_is-object":31}],20:[function(require,module,exports){
+},{"./_global":39,"./_is-object":46}],35:[function(require,module,exports){
 // IE 8- don't enum bug keys
 module.exports = (
   'constructor,hasOwnProperty,isPrototypeOf,propertyIsEnumerable,toLocaleString,toString,valueOf'
 ).split(',');
-},{}],21:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 // all enumerable object keys, includes symbols
 var getKeys = require('./_object-keys')
   , gOPS    = require('./_object-gops')
@@ -216,7 +351,7 @@ module.exports = function(it){
     while(symbols.length > i)if(isEnum.call(it, key = symbols[i++]))result.push(key);
   } return result;
 };
-},{"./_object-gops":45,"./_object-keys":48,"./_object-pie":49}],22:[function(require,module,exports){
+},{"./_object-gops":60,"./_object-keys":63,"./_object-pie":64}],37:[function(require,module,exports){
 var global    = require('./_global')
   , core      = require('./_core')
   , ctx       = require('./_ctx')
@@ -278,7 +413,7 @@ $export.W = 32;  // wrap
 $export.U = 64;  // safe
 $export.R = 128; // real proto method for `library` 
 module.exports = $export;
-},{"./_core":15,"./_ctx":16,"./_global":24,"./_hide":26}],23:[function(require,module,exports){
+},{"./_core":30,"./_ctx":31,"./_global":39,"./_hide":41}],38:[function(require,module,exports){
 module.exports = function(exec){
   try {
     return !!exec();
@@ -286,17 +421,17 @@ module.exports = function(exec){
     return true;
   }
 };
-},{}],24:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 // https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
 var global = module.exports = typeof window != 'undefined' && window.Math == Math
   ? window : typeof self != 'undefined' && self.Math == Math ? self : Function('return this')();
 if(typeof __g == 'number')__g = global; // eslint-disable-line no-undef
-},{}],25:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 var hasOwnProperty = {}.hasOwnProperty;
 module.exports = function(it, key){
   return hasOwnProperty.call(it, key);
 };
-},{}],26:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 var dP         = require('./_object-dp')
   , createDesc = require('./_property-desc');
 module.exports = require('./_descriptors') ? function(object, key, value){
@@ -305,29 +440,29 @@ module.exports = require('./_descriptors') ? function(object, key, value){
   object[key] = value;
   return object;
 };
-},{"./_descriptors":18,"./_object-dp":40,"./_property-desc":50}],27:[function(require,module,exports){
+},{"./_descriptors":33,"./_object-dp":55,"./_property-desc":66}],42:[function(require,module,exports){
 module.exports = require('./_global').document && document.documentElement;
-},{"./_global":24}],28:[function(require,module,exports){
+},{"./_global":39}],43:[function(require,module,exports){
 module.exports = !require('./_descriptors') && !require('./_fails')(function(){
   return Object.defineProperty(require('./_dom-create')('div'), 'a', {get: function(){ return 7; }}).a != 7;
 });
-},{"./_descriptors":18,"./_dom-create":19,"./_fails":23}],29:[function(require,module,exports){
+},{"./_descriptors":33,"./_dom-create":34,"./_fails":38}],44:[function(require,module,exports){
 // fallback for non-array-like ES3 and non-enumerable old V8 strings
 var cof = require('./_cof');
 module.exports = Object('z').propertyIsEnumerable(0) ? Object : function(it){
   return cof(it) == 'String' ? it.split('') : Object(it);
 };
-},{"./_cof":14}],30:[function(require,module,exports){
+},{"./_cof":29}],45:[function(require,module,exports){
 // 7.2.2 IsArray(argument)
 var cof = require('./_cof');
 module.exports = Array.isArray || function isArray(arg){
   return cof(arg) == 'Array';
 };
-},{"./_cof":14}],31:[function(require,module,exports){
+},{"./_cof":29}],46:[function(require,module,exports){
 module.exports = function(it){
   return typeof it === 'object' ? it !== null : typeof it === 'function';
 };
-},{}],32:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 'use strict';
 var create         = require('./_object-create')
   , descriptor     = require('./_property-desc')
@@ -341,7 +476,7 @@ module.exports = function(Constructor, NAME, next){
   Constructor.prototype = create(IteratorPrototype, {next: descriptor(1, next)});
   setToStringTag(Constructor, NAME + ' Iterator');
 };
-},{"./_hide":26,"./_object-create":39,"./_property-desc":50,"./_set-to-string-tag":52,"./_wks":65}],33:[function(require,module,exports){
+},{"./_hide":41,"./_object-create":54,"./_property-desc":66,"./_set-to-string-tag":69,"./_wks":82}],48:[function(require,module,exports){
 'use strict';
 var LIBRARY        = require('./_library')
   , $export        = require('./_export')
@@ -412,13 +547,13 @@ module.exports = function(Base, NAME, Constructor, next, DEFAULT, IS_SET, FORCED
   }
   return methods;
 };
-},{"./_export":22,"./_has":25,"./_hide":26,"./_iter-create":32,"./_iterators":35,"./_library":37,"./_object-gpo":46,"./_redefine":51,"./_set-to-string-tag":52,"./_wks":65}],34:[function(require,module,exports){
+},{"./_export":37,"./_has":40,"./_hide":41,"./_iter-create":47,"./_iterators":50,"./_library":52,"./_object-gpo":61,"./_redefine":67,"./_set-to-string-tag":69,"./_wks":82}],49:[function(require,module,exports){
 module.exports = function(done, value){
   return {value: value, done: !!done};
 };
-},{}],35:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 module.exports = {};
-},{}],36:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 var getKeys   = require('./_object-keys')
   , toIObject = require('./_to-iobject');
 module.exports = function(object, el){
@@ -429,9 +564,9 @@ module.exports = function(object, el){
     , key;
   while(length > index)if(O[key = keys[index++]] === el)return key;
 };
-},{"./_object-keys":48,"./_to-iobject":58}],37:[function(require,module,exports){
+},{"./_object-keys":63,"./_to-iobject":75}],52:[function(require,module,exports){
 module.exports = true;
-},{}],38:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 var META     = require('./_uid')('meta')
   , isObject = require('./_is-object')
   , has      = require('./_has')
@@ -485,7 +620,7 @@ var meta = module.exports = {
   getWeak:  getWeak,
   onFreeze: onFreeze
 };
-},{"./_fails":23,"./_has":25,"./_is-object":31,"./_object-dp":40,"./_uid":62}],39:[function(require,module,exports){
+},{"./_fails":38,"./_has":40,"./_is-object":46,"./_object-dp":55,"./_uid":79}],54:[function(require,module,exports){
 // 19.1.2.2 / 15.2.3.5 Object.create(O [, Properties])
 var anObject    = require('./_an-object')
   , dPs         = require('./_object-dps')
@@ -526,7 +661,7 @@ module.exports = Object.create || function create(O, Properties){
   } else result = createDict();
   return Properties === undefined ? result : dPs(result, Properties);
 };
-},{"./_an-object":12,"./_dom-create":19,"./_enum-bug-keys":20,"./_html":27,"./_object-dps":41,"./_shared-key":53}],40:[function(require,module,exports){
+},{"./_an-object":27,"./_dom-create":34,"./_enum-bug-keys":35,"./_html":42,"./_object-dps":56,"./_shared-key":70}],55:[function(require,module,exports){
 var anObject       = require('./_an-object')
   , IE8_DOM_DEFINE = require('./_ie8-dom-define')
   , toPrimitive    = require('./_to-primitive')
@@ -543,7 +678,7 @@ exports.f = require('./_descriptors') ? Object.defineProperty : function defineP
   if('value' in Attributes)O[P] = Attributes.value;
   return O;
 };
-},{"./_an-object":12,"./_descriptors":18,"./_ie8-dom-define":28,"./_to-primitive":61}],41:[function(require,module,exports){
+},{"./_an-object":27,"./_descriptors":33,"./_ie8-dom-define":43,"./_to-primitive":78}],56:[function(require,module,exports){
 var dP       = require('./_object-dp')
   , anObject = require('./_an-object')
   , getKeys  = require('./_object-keys');
@@ -557,7 +692,7 @@ module.exports = require('./_descriptors') ? Object.defineProperties : function 
   while(length > i)dP.f(O, P = keys[i++], Properties[P]);
   return O;
 };
-},{"./_an-object":12,"./_descriptors":18,"./_object-dp":40,"./_object-keys":48}],42:[function(require,module,exports){
+},{"./_an-object":27,"./_descriptors":33,"./_object-dp":55,"./_object-keys":63}],57:[function(require,module,exports){
 var pIE            = require('./_object-pie')
   , createDesc     = require('./_property-desc')
   , toIObject      = require('./_to-iobject')
@@ -574,7 +709,7 @@ exports.f = require('./_descriptors') ? gOPD : function getOwnPropertyDescriptor
   } catch(e){ /* empty */ }
   if(has(O, P))return createDesc(!pIE.f.call(O, P), O[P]);
 };
-},{"./_descriptors":18,"./_has":25,"./_ie8-dom-define":28,"./_object-pie":49,"./_property-desc":50,"./_to-iobject":58,"./_to-primitive":61}],43:[function(require,module,exports){
+},{"./_descriptors":33,"./_has":40,"./_ie8-dom-define":43,"./_object-pie":64,"./_property-desc":66,"./_to-iobject":75,"./_to-primitive":78}],58:[function(require,module,exports){
 // fallback for IE11 buggy Object.getOwnPropertyNames with iframe and window
 var toIObject = require('./_to-iobject')
   , gOPN      = require('./_object-gopn').f
@@ -595,7 +730,7 @@ module.exports.f = function getOwnPropertyNames(it){
   return windowNames && toString.call(it) == '[object Window]' ? getWindowNames(it) : gOPN(toIObject(it));
 };
 
-},{"./_object-gopn":44,"./_to-iobject":58}],44:[function(require,module,exports){
+},{"./_object-gopn":59,"./_to-iobject":75}],59:[function(require,module,exports){
 // 19.1.2.7 / 15.2.3.4 Object.getOwnPropertyNames(O)
 var $keys      = require('./_object-keys-internal')
   , hiddenKeys = require('./_enum-bug-keys').concat('length', 'prototype');
@@ -603,9 +738,9 @@ var $keys      = require('./_object-keys-internal')
 exports.f = Object.getOwnPropertyNames || function getOwnPropertyNames(O){
   return $keys(O, hiddenKeys);
 };
-},{"./_enum-bug-keys":20,"./_object-keys-internal":47}],45:[function(require,module,exports){
+},{"./_enum-bug-keys":35,"./_object-keys-internal":62}],60:[function(require,module,exports){
 exports.f = Object.getOwnPropertySymbols;
-},{}],46:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 // 19.1.2.9 / 15.2.3.2 Object.getPrototypeOf(O)
 var has         = require('./_has')
   , toObject    = require('./_to-object')
@@ -619,7 +754,7 @@ module.exports = Object.getPrototypeOf || function(O){
     return O.constructor.prototype;
   } return O instanceof Object ? ObjectProto : null;
 };
-},{"./_has":25,"./_shared-key":53,"./_to-object":60}],47:[function(require,module,exports){
+},{"./_has":40,"./_shared-key":70,"./_to-object":77}],62:[function(require,module,exports){
 var has          = require('./_has')
   , toIObject    = require('./_to-iobject')
   , arrayIndexOf = require('./_array-includes')(false)
@@ -637,7 +772,7 @@ module.exports = function(object, names){
   }
   return result;
 };
-},{"./_array-includes":13,"./_has":25,"./_shared-key":53,"./_to-iobject":58}],48:[function(require,module,exports){
+},{"./_array-includes":28,"./_has":40,"./_shared-key":70,"./_to-iobject":75}],63:[function(require,module,exports){
 // 19.1.2.14 / 15.2.3.14 Object.keys(O)
 var $keys       = require('./_object-keys-internal')
   , enumBugKeys = require('./_enum-bug-keys');
@@ -645,9 +780,20 @@ var $keys       = require('./_object-keys-internal')
 module.exports = Object.keys || function keys(O){
   return $keys(O, enumBugKeys);
 };
-},{"./_enum-bug-keys":20,"./_object-keys-internal":47}],49:[function(require,module,exports){
+},{"./_enum-bug-keys":35,"./_object-keys-internal":62}],64:[function(require,module,exports){
 exports.f = {}.propertyIsEnumerable;
-},{}],50:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
+// most Object methods by ES6 should accept primitives
+var $export = require('./_export')
+  , core    = require('./_core')
+  , fails   = require('./_fails');
+module.exports = function(KEY, exec){
+  var fn  = (core.Object || {})[KEY] || Object[KEY]
+    , exp = {};
+  exp[KEY] = exec(fn);
+  $export($export.S + $export.F * fails(function(){ fn(1); }), 'Object', exp);
+};
+},{"./_core":30,"./_export":37,"./_fails":38}],66:[function(require,module,exports){
 module.exports = function(bitmap, value){
   return {
     enumerable  : !(bitmap & 1),
@@ -656,9 +802,35 @@ module.exports = function(bitmap, value){
     value       : value
   };
 };
-},{}],51:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 module.exports = require('./_hide');
-},{"./_hide":26}],52:[function(require,module,exports){
+},{"./_hide":41}],68:[function(require,module,exports){
+// Works with __proto__ only. Old v8 can't work with null proto objects.
+/* eslint-disable no-proto */
+var isObject = require('./_is-object')
+  , anObject = require('./_an-object');
+var check = function(O, proto){
+  anObject(O);
+  if(!isObject(proto) && proto !== null)throw TypeError(proto + ": can't set as prototype!");
+};
+module.exports = {
+  set: Object.setPrototypeOf || ('__proto__' in {} ? // eslint-disable-line
+    function(test, buggy, set){
+      try {
+        set = require('./_ctx')(Function.call, require('./_object-gopd').f(Object.prototype, '__proto__').set, 2);
+        set(test, []);
+        buggy = !(test instanceof Array);
+      } catch(e){ buggy = true; }
+      return function setPrototypeOf(O, proto){
+        check(O, proto);
+        if(buggy)O.__proto__ = proto;
+        else set(O, proto);
+        return O;
+      };
+    }({}, false) : undefined),
+  check: check
+};
+},{"./_an-object":27,"./_ctx":31,"./_is-object":46,"./_object-gopd":57}],69:[function(require,module,exports){
 var def = require('./_object-dp').f
   , has = require('./_has')
   , TAG = require('./_wks')('toStringTag');
@@ -666,20 +838,20 @@ var def = require('./_object-dp').f
 module.exports = function(it, tag, stat){
   if(it && !has(it = stat ? it : it.prototype, TAG))def(it, TAG, {configurable: true, value: tag});
 };
-},{"./_has":25,"./_object-dp":40,"./_wks":65}],53:[function(require,module,exports){
+},{"./_has":40,"./_object-dp":55,"./_wks":82}],70:[function(require,module,exports){
 var shared = require('./_shared')('keys')
   , uid    = require('./_uid');
 module.exports = function(key){
   return shared[key] || (shared[key] = uid(key));
 };
-},{"./_shared":54,"./_uid":62}],54:[function(require,module,exports){
+},{"./_shared":71,"./_uid":79}],71:[function(require,module,exports){
 var global = require('./_global')
   , SHARED = '__core-js_shared__'
   , store  = global[SHARED] || (global[SHARED] = {});
 module.exports = function(key){
   return store[key] || (store[key] = {});
 };
-},{"./_global":24}],55:[function(require,module,exports){
+},{"./_global":39}],72:[function(require,module,exports){
 var toInteger = require('./_to-integer')
   , defined   = require('./_defined');
 // true  -> String#at
@@ -697,7 +869,7 @@ module.exports = function(TO_STRING){
       : TO_STRING ? s.slice(i, i + 2) : (a - 0xd800 << 10) + (b - 0xdc00) + 0x10000;
   };
 };
-},{"./_defined":17,"./_to-integer":57}],56:[function(require,module,exports){
+},{"./_defined":32,"./_to-integer":74}],73:[function(require,module,exports){
 var toInteger = require('./_to-integer')
   , max       = Math.max
   , min       = Math.min;
@@ -705,34 +877,34 @@ module.exports = function(index, length){
   index = toInteger(index);
   return index < 0 ? max(index + length, 0) : min(index, length);
 };
-},{"./_to-integer":57}],57:[function(require,module,exports){
+},{"./_to-integer":74}],74:[function(require,module,exports){
 // 7.1.4 ToInteger
 var ceil  = Math.ceil
   , floor = Math.floor;
 module.exports = function(it){
   return isNaN(it = +it) ? 0 : (it > 0 ? floor : ceil)(it);
 };
-},{}],58:[function(require,module,exports){
+},{}],75:[function(require,module,exports){
 // to indexed object, toObject with fallback for non-array-like ES3 strings
 var IObject = require('./_iobject')
   , defined = require('./_defined');
 module.exports = function(it){
   return IObject(defined(it));
 };
-},{"./_defined":17,"./_iobject":29}],59:[function(require,module,exports){
+},{"./_defined":32,"./_iobject":44}],76:[function(require,module,exports){
 // 7.1.15 ToLength
 var toInteger = require('./_to-integer')
   , min       = Math.min;
 module.exports = function(it){
   return it > 0 ? min(toInteger(it), 0x1fffffffffffff) : 0; // pow(2, 53) - 1 == 9007199254740991
 };
-},{"./_to-integer":57}],60:[function(require,module,exports){
+},{"./_to-integer":74}],77:[function(require,module,exports){
 // 7.1.13 ToObject(argument)
 var defined = require('./_defined');
 module.exports = function(it){
   return Object(defined(it));
 };
-},{"./_defined":17}],61:[function(require,module,exports){
+},{"./_defined":32}],78:[function(require,module,exports){
 // 7.1.1 ToPrimitive(input [, PreferredType])
 var isObject = require('./_is-object');
 // instead of the ES6 spec version, we didn't implement @@toPrimitive case
@@ -745,13 +917,13 @@ module.exports = function(it, S){
   if(!S && typeof (fn = it.toString) == 'function' && !isObject(val = fn.call(it)))return val;
   throw TypeError("Can't convert object to primitive value");
 };
-},{"./_is-object":31}],62:[function(require,module,exports){
+},{"./_is-object":46}],79:[function(require,module,exports){
 var id = 0
   , px = Math.random();
 module.exports = function(key){
   return 'Symbol('.concat(key === undefined ? '' : key, ')_', (++id + px).toString(36));
 };
-},{}],63:[function(require,module,exports){
+},{}],80:[function(require,module,exports){
 var global         = require('./_global')
   , core           = require('./_core')
   , LIBRARY        = require('./_library')
@@ -761,9 +933,9 @@ module.exports = function(name){
   var $Symbol = core.Symbol || (core.Symbol = LIBRARY ? {} : global.Symbol || {});
   if(name.charAt(0) != '_' && !(name in $Symbol))defineProperty($Symbol, name, {value: wksExt.f(name)});
 };
-},{"./_core":15,"./_global":24,"./_library":37,"./_object-dp":40,"./_wks-ext":64}],64:[function(require,module,exports){
+},{"./_core":30,"./_global":39,"./_library":52,"./_object-dp":55,"./_wks-ext":81}],81:[function(require,module,exports){
 exports.f = require('./_wks');
-},{"./_wks":65}],65:[function(require,module,exports){
+},{"./_wks":82}],82:[function(require,module,exports){
 var store      = require('./_shared')('wks')
   , uid        = require('./_uid')
   , Symbol     = require('./_global').Symbol
@@ -775,7 +947,7 @@ var $exports = module.exports = function(name){
 };
 
 $exports.store = store;
-},{"./_global":24,"./_shared":54,"./_uid":62}],66:[function(require,module,exports){
+},{"./_global":39,"./_shared":71,"./_uid":79}],83:[function(require,module,exports){
 'use strict';
 var addToUnscopables = require('./_add-to-unscopables')
   , step             = require('./_iter-step')
@@ -810,13 +982,51 @@ Iterators.Arguments = Iterators.Array;
 addToUnscopables('keys');
 addToUnscopables('values');
 addToUnscopables('entries');
-},{"./_add-to-unscopables":11,"./_iter-define":33,"./_iter-step":34,"./_iterators":35,"./_to-iobject":58}],67:[function(require,module,exports){
+},{"./_add-to-unscopables":26,"./_iter-define":48,"./_iter-step":49,"./_iterators":50,"./_to-iobject":75}],84:[function(require,module,exports){
+var $export = require('./_export')
+// 19.1.2.2 / 15.2.3.5 Object.create(O [, Properties])
+$export($export.S, 'Object', {create: require('./_object-create')});
+},{"./_export":37,"./_object-create":54}],85:[function(require,module,exports){
 var $export = require('./_export');
 // 19.1.2.4 / 15.2.3.6 Object.defineProperty(O, P, Attributes)
 $export($export.S + $export.F * !require('./_descriptors'), 'Object', {defineProperty: require('./_object-dp').f});
-},{"./_descriptors":18,"./_export":22,"./_object-dp":40}],68:[function(require,module,exports){
+},{"./_descriptors":33,"./_export":37,"./_object-dp":55}],86:[function(require,module,exports){
+// 19.1.2.6 Object.getOwnPropertyDescriptor(O, P)
+var toIObject                 = require('./_to-iobject')
+  , $getOwnPropertyDescriptor = require('./_object-gopd').f;
 
-},{}],69:[function(require,module,exports){
+require('./_object-sap')('getOwnPropertyDescriptor', function(){
+  return function getOwnPropertyDescriptor(it, key){
+    return $getOwnPropertyDescriptor(toIObject(it), key);
+  };
+});
+},{"./_object-gopd":57,"./_object-sap":65,"./_to-iobject":75}],87:[function(require,module,exports){
+// 19.1.2.9 Object.getPrototypeOf(O)
+var toObject        = require('./_to-object')
+  , $getPrototypeOf = require('./_object-gpo');
+
+require('./_object-sap')('getPrototypeOf', function(){
+  return function getPrototypeOf(it){
+    return $getPrototypeOf(toObject(it));
+  };
+});
+},{"./_object-gpo":61,"./_object-sap":65,"./_to-object":77}],88:[function(require,module,exports){
+// 19.1.2.14 Object.keys(O)
+var toObject = require('./_to-object')
+  , $keys    = require('./_object-keys');
+
+require('./_object-sap')('keys', function(){
+  return function keys(it){
+    return $keys(toObject(it));
+  };
+});
+},{"./_object-keys":63,"./_object-sap":65,"./_to-object":77}],89:[function(require,module,exports){
+// 19.1.3.19 Object.setPrototypeOf(O, proto)
+var $export = require('./_export');
+$export($export.S, 'Object', {setPrototypeOf: require('./_set-proto').set});
+},{"./_export":37,"./_set-proto":68}],90:[function(require,module,exports){
+
+},{}],91:[function(require,module,exports){
 'use strict';
 var $at  = require('./_string-at')(true);
 
@@ -834,7 +1044,7 @@ require('./_iter-define')(String, 'String', function(iterated){
   this._i += point.length;
   return {value: point, done: false};
 });
-},{"./_iter-define":33,"./_string-at":55}],70:[function(require,module,exports){
+},{"./_iter-define":48,"./_string-at":72}],92:[function(require,module,exports){
 'use strict';
 // ECMAScript 6 symbols shim
 var global         = require('./_global')
@@ -1070,11 +1280,11 @@ setToStringTag($Symbol, 'Symbol');
 setToStringTag(Math, 'Math', true);
 // 24.3.3 JSON[@@toStringTag]
 setToStringTag(global.JSON, 'JSON', true);
-},{"./_an-object":12,"./_descriptors":18,"./_enum-keys":21,"./_export":22,"./_fails":23,"./_global":24,"./_has":25,"./_hide":26,"./_is-array":30,"./_keyof":36,"./_library":37,"./_meta":38,"./_object-create":39,"./_object-dp":40,"./_object-gopd":42,"./_object-gopn":44,"./_object-gopn-ext":43,"./_object-gops":45,"./_object-keys":48,"./_object-pie":49,"./_property-desc":50,"./_redefine":51,"./_set-to-string-tag":52,"./_shared":54,"./_to-iobject":58,"./_to-primitive":61,"./_uid":62,"./_wks":65,"./_wks-define":63,"./_wks-ext":64}],71:[function(require,module,exports){
+},{"./_an-object":27,"./_descriptors":33,"./_enum-keys":36,"./_export":37,"./_fails":38,"./_global":39,"./_has":40,"./_hide":41,"./_is-array":45,"./_keyof":51,"./_library":52,"./_meta":53,"./_object-create":54,"./_object-dp":55,"./_object-gopd":57,"./_object-gopn":59,"./_object-gopn-ext":58,"./_object-gops":60,"./_object-keys":63,"./_object-pie":64,"./_property-desc":66,"./_redefine":67,"./_set-to-string-tag":69,"./_shared":71,"./_to-iobject":75,"./_to-primitive":78,"./_uid":79,"./_wks":82,"./_wks-define":80,"./_wks-ext":81}],93:[function(require,module,exports){
 require('./_wks-define')('asyncIterator');
-},{"./_wks-define":63}],72:[function(require,module,exports){
+},{"./_wks-define":80}],94:[function(require,module,exports){
 require('./_wks-define')('observable');
-},{"./_wks-define":63}],73:[function(require,module,exports){
+},{"./_wks-define":80}],95:[function(require,module,exports){
 require('./es6.array.iterator');
 var global        = require('./_global')
   , hide          = require('./_hide')
@@ -1088,7 +1298,27 @@ for(var collections = ['NodeList', 'DOMTokenList', 'MediaList', 'StyleSheetList'
   if(proto && !proto[TO_STRING_TAG])hide(proto, TO_STRING_TAG, NAME);
   Iterators[NAME] = Iterators.Array;
 }
-},{"./_global":24,"./_hide":26,"./_iterators":35,"./_wks":65,"./es6.array.iterator":66}],74:[function(require,module,exports){
+},{"./_global":39,"./_hide":41,"./_iterators":50,"./_wks":82,"./es6.array.iterator":83}],96:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _classCallCheck2 = require("babel-runtime/helpers/classCallCheck");
+
+var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var CombiningAlgorithm = function CombiningAlgorithm() {
+  (0, _classCallCheck3.default)(this, CombiningAlgorithm);
+};
+
+exports.default = CombiningAlgorithm;
+module.exports = exports['default'];
+
+},{"babel-runtime/helpers/classCallCheck":10}],97:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1108,51 +1338,19 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var Operators = function () {
   function Operators() {
     (0, _classCallCheck3.default)(this, Operators);
-
-    var _this = this;
-    _this.operators = _this.setOperators();
   }
 
   (0, _createClass3.default)(Operators, [{
-    key: 'setOperators',
-    value: function setOperators() {
-      var _this = this;
-      var operators = {
-        between: function between(params) {
-          return _this.isBetween(params[0][0], params[0][1], params[1]);
-        },
-        in: function _in(params) {
-          return params[0].indexOf(params[1]) > -1;
-        },
-        equals: function equals(params) {
-          return params[0][0] === '*' || params[0][0] === params[1];
-        },
-
-        or: function or(params) {
-          return params[0] || params[1];
-        },
-        and: function and(params) {
-          return params[0] && params[1];
-        },
-        not: function not(params) {
-          return !params[0];
-        }
-      };
-      return operators;
+    key: 'and',
+    value: function and(params) {
+      return params[0] && params[1];
     }
-
-    /**
-    * Verifies if the current time is between the given start and end times.
-    * @param {Number}     start
-    * @param {Number}     end
-    * @return {Boolean}   boolean
-    */
-
   }, {
-    key: 'isBetween',
-    value: function isBetween(start, end, now) {
-      start = parseInt(start);
-      end = parseInt(end);
+    key: 'between',
+    value: function between(params) {
+      var start = parseInt(params[0][0]);
+      var end = parseInt(params[0][1]);
+      var now = params[1];
 
       if (end < start) {
         now = now < start ? now += 2400 : now;
@@ -1161,6 +1359,36 @@ var Operators = function () {
 
       return now > start && now < end;
     }
+  }, {
+    key: 'equals',
+    value: function equals(params) {
+      return params[0] == '*' || params[0] == params[1];
+    }
+  }, {
+    key: 'greaterThan',
+    value: function greaterThan(params) {
+      return params[1] > params[0];
+    }
+  }, {
+    key: 'in',
+    value: function _in(params) {
+      return params[0].indexOf(params[1]) > -1;
+    }
+  }, {
+    key: 'lessThan',
+    value: function lessThan(params) {
+      return params[1] < params[0];
+    }
+  }, {
+    key: 'not',
+    value: function not(params) {
+      return !params[0];
+    }
+  }, {
+    key: 'or',
+    value: function or(params) {
+      return params[0] || params[1];
+    }
   }]);
   return Operators;
 }();
@@ -1168,16 +1396,12 @@ var Operators = function () {
 exports.default = Operators;
 module.exports = exports['default'];
 
-},{"babel-runtime/helpers/classCallCheck":4,"babel-runtime/helpers/createClass":5}],75:[function(require,module,exports){
+},{"babel-runtime/helpers/classCallCheck":10,"babel-runtime/helpers/createClass":11}],98:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-var _typeof2 = require('babel-runtime/helpers/typeof');
-
-var _typeof3 = _interopRequireDefault(_typeof2);
 
 var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
 
@@ -1202,106 +1426,67 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 */
 
 var PDP = function () {
-
-  /**
-  * This method is invoked by the Policy Engine and instantiates the Policy Decision Point. It
-  * initialises or loads from the Persistence Manager the object 'myGroups' to store the user's
-  * groups.
-  * @param  {Registry}    muchruntimeRegistry
-  */
-
   function PDP(context) {
     (0, _classCallCheck3.default)(this, PDP);
 
-    var _this = this;
-    _this.context = context;
-    _this.operators = new _Operators2.default(context);
+    this.context = context;
+    this.operators = new _Operators2.default();
   }
 
-  /**
-  * Verifies if the given message is compliant with the given policies. If one of the policies
-  * evaluates to 'false', then the message is not authorised. Returns the final authorisation
-  * decision and a set of actions that policies may require.
-  * @param {Message}  message
-  * @param {URL}      hypertyToVerify
-  * @param {Array}    policies
-  * @return {Array}   [authDecision, actions]
-  */
-
-
   (0, _createClass3.default)(PDP, [{
-    key: 'evaluate',
-    value: function evaluate(message, policies) {
-      var _this = this;
-      var results = [true];
-      var actions = [];
-      for (var i in policies) {
-        var policy = policies[i];
-        var condition = policy.condition;
-        var verifiesCondition = false;
-        if ((typeof condition === 'undefined' ? 'undefined' : (0, _typeof3.default)(condition)) === 'object') {
-          verifiesCondition = _this.verifiesAdvancedCondition(condition[0], condition[1], condition[2], policy.scope, message);
-        } else {
-          verifiesCondition = _this.verifiesSimpleCondition(condition, policy.scope, message);
-        }
-
-        if (verifiesCondition) {
-          results.push(policy.authorise);
-        }
-        if (policy.actions !== []) {
-          for (var _i in policy.actions) {
-            var newAction = {
-              method: policy.actions[_i].method,
-              params: message
-            };
-            actions.push(newAction);
-          }
+    key: 'applyPolicies',
+    value: function applyPolicies(message, policies) {
+      var result = this.evaluateSPPolicy(message, policies.serviceProviderPolicy);
+      if (result || result === undefined || result === 'Not Applicable') {
+        var userResult = this.evaluateUserPolicy(message, policies.userPolicy);
+        if (userResult !== undefined) {
+          result = userResult;
         }
       }
 
-      var authDecision = results.indexOf(false) === -1;
-      return [authDecision, actions];
+      return result;
     }
   }, {
-    key: 'verifiesSimpleCondition',
-    value: function verifiesSimpleCondition(condition, scope, message) {
-      var _this = this;
-      var splitCondition = condition.split(' ');
-      var variable = splitCondition[0];
-      var operator = splitCondition[1];
+    key: 'evaluateSPPolicy',
+    value: function evaluateSPPolicy(message, policy) {
+      var result = void 0;
 
-      var params = void 0;
-      if (operator === 'in') {
-        _this.context.group = { scope: scope, group: splitCondition[2], destination: message.to };
-        params = _this.context.group;
-      } else {
-        params = splitCondition.slice(2);
+      if (policy) {
+        result = policy.evaluate(this.context, message);
       }
-      _this.context[variable] = { message: message };
-      var value = _this.context[variable];
-      return _this.operators.operators[operator]([params, value]);
+
+      return result;
     }
   }, {
-    key: 'verifiesAdvancedCondition',
-    value: function verifiesAdvancedCondition(operator, left, right, scope, message) {
-      var _this = this;
-      while ((typeof left === 'undefined' ? 'undefined' : (0, _typeof3.default)(left)) === 'object') {
-        left = _this.verifiesAdvancedCondition(left[0], left[1], left[2], scope, message);
-      }
-      if (right !== undefined) {
-        while ((typeof right === 'undefined' ? 'undefined' : (0, _typeof3.default)(right)) === 'object') {
-          right = _this.verifiesAdvancedCondition(right[0], right[1], right[2], scope, message);
+    key: 'evaluateUserPolicy',
+    value: function evaluateUserPolicy(message, title) {
+      var result = void 0;
+
+      if (title !== undefined) {
+        var policy = this.context.userPolicies[title];
+
+        if (policy) {
+          result = policy.evaluate(this.context, message);
         }
       }
 
-      var resultLeft = typeof left === 'boolean' ? left : _this.verifiesSimpleCondition(left, scope, message);
-
-      var resultRight = void 0;
-      if (right !== undefined) {
-        resultRight = typeof right === 'boolean' ? right : _this.verifiesSimpleCondition(right, scope, message);
-      }
-
-      return _this.operators.operators[operator]([resultLeft, resultRight]);
+      return result;
+    }
+  }, {
+    key: 'context',
+    get: function get() {
+      return this._context;
+    },
+    set: function set(context) {
+      this._context = context;
+    }
+  }, {
+    key: 'operators',
+    get: function get() {
+      return this._operators;
+    },
+    set: function set(operators) {
+      this._operators = operators;
     }
   }]);
   return PDP;
@@ -1310,7 +1495,7 @@ var PDP = function () {
 exports.default = PDP;
 module.exports = exports['default'];
 
-},{"./Operators":74,"babel-runtime/helpers/classCallCheck":4,"babel-runtime/helpers/createClass":5,"babel-runtime/helpers/typeof":6}],76:[function(require,module,exports){
+},{"./Operators":97,"babel-runtime/helpers/classCallCheck":10,"babel-runtime/helpers/createClass":11}],99:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -1331,19 +1516,23 @@ var PEP = function () {
   function PEP(context) {
     (0, _classCallCheck3.default)(this, PEP);
 
-    var _this = this;
-    _this.context = context;
+    this.context = context;
   }
 
   (0, _createClass3.default)(PEP, [{
-    key: "enforce",
-    value: function enforce(result) {
-      var _this = this;
-      var authDecision = result[0];
-      var actions = result[1];
+    key: "enforcePolicies",
+    value: function enforcePolicies(message, policies, authDecision) {
+      var policy = void 0;
 
-      for (var i in actions) {
-        _this.context[actions[i].method](actions[i].params, authDecision);
+      if (policies.userPolicy) {
+        policy = this.context.userPolicies[policies.userPolicy];
+        if (policy) {
+          policy.enforceActions(this.context, message, authDecision);
+        }
+      }
+      policy = this.context.serviceProviderPolicy;
+      if (policy) {
+        policy.enforceActions(this.context, message, authDecision);
       }
     }
 
@@ -1358,16 +1547,88 @@ var PEP = function () {
 exports.default = PEP;
 module.exports = exports['default'];
 
-},{"babel-runtime/helpers/classCallCheck":4,"babel-runtime/helpers/createClass":5}],77:[function(require,module,exports){
+},{"babel-runtime/helpers/classCallCheck":10,"babel-runtime/helpers/createClass":11}],100:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _typeof2 = require('babel-runtime/helpers/typeof');
+var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
 
-var _typeof3 = _interopRequireDefault(_typeof2);
+var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+var _createClass2 = require('babel-runtime/helpers/createClass');
+
+var _createClass3 = _interopRequireDefault(_createClass2);
+
+var _DenyOverrides = require('./combiningAlgorithms/DenyOverrides');
+
+var _DenyOverrides2 = _interopRequireDefault(_DenyOverrides);
+
+var _FirstApplicable = require('./combiningAlgorithms/FirstApplicable');
+
+var _FirstApplicable2 = _interopRequireDefault(_FirstApplicable);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Policy = function () {
+  function Policy(key, rules, actions, combiningAlgorithm) {
+    (0, _classCallCheck3.default)(this, Policy);
+
+    this.actions = actions;
+    this.key = key;
+    this.rules = rules;
+    this.combiningAlgorithm = combiningAlgorithm;
+  }
+
+  (0, _createClass3.default)(Policy, [{
+    key: 'enforceActions',
+    value: function enforceActions(context, message, authDecision) {
+      for (var i in this.actions) {
+        context[this.actions[i]](message, authDecision);
+      }
+    }
+  }, {
+    key: 'evaluate',
+    value: function evaluate(context, message) {
+      var results = [];
+
+      for (var i in this.rules) {
+        results.push(this.rules[i].evaluate(context, message));
+      }
+
+      return this.combiningAlgorithm.evaluate(results);
+    }
+  }, {
+    key: 'combiningAlgorithm',
+    get: function get() {
+      return this._combiningAlgorithm;
+    },
+    set: function set(combiningAlgorithm) {
+      if (combiningAlgorithm === 'denyOverrides') {
+        this._combiningAlgorithm = new _DenyOverrides2.default();
+      } else {
+        if (combiningAlgorithm === 'firstApplicable') {
+          this._combiningAlgorithm = new _FirstApplicable2.default();
+        } else {
+          throw Error('Unknown algorithm: ' + combiningAlgorithm);
+        }
+      }
+    }
+  }]);
+  return Policy;
+}();
+
+exports.default = Policy;
+module.exports = exports['default'];
+
+},{"./combiningAlgorithms/DenyOverrides":103,"./combiningAlgorithms/FirstApplicable":104,"babel-runtime/helpers/classCallCheck":10,"babel-runtime/helpers/createClass":11}],101:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
 var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
 
@@ -1385,146 +1646,75 @@ var _PDP = require('./PDP');
 
 var _PDP2 = _interopRequireDefault(_PDP);
 
+var _UserPolicy = require('./policies/UserPolicy');
+
+var _UserPolicy2 = _interopRequireDefault(_UserPolicy);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-/**
-* The Policy Engine intercepts all the messages sent through the Message Bus and applies the
-* policies defined by the service provider and the user.
-*/
-//jshint browser:true, jquery: true
-
-//import persistenceManager from 'service-framework/dist/PersistenceManager';
-
 var PolicyEngine = function () {
-
-  /**
-  * This method is invoked by the RuntimeUA and instantiates the Policy Engine. A Policy Decision
-  * Point (PDP) and a Policy Enforcement Point (PEP) are initialised for the evaluation of policies
-  * and the enforcement of additional actions, respectively.
-  * @param  {IdentityModule}    identityModule
-  * @param  {Registry}          runtimeRegistry
-  */
-
   function PolicyEngine(context) {
     (0, _classCallCheck3.default)(this, PolicyEngine);
 
-    var _this = this;
-    _this.context = context;
-    _this.context.pdp = new _PDP2.default(context);
-    _this.context.pep = new _PEP2.default(context);
+    this.context = context;
+    context.policyEngine = this;
+    context.loadActivePolicy();
+    context.loadGroups();
+    context.loadSPPolicies();
+    context.loadUserPolicies();
+    this.pdp = new _PDP2.default(context);
+    this.pep = new _PEP2.default(context);
   }
 
-  /**
-  * Associates the given policies with a scope. The possible scopes are 'global', 'hyperty' and
-  * 'user'.
-  * @param  {Policy[]}  policies
-  * @param  {String}    scope
-  */
-
-
   (0, _createClass3.default)(PolicyEngine, [{
-    key: 'addPolicies',
-    value: function addPolicies(newPolicies) {
-      var _this = this;
-
-      var myPolicies = _this.context.policies;
-      if (myPolicies === undefined) {
-        myPolicies = {};
-      }
-
-      for (var i in newPolicies) {
-        var newPolicy = newPolicies[i];
-        var scope = newPolicy.scope;
-        if (myPolicies[scope] === undefined) {
-          myPolicies[scope] = [];
-        }
-        for (var j in myPolicies[scope]) {
-          var existingPolicy = myPolicies[scope][j];
-          if (existingPolicy.condition === newPolicy.condition) {
-            _this.removePolicies(newPolicies[i].condition);
-            break;
+    key: 'addPolicy',
+    value: function addPolicy(source, key, policy) {
+      if (source === 'SERVICE_PROVIDER') {
+        this.context.serviceProviderPolicies[key] = policy;
+        this.context.savePolicies(source);
+      } else {
+        if (source === 'USER') {
+          if (!policy) {
+            policy = new _UserPolicy2.default(key, [], []);
           }
+          this.context.userPolicies[key] = policy;
+          this.context.savePolicies(source);
+        } else {
+          throw Error('Unknown policy source: ' + source);
         }
-        myPolicies[scope].push(newPolicies[i]);
       }
-
-      _this.context.policies = myPolicies;
     }
-
-    /**
-    * Removes the policy with the given ID from the given scope. If policyID is '*', removes all policies associated with the given scope.
-    * @param  {String}  policyID
-    * @param  {String}  scope
-    */
-
   }, {
-    key: 'removePolicies',
-    value: function removePolicies(scope, condition) {
-      var _this = this;
-      var myPolicies = _this.context.policies;
-
-      if (scope !== '*') {
-
-        if (scope in myPolicies) {
-          if (condition !== '*') {
-            var policies = myPolicies[scope];
-            var typeOfCondition = typeof condition === 'undefined' ? 'undefined' : (0, _typeof3.default)(condition);
-            for (var i in policies) {
-              var typeOfPolicyCondition = (0, _typeof3.default)(policies[i].condition);
-              if (typeOfCondition === typeOfPolicyCondition) {
-                if (typeOfCondition === 'string') {
-                  if (policies[i].condition === condition) {
-                    policies.splice(i, 1);
-                    break;
-                  }
-                } else {
-                  //typeof condition = object (advanced policy)
-                  if (_this.areEqualArrays(policies[i].condition, condition)) {
-                    policies.splice(i, 1);
-                  }
-                }
-              }
+    key: 'removePolicy',
+    value: function removePolicy(source, key) {
+      if (source === '*') {
+        this.context.serviceProviderPolicies = {};
+        this.context.userPolicies = {};
+        this.context.activeUserPolicy = undefined;
+      } else {
+        if (source === 'SERVICE_PROVIDER') {
+          delete this.context.serviceProviderPolicies[key];
+        } else {
+          if (source === 'USER') {
+            delete this.context.userPolicies[key];
+            if (key === this.context.activeUserPolicy) {
+              this.context.activeUserPolicy = undefined;
             }
           } else {
-            delete myPolicies[scope];
+            throw Error('Unknown policy source: ' + source);
           }
-
-          _this.context.policies = myPolicies;
         }
-      } else {
-        _this.context.policies = {};
       }
+
+      this.context.savePolicies('USER');
+      this.context.savePolicies('SERVICE_PROVIDER');
+      this.context.saveActivePolicy();
     }
   }, {
-    key: 'areEqualArrays',
-    value: function areEqualArrays(array1, array2) {
-      if (array1.length !== array2.length) {
-        return false;
-      }
-
-      var numElements = array1.length;
-      for (var i = 0; i < numElements; i++) {
-        if (array1[i] instanceof Array && array2[i] instanceof Array) {
-          if (!array1[i].equals(array2[i])) {
-            return false;
-          }
-        } else if (array1[i] !== array2[i]) {
-          return false;
-        }
-      }
-      return true;
+    key: 'removeRule',
+    value: function removeRule(key, rule) {
+      delete this.context.userPolicies[key][rule.scope][rule.target][rule.condition];
     }
-
-    /**
-    * This method is executed when a message is intercepted in the Message Bus. The first step is the
-    * assignment of the identity associated with the message. The second step is the evaluation of the
-    * applicable policies in order to obtain an authorisation decision: if a policy evaluates to
-    * false, then the message is unauthorised. The third step is the enforcement of the actions that
-    * policies may require. Finally, the message is stamped as authorised or not and is returned to
-    * the Message Bus, where it will be forwarded or blocked.
-    * @param  {Message}  message
-    */
-
   }, {
     key: 'authorise',
     value: function authorise(message) {
@@ -1533,33 +1723,26 @@ var PolicyEngine = function () {
     }
   }, {
     key: 'getGroupsNames',
-    value: function getGroupsNames(scope) {
-      var _this = this;
-      var myGroups = _this.context.groups;
+    value: function getGroupsNames() {
+      var myGroups = this.context.groups;
       var groupsNames = [];
-      if (myGroups[scope] !== {}) {
-        for (var groupName in myGroups[scope]) {
+      if (myGroups !== undefined) {
+        for (var groupName in myGroups) {
           groupsNames.push(groupName);
         }
       }
       return groupsNames;
     }
-
-    /**
-    * Retrieves the group with the given group name from the PDP.
-    * @param  {String}  groupName
-    * @return {Array}   group
-    */
-
   }, {
-    key: 'getList',
-    value: function getList(scope, groupName) {
-      var _this = this;
-      var myGroups = _this.context.groups;
+    key: 'getGroup',
+    value: function getGroup(groupName) {
+      var myGroups = this.context.groups;
       var members = [];
-      if (myGroups[scope] !== undefined && myGroups[scope][groupName] !== undefined) {
-        members = myGroups[scope][groupName];
+
+      if (myGroups[groupName] !== undefined) {
+        members = myGroups[groupName];
       }
+
       return members;
     }
 
@@ -1569,46 +1752,16 @@ var PolicyEngine = function () {
     */
 
   }, {
-    key: 'createList',
-    value: function createList(scope, type, groupName) {
-      var _this = this;
-
-      var myGroups = _this.context.groups;
-      if (myGroups[scope] === undefined) {
-        myGroups[scope] = {};
-      }
-      myGroups[scope][groupName] = [];
-
-      var policy = {
-        authorise: false,
-        condition: type + ' in ' + groupName,
-        scope: scope,
-        actions: []
-      };
-      _this.addPolicies([policy]);
-
-      return myGroups;
+    key: 'createGroup',
+    value: function createGroup(groupName) {
+      this.context.groups[groupName] = [];
+      this.context.saveGroups();
     }
   }, {
     key: 'deleteGroup',
-    value: function deleteGroup(scope, groupName) {
-      var _this = this;
-
-      var myGroups = _this.context.groups;
-      delete myGroups[scope][groupName];
-
-      var myPolicies = _this.context.policies;
-
-      var policies = myPolicies[scope];
-      for (var i in policies) {
-        var condition = policies[i].condition.split(' ');
-        condition.shift();
-        var groupInPolicy = condition.join(' ');
-        if (groupInPolicy === groupName) {
-          delete policies[i];
-          break;
-        }
-      }
+    value: function deleteGroup(groupName) {
+      delete this.context.groups[groupName];
+      this.context.saveGroups();
     }
 
     /**
@@ -1618,66 +1771,25 @@ var PolicyEngine = function () {
     */
 
   }, {
-    key: 'addToList',
-    value: function addToList(scope, type, groupName, userEmail) {
-      var _this = this;
-
-      var myGroups = _this.context.groups;
-      if (myGroups[scope] === undefined) {
-        myGroups[scope] = {};
-      }
-      if (myGroups[scope][groupName] === undefined) {
-        myGroups = _this.createList(scope, type, groupName);
-      }
-      if (myGroups[scope][groupName].indexOf(userEmail) === -1) {
-        myGroups[scope][groupName].push(userEmail);
+    key: 'addToGroup',
+    value: function addToGroup(groupName, userEmail) {
+      var myGroups = this.context.groups;
+      if (myGroups[groupName] !== undefined) {
+        if (myGroups[groupName].indexOf(userEmail) === -1) {
+          myGroups[groupName].push(userEmail);
+          this.context.saveGroups();
+        }
+      } else {
+        throw Error('Group "' + groupName + '" does not exist!');
       }
     }
-
-    /**
-    * Removes the given user email from the group with the given name.
-    * @param  {String}  userEmail
-    * @param  {String}  groupName
-    */
-
   }, {
     key: 'removeFromGroup',
-    value: function removeFromGroup(scope, groupName, userEmail) {
-      var _this = this;
+    value: function removeFromGroup(groupName, userEmail) {
+      var group = this.context.groups[groupName];
 
-      var myGroups = _this.context.groups;
-      var group = myGroups[scope][groupName];
-
-      for (var i in group) {
-        if (group[i] === userEmail) {
-          group.splice(i, 1);
-          break;
-        }
-      }
-    }
-  }, {
-    key: 'getTimeslots',
-    value: function getTimeslots() {
-      var _this = this;
-      var policies = _this.context.policies.user;
-      var timeRestrictions = [];
-      for (var i in policies) {
-        if (policies[i].condition.split(' ')[0] === 'time') {
-          timeRestrictions.push(policies[i].condition);
-        }
-      }
-      return timeRestrictions;
-    }
-  }, {
-    key: 'getTimeslotById',
-    value: function getTimeslotById(condition) {
-      var _this = this;
-      var policies = _this.context.policies.user;
-      for (var i in policies) {
-        if (policies[i].condition === condition) {
-          return policies[i];
-        }
-      }
+      group.splice(group.indexOf(userEmail), 1);
+      this.context.saveGroups();
     }
   }]);
   return PolicyEngine;
@@ -1686,6 +1798,770 @@ var PolicyEngine = function () {
 exports.default = PolicyEngine;
 module.exports = exports['default'];
 
-},{"./PDP":75,"./PEP":76,"babel-runtime/helpers/classCallCheck":4,"babel-runtime/helpers/createClass":5,"babel-runtime/helpers/typeof":6}]},{},[77])(77)
+},{"./PDP":98,"./PEP":99,"./policies/UserPolicy":108,"babel-runtime/helpers/classCallCheck":10,"babel-runtime/helpers/createClass":11}],102:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
+
+var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+var _createClass2 = require('babel-runtime/helpers/createClass');
+
+var _createClass3 = _interopRequireDefault(_createClass2);
+
+var _utils = require('../utils/utils');
+
+var _Operators = require('./Operators');
+
+var _Operators2 = _interopRequireDefault(_Operators);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Rule = function () {
+  function Rule(authorise, condition, priority, scope, target) {
+    (0, _classCallCheck3.default)(this, Rule);
+
+    this.operators = new _Operators2.default();
+    this.authorise = authorise;
+    this.condition = condition;
+    this.priority = priority;
+    this.scope = scope;
+    this.target = target;
+  }
+
+  (0, _createClass3.default)(Rule, [{
+    key: 'evaluate',
+    value: function evaluate(context, message) {
+      var hypertyName = void 0;
+      switch (this.scope) {
+        case 'global':
+          break;
+
+        case 'hyperty':
+          if ((0, _utils.isDataObjectURL)(message.from)) {
+            var reporter = context.runtimeRegistry.getReporterURLSynchonous((0, _utils.removePathFromURL)(message.from));
+            if (reporter !== undefined) {
+              hypertyName = context.runtimeRegistry.getHypertyName(reporter);
+            }
+          } else {
+            if (message.from.split('://')[0] === 'hyperty') {
+              hypertyName = context.runtimeRegistry.getHypertyName((0, _utils.removePathFromURL)(message.from));
+            }
+          }
+          if (hypertyName === this.target) {
+            break;
+          }
+
+          if ((0, _utils.isDataObjectURL)(message.to)) {
+            var _reporter = context.runtimeRegistry.getReporterURLSynchonous((0, _utils.removePathFromURL)(message.to));
+            if (_reporter !== undefined) {
+              hypertyName = context.runtimeRegistry.getHypertyName(_reporter);
+            }
+          } else {
+            if (message.to.split('://')[0] === 'hyperty') {
+              hypertyName = context.runtimeRegistry.getHypertyName((0, _utils.removePathFromURL)(message.to));
+            }
+          }
+          if (hypertyName === this.target) {
+            break;
+          }
+
+          return 'Not Applicable';
+
+        case 'user':
+          var owner = void 0;
+
+          if ((0, _utils.isDataObjectURL)(message.from)) {
+            var _reporter2 = context.runtimeRegistry.getReporterURLSynchonous((0, _utils.removePathFromURL)(message.from));
+            owner = context.runtimeRegistry.getHypertyOwner(_reporter2);
+          } else {
+            if (message.from.split('://')[0] === 'hyperty') {
+              owner = context.runtimeRegistry.getHypertyOwner((0, _utils.removePathFromURL)(message.from));
+            }
+          }
+          if (owner !== undefined) {
+            owner = (0, _utils.getUserEmailFromURL)(owner);
+          }
+          if (owner === this.target) {
+            break;
+          }
+
+          if ((0, _utils.isDataObjectURL)(message.to)) {
+            var _reporter3 = context.runtimeRegistry.getReporterURLSynchonous((0, _utils.removePathFromURL)(message.to));
+            owner = context.runtimeRegistry.getHypertyOwner(_reporter3);
+            if (owner !== undefined) {
+              owner = (0, _utils.getUserEmailFromURL)(owner);
+            }
+          } else {
+            if (message.to.split('://')[0] === 'hyperty') {
+              owner = context.runtimeRegistry.getHypertyOwner((0, _utils.removePathFromURL)(message.to));
+              if (owner !== undefined) {
+                owner = (0, _utils.getUserEmailFromURL)(owner);
+              }
+            }
+          }
+          if (owner === this.target) {
+            break;
+          }
+
+          return 'Not Applicable';
+      }
+      if (this.condition.isApplicable(context, message, this.scope, this.target)) {
+        return this.authorise;
+      } else {
+        return 'Not Applicable';
+      }
+    }
+  }]);
+  return Rule;
+}();
+
+exports.default = Rule;
+module.exports = exports['default'];
+
+},{"../utils/utils":109,"./Operators":97,"babel-runtime/helpers/classCallCheck":10,"babel-runtime/helpers/createClass":11}],103:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _getPrototypeOf = require('babel-runtime/core-js/object/get-prototype-of');
+
+var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+
+var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
+
+var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+var _createClass2 = require('babel-runtime/helpers/createClass');
+
+var _createClass3 = _interopRequireDefault(_createClass2);
+
+var _possibleConstructorReturn2 = require('babel-runtime/helpers/possibleConstructorReturn');
+
+var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+
+var _inherits2 = require('babel-runtime/helpers/inherits');
+
+var _inherits3 = _interopRequireDefault(_inherits2);
+
+var _CombiningAlgorithm2 = require('../CombiningAlgorithm');
+
+var _CombiningAlgorithm3 = _interopRequireDefault(_CombiningAlgorithm2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var DenyOverrides = function (_CombiningAlgorithm) {
+  (0, _inherits3.default)(DenyOverrides, _CombiningAlgorithm);
+
+  function DenyOverrides() {
+    (0, _classCallCheck3.default)(this, DenyOverrides);
+    return (0, _possibleConstructorReturn3.default)(this, (0, _getPrototypeOf2.default)(DenyOverrides).apply(this, arguments));
+  }
+
+  (0, _createClass3.default)(DenyOverrides, [{
+    key: 'evaluate',
+    value: function evaluate(individualResults) {
+      if (individualResults.indexOf(false) !== -1) {
+        return false;
+      } else {
+        if (individualResults.indexOf(true) !== -1) {
+          return true;
+        } else {
+          return 'Not Applicable';
+        }
+      }
+    }
+  }]);
+  return DenyOverrides;
+}(_CombiningAlgorithm3.default);
+
+exports.default = DenyOverrides;
+module.exports = exports['default'];
+
+},{"../CombiningAlgorithm":96,"babel-runtime/core-js/object/get-prototype-of":5,"babel-runtime/helpers/classCallCheck":10,"babel-runtime/helpers/createClass":11,"babel-runtime/helpers/inherits":13,"babel-runtime/helpers/possibleConstructorReturn":14}],104:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _getPrototypeOf = require('babel-runtime/core-js/object/get-prototype-of');
+
+var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+
+var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
+
+var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+var _createClass2 = require('babel-runtime/helpers/createClass');
+
+var _createClass3 = _interopRequireDefault(_createClass2);
+
+var _possibleConstructorReturn2 = require('babel-runtime/helpers/possibleConstructorReturn');
+
+var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+
+var _inherits2 = require('babel-runtime/helpers/inherits');
+
+var _inherits3 = _interopRequireDefault(_inherits2);
+
+var _CombiningAlgorithm2 = require('../CombiningAlgorithm');
+
+var _CombiningAlgorithm3 = _interopRequireDefault(_CombiningAlgorithm2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var FirstApplicable = function (_CombiningAlgorithm) {
+  (0, _inherits3.default)(FirstApplicable, _CombiningAlgorithm);
+
+  function FirstApplicable() {
+    (0, _classCallCheck3.default)(this, FirstApplicable);
+    return (0, _possibleConstructorReturn3.default)(this, (0, _getPrototypeOf2.default)(FirstApplicable).apply(this, arguments));
+  }
+
+  (0, _createClass3.default)(FirstApplicable, [{
+    key: 'evaluate',
+    value: function evaluate(individualResults) {
+      for (var i in individualResults) {
+        if (individualResults[i] !== 'Not Applicable') {
+          return individualResults[i];
+        }
+      }
+
+      return 'Not Applicable';
+    }
+  }]);
+  return FirstApplicable;
+}(_CombiningAlgorithm3.default);
+
+exports.default = FirstApplicable;
+module.exports = exports['default'];
+
+},{"../CombiningAlgorithm":96,"babel-runtime/core-js/object/get-prototype-of":5,"babel-runtime/helpers/classCallCheck":10,"babel-runtime/helpers/createClass":11,"babel-runtime/helpers/inherits":13,"babel-runtime/helpers/possibleConstructorReturn":14}],105:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
+
+var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+var _createClass2 = require('babel-runtime/helpers/createClass');
+
+var _createClass3 = _interopRequireDefault(_createClass2);
+
+var _Condition = require('./Condition');
+
+var _Condition2 = _interopRequireDefault(_Condition);
+
+var _Operators = require('../Operators');
+
+var _Operators2 = _interopRequireDefault(_Operators);
+
+var _SubscriptionCondition = require('./SubscriptionCondition');
+
+var _SubscriptionCondition2 = _interopRequireDefault(_SubscriptionCondition);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var AdvancedCondition = function () {
+  function AdvancedCondition(condition) {
+    (0, _classCallCheck3.default)(this, AdvancedCondition);
+
+    this.operators = new _Operators2.default();
+    this.condition = condition;
+  }
+
+  (0, _createClass3.default)(AdvancedCondition, [{
+    key: 'isApplicable',
+    value: function isApplicable(context, message, scope, target, operator, left, right) {
+      if (!operator) {
+        operator = this.condition[0];
+        left = this.condition[1];
+        right = this.condition[2];
+      }
+
+      while (!(left instanceof _Condition2.default) & !(left instanceof _SubscriptionCondition2.default) & typeof left !== 'boolean') {
+        left = this.isApplicable(context, message, scope, target, left[0], left[1], left[2]);
+      }
+      if (right !== undefined) {
+        while (!(right instanceof _Condition2.default) & !(right instanceof _SubscriptionCondition2.default) & typeof right !== 'boolean') {
+          right = this.isApplicable(context, message, scope, target, right[0], right[1], right[2]);
+        }
+      }
+
+      var resultLeft = typeof left === 'boolean' ? left : left.isApplicable(context, message, scope, target);
+      var resultRight = void 0;
+      if (right !== undefined) {
+        resultRight = typeof right === 'boolean' ? right : right.isApplicable(context, message, scope, target);
+      }
+      return this.operators[operator]([resultLeft, resultRight]);
+    }
+  }]);
+  return AdvancedCondition;
+}();
+
+exports.default = AdvancedCondition;
+module.exports = exports['default'];
+
+},{"../Operators":97,"./Condition":106,"./SubscriptionCondition":107,"babel-runtime/helpers/classCallCheck":10,"babel-runtime/helpers/createClass":11}],106:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
+
+var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+var _createClass2 = require('babel-runtime/helpers/createClass');
+
+var _createClass3 = _interopRequireDefault(_createClass2);
+
+var _Operators = require('../Operators');
+
+var _Operators2 = _interopRequireDefault(_Operators);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Condition = function () {
+  function Condition(attribute, operator, params) {
+    (0, _classCallCheck3.default)(this, Condition);
+
+    this.attribute = attribute;
+    this.operator = operator;
+    this.params = params;
+    this.operators = new _Operators2.default();
+  }
+
+  (0, _createClass3.default)(Condition, [{
+    key: 'isApplicable',
+    value: function isApplicable(context, message) {
+      context[this.attribute] = { message: message };
+      var value = context[this.attribute];
+      var tempParam = void 0;
+      if (this.operator === 'in') {
+        if (this.params === 'preauthorised') {
+          var dataObjectURL = message.to.split('/');
+          dataObjectURL.pop();
+          dataObjectURL = dataObjectURL[0] + '//' + dataObjectURL[2];
+          tempParam = context.runtimeRegistry.getPreAuthSubscribers(dataObjectURL);
+        } else {
+          tempParam = context.policyEngine.getGroup(this.params);
+        }
+      }
+      if (!tempParam) {
+        return this.operators[this.operator]([this.params, value]);
+      } else {
+        return this.operators[this.operator]([tempParam, value]);
+      }
+    }
+  }]);
+  return Condition;
+}();
+
+exports.default = Condition;
+module.exports = exports['default'];
+
+},{"../Operators":97,"babel-runtime/helpers/classCallCheck":10,"babel-runtime/helpers/createClass":11}],107:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _getPrototypeOf = require('babel-runtime/core-js/object/get-prototype-of');
+
+var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+
+var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
+
+var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+var _createClass2 = require('babel-runtime/helpers/createClass');
+
+var _createClass3 = _interopRequireDefault(_createClass2);
+
+var _possibleConstructorReturn2 = require('babel-runtime/helpers/possibleConstructorReturn');
+
+var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+
+var _get2 = require('babel-runtime/helpers/get');
+
+var _get3 = _interopRequireDefault(_get2);
+
+var _inherits2 = require('babel-runtime/helpers/inherits');
+
+var _inherits3 = _interopRequireDefault(_inherits2);
+
+var _Condition2 = require('./Condition');
+
+var _Condition3 = _interopRequireDefault(_Condition2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var SubscriptionCondition = function (_Condition) {
+  (0, _inherits3.default)(SubscriptionCondition, _Condition);
+
+  function SubscriptionCondition(attribute, operator, params) {
+    (0, _classCallCheck3.default)(this, SubscriptionCondition);
+    return (0, _possibleConstructorReturn3.default)(this, (0, _getPrototypeOf2.default)(SubscriptionCondition).call(this, attribute, operator, params));
+  }
+
+  (0, _createClass3.default)(SubscriptionCondition, [{
+    key: 'isApplicable',
+    value: function isApplicable(context, message, scope, target) {
+      var isSubscription = message.type === 'subscribe';
+      var isFromRemoteSM = context.isFromRemoteSM(message.from);
+      if (isSubscription & isFromRemoteSM) {
+        return (0, _get3.default)((0, _getPrototypeOf2.default)(SubscriptionCondition.prototype), 'isApplicable', this).call(this, context, message);
+      } else {
+        return false;
+      }
+    }
+  }]);
+  return SubscriptionCondition;
+}(_Condition3.default);
+
+exports.default = SubscriptionCondition;
+module.exports = exports['default'];
+
+},{"./Condition":106,"babel-runtime/core-js/object/get-prototype-of":5,"babel-runtime/helpers/classCallCheck":10,"babel-runtime/helpers/createClass":11,"babel-runtime/helpers/get":12,"babel-runtime/helpers/inherits":13,"babel-runtime/helpers/possibleConstructorReturn":14}],108:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _getPrototypeOf = require('babel-runtime/core-js/object/get-prototype-of');
+
+var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+
+var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
+
+var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+var _createClass2 = require('babel-runtime/helpers/createClass');
+
+var _createClass3 = _interopRequireDefault(_createClass2);
+
+var _possibleConstructorReturn2 = require('babel-runtime/helpers/possibleConstructorReturn');
+
+var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+
+var _inherits2 = require('babel-runtime/helpers/inherits');
+
+var _inherits3 = _interopRequireDefault(_inherits2);
+
+var _AdvancedCondition = require('../conditions/AdvancedCondition');
+
+var _AdvancedCondition2 = _interopRequireDefault(_AdvancedCondition);
+
+var _Condition = require('../conditions/Condition');
+
+var _Condition2 = _interopRequireDefault(_Condition);
+
+var _Policy2 = require('../Policy');
+
+var _Policy3 = _interopRequireDefault(_Policy2);
+
+var _Rule = require('../Rule');
+
+var _Rule2 = _interopRequireDefault(_Rule);
+
+var _SubscriptionCondition = require('../conditions/SubscriptionCondition');
+
+var _SubscriptionCondition2 = _interopRequireDefault(_SubscriptionCondition);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var UserPolicy = function (_Policy) {
+  (0, _inherits3.default)(UserPolicy, _Policy);
+
+  function UserPolicy(key, rules, actions, combiningAlgorithm) {
+    (0, _classCallCheck3.default)(this, UserPolicy);
+
+    if (!combiningAlgorithm) {
+      combiningAlgorithm = 'denyOverrides';
+    }
+    return (0, _possibleConstructorReturn3.default)(this, (0, _getPrototypeOf2.default)(UserPolicy).call(this, key, rules, actions, combiningAlgorithm));
+  }
+
+  (0, _createClass3.default)(UserPolicy, [{
+    key: 'createRule',
+    value: function createRule(type, authorise, condition, scope, target, priority) {
+      if (!(condition instanceof _Condition2.default)) {
+        switch (type) {
+          case 'advanced':
+            condition = new _AdvancedCondition2.default(condition);
+            break;
+          case 'simple':
+            condition = new _Condition2.default(condition[0], condition[1], condition[2]);
+            break;
+          case 'subscription':
+            condition = new _SubscriptionCondition2.default(condition[0], condition[1], condition[2]);
+            break;
+        }
+      }
+      if (priority === undefined) {
+        priority = this.getLastPriority() + 1;
+      }
+      var rule = new _Rule2.default(authorise, condition, priority, scope, target);
+      this.rules.push(rule);
+    }
+  }, {
+    key: 'deleteRule',
+    value: function deleteRule(rule) {
+      var indexToRemove = this.rules.indexOf(rule);
+      this.rules.splice(indexToRemove, 1);
+    }
+  }, {
+    key: 'getLastPriority',
+    value: function getLastPriority() {
+      var priorities = [];
+
+      if (this.rules.length !== 0) {
+        for (var i in this.rules) {
+          priorities.push(this.rules[i].priority);
+        }
+        return Math.max.apply(Math, priorities);
+      } else {
+        return -1;
+      }
+    }
+  }, {
+    key: 'getRuleByPriority',
+    value: function getRuleByPriority(priority) {
+      for (var i in this.rules) {
+        if (this.rules[i].priority == priority) {
+          return this.rules[i];
+        }
+      }
+      throw Error('Rule with priority ' + priority + ' does not exist!');
+    }
+  }, {
+    key: 'hasSubscriptionRule',
+    value: function hasSubscriptionRule() {
+      for (var i in this.rules) {
+        if (this.rules[i].scope !== 'global') {
+          continue;
+        }
+        if (this.rules[i].condition instanceof _SubscriptionCondition2.default) {
+          return true;
+        } else {
+          if (this.rules[i].condition instanceof _AdvancedCondition2.default) {
+            for (var j in this.rules[i].condition.condition) {
+              if (this.rules[i].condition.condition[j] instanceof _SubscriptionCondition2.default) {
+                return true;
+              }
+            }
+          }
+        }
+      }
+      return false;
+    }
+  }, {
+    key: 'sortRules',
+    value: function sortRules() {
+      return this.rules.sort(function (a, b) {
+        var x = a['priority'];var y = b['priority'];
+        return x < y ? -1 : x > y ? 1 : 0;
+      });
+    }
+  }]);
+  return UserPolicy;
+}(_Policy3.default);
+
+exports.default = UserPolicy;
+module.exports = exports['default'];
+
+},{"../Policy":100,"../Rule":102,"../conditions/AdvancedCondition":105,"../conditions/Condition":106,"../conditions/SubscriptionCondition":107,"babel-runtime/core-js/object/get-prototype-of":5,"babel-runtime/helpers/classCallCheck":10,"babel-runtime/helpers/createClass":11,"babel-runtime/helpers/inherits":13,"babel-runtime/helpers/possibleConstructorReturn":14}],109:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _stringify = require('babel-runtime/core-js/json/stringify');
+
+var _stringify2 = _interopRequireDefault(_stringify);
+
+var _keys = require('babel-runtime/core-js/object/keys');
+
+var _keys2 = _interopRequireDefault(_keys);
+
+exports.divideURL = divideURL;
+exports.divideEmail = divideEmail;
+exports.emptyObject = emptyObject;
+exports.deepClone = deepClone;
+exports.removePathFromURL = removePathFromURL;
+exports.getUserURLFromEmail = getUserURLFromEmail;
+exports.getUserEmailFromURL = getUserEmailFromURL;
+exports.convertToUserURL = convertToUserURL;
+exports.isDataObjectURL = isDataObjectURL;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+/**
+ * Support module with some functions will be useful
+ * @module utils
+ */
+
+/**
+ * @typedef divideURL
+ * @type Object
+ * @property {string} type The type of URL
+ * @property {string} domain The domain of URL
+ * @property {string} identity The identity of URL
+ */
+
+/**
+ * Divide an url in type, domain and identity
+ * @param  {URL.URL} url - url address
+ * @return {divideURL} the result of divideURL
+ */
+function divideURL(url) {
+
+  if (!url) throw Error('URL is needed to split');
+
+  // let re = /([a-zA-Z-]*)?:\/\/(?:\.)?([-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b)*(\/[\/\d\w\.-]*)*(?:[\?])*(.+)*/gi;
+  var re = /([a-zA-Z-]*):\/\/(?:\.)?([-a-zA-Z0-9@:%._\+~#=]{2,256})([-a-zA-Z0-9@:%._\+~#=\/]*)/gi;
+  var subst = '$1,$2,$3';
+  var parts = url.replace(re, subst).split(',');
+
+  // If the url has no protocol, the default protocol set is https
+  if (parts[0] === url) {
+    parts[0] = 'https';
+    parts[1] = url;
+  }
+
+  var result = {
+    type: parts[0],
+    domain: parts[1],
+    identity: parts[2]
+  };
+
+  return result;
+}
+
+function divideEmail(email) {
+  var indexOfAt = email.indexOf('@');
+
+  var result = {
+    username: email.substring(0, indexOfAt),
+    domain: email.substring(indexOfAt + 1, email.length)
+  };
+
+  return result;
+}
+
+/**
+ * Check if an Object is empty
+ * @param  {Object} object Object to be checked
+ * @return {Boolean}       status of Object, empty or not (true|false);
+ */
+function emptyObject(object) {
+  return (0, _keys2.default)(object).length > 0 ? false : true;
+}
+
+/**
+ * Make a COPY of the original data
+ * @param  {Object}  obj - object to be cloned
+ * @return {Object}
+ */
+function deepClone(obj) {
+  //TODO: simple but inefficient JSON deep clone...
+  if (obj) return JSON.parse((0, _stringify2.default)(obj));
+}
+
+function removePathFromURL(url) {
+  var splitURL = url.split('/');
+  return splitURL[0] + '//' + splitURL[2] + '/' + splitURL[3];
+}
+
+/**
+ * Obtains the user URL that corresponds to a given email
+ * @param  {string} userEmail The user email
+ * @return {URL.URL} userURL The user URL
+ */
+function getUserURLFromEmail(userEmail) {
+  var indexOfAt = userEmail.indexOf('@');
+  return 'user://' + userEmail.substring(indexOfAt + 1, userEmail.length) + '/' + userEmail.substring(0, indexOfAt);
+}
+
+/**
+ * Obtains the user email that corresponds to a given URL
+ * @param  {URL.URL} userURL The user URL
+ * @return {string} userEmail The user email
+ */
+function getUserEmailFromURL(userURL) {
+  var url = divideURL(userURL);
+  return url.identity.replace('/', '') + '@' + url.domain; // identity field has '/exampleID' instead of 'exampleID'
+}
+
+/**
+ * Check if the user identifier is already in the URL format, if not, convert to URL format
+ * @param  {string}   identifier  user identifier
+ * @return {string}   userURL    the user URL
+ */
+function convertToUserURL(identifier) {
+
+  // check if the identifier is already in the url format
+  if (identifier.substring(0, 7) === 'user://') {
+    var dividedURL = divideURL(identifier);
+
+    //check if the url is well formated
+    if (dividedURL.domain && dividedURL.identity) {
+      return identifier;
+    } else {
+      throw 'userURL with wrong format';
+    }
+
+    //if not, convert the user email to URL format
+  } else {
+    return getUserURLFromEmail(identifier);
+  }
+}
+
+function isDataObjectURL(url) {
+  var schemasToIgnore = ['domain-idp', 'runtime', 'domain', 'hyperty'];
+  var splitURL = url.split('://');
+  var urlSchema = splitURL[0];
+
+  return schemasToIgnore.indexOf(urlSchema) === -1;
+}
+
+},{"babel-runtime/core-js/json/stringify":1,"babel-runtime/core-js/object/keys":6}]},{},[101])(101)
 });
 //# sourceMappingURL=PolicyEngine.js.map
