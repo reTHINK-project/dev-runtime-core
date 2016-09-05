@@ -306,14 +306,14 @@ getRegistry.then(function(registry) {
         expect(result.length).to.equal(graphConnector.contacts.length);
       });
 
-      it('Adding user ID to contact', function() {
+      it('Adding user ID to owner', function() {
         let resultTrue = graphConnector.addUserID('facebook/john');
         let resultFalse =  graphConnector.addUserID('facebook/john');
         expect(resultTrue).to.equal(true);
         expect(resultFalse).to.equal(false);
       });
 
-      it('Removing user ID to contact', function() {
+      it('Removing user ID of the owner', function() {
         let resultTrue = graphConnector.removeUserID('facebook/john');
         let resultFalse = graphConnector.removeUserID('facebook/john');
         expect(resultTrue).to.equal(true);
@@ -338,6 +338,25 @@ getRegistry.then(function(registry) {
         let success = graphConnector.addContact('testingAdd123', 'TestingAdd', 'addcontact');
         let unsuccess = graphConnector.addContact('testingAdd123', 'TestingAddfail', 'addcontactfail');
         expect(success).to.equal(true);
+        expect(unsuccess).to.equal(false);
+      });
+
+      it('adding userID to a contact', function() {
+        graphConnector.addContact('testingAddUSERID123', 'TestingUserID', 'adduserIDSuccess');
+        let success = graphConnector.setContactUserIDs('testingAddUSERID123', 'facebook/test');
+        let unsuccess = graphConnector.setContactUserIDs('testingAddUSERID123', 'facebook/test');
+        expect(success).to.equal(true);
+        expect(unsuccess).to.equal(false);
+      });
+
+      it('getting userIDs of a contact', function() {
+        graphConnector.addContact('testingGETUSERID12345', 'TestingUserIDget', 'getuserIDSuccess');
+        //Adding user ids to a contact
+        graphConnector.setContactUserIDs('testingGETUSERID12345', 'facebook/test123');
+        graphConnector.setContactUserIDs('testingGETUSERID12345', 'twitter/test123');
+        let success = graphConnector.getContactUserIDs('testingGETUSERID12345');
+        let unsuccess = graphConnector.getContactUserIDs('testingGETUSERID123456');
+        expect(success.length).to.equal(2);
         expect(unsuccess).to.equal(false);
       });
 

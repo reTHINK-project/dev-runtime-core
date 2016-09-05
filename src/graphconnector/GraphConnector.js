@@ -294,7 +294,6 @@ class GraphConnector {
       } else {
 
         _this.messageBus.postMessage(msg, (reply) => {
-
           let responseCode = reply.body.responseCode;
           if (responseCode == 200) {
             resolve(200);
@@ -360,13 +359,12 @@ class GraphConnector {
 
     for (let i = 0; i < this.contacts.length; i++) {
        if (this.contacts[i].guid == guid || this.globalRegistryRecord.guid == guid) {
-
-         success = true;  
+         success = true;
        }
-     } 
+     }
      return success;
    }
-  
+
   /**
    * To return the owner.
    * @returns  {GraphConnectorContactData}   Returns the owner.
@@ -400,7 +398,6 @@ class GraphConnector {
        to: 'global://registry/',
        body: { guid: guid }
      };
-
      return new Promise(function(resolve, reject) {
 
        if (_this.messageBus === undefined) {
@@ -417,7 +414,6 @@ class GraphConnector {
            let dataEncoded = unwrappedJWT.payloadObj.data;
            let dataDecoded = base64url.decode(dataEncoded);
            let dataJSON = JSON.parse(dataDecoded);
-
            let publicKeyObject = jsrsasign.KEYUTIL.getKey(dataJSON.publicKey);
            let encodedString = jwt.split('.').slice(0, 2).join('.');
            let sigValueHex = unwrappedJWT.sigHex;
@@ -425,7 +421,6 @@ class GraphConnector {
            sig.init(publicKeyObject);
            sig.updateString(encodedString);
            let isValid = sig.verify(sigValueHex);
-
            if (!isValid) {
              reject('Retrieved Record not valid!');
            } else {
@@ -501,7 +496,7 @@ class GraphConnector {
       let newContact = new GraphConnectorContactData(guid, firstName, lastName);
       this.contacts.push(newContact);
       success = true;
-    } 
+    }
     return success;
   }
 
@@ -746,6 +741,61 @@ class GraphConnector {
       }
 
       return rtnArray;
+    }
+
+  /**
+   * Returns success if the userID is successfully added for a contact
+   * @param  {string}   guid    guid of the contact whose userID has to be added.
+   * @param  {string}   userID   userID which is supposed to be added.
+   * @returns  {boolean}   success       returns true if userID is successfully added to the contact.
+   */
+    setContactUserIDs(guid, userID) {
+      let success = false;
+      let tmpUserID = [];
+
+      for (let i = 0; i < this.contacts.length; i++) {
+
+        if (this.contacts[i].guid == guid) {
+
+          for (let j = 0; j < this.contacts[i].userIDs.length; j++) {
+
+            if (this.contacts[i].userIDs[j] == userID) {
+              return false;
+            }
+          }
+          tmpUserID = this.contacts[i].userIDs;
+          tmpUserID.push(userID);
+          this.contacts[i].userIDs = tmpUserID;
+          success = true;
+        }
+      }
+      return success;
+    }
+
+  /**
+   * Returns ArrayList of userIDs of a contact, if contact not found then it will return a string 'Contact Does not exist'
+   * @param  {string}   guid    guid of the contact whose userID has to be added.
+   * @returns  {boolean}   success       returns Arraylist of userID of a contact, if contact not found then it will return a string 'Contact Does not exist'
+   */
+    getContactUserIDs(guid) {
+      let userIDsArray = [];
+      let found = false;
+      for (let i = 0; i < this.contacts.length; i++) {
+
+        if (this.contacts[i].guid == guid) {
+          found = true;
+
+          for (let j = 0; j < this.contacts[i].userIDs.length; j++) {
+            userIDsArray.push(this.contacts[i].userIDs[j]);
+          }
+        }
+      }
+
+      if(!found){
+        return false;
+      }else {
+        return userIDsArray;
+      }
     }
 
   /**
