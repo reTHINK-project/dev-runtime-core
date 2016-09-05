@@ -28,6 +28,7 @@ import Registry from '../registry/Registry';
 import IdentityModule from '../identity/IdentityModule';
 import PEP from '../policy/PEP';
 import MessageBus from '../bus/MessageBus';
+
 import Loader from './Loader';
 import { runtimeConfiguration } from './runtimeConfiguration';
 import GraphConnector from '../graphconnector/GraphConnector';
