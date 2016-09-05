@@ -231,7 +231,7 @@ getRegistry.then(function(registry) {
         let dataObjectReporter = 'hyperty://localhost/d692091f-192c-420c-a763-a180f13e626a';
         let authorise = ['user://gmail.com/user15'];
 
-        expect(registry.registerDataObject(identifier, dataObjectschema, dataObjectUrl, dataObjectReporter, authorise).then(function(response) {
+        expect(registry.registerDataObject(identifier, dataObjectschema, dataObjectUrl, dataObjectReporter, ['fake'], authorise).then(function(response) {
           return response;
         })).to.be.fulfilled.and.eventually.equal('ok').and.notify(done);
       });

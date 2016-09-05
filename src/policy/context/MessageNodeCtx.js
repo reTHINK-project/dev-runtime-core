@@ -1,65 +1,64 @@
 import CommonCtx from './CommonCtx';
+import Condition from '../conditions/Condition';
+import Rule from '../Rule';
+import UserPolicy from '../policies/UserPolicy';
 
 class MessageNodeCtx extends CommonCtx {
 
   constructor() {
     super();
-  }
-
-  loadPolicies() {
-    return {};
-  }
-
-  /**
-  * Returns the policies associated with a scope.
-  * @param   {String} scope
-  * @return  {Array}  policies
-  */
-
-  //TODO: can policies depend on the hyperty name? Domain Registry interaction
-  getApplicablePolicies() {
-    let _this = this;
-    let myPolicies = _this.policies;
-    let policies = [];
-
-    for (let i in myPolicies) {
-      policies.push.apply(policies, myPolicies[i]);
-    }
-
-    return policies;
-  }
-
-  set group(params) {
-    let _this = this;
-    _this.groupAttribute = _this._getList(params.scope, params.group);
-  }
-
-  get group() {
-    let _this = this;
-    return _this.groupAttribute;
+    this.serviceProviderPolicies = {};
   }
 
   authorise(message) {
-    let _this = this;
-    message.body = message.body || {};
-    let result;
+    return new Promise((resolve, reject) => {
+      let _this = this;
+      let result;
 
-    let isToVerify = _this.isToVerify(message);
-    if (isToVerify) {
+      let isToVerify = _this._isToVerify(message);
+      if (isToVerify) {
+        let policies = {
+          serviceProviderPolicy: _this.getServiceProviderPolicy(message)
+        };
+        result = _this.policyEngine.pdp.applyPolicies(message, policies);
+      }
+      if (result === undefined || result === 'Not Applicable') {
+        resolve(message);
+      } else {
+        reject('Message blocked');
+      }
 
-      result = _this.applyPolicies(message);
-      let messageAccepted = result.policiesResult[0];
-      return messageAccepted;
-
-    } else {
-      return true;
-    }
+    });
   }
 
-  //TODO: verify if scheme is not 'runtime', 'hyperty-runtime' or 'domain'
-  isToVerify() {
+  loadActivePolicy() { }
+
+  loadGroups() { }
+
+  loadSPPolicies() { }
+
+  loadUserPolicies() { }
+
+  getServiceProviderPolicy() {
+    let policy;
+
+    if (Object.keys(this.serviceProviderPolicies).length !== 0) {
+      for (let i in this.serviceProviderPolicies) {
+        policy = this.serviceProviderPolicies[i];
+      }
+    }
+    return policy;
+  }
+
+  _isToVerify() {
     return true;
   }
+
+  saveActivePolicy() {}
+
+  saveGroups() {}
+
+  savePolicies() {}
 }
 
 export default MessageNodeCtx;

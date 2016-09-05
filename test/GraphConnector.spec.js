@@ -330,8 +330,8 @@ getRegistry.then(function(registry) {
 
       it('returning the owner', function() {
         let owner = graphConnector.getOwner();
-        owner.firstName= "TestingOwner";
-        expect(owner.firstName).to.equal("TestingOwner");
+        owner.firstName = 'TestingOwner';
+        expect(owner.firstName).to.equal('TestingOwner');
       });
 
       it('adding a new contact', function() {

@@ -321,7 +321,7 @@ class GraphConnector {
 
      for (let i = 0; i < this.contacts.length; i++) {
        if (this.contacts[i].guid == guidOld) {
-         if(guidOld == guidNew) {
+         if (guidOld == guidNew) {
 
            this.contacts[i].firstName = firstName;
            this.contacts[i].lastName = lastName;
@@ -332,7 +332,7 @@ class GraphConnector {
 
          } else {
 
-           if(!this.guidExist(guidNew)) {
+           if (!this.guidExist(guidNew)) {
 
              this.contacts[i].firstName = firstName;
              this.contacts[i].lastName = lastName;
@@ -345,7 +345,7 @@ class GraphConnector {
          }
        }
      }
-    return rtnArray;
+     return rtnArray;
    }
 
   /**
@@ -353,11 +353,11 @@ class GraphConnector {
    * @param  {string}     guid        GUID which needs to be checked.
    * @returns  {boolean}   Returns true if the GUID exist
    */
-   guidExist(guid){
+   guidExist(guid) {
 
-    let success = false;
+     let success = false;
 
-    for (let i = 0; i < this.contacts.length; i++) {
+     for (let i = 0; i < this.contacts.length; i++) {
        if (this.contacts[i].guid == guid || this.globalRegistryRecord.guid == guid) {
          success = true;
        }
@@ -369,16 +369,17 @@ class GraphConnector {
    * To return the owner.
    * @returns  {GraphConnectorContactData}   Returns the owner.
    */
-   getOwner(){
+   getOwner() {
 
-    let owner = new GraphConnectorContactData(this.globalRegistryRecord.guid, this.firstName, this.lastName);
+     let owner = new GraphConnectorContactData(this.globalRegistryRecord.guid, this.firstName, this.lastName);
 
-    owner.groups = this.groups;
-    owner.lastCalculationBloomFilter1Hop = this.lastCalculationBloomFilter1Hop;
-    owner.residenceLocation =  this.residenceLocation;
-    owner.contactsBloomFilter1Hop = this.contactsBloomFilter1Hop;
+     owner.groups = this.groups;
+     owner.lastCalculationBloomFilter1Hop = this.lastCalculationBloomFilter1Hop;
+     owner.residenceLocation =  this.residenceLocation;
+     owner.contactsBloomFilter1Hop = this.contactsBloomFilter1Hop;
+     owner.userIDs = this.globalRegistryRecord.userIDs ;
 
-    return owner;
+     return owner;
    }
 
   /**
@@ -492,7 +493,7 @@ class GraphConnector {
     // TODO: what if two contacts have the same GUID?
     // TODO: reject invalid GUIDs
     let success = false;
-    if(!this.guidExist(guid)){
+    if (!this.guidExist(guid)) {
       let newContact = new GraphConnectorContactData(guid, firstName, lastName);
       this.contacts.push(newContact);
       success = true;

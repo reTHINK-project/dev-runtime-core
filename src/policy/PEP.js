@@ -1,17 +1,21 @@
 class PEP {
 
   constructor(context) {
-    let _this = this;
-    _this.context = context;
+    this.context = context;
   }
 
-  enforce(result) {
-    let _this = this;
-    let authDecision = result[0];
-    let actions = result[1];
+  enforcePolicies(message, policies, authDecision) {
+    let policy;
 
-    for (let i in actions) {
-      _this.context[actions[i].method](actions[i].params, authDecision);
+    if (policies.userPolicy) {
+      policy = this.context.userPolicies[policies.userPolicy];
+      if (policy) {
+        policy.enforceActions(this.context, message, authDecision);
+      }
+    }
+    policy = this.context.serviceProviderPolicy;
+    if (policy) {
+      policy.enforceActions(this.context, message, authDecision);
     }
   }
 

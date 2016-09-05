@@ -92,6 +92,11 @@ export function deepClone(obj) {
   if (obj) return JSON.parse(JSON.stringify(obj));
 }
 
+export function removePathFromURL(url) {
+  let splitURL = url.split('/');
+  return splitURL[0] + '//' + splitURL[2] + '/' + splitURL[3];
+}
+
 /**
  * Obtains the user URL that corresponds to a given email
  * @param  {string} userEmail The user email
