@@ -287,7 +287,7 @@ class RuntimeCoreCtx extends CommonCtx {
   }
 
   _isToVerify(message) {
-    let schemasToIgnore = ['domain-idp', 'hyperty-runtime', 'runtime', 'domain'];
+    let schemasToIgnore = ['domain', 'domain-idp', 'global', 'hyperty-runtime', 'runtime'];
     let splitFrom = (message.from).split('://');
     let fromSchema = splitFrom[0];
     let splitTo = (message.to).split('://');
