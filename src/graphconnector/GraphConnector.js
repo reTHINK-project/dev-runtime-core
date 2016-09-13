@@ -410,11 +410,21 @@ class GraphConnector {
            console.log(reply);
 
            // reply should be the JSON returned from the Global Registry REST-interface
-           let jwt = reply.body.data;
-           let unwrappedJWT = KJUR.jws.JWS.parse(reply.body.data);
+           let jwt = reply.body.Value;
+           console.log('jwt');
+           console.log(jwt);
+           let unwrappedJWT = KJUR.jws.JWS.parse(reply.body.Value);
+           console.log('unwrappedJWT');
+           console.log(unwrappedJWT);
            let dataEncoded = unwrappedJWT.payloadObj.data;
+           console.log('dataEncoded');
+           console.log(dataEncoded);
            let dataDecoded = base64url.decode(dataEncoded);
+           console.log('dataDecoded');
+           console.log(dataDecoded);
            let dataJSON = JSON.parse(dataDecoded);
+           console.log('dataJSON');
+           console.log(dataJSON);
            let publicKeyObject = jsrsasign.KEYUTIL.getKey(dataJSON.publicKey);
            let encodedString = jwt.split('.').slice(0, 2).join('.');
            let sigValueHex = unwrappedJWT.sigHex;
