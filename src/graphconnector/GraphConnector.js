@@ -411,43 +411,36 @@ class GraphConnector {
 
            // reply should be the JSON returned from the Global Registry REST-interface
            let jwt = reply.body.Value;
-           console.log('jwt');
-           console.log(jwt);
-           let unwrappedJWT = KJUR.jws.JWS.parse(reply.body.Value);
-           console.log('unwrappedJWT');
-           console.log(unwrappedJWT);
-           let dataEncoded = unwrappedJWT.payloadObj.data;
-           console.log('dataEncoded');
-           console.log(dataEncoded);
-           let dataDecoded = base64url.decode(dataEncoded);
-           console.log('dataDecoded');
-           console.log(dataDecoded);
-           let dataJSON = JSON.parse(dataDecoded);
-           console.log('dataJSON');
-           console.log(dataJSON);
-           let publicKeyObject = jsrsasign.KEYUTIL.getKey(dataJSON.publicKey);
-           let encodedString = jwt.split('.').slice(0, 2).join('.');
-           let sigValueHex = unwrappedJWT.sigHex;
-           let sig = new KJUR.crypto.Signature({alg: 'SHA256withECDSA'});
-           sig.init(publicKeyObject);
-           sig.updateString(encodedString);
-           let isValid = sig.verify(sigValueHex);
-           if (!isValid) {
-             reject('Retrieved Record not valid!');
-           } else {
-             let queriedContact = new GraphConnectorContactData(dataJSON.guid, '', '');
-             if (typeof dataJSON.userIDs != 'undefined' && dataJSON.userIDs != null) {
-               queriedContact.userIDs = dataJSON.userIDs;
+           let description = reply.body.Description;
+           if(typeof jwt !== 'undefined') {
+             let unwrappedJWT = KJUR.jws.JWS.parse(jwt);
+             let dataEncoded = unwrappedJWT.payloadObj.data;
+             let dataDecoded = base64url.decode(dataEncoded);
+             let dataJSON = JSON.parse(dataDecoded);
+             let publicKeyObject = jsrsasign.KEYUTIL.getKey(dataJSON.publicKey);
+             let encodedString = jwt.split('.').slice(0, 2).join('.');
+             let sigValueHex = unwrappedJWT.sigHex;
+             let sig = new KJUR.crypto.Signature({alg: 'SHA256withECDSA'});
+             sig.init(publicKeyObject);
+             sig.updateString(encodedString);
+             let isValid = sig.verify(sigValueHex);
+             if (!isValid) {
+               reject('Retrieved Record not valid!');
+             } else {
+               let queriedContact = new GraphConnectorContactData(dataJSON.guid, '', '');
+               if (typeof dataJSON.userIDs != 'undefined' && dataJSON.userIDs != null) {
+                 queriedContact.userIDs = dataJSON.userIDs;
 
-               for (let i = 0; i < _this.contacts.length; i++) {
-                 if (_this.contacts[i].guid == guid) {
-                   _this.contacts[i].userIDs = dataJSON.userIDs;
+                 for (let i = 0; i < _this.contacts.length; i++) {
+                   if (_this.contacts[i].guid == guid) {
+                     _this.contacts[i].userIDs = dataJSON.userIDs;
+                   }
                  }
-               }
 
+               }
+               resolve(queriedContact);
              }
-             resolve(queriedContact);
-           }
+           } else if(typeof description !== 'undefined'){ resolve(description); }
          });
        }
      });
@@ -718,7 +711,7 @@ class GraphConnector {
    */
   calculateBloomFilter1Hop() {
     let bf = new BloomFilter(
-      431328,   // number of bits to allocate. With 30000 entries, we have a false positive rate of 0.1 %.
+      4314,   // number of bits to allocate. With 300 entries, we have a false positive rate of 0.001 %.
       10        // number of hash functions.
     );
     for (let i = 0; i < this.contacts.length; i++) {
@@ -872,7 +865,15 @@ class GraphConnector {
       if (this.contacts[i].guid == guid) {
         directContactsArray.push(this.contacts[i]);
       }
-      let bf1hop = this.contacts[i].contactsBloomFilter1Hop;
+      //
+      //console.log('contact is '+this.contacts[i].firstName);
+
+      let bf1hop = new BloomFilter(
+        4314,   // number of bits to allocate. With 30000 entries, we have a false positive rate of 0.1 %.
+        10        // number of hash functions.
+      );
+      bf1hop =  this.contacts[i].contactsBloomFilter1Hop;
+      bf1hop = $.extend(new BloomFilter(4320, 10), bf1hop);
       if (bf1hop !== undefined) {
         if (bf1hop.test(guid)) {
           fofContactsArray.push(this.contacts[i]);
