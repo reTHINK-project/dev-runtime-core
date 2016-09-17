@@ -18,7 +18,7 @@ class Operators {
   }
 
   equals(params) {
-    return String(params[0]) === '*' || String(params[0]) === String(params[1]);
+    return params[0] == '*' || params[0] == params[1];
   }
 
   greaterThan(params) {

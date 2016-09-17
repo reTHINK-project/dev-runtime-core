@@ -1,4 +1,6 @@
-class FirstApplicable {
+import CombiningAlgorithm from '../CombiningAlgorithm';
+
+class FirstApplicable extends CombiningAlgorithm {
 
   evaluate(individualResults) {
     for (let i in individualResults) {
@@ -6,9 +8,9 @@ class FirstApplicable {
         return individualResults[i];
       }
     }
+
     return 'Not Applicable';
   }
-
 }
 
 export default FirstApplicable;

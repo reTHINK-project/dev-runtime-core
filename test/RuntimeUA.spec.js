@@ -14,7 +14,7 @@ import RuntimeUA from '../src/runtime/RuntimeUA';
 // Main dependecies
 import Registry from '../src/registry/Registry';
 import IdentityModule from '../src/identity/IdentityModule';
-import PEP from '../src/policy/PEP';
+import PolicyEngine from '../src/policy/PolicyEngine';
 import MessageBus from '../src/bus/MessageBus';
 import {RuntimeCatalogueLocal} from 'service-framework/dist/RuntimeCatalogue';
 
@@ -260,7 +260,7 @@ describe('RuntimeUA', function() {
     });
 
     it('depends of the Policy Engine', function() {
-      expect(runtime.policyEngine).to.be.instanceof(PEP);
+      expect(runtime.policyEngine).to.be.instanceof(PolicyEngine);
     });
 
     it('depends of the MessageBus', function() {

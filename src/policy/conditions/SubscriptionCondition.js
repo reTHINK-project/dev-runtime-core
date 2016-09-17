@@ -6,7 +6,7 @@ class SubscriptionCondition extends Condition {
     super(attribute, operator, params);
   }
 
-  isApplicable(context, message) {
+  isApplicable(context, message, scope, target) {
     let isSubscription = message.type === 'subscribe';
     let isFromRemoteSM = context.isFromRemoteSM(message.from);
     if (isSubscription & isFromRemoteSM) {
@@ -15,7 +15,6 @@ class SubscriptionCondition extends Condition {
       return false;
     }
   }
-
 }
 
 export default SubscriptionCondition;

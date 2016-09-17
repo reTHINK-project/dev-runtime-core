@@ -42,27 +42,25 @@ class PDP {
     return result;
   }
 
-  evaluatePolicies(message, isIncomingMessage) {
-    let policies = this.context.getPolicies(message, isIncomingMessage);
+  evaluateSPPolicy(message, policy) {
     let result;
 
-    if (policies !== undefined) {
-      result = this.evaluatePolicy(message, policies.serviceProviderPolicy);
-      if (result || result === undefined || result === 'Not Applicable') {
-        let userResult = this.evaluatePolicy(message, policies.userPolicy);
-        if (userResult !== undefined) {
-          result = userResult;
-        }
-      }
+    if (policy) {
+      result = policy.evaluate(this.context, message);
     }
 
     return result;
   }
 
-  evaluatePolicy(message, policy) {
+  evaluateUserPolicy(message, title) {
     let result;
-    if (policy) {
-      result = policy.evaluate(this.context, message);
+
+    if (title !== undefined) {
+      let policy = this.context.userPolicies[title];
+
+      if (policy) {
+        result = policy.evaluate(this.context, message);
+      }
     }
 
     return result;
