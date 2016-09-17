@@ -508,6 +508,9 @@ class IdentityModule {
       let isFromHyperty = divideURL(message.from).type === 'hyperty';
       let isToHyperty = divideURL(message.to).type === 'hyperty';
 
+      if (message.type === 'update') {
+        resolve(message);
+      }
       if (isFromHyperty && isToHyperty) {
         let userURL = _this._registry.getHypertyOwner(message.from);
         if (userURL) {
@@ -631,6 +634,10 @@ class IdentityModule {
       let isToDataObject = isDataObjectURL(dataObjectURL);
       let isFromHyperty = divideURL(message.from).type === 'hyperty';
       let isToHyperty = divideURL(message.to).type === 'hyperty';
+
+      if (message.type === 'update') {
+        resolve(message);
+      }
 
       //is is hyperty to hyperty communication
       if (isFromHyperty && isToHyperty) {

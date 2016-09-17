@@ -26,7 +26,7 @@ import 'babel-polyfill';
 //Main dependecies
 import Registry from '../registry/Registry';
 import IdentityModule from '../identity/IdentityModule';
-import PolicyEngine from '../policy/PolicyEngine';
+import PEP from '../policy/PEP';
 import MessageBus from '../bus/MessageBus';
 // import GraphConnector from '../graphconnector/GraphConnector';
 
@@ -44,7 +44,7 @@ import {divideURL, emptyObject} from '../utils/utils';
  * @property {RuntimeCatalogue} runtimeCatalogue - Catalogue of components can be installed;
  * @property {runtimeURL} runtimeURL - This identify the core runtime, should be unique;
  * @property {IdentityModule} identityModule - Identity Module;
- * @property {PolicyEngine} policyEngine - Policy Engine Module;
+ * @property {PEP} pep - Policy Enforcement Point Module;
  * @property {Registry} registry - Registry Module;
  * @property {MessageBus} messageBus - Message Bus is used like a router to redirect the messages from one component to other(s)
  * @property {GraphConnector} graphConnector - Graph Connector handling GUID and contacts
@@ -80,7 +80,7 @@ class RuntimeUA {
     _this.identityModule = new IdentityModule(runtimeURL);
 
     // Use the sandbox factory to create an AppSandbox;
-    // In the future can be decided by policyEngine if we need
+    // In the future can be decided by PEP if we need
     // create a AppSandbox or not;
     let appSandbox = runtimeFactory.createAppSandbox();
 
@@ -90,8 +90,8 @@ class RuntimeUA {
     // Instantiate the Message Bus
     _this.messageBus = new MessageBus(_this.registry);
 
-    // Instantiate the Policy Engine
-    _this.policyEngine = new PolicyEngine(new RuntimeCoreCtx(_this.identityModule, _this.registry));
+    // Instantiate the Policy Enforcement Point
+    _this.policyEngine = new PEP(new RuntimeCoreCtx(_this.identityModule, _this.registry));
 
     _this.messageBus.pipeline.handlers = [
 

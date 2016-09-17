@@ -148,7 +148,7 @@ gulp.task('dist', function() {
     gutil.log('The generated files will be uglified, minified, the sourcemaps files will be created separated');
   }
 
-  return gulp.src(['src/sandbox.js', 'src/minibus.js', 'src/runtime/RuntimeUA.js', 'src/policy/PolicyEngine.js', 'src/policy/context/MessageNodeCtx.js'])
+  return gulp.src(['src/sandbox.js', 'src/minibus.js', 'src/runtime/RuntimeUA.js', 'src/policy/PEP.js', 'src/policy/context/ReThinkCtx.js'])
   .pipe(dist(debug))
   .on('end', function() {
     gutil.log('All the files are created');

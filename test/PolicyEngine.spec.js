@@ -7,10 +7,9 @@ let expect = chai.expect;
 chai.use(chaiAsPromised);
 
 import AdvancedCondition from '../src/policy/conditions/AdvancedCondition';
+import BlockOverrides from '../src/policy/combiningAlgorithms/BlockOverrides';
 import Condition from '../src/policy/conditions/Condition';
-import DenyOverrides from '../src/policy/combiningAlgorithms/DenyOverrides';
-import MessageNodeCtx from '../src/policy/context/MessageNodeCtx';
-import PolicyEngine from '../src/policy/PolicyEngine';
+import PEP from '../src/policy/PEP';
 import Rule from '../src/policy/Rule';
 import RuntimeCoreCtx from '../src/policy/context/RuntimeCoreCtx';
 import ServiceProviderPolicy from '../src/policy/policies/ServiceProviderPolicy';
@@ -26,19 +25,19 @@ let andNotCondition = new AdvancedCondition(['and', new Condition('source', 'equ
 let orNotCondition = new AdvancedCondition(['or', ['not', new Condition('domain', 'equals', 'domain1')], new Condition('source', 'equals', 'user1@domain1')]);
 
 /********** RULES **********/
-let simpleRule = new Rule(false, simpleCondition, 0, 'global', 'global');
-let acceptAnySubscriptionRule = new Rule(true, new SubscriptionCondition('subscription', 'equals', '*'), 0, 'global', 'global');
-let acceptPreAuthSubscriptionRule = new Rule(true, new SubscriptionCondition('subscription', 'in', 'preauthorised'), 0, 'global', 'global');
-let blockAnySubscriptionRule = new Rule(false, new SubscriptionCondition('subscription', 'equals', '*'), 0, 'global', 'global');
-let blockPreAuthSubscriptionRule = new Rule(false, new AdvancedCondition(['not', new SubscriptionCondition('subscription', 'in', 'preauthorised')]), 0, 'global', 'global');
-let dataObjectSchemeRule = new Rule(false, new Condition('dataObjectScheme', 'equals', 'comm'), 0, 'global', 'global');
-let dateRule = new Rule(false, new Condition('date', 'equals', '01/01/2016'), 0, 'global', 'global');
-let domainRule = new Rule(false, new Condition('domain', 'equals', 'blockedDomain'), 0, 'global', 'global');
-let sourceRule = new Rule(false, new Condition('source', 'equals', 'user@blockedDomain'), 0, 'global', 'global');
-let sourceRuleForConn = new Rule(false, new Condition('source', 'equals', 'user@blockedDomain'), 0, 'hyperty', 'Connector');
-let sourceRuleForUser1 = new Rule(false, new Condition('source', 'equals', 'user@blockedDomain'), 0, 'user', 'user1@work');
-let timeRule = new Rule(false, new Condition('time', 'between', [1400, 1700]), 0, 'global', 'global');
-let weekdayRule = new Rule(false, new Condition('weekday', 'equals', '0'), 0, 'global', 'global');
+let simpleRule = new Rule(false, simpleCondition, 'global', 'global', 0);
+let acceptAnySubscriptionRule = new Rule(true, new SubscriptionCondition('subscription', 'equals', '*'), 'global', 'global', 0);
+let acceptPreAuthSubscriptionRule = new Rule(true, new SubscriptionCondition('subscription', 'in', 'preauthorised'), 'global', 'global', 0);
+let blockAnySubscriptionRule = new Rule(false, new SubscriptionCondition('subscription', 'equals', '*'), 'global', 'global', 0);
+let blockPreAuthSubscriptionRule = new Rule(false, new AdvancedCondition(['not', new SubscriptionCondition('subscription', 'in', 'preauthorised')]), 'global', 'global', 0);
+let dataObjectSchemeRule = new Rule(false, new Condition('dataObjectScheme', 'equals', 'comm'), 'global', 'global', 0);
+let dateRule = new Rule(false, new Condition('date', 'equals', '01/01/2016'), 'global', 'global', 0);
+let domainRule = new Rule(false, new Condition('domain', 'equals', 'blockedDomain'), 'global', 'global', 0);
+let sourceRule = new Rule(false, new Condition('source', 'equals', 'user@blockedDomain'), 'global', 'global', 0);
+let sourceRuleForConn = new Rule(false, new Condition('source', 'equals', 'user@blockedDomain'), 'hyperty', 'Connector', 0);
+/*let sourceRuleForUser1 = new Rule(false, new Condition('source', 'equals', 'user@blockedDomain'), 'user', 'user1@work,', 0);
+let timeRule = new Rule(false, new Condition('time', 'between', [1400, 1700]), 'global', 'global', 0);
+let weekdayRule = new Rule(false, new Condition('weekday', 'equals', '0'), 'global', 'global', 0);*/
 
 /********** POLICIES **********/
 let sourcePolicy = new ServiceProviderPolicy('HypertyChat', [simpleRule], []);
@@ -147,7 +146,7 @@ describe('Policies management', () => {
   describe('policies management', () => {
     it('creates a service provider policy', () => {
       expect(sourcePolicy.key).to.be.eql('HypertyChat');
-      expect(sourcePolicy.combiningAlgorithm).to.be.eql(new DenyOverrides());
+      expect(sourcePolicy.combiningAlgorithm).to.be.eql(new BlockOverrides());
       expect(sourcePolicy.rules).to.be.eql([simpleRule]);
     });
     it('evaluates a service provider policy to false', () => {
@@ -172,7 +171,7 @@ describe('Policy Engine with Runtime Core context', () => {
         return 'Connector';
       }
     },
-    getReporterURLSynchonous: (hypertyURL) => {
+    getReporterURLSynchonous: () => {
       return 'hyperty://domain/hyperty-url';
     },
     isDataObjectURL: (dataObjectURL) => {
@@ -190,7 +189,11 @@ describe('Policy Engine with Runtime Core context', () => {
         resolve(message);
       });
     },
-    doMutualAuthentication: () => {},
+    doMutualAuthentication: (message) => {
+      return new Promise((resolve) => {
+        resolve(message);
+      });
+    },
     encryptMessage: (message) => {
       return new Promise((resolve) => {
         resolve(message);
@@ -200,16 +203,39 @@ describe('Policy Engine with Runtime Core context', () => {
       return new Promise((resolve) => {
         resolve({ userProfile: {username: 'user@domain' } });
       });
+    },
+    _getHypertyFromDataObject: (dataObjectURL) => {
+      return new Promise((resolve) => {
+        if (dataObjectURL === 'comm://domain/data-object-url') {
+          resolve('hyperty://domain/hyperty-url');
+        }
+      });
     }
   };
 
-  let policyEngine = new PolicyEngine(new RuntimeCoreCtx(identityModule, runtimeRegistry));
+  let policyEngine = new PEP(new RuntimeCoreCtx(identityModule, runtimeRegistry));
 
   describe('initial filtering', () => {
     it('message that loads an hyperty should not be validated by policies', () => {
       let loadMessage = { id: 2, from: 'hyperty-runtime://sandbox/external', to: 'hyperty-runtime://sandbox/internal', type: 'create' };
       expect(policyEngine.context._isToVerify(loadMessage)).to.be.eql(false);
     });
+
+    /*it('message of the "update" type must have the data object\'s reporter as source', (done) => {
+      let updateMessage = { body: { source: 'hyperty://domain/hyperty-url', identity: 'identityToken' }, from: 'comm://domain/data-object-url', id: 3, to: 'comm://domain/data-object-url/changes', type: 'update' };
+      expect(policyEngine.authorise(updateMessage).then((message) => {
+        return message;
+      }), (error) => {
+        return error;
+      }).to.be.fulfilled.and.eventually.eql(updateMessage).and.notify(done);
+
+      let badUpdateMessage = { body: { source: 'hyperty://domain/hyperty-url2', identity: 'identityToken' }, from: 'comm://domain/data-object-url', id: 3, to: 'comm://domain/data-object-url/changes', type: 'update' };
+      expect(policyEngine.authorise(badUpdateMessage).then((message) => {
+        return message;
+      }), (error) => {
+        return error;
+      }).to.be.rejected.and.notify(done);
+    });*/
   });
 
   describe('identity obtention', () => {
@@ -236,10 +262,10 @@ describe('Policy Engine with Runtime Core context', () => {
     it('adds a service provider policy to the engine', () => {
       policyEngine.context.activeUserPolicy = undefined;
       policyEngine.addPolicy('SERVICE_PROVIDER', 'HypertyChat', sourcePolicy);
-      expect(policyEngine.context.serviceProviderPolicies).to.be.eql({HypertyChat: new ServiceProviderPolicy('HypertyChat', [simpleRule], [])});
-      expect(policyEngine.context.serviceProviderPolicies.HypertyChat).to.be.eql(new ServiceProviderPolicy('HypertyChat', [simpleRule], []));
-      expect(policyEngine.context.serviceProviderPolicies.HypertyChat.actions).to.be.eql([]);
-      expect(policyEngine.context.serviceProviderPolicies.HypertyChat.rules).to.be.eql([simpleRule]);
+      expect(policyEngine.context.serviceProviderPolicy).to.be.eql({HypertyChat: new ServiceProviderPolicy('HypertyChat', [simpleRule], [])});
+      expect(policyEngine.context.serviceProviderPolicy.HypertyChat).to.be.eql(new ServiceProviderPolicy('HypertyChat', [simpleRule], []));
+      expect(policyEngine.context.serviceProviderPolicy.HypertyChat.actions).to.be.eql([]);
+      expect(policyEngine.context.serviceProviderPolicy.HypertyChat.rules).to.be.eql([simpleRule]);
     });
 
     it('adds a user policy to the engine', () => {
@@ -253,27 +279,27 @@ describe('Policy Engine with Runtime Core context', () => {
     it('adds a second user policy to the engine', () => {
       policyEngine.addPolicy('USER', 'My second policy', new UserPolicy('My second policy', [simpleRule], []));
       expect(policyEngine.context.userPolicies).to.be.eql({'My policy': new UserPolicy('My policy', [dateRule], []), 'My second policy': new UserPolicy('My second policy', [simpleRule], [])});
-      expect(policyEngine.context.serviceProviderPolicies).to.be.eql({HypertyChat: new ServiceProviderPolicy('HypertyChat', [simpleRule], [])});
+      expect(policyEngine.context.serviceProviderPolicy).to.be.eql({HypertyChat: new ServiceProviderPolicy('HypertyChat', [simpleRule], [])});
       expect(policyEngine.context.activeUserPolicy).to.be.eql(undefined);
     });
 
     it('removes an existing user policy', () => {
       policyEngine.removePolicy('USER', 'My policy');
-      expect(policyEngine.context.serviceProviderPolicies).to.be.eql({HypertyChat: new ServiceProviderPolicy('HypertyChat', [simpleRule], [])});
+      expect(policyEngine.context.serviceProviderPolicy).to.be.eql({HypertyChat: new ServiceProviderPolicy('HypertyChat', [simpleRule], [])});
       expect(policyEngine.context.userPolicies).to.be.eql({'My second policy': new UserPolicy('My second policy', [simpleRule], [])});
       expect(policyEngine.context.activeUserPolicy).to.be.eql(undefined);
     });
 
     it('tries to remove a policy that does not exist', () => {
       policyEngine.removePolicy('USER', 'Vacations');
-      expect(policyEngine.context.serviceProviderPolicies).to.be.eql({HypertyChat: new ServiceProviderPolicy('HypertyChat', [simpleRule], [])});
+      expect(policyEngine.context.serviceProviderPolicy).to.be.eql({HypertyChat: new ServiceProviderPolicy('HypertyChat', [simpleRule], [])});
       expect(policyEngine.context.userPolicies).to.be.eql({'My second policy': new UserPolicy('My second policy', [simpleRule], [])});
       expect(policyEngine.context.activeUserPolicy).to.be.eql(undefined);
     });
 
     it('removes all policies', () => {
       policyEngine.removePolicy('*');
-      expect(policyEngine.context.serviceProviderPolicies).to.be.eql({});
+      expect(policyEngine.context.serviceProviderPolicy).to.be.eql({});
       expect(policyEngine.context.userPolicies).to.be.eql({});
       expect(policyEngine.context.activeUserPolicy).to.be.eql(undefined);
     });
@@ -434,7 +460,7 @@ describe('Policy Engine with Runtime Core context', () => {
   describe('data objects management', () => {
     it('rejects a subscription attempt, as the policy rejects all', (done) => {
       policyEngine.removePolicy('*');
-      policyEngine.addPolicy('USER', 'My policy', new UserPolicy('My policy', [blockAnySubscriptionRule], ['registerSubscriber']));
+      policyEngine.addPolicy('USER', 'My policy', new UserPolicy('My policy', [blockAnySubscriptionRule], []));
       policyEngine.context.activeUserPolicy = 'My policy';
       expect(policyEngine.authorise(subscribeMessage).then((message) => {
         return message;
@@ -445,7 +471,7 @@ describe('Policy Engine with Runtime Core context', () => {
 
     it('accepts a subscription attempt, as the policy accepts all', (done) => {
       policyEngine.removePolicy('*');
-      policyEngine.addPolicy('USER', 'My policy', new UserPolicy('My policy', [acceptAnySubscriptionRule], ['registerSubscriber']));
+      policyEngine.addPolicy('USER', 'My policy', new UserPolicy('My policy', [acceptAnySubscriptionRule], []));
       policyEngine.context.activeUserPolicy = 'My policy';
       expect(policyEngine.authorise(subscribeMessage).then((message) => {
         return message;
@@ -456,7 +482,7 @@ describe('Policy Engine with Runtime Core context', () => {
 
     it('accepts a subscription attempt, as the policy accepts preauthorised subscribers and is preauthorised', (done) => {
       policyEngine.removePolicy('*');
-      policyEngine.addPolicy('USER', 'My policy', new UserPolicy('My policy', [acceptPreAuthSubscriptionRule], ['registerSubscriber']));
+      policyEngine.addPolicy('USER', 'My policy', new UserPolicy('My policy', [acceptPreAuthSubscriptionRule], []));
       policyEngine.context.activeUserPolicy = 'My policy';
       expect(policyEngine.authorise(subscribeMessage).then((message) => {
         return message;
@@ -467,7 +493,7 @@ describe('Policy Engine with Runtime Core context', () => {
 
     it('rejects a subscription attempt, as the policy rejects non-preauthorised subscriber and is not preauthorised', (done) => {
       policyEngine.removePolicy('*');
-      policyEngine.addPolicy('USER', 'My policy', new UserPolicy('My policy', [blockPreAuthSubscriptionRule], ['registerSubscriber']));
+      policyEngine.addPolicy('USER', 'My policy', new UserPolicy('My policy', [blockPreAuthSubscriptionRule], []));
       policyEngine.context.activeUserPolicy = 'My policy';
       expect(policyEngine.authorise(badSubscribeMessage).then((message) => {
         return message;
@@ -480,99 +506,40 @@ describe('Policy Engine with Runtime Core context', () => {
   describe('groups management', () => {
     let groups = policyEngine.context.groups;
     for (let i in groups) {
-      policyEngine.deleteGroup(i);
+      policyEngine.context.deleteGroup(i);
     }
 
     it('creates a group', () => {
-      policyEngine.createGroup('groupA');
-      expect(policyEngine.getGroupsNames()).to.be.eql(['groupA']);
+      policyEngine.context.createGroup('groupA');
+      expect(policyEngine.context.getGroupsNames()).to.be.eql(['groupA']);
     });
 
     it('creates a second group', () => {
-      policyEngine.createGroup('groupB');
-      expect(policyEngine.getGroupsNames()).to.be.eql(['groupA', 'groupB']);
+      policyEngine.context.createGroup('groupB');
+      expect(policyEngine.context.getGroupsNames()).to.be.eql(['groupA', 'groupB']);
     });
 
     it('adds an email to a group', () => {
-      policyEngine.addToGroup('groupA', 'user1@domain');
-      expect(policyEngine.getGroup('groupA')).to.be.eql(['user1@domain']);
+      policyEngine.context.addToGroup('groupA', 'user1@domain');
+      expect(policyEngine.context.getGroup('groupA')).to.be.eql(['user1@domain']);
     });
 
     it('adds a second email to a group', () => {
-      policyEngine.addToGroup('groupA', 'user2@domain');
-      expect(policyEngine.getGroup('groupA')).to.be.eql(['user1@domain', 'user2@domain']);
+      policyEngine.context.addToGroup('groupA', 'user2@domain');
+      expect(policyEngine.context.getGroup('groupA')).to.be.eql(['user1@domain', 'user2@domain']);
     });
 
     it('removes a user from a group', () => {
-      policyEngine.removeFromGroup('groupA', 'user1@domain');
-      expect(policyEngine.getGroup('groupA')).to.be.eql(['user2@domain']);
+      policyEngine.context.removeFromGroup('groupA', 'user1@domain');
+      expect(policyEngine.context.getGroup('groupA')).to.be.eql(['user2@domain']);
     });
 
     it('deletes a group', () => {
-      policyEngine.deleteGroup('groupA');
-      expect(policyEngine.getGroup('groupA')).to.be.eql([]);
-      expect(policyEngine.getGroupsNames()).to.be.eql(['groupB']);
+      policyEngine.context.deleteGroup('groupA');
+      expect(policyEngine.context.getGroup('groupA')).to.be.eql([]);
+      expect(policyEngine.context.getGroupsNames()).to.be.eql(['groupB']);
     });
   });
   policyEngine.removePolicy('*');
-});
 
-describe('Policy Engine with Message Node context', () => {
-  let policyEngine = new PolicyEngine(new MessageNodeCtx());
-
-  it('authorises a valid message', (done) => {
-    expect(policyEngine.authorise(message)).to.be.fulfilled.and.eventually.eql(message).and.notify(done);;
-  });
-
-  /*describe('functionality: date', () => {
-    it('rejects the message as it is received in a blocked date', () => {
-      policyEngine.context.date = '01/01/2016';
-      policyEngine.removePolicy('*');
-      policyEngine.addPolicy('SERVICE_PROVIDER', 'My policy', new ServiceProviderPolicy('My policy', [dateRule], []));
-      expect(policyEngine.authorise(message)).to.be.eql(false);
-    });
-  });*/
-
-  describe('functionality: domain', () => {
-    it('rejects the message as it comes from a blocked domain', (done) => {
-      policyEngine.removePolicy('*');
-      policyEngine.addPolicy('SERVICE_PROVIDER', 'My policy', new ServiceProviderPolicy('My policy', [domainRule], []));
-      policyEngine.context.activeUserPolicy = 'My policy';
-      expect(policyEngine.authorise(messageFromBlocked)).to.be.rejected.and.notify(done);;
-    });
-
-    it('allows the message as it comes from a domain that is not blocked', (done) => {
-      expect(policyEngine.authorise(message)).to.be.fulfilled.and.eventually.eql(message).and.notify(done);;
-    });
-  });
-
-  /*describe('functionality: time of the day', () => {
-    it('rejects the message as it is received in a blocked timeslot', () => {
-      policyEngine.context.time = 1530;
-      policyEngine.removePolicy('*');
-      policyEngine.addPolicy('SERVICE_PROVIDER', 'My policy', new ServiceProviderPolicy('My policy', [timeRule], []));
-      policyEngine.context.activeUserPolicy = 'My policy';
-      expect(policyEngine.authorise(message)).to.be.eql(false);
-    });
-
-    it('accepts the message as it is received in a timeslot not blocked', () => {
-      policyEngine.context.time = 1701;
-      expect(policyEngine.authorise(message)).to.be.eql(true);
-    });
-  });
-
-  describe('functionality: weekday', () => {
-    it('rejects the message as it is received in a blocked weekday', () => {
-      policyEngine.context.weekday =  '0';
-      policyEngine.removePolicy('*');
-      policyEngine.addPolicy('SERVICE_PROVIDER', 'My policy', new ServiceProviderPolicy('My policy', [weekdayRule], []));
-      policyEngine.context.activeUserPolicy = 'My policy';
-      expect(policyEngine.authorise(message)).to.be.eql(false);
-    });
-
-    it('allows the message as it comes from a weekday that is not blocked', () => {
-      policyEngine.context.weekday = '1';
-      expect(policyEngine.authorise(message)).to.be.eql(true);
-    });
-  });*/
 });

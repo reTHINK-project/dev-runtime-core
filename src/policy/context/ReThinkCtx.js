@@ -1,6 +1,6 @@
 import {divideEmail} from '../../utils/utils';
 
-class CommonCtx {
+class ReThinkCtx {
 
   constructor() {
     this.defaultBehavior = true;
@@ -25,7 +25,6 @@ class CommonCtx {
     if (month.length === 1) {
       month = '0' + month;
     }
-
     this._date = day + '/' + month + '/' + date.getFullYear();
   }
 
@@ -63,13 +62,11 @@ class CommonCtx {
   }
 
   get source() {
-    let _this = this;
-    return _this._source;
+    return this._source;
   }
 
   get time() {
-    let _this = this;
-    return _this._time;
+    return this._time;
   }
 
   get weekday() {
@@ -78,4 +75,4 @@ class CommonCtx {
 
 }
 
-export default CommonCtx;
+export default ReThinkCtx;

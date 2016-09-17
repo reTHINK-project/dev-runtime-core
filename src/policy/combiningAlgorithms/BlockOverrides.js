@@ -1,6 +1,4 @@
-import CombiningAlgorithm from '../CombiningAlgorithm';
-
-class DenyOverrides extends CombiningAlgorithm {
+class BlockOverrides {
 
   evaluate(individualResults) {
     if (individualResults.indexOf(false) !== -1) {
@@ -16,4 +14,4 @@ class DenyOverrides extends CombiningAlgorithm {
 
 }
 
-export default DenyOverrides;
+export default BlockOverrides;
