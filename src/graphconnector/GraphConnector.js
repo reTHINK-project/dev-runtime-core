@@ -160,8 +160,8 @@ class GraphConnector {
           console.log(reply);
 
           // reply should be the JSON returned from the Global Registry REST-interface
-          let jwt = reply.body.data;
-          let unwrappedJWT = KJUR.jws.JWS.parse(reply.body.data);
+          let jwt = reply.body.Value;
+          let unwrappedJWT = KJUR.jws.JWS.parse(reply.body.Value);
           let dataEncoded = unwrappedJWT.payloadObj.data;
           let dataDecoded = base64url.decode(dataEncoded);
           let dataJSON = JSON.parse(dataDecoded);
@@ -342,6 +342,10 @@ class GraphConnector {
              rtnArray.push(this.contacts[i]);
 
            }
+         }
+         if (this.contacts[i].privateContact) {
+           // re-calculate BF1hop
+           this.calculateBloomFilter1Hop();
          }
        }
      }
@@ -711,7 +715,7 @@ class GraphConnector {
    */
   calculateBloomFilter1Hop() {
     let bf = new BloomFilter(
-      4314,   // number of bits to allocate. With 300 entries, we have a false positive rate of 0.001 %.
+      4314,     // number of bits to allocate. With 300 entries, we have a false positive rate of 0.001 %.
       10        // number of hash functions.
     );
     for (let i = 0; i < this.contacts.length; i++) {
@@ -862,19 +866,17 @@ class GraphConnector {
     let directContactsArray = [];
     let fofContactsArray = [];
     for (let i = 0; i < this.contacts.length; i++) {
-      if (this.contacts[i].guid == guid) {
+      if (this.contacts[i].guid === guid) {
         directContactsArray.push(this.contacts[i]);
       }
-      //
-      //console.log('contact is '+this.contacts[i].firstName);
-
       let bf1hop = new BloomFilter(
         4314,   // number of bits to allocate. With 30000 entries, we have a false positive rate of 0.1 %.
         10        // number of hash functions.
       );
       bf1hop =  this.contacts[i].contactsBloomFilter1Hop;
-      bf1hop = $.extend(new BloomFilter(4320, 10), bf1hop);
+
       if (bf1hop !== undefined) {
+        bf1hop = this.extend(new BloomFilter(4314, 10), bf1hop);
         if (bf1hop.test(guid)) {
           fofContactsArray.push(this.contacts[i]);
         }
@@ -884,6 +886,19 @@ class GraphConnector {
     rtnArray.push(directContactsArray, fofContactsArray);
     return rtnArray;
   }
+
+  /**
+   * Type cast one object to another equivalent to "$.extend" of jquery
+   * @param  {Object}     obj1      Object to which the other object need to be typecasted.
+   * @param  {Object}     obj2      Object needs to typecasted.
+   * @returns  {Object}   Obj2 with typecasted to obj1.
+   */
+  extend(obj1, obj2){
+    for(var key in obj2)
+        if(obj2.hasOwnProperty(key))
+            obj1[key] = obj2[key];
+    return obj1;
+}
 
   // TODO: exportGraphData(?){}
   // TODO: importGraphData(?){}

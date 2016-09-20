@@ -14,7 +14,7 @@ import bip39 from 'bip39';
 import jsrsasign from 'jsrsasign';
 import Registry from '../src/registry/Registry';
 import MessageBus from '../src/bus/MessageBus';
-import RuntimeFactory from '../resources/RuntimeFactory';
+import RuntimeFactory from './resources/RuntimeFactory';
 
 // variables
 let runtimeURL = 'hyperty-runtime://ua.pt/123';
@@ -143,7 +143,7 @@ getRegistry.then(function(registry) {
       it('check GUID when in friend-of-friend connection', function() {
 
         let bf = new BloomFilter(
-          431328,   // number of bits to allocate.
+          4314,     // number of bits to allocate. With 300 entries, we have a false positive rate of 0.001 %.
           10        // number of hash functions.
         );
 
@@ -168,7 +168,7 @@ getRegistry.then(function(registry) {
 
       it('setting bloom filter of a given contact', function() {
         let bf = new BloomFilter(
-          431328,   // number of bits to allocate.
+          4314,   // number of bits to allocate. With 300 entries, we have a false positive rate of 0.001 %.
           10        // number of hash functions.
         );
         bf.add('george');
@@ -440,7 +440,7 @@ getRegistry.then(function(registry) {
           let message = {id: msg.id, type: 'response', from: 'global://registry/', to: msg.from,
           body: { message: 'request was performed successfully',
           responseCode: 200,
-          data: jwt1,
+          Value: jwt1,
           errorCode: 0 }};
 
           graphConnector2.messageBus.postMessage(message, (reply) => {
@@ -520,7 +520,7 @@ getRegistry.then(function(registry) {
           let message = {id: msg.id, type: 'response', from: 'global://registry/', to: msg.from,
           body: { message: 'request was performed successfully',
           responseCode: 200,
-          data: jwt1,
+          Value: jwt1,
           errorCode: 0 }};
 
           graphConnector2.messageBus.postMessage(message, (reply) => {
@@ -556,7 +556,7 @@ getRegistry.then(function(registry) {
           let message = {id: 1, type: 'response', from: 'global://registry/', to: msg.from,
           body: { message: 'request was performed successfully',
           responseCode: 200,
-          data: jwt1,
+          Value: jwt1,
           errorCode: 0 }};
 
           graphConnector2.messageBus.postMessage(message, (reply) => {
