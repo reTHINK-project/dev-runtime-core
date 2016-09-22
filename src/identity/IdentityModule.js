@@ -531,7 +531,7 @@ class IdentityModule {
               _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, filteredMessage).then(hash => {
                 //console.log('result of hash ', hash);
                 let value = {iv: _this.crypto.encode(iv), value: _this.crypto.encode(encryptedValue), hash: _this.crypto.encode(hash)};
-                message.body.value = btoa(JSON.stringify(value));
+                message.body.value = JSON.stringify(value);
 
                 resolve(message);
               });
@@ -586,9 +586,9 @@ class IdentityModule {
               _this.crypto.hashHMAC(dataObjectKey.sessionKey, filteredMessage).then(hash => {
                 //console.log('hash ', hash);
 
-                let newValue = btoa(JSON.stringify({value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv), hash: _this.crypto.encode(hash)}));
+                let newValue = {value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv), hash: _this.crypto.encode(hash)};
 
-                message.body.value = newValue;
+                message.body.value = JSON.stringify(newValue);
                 resolve(message);
               });
             });
@@ -645,7 +645,7 @@ class IdentityModule {
           }
 
           if (chatKeys.authenticated && !isHandShakeType) {
-            let value = JSON.parse(atob(message.body.value));
+            let value = JSON.parse(message.body.value);
             let iv = _this.crypto.decode(value.iv);
             let data = _this.crypto.decode(value.value);
             let hash = _this.crypto.decode(value.hash);
@@ -693,7 +693,7 @@ class IdentityModule {
 
           //check if is to apply encryption
           if (dataObjectKey.isToEncrypt) {
-            let parsedValue = JSON.parse(atob(message.body.value));
+            let parsedValue = JSON.parse(message.body.value);
             let iv = _this.crypto.decode(parsedValue.iv);
             let encryptedValue = _this.crypto.decode(parsedValue.value);
             let hash = _this.crypto.decode(parsedValue.hash);
@@ -861,7 +861,7 @@ class IdentityModule {
           console.log('receiverHello');
           chatKeys.handshakeHistory.receiverHello = _this._filterMessageToHash(message);
 
-          _this.validateAssertion(message.body.identity.assertion).then((value) => {
+          _this.validateAssertion(message.body.identity.assertion, undefined, message.body.identity.idp).then((value) => {
 
             let receiverPublicKey = _this.crypto.decode(value.contents.nonce);
             let premasterSecret = _this.crypto.generatePMS();
@@ -956,7 +956,7 @@ class IdentityModule {
           console.log('senderCertificate');
           let receivedValue = JSON.parse(atob(message.body.value));
 
-          _this.validateAssertion(message.body.identity.assertion).then((value) => {
+          _this.validateAssertion(message.body.identity.assertion, undefined, message.body.identity.idp).then((value) => {
             let encryptedPMS = _this.crypto.decode(receivedValue.assymetricEncryption);
             let senderPublicKey = _this.crypto.decode(value.contents.nonce);
             chatKeys.hypertyTo.assertion = message.body.identity.assertion;
