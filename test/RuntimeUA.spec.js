@@ -16,23 +16,17 @@ import Registry from '../src/registry/Registry';
 import IdentityModule from '../src/identity/IdentityModule';
 import PolicyEngine from '../src/policy/PolicyEngine';
 import MessageBus from '../src/bus/MessageBus';
-import {RuntimeCatalogueLocal} from 'service-framework/dist/RuntimeCatalogue';
 
 import { divideURL } from '../src/utils/utils';
 
 import Loader from '../src/runtime/Loader';
 
-import RuntimeFactory from './resources/RuntimeFactory';
+import { runtimeFactory } from './resources/RuntimeFactory';
 
 // Testing runtimeUA;
 describe('RuntimeUA', function() {
 
-  // Only for testing
-  let runtimeFactory = new RuntimeFactory();
   let runtime = new RuntimeUA(runtimeFactory, 'sp.domain');
-
-  // Testing with the Local Runtime and Catalogue
-  runtime.runtimeCatalogue = new RuntimeCatalogueLocal(runtimeFactory);
 
   runtime.loader = new Loader();
   runtime.loader.registry = runtime.registry;
@@ -298,7 +292,7 @@ describe('RuntimeUA', function() {
     it('should be deployed', function(done) {
       let spDomain = 'sp.domain';
       let loadStubPromise = runtime.loadStub(spDomain);
-      let stubResolved = ['runtimeProtoStubURL', 'status'];
+      let stubResolved = ['url', 'status'];
 
       expect(loadStubPromise).to.be.fulfilled
       .and.eventually.to.have.all.keys(stubResolved)
@@ -328,11 +322,38 @@ describe('RuntimeUA', function() {
     it('should be deployed', function(done) {
       let domain = 'google.com';
       let loadIdpPromise = runtime.loadIdpProxy(domain);
-      let stubResolved = ['runtimeIdpProxyURL', 'status'];
+      let stubResolved = ['url', 'status'];
 
       expect(loadIdpPromise).to.be.fulfilled
       .and.eventually.to.have.all.keys(stubResolved)
       .and.notify(done);
+    });
+
+  });
+
+  describe('send multiple messages', function() {
+
+    it('should send read message', function(done) {
+      this.timeout(11000);
+
+      let domain = 'sp.domain';
+      let runtimeURL = 'runtime://' + domain + '/' + Math.floor((Math.random() * 10000) + 1);
+      let registy = runtimeURL + '/registry/';
+      let msg = {
+        type: 'read', from: registy, to: 'domain://registry.' + domain + '/', body: { resource: '', search:'dataObjectPerURL'}
+      };
+
+      console.log('Message:', msg);
+      runtime.messageBus.postMessage(msg,  (reply) => {
+        console.log('READ:', reply);
+
+        if (reply.body.code === 200) {
+          done();
+        } else {
+          console.log(reply.body.desc);
+        }
+      });
+
     });
 
   });

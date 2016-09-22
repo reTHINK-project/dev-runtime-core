@@ -20,7 +20,6 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 **/
-import EventEmitter from '../utils/EventEmitter';
 import AddressAllocation from './AddressAllocation';
 import ObjectAllocation from '../syncher/ObjectAllocation';
 import HypertyInstance from './HypertyInstance';
@@ -34,7 +33,7 @@ import Discovery from './Discovery';*/
 /**
 * Runtime Registry Interface
 */
-class Registry extends EventEmitter {
+class Registry {
 
   /**
   * To initialise the Runtime Registry with the RuntimeURL that will be the basis to derive the internal runtime addresses when allocating addresses to internal runtime component. In addition, the Registry domain back-end to be used to remotely register Runtime components, is also passed as input parameter.
@@ -45,8 +44,6 @@ class Registry extends EventEmitter {
   * @param  {DomainURL}           remoteRegistry        remoteRegistry
   */
   constructor(runtimeURL, appSandbox, identityModule, runtimeCatalogue, remoteRegistry) {
-
-    super();
 
     // how some functions receive the parameters for example:
     // new Registry('hyperty-runtime://sp1/123', appSandbox, idModule, remoteRegistry);
@@ -73,12 +70,28 @@ class Registry extends EventEmitter {
 
     _this.hypertiesListToRemove = {};
     _this.hypertiesList = [];
-    _this.protostubsList = {};
-    _this.idpProxyList = {};
+    let protostubsList = {};
+    let idpProxyList = {};
     _this.dataObjectList = {};
     _this.subscribedDataObjectList = {};
     _this.sandboxesList = {sandbox: {}, appSandbox: {} };
     _this.pepList = {};
+
+    let handler = {
+      get: function(target, name) {
+        return name in target ? target[name] : {};
+      },
+      set: function(target, property, value) {
+        target[property] = value;
+        return true;
+      }
+    };
+
+    _this.protostubsList = new Proxy(protostubsList, handler);
+    _this.idpProxyList = new Proxy(idpProxyList, handler);
+
+    window.protostubsList = _this.protostubsList;
+    window.idpProxyList = _this.idpProxyList;
 
     _this._domain = divideURL(_this.registryURL).domain;
     _this.sandboxesList.appSandbox[runtimeURL] = appSandbox;
@@ -175,20 +188,22 @@ class Registry extends EventEmitter {
   * @return {JSON}     dataObject     data object
   */
   discoverDataObjectPerURL(url, domain) {
+
     let _this = this;
-    let activeDomain;
-
-    if (!domain) {
-      activeDomain = _this._domain;
-    } else {
-      activeDomain = domain;
-    }
-
-    let msg = {
-      type: 'read', from: _this.registryURL, to: 'domain://registry.' + activeDomain + '/', body: { resource: url, search:'dataObjectPerURL'}
-    };
 
     return new Promise(function(resolve, reject) {
+
+      let activeDomain;
+
+      if (!domain) {
+        activeDomain = _this._domain;
+      } else {
+        activeDomain = domain;
+      }
+
+      let msg = {
+        type: 'read', from: _this.registryURL, to: 'domain://registry.' + activeDomain + '/', body: { resource: url, search:'dataObjectPerURL'}
+      };
 
       _this._messageBus.postMessage(msg, (reply) => {
 
@@ -484,15 +499,15 @@ class Registry extends EventEmitter {
   registerHyperty(sandbox, descriptorURL, descriptor) {
     let _this = this;
 
-    //assuming descriptor come in this format, the service-provider-domain url is retrieved by a split instruction
-    //hyperty-catalogue://<service-provider-domain>/<catalogue-object-identifier>
-    let domainUrl = divideURL(descriptorURL).domain;
-
-    if (domainUrl.includes('catalogue')) {
-      domainUrl = domainUrl.replace('catalogue.', '');
-    }
-
     return new Promise(function(resolve, reject) {
+
+      //assuming descriptor come in this format, the service-provider-domain url is retrieved by a split instruction
+      //hyperty-catalogue://<service-provider-domain>/<catalogue-object-identifier>
+      let domainUrl = divideURL(descriptorURL).domain;
+
+      if (domainUrl.includes('catalogue')) {
+        domainUrl = domainUrl.replace('catalogue.', '');
+      }
 
       _this.idModule.getIdentityAssertion().then(function(result) {
         let userProfile = result.userProfile;
@@ -664,12 +679,10 @@ class Registry extends EventEmitter {
 
     return new Promise(function(resolve,reject) {
 
-      let request = _this.protostubsList[url];
-
-      if (request === undefined) {
-        reject('requestUpdate couldn\'t get the ProtostubURL');
+      if (_this.protostubsList.hasOwnProperty(url)) {
+        resolve(_this.protostubsList[url]);
       } else {
-        resolve(request);
+        reject('requestUpdate couldn\'t get the ProtostubURL');
       }
     });
 
@@ -683,9 +696,10 @@ class Registry extends EventEmitter {
    */
   registerStub(sandbox, domainURL) {
     let _this = this;
-    let runtimeProtoStubURL;
 
     return new Promise(function(resolve,reject) {
+
+      let runtimeProtoStubURL;
 
       //check if messageBus is registered in registry or not
       if (_this._messageBus === undefined) {
@@ -700,7 +714,13 @@ class Registry extends EventEmitter {
       runtimeProtoStubURL = 'msg-node.' + domainURL + '/protostub/' + Math.floor((Math.random() * 10000) + 1);
 
       // TODO: Optimize this
-      _this.protostubsList[domainURL] = runtimeProtoStubURL;
+      // Proxy;
+      _this.protostubsList[domainURL] = {
+        url: runtimeProtoStubURL,
+        status: 'in-progress'
+      };
+
+      // _this.protostubsList[domainURL] = runtimeProtoStubURL;
       _this.sandboxesList.sandbox[runtimeProtoStubURL] = sandbox;
 
       // sandbox.addListener('*', function(msg) {
@@ -724,17 +744,14 @@ class Registry extends EventEmitter {
   */
   unregisterStub(hypertyRuntimeURL) {
     let _this = this;
-    let runtimeProtoStubURL;
 
-    return new Promise(function(resolve,reject) {
+    return new Promise(function(resolve, reject) {
 
-      let data = _this.protostubsList[hypertyRuntimeURL];
-
-      if (data === undefined) {
-        reject('Error on unregisterStub: Hyperty not found');
-      } else {
+      if (_this.protostubsList.hasOwnProperty(hypertyRuntimeURL)) {
         delete _this.protostubsList[hypertyRuntimeURL];
         resolve('ProtostubURL removed');
+      } else {
+        reject('Error on unregisterStub: Hyperty not found');
       }
     });
   }
@@ -747,9 +764,10 @@ class Registry extends EventEmitter {
    */
   registerIdpProxy(sandbox, domainURL) {
     let _this = this;
-    let idpProxyStubURL;
 
     return new Promise(function(resolve,reject) {
+
+      let idpProxyStubURL;
 
       //check if messageBus is registered in registry or not
       if (_this._messageBus === undefined) {
@@ -759,7 +777,11 @@ class Registry extends EventEmitter {
       idpProxyStubURL = 'domain-idp://' + domainURL + '/stub/' + Math.floor((Math.random() * 10000) + 1);
 
       // TODO: Optimize this
-      _this.idpProxyList[domainURL] = idpProxyStubURL;
+      _this.idpProxyList[domainURL] = {
+        url: idpProxyStubURL,
+        status: 'in-progress'
+      };
+
       _this.sandboxesList.sandbox[idpProxyStubURL] = sandbox;
 
       // sandbox.addListener('*', function(msg) {
@@ -785,14 +807,12 @@ class Registry extends EventEmitter {
     if (!url) throw new Error('Parameter url needed');
     let _this = this;
 
-    return new Promise(function(resolve,reject) {
+    return new Promise(function(resolve, reject) {
 
-      let request = _this.idpProxyList[url];
-
-      if (request === undefined) {
-        reject('requestUpdate couldn\'t get the idpProxyURL');
+      if (_this.idpProxyList.hasOwnProperty(url)) {
+        resolve(_this.idpProxyList[url]);
       } else {
-        resolve(request);
+        reject('requestUpdate couldn\'t get the idpProxyURL');
       }
     });
 
@@ -897,18 +917,18 @@ class Registry extends EventEmitter {
     console.log('resolve ' + url);
     let _this = this;
 
-    //split the url to find the domainURL. deals with the url for example as:
-    //"hyperty-runtime://sp1/protostub/123",
-    let dividedURL = divideURL(url);
-    let domainUrl = dividedURL.domain;
-    let type = dividedURL.type;
-
-    // resolve the domain protostub in case of a message to global registry
-    if (url.includes('global://registry')) {
-      domainUrl = _this._domain;
-    }
-
     return new Promise((resolve, reject) => {
+
+      //split the url to find the domainURL. deals with the url for example as:
+      //"hyperty-runtime://sp1/protostub/123",
+      let dividedURL = divideURL(url);
+      let domainUrl = dividedURL.domain;
+      let type = dividedURL.type;
+
+      // resolve the domain protostub in case of a message to global registry
+      if (url.includes('global://registry')) {
+        domainUrl = _this._domain;
+      }
 
       if (!domainUrl.indexOf('msg-node.') || !domainUrl.indexOf('registry.')) {
         domainUrl = domainUrl.substring(domainUrl.indexOf('.') + 1);
@@ -916,26 +936,14 @@ class Registry extends EventEmitter {
 
       let request;
       if (type === 'domain-idp') {
-        request  = _this.idpProxyList[domainUrl];
+        request  = _this.idpProxyList.hasOwnProperty(domainUrl) ? _this.idpProxyList[domainUrl] : false;
       } else {
-        request  = _this.protostubsList[domainUrl];
+        request  = _this.protostubsList.hasOwnProperty(domainUrl) ? _this.protostubsList[domainUrl] : false;
       }
 
-      // _this.addEventListener('runtime:stubLoaded', function(domainUrl) {
-      //   request  = _this.protostubsList[domainUrl];
-      //   console.info('Resolved Protostub: ', request);
-      //   resolve(request);
-      // });
-      //
-      // _this.addEventListener('runtime:idpProxyLoaded', function(domainUrl) {
-      //   request  = _this.idpProxyList[domainUrl];
-      //   console.info('Resolved IDPProxy: ', request);
-      //   resolve(request);
-      // });
-
-      if (request !== undefined) {
-        console.info('Resolved: ', request);
-        resolve(request);
+      if (request) {
+        console.info('Resolved: ', request.url);
+        resolve(request.url);
       } else {
         if (type === 'domain-idp') {
           // _this.trigger('runtime:loadIdpProxy', domainUrl);
@@ -943,7 +951,8 @@ class Registry extends EventEmitter {
           _this._loader.loadIdpProxy(domainUrl).then((result) => {
             request  = _this.idpProxyList[domainUrl];
             console.info('Resolved IDPProxy: ', request, result);
-            resolve(request);
+            _this.idpProxyList[domainUrl].status = 'deployed';
+            resolve(request.url);
           }).catch((reason) => {
             console.error('Error resolving IDPProxy: ', reason);
             reject(reason);
@@ -955,7 +964,8 @@ class Registry extends EventEmitter {
           _this._loader.loadStub(domainUrl).then((result) => {
             request  = _this.protostubsList[domainUrl];
             console.info('Resolved Protostub: ', request, result);
-            resolve(request);
+            _this.protostubsList[domainUrl].status = 'deployed';
+            resolve(request.url);
           }).catch((reason) => {
             console.error('Error resolving Protostub: ', reason);
             reject(reason);
