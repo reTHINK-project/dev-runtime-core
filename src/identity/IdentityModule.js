@@ -50,6 +50,7 @@ class IdentityModule {
 
     //to store items with this format: {identity: identityURL, token: tokenID}
     _this.identities = [];
+    _this.identitiesInfo = [];
     let newIdentity = new Identity('guid','HUMAN');
     _this.identity = newIdentity;
     _this.crypto = new Crypto();
@@ -70,31 +71,6 @@ class IdentityModule {
     // TODO improve later, this exists because the crypto lib uses browser cryptographic methods
     //_this.isToUseEncryption = (window) ? true : false;
 
-  }
-
-  identityRequestToGUI(identities) {
-    let _this = this;
-
-    return new Promise(function(resolve,reject) {
-
-      let message = {type:'create', to: _this._guiURL, from: _this._idmURL, body: {value: identities}};
-
-      let id = _this._messageBus.postMessage(message);
-
-      //add listener without timout
-      _this._messageBus.addResponseListener(_this._idmURL, id, msg => {
-        _this._messageBus.removeResponseListener(_this._idmURL, id);
-
-        if (msg.body.code === 200) {
-          let selectedIdentity = msg.body.value;
-
-          console.log('selectedIdentity: ', selectedIdentity.identity);
-          resolve(selectedIdentity);
-        } else {
-          reject('error on requesting an identity to the GUI');
-        }
-      });
-    });
   }
 
   /**
@@ -292,6 +268,39 @@ class IdentityModule {
   }
 
   /**
+  * Function that sends a request to the GUI using messages. Sends all identities registered and
+  * the Idps supported, and return the identity/idp received by the GUI
+  * @param {Array<identity>}  identities      list of identitiies
+  * @param {Array<String>}    idps            list of idps to authenticate
+  * @return {Promise}         returns a chosen identity or idp
+  */
+  requestIdentityToGUI(identities, idps) {
+    let _this = this;
+
+    return new Promise(function(resolve,reject) {
+
+      let message = {type:'create', to: _this._guiURL, from: _this._idmURL,
+                    body: {value: {identities: identities, idps: idps}}};
+
+      let id = _this._messageBus.postMessage(message);
+
+      //add listener without timout
+      _this._messageBus.addResponseListener(_this._idmURL, id, msg => {
+        _this._messageBus.removeResponseListener(_this._idmURL, id);
+
+        if (msg.body.code === 200) {
+          let selectedIdentity = msg.body;
+
+          console.log('selectedIdentity: ', selectedIdentity.value);
+          resolve(selectedIdentity);
+        } else {
+          reject('error on requesting an identity to the GUI');
+        }
+      });
+    });
+  }
+
+  /**
   * Function that fetch an identityAssertion from a user.
   *
   * @return {IdAssertion}              IdAssertion
@@ -301,43 +310,57 @@ class IdentityModule {
 
     return new Promise(function(resolve,reject) {
 
-      if (_this.currentIdentity !== undefined) {
-        //TODO verify whether the token is still valid or not.
-        // should be needed to make further requests, to obtain a valid token
-        return resolve(_this.currentIdentity);
-      } else {
+      //CHECK whether is browser environment or nodejs
+      //if it is browser, then create a fake identity
 
-        //CHECK whether is browser environment or nodejs
-        //if it is browser, then create a fake identity
+      try {
+        if (window) {
 
-        try {
-          if (window) {
+          let identities = _this.identitiesInfo;
+          let idps = ['google.com', 'microsoft.com'];
 
-            let publicKey;
-            let userkeyPair;
+          _this.requestIdentityToGUI(identities, idps).then(value => {
 
-            //generates the RSA key pair
-            _this.crypto.generateRSAKeyPair().then(function(keyPair) {
+            if (value.type === 'identity') {
+              resolve(value.value);
+            } else if (value.type === 'idp') {
 
-              publicKey = btoa(keyPair.public);
-              userkeyPair = keyPair;
-              return _this.generateAssertion(publicKey, origin, '', userkeyPair, idpDomain);
+              let publicKey;
+              let userkeyPair;
 
-            }).then(function(url) {
-              return _this.generateAssertion(publicKey, origin, url, userkeyPair, idpDomain);
+              //generates the RSA key pair
+              _this.crypto.generateRSAKeyPair().then(function(keyPair) {
 
-            }).then(function(value) {
-              if (value) {
-                resolve(value);
-              } else {
-                reject('Error on obtaining Identity');
-              }
-            }).catch(function(err) {
-              console.log(err);
-              reject(err);
-            });
-          }
-        } catch (error) {
+                publicKey = btoa(keyPair.public);
+                userkeyPair = keyPair;
+                return _this.generateAssertion(publicKey, origin, '', userkeyPair, value.value);
+
+              }).then(function(url) {
+                return _this.generateAssertion(publicKey, origin, url, userkeyPair, value.value);
+
+              }).then(function(value) {
+                if (value) {
+                  resolve(value);
+                } else {
+                  reject('Error on obtaining Identity');
+                }
+              }).catch(function(err) {
+                console.log(err);
+                reject(err);
+              });
+            } else {
+              reject('error on GUI received message.')
+            }
+          });
+
+        }
+      } catch (error) {
+
+        if (_this.currentIdentity !== undefined) {
+          //TODO verify whether the token is still valid or not.
+          // should be needed to make further requests, to obtain a valid token
+          return resolve(_this.currentIdentity);
+        } else {
           console.log('getIdentityAssertion for nodejs');
           let randomNumber = Math.floor((Math.random() * 10000) + 1);
           let identityBundle = {
@@ -441,6 +464,7 @@ class IdentityModule {
             result.keyPair = keyPair;
 
             _this.currentIdentity = newIdentity;
+            _this.identitiesInfo.push(newIdentity);
             _this.identities.push(result);
             resolve(newIdentity);
 
