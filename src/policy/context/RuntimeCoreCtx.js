@@ -22,6 +22,10 @@ class RuntimeCoreCtx extends CommonCtx {
     return this._dataObjectScheme;
   }
 
+  get resourceType() {
+    return this._resourceType;
+  }
+
   get subscription() {
     return this._subscription;
   }
@@ -35,16 +39,23 @@ class RuntimeCoreCtx extends CommonCtx {
     }
   }
 
+  set resourceType(params) {
+    let message = params.message;
+    if (message.body.value !== undefined) {
+      this._resourceType = message.body.value.resourceType;
+    }
+  }
+
   set subscription(params) {
     this._subscription = params.message.body.subscriber;
   }
 
   authorise(message) {
     let _this = this;
+    console.log('--- Policy Engine ---');
+    console.log(message);
 
     return new Promise((resolve, reject) => {
-      console.log('--- Policy Engine ---');
-      console.log(message);
       message.body = message.body || {};
       let result;
       let isToVerify = _this._isToVerify(message);
@@ -60,7 +71,7 @@ class RuntimeCoreCtx extends CommonCtx {
               };
               result = _this.policyEngine.pdp.applyPolicies(message, policies);
               _this.policyEngine.pep.enforcePolicies(message, policies, result);
-              if (result === 'Not Applicable') {
+              if (result === undefined || result === 'Not Applicable') {
                 result = _this.defaultBehavior;
                 message.body.auth = false;
               }
@@ -85,7 +96,7 @@ class RuntimeCoreCtx extends CommonCtx {
             };
             result = _this.policyEngine.pdp.applyPolicies(message, policies);
             _this.policyEngine.pep.enforcePolicies(message, policies, result);
-            if (result === 'Not Applicable') {
+            if (result === undefined || result === 'Not Applicable') {
               result = _this.defaultBehavior;
               message.body.auth = false;
             }
@@ -113,7 +124,7 @@ class RuntimeCoreCtx extends CommonCtx {
               };
               result = _this.policyEngine.pdp.applyPolicies(message, policies);
               _this.policyEngine.pep.enforcePolicies(message, policies, result);
-              if (result === 'Not Applicable') {
+              if (result === undefined || result === 'Not Applicable') {
                 result = _this.defaultBehavior;
                 message.body.auth = false;
               }
@@ -137,7 +148,7 @@ class RuntimeCoreCtx extends CommonCtx {
             };
             result = _this.policyEngine.pdp.applyPolicies(message, policies);
             _this.policyEngine.pep.enforcePolicies(message, policies, result);
-            if (result === 'Not Applicable') {
+            if (result === undefined || result === 'Not Applicable') {
               result = _this.defaultBehavior;
               message.body.auth = false;
             }
@@ -277,7 +288,7 @@ class RuntimeCoreCtx extends CommonCtx {
   }
 
   _isToVerify(message) {
-    let schemasToIgnore = ['domain-idp', 'hyperty-runtime', 'runtime', 'domain'];
+    let schemasToIgnore = ['domain', 'domain-idp', 'global', 'hyperty-runtime', 'runtime'];
     let splitFrom = (message.from).split('://');
     let fromSchema = splitFrom[0];
     let splitTo = (message.to).split('://');
