@@ -1,5 +1,5 @@
 
-import {divideURL, getUserURLFromEmail, getUserEmailFromURL, isDataObjectURL} from '../utils/utils.js';
+import {divideURL, getUserURLFromEmail, getUserEmailFromURL, isDataObjectURL, convertToUserURL} from '../utils/utils.js';
 import Identity from './Identity';
 import Crypto from './Crypto';
 import GuiFake from './GuiFake';
@@ -50,7 +50,7 @@ class IdentityModule {
 
     //to store items with this format: {identity: identityURL, token: tokenID}
     _this.identities = [];
-    _this.identitiesInfo = [];
+    _this.emailsList = [];
     let newIdentity = new Identity('guid','HUMAN');
     _this.identity = newIdentity;
     _this.crypto = new Crypto();
@@ -66,6 +66,9 @@ class IdentityModule {
 
     //failsafe to enable/disable all the criptographic functions
     _this.isToUseEncryption = true;
+
+    // variable to know if the GUI is deployed to choose the identity. if the real GUI is not deployed, a fake gui is deployed instead.
+    _this.guiDeployed = false;
 
     // verification of nodeJS, and in case it is nodeJS then disable encryption
     // TODO improve later, this exists because the crypto lib uses browser cryptographic methods
@@ -90,9 +93,6 @@ class IdentityModule {
     let _this = this;
     _this._messageBus = messageBus;
 
-    //TODO remove later with the proper GUI message listener
-    let guiFake = new GuiFake(_this._guiURL, _this._messageBus);
-    _this.guiFake = guiFake;
   }
 
   /**
@@ -142,6 +142,11 @@ class IdentityModule {
     throw 'identity not found';
   }
 
+  deployGUI() {
+    let _this = this;
+    _this.guiDeployed = true;
+  }
+
   getIdentityOfHyperty(hypertyURL) {
     let _this = this;
 
@@ -177,6 +182,14 @@ class IdentityModule {
         }
       }
     });
+  }
+
+  getIdentitiesToChoose() {
+    let _this = this;
+    let identities = _this.emailsList;
+    let idps = ['google.com', 'microsoft.com'];
+
+    return {identities: identities, idps: idps};
   }
 
   /**
@@ -218,15 +231,31 @@ class IdentityModule {
   }
 
   /**
-  * Function to remove the an identity from the Identities array
-  * @param {String}    userURL      userURL
+  * Function to remove an identity from the Identities array
+  * @param {String}    userID      userID
   */
-  deleteIdentity(userURL) {
+  deleteIdentity(userID) {
     let _this = this;
+
+    let userURL = convertToUserURL(userID);
 
     for (let identity in _this.identities) {
       if (_this.identities[identity].identity === userURL) {
         _this.identities.splice(identity, 1);
+      }
+    }
+  }
+
+  /**
+  * Function to unregister an identity from the emailsList array and not show in to the GUI
+  * @param {String}    email      email
+  */
+  unregisterIdentity(email) {
+    let _this = this;
+
+    for (let e in _this.emailsList) {
+      if (_this.emailsList[e] === email) {
+        _this.emailsList.splice(e, 1);
       }
     }
   }
@@ -279,6 +308,14 @@ class IdentityModule {
 
     return new Promise(function(resolve,reject) {
 
+      //condition to check if the real GUI is deployed. If not, deploys a fake gui
+      if (_this.guiDeployed === false) {
+
+        let guiFake = new GuiFake(_this._guiURL, _this._messageBus);
+        _this.guiFake = guiFake;
+        _this.guiDeployed = true;
+      }
+
       let message = {type:'create', to: _this._guiURL, from: _this._idmURL,
                     body: {value: {identities: identities, idps: idps}}};
 
@@ -316,40 +353,31 @@ class IdentityModule {
       try {
         if (window) {
 
-          let identities = _this.identitiesInfo;
-          let idps = ['google.com', 'microsoft.com'];
+          let identitiesInfo = _this.getIdentitiesToChoose();
 
-          _this.requestIdentityToGUI(identities, idps).then(value => {
+          _this.requestIdentityToGUI(identitiesInfo.identities, identitiesInfo.idps).then(value => {
 
             if (value.type === 'identity') {
-              resolve(value.value);
+
+              let chosenID = getUserURLFromEmail(value.value);
+
+              // returns the identity info from the chosen id
+              for (let i in _this.identities) {
+                if (_this.identities[i].identity === chosenID) {
+                  return resolve(_this.identities[i].messageInfo);
+                }
+              }
+              reject('no identity was found .');
             } else if (value.type === 'idp') {
 
-              let publicKey;
-              let userkeyPair;
-
-              //generates the RSA key pair
-              _this.crypto.generateRSAKeyPair().then(function(keyPair) {
-
-                publicKey = btoa(keyPair.public);
-                userkeyPair = keyPair;
-                return _this.generateAssertion(publicKey, origin, '', userkeyPair, value.value);
-
-              }).then(function(url) {
-                return _this.generateAssertion(publicKey, origin, url, userkeyPair, value.value);
-
-              }).then(function(value) {
-                if (value) {
-                  resolve(value);
-                } else {
-                  reject('Error on obtaining Identity');
-                }
-              }).catch(function(err) {
-                console.log(err);
+              _this.callGenerateMethods(value.value, origin).then((value) => {
+                resolve(value);
+              }, (err) => {
                 reject(err);
               });
+
             } else {
-              reject('error on GUI received message.')
+              reject('error on GUI received message.');
             }
           });
 
@@ -377,6 +405,37 @@ class IdentityModule {
           return resolve(identityBundle);
         }
       }
+    });
+  }
+
+  callGenerateMethods(idp, origin) {
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+
+      let publicKey;
+      let userkeyPair;
+
+      //generates the RSA key pair
+      _this.crypto.generateRSAKeyPair().then(function(keyPair) {
+
+        publicKey = btoa(keyPair.public);
+        userkeyPair = keyPair;
+        return _this.generateAssertion(publicKey, origin, '', userkeyPair, idp);
+
+      }).then(function(url) {
+        return _this.generateAssertion(publicKey, origin, url, userkeyPair, idp);
+
+      }).then(function(value) {
+        if (value) {
+          resolve(value);
+        } else {
+          reject('Error on obtaining Identity');
+        }
+      }).catch(function(err) {
+        console.log(err);
+        reject(err);
+      });
     });
   }
 
@@ -464,9 +523,38 @@ class IdentityModule {
             result.keyPair = keyPair;
 
             _this.currentIdentity = newIdentity;
-            _this.identitiesInfo.push(newIdentity);
-            _this.identities.push(result);
-            resolve(newIdentity);
+
+            //verify if the id already exists. If already exists then do not add to the identities list;
+            let idAlreadyExists = false;
+            let oldId;
+            for (let identity in _this.identities) {
+              if (_this.identities[identity].identity === result.identity) {
+                idAlreadyExists = true;
+                oldId = _this.identities[identity].messageInfo;
+              }
+            }
+
+            if (idAlreadyExists) {
+              resolve(oldId);
+              let exists = false;
+
+              //check if the identity exists in emailList, if not add it
+              //This is useful if an identity was previously registered but was later unregistered
+              for (let i in _this.emailsList) {
+                if (_this.emailsList[i] === idToken.email) {
+                  exists = true;
+                  break;
+                }
+              }
+              if (!exists) {
+                _this.emailsList.push(idToken.email);
+              }
+
+            } else {
+              _this.emailsList.push(idToken.email);
+              _this.identities.push(result);
+              resolve(newIdentity);
+            }
 
           }
         } else {
