@@ -1,4 +1,5 @@
 import {divideURL, emptyObject} from '../utils/utils';
+import Descriptors from './Descriptors';
 
 class Loader {
 
@@ -40,6 +41,8 @@ class Loader {
    */
   set runtimeCatalogue(value) {
     this._runtimeCatalogue = value;
+
+    this.descriptors = new Descriptors(this._runtimeURL, value);
   }
 
   /**
@@ -115,7 +118,7 @@ class Loader {
       // Probably we need to pass a factory like we do for sandboxes;
       console.info('------------------ Hyperty ------------------------');
       console.info('Get hyperty descriptor for :', hypertyDescriptorURL);
-      return this.runtimeCatalogue.getHypertyDescriptor(hypertyDescriptorURL)
+      return this.descriptors.getHypertyDescriptor(hypertyDescriptorURL)
       .then((hypertyDescriptor) => {
         // at this point, we have completed "step 2 and 3" as shown in https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md
         console.info('1: return hyperty descriptor');
@@ -328,7 +331,7 @@ class Loader {
         // we have completed step 3 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
         // we need to get ProtoStub descriptor step 4 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-        this.runtimeCatalogue.getStubDescriptor(protostubURL)
+        this.descriptors.getStubDescriptor(protostubURL)
         .then((stubDescriptor) => {
           if (haveError) return false;
           console.info('2. return the ProtoStub descriptor');
@@ -515,7 +518,7 @@ class Loader {
         // we have completed step 3 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
         // we need to get ProtoStub descriptor step 4 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-        this.runtimeCatalogue.getIdpProxyDescriptor(idpProxyURL)
+        this.descriptors.getIdpProxyDescriptor(idpProxyURL)
         .then((proxyDescriptor) => {
 
           console.info('2. Return the IDPProxy descriptor');
