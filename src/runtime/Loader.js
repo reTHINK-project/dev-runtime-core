@@ -3,6 +3,11 @@ import Descriptors from './Descriptors';
 
 class Loader {
 
+  constructor(runtimeConfiguration) {
+    if (!runtimeConfiguration) throw Error('The descriptor need to know the runtime configuration');
+    this.runtimeConfiguration = runtimeConfiguration;
+  }
+
   /**
    * Set runtime url
    * @param  {string} value runtimeURL
@@ -42,7 +47,7 @@ class Loader {
   set runtimeCatalogue(value) {
     this._runtimeCatalogue = value;
 
-    this.descriptors = new Descriptors(this._runtimeURL, value);
+    this.descriptors = new Descriptors(this._runtimeURL, value, this.runtimeConfiguration);
   }
 
   /**

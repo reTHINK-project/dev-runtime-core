@@ -149,3 +149,7 @@ export function isDataObjectURL(url) {
 
   return schemasToIgnore.indexOf(urlSchema) === -1;
 }
+
+export function getPrefix(object, key) {
+  return object.hasOwnProperty(key) && object.key ? object[key] + '.' : '';
+}

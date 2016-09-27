@@ -63,12 +63,20 @@ class RuntimeUA {
 
     let _this = this;
 
+    // Configuration object with information related with servers
+    _this.runtimeConfiguration = {
+      domain: domain,
+      cataloguePrefix: 'catalogue',
+      registryPrefix: 'registry',
+      msgNodePrefix: 'mgs-node'
+    };
+
     _this.runtimeFactory = runtimeFactory;
     _this.runtimeCatalogue = runtimeFactory.createRuntimeCatalogue();
     _this.persistenceManager = runtimeFactory.persistenceManager();
 
     // Prepare the loader to load the hyperties, protostubs and idpproxy;
-    _this.loader = new Loader();
+    _this.loader = new Loader(_this.runtimeConfiguration);
 
     // TODO: post and return registry/hypertyRuntimeInstance to and from Back-end Service
     // the response is like: runtime://sp1/123
