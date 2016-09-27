@@ -10,6 +10,8 @@ class Descriptors {
     this.runtimeConfiguration = runtimeConfiguration;
     this.runtimeURL = runtimeURL;
     this.catalogue = catalogue;
+
+    console.log('AQUI: ', this.runtimeConfiguration);
   }
 
   getHypertyDescriptor (hypertyURL) {
@@ -19,8 +21,9 @@ class Descriptors {
     let hyperty = dividedURL.identity;
 
     let prefix = getPrefix(this.runtimeConfiguration, 'cataloguePrefix');
-
-    console.log(type, domain, hyperty);
+    if (domain.includes(prefix)) {
+      prefix = '';
+    }
 
     hypertyURL = type + '://' + prefix + domain + hyperty;
 
@@ -41,8 +44,12 @@ class Descriptors {
 
     let prefix = getPrefix(this.runtimeConfiguration, 'cataloguePrefix');
 
-    stubURL = type + '://' + prefix + domain + '/.well-known/protocolstub/' + protostub;
+    if (domain.includes(prefix)) {
+      prefix = '';
+    }
 
+    stubURL = type + '://' + prefix + domain + '/.well-known/protocolstub/' + protostub;
+    console.log('Get Stub URL: ', prefix, stubURL);
     return this.catalogue.getStubDescriptor(stubURL);
   }
 
@@ -70,6 +77,9 @@ class Descriptors {
       }
 
       let prefix = getPrefix(this.runtimeConfiguration, 'cataloguePrefix');
+      if (domain.includes(prefix)) {
+        prefix = '';
+      }
 
       idpProxyURL = type + '://' + prefix + domain + '/.well-known/idp-proxy/' + idpproxy;
 
@@ -83,9 +93,14 @@ class Descriptors {
         idpproxy = domain;
         domain = originDomain;
 
+        if (domain.includes(prefix)) {
+          prefix = '';
+        }
+
         // console.log('Get an specific protostub for domain', domain, ' specific for: ', idpproxy);
         idpProxyURL = type + '://' + prefix + domain + '/.well-known/idp-proxy/' + idpproxy;
 
+        console.log('Get Proxy URL: ', prefix, idpProxyURL);
         return this.catalogue.getIdpProxyDescriptor(idpProxyURL);
       }).then((result) => {
         resolve(result);

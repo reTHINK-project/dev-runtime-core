@@ -151,5 +151,6 @@ export function isDataObjectURL(url) {
 }
 
 export function getPrefix(object, key) {
-  return object.hasOwnProperty(key) && object.key ? object[key] + '.' : '';
+  console.log('Object:', object[key]);
+  return object.hasOwnProperty(key) && object[key] ? object[key] + '.' : '';
 }
