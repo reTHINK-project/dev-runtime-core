@@ -10,8 +10,6 @@ class Descriptors {
     this.runtimeConfiguration = runtimeConfiguration;
     this.runtimeURL = runtimeURL;
     this.catalogue = catalogue;
-
-    console.log('AQUI: ', this.runtimeConfiguration);
   }
 
   getHypertyDescriptor (hypertyURL) {
