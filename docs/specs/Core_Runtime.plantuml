@@ -31,8 +31,6 @@ node "" as core1 {
  node "Graph\nConnector" as Graph
 }
 
-node "Pesistence\nManager" as Storage {
-}
 
  node "Runtime\nUser Agent" as RunUA {
 	node "Catalogue Runtime" as RepUA
@@ -40,9 +38,6 @@ node "Pesistence\nManager" as Storage {
 
 
 
- SPSand -[hidden]down-> Storage : store
-
- Sync -[hidden]up-> Storage
 
  RunUA -> Reg : Register Hyperties\nand protostubs
  }
