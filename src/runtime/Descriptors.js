@@ -1,9 +1,9 @@
-import {divideURL, getPrefix} from '../utils/utils';
+import {divideURL, getConfigurationResources, buildURL} from '../utils/utils';
 
 class Descriptors {
 
   constructor(runtimeURL, catalogue, runtimeConfiguration) {
-    if (!runtimeURL) throw Error('The descriptor know the runtime url to be used');
+    if (!runtimeURL) throw Error('The descriptor need to know the runtime url to be used');
     if (!catalogue) throw Error('The descriptor needs the catalogue instance');
     if (!runtimeConfiguration) throw Error('The descriptor needs the runtime configuration');
 
@@ -13,25 +13,11 @@ class Descriptors {
   }
 
   getHypertyDescriptor (hypertyURL) {
-    let dividedURL = divideURL(hypertyURL);
-    let type = dividedURL.type;
-    let domain = dividedURL.domain;
-    let hyperty = dividedURL.identity;
-
-    let prefix = getPrefix(this.runtimeConfiguration, 'cataloguePrefix');
-    if (domain.includes(prefix)) {
-      prefix = '';
-    }
-
-    hypertyURL = type + '://' + prefix + domain + hyperty;
-
     return this.catalogue.getHypertyDescriptor(hypertyURL);
   }
 
   getStubDescriptor (stubURL) {
     let dividedURL = divideURL(stubURL);
-    let type = dividedURL.type;
-    let domain = dividedURL.domain;
     let protostub = dividedURL.identity;
 
     if (!protostub) {
@@ -40,24 +26,14 @@ class Descriptors {
       protostub = protostub.substring(protostub.lastIndexOf('/') + 1);
     }
 
-    let prefix = getPrefix(this.runtimeConfiguration, 'cataloguePrefix');
-
-    if (domain.includes(prefix)) {
-      prefix = '';
-    }
-
-    stubURL = type + '://' + prefix + domain + '/.well-known/protocolstub/' + protostub;
-    console.log('Get Stub URL: ', prefix, stubURL);
+    stubURL = buildURL(this.runtimeConfiguration, 'catalogueURLs', 'protocolstub', protostub);
     return this.catalogue.getStubDescriptor(stubURL);
   }
 
   getIdpProxyDescriptor(idpProxyURL) {
-    console.log('IDP ProxyURL: ', idpProxyURL);
-
     return new Promise((resolve, reject) => {
 
       let dividedURL = divideURL(idpProxyURL);
-      let type = dividedURL.type;
       let domain = dividedURL.domain;
       let idpproxy = dividedURL.identity;
 
@@ -74,16 +50,12 @@ class Descriptors {
         idpproxy = idpproxy.substring(idpproxy.lastIndexOf('/') + 1);
       }
 
-      let prefix = getPrefix(this.runtimeConfiguration, 'cataloguePrefix');
-      if (domain.includes(prefix)) {
-        prefix = '';
-      }
+      let resource = getConfigurationResources(this.runtimeConfiguration, 'catalogueURLs', 'idpProxy');
 
-      idpProxyURL = type + '://' + prefix + domain + '/.well-known/idp-proxy/' + idpproxy;
-
+      idpProxyURL = resource.prefix + domain + resource.suffix + idpproxy;
+      console.log('Load Idp Proxy for domain, ' + domain + ' : ', idpProxyURL);
       return this.catalogue.getIdpProxyDescriptor(idpProxyURL).then((result) => {
 
-        // console.log('result: ', result);
         resolve(result);
 
       }).catch(() => {
@@ -91,14 +63,9 @@ class Descriptors {
         idpproxy = domain;
         domain = originDomain;
 
-        if (domain.includes(prefix)) {
-          prefix = '';
-        }
+        idpProxyURL = buildURL(this.runtimeConfiguration, 'catalogueURLs', 'idpProxy', idpproxy);
 
-        // console.log('Get an specific protostub for domain', domain, ' specific for: ', idpproxy);
-        idpProxyURL = type + '://' + prefix + domain + '/.well-known/idp-proxy/' + idpproxy;
-
-        console.log('Get Proxy URL: ', prefix, idpProxyURL);
+        console.log('Load Idp Proxy for domain, ' + domain + ' : ', idpProxyURL);
         return this.catalogue.getIdpProxyDescriptor(idpProxyURL);
       }).then((result) => {
         resolve(result);

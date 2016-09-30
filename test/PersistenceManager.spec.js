@@ -1,11 +1,13 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-import persistenceManager from 'service-framework/dist/PersistenceManager';
+import PersistenceManager from 'service-framework/dist/PersistenceManager';
 
 let expect = chai.expect;
 let localStorage = window.localStorage
 
-describe('PersistenceManager', function(){
+describe('PersistenceManager', function() {
+  let persistenceManager = new PersistenceManager(localStorage);
+
     describe('set', function(){
         it('should set the value for a given key-version tuple', function(){
             persistenceManager.set('key', 'v1.0.0', {})

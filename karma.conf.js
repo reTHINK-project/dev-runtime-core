@@ -16,7 +16,7 @@ module.exports = function(config) {
       'node_modules/object.observe/dist/object-observe.js',
       'node_modules/array.observe/array-observe.js',
       'src/**/*.js',
-      'test/**/RuntimeUA.spec.js'
+      'test/**/*.spec.js'
     ],
 
     // Define the root
@@ -60,11 +60,11 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['Chrome'],
+    browsers: ['PhantomJS'],
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
-    singleRun: false
+    singleRun: true
   });
 
 };

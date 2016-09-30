@@ -30,7 +30,7 @@ import PolicyEngine from '../policy/PolicyEngine';
 import MessageBus from '../bus/MessageBus';
 
 import Loader from './Loader';
-
+import { runtimeConfiguration } from './runtimeConfiguration';
 // import GraphConnector from '../graphconnector/GraphConnector';
 
 import SyncherManager from '../syncher/SyncherManager';
@@ -64,12 +64,7 @@ class RuntimeUA {
     let _this = this;
 
     // Configuration object with information related with servers
-    _this.runtimeConfiguration = {
-      domain: domain,
-      cataloguePrefix: 'catalogue',
-      registryPrefix: 'registry',
-      msgNodePrefix: 'mgs-node'
-    };
+    _this.runtimeConfiguration = Object.assign({domain: domain}, runtimeConfiguration);
 
     _this.runtimeFactory = runtimeFactory;
     _this.runtimeCatalogue = runtimeFactory.createRuntimeCatalogue();

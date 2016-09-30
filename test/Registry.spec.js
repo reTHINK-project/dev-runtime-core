@@ -11,13 +11,11 @@ import Registry from '../src/registry/Registry';
 import Sandbox from '../src/sandbox/Sandbox';
 import MessageBus from '../src/bus/MessageBus';
 
-import RuntimeFactory from './resources/RuntimeFactory';
+import { runtimeFactory } from './resources/runtimeFactory';
 
 // Testing Registry
-
 let runtimeURL = 'hyperty-runtime://ua.pt/123';
 
-let runtimeFactory = new RuntimeFactory();
 let appSandbox = runtimeFactory.createAppSandbox();
 let sandboxDummy = {sandbox: 'sandbox', type: 'normal'};
 let protostubURL = 'url';
@@ -88,10 +86,15 @@ getRegistry.then(function(registry) {
       it('should discover a ProtocolStub', function(done) {
         let url = 'ua.pt';
 
-        expect(registry.discoverProtostub(url).then(function(response) {
-          protostubURL = response;
-          return response;
-        })).to.be.fulfilled.and.eventually.to.contain('msg-node.ua.pt/protostub/').and.notify(done);
+        expect(registry.discoverProtostub(url).then((result) => {
+          expect(result).to.have.property('url').include('msg-node.ua.pt/protostub/');
+          expect(result).to.have.property('status', 'deployed');
+          protostubURL = result.url;
+          return result;
+        }))
+        .and.eventually.to.have.all.keys('url', 'status')
+        .and.to.be.fulfilled
+        .and.notify(done);
       });
     });
 
@@ -166,9 +169,10 @@ getRegistry.then(function(registry) {
 
       it('should get a sandbox from a specific protostubURL', function(done) {
 
-        expect(registry.getSandbox(protostubURL).then(function(response) {
-          return response;
-        })).to.be.fulfilled.and.eventually.to.be.eql(sandboxDummy).and.notify(done);
+        expect(registry.getSandbox(protostubURL))
+        .to.be.fulfilled
+        .and.eventually.to.be.eql(sandboxDummy)
+        .and.notify(done);
       });
 
       it('should get a sandbox from a protoStub URL containing the domain', function(done) {

@@ -6,6 +6,7 @@ chai.config.truncateThreshold = 0;
 let expect = chai.expect;
 chai.use(chaiAsPromised);
 
+import { runtimeFactory } from './resources/runtimeFactory';
 import AdvancedCondition from '../src/policy/conditions/AdvancedCondition';
 import Condition from '../src/policy/conditions/Condition';
 import DenyOverrides from '../src/policy/combiningAlgorithms/DenyOverrides';
@@ -65,7 +66,8 @@ let allowedSubscribeMessage = { body: { auth: true, identity: { userProfile: { u
 let badSubscribeMessage = { body: { identity: { userProfile: { username: 'user@domain' } }, subscriber: 'hyperty://domain/not-preauthorised-hyperty-instance' }, id: 1, type: 'subscribe', from: 'runtime://localhost/7600/sm', to: 'comm://domain/data-object-url/subscription' };
 
 /********** TESTS **********/
-let runtimeCtx = new RuntimeCoreCtx();
+let persistenceManager = runtimeFactory.persistenceManager();
+let runtimeCtx = new RuntimeCoreCtx({}, {}, persistenceManager);
 
 describe('Policies management', () => {
   describe('conditions management', () => {
@@ -203,7 +205,7 @@ describe('Policy Engine with Runtime Core context', () => {
     }
   };
 
-  let policyEngine = new PolicyEngine(new RuntimeCoreCtx(identityModule, runtimeRegistry));
+  let policyEngine = new PolicyEngine(new RuntimeCoreCtx(identityModule, runtimeRegistry, persistenceManager));
 
   describe('initial filtering', () => {
     it('message that loads an hyperty should not be validated by policies', () => {

@@ -1,3 +1,4 @@
+import { runtimeFactory } from './resources/runtimeFactory';
 import {Syncher, DataObjectReporter, DataObjectObserver} from 'service-framework';
 import SyncherManager from '../src/syncher/SyncherManager';
 import MessageBus from '../src/bus/MessageBus';
@@ -14,6 +15,8 @@ let expect = chai.expect;
 chai.use(chaiAsPromised);
 
 describe('SyncherManager', function() {
+  let persistenceManager = runtimeFactory.persistenceManager();
+
   let schemaURL = 'schema://fake-schema-url';
   let runtimeURL = 'hyperty-runtime://fake-runtime';
 
@@ -122,7 +125,7 @@ describe('SyncherManager', function() {
     }
   };
 
-  let policyEngine = new PolicyEngine(new RuntimeCoreCtx(identityModule, runtimeRegistry));
+  let policyEngine = new PolicyEngine(new RuntimeCoreCtx(identityModule, runtimeRegistry, persistenceManager));
 
   let handlers = [
 

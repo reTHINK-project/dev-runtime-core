@@ -19,21 +19,13 @@ import MessageBus from '../src/bus/MessageBus';
 
 import { divideURL } from '../src/utils/utils';
 
-import Loader from '../src/runtime/Loader';
-
-import { runtimeFactory } from './resources/RuntimeFactory';
+import { runtimeFactory } from './resources/runtimeFactory';
+import { runtimeConfiguration } from './resources/runtimeConfiguration';
 
 // Testing runtimeUA;
 describe('RuntimeUA', function() {
 
-  let runtime = new RuntimeUA(runtimeFactory, 'sp.domain');
-
-  runtime.loader = new Loader();
-  runtime.loader.registry = runtime.registry;
-  runtime.loader.runtimeURL = runtime.runtimeURL;
-  runtime.loader.messageBus = runtime.messageBus;
-  runtime.loader.runtimeCatalogue = runtime.runtimeCatalogue;
-  runtime.loader.runtimeFactory = runtime.runtimeFactory;
+  let runtime = new RuntimeUA(runtimeFactory, runtimeConfiguration);
 
   before(function() {
 
@@ -92,56 +84,37 @@ describe('RuntimeUA', function() {
       }
     };
 
-    sinon.stub(runtime.runtimeCatalogue, '_createHyperty', function(_this, rawHyperty) {
-      console.log('getHypertyDescriptor: ', _this);
-      return rawHyperty;
-    });
+    let IdpProxies = {
+      default: {
+        cguid: '1',
+        type: '0',
+        version: '0.1',
+        description: 'description of VertxProtoStub',
+        objectName: 'VertxProtoStub',
+        sourcePackageURL: '/sourcePackage',
+        sourcePackage: {
+          sourceCode: '',
+          sourceCodeClassname: 'VertxProtoStub',
+          encoding: 'Base64',
+          signature: ''
+        },
+        language: 'Javascript ECMA5',
+        signature: '',
+        messageSchemas: '',
+        configuration: {
+          url: 'wss://127.0.0.1:9090/ws'
+        },
+        constraints: '',
+        hypertyCapabilities: '',
+        protocolCapabilities: '',
+        policies: '',
+        dataObjects: []
+      }
+    };
 
-    sinon.stub(runtime.runtimeCatalogue, '_createStub', function(_this, rawHyperty) {
-      return rawHyperty;
-    });
-
-    sinon.stub(runtime.runtimeCatalogue, '_createRuntimeDescriptor', function(_this, rawHyperty) {
-      return rawHyperty;
-    });
-
-    sinon.stub(runtime.runtimeCatalogue, '_createDataSchema', function(_this, rawHyperty) {
-      return rawHyperty;
-    });
-
-    sinon.stub(runtime.runtimeCatalogue, '_createIdpProxy', function(_this, rawHyperty) {
-      return rawHyperty;
-    });
-
-    sinon.stub(runtime.runtimeCatalogue, 'getHypertyDescriptor', function(hypertyURL) {
-      let _this = this;
-      return _this.getDescriptor(hypertyURL, runtime.runtimeCatalogue._createHyperty);
-    });
-
-    sinon.stub(runtime.runtimeCatalogue, 'getStubDescriptor', function(stubURL) {
-      let _this = this;
-      return _this.getDescriptor(stubURL, runtime.runtimeCatalogue._createStub);
-    });
-
-    sinon.stub(runtime.runtimeCatalogue, 'getRuntimeDescriptor', function(runtimeURL) {
-      let _this = this;
-      return _this.getDescriptor(runtimeURL, runtime.runtimeCatalogue._createRuntimeDescriptor);
-    });
-
-    sinon.stub(runtime.runtimeCatalogue, 'getDataSchemaDescriptor', function(dataSchemaURL) {
-      let _this = this;
-      return _this.getDescriptor(dataSchemaURL, runtime.runtimeCatalogue._createDataSchema);
-    });
-
-    sinon.stub(runtime.runtimeCatalogue, 'getIdpProxyDescriptor', function(idpProxyURL) {
-      let _this = this;
-      return _this.getDescriptor(idpProxyURL, runtime.runtimeCatalogue._createIdpProxy);
-    });
-
-    sinon.stub(runtime.runtimeCatalogue, 'getDescriptor', (url, createFunc) => {
+    let getDescriptor = (url) => {
 
       return new Promise(function(resolve, reject) {
-        console.log(url, createFunc);
 
         let dividedURL = divideURL(url);
         let identity = dividedURL.identity;
@@ -167,18 +140,30 @@ describe('RuntimeUA', function() {
           } catch (e) {
             reject(e);
           }
+        } else if (url.includes('idp-proxy')) {
+          try {
+            result = IdpProxies[identity];
+          } catch (e) {
+            reject(e);
+          }
         }
 
         console.log(result);
-
-        // console.log('creating descriptor based on: ', result);
-        let descriptor = createFunc(runtime.runtimeCatalogue, result);
-
-        // persistenceManager.set(descriptorURL, descriptor.version, result);
-        // console.log('created descriptor object:', hyperty);
-        resolve(descriptor);
+        resolve(result);
 
       });
+    };
+
+    sinon.stub(runtime.loader.descriptors, 'getHypertyDescriptor', (hypertyURL) => {
+      return getDescriptor(hypertyURL);
+    });
+
+    sinon.stub(runtime.loader.descriptors, 'getStubDescriptor', (stubURL) => {
+      return getDescriptor(stubURL);
+    });
+
+    sinon.stub(runtime.loader.descriptors, 'getIdpProxyDescriptor', (idpProxyURL) => {
+      return getDescriptor(idpProxyURL);
     });
 
     sinon.stub(runtime.registry, 'registerHyperty')
@@ -189,19 +174,9 @@ describe('RuntimeUA', function() {
   });
 
   after(function() {
-    // runtime.runtimeCatalogue.getDescriptor.restore();
-
-    runtime.runtimeCatalogue.getHypertyDescriptor.restore();
-    runtime.runtimeCatalogue.getStubDescriptor.restore();
-    runtime.runtimeCatalogue.getRuntimeDescriptor.restore();
-    runtime.runtimeCatalogue.getDataSchemaDescriptor.restore();
-    runtime.runtimeCatalogue.getIdpProxyDescriptor.restore();
-
-    runtime.runtimeCatalogue._createStub.restore();
-    runtime.runtimeCatalogue._createRuntimeDescriptor.restore();
-    runtime.runtimeCatalogue._createDataSchema.restore();
-    runtime.runtimeCatalogue._createIdpProxy.restore();
-    runtime.runtimeCatalogue._createHyperty.restore();
+    runtime.loader.descriptors.getHypertyDescriptor.restore();
+    runtime.loader.descriptors.getStubDescriptor.restore();
+    runtime.loader.descriptors.getIdpProxyDescriptor.restore();
   });
 
   describe('constructor()', function() {
@@ -327,33 +302,6 @@ describe('RuntimeUA', function() {
       expect(loadIdpPromise).to.be.fulfilled
       .and.eventually.to.have.all.keys(stubResolved)
       .and.notify(done);
-    });
-
-  });
-
-  describe('send multiple messages', function() {
-
-    it('should send read message', function(done) {
-      this.timeout(11000);
-
-      let domain = 'sp.domain';
-      let runtimeURL = 'runtime://' + domain + '/' + Math.floor((Math.random() * 10000) + 1);
-      let registy = runtimeURL + '/registry/';
-      let msg = {
-        type: 'read', from: registy, to: 'domain://registry.' + domain + '/', body: { resource: '', search:'dataObjectPerURL'}
-      };
-
-      console.log('Message:', msg);
-      runtime.messageBus.postMessage(msg,  (reply) => {
-        console.log('READ:', reply);
-
-        if (reply.body.code === 200) {
-          done();
-        } else {
-          console.log(reply.body.desc);
-        }
-      });
-
     });
 
   });

@@ -27,6 +27,8 @@ import HypertyInstance from './HypertyInstance';
 import {MessageFactory} from 'service-framework/dist/MessageFactory';
 import {divideURL} from '../utils/utils.js';
 
+const STATUS = { DEPLOYED: 'deployed', PROGRESS: 'in-progress' };
+
 /*import IdentityManager from './IdentityManager';
 import Discovery from './Discovery';*/
 
@@ -70,28 +72,12 @@ class Registry {
 
     _this.hypertiesListToRemove = {};
     _this.hypertiesList = [];
-    let protostubsList = {};
-    let idpProxyList = {};
+    _this.protostubsList = {};
+    _this.idpProxyList = {};
     _this.dataObjectList = {};
     _this.subscribedDataObjectList = {};
     _this.sandboxesList = {sandbox: {}, appSandbox: {} };
     _this.pepList = {};
-
-    let handler = {
-      get: function(target, name) {
-        return name in target ? target[name] : {};
-      },
-      set: function(target, property, value) {
-        target[property] = value;
-        return true;
-      }
-    };
-
-    _this.protostubsList = new Proxy(protostubsList, handler);
-    _this.idpProxyList = new Proxy(idpProxyList, handler);
-
-    window.protostubsList = _this.protostubsList;
-    window.idpProxyList = _this.idpProxyList;
 
     _this._domain = divideURL(_this.registryURL).domain;
     _this.sandboxesList.appSandbox[runtimeURL] = appSandbox;
@@ -679,9 +665,16 @@ class Registry {
 
     return new Promise(function(resolve,reject) {
 
-      if (_this.protostubsList.hasOwnProperty(url)) {
-        resolve(_this.protostubsList[url]);
+      let dividedURL = divideURL(url);
+      let domainURL = dividedURL.domain;
+
+      if (_this.protostubsList.hasOwnProperty(domainURL) && _this.protostubsList[domainURL].status === STATUS.DEPLOYED) {
+        resolve(_this.protostubsList[domainURL]);
       } else {
+        _this.protostubsList[domainURL] = {
+          status: STATUS.PROGRESS
+        };
+
         reject('requestUpdate couldn\'t get the ProtostubURL');
       }
     });
@@ -717,7 +710,7 @@ class Registry {
       // Proxy;
       _this.protostubsList[domainURL] = {
         url: runtimeProtoStubURL,
-        status: 'in-progress'
+        status: STATUS.DEPLOYED
       };
 
       // _this.protostubsList[domainURL] = runtimeProtoStubURL;
@@ -779,7 +772,7 @@ class Registry {
       // TODO: Optimize this
       _this.idpProxyList[domainURL] = {
         url: idpProxyStubURL,
-        status: 'in-progress'
+        status: STATUS.PROGRESS
       };
 
       _this.sandboxesList.sandbox[idpProxyStubURL] = sandbox;
@@ -809,9 +802,16 @@ class Registry {
 
     return new Promise(function(resolve, reject) {
 
-      if (_this.idpProxyList.hasOwnProperty(url)) {
-        resolve(_this.idpProxyList[url]);
+      let dividedURL = divideURL(url);
+      let domainURL = dividedURL.domain;
+
+      if (_this.idpProxyList.hasOwnProperty(domainURL) && _this.idpProxyList[domainURL].status === STATUS.DEPLOYED) {
+        resolve(_this.idpProxyList[domainURL]);
       } else {
+        // TODO: Optimize this
+        _this.idpProxyList[domainURL] = {
+          status: STATUS.PROGRESS
+        };
         reject('requestUpdate couldn\'t get the idpProxyURL');
       }
     });
@@ -951,7 +951,7 @@ class Registry {
           _this._loader.loadIdpProxy(domainUrl).then((result) => {
             request  = _this.idpProxyList[domainUrl];
             console.info('Resolved IDPProxy: ', request, result);
-            _this.idpProxyList[domainUrl].status = 'deployed';
+            _this.idpProxyList[domainUrl].status = STATUS.DEPLOYED;
             resolve(request.url);
           }).catch((reason) => {
             console.error('Error resolving IDPProxy: ', reason);
@@ -964,7 +964,7 @@ class Registry {
           _this._loader.loadStub(domainUrl).then((result) => {
             request  = _this.protostubsList[domainUrl];
             console.info('Resolved Protostub: ', request, result);
-            _this.protostubsList[domainUrl].status = 'deployed';
+            _this.protostubsList[domainUrl].status = STATUS.DEPLOYED;
             resolve(request.url);
           }).catch((reason) => {
             console.error('Error resolving Protostub: ', reason);
