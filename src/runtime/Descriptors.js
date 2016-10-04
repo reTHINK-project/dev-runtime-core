@@ -18,7 +18,9 @@ class Descriptors {
 
   getStubDescriptor (stubURL) {
     let dividedURL = divideURL(stubURL);
+    let domain = dividedURL.domain;
     let protostub = dividedURL.identity;
+    let protoStubURL;
 
     if (!protostub) {
       protostub = 'default';
@@ -26,8 +28,20 @@ class Descriptors {
       protostub = protostub.substring(protostub.lastIndexOf('/') + 1);
     }
 
-    stubURL = buildURL(this.runtimeConfiguration, 'catalogueURLs', 'protocolstub', protostub);
-    return this.catalogue.getStubDescriptor(stubURL);
+    protoStubURL = buildURL(this.runtimeConfiguration, 'catalogueURLs', 'protocolstub', protostub);
+    if (domain !== this.runtimeConfiguration.domain) {
+      if (!stubURL.indexOf('https') || !stubURL.indexOf('hyperty-catalogue')) {
+        protoStubURL = stubURL;
+      } else {
+
+        // TODO: check how to load form different configuration domain
+        let resource = getConfigurationResources(this.runtimeConfiguration, 'catalogueURLs', 'protocolstub');
+        protoStubURL = resource.prefix + domain + resource.suffix + protostub;
+
+      }
+    }
+    console.log('Load ProtocolStub for domain, ' + domain + ' : ', protoStubURL);
+    return this.catalogue.getStubDescriptor(protoStubURL);
   }
 
   getIdpProxyDescriptor(idpProxyURL) {
