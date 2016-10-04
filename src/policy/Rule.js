@@ -1,15 +1,34 @@
+import AdvancedCondition from './conditions/AdvancedCondition';
+import Condition from './conditions/Condition';
 import {getUserEmailFromURL, isDataObjectURL, removePathFromURL} from '../utils/utils';
-import Operators from './Operators';
+import SubscriptionCondition from './conditions/AdvancedCondition';
 
 class Rule {
 
-  constructor(authorise, condition, priority, scope, target) {
-    this.operators = new Operators();
+  constructor(authorise, condition, scope, target, priority) {
     this.authorise = authorise;
-    this.condition = condition;
+    this.setCondition(condition);
     this.priority = priority;
     this.scope = scope;
     this.target = target;
+  }
+
+  setCondition(condition) {
+    if (!(condition instanceof Condition || condition instanceof SubscriptionCondition || condition instanceof AdvancedCondition)) {
+      let attribute = condition.attribute;
+      switch (attribute) {
+        case 'subscription':
+          this.condition = new SubscriptionCondition(condition.attribute, condition.operator, condition.params);
+          break;
+        case undefined:
+          this.condition = new AdvancedCondition(condition);
+          break;
+        default:
+          this.condition = new Condition(condition.attribute, condition.operator, condition.params);
+      }
+    } else {
+      this.condition = condition;
+    }
   }
 
   evaluate(context, message) {
@@ -87,6 +106,7 @@ class Rule {
 
         return 'Not Applicable';
     }
+
     if (this.condition.isApplicable(context, message, this.scope, this.target)) {
       return this.authorise;
     } else {

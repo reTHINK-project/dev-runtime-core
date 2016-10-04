@@ -6,7 +6,36 @@ class AdvancedCondition {
 
   constructor(condition) {
     this.operators = new Operators();
+    if (condition.operators !== undefined) {
+      condition = condition.condition;
+    }
+    condition = this.buildCondition(condition);
     this.condition = condition;
+  }
+
+  buildCondition(condition) {
+    if (Array.isArray(condition[1])) {
+      condition[1] = this.buildCondition(condition[1]);
+    } else {
+      if (condition[1].attribute === 'subscription') {
+        condition[1] = new SubscriptionCondition(condition[1].attribute, condition[1].operator, condition[1].params);
+      } else {
+        condition[1] = new Condition(condition[1].attribute, condition[1].operator, condition[1].params);
+      }
+    }
+
+    if (condition[2] !== undefined) {
+      if (Array.isArray(condition[2])) {
+        condition[2] = this.buildCondition(condition[2]);
+      } else {
+        if (condition[2].attribute === 'subscription') {
+          condition[2] = new SubscriptionCondition(condition[2].attribute, condition[2].operator, condition[2].params);
+        } else {
+          condition[2] = new Condition(condition[2].attribute, condition[2].operator, condition[2].params);
+        }
+      }
+    }
+    return condition;
   }
 
   isApplicable(context, message, scope, target, operator, left, right) {

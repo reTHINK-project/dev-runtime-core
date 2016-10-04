@@ -3,7 +3,7 @@ import {Syncher, DataObjectReporter, DataObjectObserver} from 'service-framework
 import SyncherManager from '../src/syncher/SyncherManager';
 import MessageBus from '../src/bus/MessageBus';
 
-import PolicyEngine from '../src/policy/PolicyEngine';
+import PEP from '../src/policy/PEP';
 import RuntimeCoreCtx from '../src/policy/context/RuntimeCoreCtx';
 
 import chai from 'chai';
@@ -125,7 +125,7 @@ describe('SyncherManager', function() {
     }
   };
 
-  let policyEngine = new PolicyEngine(new RuntimeCoreCtx(identityModule, runtimeRegistry, persistenceManager));
+  let policyEngine = new PEP(new RuntimeCoreCtx(identityModule, runtimeRegistry, persistenceManager));
 
   let handlers = [
 

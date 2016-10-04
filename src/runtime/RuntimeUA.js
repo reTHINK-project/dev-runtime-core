@@ -26,7 +26,7 @@ import 'babel-polyfill';
 //Main dependecies
 import Registry from '../registry/Registry';
 import IdentityModule from '../identity/IdentityModule';
-import PolicyEngine from '../policy/PolicyEngine';
+import PEP from '../policy/PEP';
 import MessageBus from '../bus/MessageBus';
 
 import Loader from './Loader';
@@ -44,7 +44,7 @@ import RuntimeCoreCtx from '../policy/context/RuntimeCoreCtx';
  * @property {RuntimeCatalogue} runtimeCatalogue - Catalogue of components can be installed;
  * @property {runtimeURL} runtimeURL - This identify the core runtime, should be unique;
  * @property {IdentityModule} identityModule - Identity Module;
- * @property {PolicyEngine} policyEngine - Policy Engine Module;
+ * @property {PEP} policyEngine - Policy Engine Module;
  * @property {Registry} registry - Registry Module;
  * @property {MessageBus} messageBus - Message Bus is used like a router to redirect the messages from one component to other(s)
  * @property {GraphConnector} graphConnector - Graph Connector handling GUID and contacts
@@ -101,7 +101,7 @@ class RuntimeUA {
     _this.messageBus = new MessageBus(_this.registry);
 
     // Instantiate the Policy Engine
-    _this.policyEngine = new PolicyEngine(new RuntimeCoreCtx(_this.identityModule, _this.registry, _this.persistenceManager));
+    _this.policyEngine = new PEP(new RuntimeCoreCtx(_this.identityModule, _this.registry, _this.persistenceManager));
 
     _this.messageBus.pipeline.handlers = [
 

@@ -13,6 +13,7 @@ class Condition {
     context[this.attribute] = { message: message };
     let value = context[this.attribute];
     let tempParam;
+
     if (this.operator === 'in') {
       if (this.params === 'preauthorised') {
         let dataObjectURL = message.to.split('/');
@@ -20,9 +21,10 @@ class Condition {
         dataObjectURL = dataObjectURL[0] + '//' + dataObjectURL[2];
         tempParam = context.runtimeRegistry.getPreAuthSubscribers(dataObjectURL);
       } else {
-        tempParam = context.policyEngine.getGroup(this.params);
+        tempParam = context.pep.context.getGroup(this.params);
       }
     }
+
     if (!tempParam) {
       return this.operators[this.operator]([this.params, value]);
     } else {
