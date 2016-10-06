@@ -337,6 +337,45 @@ class IdentityModule {
     });
   }
 
+  openPopup(urlreceived) {
+
+    return new Promise((resolve, reject) => {
+
+      let win = window.open(urlreceived, 'openIDrequest', 'width=800, height=600');
+      if (window.cordova) {
+        win.addEventListener('loadstart', function(e) {
+          let url = e.url;
+          let code = /\&code=(.+)$/.exec(url);
+          let error = /\&error=(.+)$/.exec(url);
+
+          if (code || error) {
+            win.close();
+            resolve(url);
+          }
+        });
+      } else {
+        let pollTimer = setInterval(function() {
+          try {
+            if (win.closed) {
+              reject('Some error occured when trying to get identity.');
+              clearInterval(pollTimer);
+            }
+
+            if (win.document.URL.indexOf('id_token') !== -1 || win.document.URL.indexOf(location.origin) !== -1) {
+              window.clearInterval(pollTimer);
+              let url =   win.document.URL;
+
+              win.close();
+              resolve(url);
+            }
+          } catch (e) {
+            //console.log(e);
+          }
+        }, 500);
+      }
+    });
+  }
+
   /**
   * Function that fetch an identityAssertion from a user.
   *
@@ -439,6 +478,87 @@ class IdentityModule {
     });
   }
 
+  sendGenerateMessage(contents, origin, usernameHint, idpDomain) {
+    let _this = this;
+    let domain = _this._resolveDomain(idpDomain);
+    let message;
+
+    return new Promise((resolve, reject) => {
+      message = {type:'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'generateAssertion', params: {contents: contents, origin: origin, usernameHint: usernameHint}}};
+      _this._messageBus.postMessage(message, (res) => {
+        let result = res.body.value;
+
+        resolve(result);
+
+      });
+    });
+  }
+
+  storeIdentity(result, keyPair) {
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+
+      let assertionParsed = JSON.parse(atob(result.assertion));
+      let idToken;
+
+      //TODO remove the verification and remove the tokenIDJSON from the google idpProxy;
+      if (assertionParsed.tokenIDJSON) {
+        idToken = assertionParsed.tokenIDJSON;
+      } else {
+        idToken = assertionParsed;
+      }
+
+      result.identity = getUserURLFromEmail(idToken.email);
+
+      _this.identity.addIdentity(result);
+
+      // check if exists any infoToken in the result received
+      let infoToken = (result.infoToken) ? result.infoToken : {};
+      let userProfileBundle = {username: idToken.email, cn: idToken.name, avatar: infoToken.picture, locale: infoToken.locale, userURL: getUserURLFromEmail(idToken.email)};
+
+      //creation of a new JSON with the identity to send via messages
+      let newIdentity = {userProfile: userProfileBundle, idp: result.idp.domain, assertion: result.assertion};
+      result.messageInfo = newIdentity;
+      result.keyPair = keyPair;
+
+      _this.currentIdentity = newIdentity;
+
+      //verify if the id already exists. If already exists then do not add to the identities list;
+      let idAlreadyExists = false;
+      let oldId;
+      for (let identity in _this.identities) {
+        if (_this.identities[identity].identity === result.identity) {
+          idAlreadyExists = true;
+          oldId = _this.identities[identity].messageInfo;
+        }
+      }
+
+      if (idAlreadyExists) {
+        resolve(oldId);
+        let exists = false;
+
+        //check if the identity exists in emailList, if not add it
+        //This is useful if an identity was previously registered but was later unregistered
+        for (let i in _this.emailsList) {
+          if (_this.emailsList[i] === idToken.email) {
+            exists = true;
+            break;
+          }
+        }
+        if (!exists) {
+          _this.emailsList.push(idToken.email);
+        }
+
+      } else {
+        _this.emailsList.push(idToken.email);
+        _this.identities.push(result);
+        resolve(newIdentity);
+      }
+
+    });
+  }
+
   /**
   * Requests the IdpProxy from a given Domain for an identityAssertion
   *
@@ -450,113 +570,28 @@ class IdentityModule {
   */
   generateAssertion(contents, origin, usernameHint, keyPair, idpDomain) {
     let _this = this;
-    let domain = _this._resolveDomain(idpDomain);
-    let message;
 
     console.log('generateAssertion');
 
     return new Promise(function(resolve,reject) {
 
-      message = {type:'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'generateAssertion', params: {contents: contents, origin: origin, usernameHint: usernameHint}}};
-
-      _this._messageBus.postMessage(message, (res) => {
-        let result = res.body.value;
+      _this.sendGenerateMessage(contents, origin, usernameHint, idpDomain).then((result) => {
 
         if (result.loginUrl) {
 
-          let win = window.open(result.loginUrl, 'openIDrequest', 'width=800, height=600');
-          if (window.cordova) {
-            win.addEventListener('loadstart', function(e) {
-              let url = e.url;
-              let code = /\&code=(.+)$/.exec(url);
-              let error = /\&error=(.+)$/.exec(url);
-
-              if (code || error) {
-                win.close();
-                resolve(url);
-              }
-            });
-          } else {
-            let pollTimer = setInterval(function() {
-              try {
-                if (win.closed) {
-                  reject('Some error occured when trying to get identity.');
-                  clearInterval(pollTimer);
-                }
-
-                if (win.document.URL.indexOf('id_token') !== -1 || win.document.URL.indexOf(location.origin) !== -1) {
-                  window.clearInterval(pollTimer);
-                  let url =   win.document.URL;
-
-                  win.close();
-                  resolve(url);
-                }
-              } catch (e) {
-                //console.log(e);
-              }
-            }, 500);
-          }
+          _this.openPopup(result.loginUrl).then((value) => {
+            resolve(value);
+          }, (err) => {
+            reject(err);
+          });
         } else if (result) {
 
-          let assertionParsed = JSON.parse(atob(result.assertion));
-          let idToken;
+          _this.storeIdentity(result, keyPair).then((value) => {
+            resolve(value);
+          }, (err) => {
+            reject(err);
+          });
 
-          //TODO remove the verification and remove the tokenIDJSON from the google idpProxy;
-          if (assertionParsed.tokenIDJSON) {
-            idToken = assertionParsed.tokenIDJSON;
-          } else {
-            idToken = assertionParsed;
-          }
-
-          if (idToken) {
-            result.identity = getUserURLFromEmail(idToken.email);
-
-            _this.identity.addIdentity(result);
-
-            // check if exists any infoToken in the result received
-            let infoToken = (result.infoToken) ? result.infoToken : {};
-            let userProfileBundle = {username: idToken.email, cn: idToken.name, avatar: infoToken.picture, locale: infoToken.locale, userURL: getUserURLFromEmail(idToken.email)};
-
-            //creation of a new JSON with the identity to send via messages
-            let newIdentity = {userProfile: userProfileBundle, idp: result.idp.domain, assertion: result.assertion};
-            result.messageInfo = newIdentity;
-            result.keyPair = keyPair;
-
-            _this.currentIdentity = newIdentity;
-
-            //verify if the id already exists. If already exists then do not add to the identities list;
-            let idAlreadyExists = false;
-            let oldId;
-            for (let identity in _this.identities) {
-              if (_this.identities[identity].identity === result.identity) {
-                idAlreadyExists = true;
-                oldId = _this.identities[identity].messageInfo;
-              }
-            }
-
-            if (idAlreadyExists) {
-              resolve(oldId);
-              let exists = false;
-
-              //check if the identity exists in emailList, if not add it
-              //This is useful if an identity was previously registered but was later unregistered
-              for (let i in _this.emailsList) {
-                if (_this.emailsList[i] === idToken.email) {
-                  exists = true;
-                  break;
-                }
-              }
-              if (!exists) {
-                _this.emailsList.push(idToken.email);
-              }
-
-            } else {
-              _this.emailsList.push(idToken.email);
-              _this.identities.push(result);
-              resolve(newIdentity);
-            }
-
-          }
         } else {
           reject('error on obtaining identity information');
         }
@@ -581,7 +616,7 @@ class IdentityModule {
 
     let domain = _this._resolveDomain(idpDomain);
 
-    let message = {type:'EXECUTE', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'validateAssertion',
+    let message = {type:'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'validateAssertion',
             params: {assertion: assertion, origin: origin}}};
 
     return new Promise(function(resolve, reject) {
