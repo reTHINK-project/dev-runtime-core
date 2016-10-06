@@ -1,15 +1,13 @@
 import AdvancedCondition from '../conditions/AdvancedCondition';
-import Condition from '../conditions/Condition'
+import Condition from '../conditions/Condition';
 import Policy from '../Policy';
 import Rule from '../Rule';
 import SubscriptionCondition from '../conditions/SubscriptionCondition';
 
 class UserPolicy extends Policy {
-  constructor(key, rules, actions, combiningAlgorithm) {
-    if (!combiningAlgorithm) {
-      combiningAlgorithm = 'denyOverrides';
-    }
-    super(key, rules, actions, combiningAlgorithm);
+
+  addAction(method, param) {
+    this.actions.push({ method: method, param: param });
   }
 
   createRule(type, authorise, condition, scope, target, priority) {
@@ -29,7 +27,7 @@ class UserPolicy extends Policy {
     if (priority === undefined) {
       priority = this.getLastPriority() + 1;
     }
-    let rule = new Rule(authorise, condition, priority, scope, target);
+    let rule = new Rule(authorise, condition, scope, target, priority);
     this.rules.push(rule);
   }
 
@@ -38,26 +36,13 @@ class UserPolicy extends Policy {
     this.rules.splice(indexToRemove, 1);
   }
 
-  getLastPriority() {
-    let priorities = [];
-
-    if (this.rules.length !== 0) {
-      for (let i in this.rules) {
-        priorities.push(this.rules[i].priority);
-      }
-      return Math.max.apply(Math, priorities);
-    } else {
-      return -1;
-    }
-  }
-
   getRuleByPriority(priority) {
     for (let i in this.rules) {
-      if (this.rules[i].priority == priority) {
+      if (String(this.rules[i].priority) === String(priority)) {
         return this.rules[i];
       }
     }
-    throw Error('Rule with priority ' + priority + ' does not exist!')
+    throw Error('Rule with priority ' + priority + ' does not exist!');
   }
 
   hasSubscriptionRule() {
@@ -82,8 +67,8 @@ class UserPolicy extends Policy {
 
   sortRules() {
     return this.rules.sort(function(a, b) {
-        let x = a['priority']; let y = b['priority'];
-        return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+      let x = a.priority; let y = b.priority;
+      return ((x < y) ? -1 : ((x > y) ? 1 : 0));
     });
   }
 }

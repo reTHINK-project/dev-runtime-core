@@ -141,6 +141,80 @@ class Registry {
     _this.identityManager = identityManager;*/
   }
 
+  /**
+  * function to request about users registered in domain registry, and
+  * return the last hyperty instance registered by the user.
+  * @param  {email}              email
+  * @param  {domain}            domain (Optional)
+  * @return {Promise}          Promise
+  */
+
+  // TODO: implement a cache system
+  discoverHypertyPerUser(email, domain) {
+    let _this = this;
+    let activeDomain;
+
+    if (!domain) {
+      activeDomain = _this._domain;
+    } else {
+      activeDomain = domain;
+    }
+
+    let identityURL = 'user://' + email.substring(email.indexOf('@') + 1, email.length) + '/' + email.substring(0, email.indexOf('@'));
+
+    // message to query domain registry, asking for a user hyperty.
+    let message = {
+      type: 'read', from: _this.registryURL, to: 'domain://registry.' + activeDomain + '/', body: { resource: identityURL}
+    };
+
+    console.log('Message: ', message, activeDomain, identityURL);
+
+    //console.log('message READ', message);
+    return new Promise(function(resolve, reject) {
+
+      _this._messageBus.postMessage(message, (reply) => {
+        console.log('message reply', reply);
+
+        let hyperty;
+        let mostRecent;
+        let lastHyperty;
+        let value = reply.body.value;
+
+        for (hyperty in value) {
+          if (value[hyperty].lastModified !== undefined) {
+            if (mostRecent === undefined) {
+              mostRecent = new Date(value[hyperty].lastModified);
+              lastHyperty = hyperty;
+            } else {
+              let hypertyDate = new Date(value[hyperty].lastModified);
+              if (mostRecent.getTime() < hypertyDate.getTime()) {
+                mostRecent = hypertyDate;
+                lastHyperty = hyperty;
+              }
+            }
+          }
+        }
+
+        console.log('Last Hyperty: ', lastHyperty, mostRecent);
+
+        let hypertyURL = lastHyperty;
+
+        if (hypertyURL === undefined) {
+          return reject('User Hyperty not found');
+        }
+
+        let idPackage = {
+          id: email,
+          descriptor: value[hypertyURL].descriptor,
+          hypertyURL: hypertyURL
+        };
+
+        console.log('===> hypertyDiscovery messageBundle: ', idPackage);
+        resolve(idPackage);
+      });
+    });
+  }
+
   _getIdentityAssociated(type, hypertyURL) {
     let _this = this;
 
