@@ -381,7 +381,7 @@ class GraphConnector {
      owner.lastCalculationBloomFilter1Hop = this.lastCalculationBloomFilter1Hop;
      owner.residenceLocation =  this.residenceLocation;
      owner.contactsBloomFilter1Hop = this.contactsBloomFilter1Hop;
-     owner.userIDs = this.globalRegistryRecord.userIDs ;
+     owner.userIDs = this.globalRegistryRecord.userIDs;
 
      return owner;
    }
@@ -416,7 +416,7 @@ class GraphConnector {
            // reply should be the JSON returned from the Global Registry REST-interface
            let jwt = reply.body.Value;
            let description = reply.body.Description;
-           if(typeof jwt !== 'undefined') {
+           if (typeof jwt !== 'undefined') {
              let unwrappedJWT = KJUR.jws.JWS.parse(jwt);
              let dataEncoded = unwrappedJWT.payloadObj.data;
              let dataDecoded = base64url.decode(dataEncoded);
@@ -444,7 +444,7 @@ class GraphConnector {
                }
                resolve(queriedContact);
              }
-           } else if(typeof description !== 'undefined'){ resolve(description); }
+           } else if (typeof description !== 'undefined') { resolve(description); }
          });
        }
      });
@@ -715,7 +715,7 @@ class GraphConnector {
    */
   calculateBloomFilter1Hop() {
     let bf = new BloomFilter(
-      4314,     // number of bits to allocate. With 300 entries, we have a false positive rate of 0.001 %.
+      4314,     // number of bits to allocate. With 300 entries, we have a false positive rate of 0.1 %.
       10        // number of hash functions.
     );
     for (let i = 0; i < this.contacts.length; i++) {
@@ -799,7 +799,7 @@ class GraphConnector {
         }
       }
 
-      if(!found){
+      if (!found) {
         return false;
       }else {
         return userIDsArray;
@@ -870,7 +870,7 @@ class GraphConnector {
         directContactsArray.push(this.contacts[i]);
       }
       let bf1hop = new BloomFilter(
-        4314,   // number of bits to allocate. With 30000 entries, we have a false positive rate of 0.1 %.
+        4314,   // number of bits to allocate. With 300 entries, we have a false positive rate of 0.1 %.
         10        // number of hash functions.
       );
       bf1hop =  this.contacts[i].contactsBloomFilter1Hop;
@@ -893,12 +893,12 @@ class GraphConnector {
    * @param  {Object}     obj2      Object needs to typecasted.
    * @returns  {Object}   Obj2 with typecasted to obj1.
    */
-  extend(obj1, obj2){
-    for(var key in obj2)
-        if(obj2.hasOwnProperty(key))
+  extend(obj1, obj2) {
+    for (var key in obj2)
+        if (obj2.hasOwnProperty(key))
             obj1[key] = obj2[key];
     return obj1;
-}
+  }
 
   // TODO: exportGraphData(?){}
   // TODO: importGraphData(?){}
