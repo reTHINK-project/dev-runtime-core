@@ -1,34 +1,40 @@
 import CommonCtx from './CommonCtx';
-import Condition from '../conditions/Condition';
-import Rule from '../Rule';
-import UserPolicy from '../policies/UserPolicy';
 
 class MessageNodeCtx extends CommonCtx {
 
   constructor() {
     super();
-    this.serviceProviderPolicies = {};
+    this.serviceProviderPolicies = {}; //TODO: how to load them?
   }
 
   authorise(message) {
-    return new Promise((resolve, reject) => {
-      let _this = this;
-      let result;
+    console.log('--- Policy Engine ---');
+    console.log(message);
+    let _this = this;
+    let result;
 
-      let isToVerify = _this._isToVerify(message);
-      if (isToVerify) {
-        let policies = {
-          serviceProviderPolicy: _this.getServiceProviderPolicy(message)
-        };
-        result = _this.policyEngine.pdp.applyPolicies(message, policies);
+    let isToVerify = _this._isToVerify(message);
+    if (isToVerify) {
+      let policies = {
+        serviceProviderPolicy: _this.getServiceProviderPolicy(message)
+      };
+      result = _this.policyEngine.pdp.applyPolicies(message, policies);
+      if (result === 'Not Applicable') {
+        result = _this.defaultBehavior;
       }
-      if (result === undefined || result === 'Not Applicable') {
-        resolve(message);
+      if (result) {
+        return true;
       } else {
-        reject('Message blocked');
+        return false;
       }
-
-    });
+    } else {
+      result = _this.defaultBehavior;
+      if (result) {
+        return true;
+      } else {
+        return false;
+      }
+    }
   }
 
   loadActivePolicy() { }
@@ -47,6 +53,7 @@ class MessageNodeCtx extends CommonCtx {
         policy = this.serviceProviderPolicies[i];
       }
     }
+
     return policy;
   }
 
@@ -55,8 +62,6 @@ class MessageNodeCtx extends CommonCtx {
   }
 
   saveActivePolicy() {}
-
-  saveGroups() {}
 
   savePolicies() {}
 }

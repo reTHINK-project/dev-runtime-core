@@ -520,8 +520,8 @@ describe('Policy Engine with Runtime Core context', () => {
 describe('Policy Engine with Message Node context', () => {
   let policyEngine = new PolicyEngine(new MessageNodeCtx());
 
-  it('authorises a valid message', (done) => {
-    expect(policyEngine.authorise(message)).to.be.fulfilled.and.eventually.eql(message).and.notify(done);;
+  it('authorises a valid message', () => {
+    expect(policyEngine.authorise(message)).to.be.eql(true);
   });
 
   /*describe('functionality: date', () => {
@@ -534,15 +534,15 @@ describe('Policy Engine with Message Node context', () => {
   });*/
 
   describe('functionality: domain', () => {
-    it('rejects the message as it comes from a blocked domain', (done) => {
+    it('rejects the message as it comes from a blocked domain', () => {
       policyEngine.removePolicy('*');
       policyEngine.addPolicy('SERVICE_PROVIDER', 'My policy', new ServiceProviderPolicy('My policy', [domainRule], []));
       policyEngine.context.activeUserPolicy = 'My policy';
-      expect(policyEngine.authorise(messageFromBlocked)).to.be.rejected.and.notify(done);;
+      expect(policyEngine.authorise(messageFromBlocked)).to.be.eql(false);
     });
 
-    it('allows the message as it comes from a domain that is not blocked', (done) => {
-      expect(policyEngine.authorise(message)).to.be.fulfilled.and.eventually.eql(message).and.notify(done);;
+    it('allows the message as it comes from a domain that is not blocked', () => {
+      expect(policyEngine.authorise(message)).to.be.eql(true);
     });
   });
 

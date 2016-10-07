@@ -73,7 +73,7 @@
     "mocha": "2.5.3",
     "object.observe": "^0.2.6",
     "phantomjs-prebuilt": "^2.1.7",
-    "service-framework": "github:rethink-project/dev-service-framework#develop",
+    "service-framework": "github:rethink-project/dev-service-framework",
     "sinon": "^1.17.3",
     "sinon-chai": "^2.8.0",
     "sjcl": "^1.0.3",
