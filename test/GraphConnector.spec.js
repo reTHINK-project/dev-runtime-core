@@ -466,10 +466,10 @@ getRegistry.then(function(registry) {
                     let publicKey2 = graphConnector2.globalRegistryRecord.publicKey;
                     let publicKeyObject2 = jsrsasign.KEYUTIL.getKey(publicKey2);
 
-                    let unwrappedJWT = KJUR.jws.JWS.parse(jwt1);
+                    let unwrappedJWT = jsrsasign.KJUR.jws.JWS.parse(jwt1);
                     let encodedString = jwt1.split('.').slice(0, 2).join('.');
                     let sigValueHex = unwrappedJWT.sigHex;
-                    let sig = new KJUR.crypto.Signature({alg: 'SHA256withECDSA'});
+                    let sig = new jsrsasign.KJUR.crypto.Signature({alg: 'SHA256withECDSA'});
                     sig.init(publicKeyObject2);
                     sig.updateString(encodedString);
                     let isValid = sig.verify(sigValueHex);

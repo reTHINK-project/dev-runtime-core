@@ -256,7 +256,7 @@ function transpile(opts) {
     .pipe(source(filename))
     .pipe(buffer())
     .pipe(sourcemaps.init())
-    //.pipe(gulpif(ug, uglify()))
+    .pipe(gulpif(ug, uglify()))
     .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest(opts.destination))
     .on('end', function() {

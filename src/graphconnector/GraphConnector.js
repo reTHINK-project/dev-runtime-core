@@ -161,7 +161,7 @@ class GraphConnector {
 
               // reply should be the JSON returned from the Global Registry REST-interface
               let jwt = reply.body.Value;
-              let unwrappedJWT = KJUR.jws.JWS.parse(reply.body.Value);
+              let unwrappedJWT = jsrsasign.KJUR.jws.JWS.parse(reply.body.Value);
               let dataEncoded = unwrappedJWT.payloadObj.data;
               let dataDecoded = base64url.decode(dataEncoded);
               let dataJSON = JSON.parse(dataDecoded);
@@ -174,7 +174,7 @@ class GraphConnector {
                 let publicKeyObject = jsrsasign.KEYUTIL.getKey(dataJSON.publicKey);
                 let encodedString = jwt.split('.').slice(0, 2).join('.');
                 let sigValueHex = unwrappedJWT.sigHex;
-                let sig = new KJUR.crypto.Signature({alg: 'SHA256withECDSA'});
+                let sig = new jsrsasign.KJUR.crypto.Signature({alg: 'SHA256withECDSA'});
                 sig.init(publicKeyObject);
                 sig.updateString(encodedString);
                 let isValid = sig.verify(sigValueHex);
@@ -210,7 +210,7 @@ class GraphConnector {
     let seed = bip39.mnemonicToSeed(mnemonic);
     Buffer.TYPED_ARRAY_SUPPORT = false;
     let hdnode = bitcoin.HDNode.fromSeedBuffer(seed);
-    let ecparams = KJUR.crypto.ECParameterDB.getByName('secp256k1');
+    let ecparams = jsrsasign.KJUR.crypto.ECParameterDB.getByName('secp256k1');
     let biPrv = hdnode.keyPair.d; // private key big integer
     let epPub = ecparams.G.multiply(biPrv); // d*G
     let biX = epPub.getX().toBigInteger(); // x from Q
@@ -220,11 +220,11 @@ class GraphConnector {
     let hX = ('0000000000' + biX.toString(16)).slice(-charlen);
     let hY = ('0000000000' + biY.toString(16)).slice(-charlen);
     let hPub = '04' + hX + hY;
-    this._prvKey = new KJUR.crypto.ECDSA({curve: 'secp256k1'});
+    this._prvKey = new jsrsasign.KJUR.crypto.ECDSA({curve: 'secp256k1'});
     this._prvKey.setPrivateKeyHex(hPrv);
     this._prvKey.isPrivate = true;
     this._prvKey.isPublic = false;
-    let pubKey = new KJUR.crypto.ECDSA({curve: 'secp256k1'});
+    let pubKey = new jsrsasign.KJUR.crypto.ECDSA({curve: 'secp256k1'});
     this.privateKey = jsrsasign.KEYUTIL.getPEM(this._prvKey, 'PKCS8PRV');
     pubKey.setPublicKeyHex(hPub);
     pubKey.isPrivate = false;
@@ -255,10 +255,10 @@ class GraphConnector {
     let recordString = JSON.stringify(record);
     let recordStringBase64 = base64url.encode(recordString);
 
-    let jwtTemp = KJUR.jws.JWS.sign(null, {alg: 'ES256'}, {data: recordStringBase64}, this._prvKey);
+    let jwtTemp = jsrsasign.KJUR.jws.JWS.sign(null, {alg: 'ES256'}, {data: recordStringBase64}, this._prvKey);
     let encodedString = jwtTemp.split('.').slice(0, 2).join('.');
 
-    let sig = new KJUR.crypto.Signature({alg: 'SHA256withECDSA'});
+    let sig = new jsrsasign.KJUR.crypto.Signature({alg: 'SHA256withECDSA'});
     sig.init(this.privateKey);
     sig.updateString(encodedString);
 
@@ -276,7 +276,7 @@ class GraphConnector {
    */
   sendGlobalRegistryRecord(jwt) {
 
-    let payloadObj = KJUR.jws.JWS.parse(jwt).payloadObj;
+    let payloadObj = jsrsasign.KJUR.jws.JWS.parse(jwt).payloadObj;
     let guid = payloadObj.guid;
 
     let _this = this;
@@ -419,14 +419,14 @@ class GraphConnector {
               let jwt = reply.body.Value;
               let description = reply.body.Description;
               if (typeof jwt !== 'undefined') {
-                let unwrappedJWT = KJUR.jws.JWS.parse(jwt);
+                let unwrappedJWT = jsrsasign.KJUR.jws.JWS.parse(jwt);
                 let dataEncoded = unwrappedJWT.payloadObj.data;
                 let dataDecoded = base64url.decode(dataEncoded);
                 let dataJSON = JSON.parse(dataDecoded);
                 let publicKeyObject = jsrsasign.KEYUTIL.getKey(dataJSON.publicKey);
                 let encodedString = jwt.split('.').slice(0, 2).join('.');
                 let sigValueHex = unwrappedJWT.sigHex;
-                let sig = new KJUR.crypto.Signature({alg: 'SHA256withECDSA'});
+                let sig = new jsrsasign.KJUR.crypto.Signature({alg: 'SHA256withECDSA'});
                 sig.init(publicKeyObject);
                 sig.updateString(encodedString);
                 let isValid = sig.verify(sigValueHex);
