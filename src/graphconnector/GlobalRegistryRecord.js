@@ -38,6 +38,7 @@ class GlobalRegistryRecord {
       this.publicKey;
       this.active;
       this.revoked;
+      this.defaults = new Object();
     }
 
   /**
@@ -57,6 +58,7 @@ class GlobalRegistryRecord {
       record.publicKey = this.publicKey;
       record.active = this.active;
       record.revoked = this.revoked;
+      record.defaults = this.defaults;
 
       return record;
     }

@@ -307,15 +307,17 @@ getRegistry.then(function(registry) {
       });
 
       it('Adding user ID to owner', function() {
-        let resultTrue = graphConnector.addUserID('facebook/john');
-        let resultFalse =  graphConnector.addUserID('facebook/john');
+
+        let resultTrue = graphConnector.addUserID('john://facebook.com/fluffy123','google.com');
+        let resultFalse =  graphConnector.addUserID('john://facebook.com/fluffy123','google.com');
         expect(resultTrue).to.equal(true);
         expect(resultFalse).to.equal(false);
+
       });
 
       it('Removing user ID of the owner', function() {
-        let resultTrue = graphConnector.removeUserID('facebook/john');
-        let resultFalse = graphConnector.removeUserID('facebook/john');
+        let resultTrue = graphConnector.removeUserID('john://facebook.com/fluffy123','google.com');
+        let resultFalse = graphConnector.removeUserID('john://facebook.com/fluffy123','google.com');
         expect(resultTrue).to.equal(true);
         expect(resultFalse).to.equal(false);
       });
@@ -343,8 +345,8 @@ getRegistry.then(function(registry) {
 
       it('adding userID to a contact', function() {
         graphConnector.addContact('testingAddUSERID123', 'TestingUserID', 'adduserIDSuccess');
-        let success = graphConnector.setContactUserIDs('testingAddUSERID123', 'facebook/test');
-        let unsuccess = graphConnector.setContactUserIDs('testingAddUSERID123', 'facebook/test');
+        let success = graphConnector.setContactUserIDs('testingAddUSERID123', 'test://facebook.com/fluffy123','google.com');
+        let unsuccess = graphConnector.setContactUserIDs('testingAddUSERID123', 'test://facebook.com/fluffy123','google.com');
         expect(success).to.equal(true);
         expect(unsuccess).to.equal(false);
       });
@@ -352,13 +354,21 @@ getRegistry.then(function(registry) {
       it('getting userIDs of a contact', function() {
         graphConnector.addContact('testingGETUSERID12345', 'TestingUserIDget', 'getuserIDSuccess');
         //Adding user ids to a contact
-        graphConnector.setContactUserIDs('testingGETUSERID12345', 'facebook/test123');
-        graphConnector.setContactUserIDs('testingGETUSERID12345', 'twitter/test123');
+        graphConnector.setContactUserIDs('testingGETUSERID12345', 'test123://facebook.com/fluffy123','google.com');
+        graphConnector.setContactUserIDs('testingGETUSERID12345', 'test://twitter.com/fluffy123','google.com');
         let success = graphConnector.getContactUserIDs('testingGETUSERID12345');
         let unsuccess = graphConnector.getContactUserIDs('testingGETUSERID123456');
         expect(success.length).to.equal(2);
         expect(unsuccess).to.equal(false);
       });
+
+      it('Setting the user Defaults', function() {
+        graphConnector.setDefaults("a", "b" , "c");
+
+        let success = graphConnector.setDefaults("1", "2" , "3");
+        expect(success).to.equal(true);
+      });
+
 
       it('bloom filter tests', function() {
 
