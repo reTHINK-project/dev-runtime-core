@@ -70,8 +70,5 @@
     "safeContextKeyword": "_this",
     "validateQuoteMarks": "'",
     "validateIndentation": 2,
-    "maxErrors": null,
-  "excludeFiles": [
-    "./test/GraphConnector.spec.js"
-  ]
+    "maxErrors": null
 }

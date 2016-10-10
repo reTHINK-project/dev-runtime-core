@@ -26,180 +26,180 @@
  */
 class GraphConnectorContactData {
 
-    /**
-     * Constructs a new object representing information about one contact.
-     * @param  {String}     guid        The GUID of the new contact.
-     * @param  {String}   firstName   The first name of the new contact.
-     * @param  {String}   lastName    The last name of the new contact.
-     */
-    constructor(guid, firstName, lastName) {
-        this._guid = guid;
-        this._userIDs = [];
-        this._firstName = firstName;
-        this._lastName = lastName;
-        this._privateContact = false;
-        this._contactsBloomFilter1Hop;
-        this._lastSyncBloomFilter1Hop = new Date(0).toISOString();
-        this._lastSyncDomainUserIDs = new Date(0).toISOString();
-        this._residenceLocation;
-        this._groups = [];
-        this._defaults = {};
-    }
+  /**
+   * Constructs a new object representing information about one contact.
+   * @param  {String}     guid        The GUID of the new contact.
+   * @param  {String}   firstName   The first name of the new contact.
+   * @param  {String}   lastName    The last name of the new contact.
+   */
+  constructor(guid, firstName, lastName) {
+    this._guid = guid;
+    this._userIDs = [];
+    this._firstName = firstName;
+    this._lastName = lastName;
+    this._privateContact = false;
+    this._contactsBloomFilter1Hop;
+    this._lastSyncBloomFilter1Hop = new Date(0).toISOString();
+    this._lastSyncDomainUserIDs = new Date(0).toISOString();
+    this._residenceLocation;
+    this._groups = [];
+    this._defaults = {};
+  }
 
-    /**
-     * Returns the GUID.
-     * @returns  {String}     GUID        GUID of the contact.
-     */
-    get guid() {
-        return this._guid;
-    }
+  /**
+   * Returns the GUID.
+   * @returns  {String}     GUID        GUID of the contact.
+   */
+  get guid() {
+    return this._guid;
+  }
 
-    /**
-     * Sets the GUID.
-     * @param  {String}     guid        GUID of the contat.
-     */
-    set guid(guid) {
-        this._guid = guid;
-    }
+  /**
+   * Sets the GUID.
+   * @param  {String}     guid        GUID of the contat.
+   */
+  set guid(guid) {
+    this._guid = guid;
+  }
 
-    /**
-     * Returns the user IDs.
-     * @returns  {List<object>}     userIDs        UserIDs of the contact.
-     */
-    get userIDs() {
-        return this._userIDs;
-    }
+  /**
+   * Returns the user IDs.
+   * @returns  {List<object>}     userIDs        UserIDs of the contact.
+   */
+  get userIDs() {
+    return this._userIDs;
+  }
 
-    /**
-     * Sets the userIDs.
-     * @param  {List<object>}     userIDs        UserIDs of the contat.
-     */
-    set userIDs(userIDs) {
-        this._userIDs = userIDs;
-        this._lastSyncDomainUserIDs = new Date().toISOString();
-    }
+  /**
+   * Sets the userIDs.
+   * @param  {List<object>}     userIDs        UserIDs of the contat.
+   */
+  set userIDs(userIDs) {
+    this._userIDs = userIDs;
+    this._lastSyncDomainUserIDs = new Date().toISOString();
+  }
 
-    /**
-     * Returns the user defaults
-     * @returns  {object}     defaults        defaults of the contact.
-     */
-    get defaults() {
-        return this._defaults;
-    }
+  /**
+   * Returns the user defaults
+   * @returns  {object}     defaults        defaults of the contact.
+   */
+  get defaults() {
+    return this._defaults;
+  }
 
-    /**
-     * Sets the defaults.
-     * @param  {object}     defaults        defaults of the contact.
-     */
-    set defaults(defaults) {
-        this._defaults = defaults;
-        this._lastSyncDomainUserIDs = new Date().toISOString();
-    }
+  /**
+   * Sets the defaults.
+   * @param  {object}     defaults        defaults of the contact.
+   */
+  set defaults(defaults) {
+    this._defaults = defaults;
+    this._lastSyncDomainUserIDs = new Date().toISOString();
+  }
 
-    /**
-     * Returns the first name.
-     * @returns  {String}     firstName        First name of the contact.
-     */
-    get firstName() {
-        return this._firstName;
-    }
+  /**
+   * Returns the first name.
+   * @returns  {String}     firstName        First name of the contact.
+   */
+  get firstName() {
+    return this._firstName;
+  }
 
-    /**
-     * Sets the first name.
-     * @param  {String}     firstName        First name of the contat.
-     */
-    set firstName(firstName) {
-        this._firstName = firstName;
-    }
+  /**
+   * Sets the first name.
+   * @param  {String}     firstName        First name of the contat.
+   */
+  set firstName(firstName) {
+    this._firstName = firstName;
+  }
 
-    /**
-     * Returns the last name.
-     * @returns  {String}     lastName        Last name of the contact.
-     */
-    get lastName() {
-        return this._lastName;
-    }
+  /**
+   * Returns the last name.
+   * @returns  {String}     lastName        Last name of the contact.
+   */
+  get lastName() {
+    return this._lastName;
+  }
 
-    /**
-     * Sets the last name.
-     * @param  {String}     lastName        Last name of the contat.
-     */
-    set lastName(lastName) {
-        this._lastName = lastName;
-    }
+  /**
+   * Sets the last name.
+   * @param  {String}     lastName        Last name of the contat.
+   */
+  set lastName(lastName) {
+    this._lastName = lastName;
+  }
 
-    /**
-     * Returns the privacy status of the contact.
-     * @returns  {Boolean}     privateContact        True/false value indicating the privacy status of the contact.
-     */
-    get privateContact() {
-        return this._privateContact;
-    }
+  /**
+   * Returns the privacy status of the contact.
+   * @returns  {Boolean}     privateContact        True/false value indicating the privacy status of the contact.
+   */
+  get privateContact() {
+    return this._privateContact;
+  }
 
-    /**
-     * Sets the privacy status of the contact according to the given Boolean value.
-     * @param  {Boolean}     boolPrivate        True/false value indicating the privacy status of the contact.
-     */
-    set privateContact(boolPrivate) {
-        this._privateContact = boolPrivate;
-    }
+  /**
+   * Sets the privacy status of the contact according to the given Boolean value.
+   * @param  {Boolean}     boolPrivate        True/false value indicating the privacy status of the contact.
+   */
+  set privateContact(boolPrivate) {
+    this._privateContact = boolPrivate;
+  }
 
-    /**
-     * Returns the Bloom filter containing the hashed GUIDs of the contacts for the contact.
-     * @returns  {BloomFilter}     bf        Bloom filter for the contact.
-     */
-    get contactsBloomFilter1Hop() {
-        return this._contactsBloomFilter1Hop;
-    }
+  /**
+   * Returns the Bloom filter containing the hashed GUIDs of the contacts for the contact.
+   * @returns  {BloomFilter}     bf        Bloom filter for the contact.
+   */
+  get contactsBloomFilter1Hop() {
+    return this._contactsBloomFilter1Hop;
+  }
 
-    /**
-     * Sets the friends-of-friends Bloom filter containing the hashed GUIDs of the contacts for the contact.
-     * @param  {BloomFilter}     bf        Bloom filter for the contact.
-     */
-    set contactsBloomFilter1Hop(bf) {
-        this._contactsBloomFilter1Hop = bf;
-        this._lastSyncBloomFilter1Hop = new Date().toISOString();
-    }
+  /**
+   * Sets the friends-of-friends Bloom filter containing the hashed GUIDs of the contacts for the contact.
+   * @param  {BloomFilter}     bf        Bloom filter for the contact.
+   */
+  set contactsBloomFilter1Hop(bf) {
+    this._contactsBloomFilter1Hop = bf;
+    this._lastSyncBloomFilter1Hop = new Date().toISOString();
+  }
 
-    /**
-     * Returns the last Sync Bloom Filter date for the contact.
-     * @returns  {String}   lastSyncBloomFilter1Hop   last Sync Bloom Filter date for the contact.
-     */
-    get lastSyncBloomFilter1Hop() {
-        return this._lastSyncBloomFilter1Hop;
-    }
+  /**
+   * Returns the last Sync Bloom Filter date for the contact.
+   * @returns  {String}   lastSyncBloomFilter1Hop   last Sync Bloom Filter date for the contact.
+   */
+  get lastSyncBloomFilter1Hop() {
+    return this._lastSyncBloomFilter1Hop;
+  }
 
-    /**
-     * Returns the geohash of the residence location.
-     * @returns  {String}     geohash        Geohash of the residence location.
-     */
-    get residenceLocation() {
-        return this._residenceLocation;
-    }
+  /**
+   * Returns the geohash of the residence location.
+   * @returns  {String}     geohash        Geohash of the residence location.
+   */
+  get residenceLocation() {
+    return this._residenceLocation;
+  }
 
-    /**
-     * Sets the geohash of the residence location.
-     * @param  {String}     geohash        Geohash of the residence location.
-     */
-    set residenceLocation(geohash) {
-        this._residenceLocation = geohash;
-    }
+  /**
+   * Sets the geohash of the residence location.
+   * @param  {String}     geohash        Geohash of the residence location.
+   */
+  set residenceLocation(geohash) {
+    this._residenceLocation = geohash;
+  }
 
-    /**
-     * Returns the groups.
-     * @returns  {List<String>}     groups        Groups of the contact.
-     */
-    get groups() {
-        return this._groups;
-    }
+  /**
+   * Returns the groups.
+   * @returns  {List<String>}     groups        Groups of the contact.
+   */
+  get groups() {
+    return this._groups;
+  }
 
-    /**
-     * Sets the groups.
-     * @param  {List<String>}     groups        Groups of the contat.
-     */
-    set groups(groups) {
-        this._groups = groups;
-    }
+  /**
+   * Sets the groups.
+   * @param  {List<String>}     groups        Groups of the contat.
+   */
+  set groups(groups) {
+    this._groups = groups;
+  }
 
 }
 
