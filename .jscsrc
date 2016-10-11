@@ -69,6 +69,5 @@
     "requireSemicolons": true,
     "safeContextKeyword": "_this",
     "validateQuoteMarks": "'",
-    "validateIndentation": 2,
-    "maxErrors": null
+    "validateIndentation": 2
 }
