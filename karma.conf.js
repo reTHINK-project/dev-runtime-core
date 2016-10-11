@@ -16,7 +16,7 @@ module.exports = function(config) {
       'node_modules/object.observe/dist/object-observe.js',
       'node_modules/array.observe/array-observe.js',
       'src/**/*.js',
-      'test/**/GraphConnector.spec.js'
+      'test/**/*.spec.js'
     ],
 
     // Define the root
