@@ -56,7 +56,7 @@ class GraphConnectorContactData {
 
   /**
    * Sets the GUID.
-   * @param  {String}     guid        GUID of the contat.
+   * @param  {String}     GUID        GUID of the contat.
    */
   set guid(guid) {
     this._guid = guid;
