@@ -14,43 +14,15 @@ class PDP {
     this.operators = new Operators();
   }
 
-  get context() {
-    return this._context;
-  }
-
-  get operators() {
-    return this._operators;
-  }
-
-  set context(context) {
-    this._context = context;
-  }
-
-  set operators(operators) {
-    this._operators = operators;
-  }
-
-  applyPolicies(message, policies) {
-    let result = this.evaluateSPPolicy(message, policies.serviceProviderPolicy);
-    if (result || result === undefined || result === 'Not Applicable') {
-      let userResult = this.evaluateUserPolicy(message, policies.userPolicy);
-      if (userResult !== undefined) {
-        result = userResult;
-      }
-    }
-
-    return result;
-  }
-
   evaluatePolicies(message, isIncomingMessage) {
     let policies = this.context.getPolicies(message, isIncomingMessage);
-    let result;
+    let result = 'Not Applicable';
 
     if (policies !== undefined) {
-      result = this.evaluatePolicy(message, policies.serviceProviderPolicy);
-      if (result || result === undefined || result === 'Not Applicable') {
-        let userResult = this.evaluatePolicy(message, policies.userPolicy);
-        if (userResult !== undefined) {
+      result = this.evaluatePolicy(message, policies.serviceProviderPolicy, isIncomingMessage);
+      if (result || result === 'Not Applicable') {
+        let userResult = this.evaluatePolicy(message, policies.userPolicy, isIncomingMessage);
+        if (userResult !== 'Not Applicable') {
           result = userResult;
         }
       }
@@ -59,10 +31,10 @@ class PDP {
     return result;
   }
 
-  evaluatePolicy(message, policy) {
-    let result;
+  evaluatePolicy(message, policy, isIncoming) {
+    let result = 'Not Applicable';
     if (policy) {
-      result = policy.evaluate(this.context, message);
+      result = policy.evaluateRules(this.context, message, isIncoming);
     }
 
     return result;

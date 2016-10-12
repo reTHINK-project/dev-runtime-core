@@ -5,8 +5,8 @@ import SubscriptionCondition from './conditions/AdvancedCondition';
 
 class Rule {
 
-  constructor(authorise, condition, scope, target, priority) {
-    this.authorise = authorise;
+  constructor(decision, condition, scope, target, priority) {
+    this.decision = decision;
     this.setCondition(condition);
     this.priority = priority;
     this.scope = scope;
@@ -31,35 +31,22 @@ class Rule {
     }
   }
 
-  evaluate(context, message) {
+  evaluate(context, message, isIncoming) {
+    let field = (isIncoming) ? message.to : message.from;
     let hypertyName;
     switch (this.scope) {
       case 'global':
         break;
 
       case 'hyperty':
-        if (isDataObjectURL(message.from)) {
-          let reporter = context.runtimeRegistry.getReporterURLSynchonous(removePathFromURL(message.from));
+        if (isDataObjectURL(field)) {
+          let reporter = context.runtimeRegistry.getReporterURLSynchonous(removePathFromURL(field));
           if (reporter !== undefined) {
             hypertyName = context.runtimeRegistry.getHypertyName(reporter);
           }
         } else {
-          if (message.from.split('://')[0] === 'hyperty') {
-            hypertyName = context.runtimeRegistry.getHypertyName(removePathFromURL(message.from));
-          }
-        }
-        if (hypertyName === this.target) {
-          break;
-        }
-
-        if (isDataObjectURL(message.to)) {
-          let reporter = context.runtimeRegistry.getReporterURLSynchonous(removePathFromURL(message.to));
-          if (reporter !== undefined) {
-            hypertyName = context.runtimeRegistry.getHypertyName(reporter);
-          }
-        } else {
-          if (message.to.split('://')[0] === 'hyperty') {
-            hypertyName = context.runtimeRegistry.getHypertyName(removePathFromURL(message.to));
+          if (field.split('://')[0] === 'hyperty') {
+            hypertyName = context.runtimeRegistry.getHypertyName(removePathFromURL(field));
           }
         }
         if (hypertyName === this.target) {
@@ -68,15 +55,15 @@ class Rule {
 
         return 'Not Applicable';
 
-      case 'user':
+      case 'identity':
         let owner;
 
-        if (isDataObjectURL(message.from)) {
-          let reporter = context.runtimeRegistry.getReporterURLSynchonous(removePathFromURL(message.from));
+        if (isDataObjectURL(field)) {
+          let reporter = context.runtimeRegistry.getReporterURLSynchonous(removePathFromURL(field));
           owner = context.runtimeRegistry.getHypertyOwner(reporter);
         } else {
-          if (message.from.split('://')[0] === 'hyperty') {
-            owner = context.runtimeRegistry.getHypertyOwner(removePathFromURL(message.from));
+          if (field.split('://')[0] === 'hyperty') {
+            owner = context.runtimeRegistry.getHypertyOwner(removePathFromURL(field));
           }
         }
         if (owner !== undefined) {
@@ -86,29 +73,11 @@ class Rule {
           break;
         }
 
-        if (isDataObjectURL(message.to)) {
-          let reporter = context.runtimeRegistry.getReporterURLSynchonous(removePathFromURL(message.to));
-          owner = context.runtimeRegistry.getHypertyOwner(reporter);
-          if (owner !== undefined) {
-            owner = getUserEmailFromURL(owner);
-          }
-        } else {
-          if (message.to.split('://')[0] === 'hyperty') {
-            owner = context.runtimeRegistry.getHypertyOwner(removePathFromURL(message.to));
-            if (owner !== undefined) {
-              owner = getUserEmailFromURL(owner);
-            }
-          }
-        }
-        if (owner === this.target) {
-          break;
-        }
-
         return 'Not Applicable';
     }
 
     if (this.condition.isApplicable(context, message, this.scope, this.target)) {
-      return this.authorise;
+      return this.decision;
     } else {
       return 'Not Applicable';
     }

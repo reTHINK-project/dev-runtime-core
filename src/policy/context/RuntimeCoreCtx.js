@@ -2,7 +2,7 @@ import AllowOverrides from '../combiningAlgorithms/AllowOverrides';
 import BlockOverrides from '../combiningAlgorithms/BlockOverrides';
 import {divideURL, getUserEmailFromURL, isDataObjectURL} from '../../utils/utils';
 import FirstApplicable from '../combiningAlgorithms/FirstApplicable';
-import ReThinkCtx from './ReThinkCtx';
+import ReThinkCtx from '../ReThinkCtx';
 
 class RuntimeCoreCtx extends ReThinkCtx {
 
@@ -16,98 +16,16 @@ class RuntimeCoreCtx extends ReThinkCtx {
     this.persistenceManager = persistenceManager;
   }
 
-  authorise(message) {
-    console.log('--- Policy Engine ---');
-    console.log(message);
-
-    return new Promise((resolve, reject) => {
-
-      message.body = message.body || {};
-      let _this = this;
-      let result;
-      if (_this._isToVerify(message)) {
-        let isIncoming = _this.isIncomingMessage(message);
-        _this.prepareForEvaluation(message, isIncoming).then(message => {
-          result = _this.pep.pdp.evaluatePolicies(message, isIncoming);
-          if (result === undefined || result === 'Not Applicable') {
-            result = _this.defaultBehavior;
-            message.body.auth = false;
-          }
-          _this.pep.actionsService.enforcePolicies(message, result, isIncoming).then(messages => {
-            for (let i in messages) {
-              message = messages[i];
-              _this.prepareToForward(message, isIncoming, result).then(message => {
-                if (result) {
-                  message.body.auth = (message.body.auth === undefined) ? true : message.body.auth;
-                  resolve(message);
-                } else {
-                  let errorMessage = { body: { code: 304, description: 'Blocked by policy' }, from: message.to, to: message.from, type: 'response' };
-                  reject(errorMessage);
-                }
-              }, (error) => {
-                reject(error);
-              });
-            }
-          }, (error) => {
-            reject(error);
-          });
-        }, (error) => {
-          reject(error);
-        });
-      } else {
-        result = _this.defaultBehavior;
-        if (result) {
-          message.body.auth = false;
-          resolve(message);
-        } else {
-          let errorMessage = { body: { code: 304, description: 'Blocked by policy' }, from: message.to, to: message.from, type: 'response' };
-          reject(errorMessage);
-        }
-      }
-    });
-  }
-
-  get dataObjectScheme() {
-    return this._dataObjectScheme;
-  }
-
-  get resourceType() {
-    return this._resourceType;
-  }
-
   get subscription() {
     return this._subscription;
-  }
-
-  set dataObjectScheme(params) {
-    let from = params.message.from;
-    if (isDataObjectURL(from)) {
-      this._dataObjectScheme = divideURL(from).type;
-    } else {
-      this._dataObjectScheme = undefined;
-    }
-  }
-
-  set resourceType(params) {
-    let message = params.message;
-    if (message.body.value !== undefined) {
-      this._resourceType = message.body.value.resourceType;
-    }
   }
 
   set subscription(params) {
     this._subscription = params.message.body.subscriber;
   }
 
-  isIncomingMessage(message) {
-    return (message.body !== undefined && message.body.identity !== undefined) ? true : false;
-  }
-
   loadConfigurations() {
     this.activeUserPolicy = this.persistenceManager.get('rethink:activePolicy');
-
-    let defaultBehavior = this.persistenceManager.get('rethink:defaultBehavior');
-    this.defaultBehavior  = (defaultBehavior === undefined) ? true : defaultBehavior;
 
     let groups = this.persistenceManager.get('rethink:groups');
     this.groups = (groups === undefined) ? {} : groups;
@@ -123,31 +41,21 @@ class RuntimeCoreCtx extends ReThinkCtx {
 
       let _this = this;
       if (isIncoming) {
-        /*if (message.type === 'update') {
-          _this._isValidUpdate(message).then(message => {
-            if (_this._isToCypherModule(message)) {
-              _this.idModule.decryptMessage(message).then(function(message) {
+        if (_this._isToCypherModule(message)) {
+          _this.idModule.decryptMessage(message).then(function(message) {
+            /*if (message.type === 'update') {
+              _this._isValidUpdate(message).then(message => {*/
                 resolve(message);
               }, (error) => {
                 reject(error);
-              });
+              /*});
             } else {
               resolve(message);
-            }
-          }, (error) => {
-            reject(error);
-          });
-        } else {*/
-        if (_this._isToCypherModule(message)) {
-          _this.idModule.decryptMessage(message).then(function(message) {
-            resolve(message);
-          }, (error) => {
-            reject(error);
+            }*/
           });
         } else {
           resolve(message);
         }
-        //}
       } else {
         if (_this._isToSetID(message)) {
           _this._getIdentity(message).then(identity => {
@@ -317,26 +225,6 @@ class RuntimeCoreCtx extends ReThinkCtx {
   }
 
   /**
-  * Identifies the messages to be verified by the Policy Engine
-  * @param    {Message}   message
-  * @returns  {boolean}   returns true if the message requires encryption/decryption
-  *                       or if its type equals 'handshake'; false otherwise
-  */
-  _isToVerify(message) {
-    let schemasToIgnore = ['domain', 'domain-idp', 'global', 'hyperty-runtime', 'runtime'];
-    let splitFrom = (message.from).split('://');
-    let fromSchema = splitFrom[0];
-    let splitTo = (message.to).split('://');
-    let toSchema =  splitTo[0];
-
-    if (message.from === fromSchema || message.to === toSchema || message.type === 'read' || message.type === 'response') {
-      return false;
-    } else {
-      return schemasToIgnore.indexOf(fromSchema) === -1 || schemasToIgnore.indexOf(toSchema) === -1;
-    }
-  }
-
-  /**
   * Identifies the messages to be forwarded to the Identity Module for
   * encryption/decryption and integrity validation.
   * @param {Message}    message
@@ -395,11 +283,6 @@ class RuntimeCoreCtx extends ReThinkCtx {
     this.persistenceManager.set('rethink:activePolicy', 0, this.activeUserPolicy);
   }
 
-  updateDefaultBehavior(newDecision) {
-    this.defaultBehavior = newDecision;
-    this.persistenceManager.set('rethink:defaultBehavior', 0, this.defaultBehavior);
-  }
-
   saveGroups() {
     this.persistenceManager.set('rethink:groups', 0, this.groups);
   }
@@ -437,12 +320,18 @@ class RuntimeCoreCtx extends ReThinkCtx {
     return groupsNames;
   }
 
-  getGroup(groupName) {
-    let myGroups = this.groups;
+  getGroup(groupName, destination) {
     let members = [];
 
-    if (myGroups[groupName] !== undefined) {
-      members = myGroups[groupName];
+    if (groupName === 'preauthorised') {
+      let dataObjectURL = destination.split('/');
+      dataObjectURL.pop();
+      dataObjectURL = dataObjectURL[0] + '//' + dataObjectURL[2];
+      members = this.runtimeRegistry.getPreAuthSubscribers(dataObjectURL);
+    } else {
+      if (this.groups[groupName] !== undefined) {
+        members = this.groups[groupName];
+      }
     }
 
     return members;
