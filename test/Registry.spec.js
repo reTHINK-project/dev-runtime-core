@@ -85,7 +85,6 @@ getRegistry.then(function(registry) {
 
       it('should discover a ProtocolStub', function(done) {
         let url = 'ua.pt';
-
         expect(registry.discoverProtostub(url).then((result) => {
           expect(result).to.have.property('url').include('msg-node.ua.pt/protostub/');
           expect(result).to.have.property('status', 'deployed');

@@ -1008,25 +1008,25 @@ class Registry {
         domainUrl = domainUrl.substring(domainUrl.indexOf('.') + 1);
       }
 
-      let request;
+      let registredComponent;
       if (type === 'domain-idp') {
-        request  = _this.idpProxyList.hasOwnProperty(domainUrl) ? _this.idpProxyList[domainUrl] : false;
+        registredComponent  = _this.idpProxyList.hasOwnProperty(domainUrl) ? _this.idpProxyList[domainUrl] : false;
       } else {
-        request  = _this.protostubsList.hasOwnProperty(domainUrl) ? _this.protostubsList[domainUrl] : false;
+        registredComponent  = _this.protostubsList.hasOwnProperty(domainUrl) ? _this.protostubsList[domainUrl] : false;
       }
 
-      if (request) {
-        console.info('Resolved: ', request.url);
-        resolve(request.url);
+      if (registredComponent && registredComponent.hasOwnProperty('status') && registredComponent.status === STATUS.DEPLOYED) {
+        console.info('Resolved: ', registredComponent.url);
+        resolve(registredComponent.url);
       } else {
         if (type === 'domain-idp') {
           // _this.trigger('runtime:loadIdpProxy', domainUrl);
 
           _this._loader.loadIdpProxy(domainUrl).then((result) => {
-            request  = _this.idpProxyList[domainUrl];
-            console.info('Resolved IDPProxy: ', request, result);
+            registredComponent  = _this.idpProxyList[domainUrl];
+            console.info('Resolved IDPProxy: ', registredComponent, result);
             _this.idpProxyList[domainUrl].status = STATUS.DEPLOYED;
-            resolve(request.url);
+            resolve(registredComponent.url);
           }).catch((reason) => {
             console.error('Error resolving IDPProxy: ', reason);
             reject(reason);
@@ -1036,10 +1036,10 @@ class Registry {
           // _this.trigger('runtime:loadStub', domainUrl);
 
           _this._loader.loadStub(domainUrl).then((result) => {
-            request  = _this.protostubsList[domainUrl];
-            console.info('Resolved Protostub: ', request, result);
+            registredComponent  = _this.protostubsList[domainUrl];
+            console.info('Resolved Protostub: ', registredComponent, result);
             _this.protostubsList[domainUrl].status = STATUS.DEPLOYED;
-            resolve(request.url);
+            resolve(registredComponent.url);
           }).catch((reason) => {
             console.error('Error resolving Protostub: ', reason);
             reject(reason);
