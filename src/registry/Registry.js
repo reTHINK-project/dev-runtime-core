@@ -262,7 +262,7 @@ class Registry {
       }
 
       let msg = {
-        type: 'read', from: _this.registryURL, to: 'domain://registry.' + activeDomain + '/', body: { resource: url, search:'dataObjectPerURL'}
+        type: 'read', from: _this.registryURL, to: 'domain://registry.' + activeDomain + '/', body: { resource: url }
       };
 
       _this._messageBus.postMessage(msg, (reply) => {
