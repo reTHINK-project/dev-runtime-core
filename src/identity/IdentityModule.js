@@ -187,7 +187,7 @@ class IdentityModule {
   getIdentitiesToChoose() {
     let _this = this;
     let identities = _this.emailsList;
-    let idps = ['google.com', 'microsoft.com'];
+    let idps = ['google.com', 'microsoft.com', 'orange.fr'];
 
     return {identities: identities, idps: idps};
   }
@@ -499,7 +499,16 @@ class IdentityModule {
 
     return new Promise((resolve, reject) => {
 
-      let assertionParsed = JSON.parse(atob(result.assertion));
+      let splitedAssertion = result.assertion.split('.');
+      let assertionParsed;
+
+      //verify if the token contains the 3 components, or just the assertion
+      if (splitedAssertion[1]) {
+        assertionParsed = JSON.parse(atob(splitedAssertion[1]));
+      } else {
+
+        assertionParsed = JSON.parse(atob(result.assertion));
+      }
       let idToken;
 
       //TODO remove the verification and remove the tokenIDJSON from the google idpProxy;
@@ -509,13 +518,19 @@ class IdentityModule {
         idToken = assertionParsed;
       }
 
-      result.identity = getUserURLFromEmail(idToken.email);
+      let email = idToken.email || idToken.sub;
+
+      let identifier = getUserURLFromEmail(email);
+
+      result.identity = identifier;
 
       _this.identity.addIdentity(result);
 
       // check if exists any infoToken in the result received
       let infoToken = (result.infoToken) ? result.infoToken : {};
-      let userProfileBundle = {username: idToken.email, cn: idToken.name, avatar: infoToken.picture, locale: infoToken.locale, userURL: getUserURLFromEmail(idToken.email)};
+
+      let commonName = idToken.name || email.substring(0, email.indexOf('@'));
+      let userProfileBundle = {username: email, cn: commonName, avatar: infoToken.picture, locale: infoToken.locale, userURL: identifier};
 
       //creation of a new JSON with the identity to send via messages
       let newIdentity = {userProfile: userProfileBundle, idp: result.idp.domain, assertion: result.assertion};
@@ -541,17 +556,17 @@ class IdentityModule {
         //check if the identity exists in emailList, if not add it
         //This is useful if an identity was previously registered but was later unregistered
         for (let i in _this.emailsList) {
-          if (_this.emailsList[i] === idToken.email) {
+          if (_this.emailsList[i] === email) {
             exists = true;
             break;
           }
         }
         if (!exists) {
-          _this.emailsList.push(idToken.email);
+          _this.emailsList.push(email);
         }
 
       } else {
-        _this.emailsList.push(idToken.email);
+        _this.emailsList.push(email);
         _this.identities.push(result);
         resolve(newIdentity);
       }
@@ -1018,7 +1033,10 @@ class IdentityModule {
 
           _this.validateAssertion(message.body.identity.assertion, undefined, message.body.identity.idp).then((value) => {
 
-            let receiverPublicKey = _this.crypto.decode(value.contents.nonce);
+            //TODO remove later this verification as soon as all the IdP proxy are updated in the example
+            let encodedpublicKey = (typeof value.contents === 'string') ? value.contents : value.contents.nonce;
+
+            let receiverPublicKey = _this.crypto.decode(encodedpublicKey);
             let premasterSecret = _this.crypto.generatePMS();
             let toRandom = message.body.value;
             chatKeys.hypertyTo.assertion = message.body.identity.assertion;
@@ -1113,7 +1131,11 @@ class IdentityModule {
 
           _this.validateAssertion(message.body.identity.assertion, undefined, message.body.identity.idp).then((value) => {
             let encryptedPMS = _this.crypto.decode(receivedValue.assymetricEncryption);
-            let senderPublicKey = _this.crypto.decode(value.contents.nonce);
+
+            //TODO remove later this verification as soon as all the IdP proxy are updated in the example
+            let encodedpublicKey = (typeof value.contents === 'string') ? value.contents : value.contents.nonce;
+
+            let senderPublicKey = _this.crypto.decode(encodedpublicKey);
             chatKeys.hypertyTo.assertion = message.body.identity.assertion;
             chatKeys.hypertyTo.publicKey = senderPublicKey;
             chatKeys.hypertyTo.userID    = value.contents.email;
