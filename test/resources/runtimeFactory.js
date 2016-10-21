@@ -1,7 +1,7 @@
 import SandboxBrowser from './sandboxes/SandboxBrowser';
 import AppSandboxBrowser from './sandboxes/AppSandboxBrowser';
 import Request from './Request';
-import {RuntimeCatalogueLocal, RuntimeCatalogue} from 'service-framework/dist/RuntimeCatalogue';
+import {RuntimeCatalogue} from 'service-framework/dist/RuntimeCatalogue';
 import PersistenceManager from 'service-framework/dist/PersistenceManager';
 
 export const runtimeFactory = {
@@ -30,16 +30,8 @@ export const runtimeFactory = {
 
   // TODO optimize the parameter was passed to inside the RuntimeCatalogue
   createRuntimeCatalogue() {
-
     let _this = this;
-    let factory = {
-      createHttpRequest: function() {
-        return _this.createHttpRequest();
-      }
-    };
-
-    return new RuntimeCatalogueLocal(_this);
-
+    return new RuntimeCatalogue(_this);
   },
 
   removeSandbox() {

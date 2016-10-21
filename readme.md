@@ -6,6 +6,13 @@
 -	[Developer View](#developer-view)
 -	[Tasks](#tasks)
 
+## <a id="note">Note</a>
+In order to try speed up the instalation process, we remove the first verification of global modules, so, if you want install this repository, you should install globaly this modules:
+
+```shell
+npm install -g karma-cli gulp-cli browserify
+```
+
 ## <a id="overview">Overview</a>
 
 This repository contains the source code and associated documentation of the core components required to support the deployment and execution of Hyperties in user devices or in network servers. More information about the Hyperty concept and the reTHINK framework in general is provided [here](https://github.com/reTHINK-project/dev-service-framework/blob/master/README.md).

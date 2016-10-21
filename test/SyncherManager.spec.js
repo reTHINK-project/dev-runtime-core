@@ -1,5 +1,5 @@
 import { runtimeFactory } from './resources/runtimeFactory';
-import {Syncher, DataObjectReporter, DataObjectObserver} from 'service-framework';
+import {Syncher, DataObjectReporter, DataObjectObserver} from 'service-framework/dist/Syncher';
 import SyncherManager from '../src/syncher/SyncherManager';
 import MessageBus from '../src/bus/MessageBus';
 

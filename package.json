@@ -2,11 +2,8 @@
   "name": "runtime-core",
   "version": "0.6.0",
   "description": "core runtime development",
-  "main": "./dist/Runtime.js",
-  "directories": {
-    "preinstall": "npm install -g browserify",
-    "test": "test"
-  },
+  "files": ["dist"],
+  "private": true,
   "scripts": {
     "test": "karma start"
   },
