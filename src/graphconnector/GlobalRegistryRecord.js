@@ -30,6 +30,7 @@ class GlobalRegistryRecord {
    * Constructs a new empty object.
    */
   constructor() {
+    this.schemaVersion = 1;
     this.guid;
     this.salt;
     this.userIDs = [];
@@ -50,6 +51,7 @@ class GlobalRegistryRecord {
     // TODO: give error if fields are missing
 
     let record = new Object();
+    record.schemaVersion = this.schemaVersion;
     record.guid = this.guid;
     record.salt = this.salt;
     record.userIDs = this.userIDs;

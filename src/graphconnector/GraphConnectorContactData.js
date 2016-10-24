@@ -33,6 +33,7 @@ class GraphConnectorContactData {
    * @param  {String}   lastName    The last name of the new contact.
    */
   constructor(guid, firstName, lastName) {
+    this._schemaVersion = 1;
     this._guid = guid;
     this._userIDs = [];
     this._firstName = firstName;
@@ -44,6 +45,22 @@ class GraphConnectorContactData {
     this._residenceLocation;
     this._groups = [];
     this._defaults = {};
+  }
+
+  /**
+   * Returns the schemaVersion.
+   * @returns  {int}     schemaVersion        schemaVersion of the Dataset.
+   */
+  get schemaVersion() {
+    return this._guid;
+  }
+
+  /**
+   * Sets the schemaVersion.
+   * @param  {int}     schemaVersion        schemaVersion of the Dataset.
+   */
+  set schemaVersion(schemaVersion) {
+    this._schemaVersion = schemaVersion;
   }
 
   /**
