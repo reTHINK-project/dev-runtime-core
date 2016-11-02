@@ -21,7 +21,7 @@
 * limitations under the License.
 **/
 import { divideURL } from '../utils/utils';
-import ObjectAllocation from './ObjectAllocation';
+import AddressAllocation from '../allocation/AddressAllocation';
 import ReporterObject from './ReporterObject';
 import ObserverObject from './ObserverObject';
 import tv4 from '../utils/tv4';
@@ -37,7 +37,7 @@ class SyncherManager {
   _url: URL
   _bus: MiniBus
   _registry: Registry
-  _allocator: ObjectAllocation
+  _allocator: AddressAllocation
 
   _reporters: { ObjectURL: ReporterObject }
   _observers: { ObjectURL: ObserverObject }
@@ -65,7 +65,7 @@ class SyncherManager {
     if (allocator) {
       _this._allocator = allocator;
     } else {
-      _this._allocator = new ObjectAllocation(_this._objectURL, bus);
+      _this._allocator = new AddressAllocation(_this._objectURL, bus);
     }
 
     bus.addListener(_this._url, (msg) => {
@@ -131,7 +131,7 @@ class SyncherManager {
       }
 
       //request address allocation of a new object from the msg-node
-      _this._allocator.create(domain, scheme, 1).then((allocated) => {
+      _this._allocator.create(domain, 1, scheme).then((allocated) => {
         let objURL = allocated[0];
 
         console.log('ALLOCATOR CREATE:', allocated);

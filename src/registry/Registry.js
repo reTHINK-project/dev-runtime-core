@@ -20,8 +20,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 **/
-import AddressAllocation from './AddressAllocation';
-import ObjectAllocation from '../syncher/ObjectAllocation';
+import AddressAllocation from '../allocation/AddressAllocation';
 import HypertyInstance from './HypertyInstance';
 
 import {MessageFactory} from 'service-framework/dist/MessageFactory';
@@ -134,8 +133,8 @@ class Registry {
     _this.addressAllocation = addressAllocation;
 
     //Install ObjectAllocation
-    let objectAllocation = new ObjectAllocation(_this.registryURL + '/object-allocation', messageBus);
-    _this.objectAllocation = objectAllocation;
+    //let objectAllocation = new AddressAllocation(_this.registryURL + '/object-allocation', messageBus);
+    //_this.objectAllocation = objectAllocation;
 
     /*let discovery = new Discovery(_this.registryURL, messageBus);
     _this.discovery = discovery;
