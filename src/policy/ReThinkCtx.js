@@ -1,18 +1,47 @@
-import {divideEmail} from '../../utils/utils';
+import {divideEmail, divideURL, isDataObjectURL} from '../utils/utils';
 
-class CommonCtx {
+class ReThinkCtx {
 
   constructor() {
-    this.defaultBehavior = true;
+    this.defaultBehaviour = true;
     this.groups = {};
   }
 
-  get defaultBehavior() {
-    return this._defaultBehavior;
+  get scheme() {
+    return this._scheme;
   }
 
-  set defaultBehavior(behavior) {
-    this._defaultBehavior = behavior;
+  get date() {
+    return this._date;
+  }
+
+  get domain() {
+    return this._domain;
+  }
+
+  get type() {
+    return this._type;
+  }
+
+  get source() {
+    return this._source;
+  }
+
+  get time() {
+    return this._time;
+  }
+
+  get weekday() {
+    return this._weekday;
+  }
+
+  set scheme(params) {
+    let from = params.message.from;
+    if (isDataObjectURL(from)) {
+      this._scheme = divideURL(from).type;
+    } else {
+      this._scheme = undefined;
+    }
   }
 
   set date(now) {
@@ -25,13 +54,19 @@ class CommonCtx {
     if (month.length === 1) {
       month = '0' + month;
     }
-
     this._date = day + '/' + month + '/' + date.getFullYear();
   }
 
   set domain(params) {
     if (params.message.body.identity !== undefined) {
       this._domain = divideEmail(params.message.body.identity.userProfile.username).domain;
+    }
+  }
+
+  set type(params) {
+    let message = params.message;
+    if (message.body.value !== undefined) {
+      this._type = message.body.value.resourceType;
     }
   }
 
@@ -54,28 +89,6 @@ class CommonCtx {
     this._weekday = String(new Date().getDay());
   }
 
-  get date() {
-    return this._date;
-  }
-
-  get domain() {
-    return this._domain;
-  }
-
-  get source() {
-    let _this = this;
-    return _this._source;
-  }
-
-  get time() {
-    let _this = this;
-    return _this._time;
-  }
-
-  get weekday() {
-    return this._weekday;
-  }
-
 }
 
-export default CommonCtx;
+export default ReThinkCtx;

@@ -20,7 +20,6 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 **/
-import EventEmitter from '../utils/EventEmitter';
 import AddressAllocation from './AddressAllocation';
 import ObjectAllocation from '../syncher/ObjectAllocation';
 import HypertyInstance from './HypertyInstance';
@@ -28,13 +27,15 @@ import HypertyInstance from './HypertyInstance';
 import {MessageFactory} from 'service-framework/dist/MessageFactory';
 import {divideURL} from '../utils/utils.js';
 
+const STATUS = { DEPLOYED: 'deployed', PROGRESS: 'in-progress' };
+
 /*import IdentityManager from './IdentityManager';
 import Discovery from './Discovery';*/
 
 /**
 * Runtime Registry Interface
 */
-class Registry extends EventEmitter {
+class Registry {
 
   /**
   * To initialise the Runtime Registry with the RuntimeURL that will be the basis to derive the internal runtime addresses when allocating addresses to internal runtime component. In addition, the Registry domain back-end to be used to remotely register Runtime components, is also passed as input parameter.
@@ -45,8 +46,6 @@ class Registry extends EventEmitter {
   * @param  {DomainURL}           remoteRegistry        remoteRegistry
   */
   constructor(runtimeURL, appSandbox, identityModule, runtimeCatalogue, remoteRegistry) {
-
-    super();
 
     // how some functions receive the parameters for example:
     // new Registry('hyperty-runtime://sp1/123', appSandbox, idModule, remoteRegistry);
@@ -84,6 +83,16 @@ class Registry extends EventEmitter {
     _this.sandboxesList.appSandbox[runtimeURL] = appSandbox;
     let msgFactory = new MessageFactory('false', '{}');
     _this.messageFactory = msgFactory;
+  }
+
+  set loader(loader) {
+    let _this = this;
+    _this._loader = loader;
+  }
+
+  get loader() {
+    let _this = this;
+    return _this._loader;
   }
 
   /**
@@ -132,6 +141,80 @@ class Registry extends EventEmitter {
     _this.identityManager = identityManager;*/
   }
 
+  /**
+  * function to request about users registered in domain registry, and
+  * return the last hyperty instance registered by the user.
+  * @param  {email}              email
+  * @param  {domain}            domain (Optional)
+  * @return {Promise}          Promise
+  */
+
+  // TODO: implement a cache system
+  discoverHypertyPerUser(email, domain) {
+    let _this = this;
+    let activeDomain;
+
+    if (!domain) {
+      activeDomain = _this._domain;
+    } else {
+      activeDomain = domain;
+    }
+
+    let identityURL = 'user://' + email.substring(email.indexOf('@') + 1, email.length) + '/' + email.substring(0, email.indexOf('@'));
+
+    // message to query domain registry, asking for a user hyperty.
+    let message = {
+      type: 'read', from: _this.registryURL, to: 'domain://registry.' + activeDomain + '/', body: { resource: identityURL}
+    };
+
+    console.log('Message: ', message, activeDomain, identityURL);
+
+    //console.log('message READ', message);
+    return new Promise(function(resolve, reject) {
+
+      _this._messageBus.postMessage(message, (reply) => {
+        console.log('message reply', reply);
+
+        let hyperty;
+        let mostRecent;
+        let lastHyperty;
+        let value = reply.body.value;
+
+        for (hyperty in value) {
+          if (value[hyperty].lastModified !== undefined) {
+            if (mostRecent === undefined) {
+              mostRecent = new Date(value[hyperty].lastModified);
+              lastHyperty = hyperty;
+            } else {
+              let hypertyDate = new Date(value[hyperty].lastModified);
+              if (mostRecent.getTime() < hypertyDate.getTime()) {
+                mostRecent = hypertyDate;
+                lastHyperty = hyperty;
+              }
+            }
+          }
+        }
+
+        console.log('Last Hyperty: ', lastHyperty, mostRecent);
+
+        let hypertyURL = lastHyperty;
+
+        if (hypertyURL === undefined) {
+          return reject('User Hyperty not found');
+        }
+
+        let idPackage = {
+          id: email,
+          descriptor: value[hypertyURL].descriptor,
+          hypertyURL: hypertyURL
+        };
+
+        console.log('===> hypertyDiscovery messageBundle: ', idPackage);
+        resolve(idPackage);
+      });
+    });
+  }
+
   _getIdentityAssociated(type, hypertyURL) {
     let _this = this;
 
@@ -165,20 +248,22 @@ class Registry extends EventEmitter {
   * @return {JSON}     dataObject     data object
   */
   discoverDataObjectPerURL(url, domain) {
+
     let _this = this;
-    let activeDomain;
-
-    if (!domain) {
-      activeDomain = _this._domain;
-    } else {
-      activeDomain = domain;
-    }
-
-    let msg = {
-      type: 'read', from: _this.registryURL, to: 'domain://registry.' + activeDomain + '/', body: { resource: url, search:'dataObjectPerURL'}
-    };
 
     return new Promise(function(resolve, reject) {
+
+      let activeDomain;
+
+      if (!domain) {
+        activeDomain = _this._domain;
+      } else {
+        activeDomain = domain;
+      }
+
+      let msg = {
+        type: 'read', from: _this.registryURL, to: 'domain://registry.' + activeDomain + '/', body: { resource: url }
+      };
 
       _this._messageBus.postMessage(msg, (reply) => {
 
@@ -444,12 +529,14 @@ class Registry extends EventEmitter {
 
       _this.dataObjectList[dataObjectUrl] = messageValue;
 
-      let message = _this.messageFactory.createCreateMessageRequest(
+      /*let message = _this.messageFactory.createCreateMessageRequest(
         _this.registryURL,
         'domain://registry.' + _this.registryDomain + '/',
         messageValue,
         'policy'
-      );
+      );*/
+
+      let message = {type:'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: messageValue, policy: 'policy'}};
 
       _this._messageBus.postMessage(message, (reply) => {
         console.log('===> registerDataObject Reply: ', reply);
@@ -472,15 +559,15 @@ class Registry extends EventEmitter {
   registerHyperty(sandbox, descriptorURL, descriptor) {
     let _this = this;
 
-    //assuming descriptor come in this format, the service-provider-domain url is retrieved by a split instruction
-    //hyperty-catalogue://<service-provider-domain>/<catalogue-object-identifier>
-    let domainUrl = divideURL(descriptorURL).domain;
-
-    if (domainUrl.includes('catalogue')) {
-      domainUrl = domainUrl.replace('catalogue.', '');
-    }
-
     return new Promise(function(resolve, reject) {
+
+      //assuming descriptor come in this format, the service-provider-domain url is retrieved by a split instruction
+      //hyperty-catalogue://<service-provider-domain>/<catalogue-object-identifier>
+      let domainUrl = divideURL(descriptorURL).domain;
+
+      if (domainUrl.includes('catalogue')) {
+        domainUrl = domainUrl.replace('catalogue.', '');
+      }
 
       _this.idModule.getIdentityAssertion().then(function(result) {
         let userProfile = result.userProfile;
@@ -555,12 +642,14 @@ class Registry extends EventEmitter {
                 //message to register the new hyperty, within the domain registry
                 let messageValue = {user: identityURL,  descriptor: descriptorURL, url: adderessList[0], expires: _this.expiresTime, resources: resources, dataSchemes: filteredDataSchemas};
 
-                let message = _this.messageFactory.createCreateMessageRequest(
+                /*let message = _this.messageFactory.createCreateMessageRequest(
                   _this.registryURL,
                   'domain://registry.' + _this.registryDomain + '/',
                   messageValue,
                   'policy'
-                );
+                );*/
+
+                let message = {type:'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: messageValue, policy: 'policy'}};
 
                 _this._messageBus.postMessage(message, (reply) => {
                   console.log('===> RegisterHyperty Reply: ', reply);
@@ -576,12 +665,13 @@ class Registry extends EventEmitter {
                 // the time is defined by a little less than half of the expires time defined
                 let keepAliveTimer = setInterval(function() {
 
-                  let message = _this.messageFactory.createCreateMessageRequest(
+                  /*let message = _this.messageFactory.createCreateMessageRequest(
                     _this.registryURL,
                     'domain://registry.' + _this.registryDomain + '/',
                     messageValue,
                     'policy'
-                  );
+                  );*/
+                  let message = {type:'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: messageValue, policy: 'policy'}};
 
                   _this._messageBus.postMessage(message, (reply) => {
                     console.log('===> KeepAlive Reply: ', reply);
@@ -649,12 +739,17 @@ class Registry extends EventEmitter {
 
     return new Promise(function(resolve,reject) {
 
-      let request = _this.protostubsList[url];
+      let dividedURL = divideURL(url);
+      let domainURL = dividedURL.domain;
 
-      if (request === undefined) {
-        reject('requestUpdate couldn\'t get the ProtostubURL');
+      if (_this.protostubsList.hasOwnProperty(domainURL) && _this.protostubsList[domainURL].status === STATUS.DEPLOYED) {
+        resolve(_this.protostubsList[domainURL]);
       } else {
-        resolve(request);
+        _this.protostubsList[domainURL] = {
+          status: STATUS.PROGRESS
+        };
+
+        reject('requestUpdate couldn\'t get the ProtostubURL');
       }
     });
 
@@ -668,9 +763,10 @@ class Registry extends EventEmitter {
    */
   registerStub(sandbox, domainURL) {
     let _this = this;
-    let runtimeProtoStubURL;
 
     return new Promise(function(resolve,reject) {
+
+      let runtimeProtoStubURL;
 
       //check if messageBus is registered in registry or not
       if (_this._messageBus === undefined) {
@@ -685,7 +781,13 @@ class Registry extends EventEmitter {
       runtimeProtoStubURL = 'msg-node.' + domainURL + '/protostub/' + Math.floor((Math.random() * 10000) + 1);
 
       // TODO: Optimize this
-      _this.protostubsList[domainURL] = runtimeProtoStubURL;
+      // Proxy;
+      _this.protostubsList[domainURL] = {
+        url: runtimeProtoStubURL,
+        status: STATUS.DEPLOYED
+      };
+
+      // _this.protostubsList[domainURL] = runtimeProtoStubURL;
       _this.sandboxesList.sandbox[runtimeProtoStubURL] = sandbox;
 
       // sandbox.addListener('*', function(msg) {
@@ -709,17 +811,14 @@ class Registry extends EventEmitter {
   */
   unregisterStub(hypertyRuntimeURL) {
     let _this = this;
-    let runtimeProtoStubURL;
 
-    return new Promise(function(resolve,reject) {
+    return new Promise(function(resolve, reject) {
 
-      let data = _this.protostubsList[hypertyRuntimeURL];
-
-      if (data === undefined) {
-        reject('Error on unregisterStub: Hyperty not found');
-      } else {
+      if (_this.protostubsList.hasOwnProperty(hypertyRuntimeURL)) {
         delete _this.protostubsList[hypertyRuntimeURL];
         resolve('ProtostubURL removed');
+      } else {
+        reject('Error on unregisterStub: Hyperty not found');
       }
     });
   }
@@ -732,9 +831,10 @@ class Registry extends EventEmitter {
    */
   registerIdpProxy(sandbox, domainURL) {
     let _this = this;
-    let idpProxyStubURL;
 
     return new Promise(function(resolve,reject) {
+
+      let idpProxyStubURL;
 
       //check if messageBus is registered in registry or not
       if (_this._messageBus === undefined) {
@@ -744,7 +844,11 @@ class Registry extends EventEmitter {
       idpProxyStubURL = 'domain-idp://' + domainURL + '/stub/' + Math.floor((Math.random() * 10000) + 1);
 
       // TODO: Optimize this
-      _this.idpProxyList[domainURL] = idpProxyStubURL;
+      _this.idpProxyList[domainURL] = {
+        url: idpProxyStubURL,
+        status: STATUS.PROGRESS
+      };
+
       _this.sandboxesList.sandbox[idpProxyStubURL] = sandbox;
 
       // sandbox.addListener('*', function(msg) {
@@ -770,14 +874,19 @@ class Registry extends EventEmitter {
     if (!url) throw new Error('Parameter url needed');
     let _this = this;
 
-    return new Promise(function(resolve,reject) {
+    return new Promise(function(resolve, reject) {
 
-      let request = _this.idpProxyList[url];
+      let dividedURL = divideURL(url);
+      let domainURL = dividedURL.domain;
 
-      if (request === undefined) {
-        reject('requestUpdate couldn\'t get the idpProxyURL');
+      if (_this.idpProxyList.hasOwnProperty(domainURL) && _this.idpProxyList[domainURL].status === STATUS.DEPLOYED) {
+        resolve(_this.idpProxyList[domainURL]);
       } else {
-        resolve(request);
+        // TODO: Optimize this
+        _this.idpProxyList[domainURL] = {
+          status: STATUS.PROGRESS
+        };
+        reject('requestUpdate couldn\'t get the idpProxyURL');
       }
     });
 
@@ -882,50 +991,59 @@ class Registry extends EventEmitter {
     console.log('resolve ' + url);
     let _this = this;
 
-    //split the url to find the domainURL. deals with the url for example as:
-    //"hyperty-runtime://sp1/protostub/123",
-    let dividedURL = divideURL(url);
-    let domainUrl = dividedURL.domain;
-    let type = dividedURL.type;
-
-    // resolve the domain protostub in case of a message to global registry
-    if (url.includes('global://registry')) {
-      domainUrl = _this._domain;
-    }
-
     return new Promise((resolve, reject) => {
+
+      //split the url to find the domainURL. deals with the url for example as:
+      //"hyperty-runtime://sp1/protostub/123",
+      let dividedURL = divideURL(url);
+      let domainUrl = dividedURL.domain;
+      let type = dividedURL.type;
+
+      // resolve the domain protostub in case of a message to global registry
+      if (url.includes('global://registry')) {
+        domainUrl = _this._domain;
+      }
 
       if (!domainUrl.indexOf('msg-node.') || !domainUrl.indexOf('registry.')) {
         domainUrl = domainUrl.substring(domainUrl.indexOf('.') + 1);
       }
 
-      let request;
+      let registredComponent;
       if (type === 'domain-idp') {
-        request  = _this.idpProxyList[domainUrl];
+        registredComponent  = _this.idpProxyList.hasOwnProperty(domainUrl) ? _this.idpProxyList[domainUrl] : false;
       } else {
-        request  = _this.protostubsList[domainUrl];
+        registredComponent  = _this.protostubsList.hasOwnProperty(domainUrl) ? _this.protostubsList[domainUrl] : false;
       }
 
-      _this.addEventListener('runtime:stubLoaded', function(domainUrl) {
-        request  = _this.protostubsList[domainUrl];
-        console.info('Resolved Protostub: ', request);
-        resolve(request);
-      });
-
-      _this.addEventListener('runtime:idpProxyLoaded', function(domainUrl) {
-        request  = _this.idpProxyList[domainUrl];
-        console.info('Resolved IDPProxy: ', request);
-        resolve(request);
-      });
-
-      if (request !== undefined) {
-        console.info('Resolved: ', request);
-        resolve(request);
+      if (registredComponent && registredComponent.hasOwnProperty('status') && registredComponent.status === STATUS.DEPLOYED) {
+        console.info('Resolved: ', registredComponent.url);
+        resolve(registredComponent.url);
       } else {
         if (type === 'domain-idp') {
-          _this.trigger('runtime:loadIdpProxy', domainUrl);
+          // _this.trigger('runtime:loadIdpProxy', domainUrl);
+
+          _this._loader.loadIdpProxy(domainUrl).then((result) => {
+            registredComponent  = _this.idpProxyList[domainUrl];
+            console.info('Resolved IDPProxy: ', registredComponent, result);
+            _this.idpProxyList[domainUrl].status = STATUS.DEPLOYED;
+            resolve(registredComponent.url);
+          }).catch((reason) => {
+            console.error('Error resolving IDPProxy: ', reason);
+            reject(reason);
+          });
+
         } else {
-          _this.trigger('runtime:loadStub', domainUrl);
+          // _this.trigger('runtime:loadStub', domainUrl);
+
+          _this._loader.loadStub(domainUrl).then((result) => {
+            registredComponent  = _this.protostubsList[domainUrl];
+            console.info('Resolved Protostub: ', registredComponent, result);
+            _this.protostubsList[domainUrl].status = STATUS.DEPLOYED;
+            resolve(registredComponent.url);
+          }).catch((reason) => {
+            console.error('Error resolving Protostub: ', reason);
+            reject(reason);
+          });
         }
 
       }

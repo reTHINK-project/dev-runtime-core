@@ -49,4 +49,6 @@ describe('Utils Module', function() {
     expect(divideURL(url)).to.deep.equal({'type' : 'https','domain': 'localhost:9090', 'identity': '/secure-test'});
   })
 
+  
+
 })

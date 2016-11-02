@@ -1,201 +1,154 @@
-import CommonCtx from './CommonCtx';
-import Condition from '../conditions/Condition';
+import AllowOverrides from '../combiningAlgorithms/AllowOverrides';
+import BlockOverrides from '../combiningAlgorithms/BlockOverrides';
 import {divideURL, getUserEmailFromURL, isDataObjectURL} from '../../utils/utils';
-import persistenceManager from 'service-framework/dist/PersistenceManager';
-import Rule from '../Rule';
-import UserPolicy from '../policies/UserPolicy';
-import SubscriptionCondition from '../conditions/SubscriptionCondition';
+import FirstApplicable from '../combiningAlgorithms/FirstApplicable';
+import ReThinkCtx from '../ReThinkCtx';
 
-class RuntimeCoreCtx extends CommonCtx {
+class RuntimeCoreCtx extends ReThinkCtx {
 
-  constructor(idModule, runtimeRegistry) {
+  constructor(idModule, runtimeRegistry, persistenceManager) {
     super();
     this.idModule = idModule;
     this.runtimeRegistry = runtimeRegistry;
     this.activeUserPolicy = undefined;
-    this.serviceProviderPolicies = {};
+    this.serviceProviderPolicy = {};
     this.userPolicies = {};
-  }
-
-  get dataObjectScheme() {
-    return this._dataObjectScheme;
+    this.persistenceManager = persistenceManager;
   }
 
   get subscription() {
     return this._subscription;
   }
 
-  set dataObjectScheme(params) {
-    let from = params.message.from;
-    if (isDataObjectURL(from)) {
-      this._dataObjectScheme = divideURL(from).type;
-    } else {
-      this._dataObjectScheme = undefined;
-    }
-  }
-
   set subscription(params) {
     this._subscription = params.message.body.subscriber;
   }
 
-  authorise(message) {
-    let _this = this;
+  loadConfigurations() {
+    this.activeUserPolicy = this.persistenceManager.get('rethink:activePolicy');
 
+    let groups = this.persistenceManager.get('rethink:groups');
+    this.groups = (groups === undefined) ? {} : groups;
+
+    let spPolicies = this.persistenceManager.get('rethink:spPolicies');
+    this.serviceProviderPolicy = (spPolicies === undefined) ? {} : spPolicies;
+
+    this._loadUserPolicies();
+  }
+
+  prepareForEvaluation(message, isIncoming) {
     return new Promise((resolve, reject) => {
-      console.log('--- Policy Engine ---');
-      console.log(message);
-      message.body = message.body || {};
-      let result;
-      let isToVerify = _this._isToVerify(message);
-      let isIncomingMessage = _this._isIncomingMessage(message);
-      let isToCypher = _this._isToCypherModule(message);
-      if (isToVerify) {
-        if (isIncomingMessage) {
-          if (isToCypher) {
-            _this.decrypt(message).then(message => {
-              let policies = {
-                serviceProviderPolicy: _this.getServiceProviderPolicy(message, isIncomingMessage),
-                userPolicy: _this.activeUserPolicy
-              };
-              result = _this.policyEngine.pdp.applyPolicies(message, policies);
-              _this.policyEngine.pep.enforcePolicies(message, policies, result);
-              if (result === 'Not Applicable') {
-                result = _this.defaultBehavior;
-                message.body.auth = false;
-              }
-              if (result) {
-                let isSubscription = message.type === 'subscribe';
-                let isFromRemoteSM = _this.isFromRemoteSM(message.from);
-                if (isSubscription & isFromRemoteSM) {
-                  _this.registerSubscriber(message);
-                  _this.doMutualAuthentication(message);
-                }
-                message.body.auth = (message.body.auth === undefined) ? true : message.body.auth;
-                resolve(message);
-              } else {
-                reject('Message blocked');
-              }
-            }, (error) => { reject(error); });
 
-          } else {
-            let policies = {
-              serviceProviderPolicy: _this.getServiceProviderPolicy(message, isIncomingMessage),
-              userPolicy: _this.activeUserPolicy
-            };
-            result = _this.policyEngine.pdp.applyPolicies(message, policies);
-            _this.policyEngine.pep.enforcePolicies(message, policies, result);
-            if (result === 'Not Applicable') {
-              result = _this.defaultBehavior;
-              message.body.auth = false;
-            }
-            if (result) {
-              let isSubscription = message.type === 'subscribe';
-              let isFromRemoteSM = _this.isFromRemoteSM(message.from);
-              if (isSubscription & isFromRemoteSM) {
-                _this.registerSubscriber(message);
-                _this.doMutualAuthentication(message);
-              }
-              message.body.auth = (message.body.auth === undefined) ? true : message.body.auth;
-              resolve(message);
+      let _this = this;
+      if (isIncoming) {
+        if (_this._isToCypherModule(message)) {
+          _this.idModule.decryptMessage(message).then(function(message) {
+            /*if (message.type === 'update') {
+              _this._isValidUpdate(message).then(message => {*/
+                resolve(message);
+              }, (error) => {
+                reject(error);
+              /*});
             } else {
-              reject('Message blocked');
-            }
-          }
+              resolve(message);
+            }*/
+          });
         } else {
-          let isToSetID = _this._isToSetID(message);
-          if (isToSetID) {
-            _this._getIdentity(message).then(identity => {
-              message.body.identity = identity;
-              let policies = {
-                serviceProviderPolicy: _this.getServiceProviderPolicy(message, isIncomingMessage),
-                userPolicy: _this.activeUserPolicy
-              };
-              result = _this.policyEngine.pdp.applyPolicies(message, policies);
-              _this.policyEngine.pep.enforcePolicies(message, policies, result);
-              if (result === 'Not Applicable') {
-                result = _this.defaultBehavior;
-                message.body.auth = false;
-              }
-              if (result) {
-                message.body.auth = (message.body.auth === undefined) ? true : message.body.auth;
-                if (isToCypher) {
-                  _this.encrypt(message).then(message => {
-                    resolve(message);
-                  }, (error) => { reject(error); });
-                } else {
-                  resolve(message);
-                }
-              } else {
-                reject('Message blocked');
-              }
-            }, (error) => { reject(error); });
-          } else {
-            let policies = {
-              serviceProviderPolicy: _this.getServiceProviderPolicy(message, isIncomingMessage),
-              userPolicy: _this.activeUserPolicy
-            };
-            result = _this.policyEngine.pdp.applyPolicies(message, policies);
-            _this.policyEngine.pep.enforcePolicies(message, policies, result);
-            if (result === 'Not Applicable') {
-              result = _this.defaultBehavior;
-              message.body.auth = false;
-            }
-            if (result) {
-              message.body.auth = (message.body.auth === undefined) ? true : message.body.auth;
-              resolve(message);
-            } else {
-              reject('Message blocked');
-            }
-          }
+          resolve(message);
         }
       } else {
-        result = _this.defaultBehavior;
-        message.body.auth = false;
-        if (result) {
-          resolve(message);
+        if (_this._isToSetID(message)) {
+          _this._getIdentity(message).then(identity => {
+            message.body.identity = identity;
+            resolve(message);
+          }, (error) => {
+            reject(error);
+          });
         } else {
-          reject('Message blocked');
+          resolve(message);
         }
+      }
+
+    });
+  }
+
+  getPolicies(message, isIncomingMessage) {
+    let policies = {};
+
+    if (this.activeUserPolicy !== undefined) {
+      policies.userPolicy = this.userPolicies[this.activeUserPolicy];
+    }
+
+    policies.serviceProviderPolicy = this.getServiceProviderPolicy(message, isIncomingMessage);
+
+    return policies;
+  }
+
+  _isValidUpdate(message) {
+    let _this = this;
+    return new Promise((resolve, reject) => {
+      if (message.from.split('://').length > 1) {
+        _this.idModule._getHypertyFromDataObject(message.from).then(hypertyURL => {
+          if (hypertyURL === message.body.source) {
+            resolve(message);
+          } else {
+            reject('The source of the message is not valid.');
+          }
+        }, (error) => {
+          reject(error);
+        });
+      } else {
+        resolve(message);
       }
     });
   }
 
-  decrypt(message) {
+  prepareToForward(message, isIncoming, result) {
     let _this = this;
-
-    return new Promise(function(resolve,reject) {
-      _this.idModule.decryptMessage(message).then(function(msg) {
-        resolve(msg);
-      }, (error) => {
-        reject(error);
-      });
+    return new Promise((resolve, reject) => {
+      if (isIncoming & result) {
+        let isSubscription = message.type === 'subscribe';
+        let isFromRemoteSM = _this.isFromRemoteSM(message.from);
+        if (isSubscription & isFromRemoteSM) {
+          _this.doMutualAuthentication(message).then(() => {
+            resolve(message);
+          }, (error) => {
+            reject(error);
+          });
+        } else {
+          resolve(message);
+        }
+      } else {
+        if (_this._isToCypherModule(message)) {
+          _this.idModule.encryptMessage(message).then((message) => {
+            resolve(message);
+          }, (error) => {
+            reject(error);
+          });
+        } else {
+          resolve(message);
+        }
+      }
     });
   }
 
   doMutualAuthentication(message) {
-    let to = message.to.split('/');
-    let subsIndex = to.indexOf('subscription');
-    let isDataObjectSubscription = subsIndex !== -1;
-    let isFromRemoteSM = this.isFromRemoteSM(message.from);
-    if (isDataObjectSubscription & isFromRemoteSM) {
-      to.pop();
-      let dataObjectURL = to[0] + '//' + to[2] + '/' + to[3];
-      if (to.length > 4) {
-        dataObjectURL = to[0] + '//' + to[2] + '/' + to[3] + '/' + to[4];
-      }
-      this.idModule.doMutualAuthentication(dataObjectURL, message.body.subscriber);
-    }
-  }
-
-  encrypt(message) {
     let _this = this;
-
-    return new Promise(function(resolve,reject) {
-      _this.idModule.encryptMessage(message).then((msg) => {
-        resolve(msg);
-      }, (error) => {
-        reject(error);
-      });
+    return new Promise(function(resolve, reject) {
+      let to = message.to.split('/');
+      let subsIndex = to.indexOf('subscription');
+      let isDataObjectSubscription = subsIndex !== -1;
+      let isFromRemoteSM = _this.isFromRemoteSM(message.from);
+      if (isDataObjectSubscription & isFromRemoteSM) {
+        to.pop();
+        let dataObjectURL = to[0] + '//' + to[2] + '/' + to[3];
+        _this.idModule.doMutualAuthentication(dataObjectURL, message.body.subscriber).then(() => {
+          _this.runtimeRegistry.registerSubscriber(dataObjectURL, message.body.subscriber);
+          resolve();
+        }, (error) => {
+          reject(error);
+        });
+      }
     });
   }
 
@@ -229,10 +182,10 @@ class RuntimeCoreCtx extends CommonCtx {
 
     if (isIncoming) {
       let toHyperty = this.runtimeRegistry.getHypertyName(message.to);
-      policy = this.serviceProviderPolicies[toHyperty];
+      policy = this.serviceProviderPolicy[toHyperty];
     } else {
       let fromHyperty = this.runtimeRegistry.getHypertyName(message.from);
-      policy = this.serviceProviderPolicies[fromHyperty];
+      policy = this.serviceProviderPolicy[fromHyperty];
     }
     return policy;
   }
@@ -248,10 +201,6 @@ class RuntimeCoreCtx extends CommonCtx {
     let fromSchema = splitFrom[0];
 
     return schemasToIgnore.indexOf(fromSchema) === -1;
-  }
-
-  _isIncomingMessage(message) {
-    return (message.body.identity) ? true : false;
   }
 
   getURL(url) {
@@ -275,81 +224,32 @@ class RuntimeCoreCtx extends CommonCtx {
     }
   }
 
-  _isToVerify(message) {
-    let schemasToIgnore = ['domain-idp', 'hyperty-runtime', 'runtime', 'domain'];
-    let splitFrom = (message.from).split('://');
-    let fromSchema = splitFrom[0];
-    let splitTo = (message.to).split('://');
-    let toSchema =  splitTo[0];
-    if (fromSchema === message.from || toSchema === message.to) {
-      return false;
-    }
-    return schemasToIgnore.indexOf(fromSchema) === -1 || schemasToIgnore.indexOf(toSchema) === -1;
-  }
-
-  //TODO use schemasToIgnore instead
+  /**
+  * Identifies the messages to be forwarded to the Identity Module for
+  * encryption/decryption and integrity validation.
+  * @param {Message}    message
+  * @returns {boolean}  returns true if the message requires encryption/decryption
+  *                     or if its type equals 'handshake'; false otherwise
+  */
   _isToCypherModule(message) {
     let isCreate = message.type === 'create';
     let isFromHyperty = divideURL(message.from).type === 'hyperty';
     let isToHyperty = divideURL(message.to).type === 'hyperty';
     let isToDataObject = isDataObjectURL(message.to);
-    let isHandshake = message.type === 'handshake';
 
-    return (isCreate && isFromHyperty && isToHyperty) || (isCreate && isFromHyperty && isToDataObject) || isHandshake;
+    return (isCreate && isFromHyperty && isToHyperty) || (isCreate && isFromHyperty && isToDataObject) || message.type === 'handshake' || message.type === 'update';
   }
 
-  loadActivePolicy() {
-    this.activeUserPolicy = persistenceManager.get('rethink:activePolicy');
-  }
-
-  loadGroups() {
-    let groups = persistenceManager.get('rethink:groups');
-    if (groups != undefined) {
-      this.groups = groups;
-    }
-  }
-
-  loadSPPolicies() {
-    let policies = persistenceManager.get('rethink:spPolicies');
-    if (policies !== undefined) {
-      this.serviceProviderPolicies = policies;
-    }
-  }
-
-  loadUserPolicies() {
-    let policies = persistenceManager.get('rethink:userPolicies');
-
+  /**
+  * Creates a group with the given name.
+  * @param  {String}  groupName
+  */
+  _loadUserPolicies() {
+    let policies = this.persistenceManager.get('rethink:userPolicies');
     if (policies !== undefined) {
       for (let i in policies) {
-        let rulesPE = [];
-        let rules = policies[i].rules;
-        for (let j in rules) {
-          let condition;
-          if (rules[j].condition.attribute === 'subscription') {
-            condition = new SubscriptionCondition(rules[j].condition.attribute, rules[j].condition.operator, rules[j].condition.params);
-          } else {
-            condition = new Condition(rules[j].condition.attribute, rules[j].condition.operator, rules[j].condition.params);
-          }
-          rulesPE.push(new Rule(rules[j].authorise, condition, rules[j].priority, rules[j].scope, rules[j].target));
-        }
-        this.userPolicies[i] = new UserPolicy(policies[i].key, rulesPE, policies[i].actions, policies[i].combiningAlgorithm);
+        this.pep.addPolicy('USER', i, policies[i]);
       }
-    }
-  }
-
-  registerSubscriber(message) {
-    let to = message.to.split('/');
-    let subsIndex = to.indexOf('subscription');
-    let isDataObjectSubscription = subsIndex !== -1;
-    let isFromRemoteSM = this.isFromRemoteSM(message.from);
-
-    if (isDataObjectSubscription & isFromRemoteSM) {
-      to.pop();
-      let dataObjectURL = to[0] + '//' + to[2] + '/' + to[3];
-      if (to.length > 4) {
-        dataObjectURL = to[0] + '//' + to[2] + '/' + to[3] + '/' + to[4];
-      }
-      this.runtimeRegistry.registerSubscriber(dataObjectURL, message.body.subscriber);
     }
   }
 
@@ -358,23 +258,121 @@ class RuntimeCoreCtx extends CommonCtx {
     return split[split.length - 1];
   }
 
+  _getPoliciesJSON(policies) {
+    for (let i in policies) {
+      let combiningAlgorithm = policies[i].combiningAlgorithm;
+      if (combiningAlgorithm instanceof BlockOverrides) {
+        policies[i].combiningAlgorithm = 'blockOverrides';
+      } else {
+        if (combiningAlgorithm instanceof AllowOverrides) {
+          policies[i].combiningAlgorithm = 'allowOverrides';
+        } else {
+          if (combiningAlgorithm instanceof FirstApplicable) {
+            policies[i].combiningAlgorithm = 'firstApplicable';
+          } else {
+            policies[i].combiningAlgorithm = undefined;
+          }
+        }
+      }
+    }
+
+    return policies;
+  }
+
   saveActivePolicy() {
-    persistenceManager.set('rethink:activePolicy', 0, this.activeUserPolicy);
+    this.persistenceManager.set('rethink:activePolicy', 0, this.activeUserPolicy);
   }
 
   saveGroups() {
-    persistenceManager.set('rethink:groups', 0, this.groups);
+    this.persistenceManager.set('rethink:groups', 0, this.groups);
   }
 
-  savePolicies(source) {
-    switch(source) {
+  savePolicies(source, policy, key) {
+    let policiesJson;
+
+    switch (source) {
       case 'USER':
-        persistenceManager.set('rethink:userPolicies', 0, this.userPolicies);
+        policiesJson = JSON.stringify(this.userPolicies);
+        policiesJson = this._getPoliciesJSON(JSON.parse(policiesJson));
+        this.persistenceManager.set('rethink:userPolicies', 0, policiesJson);
         break;
       case 'SERVICE_PROVIDER':
-        persistenceManager.set('rethink:spPolicies', 0, this.serviceProviderPolicies);
+        if (policy !== undefined & key !== undefined) {
+          this.serviceProviderPolicy[key] = policy;
+        }
+        policiesJson = JSON.stringify(this.serviceProviderPolicy);
+        policiesJson = this._getPoliciesJSON(JSON.parse(policiesJson));
+        this.persistenceManager.set('rethink:spPolicies', 0, policiesJson);
         break;
+      default:
+        throw Error('Unknown policy source: ' + source);
     }
+  }
+
+  getGroupsNames() {
+    let myGroups = this.groups;
+    let groupsNames = [];
+    if (myGroups !== undefined) {
+      for (let groupName in myGroups) {
+        groupsNames.push(groupName);
+      }
+    }
+    return groupsNames;
+  }
+
+  getGroup(groupName, destination) {
+    let members = [];
+
+    if (groupName === 'preauthorised') {
+      let dataObjectURL = destination.split('/');
+      dataObjectURL.pop();
+      dataObjectURL = dataObjectURL[0] + '//' + dataObjectURL[2];
+      members = this.runtimeRegistry.getPreAuthSubscribers(dataObjectURL);
+    } else {
+      if (this.groups[groupName] !== undefined) {
+        members = this.groups[groupName];
+      }
+    }
+
+    return members;
+  }
+
+  /**
+  * Creates a group with the given name.
+  * @param  {String}  groupName
+  */
+  createGroup(groupName) {
+    this.groups[groupName] = [];
+    this.saveGroups();
+  }
+
+  deleteGroup(groupName) {
+    delete this.groups[groupName];
+    this.saveGroups();
+  }
+
+  /**
+  * Adds the given user email to the group with the given name.
+  * @param  {String}  userEmail
+  * @param  {String}  groupName
+  */
+  addToGroup(groupName, userEmail) {
+    let myGroups = this.groups;
+    if (myGroups[groupName] !== undefined) {
+      if (myGroups[groupName].indexOf(userEmail) === -1) {
+        myGroups[groupName].push(userEmail);
+        this.saveGroups();
+      }
+    } else {
+      throw Error('Group "' + groupName + '" does not exist!');
+    }
+  }
+
+  removeFromGroup(groupName, userEmail) {
+    let group = this.groups[groupName];
+
+    group.splice(group.indexOf(userEmail), 1);
+    this.saveGroups();
   }
 
 }

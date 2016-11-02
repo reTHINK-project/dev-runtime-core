@@ -16,7 +16,7 @@ module.exports = function(config) {
       'node_modules/object.observe/dist/object-observe.js',
       'node_modules/array.observe/array-observe.js',
       'src/**/*.js',
-      'test/**/*.spec.js'
+      'test/**/GraphConnector.spec.js'
     ],
 
     // Define the root
@@ -35,9 +35,8 @@ module.exports = function(config) {
     },
 
     browserify: {
-      debug: true,
       transform: [
-        ['babelify', {presets: ['es2015', 'stage-0'], plugins: ['add-module-exports']}]
+        ['babelify', {presets: ['es2016'], plugins: ['add-module-exports']}]
       ]
     },
 

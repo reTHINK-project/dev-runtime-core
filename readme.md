@@ -1,10 +1,17 @@
-# Hyperty Runtime Core [![Build Status](https://travis-ci.org/reTHINK-project/dev-runtime-core.svg?branch=master)](https://travis-ci.org/reTHINK-project/dev-runtime-core)
+# Hyperty Runtime Core [![Build Status](https://travis-ci.org/reTHINK-project/dev-runtime-core.svg?branch=develop)](https://travis-ci.org/reTHINK-project/dev-runtime-core)
 --------------------
 
 -	[Overview](#overview)
 -	[User View: How to include the Hyperty Runtime Core in other Projects](#user-view)
 -	[Developer View](#developer-view)
 -	[Tasks](#tasks)
+
+## <a id="note">Note</a>
+In order to try speed up the instalation process, we remove the first verification of global modules, so, if you want install this repository, you should install globaly this modules:
+
+```shell
+npm install -g karma-cli gulp-cli browserify
+```
 
 ## <a id="overview">Overview</a>
 
