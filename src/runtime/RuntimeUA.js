@@ -69,6 +69,7 @@ class RuntimeUA {
     _this.runtimeFactory = runtimeFactory;
     _this.runtimeCatalogue = runtimeFactory.createRuntimeCatalogue();
     _this.persistenceManager = runtimeFactory.persistenceManager();
+    _this.storageManager = runtimeFactory.storageManager();
 
     // Prepare the loader to load the hyperties, protostubs and idpproxy;
     _this.loader = new Loader(_this.runtimeConfiguration);
@@ -84,7 +85,7 @@ class RuntimeUA {
     _this.runtimeCatalogue.runtimeURL = runtimeURL;
 
     // Instantiate the identity Module
-    _this.identityModule = new IdentityModule(runtimeURL);
+    _this.identityModule = new IdentityModule(runtimeURL, _this.storageManager);
 
     // Use the sandbox factory to create an AppSandbox;
     // In the future can be decided by policyEngine if we need
@@ -92,7 +93,7 @@ class RuntimeUA {
     let appSandbox = runtimeFactory.createAppSandbox();
 
     // Instantiate the Registry Module
-    _this.registry = new Registry(runtimeURL, appSandbox, _this.identityModule, _this.runtimeCatalogue);
+    _this.registry = new Registry(runtimeURL, appSandbox, _this.identityModule, _this.runtimeCatalogue, undefined, _this.storageManager);
 
     // Set the loader to load Hyperties, Stubs and IdpProxies
     _this.registry.loader = _this.loader;

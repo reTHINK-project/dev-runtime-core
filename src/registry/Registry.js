@@ -44,8 +44,9 @@ class Registry {
   * @param  {AppSandbox}          appSandbox            appSandbox
   * @param  {runtimeCatalogue}    runtimeCatalogue      runtimeCatalogue
   * @param  {DomainURL}           remoteRegistry        remoteRegistry
+  * @param  {storageManager}      storageManager
   */
-  constructor(runtimeURL, appSandbox, identityModule, runtimeCatalogue, remoteRegistry) {
+  constructor(runtimeURL, appSandbox, identityModule, runtimeCatalogue, remoteRegistry, storageManager) {
 
     // how some functions receive the parameters for example:
     // new Registry('hyperty-runtime://sp1/123', appSandbox, idModule, remoteRegistry);
@@ -54,6 +55,7 @@ class Registry {
     // registry.resolve('hyperty-runtime://sp1/123');
 
     if (!runtimeURL) throw new Error('runtimeURL is missing.');
+    if (!storageManager) throw new Error('storageManager is missing.');
     /*if (!remoteRegistry) throw new Error('remoteRegistry is missing');*/
 
     let _this = this;
@@ -64,6 +66,7 @@ class Registry {
     _this.runtimeCatalogue = runtimeCatalogue;
     _this.remoteRegistry = remoteRegistry;
     _this.idModule = identityModule;
+    _this.storageManager = storageManager;
     _this.identifier = Math.floor((Math.random() * 10000) + 1);
 
     // the expires in 3600, represents 1 hour
@@ -550,6 +553,80 @@ class Registry {
     });
   }
 
+  _getResourcesAndSchemes(descriptor) {
+    let _this = this;
+
+    return new Promise((resolve, reject)=> {
+
+      let resources;
+
+      // check if the hyperty resources is a vector or a string
+      // TODO delete later when catalogue is fixed
+      if (typeof (descriptor.hypertyType) === 'string') {
+        resources = [];
+        resources.push(descriptor.hypertyType);
+      } else {
+        resources = descriptor.hypertyType;
+      }
+
+      let descriptorDataSchema = descriptor.dataObjects;
+      let dataSchemasArray = [];
+
+      //this will create a array with a Promise in each position
+      for (let index in descriptorDataSchema) {
+        dataSchemasArray.push(_this.runtimeCatalogue.getDataSchemaDescriptor(descriptorDataSchema[index]));
+      }
+
+      // as soon as the previous array is completed, this will wait for the resolve of all promises in the array
+      Promise.all(dataSchemasArray).then(function(dataSchemas) {
+
+        let filteredDataSchemas = [];
+        for (let index in dataSchemas) {
+          let dataSchema = dataSchemas[index];
+          filteredDataSchemas.push(dataSchema.sourcePackage.sourceCode.properties.scheme.constant);
+        }
+
+        console.log('Hyperty Schemas', filteredDataSchemas);
+        console.log('Hyperty resources', resources);
+
+        resolve({resources: resources, dataSchema: filteredDataSchemas});
+      });
+    });
+  }
+
+  _getHypertyURLInstance(domainUrl, numberOfAddresses, resources, dataSchema) {
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+
+      _this.storageManager.get('registry:HypertyURLs').then((urlsList) => {
+
+        if (!urlsList) {
+          urlsList = {};
+        }
+
+        if (urlsList[resources + dataSchema]) {
+          return resolve(urlsList[resources + dataSchema]);
+        }
+
+        _this.addressAllocation.create(domainUrl, numberOfAddresses).then(function(addressList) {
+
+          addressList.forEach(function(address) {
+
+            _this._messageBus.addListener(address + '/status', (msg) => {
+              console.log('Message addListener for : ', address + '/status -> '  + msg);
+            });
+
+          });
+          urlsList[resources + dataSchema] = addressList;
+          _this.storageManager.set('registry:HypertyURLs', 0, urlsList).then(() => {
+            resolve(addressList);
+          });
+        });
+      });
+    });
+  }
+
   /**
   * To register a new Hyperty in the runtime which returns the HypertyURL allocated to the new Hyperty.
   * @param  {Sandbox}             sandbox               sandbox
@@ -581,66 +658,32 @@ class Registry {
 
             _this.registryDomain = domainUrl;
 
-            // TODO: should be implemented with addresses poll
-            // In this case we will request and return only one
-            // address
-            let numberOfAddresses = 1;
-            _this.addressAllocation.create(domainUrl, numberOfAddresses).then(function(adderessList) {
+            _this._getResourcesAndSchemes(descriptor).then((value) => {
 
-              adderessList.forEach(function(address) {
+              // TODO: should be implemented with addresses poll
+              // In this case we will request and return only one
+              // address
+              let numberOfAddresses = 1;
+              _this._getHypertyURLInstance(domainUrl, numberOfAddresses, value.resources, value.dataSchema).then((addressList) => {
 
-                _this._messageBus.addListener(address + '/status', (msg) => {
-                  console.log('Message addListener for : ', address + '/status -> '  + msg);
-                });
-
-              });
-
-              //check whether the received sanbox e ApplicationSandbox or a normal sandbox
-              if (sandbox.type === 'app') {
-                _this.sandboxesList.appSandbox[adderessList[0]] = sandbox;
-              } else if (sandbox.type === 'normal') {
-                _this.sandboxesList.sandbox[adderessList[0]] = sandbox;
-              } else {
-                reject('Wrong SandboxType');
-              }
-
-              let resources;
-
-              // check if the hyperty resources is a vector or a string
-              // TODO delete later when catalogue is fixed
-              if (typeof (descriptor.hypertyType) === 'string') {
-                resources = [];
-                resources.push(descriptor.hypertyType);
-              } else {
-                resources = descriptor.hypertyType;
-              }
-
-              let descriptorDataSchema = descriptor.dataObjects;
-              let dataSchemasArray = [];
-
-              //this will create a array with a Promise in each position
-              for (let index in descriptorDataSchema) {
-                dataSchemasArray.push(_this.runtimeCatalogue.getDataSchemaDescriptor(descriptorDataSchema[index]));
-              }
-
-              // as soon as the previous array is completed, this will wait for the resolve of all promises in the array
-              Promise.all(dataSchemasArray).then(function(dataSchemas) {
-
-                let filteredDataSchemas = [];
-                for (let index in dataSchemas) {
-                  let dataSchema = dataSchemas[index];
-                  filteredDataSchemas.push(dataSchema.sourcePackage.sourceCode.properties.scheme.constant);
+                //check whether the received sanbox e ApplicationSandbox or a normal sandbox
+                if (sandbox.type === 'app') {
+                  _this.sandboxesList.appSandbox[addressList[0]] = sandbox;
+                } else if (sandbox.type === 'normal') {
+                  _this.sandboxesList.sandbox[addressList[0]] = sandbox;
+                } else {
+                  reject('Wrong SandboxType');
                 }
 
                 let hyperty = new HypertyInstance(_this.identifier, _this.registryURL,
-                descriptorURL, descriptor, adderessList[0], userProfile);
+                descriptorURL, descriptor, addressList[0], userProfile);
 
-                hyperty._resources = resources;
-                hyperty._dataSchemes = filteredDataSchemas;
+                hyperty._resources = value.resources;
+                hyperty._dataSchemes = value.dataSchema;
                 _this.hypertiesList.push(hyperty);
 
                 //message to register the new hyperty, within the domain registry
-                let messageValue = {user: identityURL,  descriptor: descriptorURL, url: adderessList[0], expires: _this.expiresTime, resources: resources, dataSchemes: filteredDataSchemas};
+                let messageValue = {user: identityURL,  descriptor: descriptorURL, url: addressList[0], expires: _this.expiresTime, resources: value.resources, dataSchemes: value.dataSchema};
 
                 /*let message = _this.messageFactory.createCreateMessageRequest(
                   _this.registryURL,
@@ -655,7 +698,7 @@ class Registry {
                   console.log('===> RegisterHyperty Reply: ', reply);
 
                   if (reply.body.code === 200) {
-                    resolve(adderessList[0]);
+                    resolve(addressList[0]);
                   } else {
                     reject('Failed to register an Hyperty');
                   }
@@ -678,9 +721,6 @@ class Registry {
                   });
                 },(((_this.expiresTime / 1.1) / 2) * 1000));
 
-                console.log('Hyperty Schemas', filteredDataSchemas);
-                console.log('Hyperty resources', resources);
-
               });
 
             }).catch(function(reason) {
@@ -690,7 +730,7 @@ class Registry {
           });
         }
       }, function(err) {
-        reject('Failed to obtain an identity');
+        reject('Failed to obtain an identity', err);
       });
     });
 
