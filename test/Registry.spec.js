@@ -16,6 +16,7 @@ import { runtimeFactory } from './resources/runtimeFactory';
 // Testing Registry
 let runtimeURL = 'hyperty-runtime://ua.pt/123';
 
+let storageManager = runtimeFactory.storageManager();
 let appSandbox = runtimeFactory.createAppSandbox();
 let sandboxDummy = {sandbox: 'sandbox', type: 'normal'};
 let protostubURL = 'url';
@@ -38,7 +39,7 @@ let runtimeCatalogue = {
 };
 
 let getRegistry = new Promise(function(resolve) {
-  let registry = new Registry(runtimeURL, appSandbox, identityModule, runtimeCatalogue);
+  let registry = new Registry(runtimeURL, appSandbox, identityModule, runtimeCatalogue, storageManager);
   resolve(registry);
 });
 

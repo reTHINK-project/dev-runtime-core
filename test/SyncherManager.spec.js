@@ -15,7 +15,7 @@ let expect = chai.expect;
 chai.use(chaiAsPromised);
 
 describe('SyncherManager', function() {
-  let persistenceManager = runtimeFactory.persistenceManager();
+  let storageManager = runtimeFactory.storageManager();
 
   let schemaURL = 'schema://fake-schema-url';
   let runtimeURL = 'hyperty-runtime://fake-runtime';
@@ -37,13 +37,13 @@ describe('SyncherManager', function() {
         //reporter subscribe
         expect(msg).to.contain.all.keys({
           id: 2, type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.h1.domain/sm',
-          body: { subscribe: [ objURL + '/children/children1', objURL + '/children/children2'], source: hyperURL1 }
+          body: { subscribe: [objURL + '/children/children1', objURL + '/children/children2'], source: hyperURL1 }
         });
       } else {
         //observer subscribe
         expect(msg).to.contain.all.keys({
           id: 5, type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.obj1/sm',
-          body: { subscribe: [ objURL + '/changes', objURL + '/children/children1', objURL + '/children/children2'], source: hyperURL2 }
+          body: { subscribe: [objURL + '/changes', objURL + '/children/children1', objURL + '/children/children2'], source: hyperURL2 }
         });
       }
 
@@ -125,7 +125,7 @@ describe('SyncherManager', function() {
     }
   };
 
-  let policyEngine = new PEP(new RuntimeCoreCtx(identityModule, runtimeRegistry, persistenceManager));
+  let policyEngine = new PEP(new RuntimeCoreCtx(identityModule, runtimeRegistry, storageManager));
 
   let handlers = [
 
@@ -810,4 +810,9 @@ describe('SyncherManager', function() {
       });
     });
   });
+
+  it('should save the DataObjectURL Reporter', function() {
+
+  });
+
 });
