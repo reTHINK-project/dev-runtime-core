@@ -1,6 +1,6 @@
 {
   "name": "runtime-core",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "core runtime development",
   "files": ["dist"],
   "private": true,
