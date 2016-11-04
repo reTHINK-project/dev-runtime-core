@@ -149,3 +149,54 @@ export function isDataObjectURL(url) {
 
   return schemasToIgnore.indexOf(urlSchema) === -1;
 }
+
+/**
+ * get information relative each component configured on runtime configuration;
+ * @param  {object} configuration object with all configuration
+ * @param  {string} component     string with the component to get the configuration, like, runtimeURLS, catalogueURLs, msgNodeURL, domainRegistryURL;
+ * @param  {string} resource      type of resource to get, like, catalogue, runtimeUA, protocolstub, idpProxy
+ * @return {object}               return an object with all configurations;
+ */
+export function getConfigurationResources(configuration, component, resource) {
+  let objectResource = configuration[component];
+  let resourceType = objectResource[resource];
+
+  return resourceType;
+}
+
+/**
+ * Build a full url with the runtime configuration;
+ * @param  {object} configuration object with all configuration
+ * @param  {string} component     string with the component to get the configuration, like, runtimeURLS, catalogueURLs, msgNodeURL, domainRegistryURL;
+ * @param  {string} resource      type of resource to get, like, catalogue, runtimeUA, protocolstub, idpProxy
+ * @param  {string} type          resource to get, like a hyperty name or protocolstub name;
+ * @param  {boolean} useFallback  if true the function will check if have a fallback url;
+ * @return {string}               partial url to contact the resource;
+ */
+export function buildURL(configuration, component, resource, type, useFallback = false) {
+  let objectResource = configuration[component];
+  let url;
+
+  if (!objectResource.hasOwnProperty(resource)) {
+    throw Error('The configuration ' + JSON.stringify(objectResource, '', 2) + ' don\'t have the ' + resource + ' resource you are looking for');
+  }
+
+  let resourceType = objectResource[resource];
+
+  if (type) {
+    url = resourceType.prefix + configuration.domain + resourceType.suffix + type;
+    if (resourceType.hasOwnProperty('fallback') && useFallback) {
+      if (resourceType.fallback.indexOf('%domain%')) {
+        url = resourceType.fallback.replace(/(%domain%)/g, configuration.domain) + type;
+      } else {
+        url = resourceType.fallback + type;
+      }
+    }
+  } else {
+    url = resourceType.prefix + configuration.domain + resourceType.suffix;
+  }
+
+  // console.log(url);
+
+  return url;
+}

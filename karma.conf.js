@@ -35,9 +35,8 @@ module.exports = function(config) {
     },
 
     browserify: {
-      debug: true,
       transform: [
-        ['babelify', {presets: ['es2015', 'stage-0'], plugins: ['add-module-exports']}]
+        ['babelify', {presets: ['es2016'], plugins: ['add-module-exports']}]
       ]
     },
 

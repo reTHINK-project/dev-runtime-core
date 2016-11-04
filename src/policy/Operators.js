@@ -18,11 +18,19 @@ class Operators {
   }
 
   equals(params) {
-    return params[0] == '*' || params[0] == params[1];
+    return String(params[0]) === '*' || String(params[0]) === String(params[1]);
+  }
+
+  greaterThan(params) {
+    return params[1] > params[0];
   }
 
   in(params) {
     return params[0].indexOf(params[1]) > -1;
+  }
+
+  lessThan(params) {
+    return params[1] < params[0];
   }
 
   not(params) {
