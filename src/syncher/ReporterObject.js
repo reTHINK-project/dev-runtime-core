@@ -11,6 +11,7 @@ class ReporterObject {
     _this._url = url;
 
     _this._bus = parent._bus;
+    _this._storageManager = parent._storageManager;
 
     _this._domain = divideURL(owner).domain;
     _this._objSubscriptorURL = _this._url + '/subscription';
@@ -18,6 +19,8 @@ class ReporterObject {
     _this._subscriptions = {};
     _this._childrens = [];
     _this._childrenListeners = [];
+
+    _this._storageSubscriptions = {};
 
     _this._forwards = {};
 
@@ -42,6 +45,10 @@ class ReporterObject {
       //TODO: what todo here? Save changes?
       console.log('SyncherManager-' + changeURL + '-RCV: ', msg);
     });
+
+    _this._storageSubscriptions[_this._objSubscriptorURL] = {url: _this._url, owner: _this._owner, childrens: _this._childrens};
+    _this._storageSubscriptions[changeURL] = {url: _this._url};
+    _this._storageManager.set('reporter-subscriptions', 1, _this._storageSubscriptions);
   }
 
   _releaseListeners() {
@@ -139,6 +146,8 @@ class ReporterObject {
 
       let subscriptions = [];
       childrens.forEach((child) => subscriptions.push(childBaseURL + child));
+
+      _this._storageSubscriptions[_this._objSubscriptorURL] = {url: _this._url, owner: _this._owner, childrens: _this._childrens};
 
       //FLOW-OUT: message sent to the msg-node SubscriptionManager component
       let nodeSubscribeMsg = {

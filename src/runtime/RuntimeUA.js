@@ -134,7 +134,7 @@ class RuntimeUA {
     runtimeFactory.messageBus = _this.messageBus;
 
     // Instanciate the SyncherManager;
-    _this.syncherManager = new SyncherManager(_this.runtimeURL, _this.messageBus, _this.registry, _this.runtimeCatalogue);
+    _this.syncherManager = new SyncherManager(_this.runtimeURL, _this.messageBus, _this.registry, _this.runtimeCatalogue, _this.storageManager);
 
     // Set into loader the needed components;
     _this.loader.registry = _this.registry;

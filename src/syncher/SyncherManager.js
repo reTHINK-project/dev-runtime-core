@@ -43,12 +43,19 @@ class SyncherManager {
   _observers: { ObjectURL: ObserverObject }
   */
 
-  constructor(runtimeURL, bus, registry, catalog, allocator) {
+  constructor(runtimeURL, bus, registry, catalog, storageManager, allocator) {
+    if (!runtimeURL) throw new Error('Syncher Manager needs the runtimeURL parameter');
+    if (!bus) throw new Error('Syncher Manager needs the MessageBus instance');
+    if (!registry) throw new Error('Syncher Manager needs the Registry instance');
+    if (!catalog) throw new Error('Syncher Manager needs the RuntimeCatalogue instance');
+    if (!storageManager) throw new Error('You need the domain of runtime');
+
     let _this = this;
 
     _this._bus = bus;
     _this._registry = registry;
     _this._catalog = catalog;
+    _this._storageManager = storageManager;
 
     //TODO: these should be saved in persistence engine?
     _this._url = runtimeURL + '/sm';
@@ -77,9 +84,56 @@ class SyncherManager {
         case 'unsubscribe': _this._onLocalUnSubscribe(msg); break;
       }
     });
+
+    // _this._resumeReporterListeners();
+    // _this._resumeObserverListeners();
+
   }
 
   get url() { return this._url; }
+
+  _resumeObserverListeners() {
+
+    let observer;
+
+    // Get to the storageManager dataObjectObservers
+    this._storageManager.get('observer-subscriptions').then((subscriptions) => {
+      console.info('[storage manager observer] - subscriptions: ', subscriptions);
+
+      Object.keys(subscriptions).forEach((key) => {
+        console.info(key);
+        observer = new ObserverObject(this, subscriptions[key].url, subscriptions[key].childrens);
+        observer.resumeSubscription(key);
+
+      });
+
+    }).catch(() => {
+
+    });
+  }
+
+  _resumeReporterListeners() {
+    let reporter;
+
+    // Get to the storageManager dataObjectObservers
+    this._storageManager.get('reporter-subscriptions').then((subscriptions) => {
+      console.info('[storage manager reporter] - subscriptions: ', subscriptions);
+
+      Object.keys(subscriptions).forEach((key) => {
+        console.info(key);
+        let objURL = subscriptions[key].url;
+        let subscriptionURL = objURL + '/subscription';
+        let owner = subscriptions[key].owner;
+
+        reporter = new ReporterObject(this, owner, objURL);
+        reporter.forwardSubscribe([objURL,subscriptionURL]).then(() => {
+          this._reporters[objURL] = reporter;
+        });
+      });
+    }).catch(() => {
+
+    });
+  }
 
   //FLOW-IN: message received from Syncher -> create
   _onCreate(msg) {
@@ -268,7 +322,7 @@ class SyncherManager {
                 _this._observers[objURL] = observer;
               }
 
-              //register hyperty subscription
+              //register new hyperty subscription
               observer.addSubscription(hypertyURL);
 
               //forward to hyperty:
@@ -276,6 +330,7 @@ class SyncherManager {
               reply.from = _this._url;
               reply.to = hypertyURL;
               this._bus.postMessage(reply);
+
             }
           });
 
