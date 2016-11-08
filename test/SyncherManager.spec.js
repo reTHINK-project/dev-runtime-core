@@ -82,7 +82,7 @@ describe('SyncherManager', function() {
       return 'HypertyChat';
     },
     isDataObjectURL: (dataObjectURL) => {
-      let splitURL = dataObjectURL.split.skip('://');
+      let splitURL = dataObjectURL.split('://');
       return splitURL[0] === 'comm';
     },
     registerSubscribedDataObject: () => {},
@@ -142,7 +142,7 @@ describe('SyncherManager', function() {
     }
   ];
 
-  it.skip('reporter read', function(done) {
+  it('reporter read', function(done) {
     let bus = new MessageBus();
     bus._onPostMessage = (msg) => {
       console.log('_onPostMessage: ', msg);
@@ -168,7 +168,7 @@ describe('SyncherManager', function() {
     });
   });
 
-  it.skip('reporter observer integration', function(done) {
+  it('reporter observer integration', function(done) {
     let bus = new MessageBus();
     bus._onPostMessage = (msg) => {
       console.log('_onPostMessage: ', msg);
@@ -209,7 +209,7 @@ describe('SyncherManager', function() {
     });
   });
 
-  it.skip('verify produced sync messages', function(done) {
+  it('verify produced sync messages', function(done) {
     this.timeout(10000);
 
     let seq = 0;
@@ -380,7 +380,7 @@ describe('SyncherManager', function() {
     data['2'] = { name: 'Luis Duarte', birthdate: '02-12-1991', email: 'luis-xxx@gmail.com', phone: 910000000, obj1: { name: 'xpto' } };
   });
 
-  it.skip('verify consumed sync messages', function(done) {
+  it('verify consumed sync messages', function(done) {
     this.timeout(10000);
 
     let post;
@@ -608,7 +608,7 @@ describe('SyncherManager', function() {
     });
   });
 
-  it.skip('reporter addChild', function(done) {
+  it('reporter addChild', function(done) {
     let bus = new MessageBus();
     bus._onPostMessage = (msg) => {
       console.log('5-_onPostMessage: ', msg);
@@ -627,7 +627,7 @@ describe('SyncherManager', function() {
     });
   });
 
-  it.skip('observer addChild', function(done) {
+  it('observer addChild', function(done) {
     let bus = new MessageBus();
     bus._onPostMessage = (msg) => {
       console.log('6-_onPostMessage: ', msg);
@@ -669,7 +669,7 @@ describe('SyncherManager', function() {
     });
   });
 
-  it.skip('children deltas generate and process', function(done) {
+  it('children deltas generate and process', function(done) {
     let bus = new MessageBus();
     bus.pipeline.handlers = handlers;
 
@@ -709,7 +709,7 @@ describe('SyncherManager', function() {
     });
   });
 
-  it.skip('create and delete', function(done) {
+  it('create and delete', function(done) {
     let deleted = false;
 
     let bus = new MessageBus();
@@ -771,7 +771,7 @@ describe('SyncherManager', function() {
     });
   });
 
-  it.skip('subscribe and unsubscribe', function(done) {
+  it('subscribe and unsubscribe', function(done) {
     let bus = new MessageBus();
     bus.pipeline.handlers = handlers;
 

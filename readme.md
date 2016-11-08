@@ -1,4 +1,4 @@
-# Hyperty Runtime Core [![Build Status](https://travis-ci.org/reTHINK-project/dev-runtime-core.svg?branch=develop)](https://travis-ci.org/reTHINK-project/dev-runtime-core)
+# Hyperty Runtime Core [![Build Status](https://travis-ci.org/reTHINK-project/dev-runtime-core.svg?branch=dev-address-reusage)](https://travis-ci.org/reTHINK-project/dev-runtime-core)
 --------------------
 
 -	[Overview](#overview)

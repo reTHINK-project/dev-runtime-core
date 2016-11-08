@@ -16,7 +16,7 @@ module.exports = function(config) {
       'node_modules/object.observe/dist/object-observe.js',
       'node_modules/array.observe/array-observe.js',
       'src/**/*.js',
-      'test/**/SyncherManager.spec.js'
+      'test/**/*.spec.js'
     ],
 
     // Define the root
@@ -74,7 +74,7 @@ module.exports = function(config) {
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
-    singleRun: false
+    singleRun: true
   });
 
 };
