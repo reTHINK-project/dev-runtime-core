@@ -10,9 +10,10 @@ import IdentityModule from '../src/identity/IdentityModule';
 import { runtimeFactory } from './resources/runtimeFactory';
 
 let storageManager = runtimeFactory.storageManager();
+let persistenceManager = runtimeFactory.persistenceManager();
 let runtimeURL = 'hyperty-runtime://csp.com/123';
 
-let identityModule = new IdentityModule(runtimeURL, storageManager);
+let identityModule = new IdentityModule(runtimeURL, persistenceManager);
 
 describe('IdentityModule', function() {
 

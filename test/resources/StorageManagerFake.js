@@ -6,6 +6,7 @@ class StorageManagerFake {
 
     let store = new Map();
     this.store = store;
+    window.store = store;
   }
 
   set(key, version, value) {

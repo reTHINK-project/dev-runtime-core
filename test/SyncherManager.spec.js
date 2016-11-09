@@ -16,6 +16,7 @@ chai.use(chaiAsPromised);
 
 describe('SyncherManager', function() {
   let storageManager = runtimeFactory.storageManager();
+  let persistenceManager = runtimeFactory.persistenceManager();
 
   let schemaURL = 'schema://fake-schema-url';
   let runtimeURL = 'hyperty-runtime://fake-runtime';
@@ -125,7 +126,7 @@ describe('SyncherManager', function() {
     }
   };
 
-  let policyEngine = new PEP(new RuntimeCoreCtx(identityModule, runtimeRegistry, storageManager));
+  let policyEngine = new PEP(new RuntimeCoreCtx(identityModule, runtimeRegistry, persistenceManager));
 
   let handlers = [
 
@@ -148,7 +149,7 @@ describe('SyncherManager', function() {
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, allocator);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
@@ -174,7 +175,7 @@ describe('SyncherManager', function() {
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, allocator);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
@@ -614,7 +615,7 @@ describe('SyncherManager', function() {
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, allocator);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator);
 
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
     sync1.create(schemaURL, [], initialData).then((dor) => {
@@ -633,7 +634,7 @@ describe('SyncherManager', function() {
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, allocator);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
@@ -677,7 +678,7 @@ describe('SyncherManager', function() {
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, allocator);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
@@ -734,7 +735,7 @@ describe('SyncherManager', function() {
       }
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, allocator);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
@@ -790,7 +791,7 @@ describe('SyncherManager', function() {
       }
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, allocator);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
@@ -811,7 +812,148 @@ describe('SyncherManager', function() {
     });
   });
 
-  it('should save the DataObjectURL Reporter', function() {
+  describe('should use the storageManager', function() {
+
+    let hyperties = {};
+    // let sync1DataObjectReporter;
+    // let sync2DataObjectObserver;
+    // let sync3DataObjectObserver;
+
+    it('should save the url on storageManager', function(done) {
+
+      let bus = new MessageBus();
+      bus.pipeline.handlers = handlers;
+
+      bus._onPostMessage = function(msg)  {
+        console.log('8-_onPostMessage: ', msg);
+        if (msg.type === 'subscribe') {
+          bus.postMessage({
+            id: msg.id, type: 'response', from: msg.to, to: msg.from,
+            body: { code: 200 }
+          });
+        }
+      };
+
+      function guid() {
+        function s4() {
+          return Math.floor((1 + Math.random()) * 0x10000)
+            .toString(16)
+            .substring(1);
+        }
+        return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+          s4() + '-' + s4() + s4() + s4();
+      }
+
+      let objURL = 'resource://domain/' + guid();
+
+      //fake object allocator -> always return the same URL
+      let allocator = {
+        create: () => {
+          return new Promise((resolve) => {
+            hyperties.object = objURL;
+            resolve([objURL]);
+          });
+        }
+      };
+
+      new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator);
+
+      let hypertyURL3 = 'hyperty://h1.domain/' + guid();
+      hyperties.h3 = hypertyURL3;
+      let sync3 = new Syncher(hypertyURL3, bus, { runtimeURL: runtimeURL });
+      sync3.onNotification((notifyEvent) => {
+        sync3.subscribe(schemaURL, notifyEvent.url).then((doo) => {
+          //sync3DataObjectObserver = doo;
+          console.log('sync3 subscribe: ', doo.url);
+          done();
+        });
+      });
+
+      let hypertyURL2 = 'hyperty://h1.domain/' + guid();
+      hyperties.h2 = hypertyURL2;
+      let sync2 = new Syncher(hypertyURL2, bus, { runtimeURL: runtimeURL });
+      sync2.onNotification((notifyEvent) => {
+        sync2.subscribe(schemaURL, notifyEvent.url).then((doo) => {
+          //sync2DataObjectObserver = doo;
+          console.log('sync2 subscribe:', doo.url);
+        });
+      });
+
+      let hypertyURL1 = 'hyperty://h1.domain/' + guid();
+      hyperties.h1 = hypertyURL1;
+      let sync1 = new Syncher(hypertyURL1, bus, { runtimeURL: runtimeURL });
+      sync1.create(schemaURL, [hypertyURL2, hypertyURL3], initialData).then((dor) => {
+        // sync1DataObjectReporter = dor;
+        dor.onSubscription((subscribeEvent) => {
+          subscribeEvent.accept();
+        });
+      });
+    });
+
+    it('should resume the url stored on storageManager', (done) => {
+
+      let bus = new MessageBus();
+      bus.pipeline.handlers = handlers;
+      bus._onPostMessage = (msg) => {
+        console.log('10-_onPostMessage: ', msg);
+
+        if (msg.type === 'subscribe') {
+          bus.postMessage({
+            id: msg.id, type: 'response', from: msg.to, to: msg.from,
+            body: { code: 200 }
+          });
+        }
+
+        if (msg.type === 'update') {
+          expect(msg.from).to.eql(hyperties.object);
+          expect(msg.to).to.eql(hyperties.object + '/changes');
+          done();
+        }
+
+      };
+
+      //fake object allocator -> always return the same URL
+      let allocator = {
+        create: function() {
+          return new Promise(function(resolve) {
+            resolve([hyperties.object]);
+          });
+        }
+      };
+
+      new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator);
+
+      let sync3 = new Syncher(hyperties.h3, bus, { runtimeURL: runtimeURL });
+      sync3.onNotification((notifyEvent) => {
+        sync3.subscribe(schemaURL, notifyEvent.url).then((doo) => {
+          doo.onChange('*', function(changes) {
+            console.log('Sync 3: ', changes);
+          });
+          console.log('sync3 subscribe: ', doo.url);
+        });
+      });
+
+      let sync2 = new Syncher(hyperties.h2, bus, { runtimeURL: runtimeURL });
+      sync2.onNotification((notifyEvent) => {
+        sync2.subscribe(schemaURL, notifyEvent.url).then((doo) => {
+          doo.onChange('*', function(changes) {
+            console.log('Sync 2: ', changes);
+          });
+          console.log('sync2 subscribe:', doo.url);
+        });
+      });
+
+      let sync1 = new Syncher(hyperties.h1, bus, { runtimeURL: runtimeURL });
+      sync1.create(schemaURL, [hyperties.h2, hyperties.h3], initialData).then((dor) => {
+
+        dor.onSubscription((subscribeEvent) => {
+          subscribeEvent.accept();
+
+          dor.data.x = 20;
+        });
+      });
+
+    });
 
   });
 

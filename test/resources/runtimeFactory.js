@@ -3,7 +3,9 @@ import AppSandboxBrowser from './sandboxes/AppSandboxBrowser';
 import Request from './Request';
 import {RuntimeCatalogue} from 'service-framework/dist/RuntimeCatalogue';
 import PersistenceManager from 'service-framework/dist/PersistenceManager';
-import StorageManagerFake from './StorageManagerFake';
+import StorageManager from 'service-framework/dist/StorageManager';
+
+import Dexie from 'dexie';
 
 export const runtimeFactory = {
 
@@ -30,7 +32,14 @@ export const runtimeFactory = {
   },
 
   storageManager() {
-    return new StorageManagerFake();
+    // Using the implementation of Service Framework
+    // Dexie is the IndexDB Wrapper
+    const db = new Dexie('cache');
+    const storeName = 'objects';
+
+    return new StorageManager(db, storeName);
+
+    // return new StorageManagerFake('a', 'b');
   },
 
   // TODO optimize the parameter was passed to inside the RuntimeCatalogue
