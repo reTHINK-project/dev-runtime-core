@@ -72,7 +72,7 @@ class SyncherManager {
     if (allocator) {
       _this._allocator = allocator;
     } else {
-      _this._allocator = new AddressAllocation(_this._objectURL, bus);
+      _this._allocator = new AddressAllocation(_this._objectURL, bus, _this._registry);
     }
 
     bus.addListener(_this._url, (msg) => {
@@ -184,9 +184,16 @@ class SyncherManager {
         console.warn('Error during object validation:', e);
       }
 
+      let objectInfo = {
+        name: msg.body.value.name,
+        schema: msg.body.value.schema,
+        reporter: msg.body.value.reporter,
+        resources: msg.body.value.resources
+      };
+
       //request address allocation of a new object from the msg-node
-      _this._allocator.create(domain, 1, scheme).then((allocated) => {
-        let objURL = allocated[0];
+      _this._allocator.create(domain, 1, objectInfo, scheme).then((allocated) => {
+        let objURL = allocated.address[0];
 
         console.log('ALLOCATOR CREATE:', allocated);
 
@@ -196,7 +203,7 @@ class SyncherManager {
 
         //To register the dataObject in the runtimeRegistry
         console.info('Register Object: ', msg.body.value.name, msg.body.value.schema, objURL, msg.body.value.reporter, msg.body.value.resources);
-        _this._registry.registerDataObject(msg.body.value.name, msg.body.value.schema, objURL, msg.body.value.reporter, msg.body.value.resources, msg.body.authorise).then(function(resolve) {
+        _this._registry.registerDataObject(msg.body.value.name, msg.body.value.schema, objURL, msg.body.value.reporter, msg.body.value.resources, allocated, msg.body.authorise).then(function(resolve) {
           console.log('DataObject successfully registered', resolve);
 
           //all OK -> create reporter and register listeners
