@@ -68,7 +68,29 @@ class RuntimeUA {
 
     _this.runtimeFactory = runtimeFactory;
     _this.runtimeCatalogue = runtimeFactory.createRuntimeCatalogue();
-    _this.persistenceManager = runtimeFactory.persistenceManager();
+
+    if (typeof runtimeFactory.createRuntimeCatalogue === 'function') {
+      _this.persistenceManager = runtimeFactory.createRuntimeCatalogue();
+    } else {
+      throw new Error('Check your Runtime Factory because it need the Runtime Catalogue implementation');
+    }
+
+    if (typeof runtimeFactory.persistenceManager === 'function') {
+      _this.persistenceManager = runtimeFactory.persistenceManager();
+    } else {
+      throw new Error('Check your Runtime Factory because it need the Persistence Manager implementation');
+    }
+
+    if (typeof runtimeFactory.storageManager === 'function') {
+      _this.storageManager = runtimeFactory.storageManager();
+    } else {
+      throw new Error('Check your Runtime Factory because it need the Storage Manager implementation');
+    }
+    if (typeof runtimeFactory.runtimeCapabilities === 'function') {
+      _this.runtimeCapabilities = runtimeFactory.runtimeCapabilities(_this.storageManager);
+    } else {
+      console.info('Check your RuntimeFactory because it need the Runtime Capabilities implementation');
+    }
 
     // Prepare the loader to load the hyperties, protostubs and idpproxy;
     _this.loader = new Loader(_this.runtimeConfiguration);
