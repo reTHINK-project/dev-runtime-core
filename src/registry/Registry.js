@@ -527,10 +527,37 @@ class Registry {
         urlsList[identifier + dataObjectschema + resources + dataObjectReporter] = addressURL.address;
 
         //message to register the new hyperty, within the domain registry
-        let messageValue = {name: identifier, resources: resources, dataSchemes: dataScheme, schema: dataObjectschema, url: dataObjectUrl, expires: _this.expiresTime, reporter: dataObjectReporter, preAuth: authorise, subscribers: []};
+        let messageValue;
+        let message;
+
+        if (addressURL.newAddress) {
+
+          console.log('registering new Hyperty URL', dataObjectUrl);
+
+          messageValue = {name: identifier, resources: resources, dataSchemes: dataScheme, schema: dataObjectschema, url: dataObjectUrl, expires: _this.expiresTime, reporter: dataObjectReporter, preAuth: authorise, subscribers: []};
+
+          message = {type:'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: messageValue, policy: 'policy'}};
+
+        } else {
+
+          console.log('registering previously registered Hyperty URL', dataObjectUrl);
+
+          messageValue = {name: identifier, resources: resources, dataSchemes: dataScheme, schema: dataObjectschema, url: dataObjectUrl, expires: _this.expiresTime, reporter: dataObjectReporter, preAuth: authorise, subscribers: []};
+
+          message = {type:'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: messageValue, policy: 'policy'}};
+
+          /*message = {
+            type: 'update',
+            to: 'domain://registry.' + _this.registryDomain + '/',
+            from: _this.registryURL,
+            body: {resource: dataObjectUrl, value: 'live', attribute: 'status'}
+          };*/
+
+        }
 
         _this.dataObjectList[dataObjectUrl] = messageValue;
 
+        // step to obtain the list of all URL registered to updated with the new one.
         _this.storageManager.set('registry:DataObjectURLs', 0, urlsList).then(() => {
 
           /*let message = _this.messageFactory.createCreateMessageRequest(
@@ -539,8 +566,6 @@ class Registry {
             messageValue,
             'policy'
           );*/
-
-          let message = {type:'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: messageValue, policy: 'policy'}};
 
           _this._messageBus.postMessage(message, (reply) => {
             console.log('===> registerDataObject Reply: ', reply);
@@ -741,7 +766,17 @@ class Registry {
                 _this.hypertiesList.push(hyperty);
 
                 //message to register the new hyperty, within the domain registry
-                let messageValue = {user: identityURL,  descriptor: descriptorURL, url: addressURL.address[0], expires: _this.expiresTime, resources: value.resources, dataSchemes: value.dataSchema};
+                let messageValue;
+
+                if (addressURL.newAddress) {
+                  console.log('registering new Hyperty URL', addressURL.address[0]);
+
+                  messageValue = {user: identityURL,  descriptor: descriptorURL, url: addressURL.address[0], expires: _this.expiresTime, resources: value.resources, dataSchemes: value.dataSchema};
+                } else {
+                  console.log('registering previously registered Hyperty URL', addressURL.address[0]);
+
+                  messageValue = {user: identityURL,  descriptor: descriptorURL, url: addressURL.address[0], expires: _this.expiresTime, resources: value.resources, dataSchemes: value.dataSchema};
+                }
 
                 /*let message = _this.messageFactory.createCreateMessageRequest(
                   _this.registryURL,
@@ -775,6 +810,8 @@ class Registry {
                     'policy'
                   );*/
                   let message = {type:'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: messageValue, policy: 'policy'}};
+
+                  /*let message = {type:'update', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: { resource: addressURL.address[0]}};*/
 
                   _this._messageBus.postMessage(message, (reply) => {
                     console.log('===> KeepAlive Reply: ', reply);
