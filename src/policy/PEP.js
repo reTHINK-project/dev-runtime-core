@@ -9,10 +9,14 @@ class PEP {
   * @param    {Object}    context
   */
   constructor(context) {
-    this.pdp = new PDP(context);
-    this.actionsService = new ActionsService(context);
-    this.context = context;
-    context.pep = this;
+    let _this = this;
+
+    _this.pdp = new PDP(context);
+    _this.actionsService = new ActionsService(context);
+    _this.context = context;
+    context.pep = _this;
+
+    //TODO should be added a trigger to verify when the loadConfigurations is successfully completed
     context.loadConfigurations();
   }
 
