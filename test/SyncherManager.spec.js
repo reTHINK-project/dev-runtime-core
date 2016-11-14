@@ -60,7 +60,7 @@ describe('SyncherManager', function() {
   let allocator = {
     create: () => {
       return new Promise((resolve) => {
-        resolve([objURL]);
+        resolve({address: [objURL]});
       });
     }
   };
@@ -851,7 +851,7 @@ describe('SyncherManager', function() {
         create: () => {
           return new Promise((resolve) => {
             hyperties.object = objURL;
-            resolve([objURL]);
+            resolve({address: [objURL]});
           });
         }
       };
@@ -916,7 +916,7 @@ describe('SyncherManager', function() {
       let allocator = {
         create: function() {
           return new Promise(function(resolve) {
-            resolve([hyperties.object]);
+            resolve({address: [hyperties.object]});
           });
         }
       };
