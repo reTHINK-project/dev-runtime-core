@@ -69,6 +69,8 @@ class AddressAllocation {
 
       _this._registry.checkRegisteredURLs(info).then((urls) => {
 
+        console.log('CHECK URLS: ', urls);
+
         // if there is already a URL, then returns that URL, otherwise request a new URL
         if (urls) {
           let value = {newAddress: false, address: urls};

@@ -167,7 +167,12 @@ describe('RuntimeUA', function() {
     });
 
     sinon.stub(runtime.registry, 'registerHyperty')
-    .returns(new Promise(function(resolve, reject) {
+    .returns(new Promise(function(resolve) {
+      resolve('hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d');
+    }));
+
+    sinon.stub(runtime.registry, 'checkRegisteredURLs')
+    .returns(new Promise((resolve) => {
       resolve('hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d');
     }));
 
