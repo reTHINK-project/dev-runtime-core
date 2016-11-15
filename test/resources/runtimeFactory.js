@@ -54,7 +54,23 @@ export const runtimeFactory = {
   },
 
   runtimeCapabilities: (storageManager) => {
-
+    return {
+      getRuntimeCapabilities:() => {
+        return new Promise((resolve) => {
+          resolve(undefined);
+        });
+      },
+      isAvailable:(capability) => {
+        return new Promise((resolve) => {
+          resolve(undefined);
+        });
+      },
+      update:() => {
+        return new Promise((resolve) => {
+          resolve(undefined);
+        });
+      }
+    };
   },
 
   // TODO optimize the parameter was passed to inside the RuntimeCatalogue
