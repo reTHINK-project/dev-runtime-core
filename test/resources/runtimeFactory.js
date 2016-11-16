@@ -1,32 +1,22 @@
 import SandboxBrowser from './sandboxes/SandboxBrowser';
 import AppSandboxBrowser from './sandboxes/AppSandboxBrowser';
 import Request from './Request';
-import {RuntimeCatalogue} from 'service-framework/dist/RuntimeCatalogue';
-import PersistenceManager from 'service-framework/dist/PersistenceManager';
+import {RuntimeCatalogueLocal, RuntimeCatalogue} from 'service-framework/dist/RuntimeCatalogue';
 
-export const runtimeFactory = {
+class RuntimeFactory {
 
   createSandbox() {
     return new SandboxBrowser();
-  },
+  }
 
   createAppSandbox() {
     return new AppSandboxBrowser();
-  },
+  }
 
   createHttpRequest() {
     let request = new Request();
     return request;
-  },
-
-  atob(b64) {
-    return atob(b64);
-  },
-
-  persistenceManager() {
-    let localStorage = window.localStorage;
-    return new PersistenceManager(localStorage);
-  },
+  }
 
   storageManager() {
     return {
@@ -51,16 +41,26 @@ export const runtimeFactory = {
         });
       }
     };
-  },
+  }
 
   // TODO optimize the parameter was passed to inside the RuntimeCatalogue
   createRuntimeCatalogue() {
+
     let _this = this;
-    return new RuntimeCatalogue(_this);
-  },
+    let factory = {
+      createHttpRequest: function() {
+        return _this.createHttpRequest();
+      }
+    };
+
+    return new RuntimeCatalogueLocal(factory);
+
+  }
 
   removeSandbox() {
 
   }
 
-};
+}
+
+export default RuntimeFactory;
