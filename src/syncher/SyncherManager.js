@@ -94,7 +94,7 @@ class SyncherManager {
     }
 
     //get schema from catalogue and parse -> (scheme, children)
-    _this._catalog.getDataSchemaDescriptor(msg.body.scheme).then((descriptor) => {
+    _this._catalog.getDataSchemaDescriptor(msg.body.schema).then((descriptor) => {
 
       let properties = descriptor.sourcePackage.sourceCode.properties;
       let scheme = properties.scheme ? properties.scheme.constant : 'resource';
@@ -189,7 +189,7 @@ class SyncherManager {
       //FLOW-OUT: send invites to list of remote Syncher -> _onRemoteCreate -> onNotification
       _this._bus.postMessage({
         type: 'create', from: objSubscriptorURL, to: hypertyURL,
-        body: { identity: msg.body.identity, source: msg.from, value: msg.body.value, scheme: msg.body.scheme }
+        body: { identity: msg.body.identity, source: msg.from, value: msg.body.value, schema: msg.body.scheme }
       });
     });
   }
