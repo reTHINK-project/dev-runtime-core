@@ -30,22 +30,42 @@ export const runtimeFactory = {
 
   storageManager() {
     return {
-      set: function(key, version, value) {
+      set: (key, version, value) => {
         return new Promise((resolve) => {
           resolve(undefined);
         });
       },
-      get: function(key) {
+      get: (key) => {
         return new Promise((resolve) => {
           resolve(undefined);
         });
       },
-      getVersion: function(key) {
+      getVersion: (key) => {
         return new Promise((resolve) => {
           resolve(undefined);
         });
       },
-      delete: function(key) {
+      delete: (key) => {
+        return new Promise((resolve) => {
+          resolve(undefined);
+        });
+      }
+    };
+  },
+
+  runtimeCapabilities: (storageManager) => {
+    return {
+      getRuntimeCapabilities:() => {
+        return new Promise((resolve) => {
+          resolve(undefined);
+        });
+      },
+      isAvailable:(capability) => {
+        return new Promise((resolve) => {
+          resolve(undefined);
+        });
+      },
+      update:() => {
         return new Promise((resolve) => {
           resolve(undefined);
         });
