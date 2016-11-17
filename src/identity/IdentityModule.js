@@ -37,7 +37,7 @@ class IdentityModule {
   /**
   * This is the constructor to initialise the Identity Module it does not require any input.
   */
-  constructor(runtimeURL, runtimeCapabilities) {
+  constructor(runtimeURL) {
     let _this = this;
 
     if (!runtimeURL) throw new Error('runtimeURL is missing.');
@@ -45,7 +45,6 @@ class IdentityModule {
     _this._runtimeURL = runtimeURL;
     _this._idmURL = _this._runtimeURL + '/idm';
     _this._guiURL = _this._runtimeURL + '/identity-gui';
-    _this.runtimeCapabilities = runtimeCapabilities;
 
     _this._domain = divideURL(_this._runtimeURL).domain;
 
@@ -390,47 +389,39 @@ class IdentityModule {
       //CHECK whether is browser environment or nodejs
       //if it is browser, then create a fake identity
 
-      _this.runtimeCapabilities.isAvailable('browser').then((result) => {
-        console.log('runtime browser identity acquisition ', result);
+      try {
+        if (window) {
 
-        if (!result) return;
+          let identitiesInfo = _this.getIdentitiesToChoose();
 
-        let identitiesInfo = _this.getIdentitiesToChoose();
+          _this.requestIdentityToGUI(identitiesInfo.identities, identitiesInfo.idps).then(value => {
 
-        _this.requestIdentityToGUI(identitiesInfo.identities, identitiesInfo.idps).then(value => {
+            if (value.type === 'identity') {
 
-          if (value.type === 'identity') {
+              let chosenID = getUserURLFromEmail(value.value);
 
-            let chosenID = getUserURLFromEmail(value.value);
-
-            // returns the identity info from the chosen id
-            for (let i in _this.identities) {
-              if (_this.identities[i].identity === chosenID) {
-                return resolve(_this.identities[i].messageInfo);
+              // returns the identity info from the chosen id
+              for (let i in _this.identities) {
+                if (_this.identities[i].identity === chosenID) {
+                  return resolve(_this.identities[i].messageInfo);
+                }
               }
+              reject('no identity was found .');
+            } else if (value.type === 'idp') {
+
+              _this.callGenerateMethods(value.value, origin).then((value) => {
+                resolve(value);
+              }, (err) => {
+                reject(err);
+              });
+
+            } else {
+              reject('error on GUI received message.');
             }
-            reject('no identity was found .');
-          } else if (value.type === 'idp') {
+          });
 
-            _this.callGenerateMethods(value.value, origin).then((value) => {
-              resolve(value);
-            }, (err) => {
-              reject(err);
-            });
-
-          } else {
-            reject('error on GUI received message.');
-          }
-        });
-      }).catch(error => {
-        console.log('Error on identity acquisition ', error);
-        reject(error);
-      });
-
-      _this.runtimeCapabilities.isAvailable('node').then((result) => {
-        console.log('node identity acquisition ', result);
-
-        if (!result) return;
+        }
+      } catch (error) {
 
         if (_this.currentIdentity !== undefined) {
           //TODO verify whether the token is still valid or not.
@@ -452,11 +443,7 @@ class IdentityModule {
           _this.identities.push(identityBundle);
           return resolve(identityBundle);
         }
-
-      }).catch(error => {
-        console.log('Error on identity acquisition ', error);
-        reject(error);
-      });
+      }
     });
   }
 

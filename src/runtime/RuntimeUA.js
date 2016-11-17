@@ -68,34 +68,7 @@ class RuntimeUA {
 
     _this.runtimeFactory = runtimeFactory;
     _this.runtimeCatalogue = runtimeFactory.createRuntimeCatalogue();
-
-    if (typeof runtimeFactory.createRuntimeCatalogue === 'function') {
-      _this.persistenceManager = runtimeFactory.createRuntimeCatalogue();
-    } else {
-      throw new Error('Check your Runtime Factory because it need the Runtime Catalogue implementation');
-    }
-
-    if (typeof runtimeFactory.persistenceManager === 'function') {
-      _this.persistenceManager = runtimeFactory.persistenceManager();
-    } else {
-      throw new Error('Check your Runtime Factory because it need the Persistence Manager implementation');
-    }
-
-    if (typeof runtimeFactory.storageManager === 'function') {
-      _this.storageManager = runtimeFactory.storageManager();
-    } else {
-      throw new Error('Check your Runtime Factory because it need the Storage Manager implementation');
-    }
-    if (typeof runtimeFactory.runtimeCapabilities === 'function') {
-      _this.runtimeCapabilities = runtimeFactory.runtimeCapabilities(_this.storageManager);
-      _this.runtimeCapabilities.getRuntimeCapabilities().then((result) => {
-        console.log('capabilities: ', result);
-      }).catch((err) => {
-        console.log('Error: ', err);
-      });
-    } else {
-      console.info('Check your RuntimeFactory because it need the Runtime Capabilities implementation');
-    }
+    _this.persistenceManager = runtimeFactory.persistenceManager();
 
     // Prepare the loader to load the hyperties, protostubs and idpproxy;
     _this.loader = new Loader(_this.runtimeConfiguration);
@@ -111,7 +84,7 @@ class RuntimeUA {
     _this.runtimeCatalogue.runtimeURL = runtimeURL;
 
     // Instantiate the identity Module
-    _this.identityModule = new IdentityModule(runtimeURL, _this.runtimeCapabilities);
+    _this.identityModule = new IdentityModule(runtimeURL);
 
     // Use the sandbox factory to create an AppSandbox;
     // In the future can be decided by policyEngine if we need
@@ -119,7 +92,7 @@ class RuntimeUA {
     let appSandbox = runtimeFactory.createAppSandbox();
 
     // Instantiate the Registry Module
-    _this.registry = new Registry(runtimeURL, appSandbox, _this.identityModule, _this.runtimeCatalogue, _this.runtimeCapabilities);
+    _this.registry = new Registry(runtimeURL, appSandbox, _this.identityModule, _this.runtimeCatalogue);
 
     // Set the loader to load Hyperties, Stubs and IdpProxies
     _this.registry.loader = _this.loader;
