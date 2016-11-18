@@ -204,6 +204,14 @@ describe('RuntimeUA', function() {
 
     it('should throw when given no arguments', function() {
       expect(runtime).to.have.property('runtimeFactory');
+      expect(runtime.runtimeFactory).to.have.property('atob');
+      expect(runtime.runtimeFactory).to.have.property('persistenceManager');
+      expect(runtime.runtimeFactory).to.have.property('runtimeCapabilities');
+      expect(runtime.runtimeFactory).to.have.property('storageManager');
+      expect(runtime.runtimeFactory).to.have.property('createSandbox');
+      expect(runtime.runtimeFactory).to.have.property('createAppSandbox');
+      expect(runtime.runtimeFactory).to.have.property('createHttpRequest');
+      expect(runtime.runtimeFactory).to.have.property('createRuntimeCatalogue');
     });
 
   });

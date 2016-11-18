@@ -13,7 +13,7 @@ let storageManager = runtimeFactory.storageManager();
 let persistenceManager = runtimeFactory.persistenceManager();
 let runtimeURL = 'hyperty-runtime://csp.com/123';
 
-let identityModule = new IdentityModule(runtimeURL, persistenceManager);
+let identityModule = new IdentityModule(runtimeURL, 'runtimeCapabilities', storageManager);
 
 describe('IdentityModule', function() {
 

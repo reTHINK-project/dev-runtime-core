@@ -19,6 +19,7 @@ let runtimeURL = 'hyperty-runtime://ua.pt/123';
 let storageManager = runtimeFactory.storageManager();
 let appSandbox = runtimeFactory.createAppSandbox();
 let sandboxDummy = {sandbox: 'sandbox', type: 'normal'};
+let hypertyURL;
 let protostubURL = 'url';
 let identityModule = {
   getIdentityAssertion: () => {
@@ -39,7 +40,7 @@ let runtimeCatalogue = {
 };
 
 let getRegistry = new Promise(function(resolve) {
-  let registry = new Registry(runtimeURL, appSandbox, identityModule, runtimeCatalogue, storageManager);
+  let registry = new Registry(runtimeURL, appSandbox, identityModule, runtimeCatalogue, 'runtimeCapabilities', storageManager);
   resolve(registry);
 });
 
@@ -134,8 +135,8 @@ getRegistry.then(function(registry) {
           hypertyType: ['comm']
         };
 
-        registry.messageBus.addListener('domain://msg-node.ua.pt/hyperty-address-allocation', (msg) => {
-          let message = {id: 1, type: 'response', from: 'domain://msg-node.ua.pt/hyperty-address-allocation', to: msg.from,
+        registry.messageBus.addListener('domain://msg-node.ua.pt/address-allocation', (msg) => {
+          let message = {id: 1, type: 'response', from: 'domain://msg-node.ua.pt/address-allocation', to: msg.from,
           body: {code: 200, value: {allocated: ['hyperty://ua.pt/1']}}};
 
           registry.messageBus.postMessage(message, (reply) => {
@@ -234,8 +235,9 @@ getRegistry.then(function(registry) {
         let dataObjectUrl = 'comm://localhost/9303b707-f301-4929-ad7d-65a89a356871';
         let dataObjectReporter = 'hyperty://localhost/d692091f-192c-420c-a763-a180f13e626a';
         let authorise = ['user://gmail.com/user15'];
+        let addressURL = {newAddress: true, address: ['comm://localhost/9303b707-f301-4929-ad7d-65a89a356871']};
 
-        expect(registry.registerDataObject(identifier, dataObjectschema, dataObjectUrl, dataObjectReporter, ['fake'], authorise).then(function(response) {
+        expect(registry.registerDataObject(identifier, dataObjectschema, dataObjectUrl, dataObjectReporter, ['fake'], addressURL, authorise).then(function(response) {
           return response;
         })).to.be.fulfilled.and.eventually.equal('ok').and.notify(done);
       });

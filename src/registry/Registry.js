@@ -45,7 +45,7 @@ class Registry {
   * @param  {DomainURL}           remoteRegistry        remoteRegistry
   * @param  {storageManager}      storageManager
   */
-  constructor(runtimeURL, appSandbox, identityModule, runtimeCatalogue, remoteRegistry, storageManager) {
+  constructor(runtimeURL, appSandbox, identityModule, runtimeCatalogue, runtimeCapabilities, storageManager, remoteRegistry) {
 
     // how some functions receive the parameters for example:
     // new Registry('hyperty-runtime://sp1/123', appSandbox, idModule, remoteRegistry);
@@ -66,6 +66,7 @@ class Registry {
     _this.remoteRegistry = remoteRegistry;
     _this.idModule = identityModule;
     _this.storageManager = storageManager;
+    _this.runtimeCapabilities = runtimeCapabilities;
     _this.identifier = Math.floor((Math.random() * 10000) + 1);
 
     // the expires in 3600, represents 1 hour
@@ -527,20 +528,19 @@ class Registry {
         urlsList[identifier + dataObjectschema + resources + dataObjectReporter] = addressURL.address;
 
         //message to register the new hyperty, within the domain registry
-        let messageValue;
+        let messageValue = {name: identifier, resources: resources, dataSchemes: dataScheme, schema: dataObjectschema, url: dataObjectUrl, expires: _this.expiresTime, reporter: dataObjectReporter, preAuth: authorise, subscribers: []};
+
         let message;
 
         if (addressURL.newAddress) {
 
-          console.log('registering new Hyperty URL', dataObjectUrl);
-
-          messageValue = {name: identifier, resources: resources, dataSchemes: dataScheme, schema: dataObjectschema, url: dataObjectUrl, expires: _this.expiresTime, reporter: dataObjectReporter, preAuth: authorise, subscribers: []};
+          console.log('registering new data object URL', dataObjectUrl);
 
           message = {type:'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: messageValue, policy: 'policy'}};
 
         } else {
 
-          console.log('registering previously registered Hyperty URL', dataObjectUrl);
+          console.log('registering previously registered data object URL', dataObjectUrl);
 
           /*messageValue = {name: identifier, resources: resources, dataSchemes: dataScheme, schema: dataObjectschema, url: dataObjectUrl, expires: _this.expiresTime, reporter: dataObjectReporter, preAuth: authorise, subscribers: []};
 

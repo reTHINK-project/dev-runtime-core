@@ -32,14 +32,48 @@ export const runtimeFactory = {
   },
 
   storageManager() {
-    // Using the implementation of Service Framework
-    // Dexie is the IndexDB Wrapper
-    const db = new Dexie('cache');
-    const storeName = 'objects';
+    return {
+      set: (key, version, value) => {
+        return new Promise((resolve) => {
+          resolve(undefined);
+        });
+      },
+      get: (key) => {
+        return new Promise((resolve) => {
+          resolve(undefined);
+        });
+      },
+      getVersion: (key) => {
+        return new Promise((resolve) => {
+          resolve(undefined);
+        });
+      },
+      delete: (key) => {
+        return new Promise((resolve) => {
+          resolve(undefined);
+        });
+      }
+    };
+  },
 
-    return new StorageManager(db, storeName);
-
-    // return new StorageManagerFake('a', 'b');
+  runtimeCapabilities: (storageManager) => {
+    return {
+      getRuntimeCapabilities:() => {
+        return new Promise((resolve) => {
+          resolve(undefined);
+        });
+      },
+      isAvailable:(capability) => {
+        return new Promise((resolve) => {
+          resolve(undefined);
+        });
+      },
+      update:() => {
+        return new Promise((resolve) => {
+          resolve(undefined);
+        });
+      }
+    };
   },
 
   // TODO optimize the parameter was passed to inside the RuntimeCatalogue
