@@ -297,7 +297,7 @@ class GraphConnector {
         } else {
 
           _this.messageBus.postMessage(msg, (reply) => {
-              let responseCode = reply.body.responseCode;
+              let responseCode = reply.body.Code;
               if (responseCode == 200) {
                 resolve(200);
               } else {
