@@ -276,8 +276,10 @@ class GraphConnector {
    */
   sendGlobalRegistryRecord(jwt) {
 
-    let payloadObj = jsrsasign.KJUR.jws.JWS.parse(jwt).payloadObj;
-    let guid = payloadObj.guid;
+    let unwrappedJWT = jsrsasign.KJUR.jws.JWS.parse(jwt);
+    let dataEncoded = unwrappedJWT.payloadObj.data;
+    let dataDecoded = base64url.decode(dataEncoded);
+    let dataJSON = JSON.parse(dataDecoded);
 
     let _this = this;
 
@@ -285,7 +287,7 @@ class GraphConnector {
         type: 'CREATE',
         from: this._hypertyRuntimeURL + '/graph-connector',
         to: 'global://registry/',
-        body: {guid: this.globalRegistryRecord.guid, jwt: jwt}
+        body: {guid: dataJSON.guid, jwt: jwt}
       };
 
     return new Promise(function(resolve, reject) {
