@@ -46,9 +46,17 @@ class ReporterObject {
       console.log('SyncherManager-' + changeURL + '-RCV: ', msg);
     });
 
-    _this._storageSubscriptions[_this._objSubscriptorURL] = {url: _this._url, owner: _this._owner, childrens: _this._childrens};
-    _this._storageSubscriptions[changeURL] = {url: _this._url};
-    _this._storageManager.set('reporter-subscriptions', 1, _this._storageSubscriptions);
+    _this._storageSubscriptions[_this._url] = {url: _this._url, owner: _this._owner, childrens: _this._childrens, subscriptions: []};
+    _this._storageManager.set('syncherManager:Reporter', 1, _this._storageSubscriptions);
+  }
+
+  resumeSubscriptions(subscriptions) {
+    let _this = this;
+    subscriptions.forEach((hypertyURL) => {
+      console.log('[Reporter Object] - resume subscriptions: ', hypertyURL);
+      _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, _this._childrens, true);
+    });
+
   }
 
   _releaseListeners() {
@@ -147,7 +155,7 @@ class ReporterObject {
       let subscriptions = [];
       childrens.forEach((child) => subscriptions.push(childBaseURL + child));
 
-      _this._storageSubscriptions[_this._objSubscriptorURL] = {url: _this._url, owner: _this._owner, childrens: _this._childrens};
+      //_this._storageSubscriptions[_this._objSubscriptorURL] = {url: _this._url, owner: _this._owner, childrens: _this._childrens};
 
       //FLOW-OUT: message sent to the msg-node SubscriptionManager component
       let nodeSubscribeMsg = {
@@ -237,7 +245,14 @@ class ReporterObject {
       _this._bus.postMessage(forwardMsg, (reply) => {
         console.log('forward-reply: ', reply);
         if (reply.body.code === 200) {
-          _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, _this._childrens, true);
+          if (!_this._subscriptions[hypertyURL]) {
+            _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, _this._childrens, true);
+          }
+
+          let subscriptions = Object.keys(_this._subscriptions);
+          _this._storageSubscriptions[_this._url].subscriptions = subscriptions;
+          _this._storageManager.set('syncherManager:Reporter', 1, _this._storageSubscriptions);
+
         }
 
         //FLOW-OUT: subscription response sent (forward from internal Hyperty)

@@ -85,8 +85,8 @@ class SyncherManager {
       }
     });
 
-    // _this._resumeReporterListeners();
-    // _this._resumeObserverListeners();
+    _this._resumeReporterListeners();
+    _this._resumeObserverListeners();
 
   }
 
@@ -94,21 +94,28 @@ class SyncherManager {
 
   _resumeObserverListeners() {
 
-    let observer;
-
     // Get to the storageManager dataObjectObservers
-    this._storageManager.get('observer-subscriptions').then((subscriptions) => {
-      console.info('[storage manager observer] - subscriptions: ', subscriptions);
+    this._storageManager.get('syncherManager:Observer').then((observers) => {
+      console.info('[storage manager observer] - Resume Subscriptions: ', observers);
+      if (!observers) return;
 
-      Object.keys(subscriptions).forEach((key) => {
-        console.info(key);
-        observer = new ObserverObject(this, subscriptions[key].url, subscriptions[key].childrens);
+      Object.keys(observers).forEach((key) => {
+        console.info(key, observers[key]);
+        let objURL = observers[key].url;
+        let childrens = observers[key].childrens;
+
+        let observer = this._observers[objURL];
+        if (!observer) {
+          observer = new ObserverObject(this, objURL, childrens);
+          this._observers[objURL] = observer;
+        }
+
+        //register an used hyperty subscription
         observer.resumeSubscription(key);
-
       });
 
-    }).catch(() => {
-
+    }).catch((error) => {
+      console.error('Error: ', error);
     });
   }
 
@@ -116,22 +123,29 @@ class SyncherManager {
     let reporter;
 
     // Get to the storageManager dataObjectObservers
-    this._storageManager.get('reporter-subscriptions').then((subscriptions) => {
-      console.info('[storage manager reporter] - subscriptions: ', subscriptions);
+    this._storageManager.get('syncherManager:Reporter').then((reporters) => {
+      if (!reporters) return;
 
-      Object.keys(subscriptions).forEach((key) => {
+      Object.keys(reporters).forEach((key) => {
         console.info(key);
-        let objURL = subscriptions[key].url;
+        let objURL = reporters[key].url;
+        let owner = reporters[key].owner;
         let subscriptionURL = objURL + '/subscription';
-        let owner = subscriptions[key].owner;
+        let subscriptions = reporters[key].subscriptions;
 
         reporter = new ReporterObject(this, owner, objURL);
-        reporter.forwardSubscribe([objURL,subscriptionURL]).then(() => {
-          this._reporters[objURL] = reporter;
-        });
-      });
-    }).catch(() => {
+        reporter.resumeSubscriptions(subscriptions);
+        this._reporters[objURL] = reporter;
 
+        // reporter.resumeSubscriptions(subscriptions);
+        // reporter.forwardSubscribe([objURL, subscriptionURL]).then(() => {
+        //   this._reporters[objURL] = reporter;
+        // });
+
+      });
+
+    }).catch((error) => {
+      console.error('Error: ', error);
     });
   }
 
@@ -203,12 +217,19 @@ class SyncherManager {
 
         //To register the dataObject in the runtimeRegistry
         console.info('Register Object: ', msg.body.value.name, msg.body.value.schema, objURL, msg.body.value.reporter, msg.body.value.resources);
-        _this._registry.registerDataObject(msg.body.value.name, msg.body.value.schema, objURL, msg.body.value.reporter, msg.body.value.resources, allocated, msg.body.authorise).then(function(resolve) {
+        _this._registry.registerDataObject(msg.body.value.name, msg.body.value.schema, objURL, msg.body.value.reporter, msg.body.value.resources, allocated, msg.body.authorise).then((resolve) => {
           console.log('DataObject successfully registered', resolve);
 
           //all OK -> create reporter and register listeners
-          let reporter = new ReporterObject(_this, owner, objURL);
-          reporter.forwardSubscribe([objURL,subscriptionURL]).then(() => {
+          let reporter;
+
+          if (!this._reporters[objURL]) {
+            reporter = new ReporterObject(_this, owner, objURL);
+          } else {
+            reporter = this._reporters[objURL];
+          }
+
+          reporter.forwardSubscribe([objURL, subscriptionURL]).then(() => {
             reporter.addChildrens(childrens).then(() => {
               _this._reporters[objURL] = reporter;
 

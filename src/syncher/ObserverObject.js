@@ -30,12 +30,13 @@ class ObserverObject {
     _this._newSubscription(hyperty);
 
     _this._storageSubscriptions[hyperty] = {url: _this._url, childrens: _this._childrens};
-    _this._storageManager.set('observer-subscriptions', 1, _this._storageSubscriptions);
+    _this._storageManager.set('syncherManager:Observer', 1, _this._storageSubscriptions);
   }
 
   resumeSubscription(hyperty) {
     let _this = this;
 
+    console.log('[Observer Object] - resume subscriptions: ', hyperty);
     _this._newSubscription(hyperty);
   }
 
