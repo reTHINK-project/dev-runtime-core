@@ -709,16 +709,7 @@ class Registry {
                 urlsList = {};
               }
 
-              if (urlsList[hypertyCapabilities.resources + hypertyCapabilities.dataSchema + userProfile.userURL]) {
-                let url = urlsList[hypertyCapabilities.resources + hypertyCapabilities.dataSchema + userProfile.userURL];
-                return {newAddress: false, address: url};
-              } else {
-                return _this.addressAllocation.create(_this._domain, 1, descriptor);
-              }
-
-            }).then((addressURL) => {
-
-              urlsList[hypertyCapabilities.resources + hypertyCapabilities.dataSchema + userProfile.userURL] = addressURL.address;
+              urlsList[hypertyCapabilities.resources + hypertyCapabilities.dataSchema] = addressURL.address;
               _this.storageManager.set('registry:HypertyURLs', 0, urlsList).then(() => {
 
                 _this.registryDomain = domainUrl;

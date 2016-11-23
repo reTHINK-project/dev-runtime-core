@@ -32,29 +32,15 @@ export const runtimeFactory = {
   },
 
   storageManager() {
-    return {
-      set: (key, version, value) => {
-        return new Promise((resolve) => {
-          resolve(undefined);
-        });
-      },
-      get: (key) => {
-        return new Promise((resolve) => {
-          resolve(undefined);
-        });
-      },
-      getVersion: (key) => {
-        return new Promise((resolve) => {
-          resolve(undefined);
-        });
-      },
-      delete: (key) => {
-        return new Promise((resolve) => {
-          resolve(undefined);
-        });
-      }
-    };
-  },
+   // Using the implementation of Service Framework
+   // Dexie is the IndexDB Wrapper
+   const db = new Dexie('cache');
+   const storeName = 'objects';
+
+   return new StorageManager(db, storeName);
+
+   // return new StorageManagerFake('a', 'b');
+ },
 
   runtimeCapabilities: (storageManager) => {
     return {
