@@ -61,116 +61,152 @@ class RuntimeUA {
     if (!runtimeFactory) throw new Error('The sandbox factory is a needed parameter');
     if (!domain) throw new Error('You need the domain of runtime');
 
-    let _this = this;
-
     // Configuration object with information related with servers
-    _this.runtimeConfiguration = Object.assign({domain: domain}, runtimeConfiguration);
+    this.runtimeConfiguration = Object.assign({domain: domain}, runtimeConfiguration);
 
-    _this.runtimeFactory = runtimeFactory;
-    _this.runtimeCatalogue = runtimeFactory.createRuntimeCatalogue();
+    this.runtimeFactory = runtimeFactory;
+    this.runtimeCatalogue = runtimeFactory.createRuntimeCatalogue();
 
     if (typeof runtimeFactory.createRuntimeCatalogue === 'function') {
-      _this.persistenceManager = runtimeFactory.createRuntimeCatalogue();
+      this.persistenceManager = runtimeFactory.createRuntimeCatalogue();
     } else {
       throw new Error('Check your Runtime Factory because it need the Runtime Catalogue implementation');
     }
 
     if (typeof runtimeFactory.persistenceManager === 'function') {
-      _this.persistenceManager = runtimeFactory.persistenceManager();
+      this.persistenceManager = runtimeFactory.persistenceManager();
     } else {
       throw new Error('Check your Runtime Factory because it need the Persistence Manager implementation');
     }
 
     if (typeof runtimeFactory.storageManager === 'function') {
-      _this.storageManager = runtimeFactory.storageManager();
+      this.storageManager = runtimeFactory.storageManager();
     } else {
       throw new Error('Check your Runtime Factory because it need the Storage Manager implementation');
     }
     if (typeof runtimeFactory.runtimeCapabilities === 'function') {
-      _this.runtimeCapabilities = runtimeFactory.runtimeCapabilities(_this.storageManager);
-      _this.runtimeCapabilities.getRuntimeCapabilities().then((result) => {
-        console.log('capabilities: ', result);
-      }).catch((err) => {
-        console.log('Error: ', err);
-      });
+      this.runtimeCapabilities = runtimeFactory.runtimeCapabilities(this.storageManager);
     } else {
       console.info('Check your RuntimeFactory because it need the Runtime Capabilities implementation');
     }
 
-    // Prepare the loader to load the hyperties, protostubs and idpproxy;
-    _this.loader = new Loader(_this.runtimeConfiguration);
+  }
 
-    // TODO: post and return registry/hypertyRuntimeInstance to and from Back-end Service
-    // the response is like: runtime://sp1/123
+  init() {
 
-    let runtimeURL = 'runtime://' + domain + '/' + Math.floor((Math.random() * 10000) + 1);
-    _this.runtimeURL = runtimeURL;
-    _this.domain = domain;
+    return new Promise((resolve, reject) => {
 
-    // TODO: check if runtime catalogue need the runtimeURL;
-    _this.runtimeCatalogue.runtimeURL = runtimeURL;
+      this.domain = this.runtimeConfiguration.domain;
 
-    // Instantiate the identity Module
-    _this.identityModule = new IdentityModule(runtimeURL, _this.runtimeCapabilities);
+      try {
+        let getCapabilities = this.runtimeCapabilities.getRuntimeCapabilities();
+        let getRuntimeURL = this.storageManager.get('runtime:URL');
 
-    // Use the sandbox factory to create an AppSandbox;
-    // In the future can be decided by policyEngine if we need
-    // create a AppSandbox or not;
-    let appSandbox = runtimeFactory.createAppSandbox();
+        Promise.all([getRuntimeURL, getCapabilities]).then((results) => {
 
-    // Instantiate the Registry Module
-    _this.registry = new Registry(runtimeURL, appSandbox, _this.identityModule, _this.runtimeCatalogue, _this.runtimeCapabilities);
+          this.runtimeURL = results[0] ? results[0].runtimeURL : results[0];
+          if (!this.runtimeURL) {
+            this.runtimeURL = 'runtime://' + this.domain + '/' + Math.floor((Math.random() * 10000) + 1);
+            this.storageManager.set('runtime:URL', 1, {runtimeURL: this.runtimeURL});
+          }
 
-    // Set the loader to load Hyperties, Stubs and IdpProxies
-    _this.registry.loader = _this.loader;
+          this.capabilities = results[1];
 
-    // Instantiate the Message Bus
-    _this.messageBus = new MessageBus(_this.registry);
+          return this._loadComponents();
 
-    // Instantiate the Policy Engine
-    _this.policyEngine = new PEP(new RuntimeCoreCtx(_this.identityModule, _this.registry, _this.persistenceManager));
-
-    _this.messageBus.pipeline.handlers = [
-
-      // Policy message authorise
-      function(ctx) {
-        _this.policyEngine.authorise(ctx.msg).then(function(changedMgs) {
-          ctx.msg = changedMgs;
-          ctx.next();
-        }).catch(function(reason) {
-          console.error(reason);
-          ctx.fail(reason);
+        }).then((status) => {
+          console.log('Status: ', status);
+          resolve(status);
+        }).catch((error) => {
+          console.log('ERROR: ', error);
+          reject(error);
         });
-      }
-    ];
 
-    // Add to App Sandbox the listener;
-    appSandbox.addListener('*', function(msg) {
-      _this.messageBus.postMessage(msg);
+      } catch (e) {
+        reject(e);
+      }
+
     });
 
-    // Register messageBus on Registry
-    _this.registry.messageBus = _this.messageBus;
+  }
 
-    // Register registry on IdentityModule
-    _this.identityModule.registry = _this.registry;
+  _loadComponents() {
 
-    // Use sandbox factory to use specific methods
-    // and set the message bus to the factory
-    runtimeFactory.messageBus = _this.messageBus;
+    return new Promise((resolve, reject) => {
 
-    // Instanciate the SyncherManager;
-    _this.syncherManager = new SyncherManager(_this.runtimeURL, _this.messageBus, _this.registry, _this.runtimeCatalogue);
+      try {
 
-    // Set into loader the needed components;
-    _this.loader.registry = _this.registry;
-    _this.loader.runtimeURL = _this.runtimeURL;
-    _this.loader.messageBus = _this.messageBus;
-    _this.loader.runtimeCatalogue = _this.runtimeCatalogue;
-    _this.loader.runtimeFactory = _this.runtimeFactory;
+        // Prepare the loader to load the hyperties, protostubs and idpproxy;
+        this.loader = new Loader(this.runtimeConfiguration);
 
-    // Instantiate the Graph Connector
-    // _this.graphConnector = new GraphConnector(_this.runtimeURL, _this.messageBus);
+        // Instantiate the identity Module
+        this.identityModule = new IdentityModule(this.runtimeURL, this.runtimeCapabilities, this.storageManager);
+
+        // Use the sandbox factory to create an AppSandbox;
+        // In the future can be decided by policyEngine if we need
+        // create a AppSandbox or not;
+        let appSandbox = this.runtimeFactory.createAppSandbox();
+
+        // Instantiate the Registry Module
+        this.registry = new Registry(this.runtimeURL, appSandbox, this.identityModule, this.runtimeCatalogue, this.runtimeCapabilities, this.storageManager);
+
+        // Set the loader to load Hyperties, Stubs and IdpProxies
+        this.registry.loader = this.loader;
+
+        // Instantiate the Message Bus
+        this.messageBus = new MessageBus(this.registry);
+
+        // Instantiate the Policy Engine
+        this.policyEngine = new PEP(new RuntimeCoreCtx(this.identityModule, this.registry, this.persistenceManager));
+
+        this.messageBus.pipeline.handlers = [
+
+          // Policy message authorise
+          (ctx) => {
+            this.policyEngine.authorise(ctx.msg).then((changedMgs) => {
+              ctx.msg = changedMgs;
+              ctx.next();
+            }).catch((reason) => {
+              console.error(reason);
+              ctx.fail(reason);
+            });
+          }
+        ];
+
+        // Add to App Sandbox the listener;
+        appSandbox.addListener('*', (msg) => {
+          this.messageBus.postMessage(msg);
+        });
+
+        // Register messageBus on Registry
+        this.registry.messageBus = this.messageBus;
+
+        // Register registry on IdentityModule
+        this.identityModule.registry = this.registry;
+
+        // Use sandbox factory to use specific methods
+        // and set the message bus to the factory
+        this.runtimeFactory.messageBus = this.messageBus;
+
+        // Instanciate the SyncherManager;
+        this.syncherManager = new SyncherManager(this.runtimeURL, this.messageBus, this.registry, this.runtimeCatalogue);
+
+        // Set into loader the needed components;
+        this.loader.runtimeURL = this.runtimeURL;
+        this.loader.messageBus = this.messageBus;
+        this.loader.registry = this.registry;
+        this.loader.runtimeCatalogue = this.runtimeCatalogue;
+        this.loader.runtimeFactory = this.runtimeFactory;
+
+        // Instantiate the Graph Connector
+        // _this.graphConnector = new GraphConnector(_this.runtimeURL, _this.messageBus);
+
+        resolve(true);
+      } catch (e) {
+        reject(e);
+      }
+
+    });
 
   }
 
