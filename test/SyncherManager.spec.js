@@ -126,7 +126,7 @@ describe('SyncherManager', function() {
     }
   };
 
-  let policyEngine = new PEP(new RuntimeCoreCtx(identityModule, runtimeRegistry, persistenceManager));
+  let policyEngine = new PEP(new RuntimeCoreCtx(identityModule, runtimeRegistry, storageManager));
 
   let handlers = [
 

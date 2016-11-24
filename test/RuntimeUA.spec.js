@@ -3,6 +3,8 @@ import sinon from 'sinon';
 import chaiAsPromised from 'chai-as-promised';
 import sinonChai from 'sinon-chai';
 
+chai.config.truncateThreshold = 0;
+
 let expect = chai.expect;
 
 chai.use(chaiAsPromised);
@@ -20,12 +22,14 @@ import MessageBus from '../src/bus/MessageBus';
 import { divideURL } from '../src/utils/utils';
 
 import { runtimeFactory } from './resources/runtimeFactory';
-import { runtimeConfiguration } from './resources/runtimeConfiguration';
+
+/// import { runtimeConfiguration } from './resources/runtimeConfiguration';
 
 // Testing runtimeUA;
 describe('RuntimeUA', function() {
 
-  let runtime = new RuntimeUA(runtimeFactory, runtimeConfiguration);
+  let runtime = new RuntimeUA(runtimeFactory, 'localhost');
+  let getDescriptor;
 
   before(function() {
 
@@ -112,7 +116,7 @@ describe('RuntimeUA', function() {
       }
     };
 
-    let getDescriptor = (url) => {
+    getDescriptor = (url) => {
 
       return new Promise(function(resolve, reject) {
 
@@ -154,28 +158,6 @@ describe('RuntimeUA', function() {
       });
     };
 
-    sinon.stub(runtime.loader.descriptors, 'getHypertyDescriptor', (hypertyURL) => {
-      return getDescriptor(hypertyURL);
-    });
-
-    sinon.stub(runtime.loader.descriptors, 'getStubDescriptor', (stubURL) => {
-      return getDescriptor(stubURL);
-    });
-
-    sinon.stub(runtime.loader.descriptors, 'getIdpProxyDescriptor', (idpProxyURL) => {
-      return getDescriptor(idpProxyURL);
-    });
-
-    sinon.stub(runtime.registry, 'registerHyperty')
-    .returns(new Promise(function(resolve) {
-      resolve('hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d');
-    }));
-
-    sinon.stub(runtime.registry, 'checkRegisteredURLs')
-    .returns(new Promise((resolve) => {
-      resolve('hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d');
-    }));
-
   });
 
   after(function() {
@@ -185,6 +167,40 @@ describe('RuntimeUA', function() {
   });
 
   describe('constructor()', function() {
+
+    it('expects the runtime was ready', (done) => {
+
+      expect(runtime.init().then((result) => {
+
+        sinon.stub(runtime.loader.descriptors, 'getHypertyDescriptor', (hypertyURL) => {
+          return getDescriptor(hypertyURL);
+        });
+
+        sinon.stub(runtime.loader.descriptors, 'getStubDescriptor', (stubURL) => {
+          return getDescriptor(stubURL);
+        });
+
+        sinon.stub(runtime.loader.descriptors, 'getIdpProxyDescriptor', (idpProxyURL) => {
+          return getDescriptor(idpProxyURL);
+        });
+
+        sinon.stub(runtime.registry, 'registerHyperty')
+        .returns(new Promise(function(resolve) {
+          resolve('hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d');
+        }));
+
+        sinon.stub(runtime.registry, 'checkRegisteredURLs')
+        .returns(new Promise((resolve) => {
+          resolve('hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d');
+        }));
+
+        return result;
+      }))
+      .to.be.fulfilled
+      .and.to.eventually.be.true
+      .and.notify(done);
+
+    });
 
     it('depends of the Registry', function() {
       expect(runtime.registry).to.be.instanceof(Registry);

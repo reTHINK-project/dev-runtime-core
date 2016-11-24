@@ -216,8 +216,8 @@ describe('Policy Engine with Runtime Core context', () => {
       });
     }
   };
-  let persistenceManager = runtimeFactory.persistenceManager();
-  let policyEngine = new PEP(new RuntimeCoreCtx(identityModule, runtimeRegistry, persistenceManager));
+  let storageManager = runtimeFactory.storageManager();
+  let policyEngine = new PEP(new RuntimeCoreCtx(identityModule, runtimeRegistry, storageManager));
 
   describe('initial filtering', () => {
     it('message that loads an hyperty should not be validated by policies', () => {
