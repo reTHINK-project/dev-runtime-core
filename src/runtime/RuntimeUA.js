@@ -28,6 +28,7 @@ import Registry from '../registry/Registry';
 import IdentityModule from '../identity/IdentityModule';
 import PEP from '../policy/PEP';
 import MessageBus from '../bus/MessageBus';
+import { generateGUID } from '../utils/utils';
 
 import Loader from './Loader';
 import { runtimeConfiguration } from './runtimeConfiguration';
@@ -106,7 +107,7 @@ class RuntimeUA {
 
           this.runtimeURL = results[0] ? results[0].runtimeURL : results[0];
           if (!this.runtimeURL) {
-            this.runtimeURL = 'runtime://' + this.domain + '/' + Math.floor((Math.random() * 10000) + 1);
+            this.runtimeURL = 'runtime://' + this.domain + '/' + generateGUID();
             this.storageManager.set('runtime:URL', 1, {runtimeURL: this.runtimeURL});
           }
 
