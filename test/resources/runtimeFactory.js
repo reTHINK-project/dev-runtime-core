@@ -3,6 +3,9 @@ import AppSandboxBrowser from './sandboxes/AppSandboxBrowser';
 import Request from './Request';
 import {RuntimeCatalogue} from 'service-framework/dist/RuntimeCatalogue';
 import PersistenceManager from 'service-framework/dist/PersistenceManager';
+import StorageManager from 'service-framework/dist/StorageManager';
+
+import Dexie from 'dexie';
 
 export const runtimeFactory = {
 

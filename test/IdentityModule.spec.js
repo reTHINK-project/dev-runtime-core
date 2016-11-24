@@ -7,10 +7,12 @@ let expect = chai.expect;
 chai.use(chaiAsPromised);
 
 import IdentityModule from '../src/identity/IdentityModule';
+import { runtimeFactory } from './resources/runtimeFactory';
 
+let storageManager = runtimeFactory.storageManager();
 let runtimeURL = 'hyperty-runtime://csp.com/123';
 
-let identityModule = new IdentityModule(runtimeURL);
+let identityModule = new IdentityModule(runtimeURL, 'runtimeCapabilities', storageManager);
 
 describe('IdentityModule', function() {
 

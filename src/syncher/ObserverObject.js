@@ -10,14 +10,34 @@ class ObserverObject {
     _this._url = url;
     _this._childrens = childrens;
 
+    _this._storageManager = parent._storageManager;
+
     _this._bus = parent._bus;
+
     _this._subscriptions = {};
+    _this._storageSubscriptions = {};
+  }
+
+  _newSubscription(hyperty) {
+    let _this = this;
+
+    _this._subscriptions[hyperty] = new Subscription(_this._bus, hyperty, _this._url, _this._childrens, false);
   }
 
   addSubscription(hyperty) {
     let _this = this;
 
-    _this._subscriptions[hyperty] = new Subscription(_this._bus, hyperty, _this._url, _this._childrens, false);
+    _this._newSubscription(hyperty);
+
+    _this._storageSubscriptions[hyperty] = {url: _this._url, childrens: _this._childrens};
+    _this._storageManager.set('syncherManager:Observer', 1, _this._storageSubscriptions);
+  }
+
+  resumeSubscription(hyperty) {
+    let _this = this;
+
+    console.log('[Observer Object] - resume subscriptions: ', hyperty);
+    _this._newSubscription(hyperty);
   }
 
   removeSubscription(hyperty) {

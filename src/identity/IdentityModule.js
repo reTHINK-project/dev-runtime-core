@@ -37,12 +37,14 @@ class IdentityModule {
   /**
   * This is the constructor to initialise the Identity Module it does not require any input.
   */
-  constructor(runtimeURL, runtimeCapabilities) {
+  constructor(runtimeURL, runtimeCapabilities, storageManager) {
     let _this = this;
 
     if (!runtimeURL) throw new Error('runtimeURL is missing.');
+    if (!storageManager) throw new Error('storageManager is missing');
 
     _this._runtimeURL = runtimeURL;
+    _this.storageManager = storageManager;
     _this._idmURL = _this._runtimeURL + '/idm';
     _this._guiURL = _this._runtimeURL + '/identity-gui';
     _this.runtimeCapabilities = runtimeCapabilities;
@@ -74,6 +76,8 @@ class IdentityModule {
     // verification of nodeJS, and in case it is nodeJS then disable encryption
     // TODO improve later, this exists because the crypto lib uses browser cryptographic methods
     //_this.isToUseEncryption = (window) ? true : false;
+
+    _this._loadIdentities();
 
   }
 
@@ -141,6 +145,20 @@ class IdentityModule {
     }
 
     throw 'identity not found';
+  }
+
+  _loadIdentities() {
+    let _this = this;
+    return new Promise((resolve) => {
+
+      _this.storageManager.get('idModule:identities').then((identities) => {
+
+        if (identities) {
+          _this.identities = identities;
+        }
+        resolve();
+      });
+    });
   }
 
   deployGUI() {
@@ -271,30 +289,6 @@ class IdentityModule {
     } else {
       return 'domain-idp://' + idpDomain;
     }
-  }
-
-  /**
-  * Function to login a user within the session, it will start the process to obtain an Identity from a user, including the request for an identity Assertion. The function returns a promise with the token received by the idpProxy.
-  *
-  * @param  {Identifier}      identifier      identifier
-  * @param  {Scope}           scope           scope
-  * @return {Promise}         Promise         IDToken containing the user information
-  */
-  loginWithRP(identifier, scope) {
-    let _this = this;
-
-    return new Promise(function(resolve, reject) {
-
-      //TODO remove this verification and refactor this part
-      _this.currentIdentity = undefined;
-      _this.getIdentityAssertion('identifier', 'origin', 'hint', identifier).then(function(value) {
-        console.log('loginWithRP');
-        resolve(value);
-      }, function(err) {
-        console.log('loginWithRP err');
-        reject(err);
-      });
-    });
   }
 
   /**
@@ -450,7 +444,10 @@ class IdentityModule {
             }};
           _this.currentIdentity = identityBundle;
           _this.identities.push(identityBundle);
-          return resolve(identityBundle);
+          _this.storageManager.set('idModule:identities', 0, _this.identities).then(() => {
+
+            return resolve(identityBundle);
+          });
         }
 
       }).catch(error => {
@@ -581,7 +578,10 @@ class IdentityModule {
       } else {
         _this.emailsList.push(email);
         _this.identities.push(result);
-        resolve(newIdentity);
+        _this.storageManager.set('idModule:identities', 0, _this.identities).then(() => {
+
+          resolve(newIdentity);
+        });
       }
 
     });

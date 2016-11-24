@@ -50,7 +50,7 @@ class ObjectAllocation {
    * @param  {number} number - Number of addresses to request
    * @returns {Promise<ObjectURL>}  A list of ObjectURL's
    */
-  create(domain, scheme, number) {
+  create(domain, number, scheme) {
     let _this = this;
 
     //FLOW-OUT: message sent to msg-node ObjectAllocationManager component

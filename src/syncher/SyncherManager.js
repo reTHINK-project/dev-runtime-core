@@ -21,7 +21,7 @@
 * limitations under the License.
 **/
 import { divideURL } from '../utils/utils';
-import ObjectAllocation from './ObjectAllocation';
+import AddressAllocation from '../allocation/AddressAllocation';
 import ReporterObject from './ReporterObject';
 import ObserverObject from './ObserverObject';
 import tv4 from '../utils/tv4';
@@ -37,18 +37,25 @@ class SyncherManager {
   _url: URL
   _bus: MiniBus
   _registry: Registry
-  _allocator: ObjectAllocation
+  _allocator: AddressAllocation
 
   _reporters: { ObjectURL: ReporterObject }
   _observers: { ObjectURL: ObserverObject }
   */
 
-  constructor(runtimeURL, bus, registry, catalog, allocator) {
+  constructor(runtimeURL, bus, registry, catalog, storageManager, allocator) {
+    if (!runtimeURL) throw new Error('Syncher Manager needs the runtimeURL parameter');
+    if (!bus) throw new Error('Syncher Manager needs the MessageBus instance');
+    if (!registry) throw new Error('Syncher Manager needs the Registry instance');
+    if (!catalog) throw new Error('Syncher Manager needs the RuntimeCatalogue instance');
+    if (!storageManager) throw new Error('You need the domain of runtime');
+
     let _this = this;
 
     _this._bus = bus;
     _this._registry = registry;
     _this._catalog = catalog;
+    _this._storageManager = storageManager;
 
     //TODO: these should be saved in persistence engine?
     _this._url = runtimeURL + '/sm';
@@ -65,7 +72,7 @@ class SyncherManager {
     if (allocator) {
       _this._allocator = allocator;
     } else {
-      _this._allocator = new ObjectAllocation(_this._objectURL, bus);
+      _this._allocator = new AddressAllocation(_this._objectURL, bus, _this._registry);
     }
 
     bus.addListener(_this._url, (msg) => {
@@ -77,9 +84,70 @@ class SyncherManager {
         case 'unsubscribe': _this._onLocalUnSubscribe(msg); break;
       }
     });
+
+    _this._resumeReporterListeners();
+    _this._resumeObserverListeners();
+
   }
 
   get url() { return this._url; }
+
+  _resumeObserverListeners() {
+
+    // Get to the storageManager dataObjectObservers
+    this._storageManager.get('syncherManager:Observer').then((observers) => {
+      console.info('[storage manager observer] - Resume Subscriptions: ', observers);
+      if (!observers) return;
+
+      Object.keys(observers).forEach((key) => {
+        console.info(key, observers[key]);
+        let objURL = observers[key].url;
+        let childrens = observers[key].childrens;
+
+        let observer = this._observers[objURL];
+        if (!observer) {
+          observer = new ObserverObject(this, objURL, childrens);
+          this._observers[objURL] = observer;
+        }
+
+        //register an used hyperty subscription
+        observer.resumeSubscription(key);
+      });
+
+    }).catch((error) => {
+      console.error('Error: ', error);
+    });
+  }
+
+  _resumeReporterListeners() {
+    let reporter;
+
+    // Get to the storageManager dataObjectObservers
+    this._storageManager.get('syncherManager:Reporter').then((reporters) => {
+      if (!reporters) return;
+
+      Object.keys(reporters).forEach((key) => {
+        console.info(key);
+        let objURL = reporters[key].url;
+        let owner = reporters[key].owner;
+        let subscriptionURL = objURL + '/subscription';
+        let subscriptions = reporters[key].subscriptions;
+
+        reporter = new ReporterObject(this, owner, objURL);
+        reporter.resumeSubscriptions(subscriptions);
+        this._reporters[objURL] = reporter;
+
+        // reporter.resumeSubscriptions(subscriptions);
+        // reporter.forwardSubscribe([objURL, subscriptionURL]).then(() => {
+        //   this._reporters[objURL] = reporter;
+        // });
+
+      });
+
+    }).catch((error) => {
+      console.error('Error: ', error);
+    });
+  }
 
   //FLOW-IN: message received from Syncher -> create
   _onCreate(msg) {
@@ -130,9 +198,16 @@ class SyncherManager {
         console.warn('Error during object validation:', e);
       }
 
+      let objectInfo = {
+        name: msg.body.value.name,
+        schema: msg.body.value.schema,
+        reporter: msg.body.value.reporter,
+        resources: msg.body.value.resources
+      };
+
       //request address allocation of a new object from the msg-node
-      _this._allocator.create(domain, scheme, 1).then((allocated) => {
-        let objURL = allocated[0];
+      _this._allocator.create(domain, 1, objectInfo, scheme).then((allocated) => {
+        let objURL = allocated.address[0];
 
         console.log('ALLOCATOR CREATE:', allocated);
 
@@ -142,12 +217,19 @@ class SyncherManager {
 
         //To register the dataObject in the runtimeRegistry
         console.info('Register Object: ', msg.body.value.name, msg.body.value.schema, objURL, msg.body.value.reporter, msg.body.value.resources);
-        _this._registry.registerDataObject(msg.body.value.name, msg.body.value.schema, objURL, msg.body.value.reporter, msg.body.value.resources, msg.body.authorise).then(function(resolve) {
+        _this._registry.registerDataObject(msg.body.value.name, msg.body.value.schema, objURL, msg.body.value.reporter, msg.body.value.resources, allocated, msg.body.authorise).then((resolve) => {
           console.log('DataObject successfully registered', resolve);
 
           //all OK -> create reporter and register listeners
-          let reporter = new ReporterObject(_this, owner, objURL);
-          reporter.forwardSubscribe([objURL,subscriptionURL]).then(() => {
+          let reporter;
+
+          if (!this._reporters[objURL]) {
+            reporter = new ReporterObject(_this, owner, objURL);
+          } else {
+            reporter = this._reporters[objURL];
+          }
+
+          reporter.forwardSubscribe([objURL, subscriptionURL]).then(() => {
             reporter.addChildrens(childrens).then(() => {
               _this._reporters[objURL] = reporter;
 
@@ -268,7 +350,7 @@ class SyncherManager {
                 _this._observers[objURL] = observer;
               }
 
-              //register hyperty subscription
+              //register new hyperty subscription
               observer.addSubscription(hypertyURL);
 
               //forward to hyperty:
@@ -276,6 +358,7 @@ class SyncherManager {
               reply.from = _this._url;
               reply.to = hypertyURL;
               this._bus.postMessage(reply);
+
             }
           });
 

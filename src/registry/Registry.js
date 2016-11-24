@@ -20,8 +20,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 **/
-import AddressAllocation from './AddressAllocation';
-import ObjectAllocation from '../syncher/ObjectAllocation';
+import AddressAllocation from '../allocation/AddressAllocation';
 import HypertyInstance from './HypertyInstance';
 
 import {MessageFactory} from 'service-framework/dist/MessageFactory';
@@ -44,8 +43,9 @@ class Registry {
   * @param  {AppSandbox}          appSandbox            appSandbox
   * @param  {runtimeCatalogue}    runtimeCatalogue      runtimeCatalogue
   * @param  {DomainURL}           remoteRegistry        remoteRegistry
+  * @param  {storageManager}      storageManager
   */
-  constructor(runtimeURL, appSandbox, identityModule, runtimeCatalogue, runtimeCapabilities, remoteRegistry) {
+  constructor(runtimeURL, appSandbox, identityModule, runtimeCatalogue, runtimeCapabilities, storageManager, remoteRegistry) {
 
     // how some functions receive the parameters for example:
     // new Registry('hyperty-runtime://sp1/123', appSandbox, idModule, remoteRegistry);
@@ -54,6 +54,7 @@ class Registry {
     // registry.resolve('hyperty-runtime://sp1/123');
 
     if (!runtimeURL) throw new Error('runtimeURL is missing.');
+    if (!storageManager) throw new Error('storageManager is missing.');
     /*if (!remoteRegistry) throw new Error('remoteRegistry is missing');*/
 
     let _this = this;
@@ -64,6 +65,7 @@ class Registry {
     _this.runtimeCatalogue = runtimeCatalogue;
     _this.remoteRegistry = remoteRegistry;
     _this.idModule = identityModule;
+    _this.storageManager = storageManager;
     _this.runtimeCapabilities = runtimeCapabilities;
     _this.identifier = Math.floor((Math.random() * 10000) + 1);
 
@@ -128,18 +130,9 @@ class Registry {
     _this.idModule.messageBus = messageBus;
 
     // Install AddressAllocation
-    let addressAllocation = new AddressAllocation(_this.registryURL, messageBus);
+    let addressAllocation = new AddressAllocation(_this.registryURL, messageBus, _this);
     _this.addressAllocation = addressAllocation;
 
-    //Install ObjectAllocation
-    let objectAllocation = new ObjectAllocation(_this.registryURL + '/object-allocation', messageBus);
-    _this.objectAllocation = objectAllocation;
-
-    /*let discovery = new Discovery(_this.registryURL, messageBus);
-    _this.discovery = discovery;
-
-    let identityManager = new IdentityManager('hyperty://localhost/833a6e52-515b-498b-a57b-e3daeece48d2', _this.runtimeURL, messageBus);
-    _this.identityManager = identityManager;*/
   }
 
   /**
@@ -516,7 +509,7 @@ class Registry {
   * @param  {Array}     resources                     dataObject resources
   * @param  {Array}     authorise                     list of pre authorised authorised IDs
   */
-  registerDataObject(identifier, dataObjectschema, dataObjectUrl, dataObjectReporter, resources, authorise) {
+  registerDataObject(identifier, dataObjectschema, dataObjectUrl, dataObjectReporter, resources, addressURL, authorise) {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
@@ -525,27 +518,150 @@ class Registry {
       let filteredDataScheme = dataObjectUrl.split(':');
       dataScheme.push(filteredDataScheme[0]);
 
-      //message to register the new hyperty, within the domain registry
-      let messageValue = {name: identifier, resources: resources, dataSchemes: dataScheme, schema: dataObjectschema, url: dataObjectUrl, expires: _this.expiresTime, reporter: dataObjectReporter, preAuth: authorise, subscribers: []};
+      _this.storageManager.get('registry:DataObjectURLs').then((urlsList) => {
 
-      _this.dataObjectList[dataObjectUrl] = messageValue;
-
-      /*let message = _this.messageFactory.createCreateMessageRequest(
-        _this.registryURL,
-        'domain://registry.' + _this.registryDomain + '/',
-        messageValue,
-        'policy'
-      );*/
-
-      let message = {type:'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: messageValue, policy: 'policy'}};
-
-      _this._messageBus.postMessage(message, (reply) => {
-        console.log('===> registerDataObject Reply: ', reply);
-        if (reply.body.code === 200) {
-          resolve('ok');
-        } else {
-          reject('error on register DataObject');
+        if (!urlsList) {
+          urlsList = {};
         }
+
+        //update the list with the new elements
+        urlsList[identifier + dataObjectschema + resources + dataObjectReporter] = addressURL.address;
+
+        //message to register the new hyperty, within the domain registry
+        let messageValue = {name: identifier, resources: resources, dataSchemes: dataScheme, schema: dataObjectschema, url: dataObjectUrl, expires: _this.expiresTime, reporter: dataObjectReporter, preAuth: authorise, subscribers: []};
+
+        let message;
+
+        if (addressURL.newAddress) {
+
+          console.log('registering new data object URL', dataObjectUrl);
+
+          message = {type:'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: messageValue, policy: 'policy'}};
+
+        } else {
+
+          console.log('registering previously registered data object URL', dataObjectUrl);
+
+          /*messageValue = {name: identifier, resources: resources, dataSchemes: dataScheme, schema: dataObjectschema, url: dataObjectUrl, expires: _this.expiresTime, reporter: dataObjectReporter, preAuth: authorise, subscribers: []};
+
+          message = {type:'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: messageValue, policy: 'policy'}};*/
+
+          message = {
+            type: 'update',
+            to: 'domain://registry.' + _this.registryDomain + '/',
+            from: _this.registryURL,
+            body: {resource: dataObjectUrl, value: 'live', attribute: 'status'}
+          };
+
+        }
+
+        _this.dataObjectList[dataObjectUrl] = messageValue;
+
+        // step to obtain the list of all URL registered to updated with the new one.
+        _this.storageManager.set('registry:DataObjectURLs', 0, urlsList).then(() => {
+
+          /*let message = _this.messageFactory.createCreateMessageRequest(
+            _this.registryURL,
+            'domain://registry.' + _this.registryDomain + '/',
+            messageValue,
+            'policy'
+          );*/
+
+          _this._messageBus.postMessage(message, (reply) => {
+            console.log('===> registerDataObject Reply: ', reply);
+            if (reply.body.code === 200) {
+              resolve('ok');
+            } else {
+              reject('error on register DataObject');
+            }
+          });
+        });
+      });
+    });
+  }
+
+  _getResourcesAndSchemes(descriptor) {
+    let _this = this;
+
+    return new Promise((resolve, reject)=> {
+
+      let resources;
+
+      // check if the hyperty resources is a vector or a string
+      // TODO delete later when catalogue is fixed
+      if (typeof (descriptor.hypertyType) === 'string') {
+        resources = [];
+        resources.push(descriptor.hypertyType);
+      } else {
+        resources = descriptor.hypertyType;
+      }
+
+      let descriptorDataSchema = descriptor.dataObjects;
+      let dataSchemasArray = [];
+
+      //this will create a array with a Promise in each position
+      for (let index in descriptorDataSchema) {
+        dataSchemasArray.push(_this.runtimeCatalogue.getDataSchemaDescriptor(descriptorDataSchema[index]));
+      }
+
+      // as soon as the previous array is completed, this will wait for the resolve of all promises in the array
+      Promise.all(dataSchemasArray).then(function(dataSchemas) {
+
+        let filteredDataSchemas = [];
+        for (let index in dataSchemas) {
+          let dataSchema = dataSchemas[index];
+          filteredDataSchemas.push(dataSchema.sourcePackage.sourceCode.properties.scheme.constant);
+        }
+
+        console.log('Hyperty Schemas', filteredDataSchemas);
+        console.log('Hyperty resources', resources);
+
+        resolve({resources: resources, dataSchema: filteredDataSchemas});
+      });
+    });
+  }
+
+  /**
+  * method that returns previously registered Hyperty or DataObjects URLS, for given characteristics
+  * @param  {JSON}        info           object or hyperty charateristics info
+  * @return {addressURL}  addressURL     return the URL if there is any previousy registered URL, return undefined otherwise
+  */
+  checkRegisteredURLs(info) {
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+
+      let objectType = (info.reporter) ? 'registry:DataObjectURLs' : 'registry:HypertyURLs';
+
+      _this.storageManager.get(objectType).then((urlsList) => {
+
+        if (!urlsList) {
+          urlsList = {};
+        }
+
+        if (objectType === 'registry:HypertyURLs') {
+          _this._getResourcesAndSchemes(info).then((value) => {
+            if (urlsList[value.resources + value.dataSchema]) {
+              console.log('reusage of hyperty URL');
+              return resolve(urlsList[value.resources + value.dataSchema]);
+            } else {
+              console.log('no hyperty URL was previously registered ');
+              return resolve(undefined);
+            }
+          });
+        } else {
+
+          let characteristics = info.name + info.schema + info.resources + info.reporter;
+
+          if (urlsList[characteristics]) {
+            console.log('reusage of dataObject URL');
+            return resolve(urlsList[characteristics]);
+          } else {
+            console.log('no dataObject URL was previously registered');
+            return resolve(undefined);
+          }
+        }
+
       });
 
     });
@@ -557,8 +673,10 @@ class Registry {
   * @param  {HypertyCatalogueURL} HypertyCatalogueURL   descriptor
   * @return {HypertyURL}          HypertyURL
   */
-  registerHyperty(sandbox, descriptorURL, descriptor) {
+  registerHyperty(sandbox, descriptorURL, descriptor, addressURL) {
     let _this = this;
+
+    let hypertyCapabilities;
 
     return new Promise(function(resolve, reject) {
 
@@ -580,68 +698,60 @@ class Registry {
           //call check if the protostub exist
           _this.resolve('hyperty-runtime://' + domainUrl).then(function() {
 
-            _this.registryDomain = domainUrl;
+            return _this.storageManager.get('registry:HypertyURLs');
+          }).then((urlsList) => {
 
-            // TODO: should be implemented with addresses poll
-            // In this case we will request and return only one
-            // address
-            let numberOfAddresses = 1;
-            _this.addressAllocation.create(domainUrl, numberOfAddresses).then(function(adderessList) {
+            _this._getResourcesAndSchemes(descriptor).then((value) => {
 
-              adderessList.forEach(function(address) {
+              hypertyCapabilities = value;
 
-                _this._messageBus.addListener(address + '/status', (msg) => {
-                  console.log('Message addListener for : ', address + '/status -> '  + msg);
-                });
-
-              });
-
-              //check whether the received sanbox e ApplicationSandbox or a normal sandbox
-              if (sandbox.type === 'app') {
-                _this.sandboxesList.appSandbox[adderessList[0]] = sandbox;
-              } else if (sandbox.type === 'normal') {
-                _this.sandboxesList.sandbox[adderessList[0]] = sandbox;
-              } else {
-                reject('Wrong SandboxType');
+              if (!urlsList) {
+                urlsList = {};
               }
 
-              let resources;
+              urlsList[hypertyCapabilities.resources + hypertyCapabilities.dataSchema] = addressURL.address;
+              _this.storageManager.set('registry:HypertyURLs', 0, urlsList).then(() => {
 
-              // check if the hyperty resources is a vector or a string
-              // TODO delete later when catalogue is fixed
-              if (typeof (descriptor.hypertyType) === 'string') {
-                resources = [];
-                resources.push(descriptor.hypertyType);
-              } else {
-                resources = descriptor.hypertyType;
-              }
+                _this.registryDomain = domainUrl;
 
-              let descriptorDataSchema = descriptor.dataObjects;
-              let dataSchemasArray = [];
-
-              //this will create a array with a Promise in each position
-              for (let index in descriptorDataSchema) {
-                dataSchemasArray.push(_this.runtimeCatalogue.getDataSchemaDescriptor(descriptorDataSchema[index]));
-              }
-
-              // as soon as the previous array is completed, this will wait for the resolve of all promises in the array
-              Promise.all(dataSchemasArray).then(function(dataSchemas) {
-
-                let filteredDataSchemas = [];
-                for (let index in dataSchemas) {
-                  let dataSchema = dataSchemas[index];
-                  filteredDataSchemas.push(dataSchema.sourcePackage.sourceCode.properties.scheme.constant);
+                //check whether the received sanbox e ApplicationSandbox or a normal sandbox
+                if (sandbox.type === 'app') {
+                  _this.sandboxesList.appSandbox[addressURL.address[0]] = sandbox;
+                } else if (sandbox.type === 'normal') {
+                  _this.sandboxesList.sandbox[addressURL.address[0]] = sandbox;
+                } else {
+                  reject('Wrong SandboxType');
                 }
 
                 let hyperty = new HypertyInstance(_this.identifier, _this.registryURL,
-                descriptorURL, descriptor, adderessList[0], userProfile);
+                descriptorURL, descriptor, addressURL.address[0], userProfile);
 
-                hyperty._resources = resources;
-                hyperty._dataSchemes = filteredDataSchemas;
+                hyperty._resources = hypertyCapabilities.resources;
+                hyperty._dataSchemes = hypertyCapabilities.dataSchema;
                 _this.hypertiesList.push(hyperty);
 
                 //message to register the new hyperty, within the domain registry
-                let messageValue = {user: identityURL,  descriptor: descriptorURL, url: adderessList[0], expires: _this.expiresTime, resources: resources, dataSchemes: filteredDataSchemas};
+                let messageValue;
+                let message;
+
+                if (addressURL.newAddress) {
+                  console.log('registering new Hyperty URL', addressURL.address[0]);
+
+                  messageValue = {user: identityURL,  descriptor: descriptorURL, url: addressURL.address[0], expires: _this.expiresTime, resources: hypertyCapabilities.resources, dataSchemes: hypertyCapabilities.dataSchema};
+
+                  message = {type:'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: messageValue, policy: 'policy'}};
+
+                } else {
+                  console.log('registering previously registered Hyperty URL', addressURL.address[0]);
+
+                  message =
+                    {type: 'update',
+                     to: 'domain://registry.' + _this.registryDomain + '/',
+                     from: _this.registryURL,
+                     body: {resource: addressURL.address[0]/*, value: 'live', attribute: 'status'*/}
+                   };
+
+                }
 
                 /*let message = _this.messageFactory.createCreateMessageRequest(
                   _this.registryURL,
@@ -650,13 +760,11 @@ class Registry {
                   'policy'
                 );*/
 
-                let message = {type:'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: messageValue, policy: 'policy'}};
-
                 _this._messageBus.postMessage(message, (reply) => {
                   console.log('===> RegisterHyperty Reply: ', reply);
 
                   if (reply.body.code === 200) {
-                    resolve(adderessList[0]);
+                    resolve(addressURL.address[0]);
                   } else {
                     reject('Failed to register an Hyperty');
                   }
@@ -672,29 +780,25 @@ class Registry {
                     messageValue,
                     'policy'
                   );*/
-                  let message = {type:'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: messageValue, policy: 'policy'}};
+
+                  let message = {type:'update', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: { resource: addressURL.address[0]}};
 
                   _this._messageBus.postMessage(message, (reply) => {
                     console.log('===> KeepAlive Reply: ', reply);
                   });
                 },(((_this.expiresTime / 1.1) / 2) * 1000));
 
-                console.log('Hyperty Schemas', filteredDataSchemas);
-                console.log('Hyperty resources', resources);
-
+              }).catch(function(reason) {
+                console.log('Address Reason: ', reason);
+                reject(reason);
               });
-
-            }).catch(function(reason) {
-              console.log('Address Reason: ', reason);
-              reject(reason);
             });
           });
         }
       }, function(err) {
-        reject('Failed to obtain an identity');
+        reject('Failed to obtain an identity', err);
       });
     });
-
   }
 
   /**

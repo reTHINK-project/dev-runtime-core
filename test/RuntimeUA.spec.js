@@ -22,12 +22,13 @@ import MessageBus from '../src/bus/MessageBus';
 import { divideURL } from '../src/utils/utils';
 
 import { runtimeFactory } from './resources/runtimeFactory';
-import { runtimeConfiguration } from './resources/runtimeConfiguration';
+
+/// import { runtimeConfiguration } from './resources/runtimeConfiguration';
 
 // Testing runtimeUA;
 describe('RuntimeUA', function() {
 
-  let runtime = new RuntimeUA(runtimeFactory, runtimeConfiguration);
+  let runtime = new RuntimeUA(runtimeFactory, 'localhost');
   let getDescriptor;
 
   before(function() {
@@ -185,6 +186,11 @@ describe('RuntimeUA', function() {
 
         sinon.stub(runtime.registry, 'registerHyperty')
         .returns(new Promise(function(resolve) {
+          resolve('hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d');
+        }));
+
+        sinon.stub(runtime.registry, 'checkRegisteredURLs')
+        .returns(new Promise((resolve) => {
           resolve('hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d');
         }));
 

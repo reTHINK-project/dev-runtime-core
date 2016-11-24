@@ -6,14 +6,14 @@ import ReThinkCtx from '../ReThinkCtx';
 
 class RuntimeCoreCtx extends ReThinkCtx {
 
-  constructor(idModule, runtimeRegistry, persistenceManager) {
+  constructor(idModule, runtimeRegistry, storageManager) {
     super();
     this.idModule = idModule;
     this.runtimeRegistry = runtimeRegistry;
     this.activeUserPolicy = undefined;
     this.serviceProviderPolicy = {};
     this.userPolicies = {};
-    this.persistenceManager = persistenceManager;
+    this.storageManager = storageManager;
   }
 
   get subscription() {
@@ -25,15 +25,28 @@ class RuntimeCoreCtx extends ReThinkCtx {
   }
 
   loadConfigurations() {
-    this.activeUserPolicy = this.persistenceManager.get('rethink:activePolicy');
+    let _this = this;
 
-    let groups = this.persistenceManager.get('rethink:groups');
-    this.groups = (groups === undefined) ? {} : groups;
+    return new Promise((resolve, reject) => {
 
-    let spPolicies = this.persistenceManager.get('rethink:spPolicies');
-    this.serviceProviderPolicy = (spPolicies === undefined) ? {} : spPolicies;
+      _this.storageManager.get('rethink:activePolicy').then((value) => {
+        _this.activeUserPolicy = value;
 
-    this._loadUserPolicies();
+        return _this.storageManager.get('rethink:groups');
+      }).then((groupInfo) => {
+        let groups = groupInfo;
+        _this.groups = (groups === undefined) ? {} : groups;
+
+        return _this.storageManager.get('rethink:spPolicies');
+      }).then((policiesInfo) => {
+        let spPolicies = policiesInfo;
+        _this.serviceProviderPolicy = (spPolicies === undefined) ? {} : spPolicies;
+
+        _this._loadUserPolicies().then(() => {
+          resolve();
+        });
+      });
+    });
   }
 
   prepareForEvaluation(message, isIncoming) {
@@ -45,10 +58,10 @@ class RuntimeCoreCtx extends ReThinkCtx {
           _this.idModule.decryptMessage(message).then(function(message) {
             /*if (message.type === 'update') {
               _this._isValidUpdate(message).then(message => {*/
-                resolve(message);
-              }, (error) => {
-                reject(error);
-              /*});
+            resolve(message);
+          }, (error) => {
+            reject(error);
+            /*});
             } else {
               resolve(message);
             }*/
@@ -245,12 +258,21 @@ class RuntimeCoreCtx extends ReThinkCtx {
   * @param  {String}  groupName
   */
   _loadUserPolicies() {
-    let policies = this.persistenceManager.get('rethink:userPolicies');
-    if (policies !== undefined) {
-      for (let i in policies) {
-        this.pep.addPolicy('USER', i, policies[i]);
-      }
-    }
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+
+      _this.storageManager.get('rethink:userPolicies').then((value) => {
+        let policies = value;
+        if (policies !== undefined) {
+          for (let i in policies) {
+            this.pep.addPolicy('USER', i, policies[i]);
+          }
+        }
+        resolve();
+      });
+    });
+
   }
 
   _getLastComponentOfURL(url) {
@@ -280,11 +302,23 @@ class RuntimeCoreCtx extends ReThinkCtx {
   }
 
   saveActivePolicy() {
-    this.persistenceManager.set('rethink:activePolicy', 0, this.activeUserPolicy);
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+      _this.storageManager.set('rethink:activePolicy', 0, this.activeUserPolicy).then(() => {
+        resolve();
+      });
+    });
   }
 
   saveGroups() {
-    this.persistenceManager.set('rethink:groups', 0, this.groups);
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+      _this.storageManager.set('rethink:groups', 0, this.groups).then(() => {
+        resolve();
+      });
+    });
   }
 
   savePolicies(source, policy, key) {
@@ -294,7 +328,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
       case 'USER':
         policiesJson = JSON.stringify(this.userPolicies);
         policiesJson = this._getPoliciesJSON(JSON.parse(policiesJson));
-        this.persistenceManager.set('rethink:userPolicies', 0, policiesJson);
+        this.storageManager.set('rethink:userPolicies', 0, policiesJson);
         break;
       case 'SERVICE_PROVIDER':
         if (policy !== undefined & key !== undefined) {
@@ -302,7 +336,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
         }
         policiesJson = JSON.stringify(this.serviceProviderPolicy);
         policiesJson = this._getPoliciesJSON(JSON.parse(policiesJson));
-        this.persistenceManager.set('rethink:spPolicies', 0, policiesJson);
+        this.storageManager.set('rethink:spPolicies', 0, policiesJson);
         break;
       default:
         throw Error('Unknown policy source: ' + source);

@@ -157,7 +157,7 @@ class RuntimeUA {
         this.messageBus = new MessageBus(this.registry);
 
         // Instantiate the Policy Engine
-        this.policyEngine = new PEP(new RuntimeCoreCtx(this.identityModule, this.registry, this.persistenceManager));
+        this.policyEngine = new PEP(new RuntimeCoreCtx(this.identityModule, this.registry, this.storageManager));
 
         this.messageBus.pipeline.handlers = [
 
@@ -189,7 +189,7 @@ class RuntimeUA {
         this.runtimeFactory.messageBus = this.messageBus;
 
         // Instanciate the SyncherManager;
-        this.syncherManager = new SyncherManager(this.runtimeURL, this.messageBus, this.registry, this.runtimeCatalogue);
+        this.syncherManager = new SyncherManager(this.runtimeURL, this.messageBus, this.registry, this.runtimeCatalogue, this.storageManager);
 
         // Set into loader the needed components;
         this.loader.runtimeURL = this.runtimeURL;
