@@ -134,17 +134,9 @@ getRegistry.then(function(registry) {
           dataObjects: ['url'],
           hypertyType: ['comm']
         };
+        let addressURL = {newAddress: true, address: ['hyperty://ua.pt/1']};
 
-        registry.messageBus.addListener('domain://msg-node.ua.pt/address-allocation', (msg) => {
-          let message = {id: 1, type: 'response', from: 'domain://msg-node.ua.pt/address-allocation', to: msg.from,
-          body: {code: 200, value: {allocated: ['hyperty://ua.pt/1']}}};
-
-          registry.messageBus.postMessage(message, (reply) => {
-            console.log('Reply: ', reply);
-          });
-        });
-
-        expect(registry.registerHyperty(sandboxDummy, descriptorURL, descriptor)).to.be.fulfilled.and.eventually.equal('hyperty://ua.pt/1').and.notify(done);
+        expect(registry.registerHyperty(sandboxDummy, descriptorURL, descriptor, addressURL)).to.be.fulfilled.and.eventually.equal('hyperty://ua.pt/1').and.notify(done);
 
       });
     });
@@ -240,6 +232,63 @@ getRegistry.then(function(registry) {
         expect(registry.registerDataObject(identifier, dataObjectschema, dataObjectUrl, dataObjectReporter, ['fake'], addressURL, authorise).then(function(response) {
           return response;
         })).to.be.fulfilled.and.eventually.equal('ok').and.notify(done);
+      });
+    });
+
+    describe('checkRegisteredURLs(info)', function() {
+
+      it('should return a previously registered Hyperty URL', function(done) {
+
+        let descriptor = {
+          _objectName: 'hyperty-chat',
+          dataObjects: ['url'],
+          hypertyType: ['comm']
+        };
+
+        expect(registry.checkRegisteredURLs(descriptor).then(function(response) {
+          return response;
+        })).to.be.fulfilled.and.eventually.to.be.eql(['hyperty://ua.pt/1']).and.notify(done);
+
+      });
+
+      it('should return a undefined value if the Hyperty is not previously registered', function(done) {
+
+        let fakeDescriptor = {
+          _objectName: 'hyperty-fake',
+          dataObjects: ['url2'],
+          hypertyType: ['comm2']
+        };
+        expect(registry.checkRegisteredURLs(fakeDescriptor).then(function(response) {
+          return response;
+        })).to.be.fulfilled.and.eventually.to.be.equal(undefined).and.notify(done);
+      });
+
+      it('should return a previously registered Data Object URL', function(done) {
+
+        let info = {
+          name: 'hello-chat',
+          schema: 'hyperty-catalogue://catalogue.localhost/.well-known/dataschema/Communication',
+          resources: ['fake'],
+          reporter: 'hyperty://localhost/d692091f-192c-420c-a763-a180f13e626a'
+        };
+
+        expect(registry.checkRegisteredURLs(info).then(function(response) {
+          return response;
+        })).to.be.fulfilled.and.eventually.to.be.eql(['comm://localhost/9303b707-f301-4929-ad7d-65a89a356871']).and.notify(done);
+
+      });
+
+      it('should return a undefined value if the dataObjectURL is not previously registered', function(done) {
+
+        let fakeInfo = {
+          name: 'fake',
+          schema: 'hyperty-catalogue://catalogue.localhost/.well-known/dataschema/unknown',
+          resources: ['fake'],
+          reporter: 'hyperty://localhost/anotherURL123'
+        };
+        expect(registry.checkRegisteredURLs(fakeInfo).then(function(response) {
+          return response;
+        })).to.be.fulfilled.and.eventually.to.be.equal(undefined).and.notify(done);
       });
     });
 

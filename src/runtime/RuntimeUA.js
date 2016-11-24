@@ -115,10 +115,9 @@ class RuntimeUA {
           return this._loadComponents();
 
         }).then((status) => {
-          console.log('Status: ', status);
           resolve(status);
         }).catch((error) => {
-          console.log('ERROR: ', error);
+          console.error('ERROR: ', error);
           reject(error);
         });
 
