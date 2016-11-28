@@ -64,41 +64,17 @@ class AddressAllocation {
 
     return new Promise((resolve, reject) => {
 
-      // let messageFactory = _this._messageFactory;
-      let msg;
-
-      // is an hyperty
-      if (scheme === 'hyperty') {
+      if (reuseURL) {
 
         _this._registry.checkRegisteredURLs(info).then((urls) => {
 
-          console.log('CHECK URLS: ', urls);
-
-          // if there is already a URL, then returns that URL, otherwise request a new URL
           if (urls) {
-            console.info('[AddressAllocation - hyperty] - Reuse URL');
+            console.info('[AddressAllocation - ' + scheme + '] - Reuse URL');
             let value = {newAddress: false, address: urls};
             resolve(value);
-
           } else {
-
-            msg = {
-              type: 'create', from: _this._url, to: 'domain://msg-node.' + domain + '/address-allocation',
-              body: {value: {number: number}}
-            };
-
-            console.info('[AddressAllocation - hyperty] - Request new URL', msg);
-
-            // TODO: change this response Message using the MessageFactory
-            _this._bus.postMessage(msg, (reply) => {
-              if (reply.body.code === 200) {
-                let result = {newAddress: true, address: reply.body.value.allocated};
-                resolve(result);
-              } else {
-                reject(reply.body.desc);
-              }
-            });
-
+            console.info('[AddressAllocation - reuseURL] - Object ' + reuseURL + ' not found');
+            reject('URL Not Found');
           }
 
         }).catch((reason) => {
@@ -107,87 +83,59 @@ class AddressAllocation {
 
       } else {
 
-        // check if we have an reuseURL
-        if (reuseURL) {
+        _this._registry.checkRegisteredURLs(info).then((urls) => {
 
-          _this._registry.checkRegisteredURLs(info).then((urls) => {
+          // if there is already a URL, then returns that URL, otherwise request a new URL
+          if (urls) {
 
-            if (urls) {
-              console.info('[AddressAllocation - Object] - Reuse URL');
-              let value = {newAddress: false, address: urls};
-              resolve(value);
-            } else {
-              console.info('[AddressAllocation - reuseURL] - Object ' + reuseURL + ' not found');
-              reject('ObjectURL Not Found');
-            }
+            console.info('[AddressAllocation - ' + scheme + '] - Reuse URL');
+            let value = {newAddress: false, address: urls};
+            resolve(value);
 
-          }).catch((reason) => {
-            reject(reason);
-          });
+          } else {
 
-        } else {
+            // if there is no URL saved request a new URL
+            _this._allocateNewAddress(domain, scheme, number).then((allocated) => {
+              resolve(allocated);
+            }).catch((reason) => {
+              reject(reason);
+            });
 
-          msg = {
-            type: 'create', from: _this._url, to: 'domain://msg-node.' + domain + '/address-allocation',
-            body: { scheme: scheme, value: { number: number } }
-          };
-
-          console.info('[AddressAllocation - Object] - Request new URL');
-
-          // TODO: change this response Message using the MessageFactory
-          _this._bus.postMessage(msg, (reply) => {
-            if (reply.body.code === 200) {
-              let result = {newAddress: true, address: reply.body.value.allocated};
-              resolve(result);
-            } else {
-              reject(reply.body.desc);
-            }
-          });
-
-        }
+          }
+        }).catch((reason) => {
+          reject(reason);
+        });
 
       }
-
-      // _this._registry.checkRegisteredURLs(info).then((urls) => {
-      //
-      //   console.log('CHECK URLS: ', urls);
-      //
-      //   // if there is already a URL, then returns that URL, otherwise request a new URL
-      //   if (urls) {
-      //     let value = {newAddress: false, address: urls};
-      //     return resolve(value);
-      //   }
-      //
-      //   if (scheme) {
-      //     msg = {
-      //       type: 'create', from: _this._url, to: 'domain://msg-node.' + domain + '/address-allocation',
-      //       body: { scheme: scheme, value: { number: number } }
-      //     };
-      //   } else {
-      //     msg = {
-      //       type: 'create', from: _this._url, to: 'domain://msg-node.' + domain + '/address-allocation',
-      //       body: {value: {number: number}}
-      //     };
-      //   }
-      //
-      //   // TODO: Apply the message factory
-      //   // The msg-node-vertx should be changed the body field to receive
-      //   // the following format body: {value: {number: number}} because
-      //   // the message is generated in that way by the message factory;
-      //   // let msg = messageFactory.createMessageRequest(_this._url, 'domain://msg-node.' + domain + '/hyperty-address-allocation', '', {number: number});
-      //
-      //   // TODO: change this response Message using the MessageFactory
-      //   _this._bus.postMessage(msg, (reply) => {
-      //     if (reply.body.code === 200) {
-      //       let result = {newAddress: true, address: reply.body.value.allocated};
-      //       resolve(result);
-      //     } else {
-      //       reject(reply.body.desc);
-      //     }
-      //   });
-      //
-      // });
     });
+
+  }
+
+  _allocateNewAddress(domain, scheme, number) {
+
+    return new Promise((resolve, reject) => {
+
+      let msg = {
+        type: 'create', from: this._url, to: 'domain://msg-node.' + domain + '/address-allocation',
+        body: {value: { number: number } }
+      };
+
+      if (scheme !== 'hypert') msg.body.scheme = scheme;
+
+      console.info('[AddressAllocation - ' + scheme + '] - Request new URL');
+
+      // TODO: change this response Message using the MessageFactory
+      this._bus.postMessage(msg, (reply) => {
+        if (reply.body.code === 200) {
+          let result = {newAddress: true, address: reply.body.value.allocated};
+          resolve(result);
+        } else {
+          reject(reply.body.desc);
+        }
+      });
+
+    });
+
   }
 
   /**

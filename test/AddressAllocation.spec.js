@@ -56,7 +56,7 @@ describe('AddressAllocation', function() {
     };
 
     expect(aa.create(domain, number, info).then((list) => {
-      expect(list).to.eql({newAddress: true, address: 'hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21e'});
+      expect(list).to.eql({newAddress: false, address: 'hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21e'});
     })).notify(done);
   });
 });

@@ -204,8 +204,11 @@ class SyncherManager {
         resources: msg.body.value.resources
       };
 
+      // should resuse data object url if it passed
+      let reuseDataObject = msg.body.value.resource;
+
       //request address allocation of a new object from the msg-node
-      _this._allocator.create(domain, 1, objectInfo, scheme).then((allocated) => {
+      _this._allocator.create(domain, 1, objectInfo, scheme, reuseDataObject).then((allocated) => {
         let objURL = allocated.address[0];
 
         console.log('ALLOCATOR CREATE:', allocated);
