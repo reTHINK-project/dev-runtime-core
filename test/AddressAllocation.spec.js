@@ -26,17 +26,20 @@ describe('AddressAllocation', function() {
     }));
   });
 
+  // TODO: should update the messages
   it('creation message and reply', function(done) {
     let bus = {
       postMessage: (msg, replyCallback) => {
+
+        // TODO Should improve this test and test also the scheme and other properties;
         expect(msg).to.eql({
-          type: 'create', from: 'local://fake.url', to: 'domain://msg-node.sp.domain/hyperty-address-allocation',
-          body: {value: {number: 2}}
+          type: 'create', from: 'local://fake.url', to: 'domain://msg-node.sp.domain/address-allocation',
+          body: {scheme: undefined, value: {number: 2}}
         });
 
         replyCallback({
-          id: 1, type: 'response', from: 'domain://msg-node.sp.domain/hyperty-address-allocation', to: 'local://fake.url',
-          body: {code: 200, value: {allocated: ['hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21e', 'hyperty://ua.pt/2']}}
+          id: 1, type: 'response', from: 'domain://msg-node.sp.domain/address-allocation', to: 'local://fake.url',
+          body: {code: 200, value: {allocated: 'hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21e'}}
         });
       }
     };
@@ -46,11 +49,14 @@ describe('AddressAllocation', function() {
     let domain = 'sp.domain';
     let number = 2;
     let info = {
-
+      name: 'test',
+      schema: 'hyperty-catalogue://sp.domain/.well-known/dataschema/hello',
+      reporter: [],
+      resources: []
     };
 
     expect(aa.create(domain, number, info).then((list) => {
-      expect(list).to.eql({newAddress: false, address: 'hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21e'});
+      expect(list).to.eql({newAddress: true, address: 'hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21e'});
     })).notify(done);
   });
 });

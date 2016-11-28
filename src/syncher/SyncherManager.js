@@ -44,11 +44,11 @@ class SyncherManager {
   */
 
   constructor(runtimeURL, bus, registry, catalog, storageManager, allocator) {
-    if (!runtimeURL) throw new Error('Syncher Manager needs the runtimeURL parameter');
-    if (!bus) throw new Error('Syncher Manager needs the MessageBus instance');
-    if (!registry) throw new Error('Syncher Manager needs the Registry instance');
-    if (!catalog) throw new Error('Syncher Manager needs the RuntimeCatalogue instance');
-    if (!storageManager) throw new Error('You need the domain of runtime');
+    if (!runtimeURL) throw new Error('[Syncher Manager] - needs the runtimeURL parameter');
+    if (!bus) throw new Error('[Syncher Manager] - needs the MessageBus instance');
+    if (!registry) throw new Error('[Syncher Manager] - needs the Registry instance');
+    if (!catalog) throw new Error('[Syncher Manager] - needs the RuntimeCatalogue instance');
+    if (!storageManager) throw new Error('[Syncher Manager] - need the storageManager instance');
 
     let _this = this;
 
@@ -85,8 +85,8 @@ class SyncherManager {
       }
     });
 
-    _this._resumeReporterListeners();
-    _this._resumeObserverListeners();
+    // _this._resumeReporterListeners();
+    // _this._resumeObserverListeners();
 
   }
 
@@ -127,10 +127,9 @@ class SyncherManager {
       if (!reporters) return;
 
       Object.keys(reporters).forEach((key) => {
-        console.info(key);
+        console.info('[storage manager reporter] - Resume Subscriptions: ', reporters);
         let objURL = reporters[key].url;
         let owner = reporters[key].owner;
-        let subscriptionURL = objURL + '/subscription';
         let subscriptions = reporters[key].subscriptions;
 
         reporter = new ReporterObject(this, owner, objURL);

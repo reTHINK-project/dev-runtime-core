@@ -59,7 +59,7 @@ class AddressAllocation {
    * @param  {number} number - Number of addresses to request
    * @returns {Promise<HypertyURL>}  A list of HypertyURL's
    */
-  create(domain, number, info, scheme) {
+  create(domain, number, info, scheme, reuseURL) {
     let _this = this;
 
     return new Promise((resolve, reject) => {
@@ -67,46 +67,126 @@ class AddressAllocation {
       // let messageFactory = _this._messageFactory;
       let msg;
 
-      _this._registry.checkRegisteredURLs(info).then((urls) => {
+      // is an hyperty
+      if (scheme === 'hyperty') {
 
-        console.log('CHECK URLS: ', urls);
+        _this._registry.checkRegisteredURLs(info).then((urls) => {
 
-        // if there is already a URL, then returns that URL, otherwise request a new URL
-        if (urls) {
-          let value = {newAddress: false, address: urls};
-          return resolve(value);
-        }
+          console.log('CHECK URLS: ', urls);
 
+          // if there is already a URL, then returns that URL, otherwise request a new URL
+          if (urls) {
+            console.info('[AddressAllocation - hyperty] - Reuse URL');
+            let value = {newAddress: false, address: urls};
+            resolve(value);
 
-        if (scheme) {
+          } else {
+
+            msg = {
+              type: 'create', from: _this._url, to: 'domain://msg-node.' + domain + '/address-allocation',
+              body: {value: {number: number}}
+            };
+
+            console.info('[AddressAllocation - hyperty] - Request new URL', msg);
+
+            // TODO: change this response Message using the MessageFactory
+            _this._bus.postMessage(msg, (reply) => {
+              if (reply.body.code === 200) {
+                let result = {newAddress: true, address: reply.body.value.allocated};
+                resolve(result);
+              } else {
+                reject(reply.body.desc);
+              }
+            });
+
+          }
+
+        }).catch((reason) => {
+          reject(reason);
+        });
+
+      } else {
+
+        // check if we have an reuseURL
+        if (reuseURL) {
+
+          _this._registry.checkRegisteredURLs(info).then((urls) => {
+
+            if (urls) {
+              console.info('[AddressAllocation - Object] - Reuse URL');
+              let value = {newAddress: false, address: urls};
+              resolve(value);
+            } else {
+              console.info('[AddressAllocation - reuseURL] - Object ' + reuseURL + ' not found');
+              reject('ObjectURL Not Found');
+            }
+
+          }).catch((reason) => {
+            reject(reason);
+          });
+
+        } else {
+
           msg = {
             type: 'create', from: _this._url, to: 'domain://msg-node.' + domain + '/address-allocation',
             body: { scheme: scheme, value: { number: number } }
           };
-        } else {
-          msg = {
-            type: 'create', from: _this._url, to: 'domain://msg-node.' + domain + '/address-allocation',
-            body: {value: {number: number}}
-          };
+
+          console.info('[AddressAllocation - Object] - Request new URL');
+
+          // TODO: change this response Message using the MessageFactory
+          _this._bus.postMessage(msg, (reply) => {
+            if (reply.body.code === 200) {
+              let result = {newAddress: true, address: reply.body.value.allocated};
+              resolve(result);
+            } else {
+              reject(reply.body.desc);
+            }
+          });
+
         }
 
-        // TODO: Apply the message factory
-        // The msg-node-vertx should be changed the body field to receive
-        // the following format body: {value: {number: number}} because
-        // the message is generated in that way by the message factory;
-        // let msg = messageFactory.createMessageRequest(_this._url, 'domain://msg-node.' + domain + '/hyperty-address-allocation', '', {number: number});
+      }
 
-        // TODO: change this response Message using the MessageFactory
-        _this._bus.postMessage(msg, (reply) => {
-          if (reply.body.code === 200) {
-            let result = {newAddress: true, address: reply.body.value.allocated};
-            resolve(result);
-          } else {
-            reject(reply.body.desc);
-          }
-        });
-
-      });
+      // _this._registry.checkRegisteredURLs(info).then((urls) => {
+      //
+      //   console.log('CHECK URLS: ', urls);
+      //
+      //   // if there is already a URL, then returns that URL, otherwise request a new URL
+      //   if (urls) {
+      //     let value = {newAddress: false, address: urls};
+      //     return resolve(value);
+      //   }
+      //
+      //   if (scheme) {
+      //     msg = {
+      //       type: 'create', from: _this._url, to: 'domain://msg-node.' + domain + '/address-allocation',
+      //       body: { scheme: scheme, value: { number: number } }
+      //     };
+      //   } else {
+      //     msg = {
+      //       type: 'create', from: _this._url, to: 'domain://msg-node.' + domain + '/address-allocation',
+      //       body: {value: {number: number}}
+      //     };
+      //   }
+      //
+      //   // TODO: Apply the message factory
+      //   // The msg-node-vertx should be changed the body field to receive
+      //   // the following format body: {value: {number: number}} because
+      //   // the message is generated in that way by the message factory;
+      //   // let msg = messageFactory.createMessageRequest(_this._url, 'domain://msg-node.' + domain + '/hyperty-address-allocation', '', {number: number});
+      //
+      //   // TODO: change this response Message using the MessageFactory
+      //   _this._bus.postMessage(msg, (reply) => {
+      //     if (reply.body.code === 200) {
+      //       let result = {newAddress: true, address: reply.body.value.allocated};
+      //       resolve(result);
+      //     } else {
+      //       reject(reply.body.desc);
+      //     }
+      //   });
+      //
+      // });
     });
   }
 
