@@ -527,8 +527,25 @@ class Registry {
         //update the list with the new elements
         urlsList[identifier + dataObjectschema + resources + dataObjectReporter] = addressURL.address;
 
+        let runtime = 'runtime://domain/dataObjectXPTO';
+        let status = 'live';
+        let p2pRequester = 'dataObject://domain/requester';
+
         //message to register the new hyperty, within the domain registry
-        let messageValue = {name: identifier, resources: resources, dataSchemes: dataScheme, schema: dataObjectschema, url: dataObjectUrl, expires: _this.expiresTime, reporter: dataObjectReporter, preAuth: authorise, subscribers: []};
+        let messageValue = {
+          name: identifier,
+          resources: resources,
+          dataSchemes: dataScheme,
+          schema: dataObjectschema,
+          url: dataObjectUrl,
+          expires: _this.expiresTime,
+          reporter: dataObjectReporter,
+          preAuth: authorise,
+          subscribers: [],
+          runtime: runtime,
+          status: status,
+          p2pRequester: p2pRequester
+        };
 
         let message;
 
@@ -550,7 +567,7 @@ class Registry {
             type: 'update',
             to: 'domain://registry.' + _this.registryDomain + '/',
             from: _this.registryURL,
-            body: {resource: dataObjectUrl, value: 'live', attribute: 'status'}
+            body: {resource: dataObjectUrl, value: {status: 'live'} }
           };
 
         }
@@ -737,7 +754,25 @@ class Registry {
                 if (addressURL.newAddress) {
                   console.log('registering new Hyperty URL', addressURL.address[0]);
 
-                  messageValue = {user: identityURL,  descriptor: descriptorURL, url: addressURL.address[0], expires: _this.expiresTime, resources: hypertyCapabilities.resources, dataSchemes: hypertyCapabilities.dataSchema};
+                  let p2pHandler = 'hyperty://domain/helloHandler';
+                  let p2pRequester = 'hyperty://domain/helloRequester';
+                  let runtime = 'runtime://domain/runtimeXPTO';
+                  let status = 'live';
+
+                  messageValue = {
+                    user: identityURL,
+                    descriptor: descriptorURL,
+                    url: addressURL.address[0],
+                    expires: _this.expiresTime,
+                    resources: hypertyCapabilities.resources,
+                    dataSchemes: hypertyCapabilities.dataSchema,
+                    p2pHandler: p2pHandler,
+                    p2pRequester: p2pRequester,
+                    runtime: runtime,
+                    status: status
+                  };
+
+                  console.log('registerHyperty: messageValue ', messageValue);
 
                   message = {type:'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: messageValue, policy: 'policy'}};
 
@@ -781,7 +816,11 @@ class Registry {
                     'policy'
                   );*/
 
-                  let message = {type:'update', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: { resource: addressURL.address[0]}};
+                  let message = {
+                    type:'update',
+                    from: _this.registryURL,
+                    to: 'domain://registry.' + _this.registryDomain + '/',
+                    body: { resource: addressURL.address[0], value: {status: 'live'} }};
 
                   _this._messageBus.postMessage(message, (reply) => {
                     console.log('===> KeepAlive Reply: ', reply);
