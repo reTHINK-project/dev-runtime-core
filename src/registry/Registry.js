@@ -24,7 +24,10 @@ import AddressAllocation from '../allocation/AddressAllocation';
 import HypertyInstance from './HypertyInstance';
 
 import {MessageFactory} from 'service-framework/dist/MessageFactory';
-import {divideURL} from '../utils/utils.js';
+import {divideURL, isHypertyURL, isURL, isUserURL} from '../utils/utils.js';
+
+import Discovery from './Discovery';
+import DiscoveryServiceFramework from './DiscoveryServiceFramework';
 
 const STATUS = { DEPLOYED: 'deployed', PROGRESS: 'in-progress' };
 
@@ -116,13 +119,56 @@ class Registry {
     _this._messageBus = messageBus;
 
     _this._messageBus.addListener(_this.registryURL, function(msg) {
+      console.log('listener messageBus');
 
-      let userUrl = _this._getIdentityAssociated(msg.body.resource, msg.body.criteria);
+      let isHyperty = isHypertyURL(msg.from);
+      let isDiscovery = msg.from.substring(msg.from.length - 10, msg.from.length) === '/discovery';
 
-      let reply = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: {resource: userUrl}};
-      reply.body.code = (userUrl) ? 200 : 404;
+      let hasCriteria = msg.body.hasOwnProperty('criteria');
+      let isURLResource, isUserResource, isHypertyResource;
 
-      _this._messageBus.postMessage(reply);
+      if (msg.body.hasOwnProperty('resource')) {
+        isURLResource = isURL(msg.body.resource);
+        isUserResource = isUserURL(msg.body.resource);
+        isHypertyResource = isHypertyURL(msg.body.resource);
+      }
+      let isDelete = msg.type === 'delete';
+      let hasName, hasUser;
+
+      if (msg.body.hasOwnProperty('value')) {
+        hasName = msg.body.value.hasOwnProperty('name');
+        hasUser = msg.body.value.hasOwnProperty('user');
+      }
+
+      if (isHyperty && isDiscovery) {
+        console.log('hypertyDiscovery');
+        if (isDelete && hasName) {
+          console.log('deleteDataObject');
+        } else if (isDelete && hasUser) {
+          console.log('deleteHyperty');
+        } else if (hasCriteria && isUserResource) {
+          console.log('discoverHyperty');
+        } else if (hasCriteria && !isURLResource) {
+          console.log('discoverDataObject');
+        } else if (isHypertyResource) {
+          console.log('discoverDataObjectPerReporter');
+        } else if (isUserResource) {
+          console.log('discoverHypertyPerUser');
+        } else if (isURLResource) {
+          console.log('discoverDataObjectPerURL');
+        } else if (!isURLResource) {
+          console.log('discoverDataObjectPerName');
+        }
+
+      } else {
+        // msg sent by identity manager library
+        let userUrl = _this._getIdentityAssociated(msg.body.resource, msg.body.criteria);
+
+        let reply = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: {resource: userUrl}};
+        reply.body.code = (userUrl) ? 200 : 404;
+
+        _this._messageBus.postMessage(reply);
+      }
     });
 
     // also set up messageBus in the IdentityModule component
@@ -133,6 +179,14 @@ class Registry {
     let addressAllocation = new AddressAllocation(_this.registryURL, messageBus, _this);
     _this.addressAllocation = addressAllocation;
 
+    let discovery = new Discovery(_this.runtimeURL, messageBus);
+    _this.discovery = discovery;
+
+    let discoveryServiceFramework = new DiscoveryServiceFramework('hyperty://domain.com/123', _this.runtimeURL, messageBus);
+    _this.discoveryServiceFramework = discoveryServiceFramework;
+
+    /*let identityManager = new IdentityManager('hyperty://localhost/833a6e52-515b-498b-a57b-e3daeece48d2', _this.runtimeURL, messageBus);
+    _this.identityManager = identityManager;*/
   }
 
   /**

@@ -150,6 +150,18 @@ export function isDataObjectURL(url) {
   return schemasToIgnore.indexOf(urlSchema) === -1;
 }
 
+export function isURL(url) {
+  return (url).split('/').length >= 3;
+}
+
+export function isUserURL(url) {
+  return divideURL(url).type === 'user';
+}
+
+export function isHypertyURL(url) {
+  return divideURL(url).type === 'hyperty';
+}
+
 /**
  * get information relative each component configured on runtime configuration;
  * @param  {object} configuration object with all configuration
