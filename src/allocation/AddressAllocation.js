@@ -120,7 +120,7 @@ class AddressAllocation {
         body: {value: { number: number } }
       };
 
-      if (scheme !== 'hypert') msg.body.scheme = scheme;
+      if (scheme !== 'hyperty') msg.body.scheme = scheme;
 
       console.info('[AddressAllocation - ' + scheme + '] - Request new URL');
 
