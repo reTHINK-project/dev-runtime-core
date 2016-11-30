@@ -20,6 +20,9 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 **/
+
+import { runtimeUtils } from '../runtime/runtimeUtils';
+
 import AddressAllocation from '../allocation/AddressAllocation';
 import HypertyInstance from './HypertyInstance';
 
@@ -875,8 +878,8 @@ class Registry {
                   reject('Wrong SandboxType');
                 }
 
-                let p2pHandler = 'hyperty://domain/helloHandler' + Math.floor((Math.random() * 10000) + 1);
-                let p2pRequester = 'hyperty://domain/helloRequester' + Math.floor((Math.random() * 10000) + 1);
+                let p2pHandler = runtimeUtils.runtimeDescriptor.p2pHandlerStub;
+                let p2pRequester = runtimeUtils.runtimeDescriptor.p2pRequesterStub;
                 let runtime = _this.runtimeURL;
                 let status = 'live';
 
