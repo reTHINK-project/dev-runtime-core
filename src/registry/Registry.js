@@ -792,11 +792,15 @@ class Registry {
     let _this = this;
 
     return new Promise((resolve, reject) => {
+      let hyperty;
+
       for (let i in _this.remoteHypertyList) {
-        let hyperty = _this.remoteHypertyList[i];
+        hyperty = _this.remoteHypertyList[i];
+
+        console.log('[checkHypertyP2PHandler - for] - Hyperty: ', hyperty);
 
         if (hyperty.hypertyURL === hypertyURL && hyperty.p2pHandler) {
-          return resolve({
+          resolve({
             p2pHandler: hyperty.p2pHandler,
             p2pRequester: hyperty.p2pRequester,
             runtimeURL: hyperty.runtimeURL
@@ -804,8 +808,12 @@ class Registry {
         }
       }
 
-      // TODO discoveryPerURL
-      return reject('Undefined p2pHandler');
+      if (!hyperty) {
+        console.log('[checkHypertyP2PHandler] - Hyperty: ', hyperty);
+        // TODO discoveryPerURL
+        reject('checkHypertyP2PHandler don\'t find any hyperty');
+      }
+
     });
   }
 
@@ -838,10 +846,12 @@ class Registry {
           reject('MessageBus not found on registerStub');
         } else {
           //call check if the protostub exist
-          _this.resolve('hyperty-runtime://' + domainUrl).then(function() {
-
+          _this.resolve('hyperty-runtime://' + domainUrl).then(function(a) {
+            console.log('[registry resolve] - ', a);
             return _this.storageManager.get('registry:HypertyURLs');
           }).then((urlsList) => {
+
+            console.log('[registry storageManager] - ', urlsList);
 
             _this._getResourcesAndSchemes(descriptor).then((value) => {
 
@@ -1332,12 +1342,12 @@ class Registry {
         }
 
         if (p2pStructure.connection) {
-          return resolve(p2pStructure.connection);
+          resolve(p2pStructure.connection);
         } else {
           // _this.p2pConnection[runtimeURL] = {status: status, connection: connection, p2pHandler: p2pHandler}
 
           if (p2pStructure.status === STATUS.PROGRESS) {
-            return _this.resolveNormalStub(url).then((returnURL) => {
+            _this.resolveNormalStub(url).then((returnURL) => {
               resolve(returnURL);
             });
           } else {
@@ -1355,7 +1365,13 @@ class Registry {
             });
           }
         }
+      }, (reason) => {
+        console.log('reason: ', reason);
+        _this.resolveNormalStub(url).then((returnURL) => {
+          resolve(returnURL);
+        });
       });
+
     });
   }
 

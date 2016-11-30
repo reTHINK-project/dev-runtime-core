@@ -28,7 +28,7 @@ import Registry from '../registry/Registry';
 import IdentityModule from '../identity/IdentityModule';
 import PEP from '../policy/PEP';
 import MessageBus from '../bus/MessageBus';
-import { generateGUID, divideURL } from '../utils/utils';
+import { generateGUID } from '../utils/utils';
 
 import Loader from './Loader';
 import Descriptors from './Descriptors';
@@ -122,7 +122,7 @@ class RuntimeUA {
           return this._loadComponents();
         }).then((status) => {
           console.info('[runtime ua - install p2p] - status: ', status);
-          // return this._loadP2PHandler();
+          return this._loadP2PHandler();
         })
         .then((result) => {
           console.info('[runtime ua - installation p2p] - status: ', result);

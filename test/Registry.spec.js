@@ -69,9 +69,12 @@ describe('Registry', function() {
 
     registry._loader = loader;
     registry.messageBus = msgbus;
+
     registry.messageBus.addListener('domain://registry.ua.pt/', (msg) => {
+      console.log('MSG BUS LISTENER: ', msg);
       let responseMessage = {id: msg.id, type: 'response', to: msg.from, from: msg.to,
                               body: {code: 200}};
+
       msgbus.postMessage(responseMessage);
     });
 
@@ -211,7 +214,6 @@ describe('Registry', function() {
         hypertyType: ['comm']
       };
       let addressURL = {newAddress: true, address: ['hyperty://ua.pt/1']};
-
       expect(registry.registerHyperty(sandboxDummy, descriptorURL, descriptor, addressURL)).to.be.fulfilled.and.eventually.equal('hyperty://ua.pt/1').and.notify(done);
 
     });
