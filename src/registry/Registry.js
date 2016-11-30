@@ -1249,6 +1249,29 @@ class Registry {
     });
   }
 
+  /**
+  * To verify if source is protostub is a legacy domain or not and to resolve  true if it is and false if isnt.
+  * @param  {URL.URL}  url      url
+  * @return {boolean}
+  */
+  isLegacy(url) {
+    let _this = this;
+    return new Promise((resolve, reject) => {
+      let urlSplit = url.split('.');
+      let length = urlSplit.length;
+      let domainToCheck = urlSplit[length - 2] + '.' + urlSplit[length - 1];
+
+      _this._loader.descriptors.getStubDescriptor(domainToCheck).then((result) => {
+          if (result.interworking)
+            resolve(result.interworking);
+          else
+            resolve(false);
+        }).catch((reason) => {
+          reject(reason);
+        });
+    });
+  }
+
 }
 
 export default Registry;

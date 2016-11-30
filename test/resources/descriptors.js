@@ -94,20 +94,42 @@ export const descriptors = {
       policies: '',
       dataObjects: []
     },
-    P2PHandlerStub: {
+    'slack.com': {
       sourcePackage: {
         sourceCode: '',
-        sourceCodeClassname: 'P2PRequesterStub',
+        sourceCodeClassname: 'SlackProtoStub',
         encoding: 'base64',
         signature: ''
       },
       sourcePackageURL: '/sourcePackage',
-      cguid: '4-d1c8fa16-ffd5-8164-f4e2-7ceb1506446e4',
-      version: 0.2,
-      description: 'Description of P2PRequesterStub',
+      cguid: '4-6e7a55d5-3daf-cdc4-63fb-8b2984ada3651',
+      version: '0.5',
+      description: 'Description of SlackProtoStub',
       language: 'Javascript',
       type: 'ProtoStubs',
-      objectName: 'P2PRequesterStub',
+      objectName: 'SlackProtoStub',
+      configuration: {},
+      messageSchemas: '',
+      signature: '',
+      accessControlPolicy: 'somePolicy',
+      constraints: '',
+      dataObjects: [],
+      interworking: true
+    },
+    P2PHandlerStub: {
+      sourcePackage: {
+        sourceCode: '',
+        sourceCodeClassname: 'P2PHandlerStub',
+        encoding: 'base64',
+        signature: ''
+      },
+      sourcePackageURL: '/sourcePackage',
+      cguid: '4-d1c8fa16-ffd5-8164-f4e2-7ceb1506446e3',
+      version: 0.2,
+      description: 'Description of P2PHandlerStub',
+      anguage: 'Javascript',
+      type: 'ProtoStubs',
+      objectName: 'P2PHandlerStub',
       configuration: {},
       messageSchemas: '',
       signature: '',
@@ -115,6 +137,7 @@ export const descriptors = {
       constraints: '',
       dataObjects: []
     }
+
   },
 
   IdpProxies: {
