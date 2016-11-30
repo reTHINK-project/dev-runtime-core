@@ -1,6 +1,7 @@
 import ActionsService from './ActionsService';
 import PDP from './PDP';
 import Policy from './Policy';
+import {isHypertyURL} from '../utils/utils';
 
 class PEP {
 
@@ -155,7 +156,7 @@ class PEP {
     let splitTo = (message.to).split('://');
     let toSchema =  splitTo[0];
 
-    if (message.from === fromSchema || message.to === toSchema || message.type === 'read' || message.type === 'response') {
+    if (message.from === fromSchema || message.to === toSchema || message.type === 'read' || message.type === 'response' || (isHypertyURL(message.from) && message.type === 'delete')) {
       return false;
     } else {
       return schemasToIgnore.indexOf(fromSchema) === -1 || schemasToIgnore.indexOf(toSchema) === -1;
