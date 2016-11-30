@@ -31,7 +31,11 @@ import MessageBus from '../bus/MessageBus';
 import { generateGUID } from '../utils/utils';
 
 import Loader from './Loader';
+import Descriptors from './Descriptors';
+
 import { runtimeConfiguration } from './runtimeConfiguration';
+import { runtimeUtils } from './runtimeUtils';
+
 // import GraphConnector from '../graphconnector/GraphConnector';
 
 import SyncherManager from '../syncher/SyncherManager';
@@ -54,19 +58,22 @@ class RuntimeUA {
 
   /**
    * Create a new instance of Runtime User Agent
+   * @param {descriptor} runtimeDescriptor - pass all the hyperty runtime descriptor
    * @param {runtimeFactory} runtimeFactory - Specific implementation for the environment where the core runtime will run;
    * @param {domain} domainURL - specify the domain base for the runtime;
    */
-  constructor(runtimeFactory, domain) {
+  constructor(runtimeDescriptor, runtimeFactory, domain) {
 
+    if (!runtimeDescriptor) throw new Error('The runtime descriptor is a needed parameter');
     if (!runtimeFactory) throw new Error('The sandbox factory is a needed parameter');
     if (!domain) throw new Error('You need the domain of runtime');
 
     // Configuration object with information related with servers
     this.runtimeConfiguration = Object.assign({domain: domain}, runtimeConfiguration);
-
     this.runtimeFactory = runtimeFactory;
     this.runtimeCatalogue = runtimeFactory.createRuntimeCatalogue();
+
+    runtimeUtils.runtimeDescriptor = runtimeDescriptor;
 
     if (typeof runtimeFactory.createRuntimeCatalogue === 'function') {
       this.persistenceManager = runtimeFactory.createRuntimeCatalogue();
@@ -116,7 +123,11 @@ class RuntimeUA {
           return this._loadComponents();
 
         }).then((status) => {
-          resolve(status);
+
+          console.log('Status: ', status);
+          this._loadP2PHandler();
+
+          resolve(true);
         }).catch((error) => {
           console.error('ERROR: ', error);
           reject(error);
@@ -130,14 +141,26 @@ class RuntimeUA {
 
   }
 
+  _loadP2PHandler() {
+    let runtimeDescriptor = runtimeUtils.runtimeDescriptor;
+    let p2pStubHandler = runtimeDescriptor.p2pHandlerStub;
+    console.log('P2PStubHandler: ', p2pStubHandler);
+    return this.loadStub(p2pStubHandler);
+
+    console.log('Testes: ', stub);
+  }
+
   _loadComponents() {
 
     return new Promise((resolve, reject) => {
 
       try {
 
+        // Prepare the on instance to handle with the fallbacks and runtimeCatalogue;
+        this.descriptorInstance = new Descriptors(this.runtimeURL, this.runtimeCatalogue, this.runtimeConfiguration);
+
         // Prepare the loader to load the hyperties, protostubs and idpproxy;
-        this.loader = new Loader(this.runtimeConfiguration);
+        this.loader = new Loader(this.runtimeURL, this.runtimeConfiguration, this.descriptorInstance);
 
         // Instantiate the identity Module
         this.identityModule = new IdentityModule(this.runtimeURL, this.runtimeCapabilities, this.storageManager);
@@ -236,13 +259,13 @@ class RuntimeUA {
   * Deploy Stub from Catalogue URL or domain url
   * @param  {URL.URL}     domain          domain
   */
-  loadStub(protostubURL) {
+  loadStub(protostubURL, p2pConfig) {
 
     if (!protostubURL) throw new Error('ProtoStub descriptor url parameter is needed');
 
     return new Promise((resolve, reject) => {
 
-      this.loader.loadStub(protostubURL)
+      this.loader.loadStub(protostubURL, p2pConfig)
       .then((result) => {
         resolve(result);
       })

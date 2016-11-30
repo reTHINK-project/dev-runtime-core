@@ -1,10 +1,14 @@
 import chai from 'chai';
+import sinon from 'sinon';
 import chaiAsPromised from 'chai-as-promised';
+import sinonChai from 'sinon-chai';
 
 chai.config.truncateThreshold = 0;
 
 let expect = chai.expect;
+
 chai.use(chaiAsPromised);
+chai.use(sinonChai);
 
 // Main dependecies
 import Registry from '../src/registry/Registry';
@@ -39,8 +43,62 @@ let runtimeCatalogue = {
   }
 };
 
+let getDescriptor = (url) => {
+
+  return new Promise(function(resolve, reject) {
+
+    let dividedURL = divideURL(url);
+    let identity = dividedURL.identity;
+
+    if (!identity) {
+      identity = 'default';
+    } else {
+      identity = identity.substring(identity.lastIndexOf('/') + 1);
+    }
+
+    let result;
+
+    if (url.includes('Hyperties') || url.includes('Hyperty')) {
+      try {
+        result = Hyperties[identity];
+      } catch (e) {
+        reject(e);
+      }
+
+    } else if (!(url.includes('Hyperties') || url.includes('Hyperty')) || url.includes('ProtoStubs') || url.includes('protostub')) {
+      try {
+        result = ProtoStubs[identity];
+      } catch (e) {
+        reject(e);
+      }
+    } else if (url.includes('idp-proxy')) {
+      try {
+        result = IdpProxies[identity];
+      } catch (e) {
+        reject(e);
+      }
+    }
+
+    console.log(result);
+    resolve(result);
+
+  });
+};
+
 let getRegistry = new Promise(function(resolve) {
   let registry = new Registry(runtimeURL, appSandbox, identityModule, runtimeCatalogue, 'runtimeCapabilities', storageManager);
+  sinon.stub(registry._loader.descriptors, 'getHypertyDescriptor', (hypertyURL) => {
+    return getDescriptor(hypertyURL);
+  });
+
+  sinon.stub(registry._loader.descriptors, 'getStubDescriptor', (stubURL) => {
+    return getDescriptor(stubURL);
+  });
+
+  sinon.stub(registry._loader.descriptors, 'getIdpProxyDescriptor', (idpProxyURL) => {
+    return getDescriptor(idpProxyURL);
+  });
+
   resolve(registry);
 });
 

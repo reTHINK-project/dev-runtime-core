@@ -8,6 +8,8 @@ let expect = chai.expect;
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
 
+import { descriptors } from './resources/descriptors.js';
+
 import { buildURL } from '../src/utils/utils';
 import { runtimeConfiguration } from './resources/runtimeConfiguration';
 import { runtimeFactory } from './resources/runtimeFactory';
@@ -18,141 +20,55 @@ describe('Should get configuration and parse to Descriptors', () => {
   // Testing Registry
   let domain = 'sp.domain';
   let runtimeURL = 'hyperty-runtime://' + domain + '/123';
-  let descriptors;
-  let Hyperties;
-  let ProtoStubs;
-  let IdpProxies;
+  let descriptorsInstance;
 
   runtimeConfiguration.domain = domain;
 
   before(()=> {
     let catalogue = runtimeFactory.createRuntimeCatalogue();
-    descriptors = new Descriptors(runtimeURL, catalogue, runtimeConfiguration);
+    descriptorsInstance = new Descriptors(runtimeURL, catalogue, runtimeConfiguration);
 
-    Hyperties = {
-      HelloHyperty: {
-        sourcePackage: {
-          sourceCode: '',
-          sourceCodeClassname: 'HelloHyperty',
-          encoding: 'UTF-8',
-          signature: ''
-        },
-        cguid: 10003,
-        version: 0.1,
-        description: 'Description of GroupChat',
-        objectName: 'HelloHyperty',
-        configuration: {},
-        hypertyType: [
-          'chat'
-        ],
-        sourcePackageURL: '/sourcePackage',
-        language: 'javascript',
-        signature: '',
-        messageSchemas: '',
-        dataObjects: [
-          'https://catalogue.sp.domain/.well-known/dataschema/Communication'
-        ],
-        accessControlPolicy: 'somePolicy'
-      }
-    };
-
-    ProtoStubs = {
-      default: {
-        cguid: '1',
-        type: '0',
-        version: '0.1',
-        description: 'description of VertxProtoStub',
-        objectName: 'VertxProtoStub',
-        sourcePackageURL: '/sourcePackage',
-        sourcePackage: {
-          sourceCode: '',
-          sourceCodeClassname: 'VertxProtoStub',
-          encoding: 'Base64',
-          signature: ''
-        },
-        language: 'Javascript ECMA5',
-        signature: '',
-        messageSchemas: '',
-        configuration: {
-          url: 'wss://127.0.0.1:9090/ws'
-        },
-        constraints: '',
-        hypertyCapabilities: '',
-        protocolCapabilities: '',
-        policies: '',
-        dataObjects: []
-      }
-    };
-
-    IdpProxies = {
-      'google.com': {
-        cguid: '1',
-        type: '0',
-        version: '0.1',
-        description: 'description of VertxProtoStub',
-        objectName: 'VertxProtoStub',
-        sourcePackageURL: '/sourcePackage',
-        sourcePackage: {
-          sourceCode: '',
-          sourceCodeClassname: 'VertxProtoStub',
-          encoding: 'Base64',
-          signature: ''
-        },
-        language: 'Javascript ECMA5',
-        signature: '',
-        messageSchemas: '',
-        configuration: {
-          url: 'wss://127.0.0.1:9090/ws'
-        },
-        constraints: '',
-        hypertyCapabilities: '',
-        protocolCapabilities: '',
-        policies: '',
-        dataObjects: []
-      }
-    };
-
-    sinon.stub(descriptors.catalogue, 'getStubDescriptor', (url) => {
+    sinon.stub(descriptorsInstance.catalogue, 'getStubDescriptor', (url) => {
       return new Promise((resolve) => {
-        resolve(ProtoStubs.default);
+        resolve(descriptors.ProtoStubs.default);
       });
     });
 
-    sinon.stub(descriptors.catalogue, 'getIdpProxyDescriptor', (url) => {
+    sinon.stub(descriptorsInstance.catalogue, 'getIdpProxyDescriptor', (url) => {
       return new Promise((resolve, reject) => {
         if (url.includes('catalogue.google.com')) {
           reject();
         } else {
-          resolve(IdpProxies['google.com']);
+          resolve(descriptors.IdpProxies['google.com']);
         }
       });
     });
 
-    sinon.stub(descriptors.catalogue, 'getHypertyDescriptor', (url) => {
+    sinon.stub(descriptorsInstance.catalogue, 'getHypertyDescriptor', (url) => {
       return new Promise((resolve) => {
-        resolve(Hyperties.HelloHyperty);
+        resolve(descriptors.Hyperties.HelloHyperty);
       });
     });
 
   });
 
   after(() => {
-    descriptors.catalogue.getIdpProxyDescriptor.restore();
-    descriptors.catalogue.getHypertyDescriptor.restore();
-    descriptors.catalogue.getStubDescriptor.restore();
+    descriptorsInstance.catalogue.getIdpProxyDescriptor.restore();
+    descriptorsInstance.catalogue.getHypertyDescriptor.restore();
+    descriptorsInstance.catalogue.getStubDescriptor.restore();
   });
 
   it('constructor should receive 3 arguments', () => {
 
-    expect(descriptors)
+    expect(descriptorsInstance)
     .to.have.property('runtimeURL')
     .that.is.an('string')
     .to.not.be.empty;
 
-    expect(descriptors)
+    expect(descriptorsInstance)
     .to.have.property('catalogue');
 
-    expect(descriptors)
+    expect(descriptorsInstance)
     .to.have.property('runtimeConfiguration')
     .that.is.a('object')
     .and.to.contain.all.keys(runtimeConfiguration);
@@ -163,7 +79,7 @@ describe('Should get configuration and parse to Descriptors', () => {
 
     let hypertyDescriptorURL = 'hyperty-catalogue://catalogue.sp.domain/.well-known/hyperty/Connector';
 
-    expect(descriptors.getHypertyDescriptor(hypertyDescriptorURL))
+    expect(descriptorsInstance.getHypertyDescriptor(hypertyDescriptorURL))
     .to.be.fulfilled
     .and.notify(done);
 
@@ -173,7 +89,7 @@ describe('Should get configuration and parse to Descriptors', () => {
 
     let stubDescriptorURL = 'sp.domain';
 
-    expect(descriptors.getStubDescriptor(stubDescriptorURL))
+    expect(descriptorsInstance.getStubDescriptor(stubDescriptorURL))
     .to.be.fulfilled
     .and.notify(done);
 
@@ -183,7 +99,7 @@ describe('Should get configuration and parse to Descriptors', () => {
 
     let idpProxyURL = 'google.com';
 
-    expect(descriptors.getIdpProxyDescriptor(idpProxyURL))
+    expect(descriptorsInstance.getIdpProxyDescriptor(idpProxyURL))
     .to.be.fulfilled
     .and.notify(done);
 

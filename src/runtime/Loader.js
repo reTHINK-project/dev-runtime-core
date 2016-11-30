@@ -1,12 +1,14 @@
 import {divideURL, emptyObject} from '../utils/utils';
-import Descriptors from './Descriptors';
 import AddressAllocation from '../allocation/AddressAllocation';
 
 class Loader {
 
-  constructor(runtimeConfiguration) {
+  constructor(runtimeURL, runtimeConfiguration, runtimeDescriptorsInstance) {
     if (!runtimeConfiguration) throw Error('The descriptor need to know the runtime configuration');
+    if (!runtimeDescriptorsInstance) throw Error('The descriptor need to know the runtime Descriptor instance');
+
     this.runtimeConfiguration = runtimeConfiguration;
+    this.descriptors = runtimeDescriptorsInstance;
   }
 
   /**
@@ -43,24 +45,6 @@ class Loader {
    */
   get registry() {
     return this._registry;
-  }
-
-  /**
-   * Set Runtime Catalogue Component
-   * @param  {RuntimeCatalogue} value runtime catalogue component
-   */
-  set runtimeCatalogue(value) {
-    this._runtimeCatalogue = value;
-
-    this.descriptors = new Descriptors(this._runtimeURL, value, this.runtimeConfiguration);
-  }
-
-  /**
-   * Get Runtime Catalogue component
-   * @return {RuntimeCatalogue} Runtime Catalogue component
-   */
-  get runtimeCatalogue() {
-    return this._runtimeCatalogue;
   }
 
   /**
@@ -292,8 +276,9 @@ class Loader {
   /**
   * Deploy Stub from Catalogue URL or domain url
   * @param  {URL.URL}     domain          domain
+  * @param  {Object}      p2pConfig       configuration of p2p
   */
-  loadStub(protostubURL) {
+  loadStub(protostubURL, p2pConfig) {
 
     if (!this._readyToUse()) return false;
     if (!protostubURL) throw new Error('ProtoStub descriptor url parameter is needed');
@@ -434,7 +419,17 @@ class Loader {
             }
           }
 
+          if (p2pConfig) {
+            try {
+              configuration = Object.assign(configuration, JSON.parse(p2pConfig));
+            } catch (e) {
+              configuration = Object.assign(configuration, p2pConfig);
+            }
+          }
+
           configuration.runtimeURL = this._runtimeURL;
+
+          console.info('[runtime Loader - LoadStub] - configuration: ', configuration);
 
           // Deploy Component step xxx
           try {
@@ -668,7 +663,6 @@ class Loader {
 
     if (!this._runtimeURL) throw new Error('The loader need the runtime url address');
     if (!this._messagesBus) throw new Error('The loader need the messageBus component');
-    if (!this._runtimeCatalogue) throw new Error('The loader need the runtimeCatalogue component');
     if (!this._registry) throw new Error('The loader need the registry component');
     if (!this._runtimeFactory) throw new Error('The loader need the runtime factory component');
 

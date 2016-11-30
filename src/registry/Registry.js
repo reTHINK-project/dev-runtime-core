@@ -24,7 +24,7 @@ import AddressAllocation from '../allocation/AddressAllocation';
 import HypertyInstance from './HypertyInstance';
 
 import {MessageFactory} from 'service-framework/dist/MessageFactory';
-import {divideURL, isHypertyURL, isURL, isUserURL} from '../utils/utils.js';
+import {divideURL, isHypertyURL, isURL, isUserURL, generateGUID} from '../utils/utils.js';
 
 import Discovery from './Discovery';
 import DiscoveryServiceFramework from './DiscoveryServiceFramework';
@@ -70,7 +70,7 @@ class Registry {
     _this.idModule = identityModule;
     _this.storageManager = storageManager;
     _this.runtimeCapabilities = runtimeCapabilities;
-    _this.identifier = Math.floor((Math.random() * 10000) + 1);
+    _this.identifier = generateGUID();
 
     // the expires in 3600, represents 1 hour
     //the expires is in seconds, unit of measure received by the domain registry
@@ -976,7 +976,7 @@ class Registry {
         domainURL = domainURL.substring(domainURL.indexOf('.') + 1);
       }
 
-      runtimeProtoStubURL = 'msg-node.' + domainURL + '/protostub/' + Math.floor((Math.random() * 10000) + 1);
+      runtimeProtoStubURL = 'msg-node.' + domainURL + '/protostub/' + generateGUID();
 
       // TODO: Optimize this
       // Proxy;
@@ -1039,7 +1039,7 @@ class Registry {
         reject('MessageBus not found on registerStub');
       }
 
-      idpProxyStubURL = 'domain-idp://' + domainURL + '/stub/' + Math.floor((Math.random() * 10000) + 1);
+      idpProxyStubURL = 'domain-idp://' + domainURL + '/stub/' + generateGUID();
 
       // TODO: Optimize this
       _this.idpProxyList[domainURL] = {

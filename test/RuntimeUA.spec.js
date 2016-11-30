@@ -10,6 +10,8 @@ let expect = chai.expect;
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
 
+import { descriptors } from './resources/descriptors.js';
+
 // Testing Module
 import RuntimeUA from '../src/runtime/RuntimeUA';
 
@@ -27,94 +29,10 @@ import { runtimeFactory } from './resources/runtimeFactory';
 
 // Testing runtimeUA;
 describe('RuntimeUA', function() {
-
-  let runtime = new RuntimeUA(runtimeFactory, 'localhost');
+  let runtime = new RuntimeUA(descriptors.Runtimes.Runtime, runtimeFactory, 'localhost');
   let getDescriptor;
 
   before(function() {
-
-    let Hyperties = {
-      HelloHyperty: {
-        sourcePackage: {
-          sourceCode: '',
-          sourceCodeClassname: 'HelloHyperty',
-          encoding: 'UTF-8',
-          signature: ''
-        },
-        cguid: 10003,
-        version: 0.1,
-        description: 'Description of GroupChat',
-        objectName: 'HelloHyperty',
-        configuration: {},
-        hypertyType: [
-          'chat'
-        ],
-        sourcePackageURL: '/sourcePackage',
-        language: 'javascript',
-        signature: '',
-        messageSchemas: '',
-        dataObjects: [
-          'https://catalogue.sp.domain/.well-known/dataschema/Communication'
-        ],
-        accessControlPolicy: 'somePolicy'
-      }
-    };
-
-    let ProtoStubs = {
-      default: {
-        cguid: '1',
-        type: '0',
-        version: '0.1',
-        description: 'description of VertxProtoStub',
-        objectName: 'VertxProtoStub',
-        sourcePackageURL: '/sourcePackage',
-        sourcePackage: {
-          sourceCode: '',
-          sourceCodeClassname: 'VertxProtoStub',
-          encoding: 'Base64',
-          signature: ''
-        },
-        language: 'Javascript ECMA5',
-        signature: '',
-        messageSchemas: '',
-        configuration: {
-          url: 'wss://127.0.0.1:9090/ws'
-        },
-        constraints: '',
-        hypertyCapabilities: '',
-        protocolCapabilities: '',
-        policies: '',
-        dataObjects: []
-      }
-    };
-
-    let IdpProxies = {
-      default: {
-        cguid: '1',
-        type: '0',
-        version: '0.1',
-        description: 'description of VertxProtoStub',
-        objectName: 'VertxProtoStub',
-        sourcePackageURL: '/sourcePackage',
-        sourcePackage: {
-          sourceCode: '',
-          sourceCodeClassname: 'VertxProtoStub',
-          encoding: 'Base64',
-          signature: ''
-        },
-        language: 'Javascript ECMA5',
-        signature: '',
-        messageSchemas: '',
-        configuration: {
-          url: 'wss://127.0.0.1:9090/ws'
-        },
-        constraints: '',
-        hypertyCapabilities: '',
-        protocolCapabilities: '',
-        policies: '',
-        dataObjects: []
-      }
-    };
 
     getDescriptor = (url) => {
 
@@ -133,20 +51,20 @@ describe('RuntimeUA', function() {
 
         if (url.includes('Hyperties') || url.includes('Hyperty')) {
           try {
-            result = Hyperties[identity];
+            result = descriptors.Hyperties[identity];
           } catch (e) {
             reject(e);
           }
 
         } else if (!(url.includes('Hyperties') || url.includes('Hyperty')) || url.includes('ProtoStubs') || url.includes('protostub')) {
           try {
-            result = ProtoStubs[identity];
+            result = descriptors.ProtoStubs[identity];
           } catch (e) {
             reject(e);
           }
         } else if (url.includes('idp-proxy')) {
           try {
-            result = IdpProxies[identity];
+            result = descriptors.IdpProxies[identity];
           } catch (e) {
             reject(e);
           }
@@ -172,15 +90,15 @@ describe('RuntimeUA', function() {
 
       expect(runtime.init().then((result) => {
 
-        sinon.stub(runtime.loader.descriptors, 'getHypertyDescriptor', (hypertyURL) => {
+        sinon.stub(runtime.descriptorInstance, 'getHypertyDescriptor', (hypertyURL) => {
           return getDescriptor(hypertyURL);
         });
 
-        sinon.stub(runtime.loader.descriptors, 'getStubDescriptor', (stubURL) => {
+        sinon.stub(runtime.descriptorInstance, 'getStubDescriptor', (stubURL) => {
           return getDescriptor(stubURL);
         });
 
-        sinon.stub(runtime.loader.descriptors, 'getIdpProxyDescriptor', (idpProxyURL) => {
+        sinon.stub(runtime.descriptorInstance, 'getIdpProxyDescriptor', (idpProxyURL) => {
           return getDescriptor(idpProxyURL);
         });
 

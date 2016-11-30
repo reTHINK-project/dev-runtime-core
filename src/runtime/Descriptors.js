@@ -29,7 +29,7 @@ class Descriptors {
       let originDomain = originDividedURL.domain;
 
       if (!domain) {
-        domain = idpProxyURL;
+        domain = stubURL;
       }
 
       if (!protostub) {
