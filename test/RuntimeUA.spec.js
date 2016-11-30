@@ -10,6 +10,7 @@ let expect = chai.expect;
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
 
+import Descriptors from '../src/runtime/Descriptors';
 import { descriptors } from './resources/descriptors.js';
 
 // Testing Module
@@ -28,8 +29,10 @@ import { runtimeFactory } from './resources/runtimeFactory';
 /// import { runtimeConfiguration } from './resources/runtimeConfiguration';
 
 // Testing runtimeUA;
+let domain = 'localhost';
 describe('RuntimeUA', function() {
-  let runtime = new RuntimeUA(descriptors.Runtimes.Runtime, runtimeFactory, 'localhost');
+
+  let runtime = new RuntimeUA(descriptors.Runtimes.Runtime, runtimeFactory, domain);
   let getDescriptor;
 
   before(function() {
@@ -75,13 +78,12 @@ describe('RuntimeUA', function() {
 
       });
     };
-
   });
 
   after(function() {
-    runtime.loader.descriptors.getHypertyDescriptor.restore();
-    runtime.loader.descriptors.getStubDescriptor.restore();
-    runtime.loader.descriptors.getIdpProxyDescriptor.restore();
+    runtime.descriptorInstance.getHypertyDescriptor.restore();
+    runtime.descriptorInstance.getStubDescriptor.restore();
+    runtime.descriptorInstance.getIdpProxyDescriptor.restore();
   });
 
   describe('constructor()', function() {
