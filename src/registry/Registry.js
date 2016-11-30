@@ -78,6 +78,10 @@ class Registry {
 
     _this.hypertiesListToRemove = {};
     _this.hypertiesList = [];
+    _this.remoteHypertyList = [];
+    _this.p2pConnectionList = {};
+    _this.p2pHandlerAssociation = [];
+
     _this.protostubsList = {};
     _this.idpProxyList = {};
     _this.dataObjectList = {};
@@ -148,6 +152,52 @@ class Registry {
           console.log('deleteHyperty');
         } else if (hasCriteria && isUserResource) {
           console.log('discoverHyperty');
+          for (let i in _this.remoteHypertyList) {
+            let hyperty = _this.remoteHypertyList[i];
+            if (JSON.stringify(hyperty.resources) === JSON.stringify(msg.body.criteria.resources) &&
+              JSON.stringify(hyperty.dataSchemes) === JSON.stringify(msg.body.criteria.dataSchemes) &&
+              hyperty.user.userURL === msg.body.resource) {
+              let url = hyperty.url;
+              let valueJson = {};
+              valueJson[url] = hyperty.info;
+              let message = {
+                type: 'response',
+                to: msg.from,
+                from: msg.to,
+                body: {
+                  value: valueJson
+                }
+              };
+              return _this._messageBus.postMessage(message);
+            }
+          }
+
+          _this.discovery.discoverHyperty(msg.body.resource, msg.body.criteria.dataSchemes, msg.body.criteria.resources).then((value) => {
+            let mostRecentHyperty;
+            Object.keys(value).forEach(function(a) {
+              let hyperty = new HypertyInstance(undefined, undefined, value[a].descriptor, undefined, a, { userURL: value[a].userID },
+                'guid', _this.runtimeURL, 'ctx', value[a].p2pHandler, value[a].p2pRequester, value[a].dataSchemes, value[a].resources,
+                value[a].startingTime, value[a].lastModified);
+              hyperty.info = value;
+              if (!mostRecentHyperty) {
+                mostRecentHyperty = hyperty;
+              } else {
+                let hypertyDate = new Date(hyperty.lastModified);
+                let mostRecentHypertyDate = new Date(mostRecentHyperty.lastModified);
+
+                if (hypertyDate > mostRecentHypertyDate) {
+                  mostRecentHyperty = hyperty;
+                  console.log('update date');
+                }
+              }
+            });
+
+            if (mostRecentHyperty) {
+              console.log('push');
+              _this.remoteHypertyList.push(mostRecentHyperty);
+            }
+          });
+
         } else if (hasCriteria && !isURLResource) {
           console.log('discoverDataObject');
         } else if (isHypertyResource) {
@@ -182,7 +232,7 @@ class Registry {
     let discovery = new Discovery(_this.runtimeURL, messageBus);
     _this.discovery = discovery;
 
-    let discoveryServiceFramework = new DiscoveryServiceFramework('hyperty://domain.com/123', _this.runtimeURL, messageBus);
+    let discoveryServiceFramework = new DiscoveryServiceFramework('hyperty://localhost/123', _this.runtimeURL, messageBus);
     _this.discoveryServiceFramework = discoveryServiceFramework;
 
     /*let identityManager = new IdentityManager('hyperty://localhost/833a6e52-515b-498b-a57b-e3daeece48d2', _this.runtimeURL, messageBus);
@@ -738,6 +788,27 @@ class Registry {
     });
   }
 
+  checkHypertyP2PHandler(hypertyURL) {
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+      for (let i in _this.remoteHypertyList) {
+        let hyperty = _this.remoteHypertyList[i];
+
+        if (hyperty.hypertyURL === hypertyURL && hyperty.p2pHandler) {
+          return resolve({
+            p2pHandler: hyperty.p2pHandler,
+            p2pRequester: hyperty.p2pRequester,
+            runtimeURL: hyperty.runtimeURL
+          });
+        }
+      }
+
+      // TODO discoveryPerURL
+      return reject('Undefined p2pHandler');
+    });
+  }
+
   /**
   * To register a new Hyperty in the runtime which returns the HypertyURL allocated to the new Hyperty.
   * @param  {Sandbox}             sandbox               sandbox
@@ -794,11 +865,14 @@ class Registry {
                   reject('Wrong SandboxType');
                 }
 
-                let hyperty = new HypertyInstance(_this.identifier, _this.registryURL,
-                descriptorURL, descriptor, addressURL.address[0], userProfile);
+                let p2pHandler = 'hyperty://domain/helloHandler' + Math.floor((Math.random() * 10000) + 1);
+                let p2pRequester = 'hyperty://domain/helloRequester' + Math.floor((Math.random() * 10000) + 1);
+                let runtime = _this.runtimeURL;
+                let status = 'live';
 
-                hyperty._resources = hypertyCapabilities.resources;
-                hyperty._dataSchemes = hypertyCapabilities.dataSchema;
+                let hyperty = new HypertyInstance(_this.identifier, _this.registryURL,
+                descriptorURL, descriptor, addressURL.address[0], userProfile, 'guid', _this.runtimeURL, 'ctx', p2pHandler, p2pRequester, hypertyCapabilities.dataSchema, hypertyCapabilities.resources);
+
                 _this.hypertiesList.push(hyperty);
 
                 //message to register the new hyperty, within the domain registry
@@ -807,11 +881,6 @@ class Registry {
 
                 if (addressURL.newAddress) {
                   console.log('registering new Hyperty URL', addressURL.address[0]);
-
-                  let p2pHandler = 'hyperty://domain/helloHandler';
-                  let p2pRequester = 'hyperty://domain/helloRequester';
-                  let runtime = 'runtime://domain/runtimeXPTO';
-                  let status = 'live';
 
                   messageValue = {
                     user: identityURL,
@@ -1180,13 +1249,8 @@ class Registry {
     });
   }
 
-  /**
-  * To verify if source is valid and to resolve target runtime url address if needed (eg protostub runtime url in case the message is to be dispatched to a remote endpoint).
-  * @param  {URL.URL}  url       url
-  * @return {Promise<URL.URL>}                 Promise <URL.URL>
-  */
-  resolve(url) {
-    console.log('resolve ' + url);
+  resolveNormalStub(url) {
+    console.log('resolveNormalStub ' + url);
     let _this = this;
 
     return new Promise((resolve, reject) => {
@@ -1245,7 +1309,53 @@ class Registry {
         }
 
       }
+    });
+  }
 
+  /**
+  * To verify if source is valid and to resolve target runtime url address if needed (eg protostub runtime url in case the message is to be dispatched to a remote endpoint).
+  * @param  {URL.URL}  url       url
+  * @return {Promise<URL.URL>}                 Promise <URL.URL>
+  */
+  resolve(url) {
+    console.log('resolve ' + url);
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+
+      _this.checkHypertyP2PHandler(url).then((hypertyInfo) => {
+
+        let p2pStructure = _this.p2pConnectionList[hypertyInfo.runtimeURL];
+
+        if (!p2pStructure) {
+          p2pStructure = {};
+        }
+
+        if (p2pStructure.connection) {
+          return resolve(p2pStructure.connection);
+        } else {
+          // _this.p2pConnection[runtimeURL] = {status: status, connection: connection, p2pHandler: p2pHandler}
+
+          if (p2pStructure.status === STATUS.PROGRESS) {
+            return _this.resolveNormalStub(url).then((returnURL) => {
+              resolve(returnURL);
+            });
+          } else {
+            p2pStructure.status = STATUS.PROGRESS;
+            _this.p2pConnectionList[hypertyInfo.runtimeURL] = p2pStructure;
+
+            // TODO stub load
+            _this._loader.loadStub(hypertyInfo.p2pRequester).then((protostubInfo) => {
+              p2pStructure.status = STATUS.DEPLOYED;
+              _this.p2pConnectionList[hypertyInfo.runtimeURL] = p2pStructure;
+
+              resolve(protostubInfo.url);
+            }).catch((error) => {
+              reject(error);
+            });
+          }
+        }
+      });
     });
   }
 
