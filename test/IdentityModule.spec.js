@@ -48,7 +48,10 @@ describe('IdentityModule', function() {
     //not expected to have initially an identity registered
     let expectedInfo = {
       identities: [],
-      idps: ['google.com', 'microsoft.com', 'orange.fr']
+      idps: [{ domain: 'google.com', type: 'idToken' },
+            { domain: 'microsoft.com', type: 'idToken' },
+            { domain: 'orange.fr', type: 'idToken' },
+            { domain: 'slack.com', type: 'Legacy' }]
     };
 
     it('should return a list of IdPs and a list of identities previously registered', () => {

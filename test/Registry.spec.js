@@ -1,16 +1,22 @@
 import chai from 'chai';
+import sinon from 'sinon';
 import chaiAsPromised from 'chai-as-promised';
+import sinonChai from 'sinon-chai';
 
 chai.config.truncateThreshold = 0;
 
 let expect = chai.expect;
+
 chai.use(chaiAsPromised);
+chai.use(sinonChai);
 
 // Main dependecies
 import Registry from '../src/registry/Registry';
 import Sandbox from '../src/sandbox/Sandbox';
 import MessageBus from '../src/bus/MessageBus';
-
+import Loader from '../src/runtime/Loader';
+import { descriptors } from './resources/descriptors';
+import {divideURL} from '../src/utils/utils';
 import { runtimeFactory } from './resources/runtimeFactory';
 
 // Testing Registry
@@ -39,8 +45,75 @@ let runtimeCatalogue = {
   }
 };
 
+let getDescriptor = (url) => {
+
+  return new Promise(function(resolve, reject) {
+
+    let dividedURL = divideURL(url);
+    let identity = dividedURL.identity;
+
+    if (!identity) {
+      identity = 'default';
+    } else {
+      identity = identity.substring(identity.lastIndexOf('/') + 1);
+    }
+
+    let result;
+
+    if (url.includes('Hyperties') || url.includes('Hyperty')) {
+      try {
+        result = descriptors.Hyperties[identity];
+      } catch (e) {
+        reject(e);
+      }
+
+    } else if (!(url.includes('Hyperties') || url.includes('Hyperty')) || url.includes('ProtoStubs') || url.includes('protostub')) {
+      try {
+        result = descriptors.ProtoStubs[identity];
+      } catch (e) {
+        reject(e);
+      }
+    } else if (url.includes('idp-proxy')) {
+      try {
+        result = descriptors.IdpProxies[identity];
+      } catch (e) {
+        reject(e);
+      }
+    }
+
+    console.log(result);
+    resolve(result);
+
+  });
+};
+
+
+
+
 let getRegistry = new Promise(function(resolve) {
   let registry = new Registry(runtimeURL, appSandbox, identityModule, runtimeCatalogue, 'runtimeCapabilities', storageManager);
+  let loader = new Loader({});
+  loader.runtimeURL = runtimeURL;
+  loader.runtimeCatalogue = runtimeCatalogue;
+  loader.registry = registry;
+  loader.runtimeFactory = runtimeFactory;
+  let msgbus = new MessageBus(registry);
+  loader.messageBus = msgbus;
+
+  registry.loader = loader;
+  console.log('registry ', registry._loader.descriptors);
+  sinon.stub(registry._loader.descriptors, 'getHypertyDescriptor', (hypertyURL) => {
+    return getDescriptor(hypertyURL);
+  });
+
+  sinon.stub(registry._loader.descriptors, 'getStubDescriptor', (stubURL) => {
+    //console.log('get descriptor for:', stubURL);
+    return getDescriptor('https://catalogue.ua.pt/.well-known/protocolstub/' + stubURL);
+  });
+
+  sinon.stub(registry._loader.descriptors, 'getIdpProxyDescriptor', (idpProxyURL) => {
+    return getDescriptor(idpProxyURL);
+  });
   resolve(registry);
 });
 
@@ -337,6 +410,19 @@ getRegistry.then(function(registry) {
         expect(registry.unregisterHyperty(url).then(function(response) {
           return response;
         })).to.be.fulfilled.and.eventually.equal('Hyperty successfully deleted').and.notify(done);
+      });
+    });
+
+    describe('isLegacy(url)', function() {
+
+      it('should return a protostub', function(done) {
+        let url = 'slack://user@team.slack.com';
+
+        expect(registry.isLegacy(url).then(function(response) {
+          console.log('ProtoSTUB->', response);
+          return response;
+        })).to.be.fulfilled.and.eventually.to.equal(true).and.notify(done);
+
       });
     });
 
