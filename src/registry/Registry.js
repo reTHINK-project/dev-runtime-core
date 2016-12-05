@@ -801,7 +801,7 @@ class Registry {
       for (let i in _this.remoteHypertyList) {
         hyperty = _this.remoteHypertyList[i];
 
-        console.log('[register - checkHypertyP2PHandler] - Hyperty: ', _this.p2pHandlerStub);
+        console.log('[Registry - checkHypertyP2PHandler] - for each Hyperty: ', hyperty);
 
         if (hyperty.hypertyURL === hypertyURL && hyperty.p2pHandler) {
           resolve({
@@ -813,7 +813,7 @@ class Registry {
       }
 
       if (!hyperty) {
-        console.log('[register - checkHypertyP2PHandler] - Hyperty: ', hyperty);
+        console.log('[Registry - checkHypertyP2PHandler] - Hyperty: ', hyperty);
 
         // TODO discoveryPerURL
         reject('checkHypertyP2PHandler don\'t find any hyperty');
@@ -1055,7 +1055,7 @@ class Registry {
         reject('MessageBus not found on registerStub');
       }
 
-      console.info('[Register - registerStub] - ', stubID);
+      console.info('[Registry - registerStub] - ', stubID);
 
       //TODO implement a unique number for the protostubURL
       if (!stubID.indexOf('msg-node.')) {
@@ -1073,7 +1073,7 @@ class Registry {
       if (isP2PHandler) {
         runtimeProtoStubURL = 'msg-node.' + stubID + '/protostub/' + generateGUID();
 
-        console.info('[Register - registerStub - isP2PHandler] - ', runtimeProtoStubURL);
+        console.info('[Registry - registerStub - isP2PHandler] - ', runtimeProtoStubURL);
 
         _this.p2pHandlerStub[stubID] = {
           url: runtimeProtoStubURL,
@@ -1086,14 +1086,14 @@ class Registry {
 
       } else if (!isP2PHandler && P2PRequesterStub) {
 
-        console.info('[Register - registerStub - P2PRequesterStub] - ', P2PRequesterStub);
+        console.info('[Registry - registerStub - P2PRequesterStub] - ', P2PRequesterStub);
         _this.p2pHandlerAssociation[_this.p2pHandlerStub].push(P2PRequesterStub);
 
       } else {
 
         runtimeProtoStubURL = 'msg-node.' + stubID + '/protostub/' + generateGUID();
 
-        console.info('[Register - registerStub - Normal Stub] - ', stubID);
+        console.info('[Registry - registerStub - Normal Stub] - ', stubID);
 
         // TODO: Optimize this
         _this.protostubsList[stubID] = {
@@ -1364,18 +1364,15 @@ class Registry {
   * @return {Promise<URL.URL>}                 Promise <URL.URL>
   */
   resolve(url) {
-    console.log('resolve ' + url);
+    console.log('[Registry - Resolve] -  ' + url);
     let _this = this;
 
     return new Promise((resolve, reject) => {
 
       //split the url to find the domainURL. deals with the url for example as:
       //"hyperty-runtime://sp1/protostub/123",
-      let dividedURL = divideURL(url);
-      let scheme = dividedURL.type;
 
-      console.log('[Registry - Resolve] - ', scheme);
-      if (scheme === 'domain' || scheme === global) {
+      if (url.includes('domain') || url.includes('global')) {
 
         _this.resolveNormalStub(url).then((returnURL) => {
           resolve(returnURL);
@@ -1403,6 +1400,8 @@ class Registry {
               p2pStructure.status = STATUS.PROGRESS;
               _this.p2pConnectionList[hypertyInfo.runtimeURL] = p2pStructure;
 
+              console.log('[Registry - resolve] loadStub with p2pRequester: ', hypertyInfo);
+
               // TODO stub load
               _this._loader.loadStub(hypertyInfo.p2pRequester).then((protostubInfo) => {
                 p2pStructure.status = STATUS.DEPLOYED;
@@ -1415,7 +1414,8 @@ class Registry {
             }
           }
         }, (reason) => {
-          console.log('reason: ', reason);
+          console.error('[Registry - Resolve] - Reason: ', reason);
+
           _this.resolveNormalStub(url).then((returnURL) => {
             resolve(returnURL);
           });
