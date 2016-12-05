@@ -356,15 +356,7 @@ class Loader {
           console.info('3. return the ProtoStub Source Code');
 
           // we have completed step 7 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-
           _stubSourcePackage = stubSourcePackage;
-
-          // TODO: Check on PEP (policy Engine) if we need the sandbox and check if the Sandbox Factory have the context sandbox;
-          let policy = true;
-          return policy;
-        }, handleError)
-        .then((policy) => {
-          if (haveError) return false;
 
           // this will return the sandbox or one promise to getSandbox;
           return this.registry.getSandbox(domain);
@@ -399,7 +391,7 @@ class Loader {
           _stubSandbox = sandbox;
 
           // we need register stub on registry - step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-          return this.registry.registerStub(_stubSandbox, domain);
+          return this.registry.registerStub(_stubSandbox, domain, p2pConfig);
         }, handleError)
         .then((runtimeProtoStubURL) => {
           if (haveError) return false;
@@ -451,19 +443,17 @@ class Loader {
           });
 
           // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-          let stub = this.registry.protostubsList[domain];
+          let stub;
+          if (p2pConfig) {
+            if (p2pConfig.hasOwnProperty('isHandlerStub')) stub = this.registry.p2pHandlerStub[domain];
 
-          // // Load Stub function resolved with success;
-          // let stub = {
-          //   runtimeProtoStubURL: _runtimeProtoStubURL,
-          //   status: deployComponentStatus
-          // };
-
-          console.log('Deployed: ', stub, domain, this.registry.protostubsList);
+            // if (p2pConfig.hasOwnProperty('p2pRequesterStub')) P2PRequesterStub = p2pConfig.p2pRequesterStub;
+          } else {
+            stub = this.registry.protostubsList[domain];
+          }
 
           resolve(stub);
           console.info('------------------- END ---------------------------\n');
-
         }, handleError)
         .catch(errorReason);
 

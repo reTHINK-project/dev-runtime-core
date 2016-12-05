@@ -82,6 +82,7 @@ class Registry {
     _this.hypertiesListToRemove = {};
     _this.hypertiesList = [];
     _this.remoteHypertyList = [];
+    _this.p2pHandlerStub = {};
     _this.p2pConnectionList = {};
     _this.p2pHandlerAssociation = [];
 
@@ -800,7 +801,7 @@ class Registry {
       for (let i in _this.remoteHypertyList) {
         hyperty = _this.remoteHypertyList[i];
 
-        console.log('[checkHypertyP2PHandler - for] - Hyperty: ', hyperty);
+        console.log('[register - checkHypertyP2PHandler] - Hyperty: ', _this.p2pHandlerStub);
 
         if (hyperty.hypertyURL === hypertyURL && hyperty.p2pHandler) {
           resolve({
@@ -812,7 +813,8 @@ class Registry {
       }
 
       if (!hyperty) {
-        console.log('[checkHypertyP2PHandler] - Hyperty: ', hyperty);
+        console.log('[register - checkHypertyP2PHandler] - Hyperty: ', hyperty);
+
         // TODO discoveryPerURL
         reject('checkHypertyP2PHandler don\'t find any hyperty');
       }
@@ -1037,11 +1039,11 @@ class Registry {
 
   /**
    * To register a new Protocol Stub in the runtime including as input parameters the function to postMessage, the DomainURL that is connected with the stub, which returns the RuntimeURL allocated to the new ProtocolStub.
-   * @param {Sandbox}        Sandbox
-   * @param  {DomainURL}     DomainURL service provider domain
+   * @param  {Sandbox}       Sandbox
+   * @param  {stubID}        Domain or hyperty runtime to register the stub
    * @return {RuntimeProtoStubURL}
    */
-  registerStub(sandbox, domainURL) {
+  registerStub(sandbox, stubID, p2pConfig) {
     let _this = this;
 
     return new Promise(function(resolve,reject) {
@@ -1053,28 +1055,59 @@ class Registry {
         reject('MessageBus not found on registerStub');
       }
 
+      console.info('[Register - registerStub] - ', stubID);
+
       //TODO implement a unique number for the protostubURL
-      if (!domainURL.indexOf('msg-node.')) {
-        domainURL = domainURL.substring(domainURL.indexOf('.') + 1);
+      if (!stubID.indexOf('msg-node.')) {
+        stubID = stubID.substring(stubID.indexOf('.') + 1);
       }
 
-      runtimeProtoStubURL = 'msg-node.' + domainURL + '/protostub/' + generateGUID();
+      let isP2PHandler;
+      let P2PRequesterStub;
 
-      // TODO: Optimize this
-      // Proxy;
-      _this.protostubsList[domainURL] = {
-        url: runtimeProtoStubURL,
-        status: STATUS.DEPLOYED
-      };
+      if (p2pConfig) {
+        if (p2pConfig.hasOwnProperty('isHandlerStub')) isP2PHandler = p2pConfig.isHandlerStub;
+        if (p2pConfig.hasOwnProperty('p2pRequesterStub')) P2PRequesterStub = p2pConfig.p2pRequesterStub;
+      }
 
-      // _this.protostubsList[domainURL] = runtimeProtoStubURL;
-      _this.sandboxesList.sandbox[runtimeProtoStubURL] = sandbox;
+      if (isP2PHandler) {
+        runtimeProtoStubURL = 'msg-node.' + stubID + '/protostub/' + generateGUID();
 
-      // sandbox.addListener('*', function(msg) {
-      //   _this._messageBus.postMessage(msg);
-      // });
+        console.info('[Register - registerStub - isP2PHandler] - ', runtimeProtoStubURL);
 
-      resolve(runtimeProtoStubURL);
+        _this.p2pHandlerStub[stubID] = {
+          url: runtimeProtoStubURL,
+          status: STATUS.DEPLOYED
+        };
+
+        _this.p2pHandlerAssociation[_this.p2pHandlerStub] = [];
+
+        resolve(_this.p2pHandlerStub[stubID].url);
+
+      } else if (!isP2PHandler && P2PRequesterStub) {
+
+        console.info('[Register - registerStub - P2PRequesterStub] - ', P2PRequesterStub);
+        _this.p2pHandlerAssociation[_this.p2pHandlerStub].push(P2PRequesterStub);
+
+      } else {
+
+        runtimeProtoStubURL = 'msg-node.' + stubID + '/protostub/' + generateGUID();
+
+        console.info('[Register - registerStub - Normal Stub] - ', stubID);
+
+        // TODO: Optimize this
+        _this.protostubsList[stubID] = {
+          url: runtimeProtoStubURL,
+          status: STATUS.DEPLOYED
+        };
+
+        // _this.protostubsList[domainURL] = runtimeProtoStubURL;
+        _this.sandboxesList.sandbox[runtimeProtoStubURL] = sandbox;
+
+        resolve(_this.protostubsList[stubID].url);
+      }
+
+      // resolve(runtimeProtoStubURL);
 
       _this._messageBus.addListener(runtimeProtoStubURL + '/status', (msg) => {
         if (msg.resource === msg.to + '/status') {
@@ -1336,44 +1369,58 @@ class Registry {
 
     return new Promise((resolve, reject) => {
 
-      _this.checkHypertyP2PHandler(url).then((hypertyInfo) => {
+      //split the url to find the domainURL. deals with the url for example as:
+      //"hyperty-runtime://sp1/protostub/123",
+      let dividedURL = divideURL(url);
+      let scheme = dividedURL.type;
 
-        let p2pStructure = _this.p2pConnectionList[hypertyInfo.runtimeURL];
+      console.log('[Registry - Resolve] - ', scheme);
+      if (scheme === 'domain' || scheme === global) {
 
-        if (!p2pStructure) {
-          p2pStructure = {};
-        }
-
-        if (p2pStructure.connection) {
-          resolve(p2pStructure.connection);
-        } else {
-          // _this.p2pConnection[runtimeURL] = {status: status, connection: connection, p2pHandler: p2pHandler}
-
-          if (p2pStructure.status === STATUS.PROGRESS) {
-            _this.resolveNormalStub(url).then((returnURL) => {
-              resolve(returnURL);
-            });
-          } else {
-            p2pStructure.status = STATUS.PROGRESS;
-            _this.p2pConnectionList[hypertyInfo.runtimeURL] = p2pStructure;
-
-            // TODO stub load
-            _this._loader.loadStub(hypertyInfo.p2pRequester).then((protostubInfo) => {
-              p2pStructure.status = STATUS.DEPLOYED;
-              _this.p2pConnectionList[hypertyInfo.runtimeURL] = p2pStructure;
-
-              resolve(protostubInfo.url);
-            }).catch((error) => {
-              reject(error);
-            });
-          }
-        }
-      }, (reason) => {
-        console.log('reason: ', reason);
         _this.resolveNormalStub(url).then((returnURL) => {
           resolve(returnURL);
         });
-      });
+
+      } else {
+        _this.checkHypertyP2PHandler(url).then((hypertyInfo) => {
+
+          let p2pStructure = _this.p2pConnectionList[hypertyInfo.runtimeURL];
+
+          if (!p2pStructure) {
+            p2pStructure = {};
+          }
+
+          if (p2pStructure.connection) {
+            resolve(p2pStructure.connection);
+          } else {
+            // _this.p2pConnection[runtimeURL] = {status: status, connection: connection, p2pHandler: p2pHandler}
+
+            if (p2pStructure.status === STATUS.PROGRESS) {
+              _this.resolveNormalStub(url).then((returnURL) => {
+                resolve(returnURL);
+              });
+            } else {
+              p2pStructure.status = STATUS.PROGRESS;
+              _this.p2pConnectionList[hypertyInfo.runtimeURL] = p2pStructure;
+
+              // TODO stub load
+              _this._loader.loadStub(hypertyInfo.p2pRequester).then((protostubInfo) => {
+                p2pStructure.status = STATUS.DEPLOYED;
+                _this.p2pConnectionList[hypertyInfo.runtimeURL] = p2pStructure;
+
+                resolve(protostubInfo.url);
+              }).catch((error) => {
+                reject(error);
+              });
+            }
+          }
+        }, (reason) => {
+          console.log('reason: ', reason);
+          _this.resolveNormalStub(url).then((returnURL) => {
+            resolve(returnURL);
+          });
+        });
+      }
 
     });
   }

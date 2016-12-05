@@ -148,8 +148,12 @@ class RuntimeUA {
       let runtimeDescriptor = runtimeUtils.runtimeDescriptor;
       let p2pStubHandler = runtimeDescriptor.p2pHandlerStub;
       console.log('P2PStubHandler: ', p2pStubHandler);
-      this.loadStub(p2pStubHandler).then((result) => {
-        console.log('Result: ', result);
+
+      let p2pConfig = {
+        isHandlerStub: true
+      };
+
+      this.loadStub(p2pStubHandler, p2pConfig).then((result) => {
 
         // "type" : "subscribe",
         // "from" : "hyperty-runtime://<p2p-handler-sp-domain>/<p2p-handler-runtime-instance-identifier>/ua",
@@ -174,7 +178,7 @@ class RuntimeUA {
           console.log('[runtime ua - postMessage] - reply: ', reply);
         });
 
-        console.info('[runtime ua - p2p installation] - success: ');
+        console.info('[runtime ua - p2p installation] - success: ', result);
         resolve(true);
       }).catch((reason) => {
         console.info('[runtime ua - p2p installation] - fail: ', reason);
