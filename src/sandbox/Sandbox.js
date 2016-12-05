@@ -22,9 +22,10 @@
 **/
 import SandboxRegistry from '../sandbox/SandboxRegistry';
 import MiniBus from '../bus/MiniBus';
+
 // import MessageFactory from '../../resources/MessageFactory';
 
-export let SandboxType = {APP: 'app', NORMAL: 'normal'};
+export let SandboxType = {APP: 'app', NORMAL: 'normal', WINDOW: 'window'};
 
 /**
  * @author micaelpedrosa@gmail.com

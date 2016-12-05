@@ -377,7 +377,16 @@ class Loader {
           // check if the sandbox is registed for this stub descriptor url;
           // Make Steps xxx --- xxx
           // Instantiate the Sandbox
-          let sandbox = this._runtimeFactory.createSandbox();
+          let sandbox;
+
+          if (p2pConfig && (p2pConfig.hasOwnProperty('isHandlerStub') || p2pConfig.hasOwnProperty('p2pRequesterStub'))) {
+            console.info('[LoadStub] - createWindowSandbox', this._runtimeFactory.createWindowSandbox);
+            sandbox = this._runtimeFactory.createWindowSandbox();
+          } else {
+            console.info('[LoadStub] - createSandbox', this._runtimeFactory.createSandbox);
+            sandbox = this._runtimeFactory.createSandbox();
+          }
+
           sandbox.addListener('*', (msg) => {
             this.messageBus.postMessage(msg);
           });

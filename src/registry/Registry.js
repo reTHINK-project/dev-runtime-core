@@ -133,7 +133,9 @@ class Registry {
       let isDiscovery = msg.from.substring(msg.from.length - 10, msg.from.length) === '/discovery';
 
       let hasCriteria = msg.body.hasOwnProperty('criteria');
-      let isURLResource, isUserResource, isHypertyResource;
+      let isURLResource;
+      let isUserResource;
+      let isHypertyResource;
 
       if (msg.body.hasOwnProperty('resource')) {
         isURLResource = isURL(msg.body.resource);
@@ -141,7 +143,8 @@ class Registry {
         isHypertyResource = isHypertyURL(msg.body.resource);
       }
       let isDelete = msg.type === 'delete';
-      let hasName, hasUser;
+      let hasName;
+      let hasUser;
 
       if (msg.body.hasOwnProperty('value')) {
         hasName = msg.body.value.hasOwnProperty('name');
@@ -708,7 +711,7 @@ class Registry {
   _getResourcesAndSchemes(descriptor) {
     let _this = this;
 
-    return new Promise((resolve, reject)=> {
+    return new Promise((resolve)=> {
 
       let resources;
 
@@ -754,7 +757,7 @@ class Registry {
   checkRegisteredURLs(info) {
     let _this = this;
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
 
       let objectType = (info.reporter) ? 'registry:DataObjectURLs' : 'registry:HypertyURLs';
 
@@ -917,12 +920,12 @@ class Registry {
                 } else {
                   console.log('registering previously registered Hyperty URL', addressURL.address[0]);
 
-                  message =
-                    {type: 'update',
-                     to: 'domain://registry.' + _this.registryDomain + '/',
-                     from: _this.registryURL,
-                     body: {resource: addressURL.address[0]/*, value: 'live', attribute: 'status'*/}
-                   };
+                  message = {
+                    type: 'update',
+                    to: 'domain://registry.' + _this.registryDomain + '/',
+                    from: _this.registryURL,
+                    body: {resource: addressURL.address[0]/*, value: 'live', attribute: 'status'*/}
+                  };
 
                 }
 
@@ -1214,7 +1217,7 @@ class Registry {
   registerPEP(postMessage, hyperty) {
     let _this = this;
 
-    return new Promise(function(resolve,reject) {
+    return new Promise(function(resolve) {
       //TODO check what parameter in the postMessage the pep is.
       _this.pepList[hyperty] = postMessage;
       resolve('PEP registered with success');
@@ -1240,15 +1243,6 @@ class Registry {
       }
     });
 
-  }
-
-  /**
-  * To receive status events from components registered in the Registry.
-  * @param  {Message.Message}     Message.Message       event
-  */
-  onEvent(event) {
-    // TODO body...
-    console.log('onEvent');
   }
 
   /**
