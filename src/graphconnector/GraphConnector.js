@@ -161,6 +161,8 @@ class GraphConnector {
 
               // reply should be the JSON returned from the Global Registry REST-interface
               let jwt = reply.body.Value;
+
+            if(typeof  jwt !== 'undefined'){
               let unwrappedJWT = jsrsasign.KJUR.jws.JWS.parse(reply.body.Value);
               let dataEncoded = unwrappedJWT.payloadObj.data;
               let dataDecoded = base64url.decode(dataEncoded);
@@ -183,7 +185,7 @@ class GraphConnector {
                   reject('Retrieved Record not valid!');
                 } else {
                   if (typeof dataJSON.userIDs != 'undefined' && dataJSON.userIDs != null) {
-                      _this.globalRegistryRecord.userIDs = dataJSON.userIDs;
+                    _this.globalRegistryRecord.userIDs = dataJSON.userIDs;
                   }
                   _this.globalRegistryRecord.lastUpdate = dataJSON.lastUpdate;
                   _this.globalRegistryRecord.timeout = dataJSON.timeout;
@@ -194,6 +196,9 @@ class GraphConnector {
                   resolve(_this.globalRegistryRecord);
                 }
               }
+            }else{
+              resolve("not found");
+            }
             });
         }
       });
@@ -419,9 +424,9 @@ class GraphConnector {
 
               // reply should be the JSON returned from the Global Registry REST-interface
               let jwt = reply.body.Value;
-              let description = reply.body.Description;
               if (typeof jwt !== 'undefined') {
-                let unwrappedJWT = jsrsasign.KJUR.jws.JWS.parse(jwt);
+                console.log("verify JWT");
+                let unwrappedJWT = jsrsasign.KJUR.jws.JWS.parse(reply.body.Value);
                 let dataEncoded = unwrappedJWT.payloadObj.data;
                 let dataDecoded = base64url.decode(dataEncoded);
                 let dataJSON = JSON.parse(dataDecoded);
@@ -433,8 +438,10 @@ class GraphConnector {
                 sig.updateString(encodedString);
                 let isValid = sig.verify(sigValueHex);
                 if (!isValid) {
+                  console.log("invalid JWT");
                   reject('Retrieved Record not valid!');
                 } else {
+                  console.log("valid JWT");
                   let queriedContact = new GraphConnectorContactData(dataJSON.guid, '', '');
                   if (typeof dataJSON.userIDs != 'undefined' && dataJSON.userIDs != null) {
                       queriedContact.userIDs = dataJSON.userIDs;
@@ -448,8 +455,9 @@ class GraphConnector {
                   }
                   resolve(queriedContact);
                 }
-              } else if (typeof description !== 'undefined') {
-                resolve(description);
+              } else {
+                console.log(" undefined Response");
+                resolve("undefined");
               }
             });
         }
