@@ -101,7 +101,7 @@ describe('SyncherManager', function() {
         resolve(message);
       });
     },
-    getIdentityOfHyperty: () => {
+    getToken: () => {
       return new Promise((resolve) => {
         resolve({ userProfile: {username: 'user@domain' } });
       });

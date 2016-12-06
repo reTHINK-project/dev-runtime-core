@@ -223,17 +223,17 @@ class RuntimeCoreCtx extends ReThinkCtx {
 
   _getIdentity(message) {
     if (message.type === 'update') {
-      return this.idModule.getIdentityOfHyperty(message.body.source);
+      return this.idModule.getToken(message.body.source);
     }
 
     if (message.type === 'response' && message.body.source !== undefined) {
-      return this.idModule.getIdentityOfHyperty(message.body.source);
+      return this.idModule.getToken(message.body.source);
     }
 
     if (divideURL(message.from).type === 'hyperty') {
-      return this.idModule.getIdentityOfHyperty(message.from);
+      return this.idModule.getToken(message.from, message.to);
     } else {
-      return this.idModule.getIdentityOfHyperty(this.getURL(message.from));
+      return this.idModule.getToken(this.getURL(message.from));
     }
   }
 

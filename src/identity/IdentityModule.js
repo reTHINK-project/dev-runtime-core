@@ -166,9 +166,48 @@ class IdentityModule {
     _this.guiDeployed = true;
   }
 
-  getIdentityOfHyperty(hypertyURL) {
+  getToken(hypertyURL, toUrl) {
     let _this = this;
+    return new Promise(function(resolve, reject) {
 
+      if (toUrl && toUrl.split('@').length > 1) {
+        console.log('toUrl', toUrl);
+        _this.registry.isLegacy(toUrl).then(function(result) {
+          console.log('FROM isLEGACY:', result);
+          if (result) {
+            let urlSplit = toUrl.split('.');
+            let length = urlSplit.length;
+            let domainToCheck = urlSplit[length - 2] + '.' + urlSplit[length - 1];
+
+            for (let index in _this.identities) {
+              let identity = _this.identities[index];
+
+              if (identity.hasOwnProperty('interworking') && identity.interworking.domain === domainToCheck) {
+                return resolve(identity.interworking.access_token);
+              }
+            }
+          }
+          _this.getIdToken(hypertyURL).then(function(identity) {
+            console.log('from getIdToken', identity);
+            return resolve(identity);
+          }).catch(function(error) {
+            console.error('error on getToken', error);
+            return reject(error);
+          });
+        });
+      } else {
+        _this.getIdToken(hypertyURL).then(function(identity) {
+          console.log('from getIdToken', identity);
+          return resolve(identity);
+        }).catch(function(error) {
+          return reject(error);
+        });
+      }
+    });
+  }
+
+  getIdToken(hypertyURL) {
+    let _this = this;
     return new Promise(function(resolve, reject) {
       let splitURL = hypertyURL.split('://');
       if (splitURL[0] !== 'hyperty') {

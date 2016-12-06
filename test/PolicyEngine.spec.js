@@ -203,7 +203,7 @@ describe('Policy Engine with Runtime Core context', () => {
         resolve(message);
       });
     },
-    getIdentityOfHyperty: () => {
+    getToken: () => {
       return new Promise((resolve) => {
         resolve({ userProfile: {username: 'user@domain' } });
       });

@@ -30,7 +30,7 @@
   },
   "homepage": "https://rethink-project.eu/",
   "dependencies": {
-    "service-framework": "github:rethink-project/dev-service-framework#dev-address-reusage"
+    "service-framework": "github:rethink-project/dev-service-framework#dev-interworking"
   },
   "devDependencies": {
     "array.observe": "0.0.1",

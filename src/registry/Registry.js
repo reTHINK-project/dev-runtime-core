@@ -1257,16 +1257,20 @@ class Registry {
   isLegacy(url) {
     let _this = this;
     return new Promise((resolve, reject) => {
-      let urlSplit = url.split('.');
-      let length = urlSplit.length;
-      let domainToCheck = urlSplit[length - 2] + '.' + urlSplit[length - 1];
 
-      _this._loader.descriptors.getStubDescriptor(domainToCheck).then((result) => {
+      let dividedURL = divideURL(url);
+      console.log('ON Legacy:', dividedURL);
+      let splitedDomain = dividedURL.domain.split('.');
+      let splitedLength = splitedDomain.length;
+      let domain = splitedDomain[splitedLength - 2] + '.' + splitedDomain[splitedLength - 1];
+      _this._loader.descriptors.getIdpProxyDescriptor(domain).then((result) => {
+          console.log('Getting stub descriptor:', result);
           if (result.interworking)
             resolve(result.interworking);
           else
             resolve(false);
         }).catch((reason) => {
+          console.log('problem loading stub for domain:', domain);
           reject(reason);
         });
     });
