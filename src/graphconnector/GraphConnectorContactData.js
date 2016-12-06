@@ -52,7 +52,7 @@ class GraphConnectorContactData {
    * @returns  {int}     schemaVersion        schemaVersion of the Dataset.
    */
   get schemaVersion() {
-    return this._guid;
+    return this._schemaVersion;
   }
 
   /**

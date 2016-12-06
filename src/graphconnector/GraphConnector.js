@@ -81,8 +81,8 @@ class GraphConnector {
    * Sets the first name and last name of the owner.
    * @param  {string}     fname     The owner's first name.
    * @param  {string}     lname     The owner's last name.
+   * @returns  {boolean} Returns true if the owner name is successfully added.
    */
-
   setOwnerName(fname, lname) {
     let status = false;
     if (typeof fname !== 'undefined') {
@@ -162,43 +162,43 @@ class GraphConnector {
               // reply should be the JSON returned from the Global Registry REST-interface
               let jwt = reply.body.Value;
 
-            if(typeof  jwt !== 'undefined'){
-              let unwrappedJWT = jsrsasign.KJUR.jws.JWS.parse(reply.body.Value);
-              let dataEncoded = unwrappedJWT.payloadObj.data;
-              let dataDecoded = base64url.decode(dataEncoded);
-              let dataJSON = JSON.parse(dataDecoded);
+              if (typeof jwt !== 'undefined') {
+                let unwrappedJWT = jsrsasign.KJUR.jws.JWS.parse(reply.body.Value);
+                let dataEncoded = unwrappedJWT.payloadObj.data;
+                let dataDecoded = base64url.decode(dataEncoded);
+                let dataJSON = JSON.parse(dataDecoded);
 
-              // public key should match
-              let sameKey = (dataJSON.publicKey == _this.globalRegistryRecord.publicKey);
-              if (!sameKey) {
-                reject('Retrieved key does not match!');
-              } else {
-                let publicKeyObject = jsrsasign.KEYUTIL.getKey(dataJSON.publicKey);
-                let encodedString = jwt.split('.').slice(0, 2).join('.');
-                let sigValueHex = unwrappedJWT.sigHex;
-                let sig = new jsrsasign.KJUR.crypto.Signature({alg: 'SHA256withECDSA'});
-                sig.init(publicKeyObject);
-                sig.updateString(encodedString);
-                let isValid = sig.verify(sigValueHex);
-
-                if (!isValid) {
-                  reject('Retrieved Record not valid!');
+                // public key should match
+                let sameKey = (dataJSON.publicKey == _this.globalRegistryRecord.publicKey);
+                if (!sameKey) {
+                  reject('Retrieved key does not match!');
                 } else {
-                  if (typeof dataJSON.userIDs != 'undefined' && dataJSON.userIDs != null) {
-                    _this.globalRegistryRecord.userIDs = dataJSON.userIDs;
+                  let publicKeyObject = jsrsasign.KEYUTIL.getKey(dataJSON.publicKey);
+                  let encodedString = jwt.split('.').slice(0, 2).join('.');
+                  let sigValueHex = unwrappedJWT.sigHex;
+                  let sig = new jsrsasign.KJUR.crypto.Signature({alg: 'SHA256withECDSA'});
+                  sig.init(publicKeyObject);
+                  sig.updateString(encodedString);
+                  let isValid = sig.verify(sigValueHex);
+
+                  if (!isValid) {
+                    reject('Retrieved Record not valid!');
+                  } else {
+                    if (typeof dataJSON.userIDs != 'undefined' && dataJSON.userIDs != null) {
+                      _this.globalRegistryRecord.userIDs = dataJSON.userIDs;
+                    }
+                    _this.globalRegistryRecord.lastUpdate = dataJSON.lastUpdate;
+                    _this.globalRegistryRecord.timeout = dataJSON.timeout;
+                    _this.globalRegistryRecord.salt = dataJSON.salt;
+                    _this.globalRegistryRecord.active = dataJSON.active;
+                    _this.globalRegistryRecord.revoked = dataJSON.revoked;
+                    _this.globalRegistryRecord.defaults = dataJSON.defaults;
+                    resolve(_this.globalRegistryRecord);
                   }
-                  _this.globalRegistryRecord.lastUpdate = dataJSON.lastUpdate;
-                  _this.globalRegistryRecord.timeout = dataJSON.timeout;
-                  _this.globalRegistryRecord.salt = dataJSON.salt;
-                  _this.globalRegistryRecord.active = dataJSON.active;
-                  _this.globalRegistryRecord.revoked = dataJSON.revoked;
-                  _this.globalRegistryRecord.defaults = dataJSON.defaults;
-                  resolve(_this.globalRegistryRecord);
                 }
+              }else {
+                resolve('not found');
               }
-            }else{
-              resolve("not found");
-            }
             });
         }
       });
@@ -342,12 +342,12 @@ class GraphConnector {
 
           if (!this.guidExist(guidNew)) {
 
-              this.contacts[i].firstName = firstName;
-              this.contacts[i].lastName = lastName;
-              this.contacts[i].guid = guidNew;
-              this.contacts[i].privateContact = privStatus;
+            this.contacts[i].firstName = firstName;
+            this.contacts[i].lastName = lastName;
+            this.contacts[i].guid = guidNew;
+            this.contacts[i].privateContact = privStatus;
 
-              rtnArray.push(this.contacts[i]);
+            rtnArray.push(this.contacts[i]);
 
           }
         }
@@ -425,7 +425,7 @@ class GraphConnector {
               // reply should be the JSON returned from the Global Registry REST-interface
               let jwt = reply.body.Value;
               if (typeof jwt !== 'undefined') {
-                console.log("verify JWT");
+                console.log('verify JWT');
                 let unwrappedJWT = jsrsasign.KJUR.jws.JWS.parse(reply.body.Value);
                 let dataEncoded = unwrappedJWT.payloadObj.data;
                 let dataDecoded = base64url.decode(dataEncoded);
@@ -438,26 +438,26 @@ class GraphConnector {
                 sig.updateString(encodedString);
                 let isValid = sig.verify(sigValueHex);
                 if (!isValid) {
-                  console.log("invalid JWT");
+                  console.log('invalid JWT');
                   reject('Retrieved Record not valid!');
                 } else {
-                  console.log("valid JWT");
+                  console.log('valid JWT');
                   let queriedContact = new GraphConnectorContactData(dataJSON.guid, '', '');
                   if (typeof dataJSON.userIDs != 'undefined' && dataJSON.userIDs != null) {
-                      queriedContact.userIDs = dataJSON.userIDs;
+                    queriedContact.userIDs = dataJSON.userIDs;
 
-                      for (let i = 0; i < _this.contacts.length; i++) {
-                          if (_this.contacts[i].guid == guid) {
-                              _this.contacts[i].userIDs = dataJSON.userIDs;
-                          }
+                    for (let i = 0; i < _this.contacts.length; i++) {
+                      if (_this.contacts[i].guid == guid) {
+                        _this.contacts[i].userIDs = dataJSON.userIDs;
                       }
+                    }
 
                   }
                   resolve(queriedContact);
                 }
               } else {
-                console.log(" undefined Response");
-                resolve("undefined");
+                console.log(' undefined Response');
+                resolve('undefined');
               }
             });
         }
@@ -467,9 +467,9 @@ class GraphConnector {
 
   /**
    * Adds a UserID for the user.
+   * @param {string} uid.
+   * @param {string} domain.
    * @returns  {boolean}   returns false if the userID exists and the user ID will not be added, true otherwise.
-   * @param uid
-   * @param domain
    */
   addUserID(uid, domain) {
     // check if already inside
@@ -492,9 +492,9 @@ class GraphConnector {
 
   /**
    * Removes a UserID for the user.
+   * @param {string} uid.
+   * @param {string} domain.
    * @returns  {boolean}   true if the userID exists and deleted, false otherwise.
-   * @param uid
-   * @param domain
    */
   removeUserID(uid, domain) {
     let found = false;
@@ -508,13 +508,12 @@ class GraphConnector {
     return found;
   }
 
-
   /**
    * set User  Defaults.
-   * @returns  {boolean}   returns true
-   * @param voice
-   * @param chat
-   * @param video
+   * @param {string} voice
+   * @param {string} chat
+   * @param {string} video
+   * @returns  {boolean}   returns True if the Defaults are successfully added, false otherwise.
    */
   setDefaults(voice, chat, video) {
 
@@ -530,7 +529,8 @@ class GraphConnector {
    * Add a contact to the Graph Connector.
    * @param  {string}   guid          GUID of the new contact.
    * @param  {string}   firstName     First name of the new contact.
-   * @param  {string}   lastname      Last name of the new contact.
+   * @param  {string}   lastName      Last name of the new contact.
+   * @returns  {boolean}   returns True if the Contact is successfully added, false otherwise.
    */
   addContact(guid, firstName, lastName) {
 
@@ -548,7 +548,7 @@ class GraphConnector {
   /**
    * Removes a location for a user identified by a given GUID.
    * @param  {string}   guid    GUID of the contact.
-   * @returns  {boolean}  True if the group name is successfully deleted, false otherwise.
+   * @returns  {boolean}  True if the Location is successfully  removed, false otherwise.
    */
   removeLocation(guid) {
     let success = false;
@@ -570,7 +570,7 @@ class GraphConnector {
    * Adds a location for a user identified by a given GUID.
    * @param  {string}   guid          GUID of the contact.
    * @param  {string}   locationName    location  of the contact
-   * @returns  {boolean}  Success if the group name is successfully added
+   * @returns  {boolean}  Success if the Location is successfully added
    */
   setLocation(guid, locationName) {
     let success = false;
@@ -581,8 +581,8 @@ class GraphConnector {
       } else {
         for (let i = 0; i < this.contacts.length; i++) {
           if (this.contacts[i].guid == guid) {
-              this.contacts[i].residenceLocation = locationName;
-              success = true;
+            this.contacts[i].residenceLocation = locationName;
+            success = true;
           }
         }
       }
@@ -619,7 +619,7 @@ class GraphConnector {
     let rtnArray = [];
     let ownerTmp;
     if (typeof groupName !== 'undefined') {
-      for (var k = 0; k < this.groups.length; k++) {
+      for (let k = 0; k < this.groups.length; k++) {
         if (this.groups[k] == groupName) {
           ownerTmp = new GraphConnectorContactData(this.globalRegistryRecord.guid, this.firstName, this.lastName);
           (typeof this.residenceLocation == 'undefined') ? ownerTmp.residenceLocation = '' : ownerTmp.residenceLocation = this.residenceLocation;
@@ -635,7 +635,7 @@ class GraphConnector {
       for (let i = 0; i < this.contacts.length; i++) {
         for (let j = 0; j < this.contacts[i].groups.length; j++) {
           if (this.contacts[i].groups[j] == groupName) {
-              rtnArray.push(this.contacts[i]);
+            rtnArray.push(this.contacts[i]);
           }
         }
       }
@@ -660,10 +660,10 @@ class GraphConnector {
       } else {
         for (let i = 0; i < this.contacts.length; i++) {
           if (this.contacts[i].guid == guid) {
-              if (!this.contacts[i].groups.includes(groupName)) {
-                  this.contacts[i].groups.push(groupName);
-                  success = true;
-              }
+            if (!this.contacts[i].groups.includes(groupName)) {
+              this.contacts[i].groups.push(groupName);
+              success = true;
+            }
           }
         }
       }
@@ -683,19 +683,19 @@ class GraphConnector {
       if (guid == this.globalRegistryRecord.guid) {
         for (let z = 0; z < this.groups.length; z++) {
           if (this.groups[z] == groupName) {
-              this.groups.splice(z, 1);
-              success = true;
+            this.groups.splice(z, 1);
+            success = true;
           }
         }
       } else {
         for (let i = 0; i < this.contacts.length; i++) {
           if (this.contacts[i].guid == guid) {
-              for (var j = 0; j < this.contacts[i].groups.length; j++) {
-                  if (this.contacts[i].groups[j] == groupName) {
-                      this.contacts[i].groups.splice(j, 1);
-                  }
-                  success = true;
+            for (let j = 0; j < this.contacts[i].groups.length; j++) {
+              if (this.contacts[i].groups[j] == groupName) {
+                this.contacts[i].groups.splice(j, 1);
               }
+              success = true;
+            }
           }
         }
       }
@@ -714,6 +714,7 @@ class GraphConnector {
   /**
    * Removes a contact from the Graph Connector.
    * @param  {string}     guid      GUID of the user to be removed.
+   * @returns  {boolean}  Success if the Contact is successfully removed.
    */
   removeContact(guid) {
     // remove from contacts
@@ -792,7 +793,8 @@ class GraphConnector {
   /**
    * Returns success if the userID is successfully added for a contact
    * @param  {string}   guid    guid of the contact whose userID has to be added.
-   * @param  {string}   userID   userID which is supposed to be added.
+   * @param  {string}   uid   userID which is supposed to be added.
+   * @param  {string}   domain   domain which is supposed to be added.
    * @returns  {boolean}   success       returns true if userID is successfully added to the contact.
    */
   setContactUserIDs(guid, uid, domain) {
@@ -806,7 +808,7 @@ class GraphConnector {
         for (let j = 0; j < this.contacts[i].userIDs.length; j++) {
 
           if (this.contacts[i].userIDs[j].uid == uid && this.contacts[i].userIDs[j].domain == domain) {
-              return false;
+            return false;
           }
         }
         tmpUserID = this.contacts[i].userIDs;
@@ -824,7 +826,7 @@ class GraphConnector {
   /**
    * Returns ArrayList of userIDs of a contact, if contact not found then it will return a string 'Contact Does not exist'
    * @param  {string}   guid    guid of the contact whose userID has to be added.
-   * @returns  {boolean}   success       returns Arraylist of userID of a contact, if contact not found then it will return a string 'Contact Does not exist'
+   * @returns  {array}   success       returns Arraylist of userID of a contact, if contact not found then it will return a string 'Contact Does not exist'
    */
   getContactUserIDs(guid) {
     let userIDsArray = [];
@@ -849,12 +851,12 @@ class GraphConnector {
 
   /**
    * Sets active attribute of the GlobalRegistryRecord.
-   * @param  {boolean}   boolean    Value to set the active flag of the GlobalRegistryRecord to.
-   * @returns {boolean} True if set succesfully, false otherwise.
+   * @param  {int}   int    Value to set the active flag of the GlobalRegistryRecord to.
+   * @returns {boolean} True if Active is succesfully set, false otherwise.
    */
-  setActive(boolean) {
-    if (typeof boolean === 'boolean') {
-      this.globalRegistryRecord.active = boolean;
+  setActive(int) {
+    if (typeof int === 'number') {
+      this.globalRegistryRecord.active = int;
       this.globalRegistryRecord.lastUpdate = new Date().toISOString();
       return true;
     }
@@ -863,12 +865,12 @@ class GraphConnector {
 
   /**
    * Sets revoked attribute of the GlobalRegistryRecord.
-   * @param  {boolean}   boolean    Value to set the revoked flag of the GlobalRegistryRecord to.
-   * @returns {boolean} True if set succesfully, false otherwise.
+   * @param  {int}   int    Value to set the revoked flag of the GlobalRegistryRecord to.
+   * @returns {boolean} True if Revoked is succesfully set, false otherwise.
    */
-  setRevoked(boolean) {
-    if (typeof boolean === 'boolean') {
-      this.globalRegistryRecord.revoked = boolean;
+  setRevoked(int) {
+    if (typeof int === 'number') {
+      this.globalRegistryRecord.revoked = int;
       this.globalRegistryRecord.lastUpdate = new Date().toISOString();
       return true;
     }
@@ -877,8 +879,8 @@ class GraphConnector {
 
   /**
    * Sets Timeout attribute of the GlobalRegistryRecord.
-   * @param  {Date}   Date    Date to set the timeout of the GlobalRegistryRecord to.
-   * @returns {boolean} True if set succesfully, false otherwise.
+   * @param  {Date}   Timeout  Date to set the timeout of the GlobalRegistryRecord to.
+   * @returns {boolean} True if Timeout is succesfully set, false otherwise.
    */
   setTimeout(Timeout) {
     let now = new Date();
@@ -892,7 +894,7 @@ class GraphConnector {
 
   /**
    Returns the globalRegistryRecord for the owner.
-   @returns {array}
+   @returns {object}
    */
   getGlobalRegistryRecord() {
     return this.globalRegistryRecord;
