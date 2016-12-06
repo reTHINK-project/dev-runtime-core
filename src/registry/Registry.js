@@ -82,9 +82,11 @@ class Registry {
     _this.hypertiesListToRemove = {};
     _this.hypertiesList = [];
     _this.remoteHypertyList = [];
+
     _this.p2pHandlerStub = {};
+    _this.p2pRequesterStub = {};
     _this.p2pConnectionList = {};
-    _this.p2pHandlerAssociation = [];
+    _this.p2pHandlerAssociation = {};
 
     _this.protostubsList = {};
     _this.idpProxyList = {};
@@ -1041,6 +1043,45 @@ class Registry {
   }
 
   /**
+  * To discover protocol stubs available in the runtime for a certain domain. If available, it returns the runtime url for the protocol stub that connects to the requested domain. Required by the runtime BUS to route messages to remote servers or peers (do we need something similar for Hyperties?).
+  * @param  {RuntimeURL}           RuntimeURL            url
+  * @return {RuntimeURL}           RuntimeURL
+  */
+  discoverP2PStub(runtimeURL) {
+    let _this = this;
+
+    return new Promise((resolve,reject) => {
+
+      if (runtimeURL) {
+
+        if (_this.p2pRequesterStub.hasOwnProperty(runtimeURL) && _this.p2pRequesterStub[runtimeURL].status === STATUS.DEPLOYED) {
+          resolve(_this.p2pRequesterStub[runtimeURL]);
+        } else {
+          _this.p2pRequesterStub[runtimeURL] = {
+            status: STATUS.PROGRESS
+          };
+
+          reject('requestUpdate couldn\'t get the P2PRequesterStub');
+        }
+      } else {
+
+        if (_this.p2pHandlerStub.hasOwnProperty(_this.runtimeURL) && _this.p2pHandlerStub[_this.runtimeURL].status === STATUS.DEPLOYED) {
+          resolve(_this.p2pHandlerStub[_this.runtimeURL]);
+        } else {
+          _this.p2pHandlerStub[_this.runtimeURL] = {
+            status: STATUS.PROGRESS
+          };
+
+          reject('requestUpdate couldn\'t get the P2PHandlerStub');
+        }
+
+      }
+
+    });
+
+  }
+
+  /**
    * To register a new Protocol Stub in the runtime including as input parameters the function to postMessage, the DomainURL that is connected with the stub, which returns the RuntimeURL allocated to the new ProtocolStub.
    * @param  {Sandbox}       Sandbox
    * @param  {stubID}        Domain or hyperty runtime to register the stub
@@ -1049,7 +1090,7 @@ class Registry {
   registerStub(sandbox, stubID, p2pConfig) {
     let _this = this;
 
-    return new Promise(function(resolve,reject) {
+    return new Promise((resolve,reject) => {
 
       let runtimeProtoStubURL;
 
@@ -1060,41 +1101,47 @@ class Registry {
 
       console.info('[Registry - registerStub] - ', stubID);
 
-      //TODO implement a unique number for the protostubURL
       if (!stubID.indexOf('msg-node.')) {
         stubID = stubID.substring(stubID.indexOf('.') + 1);
       }
 
-      let isP2PHandler;
+      let isP2PHandler = false;
       let P2PRequesterStub;
 
       if (p2pConfig) {
-        if (p2pConfig.hasOwnProperty('isHandlerStub')) isP2PHandler = p2pConfig.isHandlerStub;
+        if (p2pConfig.hasOwnProperty('isHandlerStub') && p2pConfig.isHandlerStub) isP2PHandler = p2pConfig.isHandlerStub;
         if (p2pConfig.hasOwnProperty('p2pRequesterStub')) P2PRequesterStub = p2pConfig.p2pRequesterStub;
       }
 
+      //TODO implement a unique number for the protostubURL
+      runtimeProtoStubURL = 'msg-node.' + stubID + '/protostub/' + generateGUID();
+
       if (isP2PHandler) {
-        runtimeProtoStubURL = 'msg-node.' + stubID + '/protostub/' + generateGUID();
 
         console.info('[Registry - registerStub - isP2PHandler] - ', runtimeProtoStubURL);
 
-        _this.p2pHandlerStub[stubID] = {
+        _this.p2pHandlerStub[_this.runtimeURL] = {
           url: runtimeProtoStubURL,
           status: STATUS.DEPLOYED
         };
 
-        _this.p2pHandlerAssociation[_this.p2pHandlerStub] = [];
+        _this.p2pHandlerAssociation[_this.runtimeURL] = [];
 
-        resolve(_this.p2pHandlerStub[stubID].url);
+        resolve(_this.p2pHandlerStub[_this.runtimeURL]);
 
       } else if (!isP2PHandler && P2PRequesterStub) {
 
-        console.info('[Registry - registerStub - P2PRequesterStub] - ', P2PRequesterStub);
-        _this.p2pHandlerAssociation[_this.p2pHandlerStub].push(P2PRequesterStub);
+        console.info('[Registry - registerStub - P2PRequesterStub] - ', P2PRequesterStub, ' - ', runtimeProtoStubURL);
+
+        _this.p2pHandlerAssociation[_this.runtimeURL].push(runtimeProtoStubURL);
+        _this.p2pRequesterStub[_this.runtimeURL] = {
+          url: runtimeProtoStubURL,
+          status: STATUS.DEPLOYED
+        };
+
+        resolve(_this.p2pRequesterStub[_this.runtimeURL]);
 
       } else {
-
-        runtimeProtoStubURL = 'msg-node.' + stubID + '/protostub/' + generateGUID();
 
         console.info('[Registry - registerStub - Normal Stub] - ', stubID);
 
@@ -1107,7 +1154,7 @@ class Registry {
         // _this.protostubsList[domainURL] = runtimeProtoStubURL;
         _this.sandboxesList.sandbox[runtimeProtoStubURL] = sandbox;
 
-        resolve(_this.protostubsList[stubID].url);
+        resolve(_this.protostubsList[stubID]);
       }
 
       // resolve(runtimeProtoStubURL);

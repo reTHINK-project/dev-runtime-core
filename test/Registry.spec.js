@@ -67,6 +67,7 @@ describe('Registry', function() {
     let msgbus = new MessageBus(registry);
     loader.messageBus = msgbus;
 
+    registry._runtimeURL = runtimeURL;
     registry._loader = loader;
     registry.messageBus = msgbus;
 
@@ -152,14 +153,43 @@ describe('Registry', function() {
 
   describe('registerStub(sandBox, domainURL)', function() {
 
-    it('should register a stub', function(done) {
-      let domainURL = 'ua.pt';
+    let domainURL = 'ua.pt';
 
-      expect(registry.registerStub(sandboxDummy, domainURL).then(function(done) {
-        return done;
+    it('should register a stub', function(done) {
+      expect(registry.registerStub(sandboxDummy, domainURL).then((deployed) => {
+        return deployed.url;
       })).to.be.fulfilled.and.eventually.to.contain('msg-node.ua.pt/protostub/').and.notify(done);
 
     });
+
+    it('should register a P2P Handler Stub', (done) => {
+      let p2pConfig = {
+        isHandlerStub: true
+      };
+
+      expect(registry.registerStub(sandboxDummy, domainURL, p2pConfig).then((deployed) => {
+        return deployed.url;
+      })).to.be.fulfilled.and.eventually.to.contain('msg-node.ua.pt/protostub/').and.notify(done);
+    });
+
+    it('should register a P2P Requester Stub', (done) => {
+
+      let p2pConfig = {
+        p2pRequesterStub: 'https://localhost/.well-known/protocolstub/P2PRequesterStub'
+      };
+
+      expect(registry.registerStub(sandboxDummy, domainURL, p2pConfig).then((deployed) => {
+        return deployed.url;
+      })).to.be.fulfilled.and.eventually.to.contain('msg-node.ua.pt/protostub/').and.notify(done);
+    });
+
+    it('should discover P2PHandlerStub', (done) => {
+      expect(registry.discoverP2PStub().then((discovered) => {
+        return discovered.url;
+      })).to.be.fulfilled
+      .and.eventually.to.contain('msg-node.ua.pt/protostub/').and.notify(done);
+    });
+
   });
 
   describe('discoverProtostub(url)', function() {

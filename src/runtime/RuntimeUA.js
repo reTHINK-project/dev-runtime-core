@@ -165,7 +165,7 @@ class RuntimeUA {
           from: runtimeUAURL,
           to: 'domain://msg-node.' + this.domain + '/sm',
           body: {
-            subscribe: [result.url],
+            subscribe: [result],
             source: this.runtimeURL
           }
         };
