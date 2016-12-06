@@ -1127,6 +1127,7 @@ class Registry {
 
         _this.p2pHandlerAssociation[_this.runtimeURL] = [];
 
+        _this.sandboxesList.sandbox[runtimeProtoStubURL] = sandbox;
         resolve(_this.p2pHandlerStub[_this.runtimeURL]);
 
       } else if (!isP2PHandler && P2PRequesterStub) {
@@ -1139,6 +1140,7 @@ class Registry {
           status: STATUS.DEPLOYED
         };
 
+        _this.sandboxesList.sandbox[runtimeProtoStubURL] = sandbox;
         resolve(_this.p2pRequesterStub[_this.runtimeURL]);
 
       } else {

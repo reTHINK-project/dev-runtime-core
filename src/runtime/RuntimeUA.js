@@ -155,10 +155,6 @@ class RuntimeUA {
 
       this.loadStub(p2pStubHandler, p2pConfig).then((result) => {
 
-        // "type" : "subscribe",
-        // "from" : "hyperty-runtime://<p2p-handler-sp-domain>/<p2p-handler-runtime-instance-identifier>/ua",
-        // "to" : "domain://msg-node.<p2p-handler-sp-domain>/sm",
-        // "body" : { "subscribe" : ["<P2PHandlerStubURL>"], "source" : "hyperty-runtime://<p2p-handler-sp-domain>/<p2p-handler-runtime-instance-identifier>" }
         let runtimeUAURL = this.runtimeURL + '/ua';
         let msg = {
           type: 'subscribe',
