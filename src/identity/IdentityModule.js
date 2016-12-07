@@ -1,5 +1,5 @@
 
-import {divideURL, getUserURLFromEmail, getUserEmailFromURL, isDataObjectURL, convertToUserURL} from '../utils/utils.js';
+import {divideURL, getUserURLFromEmail, getUserEmailFromURL, isDataObjectURL, convertToUserURL, getUserIdentityDomain} from '../utils/utils.js';
 import Identity from './Identity';
 import Crypto from './Crypto';
 import GuiFake from './GuiFake';
@@ -187,7 +187,12 @@ class IdentityModule {
               }
             }
             console.log('NO Identity.. Login now');
-            _this.callGenerateMethods(toUrl);
+            let domain = getUserIdentityDomain(toUrl);
+            _this.callGenerateMethods(domain).then((value) => {
+              resolve(value);
+            }, (err) => {
+              reject(err);
+            });
           }
           _this.getIdToken(hypertyURL).then(function(identity) {
             console.log('from getIdToken', identity);

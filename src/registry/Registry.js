@@ -24,7 +24,7 @@ import AddressAllocation from '../allocation/AddressAllocation';
 import HypertyInstance from './HypertyInstance';
 
 import {MessageFactory} from 'service-framework/dist/MessageFactory';
-import {divideURL, isHypertyURL, isURL, isUserURL, generateGUID} from '../utils/utils.js';
+import {divideURL, isHypertyURL, isURL, isUserURL, generateGUID, getUserIdentityDomain} from '../utils/utils.js';
 
 import Discovery from './Discovery';
 import DiscoveryServiceFramework from './DiscoveryServiceFramework';
@@ -1258,11 +1258,7 @@ class Registry {
     let _this = this;
     return new Promise((resolve, reject) => {
 
-      let dividedURL = divideURL(url);
-      console.log('ON Legacy:', dividedURL);
-      let splitedDomain = dividedURL.domain.split('.');
-      let splitedLength = splitedDomain.length;
-      let domain = splitedDomain[splitedLength - 2] + '.' + splitedDomain[splitedLength - 1];
+      let domain = getUserIdentityDomain(url);
       _this._loader.descriptors.getIdpProxyDescriptor(domain).then((result) => {
           console.log('Getting stub descriptor:', result);
           if (result.interworking)

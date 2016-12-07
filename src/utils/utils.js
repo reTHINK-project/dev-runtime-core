@@ -224,3 +224,11 @@ export function generateGUID() {
   return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
 
 }
+
+export function getUserIdentityDomain(url) {
+  let dividedURL = divideURL(url);
+  let splitedDomain = dividedURL.domain.split('.');
+  let splitedLength = splitedDomain.length;
+  let domain = splitedDomain[splitedLength - 2] + '.' + splitedDomain[splitedLength - 1];
+  return domain;
+}
