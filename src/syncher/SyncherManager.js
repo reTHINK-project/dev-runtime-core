@@ -78,6 +78,7 @@ class SyncherManager {
     bus.addListener(_this._url, (msg) => {
       console.log('SyncherManager-RCV: ', msg);
       switch (msg.type) {
+        case 'read': _this._onRead(msg); break;
         case 'create': _this._onCreate(msg); break;
         case 'delete': _this._onDelete(msg); break;
         case 'subscribe': _this._onLocalSubscribe(msg); break;
@@ -146,6 +147,34 @@ class SyncherManager {
     }).catch((error) => {
       console.error('Error: ', error);
     });
+  }
+
+  _onRead(msg) {
+    let owner = msg.from;
+
+    console.log('[syncherManager - onRead] - ', msg);
+
+    this._storageManager.get('syncherManager:Observer').then((observers) => {
+
+      let selectedInfo;
+      Object.keys(observers).forEach((key) => {
+        if (key === owner) {
+          selectedInfo = observers[key];
+        }
+      });
+
+      let responseMsg = {
+        type: 'response', from: this._url, to: owner,
+        body: { code: 200, value: 'no objects stored' }
+      };
+
+      if (selectedInfo) responseMsg.body.value = selectedInfo;
+
+      //FLOW-OUT: message response to Syncher -> create
+      this._bus.postMessage(responseMsg);
+
+    });
+
   }
 
   //FLOW-IN: message received from Syncher -> create
@@ -349,6 +378,9 @@ class SyncherManager {
               let observer = _this._observers[objURL];
               if (!observer) {
                 observer = new ObserverObject(_this, objURL, childrens);
+
+                // TODO: Talk with @pchainho about this storeData
+                observer._storeData(hypertyURL, msg.body.schema, 'on', {});
                 _this._observers[objURL] = observer;
               }
 

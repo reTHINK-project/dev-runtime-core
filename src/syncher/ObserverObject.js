@@ -24,13 +24,32 @@ class ObserverObject {
     _this._subscriptions[hyperty] = new Subscription(_this._bus, hyperty, _this._url, _this._childrens, false);
   }
 
+  _storeData(hyperty, schema, status, initialData, childrenResources) {
+    let _this = this;
+
+    if (!_this._storageSubscriptions.hasOwnProperty(hyperty) && !_this._storageSubscriptions[hyperty]) {
+      _this._storageSubscriptions[hyperty] = [];
+    }
+
+    let saveObject = {
+      url: _this._url,
+      childrens: _this._childrens
+    };
+
+    if (schema) saveObject.schema = schema;
+    if (status) saveObject.status = status;
+    if (initialData) saveObject.initialData = initialData;
+    if (childrenResources) saveObject.childrenResources = childrenResources;
+
+    _this._storageSubscriptions[hyperty].push(saveObject);
+
+    _this._storageManager.set('syncherManager:Observer', 1, _this._storageSubscriptions);
+  }
+
   addSubscription(hyperty) {
     let _this = this;
 
     _this._newSubscription(hyperty);
-
-    _this._storageSubscriptions[hyperty] = {url: _this._url, childrens: _this._childrens};
-    _this._storageManager.set('syncherManager:Observer', 1, _this._storageSubscriptions);
   }
 
   resumeSubscription(hyperty) {
