@@ -186,6 +186,8 @@ class IdentityModule {
                 return resolve(identity.interworking.access_token);
               }
             }
+            console.log('NO Identity.. Login now');
+            _this.callGenerateMethods(toUrl);
           }
           _this.getIdToken(hypertyURL).then(function(identity) {
             console.log('from getIdToken', identity);
