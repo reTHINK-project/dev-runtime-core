@@ -931,12 +931,7 @@ class Registry {
 
                 }
 
-                /*let message = _this.messageFactory.createCreateMessageRequest(
-                  _this.registryURL,
-                  'domain://registry.' + _this.registryDomain + '/',
-                  messageValue,
-                  'policy'
-                );*/
+                console.log('[RegisterHyperty - message] - ', message);
 
                 _this._messageBus.postMessage(message, (reply) => {
                   console.log('===> RegisterHyperty Reply: ', reply);

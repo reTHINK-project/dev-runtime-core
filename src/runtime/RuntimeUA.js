@@ -127,10 +127,9 @@ class RuntimeUA {
         .then((result) => {
           console.info('[runtime ua - installation p2p] - status: ', result);
           resolve(true);
-        })
-        .catch((error) => {
-          console.error('ERROR: ', error);
-          reject(error);
+        }, (reason) => {
+          console.error('ERROR: ', reason);
+          resolve(true);
         });
 
       } catch (e) {
