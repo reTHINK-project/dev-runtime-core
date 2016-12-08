@@ -569,10 +569,31 @@ class GraphConnector {
 
                   if (reply.body.Code == 200) {
                     console.log('Response code is 200');
-                    let newContact = new GraphConnectorContactData(guid, firstName, lastName);
-                    _this.contacts.push(newContact);
-                    resolve(true);
+                    console.log('verify JWT');
+                    let unwrappedJWT = jsrsasign.KJUR.jws.JWS.parse(reply.body.Value);
+                    let dataEncoded = unwrappedJWT.payloadObj.data;
+                    let dataDecoded = base64url.decode(dataEncoded);
+                    let dataJSON = JSON.parse(dataDecoded);
+                    let publicKeyObject = jsrsasign.KEYUTIL.getKey(dataJSON.publicKey);
+                    let encodedString = jwt.split('.').slice(0, 2).join('.');
+                    let sigValueHex = unwrappedJWT.sigHex;
+                    let sig = new jsrsasign.KJUR.crypto.Signature({alg: 'SHA256withECDSA'});
+                    sig.init(publicKeyObject);
+                    sig.updateString(encodedString);
+                    let isValid = sig.verify(sigValueHex);
+                    if (!isValid) {
+                      console.log('invalid JWT');
+                      resolve(false);
+                    } else {
+                      console.log('valid JWT');
+                      let queriedContact = new GraphConnectorContactData(dataJSON.guid, firstName, lastName);
+                      if (typeof dataJSON.userIDs != 'undefined' && dataJSON.userIDs != null) {
+                        queriedContact.userIDs = dataJSON.userIDs;
 
+                      }
+                      _this.contacts.push(queriedContact);
+                      resolve(true);
+                    }
                   }else {
                     console.log('Response code is not 200');
                     resolve(false);
