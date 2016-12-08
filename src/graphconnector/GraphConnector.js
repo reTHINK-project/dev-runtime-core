@@ -425,35 +425,41 @@ class GraphConnector {
               // reply should be the JSON returned from the Global Registry REST-interface
               let jwt = reply.body.Value;
               if (typeof jwt !== 'undefined') {
-                console.log('verify JWT');
-                let unwrappedJWT = jsrsasign.KJUR.jws.JWS.parse(reply.body.Value);
-                let dataEncoded = unwrappedJWT.payloadObj.data;
-                let dataDecoded = base64url.decode(dataEncoded);
-                let dataJSON = JSON.parse(dataDecoded);
-                let publicKeyObject = jsrsasign.KEYUTIL.getKey(dataJSON.publicKey);
-                let encodedString = jwt.split('.').slice(0, 2).join('.');
-                let sigValueHex = unwrappedJWT.sigHex;
-                let sig = new jsrsasign.KJUR.crypto.Signature({alg: 'SHA256withECDSA'});
-                sig.init(publicKeyObject);
-                sig.updateString(encodedString);
-                let isValid = sig.verify(sigValueHex);
-                if (!isValid) {
-                  console.log('invalid JWT');
-                  reject('Retrieved Record not valid!');
-                } else {
-                  console.log('valid JWT');
-                  let queriedContact = new GraphConnectorContactData(dataJSON.guid, '', '');
-                  if (typeof dataJSON.userIDs != 'undefined' && dataJSON.userIDs != null) {
-                    queriedContact.userIDs = dataJSON.userIDs;
 
-                    for (let i = 0; i < _this.contacts.length; i++) {
-                      if (_this.contacts[i].guid == guid) {
-                        _this.contacts[i].userIDs = dataJSON.userIDs;
+                if (reply.body.Code == 200) {
+                  console.log('verify JWT');
+                  let unwrappedJWT = jsrsasign.KJUR.jws.JWS.parse(reply.body.Value);
+                  let dataEncoded = unwrappedJWT.payloadObj.data;
+                  let dataDecoded = base64url.decode(dataEncoded);
+                  let dataJSON = JSON.parse(dataDecoded);
+                  let publicKeyObject = jsrsasign.KEYUTIL.getKey(dataJSON.publicKey);
+                  let encodedString = jwt.split('.').slice(0, 2).join('.');
+                  let sigValueHex = unwrappedJWT.sigHex;
+                  let sig = new jsrsasign.KJUR.crypto.Signature({alg: 'SHA256withECDSA'});
+                  sig.init(publicKeyObject);
+                  sig.updateString(encodedString);
+                  let isValid = sig.verify(sigValueHex);
+                  if (!isValid) {
+                    console.log('invalid JWT');
+                    reject('Retrieved Record not valid!');
+                  } else {
+                    console.log('valid JWT');
+                    let queriedContact = new GraphConnectorContactData(dataJSON.guid, '', '');
+                    if (typeof dataJSON.userIDs != 'undefined' && dataJSON.userIDs != null) {
+                      queriedContact.userIDs = dataJSON.userIDs;
+
+                      for (let i = 0; i < _this.contacts.length; i++) {
+                        if (_this.contacts[i].guid == guid) {
+                          _this.contacts[i].userIDs = dataJSON.userIDs;
+                        }
                       }
-                    }
 
+                    }
+                    resolve(queriedContact);
                   }
-                  resolve(queriedContact);
+                }else {
+                  console.log('Response code is not 200');
+                  resolve(reply.body.Description);
                 }
               } else {
                 console.log(' undefined Response');
@@ -464,6 +470,7 @@ class GraphConnector {
       });
 
   }
+
 
   /**
    * Adds a UserID for the user.
@@ -534,15 +541,55 @@ class GraphConnector {
    */
   addContact(guid, firstName, lastName) {
 
-    // TODO: what if two contacts have the same GUID?
     // TODO: reject invalid GUIDs
     let success = false;
     if (!this.guidExist(guid)) {
-      let newContact = new GraphConnectorContactData(guid, firstName, lastName);
-      this.contacts.push(newContact);
-      success = true;
+
+      let _this = this;
+
+      let msg = {
+          type: 'READ',
+          from: this._hypertyRuntimeURL + '/graph-connector',
+          to: 'global://registry/',
+          body: {guid: guid}
+        };
+      return new Promise(function(resolve, reject) {
+
+          if (_this.messageBus === undefined) {
+            reject('MessageBus not found on GraphConnector');
+          } else {
+
+            _this.messageBus.postMessage(msg, (reply) => {
+
+                console.log(reply);
+
+                // reply should be the JSON returned from the Global Registry REST-interface
+                let jwt = reply.body.Value;
+                if (typeof jwt !== 'undefined') {
+
+                  if (reply.body.Code == 200) {
+                    console.log('Response code is 200');
+                    let newContact = new GraphConnectorContactData(guid, firstName, lastName);
+                    _this.contacts.push(newContact);
+                    resolve(true);
+
+                  }else {
+                    console.log('Response code is not 200');
+                    resolve(false);
+                  }
+                } else {
+                  console.log(' undefined Response');
+                  resolve(false);
+                }
+              });
+          }
+        });
+
+    }else {
+      return new Promise(function(resolve, reject) {
+          resolve(false);
+        });
     }
-    return success;
   }
 
   /**
