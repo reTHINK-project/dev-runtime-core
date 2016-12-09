@@ -64,6 +64,9 @@ class SyncherManager {
     _this._reporters = {};
     _this._observers = {};
 
+    _this._storeDataObject = {};
+    _this._storeSubscription = {};
+
     //TODO: this should not be hardcoded!
     _this._domain = divideURL(runtimeURL).domain;
 
@@ -86,95 +89,125 @@ class SyncherManager {
       }
     });
 
-    // _this._resumeReporterListeners();
-    // _this._resumeObserverListeners();
-
+    // resume subscriptions
+    //TODO: check if it is really necessary save the subscriptions
+    // _this._resumeSubscriptions();
   }
 
   get url() { return this._url; }
 
-  _resumeObserverListeners() {
+  _storeDataObjects(url, dataObjectURL, isReporter, schema, status, initialData, children, childrenResources) {
 
-    // Get to the storageManager dataObjectObservers
-    this._storageManager.get('syncherManager:Observer').then((observers) => {
-      console.info('[storage manager observer] - Resume Subscriptions: ', observers);
-      if (!observers) return;
+    let saveObject;
+    if (!this._storeDataObject.hasOwnProperty(url) && !this._storeDataObject[url]) {
+      this._storeDataObject[url] = [];
+      saveObject = {
+        url: dataObjectURL,
+        isReporter: isReporter
+      };
+    } else {
+      saveObject = this._storeDataObject[url];
+    }
 
-      Object.keys(observers).forEach((key) => {
-        console.info(key, observers[key]);
-        let objURL = observers[key].url;
-        let childrens = observers[key].childrens;
+    if (schema) saveObject.schema = schema;
+    if (status) saveObject.status = status;
+    if (children) saveObject.children = children;
+    if (initialData) saveObject.initialData = initialData;
+    if (childrenResources) saveObject.childrenResources = childrenResources;
 
-        let observer = this._observers[objURL];
-        if (!observer) {
-          observer = new ObserverObject(this, objURL, childrens);
-          this._observers[objURL] = observer;
-        }
+    this._storeDataObject[url].push(saveObject);
 
-        //register an used hyperty subscription
-        observer.resumeSubscription(key);
-      });
-
-    }).catch((error) => {
-      console.error('Error: ', error);
-    });
+    // this._storageManager.set('syncherManager:Observer', 1, this._storeDataObject);
+    this._storageManager.set('syncherManager:ObjectURLs', 1, this._storeDataObject);
   }
 
-  _resumeReporterListeners() {
-    let reporter;
-
-    // Get to the storageManager dataObjectObservers
-    this._storageManager.get('syncherManager:Reporter').then((reporters) => {
-      if (!reporters) return;
-
-      Object.keys(reporters).forEach((key) => {
-        console.info('[storage manager reporter] - Resume Subscriptions: ', reporters);
-        let objURL = reporters[key].url;
-        let owner = reporters[key].owner;
-        let subscriptions = reporters[key].subscriptions;
-
-        reporter = new ReporterObject(this, owner, objURL);
-        reporter.resumeSubscriptions(subscriptions);
-        this._reporters[objURL] = reporter;
-
-        // reporter.resumeSubscriptions(subscriptions);
-        // reporter.forwardSubscribe([objURL, subscriptionURL]).then(() => {
-        //   this._reporters[objURL] = reporter;
-        // });
-
-      });
-
-    }).catch((error) => {
-      console.error('Error: ', error);
-    });
-  }
+  // _storeSubscriptions(dataObjectURL, hyperty, childrens) {
+  //
+  //   if (!this._storeSubscription.hasOwnProperty(dataObjectURL) && !this._storeSubscription[dataObjectURL]) {
+  //     this._storeSubscription[dataObjectURL] = [];
+  //     this._storeSubscription[dataObjectURL] = {childrens: [], subscriptions: []};
+  //   }
+  //
+  //   if (hyperty) this._storeSubscription[dataObjectURL].subscriptions.push(hyperty);
+  //   if (childrens) this._storeSubscription[dataObjectURL].childrens.concat(childrens);
+  //
+  //   this._storageManager.set('syncherManager:Subscriptions', 1, this._storeSubscription);
+  // }
+  //
+  // _resumeSubscriptions() {
+  //
+  //   this._storageManager.get('syncherManager:Subscriptions').then((objectURLs) => {
+  //
+  //     console.info('[storage manager] - Resume Subscriptions: ', objectURLs);
+  //     if (!objectURLs) return;
+  //
+  //     Object.keys(objectURLs).forEach((key) => {
+  //       console.info(key, objectURLs[key]);
+  //       let objURL = key;
+  //       let subscriptions = objectURLs[key].subscriptions;
+  //       let childrens = objectURLs[key].childrens;
+  //
+  //       let observer = this._observers[objURL];
+  //       if (!observer) {
+  //         observer = new ObserverObject(this, objURL, childrens);
+  //         this._observers[objURL] = observer;
+  //       }
+  //
+  //       subscriptions.forEach((hypertyURL) => {
+  //
+  //         //register new hyperty subscription
+  //         observer.addSubscription(hypertyURL);
+  //
+  //         console.info('[storage manager] - add the subscription hyperty url: ', hypertyURL);
+  //       });
+  //
+  //     });
+  //
+  //   });
+  // }
 
   _onRead(msg) {
     let owner = msg.from;
 
     console.log('[syncherManager - onRead] - ', msg);
 
-    this._storageManager.get('syncherManager:Observer').then((observers) => {
+    let sendResponse = (msg) => {
 
-      let selectedInfo;
-      Object.keys(observers).forEach((key) => {
-        if (key === owner) {
-          selectedInfo = observers[key];
-        }
-      });
+      //FLOW-OUT: send a provisional message response from SyncherManager -> Hyperty
+      this._bus.postMessage(msg);
+    };
+
+    this._storageManager.get('syncherManager:ObjectURLs').then((storedObjects) => {
 
       let responseMsg = {
         type: 'response', from: this._url, to: owner,
-        body: { code: 200, value: 'no objects stored' }
+        body: {}
       };
 
-      if (selectedInfo) responseMsg.body.value = selectedInfo;
+      if (storedObjects) {
+        let selectedInfo;
+        Object.keys(storedObjects).forEach((key) => {
+          if (key === owner) {
+            selectedInfo = storedObjects[key];
+          }
+        });
 
-      //FLOW-OUT: message response to Syncher -> create
-      this._bus.postMessage(responseMsg);
+        if (selectedInfo) {
+          responseMsg.body.code = 200;
+          responseMsg.body.value = selectedInfo;
+          sendResponse(responseMsg);
+        } else {
+          responseMsg.body.code = 404;
+          responseMsg.body.description = 'Not found';
+          sendResponse(responseMsg);
+        }
 
+      } else {
+        responseMsg.body.code = 404;
+        responseMsg.body.description = 'Not found';
+        sendResponse(responseMsg);
+      }
     });
-
   }
 
   //FLOW-IN: message received from Syncher -> create
@@ -259,6 +292,9 @@ class SyncherManager {
           } else {
             reporter = this._reporters[objURL];
           }
+
+          // Store for each reporter hyperty the dataObject
+          _this._storeDataObjects(owner, objURL, true, msg.body.schema, 'on', msg.body.value, null, childrens);
 
           reporter.forwardSubscribe([objURL, subscriptionURL]).then(() => {
             reporter.addChildrens(childrens).then(() => {
@@ -378,11 +414,15 @@ class SyncherManager {
               let observer = _this._observers[objURL];
               if (!observer) {
                 observer = new ObserverObject(_this, objURL, childrens);
-
-                // TODO: Talk with @pchainho about this storeData
-                observer._storeData(hypertyURL, msg.body.schema, 'on', {});
                 _this._observers[objURL] = observer;
               }
+
+              // Store for each reporter hyperty the dataObject
+              _this._storeDataObjects(hypertyURL, objURL, false, msg.body.schema, 'on', {}, null, childrens);
+
+              // Store the subscription did
+              //TODO: check if is really necessary save the subscriptions
+              // _this._storeSubscriptions(objURL, hypertyURL, childrens);
 
               //register new hyperty subscription
               observer.addSubscription(hypertyURL);

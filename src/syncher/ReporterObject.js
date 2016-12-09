@@ -20,8 +20,6 @@ class ReporterObject {
     _this._childrens = [];
     _this._childrenListeners = [];
 
-    _this._storageSubscriptions = {};
-
     _this._forwards = {};
 
     _this._allocateListeners();
@@ -43,20 +41,9 @@ class ReporterObject {
     let changeURL = _this._url + '/changes';
     _this._changeListener = _this._bus.addListener(changeURL, (msg) => {
       //TODO: what todo here? Save changes?
+      _this._parent._storeDataObjects(_this._owner, _this._url, true, msg.body.schema, 'on', msg.body.value);
       console.log('SyncherManager-' + changeURL + '-RCV: ', msg);
     });
-
-    _this._storageSubscriptions[_this._url] = {url: _this._url, owner: _this._owner, childrens: _this._childrens, subscriptions: []};
-    _this._storageManager.set('syncherManager:Reporter', 1, _this._storageSubscriptions);
-  }
-
-  resumeSubscriptions(subscriptions) {
-    let _this = this;
-    subscriptions.forEach((hypertyURL) => {
-      console.log('[Reporter Object] - resume subscriptions: ', hypertyURL);
-      _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, _this._childrens, true);
-    });
-
   }
 
   _releaseListeners() {
@@ -248,11 +235,6 @@ class ReporterObject {
           if (!_this._subscriptions[hypertyURL]) {
             _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, _this._childrens, true);
           }
-
-          let subscriptions = Object.keys(_this._subscriptions);
-          _this._storageSubscriptions[_this._url].subscriptions = subscriptions;
-          _this._storageManager.set('syncherManager:Reporter', 1, _this._storageSubscriptions);
-
         }
 
         //FLOW-OUT: subscription response sent (forward from internal Hyperty)
