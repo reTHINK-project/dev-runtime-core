@@ -41,8 +41,8 @@ class GraphConnector {
 
   /**
    * Constructs a new and empty Graph Connector.
-   * @param {string}   HypertyRuntimeURL    The Hyperty Runtime URL.
-   * @param {messageBus}    MessageBus      The Message Bus.
+   * @param {string}   hypertyRuntimeURL    The Hyperty Runtime URL.
+   * @param {messageBus}    messageBus      The Message Bus.
    */
   constructor(hypertyRuntimeURL, messageBus) {
     this.contacts = [];
@@ -59,6 +59,11 @@ class GraphConnector {
 
     this._messageBus = messageBus;
     this._hypertyRuntimeURL = hypertyRuntimeURL;
+
+    //if (!storageManager) throw new Error('storageManager is missing');
+    //this.storageManager = storageManager;
+
+    //this._loadIdentities();
   }
 
   /**
@@ -1013,6 +1018,36 @@ class GraphConnector {
 
   // TODO: exportGraphData(?){}
   // TODO: importGraphData(?){}
+
+  _loadIdentities() {
+    let _this = this;
+    return new Promise((resolve) => {
+
+        _this.storageManager.get('idModule:graphConnector').then((graphConnector) => {
+
+            if (graphConnector) {
+              _this.graphConnector = graphConnector;
+            }
+            resolve();
+          });
+      });
+  }
+
+  storeGraphConnector() {
+    let _this = this;
+
+    _this.storageManager.set('idModule:graphConnector', 0, _this.graphConnector).then(() => {
+
+        _this._messageBus.postMessage(message, (reply) => {
+            console.log('===> registerDataObject Reply: ', reply);
+            if (reply.body.code === 200) {
+              resolve('ok');
+            } else {
+              reject('error on register DataObject');
+            }
+          });
+      });
+  }
 
 }
 
