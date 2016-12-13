@@ -170,7 +170,7 @@ class RuntimeUA {
     _this.loader.runtimeFactory = _this.runtimeFactory;
 
     // Instantiate the Graph Connector
-    _this.graphConnector = new GraphConnector(_this.runtimeURL, _this.messageBus);
+    _this.graphConnector = new GraphConnector(_this.runtimeURL, _this.messageBus, _this.storageManager);
 
   }
 
