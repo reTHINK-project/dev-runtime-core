@@ -27,13 +27,13 @@ let identityModule = {
         let identityBundle = {identity: 'user://gmail.com/openidtest10', token: 'idToken'};
         identities.push(identityBundle);
         return identities;
-    }
-};
+      }
+  };
 
 let getRegistry = new Promise(function(resolve, reject) {
     let registry = new Registry(runtimeURL, appSandbox, identityModule);
     resolve(registry);
-});
+  });
 
 getRegistry.then(function(registry) {
     describe('Graph Connector', function() {
@@ -44,8 +44,8 @@ getRegistry.then(function(registry) {
                 registry.messageBus = msgbus;
                 let graphConnector = new GraphConnector(runtimeURL, msgbus);
                 expect(graphConnector.contacts.length).to.equal(0);
-            });
-        });
+              });
+          });
 
         describe('create mock address book', function() {
             let msgbus = new MessageBus(registry);
@@ -57,15 +57,15 @@ getRegistry.then(function(registry) {
             let remGUIDArr = [];
             for (let j = 0; j < 299; j++) {
 
-                // to mock GUIDs for now
-                guid = Math.floor(Math.random() * 9999999999999999999999999999999999) + 1000000000000000000000000000000000;
+              // to mock GUIDs for now
+              guid = Math.floor(Math.random() * 9999999999999999999999999999999999) + 1000000000000000000000000000000000;
 
-                firstName = randomName();
-                lastName = randomName();
-                graphConnector.addContact(guid, firstName, lastName);
-                if (j % 10 === 0) {
-                    remGUIDArr.push(guid);
-                }
+              firstName = randomName();
+              lastName = randomName();
+              graphConnector.addContact(guid, firstName, lastName);
+              if (j % 10 === 0) {
+                remGUIDArr.push(guid);
+              }
             }
             graphConnector.addContact('123', 'Alice', 'Wonderland');
             var expected = new GraphConnectorContactData('123', 'Alice', 'Wonderland');
@@ -76,18 +76,18 @@ getRegistry.then(function(registry) {
 
             it('create new GraphConnector with random contacts', function() {
                 expect(graphConnector.contacts.length).to.equal(300);
-            });
+              });
 
             it('remove some contacts from GraphConnector', function() {
                 let status;
                 for (let j = 0; j < remGUIDArr.length; j++) {
-                    status = graphConnector.removeContact(remGUIDArr[j]);
-                    expect(status).to.equal(true);
+                  status = graphConnector.removeContact(remGUIDArr[j]);
+                  expect(status).to.equal(true);
                 }
                 status = graphConnector.removeContact('4321');
                 expect(status).to.equal(false);
                 expect(graphConnector.contacts.length).to.equal(270);
-            });
+              });
 
             it('check GUID when in direct contacts', function() {
 
@@ -99,7 +99,7 @@ getRegistry.then(function(registry) {
                 expect(directContacts.length).to.equal(1);
                 expect(fofs.length).to.equal(0);
                 expect(directContacts[0]).to.eql(expected);
-            });
+              });
 
             it('setting first and last name of the owner', function() {
 
@@ -108,16 +108,16 @@ getRegistry.then(function(registry) {
                 result = graphConnector.setOwnerName('Tom');
                 expect(result).to.equal(true);
 
-            });
+              });
 
             it('test direct contacts bloom filter', function() {
 
                 graphConnector.calculateBloomFilter1Hop();
 
                 for (let i = 0; i < remGUIDArr.length; i++) {
-                    let result = graphConnector.contactsBloomFilter1Hop.test(remGUIDArr[i]);
-                    if (result) console.log(contacts);
-                    expect(result).to.equal(false);
+                  let result = graphConnector.contactsBloomFilter1Hop.test(remGUIDArr[i]);
+                  if (result) console.log(contacts);
+                  expect(result).to.equal(false);
                 }
 
                 let resultAlice = graphConnector.contactsBloomFilter1Hop.test('123');
@@ -125,7 +125,7 @@ getRegistry.then(function(registry) {
                 expect(graphConnector.contactsBloomFilter1Hop.test('absdgdghdftgh')).to.equal(false);
                 graphConnector.removeContact('123');
                 expect(graphConnector.contactsBloomFilter1Hop.test('123')).to.equal(false);
-            });
+              });
 
             it('test privacy setting for contacts', function() {
 
@@ -138,7 +138,7 @@ getRegistry.then(function(registry) {
                 graphConnector.calculateBloomFilter1Hop();
                 expect(graphConnector.contactsBloomFilter1Hop.test('123')).to.equal(false);
 
-            });
+              });
 
             it('check GUID when in friend-of-friend connection', function() {
 
@@ -164,7 +164,7 @@ getRegistry.then(function(registry) {
                 expect(fofs[0].lastName).to.eql('Wonderland');
                 expect(fofs[0].guid).to.eql('123');
 
-            });
+              });
 
             it('setting bloom filter of a given contact', function() {
                 let bf = new BloomFilter(
@@ -180,7 +180,7 @@ getRegistry.then(function(registry) {
                 expect((graphConnector.getContact('bloom123')[0].contactsBloomFilter1Hop)).to.eql(bf);
                 let lastSyncDate = graphConnector.getContact('bloom123')[0].lastSyncBloomFilter1Hop;
                 expect(typeof lastSyncDate).not.to.equal('undefined');
-            });
+              });
 
             it('editing contact (GUID, lname, fname, privacyStatus)', function() {
                 expectedEdit.privateContact = true;
@@ -194,7 +194,7 @@ getRegistry.then(function(registry) {
                 expect(result[0].lname).to.equal(expectedEdit.lname);
                 result = graphConnector.editContact('1234', 'Joey', 'Wunderlander', '1234', true);
                 expect(result[0].privateContact).to.equal(expectedEdit.privateContact);
-            });
+              });
 
             it('Adding a groupname to a contact', function() {
 
@@ -205,7 +205,7 @@ getRegistry.then(function(registry) {
                 expect(resultFalse).to.equal(false);
                 resultFalse = graphConnector.addGroupName('123456789', 'Winterfell');
                 expect(resultFalse).to.equal(false);
-            });
+              });
 
             it('Adding and removing groupname to owner', function() {
                 let res = graphConnector.addGroupName('1234567890qwertz', 'Winterfell');
@@ -214,14 +214,14 @@ getRegistry.then(function(registry) {
                 expect(res).to.equal(false);
                 res = graphConnector.removeGroupName('1234567890qwertz', 'Winterfell');
                 expect(res).to.equal(true);
-            });
+              });
 
             it('adding a residenceLocation to a contact and to owner', function() {
                 let contact = graphConnector.setLocation('123456', 'Berlin');
                 expect(contact).to.equal(true);
                 contact = graphConnector.setLocation('1234567890qwertz', 'Honolulu');
                 expect(contact).to.equal(true);
-            });
+              });
 
             it('getting all contacts with same groupName', function() {
                 graphConnector.addGroupName('123456', 'Summerfall');
@@ -229,7 +229,7 @@ getRegistry.then(function(registry) {
                 graphConnector.addGroupName('1234567890qwertz', 'Summerfall');
                 let res = graphConnector.getGroup('Summerfall');
                 expect(res.length).to.equal(3);
-            });
+              });
 
             it('getting all the group names of the user', function() {
 
@@ -240,7 +240,7 @@ getRegistry.then(function(registry) {
                 expect(result.length).to.equal(3);
                 graphConnector.removeGroupName('1234', 'SSummerfall');
 
-            });
+              });
 
             it('removing a groupname of a contact', function() {
                 graphConnector.addContact('123456', 'john', 'snow');
@@ -248,28 +248,28 @@ getRegistry.then(function(registry) {
                 let resultFalse = graphConnector.removeGroupName('123456789', 'Winterfell');
                 expect(resultTrue).to.equal(true);
                 expect(resultFalse).to.equal(false);
-            });
+              });
 
             it('removing a residenceLocation', function() {
                 let result = graphConnector.removeLocation('123456');
                 expect(result).to.equal(true);
                 result = graphConnector.removeLocation('1234567noValidGUID');
                 expect(result).to.equal(false);
-            });
+              });
 
             it('checking setActive() ', function() {
                 let result = graphConnector.setActive(true);
                 expect(result).to.equal(true);
                 result = graphConnector.setActive(false);
                 expect(result).to.equal(true);
-            });
+              });
 
             it('checking setRevoked() ', function() {
                 let result = graphConnector.setRevoked(true);
                 expect(result).to.equal(true);
                 result = graphConnector.setRevoked(false);
                 expect(result).to.equal(true);
-            });
+              });
 
             it('checking setTimeout() ', function() {
                 let timeout = new Date('October 13, 2017 11:13:00');
@@ -279,7 +279,7 @@ getRegistry.then(function(registry) {
                 timeout = new Date();
                 result = graphConnector.setTimeout(timeout);
                 expect(result).to.equal(false);
-            });
+              });
 
             it('get contact by first name', function() {
                 graphConnector.addContact('kkk', 'Ishantiw', 'abc');
@@ -289,7 +289,7 @@ getRegistry.then(function(registry) {
                 expect(result.length).to.equal(3);
 
                 //expect(result[0]).to.eql(expected);
-            });
+              });
 
             it('get contact by last name', function() {
                 graphConnector.addContact('kkklast', 'fgh', 'Joky');
@@ -299,12 +299,12 @@ getRegistry.then(function(registry) {
                 expect(result.length).to.equal(3);
 
                 ///expect(result[0]).to.eql(expected);
-            });
+              });
 
             it('get list of contacts', function() {
                 let result = graphConnector.getAllContacts();
                 expect(result.length).to.equal(graphConnector.contacts.length);
-            });
+              });
 
             it('Adding user ID to owner', function() {
 
@@ -313,14 +313,14 @@ getRegistry.then(function(registry) {
                 expect(resultTrue).to.equal(true);
                 expect(resultFalse).to.equal(false);
 
-            });
+              });
 
             it('Removing user ID of the owner', function() {
                 let resultTrue = graphConnector.removeUserID('john://facebook.com/fluffy123', 'google.com');
                 let resultFalse = graphConnector.removeUserID('john://facebook.com/fluffy123', 'google.com');
                 expect(resultTrue).to.equal(true);
                 expect(resultFalse).to.equal(false);
-            });
+              });
 
             it('Guid exists or not', function() {
                 graphConnector.addContact('guidcheck123', 'guidTest', 'guid');
@@ -328,20 +328,20 @@ getRegistry.then(function(registry) {
                 let resultFalse = graphConnector.guidExist('guidcheck321');
                 expect(resultTrue).to.equal(true);
                 expect(resultFalse).to.equal(false);
-            });
+              });
 
             it('returning the owner', function() {
                 let owner = graphConnector.getOwner();
                 owner.firstName = 'TestingOwner';
                 expect(owner.firstName).to.equal('TestingOwner');
-            });
+              });
 
             it('adding a new contact', function() {
                 let success = graphConnector.addContact('testingAdd123', 'TestingAdd', 'addcontact');
                 let unsuccess = graphConnector.addContact('testingAdd123', 'TestingAddfail', 'addcontactfail');
                 expect(success).to.equal(true);
                 expect(unsuccess).to.equal(false);
-            });
+              });
 
             it('adding userID to a contact', function() {
                 graphConnector.addContact('testingAddUSERID123', 'TestingUserID', 'adduserIDSuccess');
@@ -349,7 +349,7 @@ getRegistry.then(function(registry) {
                 let unsuccess = graphConnector.setContactUserIDs('testingAddUSERID123', 'test://facebook.com/fluffy123', 'google.com');
                 expect(success).to.equal(true);
                 expect(unsuccess).to.equal(false);
-            });
+              });
 
             it('getting userIDs of a contact', function() {
                 graphConnector.addContact('testingGETUSERID12345', 'TestingUserIDget', 'getuserIDSuccess');
@@ -360,14 +360,14 @@ getRegistry.then(function(registry) {
                 let unsuccess = graphConnector.getContactUserIDs('testingGETUSERID123456');
                 expect(success.length).to.equal(2);
                 expect(unsuccess).to.equal(false);
-            });
+              });
 
             it('Setting the user Defaults', function() {
                 graphConnector.setDefaults('a', 'b', 'c');
 
                 let success = graphConnector.setDefaults('1', '2', '3');
                 expect(success).to.equal(true);
-            });
+              });
 
             it('bloom filter tests', function() {
 
@@ -407,17 +407,17 @@ getRegistry.then(function(registry) {
 
                 f = new BloomFilter(1000, 4);
                 for (let i = 0; i < 100; ++i) {
-                    f.add(i);
+                  f.add(i);
                 }
                 expect(f.size()).to.be.closeTo(99.953102, 1e-6);
                 for (let i = 0; i < 1000; ++i) {
-                    f.add(i);
+                  f.add(i);
                 }
                 expect(f.size()).to.be.closeTo(950.424571, 1e-6);
 
-            });
+              });
 
-        });
+          });
 
         describe('GUID', function() {
             let msgbus = new MessageBus(registry);
@@ -434,7 +434,7 @@ getRegistry.then(function(registry) {
 
                 expect(res.length).to.equal(16);
 
-            });
+              });
 
             it('GUID re-generation', function(done) {
 
@@ -453,13 +453,13 @@ getRegistry.then(function(registry) {
                             responseCode: 200,
                             Value: jwt1,
                             errorCode: 0
-                        }
-                    };
+                          }
+                      };
 
                     graphConnector2.messageBus.postMessage(message, (reply) => {
                         console.log('Reply GUID re-generation: ', reply);
-                    });
-                });
+                      });
+                  });
 
                 expect(graphConnector2.useGUID(mnemonic1).then(function(response) {
 
@@ -475,10 +475,10 @@ getRegistry.then(function(registry) {
                     let isValid = sig.verify(sigValueHex);
 
                     return isValid;
-                })).to.be.fulfilled.and.eventually.equal(true).and.notify(done);
+                  })).to.be.fulfilled.and.eventually.equal(true).and.notify(done);
 
-            });
-        });
+              });
+          });
 
         describe('Global Registry Connection - send', function() {
             let msgbus = new MessageBus(registry);
@@ -502,20 +502,20 @@ getRegistry.then(function(registry) {
                             message: 'request was performed successfully',
                             responseCode: 200,
                             errorCode: 0
-                        }
-                    };
+                          }
+                      };
 
                     graphConnector1.messageBus.postMessage(message, (reply) => {
                         console.log('Reply GRC - send: ', reply);
-                    });
-                });
+                      });
+                  });
 
                 expect(graphConnector1.sendGlobalRegistryRecord(jwt1).then(function(response) {
                     return response;
-                })).to.be.fulfilled.and.eventually.equal(200).and.notify(done);
+                  })).to.be.fulfilled.and.eventually.equal(200).and.notify(done);
 
-            });
-        });
+              });
+          });
 
         describe('Global Registry Connection - use GUID', function() {
             let msgbus = new MessageBus(registry);
@@ -541,20 +541,20 @@ getRegistry.then(function(registry) {
                             responseCode: 200,
                             Value: jwt1,
                             errorCode: 0
-                        }
-                    };
+                          }
+                      };
 
                     graphConnector2.messageBus.postMessage(message, (reply) => {
                         console.log('Reply GRC - use GUID: ', reply);
-                    });
-                });
+                      });
+                  });
 
                 expect(graphConnector2.useGUID(mnemonic1).then(function(response) {
                     return graphConnector2.globalRegistryRecord;
-                })).to.be.fulfilled.and.eventually.eql(grr1).and.notify(done);
-            });
+                  })).to.be.fulfilled.and.eventually.eql(grr1).and.notify(done);
+              });
 
-        });
+          });
 
         describe('Querying Global Registry', function() {
             let msgbus = new MessageBus(registry);
@@ -581,35 +581,35 @@ getRegistry.then(function(registry) {
                             responseCode: 200,
                             Value: jwt1,
                             errorCode: 0
-                        }
-                    };
+                          }
+                      };
 
                     graphConnector2.messageBus.postMessage(message, (reply) => {
                         console.log('Reply QGR - query: ', reply);
-                    });
-                });
+                      });
+                  });
 
                 expect(graphConnector2.queryGlobalRegistry(guid1).then(function(response) {
                     return response.guid;
-                })).to.be.fulfilled.and.eventually.equal(guid1).and.notify(done);
+                  })).to.be.fulfilled.and.eventually.equal(guid1).and.notify(done);
 
-            });
+              });
 
-        });
+          });
 
-    });
-});
+      });
+  });
 
 function randomName() {
-    let text = '';
-    let firstLetter = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    let restLetters = 'abcdefghijklmnopqrstuvwxyz';
+  let text = '';
+  let firstLetter = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  let restLetters = 'abcdefghijklmnopqrstuvwxyz';
 
-    text += firstLetter.charAt(Math.floor(Math.random() * firstLetter.length));
+  text += firstLetter.charAt(Math.floor(Math.random() * firstLetter.length));
 
-    for (let i = 0; i < 4; i++) {
-        text += restLetters.charAt(Math.floor(Math.random() * restLetters.length));
-    }
+  for (let i = 0; i < 4; i++) {
+    text += restLetters.charAt(Math.floor(Math.random() * restLetters.length));
+  }
 
-    return text;
+  return text;
 }
