@@ -24,7 +24,11 @@ module.exports = function(config) {
 
     // list of files to exclude
     exclude: [
+<<<<<<< HEAD
       //'test/**/GraphConnector.spec.js'
+=======
+      //'test/GraphConnector.spec.js'
+>>>>>>> 35895a8c2d55f49894b4852f217c87982844bedc
     ],
 
     // preprocess matching files before serving them to the browser
