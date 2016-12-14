@@ -14,50 +14,51 @@ import bip39 from 'bip39';
 import jsrsasign from 'jsrsasign';
 import Registry from '../src/registry/Registry';
 import MessageBus from '../src/bus/MessageBus';
-import { runtimeFactory } from './resources/runtimeFactory';
+import RuntimeFactory from '../resources/RuntimeFactory';
 
 // variables
 let runtimeURL = 'hyperty-runtime://ua.pt/123';
+let runtimeFactory = new RuntimeFactory();
 let appSandbox = runtimeFactory.createAppSandbox();
 
 let identityModule = {
-    getIdentities: () => {
-        let identities = [];
-        let identityBundle = {identity: 'user://gmail.com/openidtest10', token: 'idToken'};
-        identities.push(identityBundle);
-        return identities;
-      }
-  };
+  getIdentities: () => {
+    let identities = [];
+    let identityBundle = {identity: 'user://gmail.com/openidtest10', token: 'idToken'};
+    identities.push(identityBundle);
+    return identities;
+  }
+};
 
 let getRegistry = new Promise(function(resolve, reject) {
-    let registry = new Registry(runtimeURL, appSandbox, identityModule);
-    resolve(registry);
-  });
+  let registry = new Registry(runtimeURL, appSandbox, identityModule);
+  resolve(registry);
+});
 
 getRegistry.then(function(registry) {
-    describe('Graph Connector', function() {
+  describe('Graph Connector', function() {
 
-        describe('construction', function() {
-            it('create new GraphConnector instance with zero contacts', function() {
-                let msgbus = new MessageBus(registry);
-                registry.messageBus = msgbus;
-                let graphConnector = new GraphConnector(runtimeURL, msgbus);
-                expect(graphConnector.contacts.length).to.equal(0);
-              });
-          });
+    describe('construction', function() {
+      it('create new GraphConnector instance with zero contacts', function() {
+        let msgbus = new MessageBus(registry);
+        registry.messageBus = msgbus;
+        let graphConnector = new GraphConnector(runtimeURL, msgbus);
+        expect(graphConnector.contacts.length).to.equal(0);
+      });
+    });
 
-        describe('create mock address book', function() {
-            let msgbus = new MessageBus(registry);
-            registry.messageBus = msgbus;
-            var graphConnector = new GraphConnector(runtimeURL, msgbus);
-            let guid;
-            let firstName;
-            let lastName;
-            let remGUIDArr = [];
-            for (let j = 0; j < 299; j++) {
+    describe('create mock address book', function() {
+      let msgbus = new MessageBus(registry);
+      registry.messageBus = msgbus;
+      var graphConnector = new GraphConnector(runtimeURL, msgbus);
+      let guid;
+      let firstName;
+      let lastName;
+      let remGUIDArr = [];
+      for (let j = 0; j < 299; j++) {
 
-              // to mock GUIDs for now
-              guid = Math.floor(Math.random() * 9999999999999999999999999999999999) + 1000000000000000000000000000000000;
+        // to mock GUIDs for now
+        guid = Math.floor(Math.random() * 9999999999999999999999999999999999) + 1000000000000000000000000000000000;
 
               firstName = randomName();
               lastName = randomName();
