@@ -117,7 +117,6 @@ export function getUserEmailFromURL(userURL) {
   return url.identity.replace('/', '') + '@' + url.domain; // identity field has '/exampleID' instead of 'exampleID'
 }
 
-
 /**
  * Check if the user identifier is already in the URL format, if not, convert to URL format
  * @param  {string}   identifier  user identifier
@@ -148,6 +147,13 @@ export function isDataObjectURL(url) {
   let urlSchema = splitURL[0];
 
   return schemasToIgnore.indexOf(urlSchema) === -1;
+}
+
+export function isLegacy(url) {
+  if (url.split('@').length > 1)
+    return true;
+  else
+    return false;
 }
 
 export function isURL(url) {
@@ -229,6 +235,9 @@ export function getUserIdentityDomain(url) {
   let dividedURL = divideURL(url);
   let splitedDomain = dividedURL.domain.split('.');
   let splitedLength = splitedDomain.length;
+  if (splitedLength == 1) {
+    return splitedDomain[splitedLength - 1];
+  }
   let domain = splitedDomain[splitedLength - 2] + '.' + splitedDomain[splitedLength - 1];
   return domain;
 }

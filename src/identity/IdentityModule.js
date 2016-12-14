@@ -1,5 +1,5 @@
 
-import {divideURL, getUserURLFromEmail, getUserEmailFromURL, isDataObjectURL, convertToUserURL, getUserIdentityDomain} from '../utils/utils.js';
+import {divideURL, getUserURLFromEmail, getUserEmailFromURL, isDataObjectURL, convertToUserURL, getUserIdentityDomain, isLegacy} from '../utils/utils.js';
 import Identity from './Identity';
 import Crypto from './Crypto';
 import GuiFake from './GuiFake';
@@ -169,38 +169,35 @@ class IdentityModule {
   getToken(hypertyURL, toUrl) {
     let _this = this;
     return new Promise(function(resolve, reject) {
-
+      console.log('from->', hypertyURL, '  to->', toUrl);
       if (toUrl && toUrl.split('@').length > 1) {
         console.log('toUrl', toUrl);
         _this.registry.isLegacy(toUrl).then(function(result) {
           console.log('FROM isLEGACY:', result);
           if (result) {
-            let urlSplit = toUrl.split('.');
-            let length = urlSplit.length;
-            let domainToCheck = urlSplit[length - 2] + '.' + urlSplit[length - 1];
+            let token = _this.getAccessToken(toUrl);
+            if (token)
+              return resolve(token);
 
-            for (let index in _this.identities) {
-              let identity = _this.identities[index];
-
-              if (identity.hasOwnProperty('interworking') && identity.interworking.domain === domainToCheck) {
-                return resolve(identity.interworking.access_token);
-              }
-            }
             console.log('NO Identity.. Login now');
             let domain = getUserIdentityDomain(toUrl);
+            console.log('From userIdentityDomain domain->', domain);
             _this.callGenerateMethods(domain).then((value) => {
-              resolve(value);
+              console.log('sucess CallGeneratemethods');
+              return resolve(value);
             }, (err) => {
-              reject(err);
+              console.log('error CallGeneratemethods');
+              return reject(err);
+            });
+          } else {
+            _this.getIdToken(hypertyURL).then(function(identity) {
+              console.log('from getIdToken', identity);
+              return resolve(identity);
+            }).catch(function(error) {
+              console.error('error on getToken', error);
+              return reject(error);
             });
           }
-          _this.getIdToken(hypertyURL).then(function(identity) {
-            console.log('from getIdToken', identity);
-            return resolve(identity);
-          }).catch(function(error) {
-            console.error('error on getToken', error);
-            return reject(error);
-          });
         });
       } else {
         _this.getIdToken(hypertyURL).then(function(identity) {
@@ -247,6 +244,21 @@ class IdentityModule {
         }
       }
     });
+  }
+
+  getAccessToken(url) {
+    let _this = this;
+    let urlSplit = url.split('.');
+    let length = urlSplit.length;
+    let domainToCheck = urlSplit[length - 2] + '.' + urlSplit[length - 1];
+
+    for (let index in _this.identities) {
+      let identity = _this.identities[index];
+      if (identity.hasOwnProperty('interworking') && identity.interworking.domain === domainToCheck) {
+        return identity.interworking.access_token;
+      }
+    }
+    return null;
   }
 
   getIdentitiesToChoose() {
@@ -726,6 +738,7 @@ class IdentityModule {
       }
 
       let isToDataObject = isDataObjectURL(dataObjectURL);
+      let isToLegacyIdentity = isLegacy(message.to);
       let isFromHyperty = divideURL(message.from).type === 'hyperty';
       let isToHyperty = divideURL(message.to).type === 'hyperty';
 
@@ -733,7 +746,9 @@ class IdentityModule {
         resolve(message);
       }
 
-      if (isFromHyperty && isToHyperty) {
+      if (isToLegacyIdentity) {
+        resolve(message);
+      } else if (isFromHyperty && isToHyperty) {
         let userURL = _this._registry.getHypertyOwner(message.from);
         if (userURL) {
 
@@ -786,7 +801,7 @@ class IdentityModule {
         //if no key exists, create a new one if is the reporter of dataObject
         if (!dataObjectKey) {
           let isHypertyReporter = _this.registry.getReporterURLSynchonous(dataObjectURL);
-
+          console.log('isHypertyReporter:', isHypertyReporter);
           // if the hyperty is the reporter of the dataObject then generates a session key
           if (isHypertyReporter && isHypertyReporter === message.from) {
 

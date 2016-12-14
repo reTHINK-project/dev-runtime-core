@@ -24,7 +24,7 @@ import AddressAllocation from '../allocation/AddressAllocation';
 import HypertyInstance from './HypertyInstance';
 
 import {MessageFactory} from 'service-framework/dist/MessageFactory';
-import {divideURL, isHypertyURL, isURL, isUserURL, generateGUID, getUserIdentityDomain} from '../utils/utils.js';
+import {divideURL, isHypertyURL, isURL, isUserURL, generateGUID, getUserIdentityDomain, isLegacy} from '../utils/utils.js';
 
 import Discovery from './Discovery';
 import DiscoveryServiceFramework from './DiscoveryServiceFramework';
@@ -78,6 +78,7 @@ class Registry {
 
     _this.hypertiesListToRemove = {};
     _this.hypertiesList = [];
+    _this.idpLegacyProxyList = {};
     _this.protostubsList = {};
     _this.idpProxyList = {};
     _this.dataObjectList = {};
@@ -1202,6 +1203,11 @@ class Registry {
         domainUrl = _this._domain;
       }
 
+      if (isLegacy(domainUrl)) {
+        domainUrl = getUserIdentityDomain(domainUrl);
+      }
+      console.log('domainUrl:', domainUrl);
+
       if (!domainUrl.indexOf('msg-node.') || !domainUrl.indexOf('registry.')) {
         domainUrl = domainUrl.substring(domainUrl.indexOf('.') + 1);
       }
@@ -1214,7 +1220,7 @@ class Registry {
       }
 
       if (registredComponent && registredComponent.hasOwnProperty('status') && registredComponent.status === STATUS.DEPLOYED) {
-        console.info('Resolved: ', registredComponent.url);
+        console.info('TESTING Resolved: ', registredComponent.url);
         resolve(registredComponent.url);
       } else {
         if (type === 'domain-idp') {
@@ -1243,9 +1249,7 @@ class Registry {
             reject(reason);
           });
         }
-
       }
-
     });
   }
 
@@ -1257,17 +1261,27 @@ class Registry {
   isLegacy(url) {
     let _this = this;
     return new Promise((resolve, reject) => {
-
+      console.log('ON Legacy');
       let domain = getUserIdentityDomain(url);
+      console.log('ON Legacy:', domain);
+      if (_this.idpLegacyProxyList.hasOwnProperty(domain)) {
+        let result = _this.idpLegacyProxyList[domain];
+        if (result.interworking)
+          return resolve(result.interworking);
+        else
+          return resolve(false);
+      }
+
       _this._loader.descriptors.getIdpProxyDescriptor(domain).then((result) => {
           console.log('Getting stub descriptor:', result);
+          _this.idpLegacyProxyList[domain] = result;
           if (result.interworking)
             resolve(result.interworking);
           else
             resolve(false);
         }).catch((reason) => {
           console.log('problem loading stub for domain:', domain);
-          reject(reason);
+          resolve(false);
         });
     });
   }
