@@ -180,10 +180,12 @@ describe('SyncherManager', function() {
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
       console.log('on-create-notify: ', notifyEvent);
+
       notifyEvent.ack();
 
       sync2.subscribe(schemaURL, notifyEvent.url).then((doo) => {
-        console.log('on-subscribe-reply');
+        console.log('on-subscribe-reply', doo);
+
         doo.onChange('*', (changeEvent) => {
           console.log('on-change: ', JSON.stringify(changeEvent));
           expect(changeEvent).to.contain.all.keys({ cType: 'add', oType: 'object', field: 'test', data: ['a', 'b', 'c'] });
@@ -195,7 +197,7 @@ describe('SyncherManager', function() {
 
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
     sync1.create(schemaURL, [], initialData).then((dor) => {
-      console.log('on-create-reply');
+      console.log('on-create-reply', dor);
       dor.inviteObservers([hyperURL2]);
 
       dor.onSubscription((subscribeEvent) => {
@@ -207,6 +209,42 @@ describe('SyncherManager', function() {
         dor.data.test = ['a', 'b', 'c'];
       });
     });
+  });
+
+  it.skip('should resume the connection', function(done) {
+
+    let bus = new MessageBus();
+    bus._onMessage((a) => {
+      console.log(a);
+    });
+
+    bus._onPostMessage = (msg) => {
+      console.log('_onPostMessage: ', msg);
+      msgNodeResponseFunc(bus, msg);
+    };
+
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator);
+
+    let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
+    sync2.resume({schema: schemaURL}).then((result) => {
+      console.log('resume');
+    });
+
+    let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
+    sync1.create(schemaURL, [], initialData).then((dor) => {
+      console.log('on-create-resume-reply', dor);
+      dor.inviteObservers([hyperURL2]);
+
+      dor.onSubscription((subscribeEvent) => {
+        console.log('on-resume-subscribe: ', subscribeEvent);
+
+        //we may have some problems in the time sequence here.
+        //change-msg can reach the observer first
+        subscribeEvent.accept();
+        dor.data.test = ['a', 'b', 'c'];
+      });
+    });
+
   });
 
   it('verify produced sync messages', function(done) {

@@ -81,7 +81,6 @@ class SyncherManager {
     bus.addListener(_this._url, (msg) => {
       console.log('SyncherManager-RCV: ', msg);
       switch (msg.type) {
-        case 'read': _this._onRead(msg); break;
         case 'create': _this._onCreate(msg); break;
         case 'delete': _this._onDelete(msg); break;
         case 'subscribe': _this._onLocalSubscribe(msg); break;
@@ -89,14 +88,11 @@ class SyncherManager {
       }
     });
 
-    // resume subscriptions
-    //TODO: check if it is really necessary save the subscriptions
-    // _this._resumeSubscriptions();
   }
 
   get url() { return this._url; }
 
-  _storeDataObjects(url, dataObjectURL, isReporter, schema, status, initialData, children, childrenResources) {
+  _storeDataObjects(url, dataObjectURL, isReporter, schema, status, initialData, children, childrenResources, subscriberUser) {
 
     let saveObject;
     if (!this._storeDataObject.hasOwnProperty(url) && !this._storeDataObject[url]) {
@@ -113,6 +109,7 @@ class SyncherManager {
     if (status) saveObject.status = status;
     if (children) saveObject.children = children;
     if (initialData) saveObject.initialData = initialData;
+    if (subscriberUser) saveObject.subscriberUser = subscriberUser;
     if (childrenResources) saveObject.childrenResources = childrenResources;
 
     this._storeDataObject[url].push(saveObject);
@@ -133,16 +130,17 @@ class SyncherManager {
   //
   //   this._storageManager.set('syncherManager:Subscriptions', 1, this._storeSubscription);
   // }
-  //
-  // _resumeSubscriptions() {
+
+  // _resumeSubscription(objectURL) {
   //
   //   this._storageManager.get('syncherManager:Subscriptions').then((objectURLs) => {
   //
-  //     console.info('[storage manager] - Resume Subscriptions: ', objectURLs);
+  //     console.info('[storage manager] - Resume Subscriptions: ', objectURLs, objectURL);
   //     if (!objectURLs) return;
   //
-  //     Object.keys(objectURLs).forEach((key) => {
-  //       console.info(key, objectURLs[key]);
+  //     Object.keys(objectURLs).filter((key) => {
+  //       return key === objectURL;
+  //     }).forEach((key) => {
   //       let objURL = key;
   //       let subscriptions = objectURLs[key].subscriptions;
   //       let childrens = objectURLs[key].childrens;
@@ -154,61 +152,74 @@ class SyncherManager {
   //       }
   //
   //       subscriptions.forEach((hypertyURL) => {
-  //
   //         //register new hyperty subscription
   //         observer.addSubscription(hypertyURL);
-  //
   //         console.info('[storage manager] - add the subscription hyperty url: ', hypertyURL);
   //       });
-  //
   //     });
-  //
   //   });
   // }
 
-  _onRead(msg) {
-    let owner = msg.from;
-
-    console.log('[syncherManager - onRead] - ', msg);
-
-    let sendResponse = (msg) => {
-
-      //FLOW-OUT: send a provisional message response from SyncherManager -> Hyperty
-      this._bus.postMessage(msg);
-    };
-
-    this._storageManager.get('syncherManager:ObjectURLs').then((storedObjects) => {
-
-      let responseMsg = {
-        type: 'response', from: this._url, to: owner,
-        body: {}
-      };
-
-      if (storedObjects) {
-        let selectedInfo;
-        Object.keys(storedObjects).forEach((key) => {
-          if (key === owner) {
-            selectedInfo = storedObjects[key];
-          }
-        });
-
-        if (selectedInfo) {
-          responseMsg.body.code = 200;
-          responseMsg.body.value = selectedInfo;
-          sendResponse(responseMsg);
-        } else {
-          responseMsg.body.code = 404;
-          responseMsg.body.description = 'Not found';
-          sendResponse(responseMsg);
-        }
-
-      } else {
-        responseMsg.body.code = 404;
-        responseMsg.body.description = 'Not found';
-        sendResponse(responseMsg);
-      }
-    });
-  }
+  // _onRead(msg) {
+  //   let owner = msg.from;
+  //
+  //   console.log('[syncherManager - onRead] - ', msg);
+  //
+  //   let sendResponse = (msg) => {
+  //
+  //     //FLOW-OUT: send a provisional message response from SyncherManager -> Hyperty
+  //     this._bus.postMessage(msg, (reply) => {
+  //
+  //       //forward to hyperty:
+  //       reply.id = msg.id;
+  //       reply.from = msg.to;
+  //       reply.to = msg.from;
+  //       this._bus.postMessage(reply);
+  //
+  //     });
+  //   };
+  //
+  //   let noResults = (msg) => {
+  //     msg.body.code = 404;
+  //     msg.body.description = 'Not found';
+  //     sendResponse(msg);
+  //   };
+  //
+  //   this._storageManager.get('syncherManager:ObjectURLs').then((storedObjects) => {
+  //
+  //     let responseMsg = {
+  //       type: 'response', from: this._url, to: owner,
+  //       body: {}
+  //     };
+  //
+  //     if (storedObjects) {
+  //       let selectedInfo;
+  //       Object.keys(storedObjects).forEach((key) => {
+  //         if (key === owner) {
+  //           selectedInfo = storedObjects[key];
+  //         }
+  //       });
+  //
+  //       if (selectedInfo) {
+  //
+  //         // for (let i = 0; i < selectedInfo.length; i++) {
+  //         //   this._resumeSubscription(selectedInfo[i].url);
+  //         // }
+  //
+  //         responseMsg.body.code = 200;
+  //         responseMsg.body.value = selectedInfo;
+  //
+  //         sendResponse(responseMsg);
+  //
+  //       } else {
+  //         noResults();
+  //       }
+  //
+  //     } else {
+  //       noResults();
+  //     }
+  //   });
+  // }
 
   //FLOW-IN: message received from Syncher -> create
   _onCreate(msg) {
@@ -294,7 +305,7 @@ class SyncherManager {
           }
 
           // Store for each reporter hyperty the dataObject
-          _this._storeDataObjects(owner, objURL, true, msg.body.schema, 'on', msg.body.value, null, childrens);
+          _this._storeDataObjects(owner, objURL, true, msg.body.schema, 'on', msg.body.value, null, childrens, msg.body.identity);
 
           reporter.forwardSubscribe([objURL, subscriptionURL]).then(() => {
             reporter.addChildrens(childrens).then(() => {
@@ -338,7 +349,7 @@ class SyncherManager {
       //FLOW-OUT: send invites to list of remote Syncher -> _onRemoteCreate -> onNotification
       _this._bus.postMessage({
         type: 'create', from: objSubscriptorURL, to: hypertyURL,
-        body: { identity: msg.body.identity, source: msg.from, value: msg.body.value, schema: msg.body.scheme }
+        body: { identity: msg.body.identity, source: msg.from, value: msg.body.value, schema: msg.body.schema }
       });
     });
   }
@@ -366,12 +377,8 @@ class SyncherManager {
   _onLocalSubscribe(msg) {
     let _this = this;
 
-    let hypertyURL = msg.from;
     let objURL = msg.body.resource;
-    let objURLSubscription = objURL + '/subscription';
     let childBaseURL = objURL + '/children/';
-
-    let domain = divideURL(objURL).domain;
 
     //get schema from catalogue and parse -> (children)
     _this._catalog.getDataSchemaDescriptor(msg.body.schema).then((descriptor) => {
@@ -383,68 +390,89 @@ class SyncherManager {
       subscriptions.push(objURL + '/changes');
       childrens.forEach((child) => subscriptions.push(childBaseURL + child));
 
-      //FLOW-OUT: subscribe message to the msg-node, registering listeners on the broker
-      let nodeSubscribeMsg = {
-        type: 'subscribe', from: _this._url, to: 'domain://msg-node.' + domain + '/sm',
-        body: { identity: msg.body.identity, subscribe: subscriptions, source: hypertyURL }
-      };
+      // TODO: filter the msg.body.. criteria to find some stored data
 
-      //subscribe in msg-node
-      _this._bus.postMessage(nodeSubscribeMsg, (reply) => {
-        console.log('node-subscribe-response(observer): ', reply);
-        if (reply.body.code === 200) {
-
-          //FLOW-OUT: reply with provisional response
-          _this._bus.postMessage({
-            id: msg.id, type: 'response', from: msg.to, to: hypertyURL,
-            body: { code: 100, childrenResources: childrens }
-          });
-
-          //FLOW-OUT: subscribe message to remote ReporterObject -> _onRemoteSubscribe
-          let objSubscribeMsg = {
-            type: 'subscribe', from: _this._url, to: objURLSubscription,
-            body: { identity: nodeSubscribeMsg.body.identity, subscriber: hypertyURL }
-          };
-
-          //subscribe to reporter SM
-          _this._bus.postMessage(objSubscribeMsg, (reply) => {
-            console.log('reporter-subscribe-response: ', reply);
-            if (reply.body.code === 200) {
-
-              let observer = _this._observers[objURL];
-              if (!observer) {
-                observer = new ObserverObject(_this, objURL, childrens);
-                _this._observers[objURL] = observer;
-              }
-
-              // Store for each reporter hyperty the dataObject
-              _this._storeDataObjects(hypertyURL, objURL, false, msg.body.schema, 'on', {}, null, childrens);
-
-              // Store the subscription did
-              //TODO: check if is really necessary save the subscriptions
-              // _this._storeSubscriptions(objURL, hypertyURL, childrens);
-
-              //register new hyperty subscription
-              observer.addSubscription(hypertyURL);
-
-              //forward to hyperty:
-              reply.id = msg.id;
-              reply.from = _this._url;
-              reply.to = hypertyURL;
-              this._bus.postMessage(reply);
-
-            }
-          });
-
-        } else {
-          //listener rejected
-          _this._bus.postMessage({
-            id: msg.id, type: 'response', from: msg.to, to: hypertyURL,
-            body: reply.body
-          });
-        }
-      });
+      this._newSubscription(msg, subscriptions, childrens);
     });
+  }
+
+  _newSubscription(msg, subscriptions, childrens) {
+    let _this = this;
+
+    let objURL = msg.body.resource;
+
+    let hypertyURL = msg.from;
+    let domain = divideURL(objURL).domain;
+    let objURLSubscription = objURL + '/subscription';
+
+    //FLOW-OUT: subscribe message to the msg-node, registering listeners on the broker
+    let nodeSubscribeMsg = {
+      type: 'subscribe', from: _this._url, to: 'domain://msg-node.' + domain + '/sm',
+      body: { identity: msg.body.identity, subscribe: subscriptions, source: hypertyURL }
+    };
+
+    //subscribe in msg-node
+    _this._bus.postMessage(nodeSubscribeMsg, (reply) => {
+      console.log('node-subscribe-response(observer): ', reply);
+      if (reply.body.code === 200) {
+
+        //FLOW-OUT: reply with provisional response
+        _this._bus.postMessage({
+          id: msg.id, type: 'response', from: msg.to, to: hypertyURL,
+          body: { code: 100, childrenResources: childrens, schema: msg.body.schema, resource: msg.body.resource }
+        });
+
+        //FLOW-OUT: subscribe message to remote ReporterObject -> _onRemoteSubscribe
+        let objSubscribeMsg = {
+          type: 'subscribe', from: _this._url, to: objURLSubscription,
+          body: { identity: nodeSubscribeMsg.body.identity, subscriber: hypertyURL }
+        };
+
+        //subscribe to reporter SM
+        _this._bus.postMessage(objSubscribeMsg, (reply) => {
+          console.log('reporter-subscribe-response: ', reply);
+          if (reply.body.code === 200) {
+
+            let observer = _this._observers[objURL];
+            if (!observer) {
+              observer = new ObserverObject(_this, objURL, childrens);
+              _this._observers[objURL] = observer;
+            }
+
+            // Store for each reporter hyperty the dataObject
+            _this._storeDataObjects(hypertyURL, objURL, false, msg.body.schema, 'on', {}, null, childrens, msg.body.identity);
+
+            // Store the subscription did
+            //TODO: check if is really necessary save the subscriptions
+            // _this._storeSubscriptions(objURL, hypertyURL, childrens);
+
+            //register new hyperty subscription
+            observer.addSubscription(hypertyURL);
+
+            //forward to hyperty:
+            reply.id = msg.id;
+            reply.from = _this._url;
+            reply.to = hypertyURL;
+            reply.body.schema = msg.body.schema;
+            reply.body.resource = msg.body.resource;
+            this._bus.postMessage(reply);
+
+          }
+        });
+
+      } else {
+        //listener rejected
+        _this._bus.postMessage({
+          id: msg.id, type: 'response', from: msg.to, to: hypertyURL,
+          body: reply.body
+        });
+      }
+    });
+
+  }
+
+  _reuseSubscription() {
+
   }
 
   //FLOW-IN: message received from local DataObjectObserver -> unsubscribe
