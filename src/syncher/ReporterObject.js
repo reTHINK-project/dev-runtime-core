@@ -41,7 +41,7 @@ class ReporterObject {
     let changeURL = _this._url + '/changes';
     _this._changeListener = _this._bus.addListener(changeURL, (msg) => {
       //TODO: what todo here? Save changes?
-      _this._parent._storeDataObjects(_this._owner, _this._url, true, msg.body.schema, 'on', msg.body.value);
+      _this._parent._storeDataObjects(_this._url, _this._owner, true, msg.body.schema, 'on', msg.body.value);
       console.log('SyncherManager-' + changeURL + '-RCV: ', msg);
     });
   }
@@ -209,13 +209,16 @@ class ReporterObject {
 
     //validate if subscription already exists?
     if (_this._subscriptions[hypertyURL]) {
-      let errorMsg = {
-        id: msg.id, type: 'response', from: msg.to, to: hypertyURL,
-        body: { code: 500, desc: 'Subscription for (' + _this._url + ' : ' +  hypertyURL + ') already exists!' }
-      };
+      // let errorMsg = {
+      //   id: msg.id, type: 'response', from: msg.to, to: hypertyURL,
+      //   body: { code: 500, desc: 'Subscription for (' + _this._url + ' : ' +  hypertyURL + ') already exists!' }
+      // };
+      //
+      // _this._bus.postMessage(errorMsg);
+      // return;
 
-      _this._bus.postMessage(errorMsg);
-      return;
+      // new version because of reusage
+      _this._subscriptions[hypertyURL]._releaseListeners();
     }
 
     //ask to subscribe to Syncher? (depends on the operation mode)

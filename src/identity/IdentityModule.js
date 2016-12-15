@@ -1301,6 +1301,8 @@ class IdentityModule {
           let dataObjectURL;
           let receiverAcknowledgeMsg;
 
+          console.log('[reporterSessionKey] - decryptAES: ', chatKeys.keys.hypertyToSessionKey, encryptedValue, iv);
+
           _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, encryptedValue, iv).then(decryptedValue => {
 
             parsedValue = JSON.parse(decryptedValue);

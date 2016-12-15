@@ -211,7 +211,7 @@ describe('SyncherManager', function() {
     });
   });
 
-  it.skip('should resume the connection', function(done) {
+  it('should resume the connection', function(done) {
 
     let bus = new MessageBus();
     bus._onMessage((a) => {
@@ -226,8 +226,17 @@ describe('SyncherManager', function() {
     new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
-    sync2.resume({schema: schemaURL}).then((result) => {
-      console.log('resume');
+    sync2.resumeObservers({}).then((doo) => {
+
+      console.log('on-subscribe-reply', doo);
+
+      doo.onChange('*', (changeEvent) => {
+        console.log('on-change: ', JSON.stringify(changeEvent));
+        expect(changeEvent).to.contain.all.keys({ cType: 'add', oType: 'object', field: 'test', data: ['a', 'b', 'c'] });
+        expect(doo.data).to.contain.all.keys({ communication: { name: 'chat-x' }, x: 10, y: 10, test: ['a', 'b', 'c'] });
+        done();
+      });
+
     });
 
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
