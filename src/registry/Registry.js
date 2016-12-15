@@ -820,10 +820,30 @@ class Registry {
       if (!hyperty) {
         console.log('[Registry - checkHypertyP2PHandler] - Hyperty: ', hyperty);
 
-        // TODO discoveryPerURL
-        reject('checkHypertyP2PHandler don\'t find any hyperty');
-      }
+        let message = {
+          type: 'read',
+          from: _this.registryURL,
+          to: 'domain://registry.' + _this._domain + '/',
+          body: {
+              resource: hypertyURL
+            }
+        };
 
+        _this._messageBus.postMessage(message, (reply) => {
+          console.log('discover hyperty per url reply', reply);
+          if ('value' in reply.body) {
+            let resolvedHyperty = reply.body.value;
+
+            resolve({
+              p2pHandler: resolvedHyperty.p2pHandler,
+              p2pRequester: resolvedHyperty.p2pRequester,
+              runtimeURL: resolvedHyperty.runtimeURL
+            });
+          } else {
+            reject('Hyperty with P2PHandler not found', reply.body.code);
+          }
+        });
+      }
     });
   }
 
