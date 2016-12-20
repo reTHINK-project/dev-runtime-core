@@ -187,18 +187,18 @@ class GraphConnector {
                   let isValid = sig.verify(sigValueHex);
 
                   if (!isValid) {
-                      reject('Retrieved Record not valid!');
+                    reject('Retrieved Record not valid!');
                   } else {
-                      if (typeof dataJSON.userIDs != 'undefined' && dataJSON.userIDs != null) {
-                          _this.globalRegistryRecord.userIDs = dataJSON.userIDs;
-                      }
-                      _this.globalRegistryRecord.lastUpdate = dataJSON.lastUpdate;
-                      _this.globalRegistryRecord.timeout = dataJSON.timeout;
-                      _this.globalRegistryRecord.salt = dataJSON.salt;
-                      _this.globalRegistryRecord.active = dataJSON.active;
-                      _this.globalRegistryRecord.revoked = dataJSON.revoked;
-                      _this.globalRegistryRecord.defaults = dataJSON.defaults;
-                      resolve(_this.globalRegistryRecord);
+                    if (typeof dataJSON.userIDs != 'undefined' && dataJSON.userIDs != null) {
+                      _this.globalRegistryRecord.userIDs = dataJSON.userIDs;
+                    }
+                    _this.globalRegistryRecord.lastUpdate = dataJSON.lastUpdate;
+                    _this.globalRegistryRecord.timeout = dataJSON.timeout;
+                    _this.globalRegistryRecord.salt = dataJSON.salt;
+                    _this.globalRegistryRecord.active = dataJSON.active;
+                    _this.globalRegistryRecord.revoked = dataJSON.revoked;
+                    _this.globalRegistryRecord.defaults = dataJSON.defaults;
+                    resolve(_this.globalRegistryRecord);
                   }
                 }
               }else {
@@ -333,13 +333,13 @@ class GraphConnector {
     let rtnArray = [];
 
     for (let i = 0; i < this.contacts.length; i++) {
-      if (this.contacts[i].guid == guidOld) {
+      if (this.contacts[i]._guid == guidOld) {
         if (guidOld == guidNew) {
 
-          this.contacts[i].firstName = firstName;
-          this.contacts[i].lastName = lastName;
-          this.contacts[i].guid = guidOld;
-          this.contacts[i].privateContact = privStatus;
+          this.contacts[i]._firstName = firstName;
+          this.contacts[i]._lastName = lastName;
+          this.contacts[i]._guid = guidOld;
+          this.contacts[i]._privateContact = privStatus;
 
           rtnArray.push(this.contacts[i]);
 
@@ -347,16 +347,16 @@ class GraphConnector {
 
           if (!this.guidExist(guidNew)) {
 
-              this.contacts[i].firstName = firstName;
-              this.contacts[i].lastName = lastName;
-              this.contacts[i].guid = guidNew;
-              this.contacts[i].privateContact = privStatus;
+            this.contacts[i]._firstName = firstName;
+            this.contacts[i]._lastName = lastName;
+            this.contacts[i]._guid = guidNew;
+            this.contacts[i]._privateContact = privStatus;
 
-              rtnArray.push(this.contacts[i]);
+            rtnArray.push(this.contacts[i]);
 
           }
         }
-        if (this.contacts[i].privateContact) {
+        if (this.contacts[i]._privateContact) {
           // re-calculate BF1hop
           this.calculateBloomFilter1Hop();
         }
@@ -375,7 +375,7 @@ class GraphConnector {
     let success = false;
 
     for (let i = 0; i < this.contacts.length; i++) {
-      if (this.contacts[i].guid == guid || this.globalRegistryRecord.guid == guid) {
+      if (this.contacts[i]._guid == guid || this.globalRegistryRecord.guid == guid) {
         success = true;
       }
     }
@@ -445,22 +445,22 @@ class GraphConnector {
                   sig.updateString(encodedString);
                   let isValid = sig.verify(sigValueHex);
                   if (!isValid) {
-                      console.log('invalid JWT');
-                      reject('Retrieved Record not valid!');
+                    console.log('invalid JWT');
+                    reject('Retrieved Record not valid!');
                   } else {
-                      console.log('valid JWT');
-                      let queriedContact = new GraphConnectorContactData(dataJSON.guid, '', '');
-                      if (typeof dataJSON.userIDs != 'undefined' && dataJSON.userIDs != null) {
-                          queriedContact.userIDs = dataJSON.userIDs;
+                    console.log('valid JWT');
+                    let queriedContact = new GraphConnectorContactData(dataJSON.guid, '', '');
+                    if (typeof dataJSON.userIDs != 'undefined' && dataJSON.userIDs != null) {
+                      queriedContact.userIDs = dataJSON.userIDs;
 
-                          for (let i = 0; i < _this.contacts.length; i++) {
-                              if (_this.contacts[i].guid == guid) {
-                                  _this.contacts[i].userIDs = dataJSON.userIDs;
-                              }
-                          }
-
+                      for (let i = 0; i < _this.contacts.length; i++) {
+                        if (_this.contacts[i]._guid == guid) {
+                          _this.contacts[i]._userIDs = dataJSON.userIDs;
+                        }
                       }
-                      resolve(queriedContact);
+
+                    }
+                    resolve(queriedContact);
                   }
                 }else {
                   console.log('Response code is not 200');
@@ -573,35 +573,35 @@ class GraphConnector {
                 if (typeof jwt !== 'undefined') {
 
                   if (reply.body.Code == 200) {
-                      console.log('Response code is 200');
-                      console.log('verify JWT');
-                      let unwrappedJWT = jsrsasign.KJUR.jws.JWS.parse(reply.body.Value);
-                      let dataEncoded = unwrappedJWT.payloadObj.data;
-                      let dataDecoded = base64url.decode(dataEncoded);
-                      let dataJSON = JSON.parse(dataDecoded);
-                      let publicKeyObject = jsrsasign.KEYUTIL.getKey(dataJSON.publicKey);
-                      let encodedString = jwt.split('.').slice(0, 2).join('.');
-                      let sigValueHex = unwrappedJWT.sigHex;
-                      let sig = new jsrsasign.KJUR.crypto.Signature({alg: 'SHA256withECDSA'});
-                      sig.init(publicKeyObject);
-                      sig.updateString(encodedString);
-                      let isValid = sig.verify(sigValueHex);
-                      if (!isValid) {
-                          console.log('invalid JWT');
-                          resolve(false);
-                      } else {
-                          console.log('valid JWT');
-                          let queriedContact = new GraphConnectorContactData(dataJSON.guid, firstName, lastName);
-                          if (typeof dataJSON.userIDs != 'undefined' && dataJSON.userIDs != null) {
-                              queriedContact.userIDs = dataJSON.userIDs;
-
-                          }
-                          _this.contacts.push(queriedContact);
-                          resolve(true);
-                      }
-                  }else {
-                      console.log('Response code is not 200');
+                    console.log('Response code is 200');
+                    console.log('verify JWT');
+                    let unwrappedJWT = jsrsasign.KJUR.jws.JWS.parse(reply.body.Value);
+                    let dataEncoded = unwrappedJWT.payloadObj.data;
+                    let dataDecoded = base64url.decode(dataEncoded);
+                    let dataJSON = JSON.parse(dataDecoded);
+                    let publicKeyObject = jsrsasign.KEYUTIL.getKey(dataJSON.publicKey);
+                    let encodedString = jwt.split('.').slice(0, 2).join('.');
+                    let sigValueHex = unwrappedJWT.sigHex;
+                    let sig = new jsrsasign.KJUR.crypto.Signature({alg: 'SHA256withECDSA'});
+                    sig.init(publicKeyObject);
+                    sig.updateString(encodedString);
+                    let isValid = sig.verify(sigValueHex);
+                    if (!isValid) {
+                      console.log('invalid JWT');
                       resolve(false);
+                    } else {
+                      console.log('valid JWT');
+                      let queriedContact = new GraphConnectorContactData(dataJSON.guid, firstName, lastName);
+                      if (typeof dataJSON.userIDs != 'undefined' && dataJSON.userIDs != null) {
+                        queriedContact.userIDs = dataJSON.userIDs;
+
+                      }
+                      _this.contacts.push(queriedContact);
+                      resolve(true);
+                    }
+                  }else {
+                    console.log('Response code is not 200');
+                    resolve(false);
                   }
                 } else {
                   console.log(' undefined Response');
@@ -630,7 +630,7 @@ class GraphConnector {
       success = true;
     } else {
       for (let i = 0; i < this.contacts.length; i++) {
-        if (this.contacts[i].guid == guid) {
+        if (this.contacts[i]._guid == guid) {
           this.contacts[i].residenceLocation = '';
           success = true;
         }
@@ -653,9 +653,9 @@ class GraphConnector {
         success = true;
       } else {
         for (let i = 0; i < this.contacts.length; i++) {
-          if (this.contacts[i].guid == guid) {
-              this.contacts[i].residenceLocation = locationName;
-              success = true;
+          if (this.contacts[i]._guid == guid) {
+            this.contacts[i].residenceLocation = locationName;
+            success = true;
           }
         }
       }
@@ -671,8 +671,8 @@ class GraphConnector {
   getGroupNames() {
     let rtnSet = new Set();
     for (let i = 0; i < this.contacts.length; i++) {
-      for (let j = 0; j < this.contacts[i].groups.length; j++) {
-        rtnSet.add(this.contacts[i].groups[j]);
+      for (let j = 0; j < this.contacts[i]._groups.length; j++) {
+        rtnSet.add(this.contacts[i]._groups[j]);
       }
     }
     for (let k = 0; k < this.groups.length; k++) {
@@ -706,9 +706,9 @@ class GraphConnector {
         }
       }
       for (let i = 0; i < this.contacts.length; i++) {
-        for (let j = 0; j < this.contacts[i].groups.length; j++) {
-          if (this.contacts[i].groups[j] == groupName) {
-              rtnArray.push(this.contacts[i]);
+        for (let j = 0; j < this.contacts[i]._groups.length; j++) {
+          if (this.contacts[i]._groups[j] == groupName) {
+            rtnArray.push(this.contacts[i]);
           }
         }
       }
@@ -732,11 +732,11 @@ class GraphConnector {
         }
       } else {
         for (let i = 0; i < this.contacts.length; i++) {
-          if (this.contacts[i].guid == guid) {
-              if (!this.contacts[i].groups.includes(groupName)) {
-                  this.contacts[i].groups.push(groupName);
-                  success = true;
-              }
+          if (this.contacts[i]._guid == guid) {
+            if (!this.contacts[i]._groups.includes(groupName)) {
+              this.contacts[i]._groups.push(groupName);
+              success = true;
+            }
           }
         }
       }
@@ -756,19 +756,19 @@ class GraphConnector {
       if (guid == this.globalRegistryRecord.guid) {
         for (let z = 0; z < this.groups.length; z++) {
           if (this.groups[z] == groupName) {
-              this.groups.splice(z, 1);
-              success = true;
+            this.groups.splice(z, 1);
+            success = true;
           }
         }
       } else {
         for (let i = 0; i < this.contacts.length; i++) {
-          if (this.contacts[i].guid == guid) {
-              for (let j = 0; j < this.contacts[i].groups.length; j++) {
-                  if (this.contacts[i].groups[j] == groupName) {
-                      this.contacts[i].groups.splice(j, 1);
-                  }
-                  success = true;
+          if (this.contacts[i]._guid == guid) {
+            for (let j = 0; j < this.contacts[i]._groups.length; j++) {
+              if (this.contacts[i]._groups[j] == groupName) {
+                this.contacts[i]._groups.splice(j, 1);
               }
+              success = true;
+            }
           }
         }
       }
@@ -793,7 +793,7 @@ class GraphConnector {
     // remove from contacts
     let status = false;
     for (let i = 0; i < this.contacts.length; i++) {
-      if (this.contacts[i].guid == guid) {
+      if (this.contacts[i]._guid == guid) {
         this.contacts.splice(i, 1);
         status = true;
       }
@@ -814,7 +814,7 @@ class GraphConnector {
   setBloomFilter1HopContact(guid, bf) {
     let success = false;
     for (let i = 0; i < this.contacts.length; i++) {
-      if (this.contacts[i].guid == guid) {
+      if (this.contacts[i]._guid == guid) {
         this.contacts[i].contactsBloomFilter1Hop = bf;
         success = true;
       }
@@ -832,7 +832,7 @@ class GraphConnector {
     );
     for (let i = 0; i < this.contacts.length; i++) {
       if (!this.contacts[i].privateContact) {
-        bf.add(this.contacts[i].guid);
+        bf.add(this.contacts[i]._guid);
       }
     }
     this.contactsBloomFilter1Hop = bf;
@@ -852,8 +852,8 @@ class GraphConnector {
 
     let patt = new RegExp(name, 'i');
     for (let i = 0; i < this.contacts.length; i++) {
-      fname = this.contacts[i].firstName;
-      lname = this.contacts[i].lastName;
+      fname = this.contacts[i]._firstName;
+      lname = this.contacts[i]._lastName;
 
       if (patt.test(fname) || patt.test(lname)) {
         rtnArray.push(this.contacts[i]);
@@ -878,18 +878,18 @@ class GraphConnector {
 
       if (this.contacts[i].guid == guid) {
 
-        for (let j = 0; j < this.contacts[i].userIDs.length; j++) {
+        for (let j = 0; j < this.contacts[i]._userIDs.length; j++) {
 
-          if (this.contacts[i].userIDs[j].uid == uid && this.contacts[i].userIDs[j].domain == domain) {
-              return false;
+          if (this.contacts[i]._userIDs[j].uid == uid && this.contacts[i]._userIDs[j].domain == domain) {
+            return false;
           }
         }
-        tmpUserID = this.contacts[i].userIDs;
+        tmpUserID = this.contacts[i]._userIDs;
         let item = new Object();
         item.uid = uid;
         item.domain = domain;
         tmpUserID.push(item);
-        this.contacts[i].userIDs = tmpUserID;
+        this.contacts[i]._userIDs = tmpUserID;
         success = true;
       }
     }
@@ -906,11 +906,11 @@ class GraphConnector {
     let found = false;
     for (let i = 0; i < this.contacts.length; i++) {
 
-      if (this.contacts[i].guid == guid) {
+      if (this.contacts[i]._guid == guid) {
         found = true;
 
-        for (let j = 0; j < this.contacts[i].userIDs.length; j++) {
-          userIDsArray.push(this.contacts[i].userIDs[j]);
+        for (let j = 0; j < this.contacts[i]._userIDs.length; j++) {
+          userIDsArray.push(this.contacts[i]._userIDs[j]);
         }
       }
     }
@@ -982,7 +982,7 @@ class GraphConnector {
     let directContactsArray = [];
     let fofContactsArray = [];
     for (let i = 0; i < this.contacts.length; i++) {
-      if (this.contacts[i].guid === guid) {
+      if (this.contacts[i]._guid === guid) {
         directContactsArray.push(this.contacts[i]);
       }
       let bf1hop = new BloomFilter(
@@ -1016,36 +1016,40 @@ class GraphConnector {
     return obj1;
   }
 
-  // TODO: exportGraphData(?){}
-  // TODO: importGraphData(?){}
   _loadIdentities() {
     let _this = this;
     return new Promise((resolve) => {
 
-        _this.storageManager.get('idModule:graphConnector').then((graphConnector) => {
-
-            if (graphConnector) {
-              _this.graphConnector = graphConnector;
+        _this.storageManager.get('idModule:globalRegistryRecord').then((globalRegistryRecord) => {
+            if (globalRegistryRecord) {
+              _this.globalRegistryRecord = globalRegistryRecord;
             }
             resolve();
           });
+
+        _this.storageManager.get('idModule:contacts').then((contacts) => {
+            if (contacts) {
+              _this.contacts = contacts;
+            }
+            resolve();
+          });
+
+        _this.storageManager.get('idModule:groups').then((groups) => {
+            if (groups) {
+              _this.groups = groups;
+            }
+            resolve();
+          });
+
       });
   }
 
   storeGraphConnector() {
     let _this = this;
+    _this.storageManager.set('idModule:globalRegistryRecord', 0, _this.globalRegistryRecord);
+    _this.storageManager.set('idModule:contacts', 0, _this.contacts);
+    _this.storageManager.set('idModule:groups', 0, _this.groups);
 
-    _this.storageManager.set('idModule:graphConnector', 0, _this.graphConnector).then(() => {
-
-        _this._messageBus.postMessage(message, (reply) => {
-            console.log('===> registerDataObject Reply: ', reply);
-            if (reply.body.code === 200) {
-              resolve('ok');
-            } else {
-              reject('error on register DataObject');
-            }
-          });
-      });
   }
 }
 
