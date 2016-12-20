@@ -43,6 +43,7 @@ class GraphConnector {
    * Constructs a new and empty Graph Connector.
    * @param {string}   hypertyRuntimeURL    The Hyperty Runtime URL.
    * @param {messageBus}    messageBus      The Message Bus.
+   * @param {storageManager} storageManager the storage Manager.
    */
   constructor(hypertyRuntimeURL, messageBus,storageManager) {
     this.contacts = [];
@@ -63,12 +64,11 @@ class GraphConnector {
     if (!storageManager) throw new Error('storageManager is missing');
     this.storageManager = storageManager;
 
-    this._loadIdentities();
+    this._loadGraphConnector();
   }
 
   /**
    * Returns the MessageBus.
-   * @param {MessageBus}           messageBus    The Message Bus.
    */
   get messageBus() {
     return this._messageBus;
@@ -1016,25 +1016,28 @@ class GraphConnector {
     return obj1;
   }
 
-  _loadIdentities() {
+  /**
+ * get the entry from the storage Manager for a given keys: globalRegistryRecord, contacts, groups.
+ */
+  _loadGraphConnector() {
     let _this = this;
     return new Promise((resolve) => {
 
-        _this.storageManager.get('idModule:globalRegistryRecord').then((globalRegistryRecord) => {
+        _this.storageManager.get('graphConnector:globalRegistryRecord').then((globalRegistryRecord) => {
             if (globalRegistryRecord) {
               _this.globalRegistryRecord = globalRegistryRecord;
             }
             resolve();
           });
 
-        _this.storageManager.get('idModule:contacts').then((contacts) => {
+        _this.storageManager.get('graphConnector:contacts').then((contacts) => {
             if (contacts) {
               _this.contacts = contacts;
             }
             resolve();
           });
 
-        _this.storageManager.get('idModule:groups').then((groups) => {
+        _this.storageManager.get('graphConnector:groups').then((groups) => {
             if (groups) {
               _this.groups = groups;
             }
@@ -1044,11 +1047,14 @@ class GraphConnector {
       });
   }
 
+  /**
+   * store the entry into the storage Manager for the given keys: globalRegistryRecord, contacts, groups.
+   */
   storeGraphConnector() {
     let _this = this;
-    _this.storageManager.set('idModule:globalRegistryRecord', 0, _this.globalRegistryRecord);
-    _this.storageManager.set('idModule:contacts', 0, _this.contacts);
-    _this.storageManager.set('idModule:groups', 0, _this.groups);
+    _this.storageManager.set('graphConnector:globalRegistryRecord', 0, _this.globalRegistryRecord);
+    _this.storageManager.set('graphConnector:contacts', 0, _this.contacts);
+    _this.storageManager.set('graphConnector:groups', 0, _this.groups);
 
   }
 }
