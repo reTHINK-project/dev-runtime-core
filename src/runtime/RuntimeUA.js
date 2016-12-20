@@ -264,7 +264,7 @@ class RuntimeUA {
 
     console.info('Unregister all hyperties');
     return new Promise(function(resolve, reject) {
-
+        _this.graphConnector.storeGraphConnector();
         _this.registry.unregisterAllHyperties().then(function(result) {
             console.info('All the hyperties are unregisted with Success:', result);
             resolve(true);
