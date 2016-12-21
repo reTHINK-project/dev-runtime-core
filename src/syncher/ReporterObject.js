@@ -41,9 +41,24 @@ class ReporterObject {
     let changeURL = _this._url + '/changes';
     _this._changeListener = _this._bus.addListener(changeURL, (msg) => {
       //TODO: what todo here? Save changes?
-      _this._parent._storeDataObjects(_this._url, _this._owner, true, msg.body.schema, 'on', msg.body.value);
+      if (msg.body.attribute) {
+        _this._parent._storeDataObjects.updateData(_this._url, 'data', msg.body.attribute, msg.body.value, true);
+      }
       console.log('SyncherManager-' + changeURL + '-RCV: ', msg);
     });
+  }
+
+  resumeSubscriptions(subscriptions) {
+    let _this = this;
+
+    Object.keys(subscriptions).forEach((key) => {
+      let hypertyURL = subscriptions[key];
+      // console.log('RESUME: ', hypertyURL, _this._subscriptions[hypertyURL]);
+      if (!_this._subscriptions[hypertyURL]) {
+        _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, _this._childrens, true);
+      }
+    });
+
   }
 
   _releaseListeners() {
@@ -239,6 +254,15 @@ class ReporterObject {
             _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, _this._childrens, true);
           }
         }
+
+        // Store for each reporter hyperty the dataObject
+        let userURL;
+        if (msg.body.identity && msg.body.identity.userProfile.userURL) {
+          userURL = msg.body.identity.userProfile.userURL;
+          _this._parent._storeDataObjects.update(_this._url, 'subscriberUsers', userURL);
+        }
+
+        _this._parent._storeDataObjects.update(_this._url, 'subscriptions', hypertyURL);
 
         //FLOW-OUT: subscription response sent (forward from internal Hyperty)
         _this._bus.postMessage({

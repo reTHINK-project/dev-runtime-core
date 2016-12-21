@@ -16,7 +16,6 @@ chai.use(chaiAsPromised);
 
 describe('SyncherManager', function() {
   let storageManager = runtimeFactory.storageManager();
-  let persistenceManager = runtimeFactory.persistenceManager();
 
   let schemaURL = 'schema://fake-schema-url';
   let runtimeURL = 'hyperty-runtime://fake-runtime';
@@ -183,8 +182,8 @@ describe('SyncherManager', function() {
 
       notifyEvent.ack();
 
-      sync2.subscribe(schemaURL, notifyEvent.url).then((doo) => {
-        console.log('on-subscribe-reply', doo);
+      sync2.subscribe(schemaURL, notifyEvent.url, true, false).then((doo) => {
+        console.log('on-subscribe-reply', doo, doo.data);
 
         doo.onChange('*', (changeEvent) => {
           console.log('on-change: ', JSON.stringify(changeEvent));
@@ -196,7 +195,7 @@ describe('SyncherManager', function() {
     });
 
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
-    sync1.create(schemaURL, [], initialData).then((dor) => {
+    sync1.create(schemaURL, [], initialData, true, false).then((dor) => {
       console.log('on-create-reply', dor);
       dor.inviteObservers([hyperURL2]);
 
@@ -211,7 +210,7 @@ describe('SyncherManager', function() {
     });
   });
 
-  it('should resume the connection', function(done) {
+  it('should resume observers', function(done) {
 
     let bus = new MessageBus();
     bus._onMessage((a) => {
@@ -228,12 +227,13 @@ describe('SyncherManager', function() {
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.resumeObservers({}).then((doo) => {
 
-      console.log('on-subscribe-reply', doo);
+      console.log('on-subscribe-resume-reply', doo, doo.data);
 
       doo.onChange('*', (changeEvent) => {
-        console.log('on-change: ', JSON.stringify(changeEvent));
+        console.log('on-change: ', JSON.stringify(changeEvent), doo.data);
         expect(changeEvent).to.contain.all.keys({ cType: 'add', oType: 'object', field: 'test', data: ['a', 'b', 'c'] });
         expect(doo.data).to.contain.all.keys({ communication: { name: 'chat-x' }, x: 10, y: 10, test: ['a', 'b', 'c'] });
+
         done();
       });
 
@@ -244,6 +244,10 @@ describe('SyncherManager', function() {
       console.log('on-create-resume-reply', dor);
       dor.inviteObservers([hyperURL2]);
 
+      dor.onRead((readEvent) => {
+        readEvent.accept();
+      });
+
       dor.onSubscription((subscribeEvent) => {
         console.log('on-resume-subscribe: ', subscribeEvent);
 
@@ -253,6 +257,48 @@ describe('SyncherManager', function() {
         dor.data.test = ['a', 'b', 'c'];
       });
     });
+
+  });
+
+  it('should resume reporters', function(done) {
+
+    let bus = new MessageBus();
+    bus._onMessage((a) => {
+      console.log('AQUI:', a);
+    });
+
+    bus._onPostMessage = (msg) => {
+      console.log('_onPostMessage: ', msg);
+      msgNodeResponseFunc(bus, msg);
+    };
+
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator);
+
+    let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
+
+    sync1.resumeReporters({}).then((dor) => {
+      dor.data.newTest = ['a', 'b', 'c'];
+      expect(dor.data).to.contain.all.keys({ communication: { name: 'chat-x' }, x: 10, y: 10, test: ['a', 'b', 'c'], newTest: ['a', 'b', 'c'] });
+      done();
+    });
+
+    // sync1.create(schemaURL, [], initialData).then((dor) => {
+    //   console.log('on-create-resume-reply', dor);
+    //   dor.inviteObservers([hyperURL2]);
+    //
+    //   dor.onRead((readEvent) => {
+    //     readEvent.accept();
+    //   });
+    //
+    //   dor.onSubscription((subscribeEvent) => {
+    //     console.log('on-resume-subscribe: ', subscribeEvent);
+    //
+    //     //we may have some problems in the time sequence here.
+    //     //change-msg can reach the observer first
+    //     subscribeEvent.accept();
+    //     dor.data.test = ['a', 'b', 'c'];
+    //   });
+    // });
 
   });
 
