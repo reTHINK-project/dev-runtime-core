@@ -97,7 +97,7 @@ class SyncherManager {
   //FLOW-IN: message received from Syncher -> create
   _onCreate(msg) {
 
-    if (msg.body.hasOwnProperty('resume') && !msg.body.resume || !msg.body.resume) {
+    if (msg.body.hasOwnProperty('resume') && !msg.body.resume) {
       this._newCreate(msg);
     } else {
       this._storeDataObjects.getResourcesByCriteria(msg, true).then((result) => {
@@ -534,7 +534,7 @@ class SyncherManager {
         body: { code: 200 }
       });
 
-      this._storeDataObjects.delete(objURL, 'subscriptions', hypertyURL);
+      this._storeDataObjects.delete(objURL, 'subscriptions', hypertyURL, true);
 
       //TODO: remove Object if no more subscription?
       //delete _this._observers[objURL];

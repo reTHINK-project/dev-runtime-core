@@ -21,27 +21,25 @@ class StoreDataObjects {
       };
     }
 
-    if (isReporter) this._storeDataObject[type][resource].owner = subscription;
-
     if (data) this._storeDataObject[type][resource].data = data;
     if (schema) this._storeDataObject[type][resource].schema = schema;
     if (status) this._storeDataObject[type][resource].status = status;
     if (children) this._storeDataObject[type][resource].children = children;
     if (childrenResources) this._storeDataObject[type][resource].childrenResources = childrenResources;
 
-    console.log('SET:', subscription, !isReporter);
     if (subscription && !isReporter) {
-      if (this._storeDataObject[type][resource].subscriptions.indexOf(subscription)) this._storeDataObject[type][resource].subscriptions.push(subscription);
+      this._updateToArray(resource, 'subscriptions', subscription, type);
+    } else {
+      this._storeDataObject[type][resource].owner = subscription;
     }
 
     if (subscriberUser) {
-      if (this._storeDataObject[type][resource].subscriberUsers.indexOf(subscriberUser)) this._storeDataObject[type][resource].subscriberUsers.push(subscriberUser);
+      if (this._storeDataObject[type][resource].subscriberUsers.indexOf(subscriberUser)) {
+        this._updateToArray(resource, 'subscriberUsers', subscriberUser, type);
+      }
     }
 
-    console.log('SET: ', this._storeDataObject[type][resource], subscription);
-
     return this._storageManager.set('syncherManager:ObjectURLs', 1, this._storeDataObject);
-
   }
 
   updateData(resource, key, attribute, value, isReporter = true) {
@@ -58,17 +56,24 @@ class StoreDataObjects {
       return this._storageManager.set('syncherManager:ObjectURLs', 1, this._storeDataObject);
 
     } else {
-      //throw new Error('[StoreDataObjects] - Can\'t update this ' + resource + ' to the key ' + key + ' with value: ' + value);
+      // throw new Error('[StoreDataObjects] - Can\'t update Data this ' + resource + ' to the key ' + key + ' with value: ' + value);
     }
   }
 
   update(resource, key, value, isReporter = true) {
     let type = this._getTypeOfObject(isReporter);
 
-    if (this._storeDataObject.hasOwnProperty(type) && this._storeDataObject[type][resource] && resource && key && value) {
+    if (this._storeDataObject[type] && this._storeDataObject[type][resource] && resource && key && value) {
 
       if (key === 'subscriptions' || key === 'subscriberUsers') {
-        this._updateToArray(resource, key, value, type);
+        let update = true;
+
+        if (key === 'subscriptions') {
+          update = !this._isOwner(this._storeDataObject[type][resource], value);
+        }
+        console.log('UPDATE:', update);
+        if (update) this._updateToArray(resource, key, value, type);
+
       } else {
         this._storeDataObject[type][resource][key] = value;
       }
@@ -76,17 +81,19 @@ class StoreDataObjects {
       return this._storageManager.set('syncherManager:ObjectURLs', 1, this._storeDataObject);
 
     } else {
-      //throw new Error('[StoreDataObjects] - Can\'t update this ' + resource + ' to the key ' + key + ' with value: ' + value);
+      // throw new Error('[StoreDataObjects] - Can\'t update this ' + resource + ' to the key ' + key + ' with value: ' + value);
     }
   }
 
-  delete(resource, key, value) {
-    if (this._storeDataObject[resource] && resource && key && value) {
+  delete(resource, key, value, isReporter = true) {
+    let type = this._getTypeOfObject(isReporter);
+
+    if (this._storeDataObject[type] && this._storeDataObject[type][resource] && resource && key && value) {
 
       if (key === 'subscriptions' || key === 'subscriberUsers') {
-        this._removeFromArray(resource, key);
+        this._removeFromArray(resource, key, value, type);
       } else {
-        delete this._storeDataObject[resource][key];
+        delete this._storeDataObject[type][resource][key];
       }
 
       return this._storageManager.set('syncherManager:ObjectURLs', 1, this._storeDataObject);
@@ -149,7 +156,7 @@ class StoreDataObjects {
           return resolve(null);
         }
 
-        if (msg.body.hasOwnProperty('resume') && !msg.body.resume) {
+        if (msg.body && msg.body.hasOwnProperty('resume') && !msg.body.resume) {
           return resolve(null);
         }
 
@@ -157,17 +164,27 @@ class StoreDataObjects {
         // if not search for on the 'from' of the message.
         let result = [];
         let hasSubscription = this._hasSubscription(storedDataObjects[type], msg.from);
-        let isOwner = this._isOwner(storedDataObjects[type], msg.from);
+        let isOwner = this._searchOwner(storedDataObjects[type], msg.from);
+
+        console.log('AQUI:', hasSubscription);
 
         if (msg.hasOwnProperty('from') && hasSubscription || isOwner) {
           let resource = this._getResourcesBySubscription(storedDataObjects[type], msg.from);
-          let identityFoundData = this._getResourcesByIdentity(storedDataObjects[type], msg.body.identity);
-          let schemaFoundData = this._getResourcesBySchema(storedDataObjects[type], msg.body.schema);
-          let dataFound = this._getResourcesByData(storedDataObjects[type], msg.body.value);
+
+          console.log('AQUI: ', resource);
+
+          let identityFoundData = [];
+          if (msg.body && msg.body.identity) identityFoundData = this._getResourcesByIdentity(storedDataObjects[type], msg.body.identity);
+
+          let schemaFoundData = [];
+          if (msg.body && msg.body.schema) schemaFoundData = this._getResourcesBySchema(storedDataObjects[type], msg.body.schema);
+
+          let dataFound = [];
+          if (msg.body && msg.body.value) dataFound = this._getResourcesByData(storedDataObjects[type], msg.body.value);
 
           // you can pass as arrays as you want.. it will be merged in on place
           // removed duplicates;
-          result = this._intersection(identityFoundData, schemaFoundData, dataFound, resource);
+          result = this._intersection(resource, identityFoundData, schemaFoundData, dataFound);
         } else {
           return resolve(null);
         }
@@ -189,6 +206,9 @@ class StoreDataObjects {
   }
 
   _getResourcesByIdentity(storedData, userURL) {
+    console.log('_getResourcesByIdentity', storedData, userURL);
+    if (!storedData) return [];
+
     return Object.keys(storedData).filter((objectURL) => {
       return storedData[objectURL].subscriberUsers.filter((current) => {
         return current === userURL;
@@ -197,7 +217,10 @@ class StoreDataObjects {
   }
 
   _getResourcesBySubscription(storedData, subscription) {
+    if (!storedData) return [];
+
     return Object.keys(storedData).filter((objectURL) => {
+      console.log(storedData[objectURL], subscription);
       return storedData[objectURL].subscriptions.filter((current) => {
         console.log('Cuurent:', current, subscription);
         return current === subscription;
@@ -240,12 +263,17 @@ class StoreDataObjects {
     }).length > 0 ? true : false;
   }
 
-  _isOwner(storedData, url) {
+  _searchOwner(storedData, from) {
     if (!storedData) return false;
 
     return Object.keys(storedData).filter((objectURL) => {
-      return storedData[objectURL].owner === url;
+      return storedData[objectURL].owner === from;
     }).length > 0 ? true : false;
+  }
+
+  _isOwner(value, url) {
+    if (!value) return false;
+    return value.owner === url ? true : false;
   }
 
   _intersection() {
@@ -264,9 +292,9 @@ class StoreDataObjects {
     if (this._storeDataObject[type][resource][key].indexOf(value)) this._storeDataObject[type][resource][key].push(value);
   }
 
-  _removeFromArray(resource, key, value) {
-    let indexOfValue = this._storeDataObject[resource][key].indexOf(value);
-    if (indexOfValue) this._storeDataObject[resource][key].splice(indexOfValue, 1);
+  _removeFromArray(resource, key, value, type) {
+    let indexOfValue = this._storeDataObject[type][resource][key].indexOf(value);
+    if (indexOfValue) this._storeDataObject[type][resource][key].splice(indexOfValue, 1);
   }
 
   _hasValue(obj, key, value) {
