@@ -55,8 +55,6 @@ class StoreDataObjects {
 
       return this._storageManager.set('syncherManager:ObjectURLs', 1, this._storeDataObject);
 
-    } else {
-      // throw new Error('[StoreDataObjects] - Can\'t update Data this ' + resource + ' to the key ' + key + ' with value: ' + value);
     }
   }
 
@@ -71,7 +69,7 @@ class StoreDataObjects {
         if (key === 'subscriptions') {
           update = !this._isOwner(this._storeDataObject[type][resource], value);
         }
-        console.log('UPDATE:', update);
+
         if (update) this._updateToArray(resource, key, value, type);
 
       } else {
@@ -80,12 +78,11 @@ class StoreDataObjects {
 
       return this._storageManager.set('syncherManager:ObjectURLs', 1, this._storeDataObject);
 
-    } else {
-      // throw new Error('[StoreDataObjects] - Can\'t update this ' + resource + ' to the key ' + key + ' with value: ' + value);
     }
   }
 
   delete(resource, key, value, isReporter = true) {
+
     let type = this._getTypeOfObject(isReporter);
 
     if (this._storeDataObject[type] && this._storeDataObject[type][resource] && resource && key && value) {
@@ -98,9 +95,8 @@ class StoreDataObjects {
 
       return this._storageManager.set('syncherManager:ObjectURLs', 1, this._storeDataObject);
 
-    } else {
-      throw new Error('[StoreDataObjects] - Can\'t delete this ' + resource + ' to the key ' + key + ' with value: ' + value);
     }
+
   }
 
   /**
@@ -143,8 +139,6 @@ class StoreDataObjects {
    */
   getResourcesByCriteria(msg, isReporter) {
 
-    console.log('MSG:', msg);
-
     return new Promise((resolve) => {
 
       let type = this._getTypeOfObject(isReporter);
@@ -166,12 +160,8 @@ class StoreDataObjects {
         let hasSubscription = this._hasSubscription(storedDataObjects[type], msg.from);
         let isOwner = this._searchOwner(storedDataObjects[type], msg.from);
 
-        console.log('AQUI:', hasSubscription);
-
         if (msg.hasOwnProperty('from') && hasSubscription || isOwner) {
           let resource = this._getResourcesBySubscription(storedDataObjects[type], msg.from);
-
-          console.log('AQUI: ', resource);
 
           let identityFoundData = [];
           if (msg.body && msg.body.identity) identityFoundData = this._getResourcesByIdentity(storedDataObjects[type], msg.body.identity);
@@ -206,7 +196,6 @@ class StoreDataObjects {
   }
 
   _getResourcesByIdentity(storedData, userURL) {
-    console.log('_getResourcesByIdentity', storedData, userURL);
     if (!storedData) return [];
 
     return Object.keys(storedData).filter((objectURL) => {
@@ -220,9 +209,7 @@ class StoreDataObjects {
     if (!storedData) return [];
 
     return Object.keys(storedData).filter((objectURL) => {
-      console.log(storedData[objectURL], subscription);
       return storedData[objectURL].subscriptions.filter((current) => {
-        console.log('Cuurent:', current, subscription);
         return current === subscription;
       }).length;
     });

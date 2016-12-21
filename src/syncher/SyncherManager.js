@@ -98,17 +98,17 @@ class SyncherManager {
   _onCreate(msg) {
 
     if (msg.body.hasOwnProperty('resume') && !msg.body.resume) {
+      console.info('[SyncherManager - Create New Object]', msg);
       this._newCreate(msg);
     } else {
       this._storeDataObjects.getResourcesByCriteria(msg, true).then((result) => {
 
-        console.log('[SyncherManager - Create] - filter result', result, msg);
+        console.info('[SyncherManager - Create Resumed Object]', msg);
 
         if (result && Object.keys(result).length > 0) {
 
           // TODO: should reuse the storaged information
           Object.keys(result).forEach((objURL) => {
-            console.log('[SyncherManager - resume Create] - reuse current object url: ', result[objURL]);
             this._resumeCreate(msg, result[objURL]);
           });
 
