@@ -183,8 +183,10 @@ class IdentityModule {
             let domain = getUserIdentityDomain(toUrl);
             console.log('From userIdentityDomain domain->', domain);
             _this.callGenerateMethods(domain).then((value) => {
-              console.log('sucess CallGeneratemethods');
-              return resolve(value);
+              console.log('sucess CallGeneratemethods', value);
+              let token = _this.getAccessToken(toUrl);
+              if (token)
+                return resolve(token);
             }, (err) => {
               console.log('error CallGeneratemethods');
               return reject(err);

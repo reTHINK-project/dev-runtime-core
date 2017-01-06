@@ -70,6 +70,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
           resolve(message);
         }
       } else {
+        console.log('ON prepareForEvaluation', message);
         if (_this._isToSetID(message)) {
           _this._getIdentity(message).then(identity => {
             message.body.identity = identity;
@@ -222,6 +223,9 @@ class RuntimeCoreCtx extends ReThinkCtx {
   }
 
   _getIdentity(message) {
+    console.log('ON Get Identity');
+    console.log('body source->', message.body.source);
+    console.log('message from->', message.from, ' message to->', message.to);
     if (message.type === 'update') {
       return this.idModule.getToken(message.body.source);
     }
