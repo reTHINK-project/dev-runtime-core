@@ -140,7 +140,8 @@ class PEP {
   }
 
   _isIncomingMessage(message) {
-    return (message.body !== undefined && message.body.identity !== undefined) ? true : false;
+
+    return this.context.runtimeRegistry.isLocal(message.from);
   }
 
   /**

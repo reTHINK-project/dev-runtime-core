@@ -230,11 +230,11 @@ class RuntimeCoreCtx extends ReThinkCtx {
       return this.idModule.getToken(message.body.source);
     }
 
-    if (divideURL(message.from).type === 'hyperty') {
+//    if (divideURL(message.from).type === 'hyperty') {
       return this.idModule.getToken(message.from, message.to);
-    } else {
+/*    } else {
       return this.idModule.getToken(this.getURL(message.from));
-    }
+    }*/
   }
 
   /**

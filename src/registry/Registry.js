@@ -1286,6 +1286,39 @@ class Registry {
     });
   }
 
+  /**
+  * To verify if URL is locally registered or not.
+  * @param  {URL.URL}  url      url
+  * @return {boolean}
+  */
+
+  isLocal(url) {
+
+    let runtimeScheme = ['hyperty-runtime', 'runtime'];
+    let hypertyScheme = ['hyperty'];
+    let urlScheme = url.split('://')[0];
+
+    // Process Runtime Core URLs
+
+    if (runtimeScheme.indexOf(urlScheme) === -1) {
+      return url.includes(this.runtimeURL);
+    }
+
+    // Process Hyperty URLs
+
+    if (hypertyScheme.indexOf(urlScheme) === -1) {
+      return this.hypertiesList.hasOwnProperty(url) === -1;
+    }
+
+    // Process Data Object URLs
+
+    if (url.includes('/subscription')) {
+      url = url.substring(0, url.indexOf('/subscription'));
+    }
+
+    return this.dataObjectList.hasOwnProperty(url) === -1;
+  }
+
 }
 
 export default Registry;
