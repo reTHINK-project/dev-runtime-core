@@ -142,7 +142,7 @@ class PEP {
 
   _isIncomingMessage(message) {
 
-    return this.context.runtimeRegistry.isLocal(message.from);
+    return !(this.context.runtimeRegistry.isLocal(message.from));
   }
 
   /**

@@ -166,44 +166,52 @@ class IdentityModule {
     _this.guiDeployed = true;
   }
 
-  getToken(hypertyURL, toUrl) {
+
+  /**
+  * get a Token to be added to a message
+  * @param  {String}  fromURL     origin of the message
+  * @param  {String}  toURL     target of the message
+  * @return {JSON}    token    token to be added to the message
+  */
+
+  getToken(fromURL, toUrl) {
     let _this = this;
     return new Promise(function(resolve, reject) {
-      console.log('from->', hypertyURL, '  to->', toUrl);
+      console.log('[Identity.IdentityModule.getToken] from->', fromURL, '  to->', toUrl);
       if (toUrl && toUrl.split('@').length > 1) {
-        console.log('toUrl', toUrl);
+//        console.log('toUrl', toUrl);
         _this.registry.isLegacy(toUrl).then(function(result) {
-          console.log('FROM isLEGACY:', result);
+          console.log('[Identity.IdentityModule.getToken] isLEGACY: ', result);
           if (result) {
             let token = _this.getAccessToken(toUrl);
             if (token)
               return resolve(token);
 
-            console.log('NO Identity.. Login now');
+            console.log('[Identity.IdentityModule.getToken] NO Identity.. Login now');
             let domain = getUserIdentityDomain(toUrl);
-            console.log('From userIdentityDomain domain->', domain);
+            console.log('[Identity.IdentityModule.getToken] domain->', domain);
             _this.callGenerateMethods(domain).then((value) => {
-              console.log('sucess CallGeneratemethods', value);
+              console.log('[Identity.IdentityModule.getToken] CallGeneratemethods', value);
               let token = _this.getAccessToken(toUrl);
               if (token)
                 return resolve(token);
             }, (err) => {
-              console.log('error CallGeneratemethods');
+              console.error('[Identity.IdentityModule.getToken] error CallGeneratemethods');
               return reject(err);
             });
           } else {
-            _this.getIdToken(hypertyURL).then(function(identity) {
-              console.log('from getIdToken', identity);
+            _this.getIdToken(fromURL).then(function(identity) {
+              console.log('[Identity.IdentityModule.getToken] getIdToken', identity);
               return resolve(identity);
             }).catch(function(error) {
-              console.error('error on getToken', error);
+              console.error('[Identity.IdentityModule.getToken] error on getToken', error);
               return reject(error);
             });
           }
         });
       } else {
-        _this.getIdToken(hypertyURL).then(function(identity) {
-          console.log('from getIdToken', identity);
+        _this.getIdToken(fromURL).then(function(identity) {
+          console.log('[Identity.IdentityModule.getToken] from getIdToken', identity);
           return resolve(identity);
         }).catch(function(error) {
           return reject(error);
@@ -211,6 +219,13 @@ class IdentityModule {
       }
     });
   }
+
+  /**
+  * get an Id Token for a HypertyURL
+  * @param  {String}  hypertyURL     the Hyperty address
+  * @return {JSON}    token    Id token to be added to the message
+  */
+
 
   getIdToken(hypertyURL) {
     let _this = this;
@@ -247,6 +262,12 @@ class IdentityModule {
       }
     });
   }
+
+  /**
+  * get an Access Token for a legacyURL
+  * @param  {String}  legacyURL     the legacy address
+  * @return {JSON}    token    Access token to be added to the message
+  */
 
   getAccessToken(url) {
     let _this = this;

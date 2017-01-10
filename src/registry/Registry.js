@@ -1254,16 +1254,16 @@ class Registry {
   }
 
   /**
-  * To verify if source is protostub is a legacy domain or not and to resolve  true if it is and false if isnt.
+  * To verify if url is from a legacy domain.
   * @param  {URL.URL}  url      url
   * @return {boolean}
   */
   isLegacy(url) {
     let _this = this;
     return new Promise((resolve, reject) => {
-      console.log('ON Legacy');
+      console.log('[Registry.Registry.isLegacy] ', url);
       let domain = getUserIdentityDomain(url);
-      console.log('ON Legacy:', domain);
+      console.log('[Registry.Registry.isLegacy] domain: ', domain);
       if (_this.idpLegacyProxyList.hasOwnProperty(domain)) {
         let result = _this.idpLegacyProxyList[domain];
         if (result.interworking)
@@ -1273,14 +1273,14 @@ class Registry {
       }
 
       _this._loader.descriptors.getIdpProxyDescriptor(domain).then((result) => {
-          console.log('Getting stub descriptor:', result);
+          console.log('[Registry.Registry.isLegacy] Legacy stub descriptor: ', result);
           _this.idpLegacyProxyList[domain] = result;
           if (result.interworking)
             resolve(result.interworking);
           else
             resolve(false);
         }).catch((reason) => {
-          console.log('problem loading stub for domain:', domain);
+          console.warn('problem loading stub for domain:', domain);
           resolve(false);
         });
     });
