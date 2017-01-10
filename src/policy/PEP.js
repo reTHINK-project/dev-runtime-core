@@ -53,7 +53,9 @@ class PEP {
     }
   }
 
+
   authorise(message) {
+
     console.log('--- Policy Engine ---');
     console.log(JSON.stringify(message));
     console.log(message);
@@ -142,7 +144,15 @@ class PEP {
 
   _isIncomingMessage(message) {
 
-    return this.context.runtimeRegistry.isLocal(message.from);
+    let old = (message.body !== undefined && message.body.identity !== undefined) ? true : false;
+    let paulo = this.context.runtimeRegistry.isLocal(message.from);
+    console.log('old:', old,'->new ', paulo );
+
+    if ( !paulo) {
+      return !paulo;
+    } else {
+      return old;
+    }
   }
 
   /**

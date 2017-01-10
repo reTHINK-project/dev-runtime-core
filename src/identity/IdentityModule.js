@@ -217,8 +217,10 @@ class IdentityModule {
     return new Promise(function(resolve, reject) {
       let splitURL = hypertyURL.split('://');
       if (splitURL[0] !== 'hyperty') {
+        debugger;
         _this._getHypertyFromDataObject(hypertyURL).then((returnedHypertyURL) => {
           let userURL = _this.registry.getHypertyOwner(returnedHypertyURL);
+          debugger;
           if (userURL) {
 
             for (let index in _this.identities) {
