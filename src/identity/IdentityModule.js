@@ -175,7 +175,9 @@ class IdentityModule {
           for (let index in _this.identities) {
             let identity = _this.identities[index];
             if (identity.identity === userURL) {
-              return resolve(identity.messageInfo);
+              // TODO check this getIdentityOfHyperty when we run on nodejs environment;
+              if (identity.hasOwnProperty('messageInfo')) return resolve(identity.messageInfo);
+              else return resolve(identity);
             }
           }
         } else {
@@ -439,15 +441,25 @@ class IdentityModule {
         } else {
           console.log('getIdentityAssertion for nodejs');
           let randomNumber = Math.floor((Math.random() * 10000) + 1);
+
+          let userProfile = {
+            avatar: 'https://lh3.googleusercontent.com/-WaCrjVMMV-Q/AAAAAAAAAAI/AAAAAAAAAAs/8OlVqCpSB9c/photo.jpg',
+            cn: 'test nodejs',
+            username: 'nodejs-' + randomNumber + '@nodejs.com',
+            userURL: 'user://nodejs.com/nodejs-' + randomNumber
+          };
+
           let identityBundle = {
             assertion: 'assertion',
             idp:'nodejs',
-            userProfile: {
-              avatar: 'https://lh3.googleusercontent.com/-WaCrjVMMV-Q/AAAAAAAAAAI/AAAAAAAAAAs/8OlVqCpSB9c/photo.jpg',
-              cn: 'test nodejs',
-              username: 'nodejs-' + randomNumber + '@nodejs.com',
-              userURL: 'user://nodejs.com/nodejs-' + randomNumber
-            }};
+            identity: 'user://nodejs.com/nodejs-' + randomNumber,
+            messageInfo: {
+              assertion: 'assertion',
+              idp:'nodejs',
+              userProfile: userProfile
+            },
+            userProfile: userProfile
+          };
           _this.currentIdentity = identityBundle;
           _this.identities.push(identityBundle);
           return resolve(identityBundle);

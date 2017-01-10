@@ -6,7 +6,7 @@ import ReThinkCtx from '../ReThinkCtx';
 
 class RuntimeCoreCtx extends ReThinkCtx {
 
-  constructor(idModule, runtimeRegistry, persistenceManager) {
+  constructor(idModule, runtimeRegistry, persistenceManager, runtimeCapabilities) {
     super();
     this.idModule = idModule;
     this.runtimeRegistry = runtimeRegistry;
@@ -14,6 +14,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
     this.serviceProviderPolicy = {};
     this.userPolicies = {};
     this.persistenceManager = persistenceManager;
+    this.runtimeCapabilities = runtimeCapabilities;
   }
 
   get subscription() {
@@ -106,29 +107,41 @@ class RuntimeCoreCtx extends ReThinkCtx {
   prepareToForward(message, isIncoming, result) {
     let _this = this;
     return new Promise((resolve, reject) => {
-      if (isIncoming & result) {
-        let isSubscription = message.type === 'subscribe';
-        let isFromRemoteSM = _this.isFromRemoteSM(message.from);
-        if (isSubscription & isFromRemoteSM) {
-          _this.doMutualAuthentication(message).then(() => {
-            resolve(message);
-          }, (error) => {
-            reject(error);
-          });
-        } else {
+
+      // TODO remove this validation. When the Nodejs auth was completed this should work like browser;
+      this.runtimeCapabilities.isAvailable('node').then(isNode => {
+
+        if (isNode) {
           resolve(message);
-        }
-      } else {
-        if (_this._isToCypherModule(message)) {
-          _this.idModule.encryptMessage(message).then((message) => {
-            resolve(message);
-          }, (error) => {
-            reject(error);
-          });
         } else {
-          resolve(message);
+
+          if (isIncoming & result) {
+            let isSubscription = message.type === 'subscribe';
+            let isFromRemoteSM = _this.isFromRemoteSM(message.from);
+            if (isSubscription & isFromRemoteSM) {
+              _this.doMutualAuthentication(message).then(() => {
+                resolve(message);
+              }, (error) => {
+                reject(error);
+              });
+            } else {
+              resolve(message);
+            }
+          } else {
+            if (_this._isToCypherModule(message)) {
+              _this.idModule.encryptMessage(message).then((message) => {
+                resolve(message);
+              }, (error) => {
+                reject(error);
+              });
+            } else {
+              resolve(message);
+            }
+          }
+
         }
-      }
+      });
+
     });
   }
 
