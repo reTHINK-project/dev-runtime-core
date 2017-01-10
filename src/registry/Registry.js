@@ -1300,14 +1300,14 @@ class Registry {
 
     // Process Runtime Core URLs
 
-    if (runtimeScheme.indexOf(urlScheme) === -1) {
+    if (runtimeScheme.indexOf(urlScheme) !== -1) {
       return url.includes(this.runtimeURL);
     }
 
     // Process Hyperty URLs
 
-    if (hypertyScheme.indexOf(urlScheme) === -1) {
-      return this.hypertiesList.hasOwnProperty(url) === -1;
+    if (hypertyScheme.indexOf(urlScheme) !== -1) {
+      return this.hypertiesList.hasOwnProperty(url);
     }
 
     // Process Data Object URLs
@@ -1316,7 +1316,7 @@ class Registry {
       url = url.substring(0, url.indexOf('/subscription'));
     }
 
-    return this.dataObjectList.hasOwnProperty(url) === -1;
+    return this.dataObjectList.hasOwnProperty(url);
   }
 
 }
