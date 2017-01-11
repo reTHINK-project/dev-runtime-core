@@ -120,6 +120,10 @@ class RuntimeCoreCtx extends ReThinkCtx {
   prepareToForward(message, isIncoming, result) {
     let _this = this;
     return new Promise((resolve, reject) => {
+
+      // hack to disable mutual authentication until #147 is fixed
+      resolve(message);
+
       if (isIncoming & result) {
         let isSubscription = message.type === 'subscribe';
         let isFromRemoteSM = _this.isFromRemoteSM(message.from);
