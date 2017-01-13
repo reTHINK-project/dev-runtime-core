@@ -837,7 +837,7 @@ class Registry {
             resolve({
               p2pHandler: resolvedHyperty.p2pHandler,
               p2pRequester: resolvedHyperty.p2pRequester,
-              runtimeURL: resolvedHyperty.runtimeURL
+              runtimeURL: resolvedHyperty.runtime
             });
           } else {
             reject('Hyperty with P2PHandler not found', reply.body.code);
