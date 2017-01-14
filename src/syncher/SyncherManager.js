@@ -199,7 +199,7 @@ class SyncherManager {
 
       let objectInfo = {
         name: msg.body.value.name,
-        schema: msg.body.value.schema,
+        schema: msg.body.schema,
         reporter: msg.body.value.reporter,
         resources: msg.body.value.resources
       };

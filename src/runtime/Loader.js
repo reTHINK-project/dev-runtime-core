@@ -4,8 +4,8 @@ import AddressAllocation from '../allocation/AddressAllocation';
 class Loader {
 
   constructor(runtimeURL, runtimeConfiguration, runtimeDescriptorsInstance) {
-    if (!runtimeConfiguration) throw Error('The descriptor need to know the runtime configuration');
-    if (!runtimeDescriptorsInstance) throw Error('The descriptor need to know the runtime Descriptor instance');
+    if (!runtimeConfiguration) throw   Error('[Runtime.Loader] The descriptor need to know the runtime configuration');
+    if (!runtimeDescriptorsInstance) throw   Error('[Runtime.Loader] The descriptor need to know the runtime Descriptor instance');
 
     this.runtimeConfiguration = runtimeConfiguration;
     this.descriptors = runtimeDescriptorsInstance;
@@ -86,7 +86,7 @@ class Loader {
   loadHyperty(hypertyDescriptorURL) {
 
     if (!this._readyToUse()) return false;
-    if (!hypertyDescriptorURL) throw new Error('Hyperty descriptor url parameter is needed');
+    if (!hypertyDescriptorURL) throw new   Error('[Runtime.Loader] Hyperty descriptor url parameter is needed');
 
     return new Promise((resolve, reject) => {
 
@@ -97,7 +97,7 @@ class Loader {
       let haveError = false;
 
       let errorReason = (reason) => {
-        console.error('Something failed on the deploy hyperty: ', reason);
+        console.  Error('[Runtime.Loader] Something failed on the deploy hyperty: ', reason);
         reject(reason);
       };
 
@@ -110,12 +110,12 @@ class Loader {
       // TODO: the request Module should be changed,
       // because at this moment it is incompatible with nodejs;
       // Probably we need to pass a factory like we do for sandboxes;
-      console.info('------------------ Hyperty ------------------------');
-      console.info('Get hyperty descriptor for :', hypertyDescriptorURL);
+      console.info('[Runtime.Loader] ------------------ Hyperty ------------------------');
+      console.info('[Runtime.Loader] Get hyperty descriptor for :', hypertyDescriptorURL);
       return this.descriptors.getHypertyDescriptor(hypertyDescriptorURL)
       .then((hypertyDescriptor) => {
         // at this point, we have completed "step 2 and 3" as shown in https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md
-        console.info('1: return hyperty descriptor');
+        console.info('[Runtime.Loader] 1: return hyperty descriptor');
 
         // hyperty contains the full path of the catalogue URL, e.g.
         // catalogue.rethink.eu/.well-known/..........
@@ -133,7 +133,7 @@ class Loader {
       .then((sourcePackage) => {
         if (haveError) return false;
 
-        console.info('2: return hyperty source code');
+        console.info('[Runtime.Loader] 2: return hyperty source code');
 
         // at this point, we have completed "step 4 and 5" as shown in https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md
 
@@ -152,7 +152,7 @@ class Loader {
       }, handleError)
       .then((policyResult) => {
         if (haveError) return false;
-        console.info('3: return policy engine result' + policyResult);
+        console.info('[Runtime.Loader] 3: return policy engine result' + policyResult);
 
         // we have completed step 6 to 9 of https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
         //
@@ -184,29 +184,36 @@ class Loader {
       }, handleError)
       .then((sandbox) => {
         if (haveError) return false;
-        console.info('4: return the sandbox', sandbox);
+        console.info('[Runtime.Loader] 4: return the sandbox', sandbox);
 
         // Return the sandbox indepentely if it running in the same sandbox or not
         // we have completed step 14 here.
         return sandbox;
       }, (reason) => {
         if (haveError) return false;
-        console.error('4.1: Try to register a new sandbox');
+        console.  Error('[Runtime.Loader] 4.1: Try to register a new sandbox');
 
         // check if the sandbox is registed for this hyperty descriptor url;
         // Make Steps xxx --- xxx
         // Instantiate the Sandbox
-        let sandbox = this._runtimeFactory.createSandbox();
 
-        sandbox.addListener('*', (msg) => {
-          this.messageBus.postMessage(msg);
+        let hypertyCapabilities = {};
+        if (_hypertyDescriptor && _hypertyDescriptor.hasOwnProperty('capabilities')) {
+          hypertyCapabilities = _hypertyDescriptor.stubCapabilities;
+        }
+
+        return this._runtimeFactory.createSandbox(hypertyCapabilities).then((sandbox) => {
+
+          sandbox.addListener('*', (msg) => {
+            this.messageBus.postMessage(msg);
+          });
+
+          return sandbox;
         });
-
-        return sandbox;
       }, handleError)
       .then((sandbox) => {
         if (haveError) return false;
-        console.info('5: return sandbox and register');
+        console.info('[Runtime.Loader] 5: return sandbox and register');
 
         _hypertySandbox = sandbox;
 
@@ -215,14 +222,14 @@ class Loader {
       }, handleError)
       .then((addresses) => {
         if (haveError) return false;
-        console.info('6: return the addresses for the hyperty');
+        console.info('[Runtime.Loader] 6: return the addresses for the hyperty');
 
         // Register hyperty
         return this.registry.registerHyperty(_hypertySandbox, hypertyDescriptorURL, _hypertyDescriptor, addresses);
       }, handleError)
       .then((hypertyURL) => {
         if (haveError) return false;
-        console.info('7: Hyperty url, after register hyperty', hypertyURL);
+        console.info('[Runtime.Loader] 7: Hyperty url, after register hyperty', hypertyURL);
 
         // we have completed step 16 of https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
         _hypertyURL = hypertyURL;
@@ -243,13 +250,13 @@ class Loader {
         try {
           return _hypertySandbox.deployComponent(_hypertySourcePackage.sourceCode, _hypertyURL, configuration);
         } catch (e) {
-          console.error('Error on deploy component:', e);
+          console.  Error('[Runtime.Loader] Error on deploy component:', e);
           reject(e);
         }
       }, handleError)
       .then((deployComponentStatus) => {
         if (haveError) return false;
-        console.info('8: Deploy component status for hyperty: ', deployComponentStatus);
+        console.info('[Runtime.Loader] 8: Deploy component status for hyperty: ', deployComponentStatus);
 
         // we have completed step 19 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
 
@@ -267,7 +274,7 @@ class Loader {
         resolve(hyperty);
 
         // we have completed step 21 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
-        console.info('------------------ END ------------------------');
+        console.info('[Runtime.Loader] ------------------ END ------------------------');
       }, handleError)
       .catch(errorReason);
     });
@@ -278,7 +285,8 @@ class Loader {
   * @param  {URL.URL}     domain          domain
   * @param  {Object}      p2pConfig       configuration of p2p
   */
-  loadStub(protostubURL, p2pConfig) {
+
+  loadStub(protostubURL) {
 
     if (!this._readyToUse()) return false;
     if (!protostubURL) throw new Error('ProtoStub descriptor url parameter is needed');
@@ -419,17 +427,7 @@ class Loader {
             }
           }
 
-          if (p2pConfig) {
-            try {
-              configuration = Object.assign(configuration, JSON.parse(p2pConfig));
-            } catch (e) {
-              configuration = Object.assign(configuration, p2pConfig);
-            }
-          }
-
           configuration.runtimeURL = this._runtimeURL;
-
-          console.info('[runtime Loader - LoadStub] - configuration: ', configuration);
 
           // Deploy Component step xxx
           try {
@@ -477,6 +475,7 @@ class Loader {
   * Deploy idpProxy from Catalogue URL or domain url
   * @param  {URL.URL}     domain          domain
   */
+
   loadIdpProxy(idpProxyURL) {
 
     if (!this._readyToUse()) return false;
@@ -661,10 +660,10 @@ class Loader {
 
     let status = false;
 
-    if (!this._runtimeURL) throw new Error('The loader need the runtime url address');
-    if (!this._messagesBus) throw new Error('The loader need the messageBus component');
-    if (!this._registry) throw new Error('The loader need the registry component');
-    if (!this._runtimeFactory) throw new Error('The loader need the runtime factory component');
+    if (!this._runtimeURL) throw new   Error('[Runtime.Loader] The loader need the runtime url address');
+    if (!this._messagesBus) throw new   Error('[Runtime.Loader] The loader need the messageBus component');
+    if (!this._registry) throw new   Error('[Runtime.Loader] The loader need the registry component');
+    if (!this._runtimeFactory) throw new   Error('[Runtime.Loader] The loader need the runtime factory component');
 
     status = true;
     return status;

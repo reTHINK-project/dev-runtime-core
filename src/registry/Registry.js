@@ -128,7 +128,7 @@ class Registry {
       let hasCriteria = msg.body.hasOwnProperty('criteria');
       let isURLResource, isUserResource, isHypertyResource;
 
-      if (msg.body.hasOwnProperty('resource')) {
+      if (msg.body.hasOwnProperty('resource') && msg.body.resource !== '.') {
         isURLResource = isURL(msg.body.resource);
         isUserResource = isUserURL(msg.body.resource);
         isHypertyResource = isHypertyURL(msg.body.resource);
@@ -938,8 +938,13 @@ class Registry {
 
     return new Promise(function(resolve,reject) {
 
-      let dividedURL = divideURL(url);
-      let domainURL = dividedURL.domain;
+      let domainURL;
+
+      if (url.includes('://'))
+        domainURL = divideURL(url).domain;
+      else {
+        domainURL = url;
+      }
 
       if (_this.protostubsList.hasOwnProperty(domainURL) && _this.protostubsList[domainURL].status === STATUS.DEPLOYED) {
         resolve(_this.protostubsList[domainURL]);
@@ -1144,7 +1149,7 @@ class Registry {
   */
   getSandbox(url) {
     if (!url) throw new Error('Parameter url needed');
-    console.log('[Registry] getSandbox: ', url);
+    console.log('[Registry getSandbox] getSandbox: ', url);
 
     let _this = this;
     return new Promise(function(resolve,reject) {
@@ -1160,7 +1165,13 @@ class Registry {
 
         if (!request) {
 
-          let domain = divideURL(url).domain;
+          let domain;
+
+          if (url.includes('://'))
+           domain = divideURL(url).domain;
+           else {
+             domain = url;
+           }
 
           // search in the sandboxes list for a entry containing the domain given
           for (let sandbox in _this.sandboxesList.sandbox) {
@@ -1199,6 +1210,11 @@ class Registry {
       let type = dividedURL.type;
       let islegacy;
 
+      if (url.includes(_this.runtimeURL)) {
+        console.error('[Registry - resolve] URL to be resolved should have listeners ', url);
+        reject('[Registry - resolve] URL to be resolved should have listeners ', url);
+      }
+
       // resolve the domain protostub in case of a message to global registry
 
       if (url.includes('global://registry')) {
@@ -1209,12 +1225,12 @@ class Registry {
         }
       }
 
-      _this.isLegacy(domainUrl).then((isLegacy) => {
+      _this.isLegacy(url).then((isLegacy) => {
 
         // if legacy it should resolve for <protocol>.<domain>
 
           if (isLegacy && type !== 'domain-idp')
-              domainUrl = type + '.' + getUserIdentityDomain(domainUrl);
+              domainUrl = type + '.' + getUserIdentityDomain(url);
 
           console.log('[Registry.resolve] domainUrl:', domainUrl);
 
@@ -1279,7 +1295,17 @@ class Registry {
         return resolve(false);
 
       console.log('[Registry] [Registry.Registry.isLegacy] ', url);
-      let domain = getUserIdentityDomain(url);
+
+      // TODO: to be defined in the runtime configuration
+      let nonLegacy = ["runtime","hyperty-runtime","domain","global","hyperty"];
+
+      let urlDivided = divideURL(url);
+
+      if (nonLegacy.indexOf(urlDivided.type) !== -1 || urlDivided.domain === _this._domain)
+        return resolve(false);
+
+      let domain = urlDivided.domain;
+
       console.log('[Registry] [Registry.Registry.isLegacy] domain: ', domain);
       if (_this.idpLegacyProxyList.hasOwnProperty(domain)) {
         let result = _this.idpLegacyProxyList[domain];
