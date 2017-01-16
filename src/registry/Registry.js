@@ -1126,10 +1126,12 @@ class Registry {
       if (p2pConfig) {
         if (p2pConfig.hasOwnProperty('isHandlerStub') && p2pConfig.isHandlerStub) isP2PHandler = p2pConfig.isHandlerStub;
         if (p2pConfig.hasOwnProperty('p2pRequesterStub')) P2PRequesterStub = p2pConfig.p2pRequesterStub;
-      }
+        runtimeProtoStubURL = 'runtime://p2p.' + stubID + '/protostub/' + generateGUID();
 
-      //TODO implement a unique number for the protostubURL
-      runtimeProtoStubURL = 'msg-node.' + stubID + '/protostub/' + generateGUID();
+      } else {
+          runtimeProtoStubURL = 'runtime://msg-node.' + stubID + '/protostub/' + generateGUID();
+        //TODO implement a unique number for the protostubURL
+          }
 
       if (isP2PHandler) {
 
@@ -1460,8 +1462,10 @@ class Registry {
 
               console.log('[Registry - resolve] loadStub with p2pRequester: ', hypertyInfo);
 
+              let p2pConfig = { p2pHandlerStub: hypertyInfo.runtimeURL, p2pRequesterStub: true };
+
               // TODO stub load
-              _this._loader.loadStub(hypertyInfo.p2pRequester).then((protostubInfo) => {
+              _this._loader.loadStub(hypertyInfo.p2pRequester, p2pConfig).then((protostubInfo) => {
                 p2pStructure.status = STATUS.DEPLOYED;
                 _this.p2pConnectionList[hypertyInfo.runtimeURL] = p2pStructure;
 

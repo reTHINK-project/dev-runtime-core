@@ -54,7 +54,7 @@ class PEP {
   }
 
   authorise(message) {
-    console.log('--- Policy Engine ---');
+    console.log('[Policy.PEP Authorise] ', message);
     console.log(message);
     if (!message) throw new Error('message is not defined');
     if (!message.from) throw new Error('message.from is not defined');
