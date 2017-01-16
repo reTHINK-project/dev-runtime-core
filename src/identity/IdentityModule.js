@@ -183,6 +183,7 @@ class IdentityModule {
         _this.registry.isLegacy(toUrl).then(function(result) {
           console.log('[Identity.IdentityModule.getToken] isLEGACY: ', result);
           if (result) {
+
             let token = _this.getAccessToken(toUrl);
             if (token)
               return resolve(token);
@@ -195,6 +196,9 @@ class IdentityModule {
               let token = _this.getAccessToken(toUrl);
               if (token)
                 return resolve(token);
+              else {
+                return reject('No Access token found');
+              }
             }, (err) => {
               console.error('[Identity.IdentityModule.getToken] error CallGeneratemethods');
               return reject(err);
@@ -273,9 +277,11 @@ class IdentityModule {
 
   getAccessToken(url) {
     let _this = this;
-    let urlSplit = url.split('.');
-    let length = urlSplit.length;
-    let domainToCheck = urlSplit[length - 2] + '.' + urlSplit[length - 1];
+
+  /*  let urlSplit = url.split('.');
+    let length = urlSplit.length;*/
+
+    let domainToCheck = divideURL(url).domain;
 
     for (let index in _this.identities) {
       let identity = _this.identities[index];
@@ -283,6 +289,7 @@ class IdentityModule {
         return identity.interworking.access_token;
       }
     }
+
     return null;
   }
 
