@@ -305,6 +305,7 @@ class Loader {
       let _runtimeProtoStubURL;
       let _stubSourcePackage;
       let haveError = false;
+      let stubId;
 
       let errorReason = (reason) => {
         console.  Error('[Runtime.Loader.loadStub]Something failed on the deploy of protocolstub: ', reason);
@@ -321,7 +322,7 @@ class Loader {
       let isP2PHandler = false;
       let isP2PRequester = false;
 
-      console.info('[Runtime.Loader.loadStub]------------------- ProtoStub ---------------------------\n');
+      console.info('[Runtime.Loader.loadStub] starting loading ', protostubURL, ' p2pconfig ', p2pConfig);
       console.info('[Runtime.Loader.loadStub]Discover or Create a new ProtoStub for domain: ', domain);
 
       // step 2 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
@@ -331,11 +332,14 @@ class Loader {
           // step 6 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
           discoverStub = this.registry.discoverP2PStub();
           isP2PHandler = true;
+          stubId = _this.runtimeURL;
         } else {
           isP2PRequester = true;
 
           // step 4 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-          let p2pHandlerRuntimeURL = p2pConfig.p2pHandlerStub;
+          let p2pHandlerRuntimeURL = p2pConfig.runtimeURL;
+          stubId = p2pHandlerRuntimeURL;
+
 
           // step 5 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
           discoverStub = this.registry.discoverP2PStub(p2pHandlerRuntimeURL);
@@ -344,14 +348,15 @@ class Loader {
       } else {
         // step 3 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
         discoverStub = this.registry.discoverProtostub(domain);
+        stubId = domain;
       }
 
       discoverStub.then((runtimeProtoStub) => {
         // Is registed?
-        console.info('[Runtime.Loader.loadStub]1. Proto Stub Discovered for ', domain, ': ', runtimeProtoStub);
-        if (isP2PHandler) console.info(runtimeProtoStub + ' is a P2PHandlerStub');
-        if (isP2PRequester) console.info(runtimeProtoStub + ' is a P2PRequesterStub');
-        if (!isP2PHandler && !isP2PRequester) console.info(runtimeProtoStub + ' is a regular msg node protostub');
+        console.info('[Runtime.Loader.loadStub]1. Proto Stub Discovered for ', protostubURL, ': ', runtimeProtoStub);
+        if (isP2PHandler) console.info('[Runtime.Loader.loadStub]' + runtimeProtoStub + ' is a P2PHandlerStub');
+        if (isP2PRequester) console.info('[Runtime.Loader.loadStub]' + runtimeProtoStub + ' is a P2PRequesterStub');
+        if (!isP2PHandler && !isP2PRequester) console.info('[Runtime.Loader.loadStub]' + runtimeProtoStub + ' is a regular msg node protostub');
 
         // step 23 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
         resolve(runtimeProtoStub);
@@ -437,7 +442,7 @@ class Loader {
           _stubSandbox = sandbox;
 
           // step 17 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-          return this.registry.registerStub(_stubSandbox, domain, p2pConfig);
+          return this.registry.registerStub(_stubSandbox, stubId, p2pConfig);
         }, handleError)
         .then((runtimeProtoStub) => {
           if (haveError) return false;

@@ -149,7 +149,8 @@ class RuntimeUA {
       console.log('P2PStubHandler: ', p2pStubHandler);
 
       let p2pConfig = {
-        isHandlerStub: true
+        isHandlerStub: true,
+        runtimeURL: this.runtimeURL
       };
 
       this.loadStub(p2pStubHandler, p2pConfig).then((result) => {

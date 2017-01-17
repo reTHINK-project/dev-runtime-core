@@ -32,7 +32,7 @@ import {divideURL, isHypertyURL, isURL, isUserURL, generateGUID} from '../utils/
 import Discovery from './Discovery';
 import DiscoveryServiceFramework from './DiscoveryServiceFramework';
 
-const STATUS = { DEPLOYED: 'deployed', PROGRESS: 'in-progress' };
+const STATUS = { CREATED: 'created', LIVE: 'live', DEPLOYED: 'deployed', PROGRESS: 'in-progress', DISCONNECTED: 'disconnected', DEAD: 'dead' };
 
 /*import IdentityManager from './IdentityManager';
 import Discovery from './Discovery';*/
@@ -94,6 +94,7 @@ class Registry {
     _this.subscribedDataObjectList = {};
     _this.sandboxesList = {sandbox: {}, appSandbox: {} };
     _this.pepList = {};
+    _this.registries = {};
 
     _this._domain = divideURL(_this.registryURL).domain;
     _this.sandboxesList.appSandbox[runtimeURL] = appSandbox;
@@ -1124,50 +1125,45 @@ class Registry {
       let P2PRequesterStub;
 
       if (p2pConfig) {
-        if (p2pConfig.hasOwnProperty('isHandlerStub') && p2pConfig.isHandlerStub) isP2PHandler = p2pConfig.isHandlerStub;
-        if (p2pConfig.hasOwnProperty('p2pRequesterStub')) P2PRequesterStub = p2pConfig.p2pRequesterStub;
-        runtimeProtoStubURL = 'runtime://p2p.' + stubID + '/protostub/' + generateGUID();
+        if (p2pConfig.hasOwnProperty('isHandlerStub') && p2pConfig.isHandlerStub){
+          isP2PHandler = p2pConfig.isHandlerStub;
+          runtimeProtoStubURL = _this.runtimeURL + '/p2phandler/' + generateGUID();
+          console.info('[Registry - registerStub - isP2PHandler] - ', runtimeProtoStubURL);
 
+          _this.p2pHandlerStub[stubID] = {
+            url: runtimeProtoStubURL,
+            status: STATUS.CREATED
+          };
+
+          _this.p2pHandlerAssociation[_this.runtimeURL] = [];
+
+          _this.sandboxesList.sandbox[runtimeProtoStubURL] = sandbox;
+          resolve(_this.p2pHandlerStub[stubID]);
+        } else {
+          P2PRequesterStub = p2pConfig.p2pRequesterStub;
+          runtimeProtoStubURL = _this.runtimeURL + '/p2prequester/' + generateGUID();
+          console.info('[Registry - registerStub - P2PRequesterStub] - ', P2PRequesterStub, ' - ', runtimeProtoStubURL);
+
+          // to be clarified what is this p2pHandlerAssociation
+
+          _this.p2pHandlerAssociation[_this.runtimeURL].push(runtimeProtoStubURL);
+          _this.p2pRequesterStub[stubID] = {
+            url: runtimeProtoStubURL,
+            status: STATUS.CREATED
+          };
+
+          _this.sandboxesList.sandbox[runtimeProtoStubURL] = sandbox;
+          resolve(_this.p2pRequesterStub[stubID]);
+        }
       } else {
-          runtimeProtoStubURL = 'runtime://msg-node.' + stubID + '/protostub/' + generateGUID();
-        //TODO implement a unique number for the protostubURL
-          }
-
-      if (isP2PHandler) {
-
-        console.info('[Registry - registerStub - isP2PHandler] - ', runtimeProtoStubURL);
-
-        _this.p2pHandlerStub[_this.runtimeURL] = {
-          url: runtimeProtoStubURL,
-          status: STATUS.DEPLOYED
-        };
-
-        _this.p2pHandlerAssociation[_this.runtimeURL] = [];
-
-        _this.sandboxesList.sandbox[runtimeProtoStubURL] = sandbox;
-        resolve(_this.p2pHandlerStub[_this.runtimeURL]);
-
-      } else if (!isP2PHandler && P2PRequesterStub) {
-
-        console.info('[Registry - registerStub - P2PRequesterStub] - ', P2PRequesterStub, ' - ', runtimeProtoStubURL);
-
-        _this.p2pHandlerAssociation[_this.runtimeURL].push(runtimeProtoStubURL);
-        _this.p2pRequesterStub[_this.runtimeURL] = {
-          url: runtimeProtoStubURL,
-          status: STATUS.DEPLOYED
-        };
-
-        _this.sandboxesList.sandbox[runtimeProtoStubURL] = sandbox;
-        resolve(_this.p2pRequesterStub[_this.runtimeURL]);
-
-      } else {
+        runtimeProtoStubURL = _this.runtimeURL + '/protostub/' + generateGUID();
 
         console.info('[Registry - registerStub - Normal Stub] - ', stubID);
 
         // TODO: Optimize this
         _this.protostubsList[stubID] = {
           url: runtimeProtoStubURL,
-          status: STATUS.DEPLOYED
+          status: STATUS.CREATED
         };
 
         // _this.protostubsList[domainURL] = runtimeProtoStubURL;
@@ -1181,6 +1177,44 @@ class Registry {
       _this._messageBus.addListener(runtimeProtoStubURL + '/status', (msg) => {
         if (msg.resource === msg.to + '/status') {
           console.log('RuntimeProtostubURL/status message: ', msg.body.value);
+
+          if (runtimeProtoStubURL.includes('protostub')) {
+
+            let filtered = Object.keys(_this.protostubList).filter((key) => {
+              	return _this.protostubList[key].url === runtimeProtoStubURL;
+              }).map((key) => {
+              	_this.protostubList[key].status = msg.body.value;
+              });
+          } else {
+
+
+            let remoteRuntimeURL = msg.body.resource;
+
+            let p2pConnection = _this.p2pConnectionList[remoteRuntimeURL];
+
+            if (p2pConnection) {
+              _this.p2pConnectionList[remoteRuntimeURL].status =  msg.body.value;
+              _this.p2pConnectionList[remoteRuntimeURL].url =  runtimeProtoStubURL;
+            } else {
+
+              p2pConnection = {
+                status: msg.body.value,
+                url: runtimeProtoStubURL
+              };
+
+              _this.p2pConnectionList[remoteRuntimeURL] =  p2pConnection;
+            }
+
+          if (runtimeProtoStubURL.includes('p2prequester')) {
+
+            let filtered = Object.keys(protostubList).filter((key) => {
+              	return protostubList[key].url === runtimeProtoStubURL;
+              }).map((key) => {
+              	p2pRequesterStub[key].status = msg.body.value;
+              });
+          }
+        }
+
         }
       });
     });
@@ -1441,33 +1475,32 @@ class Registry {
       } else {
         _this.checkHypertyP2PHandler(url).then((hypertyInfo) => {
 
-          let p2pStructure = _this.p2pConnectionList[hypertyInfo.runtimeURL];
+          let p2pConnection = _this.p2pConnectionList[hypertyInfo.runtimeURL];
 
-          if (!p2pStructure) {
-            p2pStructure = {};
+          if (!p2pConnection) {
+            p2pConnection = {};
           }
 
-          if (p2pStructure.connection) {
-            resolve(p2pStructure.connection);
+          if (p2pConnection.status === STATUS.LIVE) {
+            resolve(p2pConnection.url);
           } else {
-            // _this.p2pConnection[runtimeURL] = {status: status, connection: connection, p2pHandler: p2pHandler}
 
-            if (p2pStructure.status === STATUS.PROGRESS) {
+            if (p2pConnection.status === STATUS.CREATED) {
               _this.resolveNormalStub(url).then((returnURL) => {
                 resolve(returnURL);
               });
             } else {
-              p2pStructure.status = STATUS.PROGRESS;
-              _this.p2pConnectionList[hypertyInfo.runtimeURL] = p2pStructure;
+              p2pConnection.status = STATUS.CREATED;
+              _this.p2pConnectionList[hypertyInfo.runtimeURL] = p2pConnection;
 
               console.log('[Registry - resolve] loadStub with p2pRequester: ', hypertyInfo);
 
-              let p2pConfig = { p2pHandlerStub: hypertyInfo.runtimeURL, p2pRequesterStub: true };
+              let p2pConfig = { p2pHandler: hypertyInfo.runtimeURL, p2pRequesterStub: true };
 
               // TODO stub load
               _this._loader.loadStub(hypertyInfo.p2pRequester, p2pConfig).then((protostubInfo) => {
-                p2pStructure.status = STATUS.DEPLOYED;
-                _this.p2pConnectionList[hypertyInfo.runtimeURL] = p2pStructure;
+                p2pConnection.status = STATUS.CREATED;
+                _this.p2pConnectionList[hypertyInfo.runtimeURL] = p2pConnection;
 
                 resolve(protostubInfo.url);
               }).catch((error) => {
