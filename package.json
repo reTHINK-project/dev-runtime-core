@@ -28,7 +28,7 @@
   },
   "homepage": "https://rethink-project.eu/",
   "dependencies": {
-    "service-framework": "github:rethink-project/dev-service-framework#dev-proxy-observe"
+    "service-framework": "github:rethink-project/dev-service-framework#develop"
   },
   "devDependencies": {
     "babel-plugin-add-module-exports": "^0.2.1",
