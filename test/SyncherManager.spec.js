@@ -208,7 +208,12 @@ describe('SyncherManager', function() {
         //we may have some problems in the time sequence here.
         //change-msg can reach the observer first
         subscribeEvent.accept();
-        dor.data.test = ['a', 'b', 'c'];
+
+        // TODO: We had the settimeout because when the proxyobserve trigger will trigger with this version of object..
+        // this hack should make it trigger in next cycle;
+        setTimeout(() => {
+          dor.data.test = ['a', 'b', 'c'];
+        });
       });
     });
   });
