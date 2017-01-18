@@ -13,9 +13,6 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'node_modules/object.observe/dist/object-observe.js',
-      'node_modules/array.observe/array-observe.js',
-      'src/**/*.js',
       'test/**/*.spec.js'
     ],
 
@@ -60,7 +57,19 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['PhantomJS'],
+    browsers: ['CustomChrome'],
+
+    // you can define custom flags
+    customLaunchers: {
+      CustomChrome: {
+        base: 'Chrome',
+        flags: [
+          '--disable-web-security',
+          '--ignore-certificate-errors'
+        ],
+        debug: false
+      }
+    },
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
