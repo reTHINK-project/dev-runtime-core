@@ -1,4 +1,10 @@
 {
+  "title": "Service Framework",
   "source": "./src",
-  "destination": "./docs/api"
+  "destination": "./docs/api",
+  "lint": true,
+  "test": {
+    "type": "mocha",
+    "source": "./test"
+  }
 }
