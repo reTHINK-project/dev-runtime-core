@@ -1,6 +1,5 @@
 // Unit test modules
 import chai from 'chai';
-import sinon from 'sinon';
 import chaiAsPromised from 'chai-as-promised';
 import sinonChai from 'sinon-chai';
 
