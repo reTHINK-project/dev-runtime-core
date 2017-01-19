@@ -1040,21 +1040,20 @@ class Registry {
     if (!url) throw new Error('Parameter url needed');
     let _this = this;
 
-    return new Promise(function(resolve,reject) {
+    let dividedURL = divideURL(url);
+    let domainURL = dividedURL.domain;
 
-      let dividedURL = divideURL(url);
-      let domainURL = dividedURL.domain;
+    if (_this.protostubsList.hasOwnProperty(domainURL) && _this.protostubsList[domainURL].status === STATUS.LIVE) {
+      return (_this.protostubsList[domainURL]);
+    } else {
 
-      if (_this.protostubsList.hasOwnProperty(domainURL) && _this.protostubsList[domainURL].status === STATUS.DEPLOYED) {
-        resolve(_this.protostubsList[domainURL]);
-      } else {
-        _this.protostubsList[domainURL] = {
-          status: STATUS.PROGRESS
-        };
+      _this.protostubsList[domainURL] = {
+        status: STATUS.CREATED
+      };
 
-        reject('requestUpdate couldn\'t get the ProtostubURL');
-      }
-    });
+      throw new Error('[Registry - discoverProtoStub ] Message Node Protostub Not Found. Creating one');
+
+    }
 
   }
 
@@ -1066,34 +1065,31 @@ class Registry {
   discoverP2PStub(runtimeURL) {
     let _this = this;
 
-    return new Promise((resolve,reject) => {
+    if (runtimeURL) {
 
-      if (runtimeURL) {
-
-        if (_this.p2pRequesterStub.hasOwnProperty(runtimeURL) && _this.p2pRequesterStub[runtimeURL].status === STATUS.DEPLOYED) {
-          resolve(_this.p2pRequesterStub[runtimeURL]);
-        } else {
-          _this.p2pRequesterStub[runtimeURL] = {
-            status: STATUS.PROGRESS
-          };
-
-          reject('requestUpdate couldn\'t get the P2PRequesterStub');
-        }
+      if (_this.p2pRequesterStub.hasOwnProperty(runtimeURL) && _this.p2pRequesterStub[runtimeURL].status === STATUS.LIVE) {
+        return (_this.p2pRequesterStub[runtimeURL]);
       } else {
+        _this.p2pRequesterStub[runtimeURL] = {
+          status: STATUS.CREATED
+        };
 
-        if (_this.p2pHandlerStub.hasOwnProperty(_this.runtimeURL) && _this.p2pHandlerStub[_this.runtimeURL].status === STATUS.DEPLOYED) {
-          resolve(_this.p2pHandlerStub[_this.runtimeURL]);
-        } else {
-          _this.p2pHandlerStub[_this.runtimeURL] = {
-            status: STATUS.PROGRESS
-          };
-
-          reject('requestUpdate couldn\'t get the P2PHandlerStub');
-        }
+        throw new Error('[Registry - discoverP2PStub ] P2P Requester Stub Not Found. Creating one');
 
       }
+    } else {
 
-    });
+      if (_this.p2pHandlerStub.hasOwnProperty(_this.runtimeURL) && _this.p2pHandlerStub[_this.runtimeURL].status === STATUS.LIVE) {
+        return (_this.p2pHandlerStub[_this.runtimeURL]);
+      } else {
+        _this.p2pHandlerStub[_this.runtimeURL] = {
+          status: STATUS.CREATED
+        };
+
+        throw new Error('[Registry - discoverP2PStub ] P2P Handler Stub Not Found. Creating one');
+      }
+
+    }
 
   }
 
@@ -1110,6 +1106,8 @@ class Registry {
 
       let runtimeProtoStubURL;
 
+      debugger;
+
       //check if messageBus is registered in registry or not
       if (_this._messageBus === undefined) {
         reject('MessageBus not found on registerStub');
@@ -1125,7 +1123,7 @@ class Registry {
       let P2PRequesterStub;
 
       if (p2pConfig) {
-        if (p2pConfig.hasOwnProperty('isHandlerStub') && p2pConfig.isHandlerStub){
+        if (p2pConfig.hasOwnProperty('isHandlerStub') && p2pConfig.isHandlerStub) {
           isP2PHandler = p2pConfig.isHandlerStub;
           runtimeProtoStubURL = _this.runtimeURL + '/p2phandler/' + generateGUID();
           console.info('[Registry - registerStub - isP2PHandler] - ', runtimeProtoStubURL);

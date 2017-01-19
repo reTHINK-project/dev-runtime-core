@@ -294,6 +294,8 @@ class Loader {
 
       // to analyse if domain for p2pHandlers should be something else and not the default domain itself
 
+      debugger;
+
       let domain = divideURL(protostubURL).domain;
 
       if (!domain) {
@@ -326,43 +328,41 @@ class Loader {
       console.info('[Runtime.Loader.loadStub]Discover or Create a new ProtoStub for domain: ', domain);
 
       // step 2 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-      if (p2pConfig) {
+      try {
+        if (p2pConfig) {
 
-        if (p2pConfig.hasOwnProperty('isHandlerStub') && p2pConfig.isHandlerStub) {
-          // step 6 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-          discoverStub = this.registry.discoverP2PStub();
-          isP2PHandler = true;
-          stubId = _this.runtimeURL;
+          if (p2pConfig.hasOwnProperty('isHandlerStub') && p2pConfig.isHandlerStub) {
+            // step 6 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+            isP2PHandler = true;
+            stubId = this.runtimeURL;
+            discoverStub = this.registry.discoverP2PStub();
+          } else {
+            isP2PRequester = true;
+            let p2pHandlerRuntimeURL = p2pConfig.runtimeURL;
+            stubId = p2pHandlerRuntimeURL;
+
+            // step 4 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+
+            // step 5 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+            discoverStub = this.registry.discoverP2PStub(p2pHandlerRuntimeURL);
+          }
+
         } else {
-          isP2PRequester = true;
-
-          // step 4 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-          let p2pHandlerRuntimeURL = p2pConfig.runtimeURL;
-          stubId = p2pHandlerRuntimeURL;
-
-
-          // step 5 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-          discoverStub = this.registry.discoverP2PStub(p2pHandlerRuntimeURL);
+          // step 3 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          stubId = domain;
+          discoverStub = this.registry.discoverProtostub(domain);
         }
 
-      } else {
-        // step 3 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-        discoverStub = this.registry.discoverProtostub(domain);
-        stubId = domain;
-      }
-
-      discoverStub.then((runtimeProtoStub) => {
         // Is registed?
-        console.info('[Runtime.Loader.loadStub]1. Proto Stub Discovered for ', protostubURL, ': ', runtimeProtoStub);
-        if (isP2PHandler) console.info('[Runtime.Loader.loadStub]' + runtimeProtoStub + ' is a P2PHandlerStub');
-        if (isP2PRequester) console.info('[Runtime.Loader.loadStub]' + runtimeProtoStub + ' is a P2PRequesterStub');
-        if (!isP2PHandler && !isP2PRequester) console.info('[Runtime.Loader.loadStub]' + runtimeProtoStub + ' is a regular msg node protostub');
+        console.info('[Runtime.Loader.loadStub]1. Proto Stub Discovered for ', protostubURL, ': ', discoverStub);
 
         // step 23 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-        resolve(runtimeProtoStub);
+        resolve(discoverStub);
         console.info(' [Runtime.Loader]------------------- END ---------------------------\n');
-      })
-      .catch((reason) => {
+
+      }
+
+      catch (reason) {
 
         // is not registed?
         console.info('[Runtime.Loader.loadStub]1. Proto Stub not found ' + reason);
@@ -509,7 +509,7 @@ class Loader {
         }, handleError)
         .catch(errorReason);
 
-      });
+      };
 
     });
 
