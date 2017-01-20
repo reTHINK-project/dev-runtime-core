@@ -982,7 +982,7 @@ class Registry {
         domainURL = domainURL.substring(domainURL.indexOf('.') + 1);
       }
 
-      runtimeProtoStubURL = 'msg-node.' + domainURL + '/protostub/' + generateGUID();
+      runtimeProtoStubURL = _this.runtimeURL + '/protostub/' + generateGUID();
 
       // TODO: Optimize this
       // Proxy;
