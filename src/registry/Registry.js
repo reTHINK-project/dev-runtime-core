@@ -876,13 +876,13 @@ class Registry {
         if (_this._messageBus === undefined) {
           reject('MessageBus not found on registerStub');
         } else {
-          //call check if the protostub exist
-          _this.resolve('hyperty-runtime://' + domainUrl).then(function(a) {
-            console.log('[registry resolve] - ', a);
-            return _this.storageManager.get('registry:HypertyURLs');
-          }).then((urlsList) => {
+          //call check if the protostub exist: to be removed
+          /*  _this.resolve(domainUrl).then(function(a) {
+            console.log('[Registry registerHyperty] stub to domain registry- ', a);*/
 
-            console.log('[registry storageManager] - ', urlsList);
+          _this.storageManager.get('registry:HypertyURLs').then((urlsList) => {
+
+            console.log('[Registry registerHyperty] storageManager] - ', urlsList);
 
             _this._getResourcesAndSchemes(descriptor).then((value) => {
 
@@ -921,7 +921,7 @@ class Registry {
                 let message;
 
                 if (addressURL.newAddress) {
-                  console.log('registering new Hyperty URL', addressURL.address[0]);
+                  console.log('[Registry registerHyperty] registering new Hyperty URL', addressURL.address[0]);
 
                   messageValue = {
                     user: identityURL,
@@ -936,12 +936,12 @@ class Registry {
                     status: status
                   };
 
-                  console.log('registerHyperty: messageValue ', messageValue);
+                  console.log('[Registry registerHyperty] registering new Hyperty at domain registry ', messageValue);
 
                   message = {type:'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: messageValue, policy: 'policy'}};
 
                 } else {
-                  console.log('registering previously registered Hyperty URL', addressURL.address[0]);
+                  console.log('[Registry registerHyperty] registering previously registered Hyperty URL', addressURL.address[0]);
 
                   message = {
                     type: 'update',
@@ -952,10 +952,10 @@ class Registry {
 
                 }
 
-                console.log('[RegisterHyperty - message] - ', message);
+                console.log('[Registry registerHyperty] updating Hyperty registration at domain registry  - ', message);
 
                 _this._messageBus.postMessage(message, (reply) => {
-                  console.log('===> RegisterHyperty Reply: ', reply);
+                  console.log('[Registry registerHyperty] Hyperty registration update response: ', reply);
 
                   if (reply.body.code === 200) {
                     resolve(addressURL.address[0]);
@@ -982,19 +982,19 @@ class Registry {
                     body: { resource: addressURL.address[0], value: {status: 'live'} }};
 
                   _this._messageBus.postMessage(message, (reply) => {
-                    console.log('===> KeepAlive Reply: ', reply);
+                    console.log('[Registry registerHyperty] KeepAlive Reply: ', reply);
                   });
                 },(((_this.expiresTime / 1.1) / 2) * 1000));
 
               }).catch(function(reason) {
-                console.log('Address Reason: ', reason);
+                console.log('[Registry registerHyperty] Error: ', reason);
                 reject(reason);
               });
             });
           });
         }
       }, function(err) {
-        reject('Failed to obtain an identity', err);
+        reject('[Registry registerHyperty] Failed to obtain an identity', err);
       });
     });
   }
@@ -1113,7 +1113,7 @@ class Registry {
         reject('MessageBus not found on registerStub');
       }
 
-      console.info('[Registry - registerStub] - ', stubID);
+      console.info('[Registry - registerStub] - stubID ', stubID);
 
       if (!stubID.indexOf('msg-node.')) {
         stubID = stubID.substring(stubID.indexOf('.') + 1);
@@ -1493,7 +1493,7 @@ class Registry {
 
               console.log('[Registry - resolve] loadStub with p2pRequester: ', hypertyInfo);
 
-              let p2pConfig = { p2pHandler: hypertyInfo.runtimeURL, p2pRequesterStub: true };
+              let p2pConfig = { runtimeURL: hypertyInfo.runtimeURL, p2pRequesterStub: true };
 
               // TODO stub load
               _this._loader.loadStub(hypertyInfo.p2pRequester, p2pConfig).then((protostubInfo) => {

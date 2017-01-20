@@ -470,7 +470,7 @@ class Loader {
             }
           }
 
-          configuration.runtimeURL = this._runtimeURL;
+          // configuration.runtimeURL = this._runtimeURL;
 
           // step 24 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
           try {
@@ -498,7 +498,7 @@ class Loader {
             console.log('[Runtime.Loader.loadStub] p2pConfig: ', p2pConfig);
 
             if (p2pConfig.hasOwnProperty('isHandlerStub')) stub = this.registry.p2pHandlerStub[this._runtimeURL];
-            if (p2pConfig.hasOwnProperty('p2pRequesterStub')) stub = this.registry.p2pRequesterStub[this._runtimeURL];
+            if (p2pConfig.hasOwnProperty('p2pRequesterStub')) stub = this.registry.p2pRequesterStub[p2pConfig.runtimeURL];
           } else {
             stub = this.registry.protostubsList[domain];
           }
