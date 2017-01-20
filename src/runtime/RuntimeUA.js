@@ -157,7 +157,7 @@ class RuntimeUA {
         this.messageBus = new MessageBus(this.registry);
 
         // Instantiate the Policy Engine
-        this.policyEngine = new PEP(new RuntimeCoreCtx(this.identityModule, this.registry, this.storageManager));
+        this.policyEngine = new PEP(new RuntimeCoreCtx(this.identityModule, this.registry, this.storageManager, this.runtimeCapabilities));
 
         this.messageBus.pipeline.handlers = [
 

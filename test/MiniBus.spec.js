@@ -1,5 +1,7 @@
-import expect from 'expect.js';
+import chai from 'chai';
 import MiniBus from '../src/bus/MiniBus';
+
+let expect = chai.expect;
 
 describe('MiniBus', function() {
   it('simple sending message', function(done) {
@@ -51,7 +53,7 @@ describe('MiniBus', function() {
 
       setTimeout(() => {
         //expect not to enter in the hyper-1 listener
-        expect(msgResult).to.be.empty();
+        expect(msgResult).to.be.empty;
         done();
       });
     });
