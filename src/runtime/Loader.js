@@ -294,8 +294,6 @@ class Loader {
 
       // to analyse if domain for p2pHandlers should be something else and not the default domain itself
 
-      debugger;
-
       let domain = divideURL(protostubURL).domain;
 
       if (!domain) {
@@ -338,7 +336,7 @@ class Loader {
             discoverStub = this.registry.discoverP2PStub();
           } else {
             isP2PRequester = true;
-            let p2pHandlerRuntimeURL = p2pConfig.runtimeURL;
+            let p2pHandlerRuntimeURL = p2pConfig.remoteRuntimeURL;
             stubId = p2pHandlerRuntimeURL;
 
             // step 4 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
@@ -470,7 +468,9 @@ class Loader {
             }
           }
 
-          // configuration.runtimeURL = this._runtimeURL;
+          // required for protostub session
+
+           configuration.runtimeURL = this._runtimeURL;
 
           // step 24 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
           try {
@@ -498,7 +498,7 @@ class Loader {
             console.log('[Runtime.Loader.loadStub] p2pConfig: ', p2pConfig);
 
             if (p2pConfig.hasOwnProperty('isHandlerStub')) stub = this.registry.p2pHandlerStub[this._runtimeURL];
-            if (p2pConfig.hasOwnProperty('p2pRequesterStub')) stub = this.registry.p2pRequesterStub[p2pConfig.runtimeURL];
+            if (p2pConfig.hasOwnProperty('p2pRequesterStub')) stub = this.registry.p2pRequesterStub[p2pConfig.remoteRuntimeURL];
           } else {
             stub = this.registry.protostubsList[domain];
           }

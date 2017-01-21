@@ -40,37 +40,26 @@
  */
 export function divideURL(url) {
 
-  if (!url) throw Error('URL is needed to split');
 
-  // let re = /([a-zA-Z-]*)?:\/\/(?:\.)?([-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b)*(\/[\/\d\w\.-]*)*(?:[\?])*(.+)*/gi;
-  let re = /([a-zA-Z-]*):\/\/(?:\.)?([-a-zA-Z0-9@:%._\+~#=]{2,256})([-a-zA-Z0-9@:%._\+~#=\/]*)/gi;
-  let subst = '$1,$2,$3';
-  let parts = url.replace(re, subst).split(',');
+    // let re = /([a-zA-Z-]*)?:\/\/(?:\.)?([-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b)*(\/[\/\d\w\.-]*)*(?:[\?])*(.+)*/gi;
+    let re = /([a-zA-Z-]*):\/\/(?:\.)?([-a-zA-Z0-9@:%._\+~#=]{2,256})([-a-zA-Z0-9@:%._\+~#=\/]*)/gi;
+    let subst = '$1,$2,$3';
+    let parts = url.replace(re, subst).split(',');
 
-  // If the url has no protocol, the default protocol set is https
-  if (parts[0] === url) {
-    parts[0] = 'https';
-    parts[1] = url;
-  }
+    // If the url has no protocol, the default protocol set is https
+    if (parts[0] === url) {
+      parts[0] = 'https';
+      parts[1] = url;
+    }
 
-  let result = {
-    type: parts[0],
-    domain: parts[1],
-    identity: parts[2]
-  };
+    let result = {
+      type: parts[0],
+      domain: parts[1],
+      identity: parts[2]
+    };
 
-  return result;
-}
+    return result;
 
-export function divideEmail(email) {
-  let indexOfAt = email.indexOf('@');
-
-  let result = {
-    username: email.substring(0, indexOfAt),
-    domain: email.substring(indexOfAt + 1, email.length)
-  };
-
-  return result;
 }
 
 /**

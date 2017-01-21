@@ -906,7 +906,7 @@ class Registry {
                   reject('Wrong SandboxType');
                 }
 
-                let p2pHandler = runtimeUtils.runtimeDescriptor.p2pHandlerStub;
+                let p2pHandler = _this.p2pHandlerStub[_this.runtimeURL].url;
                 let p2pRequester = runtimeUtils.runtimeDescriptor.p2pRequesterStub;
                 let runtime = _this.runtimeURL;
                 let status = 'live';
@@ -947,7 +947,7 @@ class Registry {
                     type: 'update',
                     to: 'domain://registry.' + _this.registryDomain + '/',
                     from: _this.registryURL,
-                    body: {resource: addressURL.address[0]/*, value: 'live', attribute: 'status'*/}
+                    body: {resource: addressURL.address[0], value: { status: 'live', user: identityURL, p2pHandler: p2pHandler }}
                   };
 
                 }
@@ -1106,8 +1106,6 @@ class Registry {
 
       let runtimeProtoStubURL;
 
-      debugger;
-
       //check if messageBus is registered in registry or not
       if (_this._messageBus === undefined) {
         reject('MessageBus not found on registerStub');
@@ -1125,7 +1123,7 @@ class Registry {
       if (p2pConfig) {
         if (p2pConfig.hasOwnProperty('isHandlerStub') && p2pConfig.isHandlerStub) {
           isP2PHandler = p2pConfig.isHandlerStub;
-          runtimeProtoStubURL = _this.runtimeURL + '/p2phandler/' + generateGUID();
+          runtimeProtoStubURL = 'runtime://' + divideURL(stubID) + '/p2phandler/' + generateGUID();
           console.info('[Registry - registerStub - isP2PHandler] - ', runtimeProtoStubURL);
 
           _this.p2pHandlerStub[stubID] = {
@@ -1139,7 +1137,7 @@ class Registry {
           resolve(_this.p2pHandlerStub[stubID]);
         } else {
           P2PRequesterStub = p2pConfig.p2pRequesterStub;
-          runtimeProtoStubURL = _this.runtimeURL + '/p2prequester/' + generateGUID();
+          runtimeProtoStubURL = 'runtime://' + divideURL(p2pConfig.remoteRuntimeURL).domain + '/p2prequester/' + generateGUID();
           console.info('[Registry - registerStub - P2PRequesterStub] - ', P2PRequesterStub, ' - ', runtimeProtoStubURL);
 
           // to be clarified what is this p2pHandlerAssociation
@@ -1154,7 +1152,7 @@ class Registry {
           resolve(_this.p2pRequesterStub[stubID]);
         }
       } else {
-        runtimeProtoStubURL = _this.runtimeURL + '/protostub/' + generateGUID();
+        runtimeProtoStubURL = 'runtime://' + stubID + '/protostub/' + generateGUID();
 
         console.info('[Registry - registerStub - Normal Stub] - ', stubID);
 
@@ -1493,7 +1491,7 @@ class Registry {
 
               console.log('[Registry - resolve] loadStub with p2pRequester: ', hypertyInfo);
 
-              let p2pConfig = { runtimeURL: hypertyInfo.runtimeURL, p2pRequesterStub: true };
+              let p2pConfig = { remoteRuntimeURL: hypertyInfo.runtimeURL, p2pHandler: hypertyInfo.p2pHandler, p2pRequesterStub: true };
 
               // TODO stub load
               _this._loader.loadStub(hypertyInfo.p2pRequester, p2pConfig).then((protostubInfo) => {
