@@ -1123,7 +1123,7 @@ class Registry {
       if (p2pConfig) {
         if (p2pConfig.hasOwnProperty('isHandlerStub') && p2pConfig.isHandlerStub) {
           isP2PHandler = p2pConfig.isHandlerStub;
-          runtimeProtoStubURL = 'runtime://' + divideURL(stubID) + '/p2phandler/' + generateGUID();
+          runtimeProtoStubURL = 'runtime://' + divideURL(stubID).domain + '/p2phandler/' + generateGUID();
           console.info('[Registry - registerStub - isP2PHandler] - ', runtimeProtoStubURL);
 
           _this.p2pHandlerStub[stubID] = {
