@@ -37,12 +37,14 @@ class IdentityModule {
   /**
   * This is the constructor to initialise the Identity Module it does not require any input.
   */
-  constructor(runtimeURL, runtimeCapabilities) {
+  constructor(runtimeURL, runtimeCapabilities, storageManager) {
     let _this = this;
 
     if (!runtimeURL) throw new Error('runtimeURL is missing.');
+    if (!storageManager) throw new Error('storageManager is missing');
 
     _this._runtimeURL = runtimeURL;
+    _this.storageManager = storageManager;
     _this._idmURL = _this._runtimeURL + '/idm';
     _this._guiURL = _this._runtimeURL + '/identity-gui';
     _this.runtimeCapabilities = runtimeCapabilities;
@@ -74,6 +76,8 @@ class IdentityModule {
     // verification of nodeJS, and in case it is nodeJS then disable encryption
     // TODO improve later, this exists because the crypto lib uses browser cryptographic methods
     //_this.isToUseEncryption = (window) ? true : false;
+
+    _this._loadIdentities();
 
   }
 
@@ -141,6 +145,20 @@ class IdentityModule {
     }
 
     throw 'identity not found';
+  }
+
+  _loadIdentities() {
+    let _this = this;
+    return new Promise((resolve) => {
+
+      _this.storageManager.get('idModule:identities').then((identities) => {
+
+        if (identities) {
+          _this.identities = identities;
+        }
+        resolve();
+      });
+    });
   }
 
   deployGUI() {
@@ -273,30 +291,6 @@ class IdentityModule {
     } else {
       return 'domain-idp://' + idpDomain;
     }
-  }
-
-  /**
-  * Function to login a user within the session, it will start the process to obtain an Identity from a user, including the request for an identity Assertion. The function returns a promise with the token received by the idpProxy.
-  *
-  * @param  {Identifier}      identifier      identifier
-  * @param  {Scope}           scope           scope
-  * @return {Promise}         Promise         IDToken containing the user information
-  */
-  loginWithRP(identifier, scope) {
-    let _this = this;
-
-    return new Promise(function(resolve, reject) {
-
-      //TODO remove this verification and refactor this part
-      _this.currentIdentity = undefined;
-      _this.getIdentityAssertion('identifier', 'origin', 'hint', identifier).then(function(value) {
-        console.log('loginWithRP');
-        resolve(value);
-      }, function(err) {
-        console.log('loginWithRP err');
-        reject(err);
-      });
-    });
   }
 
   /**
@@ -462,7 +456,10 @@ class IdentityModule {
           };
           _this.currentIdentity = identityBundle;
           _this.identities.push(identityBundle);
-          return resolve(identityBundle);
+          _this.storageManager.set('idModule:identities', 0, _this.identities).then(() => {
+
+            return resolve(identityBundle);
+          });
         }
 
       }).catch(error => {
@@ -593,7 +590,10 @@ class IdentityModule {
       } else {
         _this.emailsList.push(email);
         _this.identities.push(result);
-        resolve(newIdentity);
+        _this.storageManager.set('idModule:identities', 0, _this.identities).then(() => {
+
+          resolve(newIdentity);
+        });
       }
 
     });
@@ -747,52 +747,59 @@ class IdentityModule {
       } else if (isFromHyperty && isToDataObject) {
         console.log('dataObject value to encrypt: ', message.body.value);
 
-        let dataObjectKey = _this.dataObjectSessionKeys[dataObjectURL];
+        // TIAGO - persistence issue #147
+        _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
+          let dataObjectKey = sessionKeys[dataObjectURL];
 
-        //if no key exists, create a new one if is the reporter of dataObject
-        if (!dataObjectKey) {
-          let isHypertyReporter = _this.registry.getReporterURLSynchonous(dataObjectURL);
+          //if no key exists, create a new one if is the reporter of dataObject
+          if (!dataObjectKey) {
+            let isHypertyReporter = _this.registry.getReporterURLSynchonous(dataObjectURL);
 
-          // if the hyperty is the reporter of the dataObject then generates a session key
-          if (isHypertyReporter && isHypertyReporter === message.from) {
+            // if the hyperty is the reporter of the dataObject then generates a session key
+            if (isHypertyReporter && isHypertyReporter === message.from) {
 
-            let sessionKey = _this.crypto.generateRandom();
-            _this.dataObjectSessionKeys[dataObjectURL] = {sessionKey: sessionKey, isToEncrypt: true};
+              let sessionKey = _this.crypto.generateRandom();
+              _this.dataObjectSessionKeys[dataObjectURL] = {sessionKey: sessionKey, isToEncrypt: true};
 
-            dataObjectKey = _this.dataObjectSessionKeys[dataObjectURL];
+              // TIAGO - persistence issue #147
+              _this.storageManager.set('dataObjectSessionKeys', 0, _this.dataObjectSessionKeys);
+
+              dataObjectKey = _this.dataObjectSessionKeys[dataObjectURL];
+            }
           }
-        }
 
-        //check if there is already a session key for the chat room
-        if (dataObjectKey) {
+          //check if there is already a session key for the chat room
+          if (dataObjectKey) {
 
-          // and if is to apply encryption, encrypt the messages
-          if (dataObjectKey.isToEncrypt) {
-            let iv = _this.crypto.generateIV();
+            // and if is to apply encryption, encrypt the messages
+            if (dataObjectKey.isToEncrypt) {
+              let iv = _this.crypto.generateIV();
 
-            _this.crypto.encryptAES(dataObjectKey.sessionKey, _this.crypto.encode(JSON.stringify(message.body.value)), iv).then(encryptedValue => {
+              _this.crypto.encryptAES(dataObjectKey.sessionKey, _this.crypto.encode(JSON.stringify(message.body.value)), iv).then(encryptedValue => {
 
-              let filteredMessage = _this._filterMessageToHash(message, message.body.value + iv, dataObjectKey.sessionKey);
+                let filteredMessage = _this._filterMessageToHash(message, message.body.value + iv, dataObjectKey.sessionKey);
 
-              _this.crypto.hashHMAC(dataObjectKey.sessionKey, filteredMessage).then(hash => {
-                //console.log('hash ', hash);
+                _this.crypto.hashHMAC(dataObjectKey.sessionKey, filteredMessage).then(hash => {
+                  //console.log('hash ', hash);
 
-                let newValue = {value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv), hash: _this.crypto.encode(hash)};
+                  let newValue = {value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv), hash: _this.crypto.encode(hash)};
 
-                message.body.value = JSON.stringify(newValue);
-                resolve(message);
+                  message.body.value = JSON.stringify(newValue);
+                  resolve(message);
+                });
               });
-            });
 
-          // if not, just send the message
+            // if not, just send the message
+            } else {
+              resolve(message);
+            }
+
+            // start the generation of a new session Key
           } else {
-            resolve(message);
+            reject('failed to decrypt message');
           }
 
-          // start the generation of a new session Key
-        } else {
-          reject('failed to decrypt message');
-        }
+        });
       }
     });
   }
@@ -882,44 +889,47 @@ class IdentityModule {
       } else if (isFromHyperty && isToDataObject) {
         console.log('dataObject value to decrypt: ', message.body);
 
-        let dataObjectKey = _this.dataObjectSessionKeys[dataObjectURL];
+        // TIAGO - persistence issue #147
+        _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
+          let dataObjectKey = sessionKeys[dataObjectURL];
 
-        if (dataObjectKey) {
+          if (dataObjectKey) {
 
-          //check if is to apply encryption
-          if (dataObjectKey.isToEncrypt) {
-            let parsedValue = JSON.parse(message.body.value);
-            let iv = _this.crypto.decode(parsedValue.iv);
-            let encryptedValue = _this.crypto.decode(parsedValue.value);
-            let hash = _this.crypto.decode(parsedValue.hash);
+            //check if is to apply encryption
+            if (dataObjectKey.isToEncrypt) {
+              let parsedValue = JSON.parse(message.body.value);
+              let iv = _this.crypto.decode(parsedValue.iv);
+              let encryptedValue = _this.crypto.decode(parsedValue.value);
+              let hash = _this.crypto.decode(parsedValue.hash);
 
-            _this.crypto.decryptAES(dataObjectKey.sessionKey, encryptedValue, iv).then(decryptedValue => {
-              let parsedValue = JSON.parse(atob(decryptedValue));
-              console.log('decrypted Value,', parsedValue);
-              message.body.value = parsedValue;
+              _this.crypto.decryptAES(dataObjectKey.sessionKey, encryptedValue, iv).then(decryptedValue => {
+                let parsedValue = JSON.parse(atob(decryptedValue));
+                console.log('decrypted Value,', parsedValue);
+                message.body.value = parsedValue;
 
-              let filteredMessage = _this._filterMessageToHash(message, parsedValue + iv);
+                let filteredMessage = _this._filterMessageToHash(message, parsedValue + iv);
 
-              _this.crypto.verifyHMAC(dataObjectKey.sessionKey, filteredMessage, hash).then(result => {
-                //console.log('result of hash verification! ', result);
+                _this.crypto.verifyHMAC(dataObjectKey.sessionKey, filteredMessage, hash).then(result => {
+                  //console.log('result of hash verification! ', result);
 
-                message.body.assertedIdentity = true;
-                resolve(message);
+                  message.body.assertedIdentity = true;
+                  resolve(message);
+                });
               });
-            });
 
-          //if not, just return the message
+            //if not, just return the message
+            } else {
+              message.body.assertedIdentity = true;
+              resolve(message);
+            }
+
           } else {
             message.body.assertedIdentity = true;
             resolve(message);
+
+            //reject('no sessionKey for chat room found');
           }
-
-        } else {
-          message.body.assertedIdentity = true;
-          resolve(message);
-
-          //reject('no sessionKey for chat room found');
-        }
+        });
 
       } else {
         reject('wrong message to decrypt');
@@ -1313,6 +1323,8 @@ class IdentityModule {
           let dataObjectURL;
           let receiverAcknowledgeMsg;
 
+          console.log('[reporterSessionKey] - decryptAES: ', chatKeys.keys.hypertyToSessionKey, encryptedValue, iv);
+
           _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, encryptedValue, iv).then(decryptedValue => {
 
             parsedValue = JSON.parse(decryptedValue);
@@ -1328,6 +1340,9 @@ class IdentityModule {
             //console.log('hash successfully validated ', hashResult);
 
             _this.dataObjectSessionKeys[dataObjectURL] =  {sessionKey: sessionKey, isToEncrypt: true};
+
+            // TIAGO - persistence issue #147
+            _this.storageManager.set('dataObjectSessionKeys', 0, _this.dataObjectSessionKeys);
 
             iv = _this.crypto.generateIV();
             value.iv = _this.crypto.encode(iv);
@@ -1402,6 +1417,9 @@ class IdentityModule {
       if (!sessionKeyBundle) {
         sessionKey = _this.crypto.generateRandom();
         _this.dataObjectSessionKeys[chatKeys.dataObjectURL] = {sessionKey: sessionKey, isToEncrypt: true};
+
+        // TIAGO - persistence issue #147
+        _this.storageManager.set('dataObjectSessionKeys', 0, _this.dataObjectSessionKeys);
       } else {
         sessionKey = sessionKeyBundle.sessionKey;
       }

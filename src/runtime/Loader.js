@@ -1,5 +1,6 @@
 import {divideURL, emptyObject} from '../utils/utils';
 import Descriptors from './Descriptors';
+import AddressAllocation from '../allocation/AddressAllocation';
 
 class Loader {
 
@@ -30,6 +31,10 @@ class Loader {
    */
   set registry(value) {
     this._registry = value;
+
+    // Install AddressAllocation
+    let addressAllocation = new AddressAllocation(this._runtimeURL, this._messagesBus, this._registry);
+    this._addressAllocation = addressAllocation;
   }
 
   /**
@@ -221,12 +226,19 @@ class Loader {
 
         _hypertySandbox = sandbox;
 
+        let numberOfAddresses = 1;
+        return this._addressAllocation.create(this._registry._domain, numberOfAddresses, _hypertyDescriptor, 'hyperty');
+      }, handleError)
+      .then((addresses) => {
+        if (haveError) return false;
+        console.info('6: return the addresses for the hyperty');
+
         // Register hyperty
-        return this.registry.registerHyperty(sandbox, hypertyDescriptorURL, _hypertyDescriptor);
+        return this.registry.registerHyperty(_hypertySandbox, hypertyDescriptorURL, _hypertyDescriptor, addresses);
       }, handleError)
       .then((hypertyURL) => {
         if (haveError) return false;
-        console.info('6: Hyperty url, after register hyperty', hypertyURL);
+        console.info('7: Hyperty url, after register hyperty', hypertyURL);
 
         // we have completed step 16 of https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
         _hypertyURL = hypertyURL;
@@ -253,7 +265,7 @@ class Loader {
       }, handleError)
       .then((deployComponentStatus) => {
         if (haveError) return false;
-        console.info('7: Deploy component status for hyperty: ', deployComponentStatus);
+        console.info('8: Deploy component status for hyperty: ', deployComponentStatus);
 
         // we have completed step 19 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
 
