@@ -982,7 +982,8 @@ class Registry {
         domainURL = domainURL.substring(domainURL.indexOf('.') + 1);
       }
 
-      runtimeProtoStubURL = 'runtime://' + domainURL + '/protostub/' + generateGUID();
+      // hack to allow reporters in protostubs. To be improved for cross-domain scenarios when merged with p2p branch
+      runtimeProtoStubURL = 'runtime://' + divideURL(_this.runtimeURL).domain + '/protostub/' + generateGUID();
 
       // TODO: Optimize this
       // Proxy;
