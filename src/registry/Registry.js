@@ -963,10 +963,14 @@ class Registry {
    * To register a new Protocol Stub in the runtime including as input parameters the function to postMessage, the DomainURL that is connected with the stub, which returns the RuntimeURL allocated to the new ProtocolStub.
    * @param {Sandbox}        Sandbox
    * @param  {DomainURL}     DomainURL service provider domain
+   * @param  {descriptorURL}     Catalogue URL of the Protostub descriptor
+   * @param  {descriptor}     Protostub descriptor
    * @return {RuntimeProtoStubURL}
    */
-  registerStub(sandbox, domainURL) {
+  registerStub(sandbox, domainURL, descriptorURL, descriptor) {
     let _this = this;
+
+    let _stubDescriptor = descriptor;
 
     return new Promise(function(resolve,reject) {
 
@@ -986,11 +990,19 @@ class Registry {
       runtimeProtoStubURL = 'runtime://' + divideURL(_this.runtimeURL).domain + '/protostub/' + generateGUID();
 
       // TODO: Optimize this
-      // Proxy;
+      // TODO: add interworking info from descriptor
+
       _this.protostubsList[domainURL] = {
         url: runtimeProtoStubURL,
         status: STATUS.DEPLOYED
       };
+
+      if (descriptorURL)
+        _this.protostubsList[domainURL].descriptorURL = descriptorURL;
+
+      if (_stubDescriptor && (_stubDescriptor.hasOwnProperty('interworking'))) {
+        _this.protostubsList[domainURL].interworking = _stubDescriptor.interworking;
+      }
 
       // _this.protostubsList[domainURL] = runtimeProtoStubURL;
       _this.sandboxesList.sandbox[runtimeProtoStubURL] = sandbox;
@@ -1342,7 +1354,8 @@ class Registry {
     let hypertyScheme = ['hyperty'];
     let urlScheme = url.split('://')[0];
 
-    // Process Runtime Core URLs
+    // Process Runtime Core URLs.
+    // Messages originated from protostubs should also not include the runtimeURL in its URL.
 
     if (runtimeScheme.indexOf(urlScheme) !== -1) {
       return url.includes(this.runtimeURL);
@@ -1363,6 +1376,31 @@ class Registry {
     return this.dataObjectList.hasOwnProperty(url);
   }
 
+  /**
+  * To verify if protostub is to interwork with a legacy domain.
+  * @param  {URL.URL}  runtimeProtostubURL      The runtime URL of the Protostub
+  * @return {boolean}
+  */
+
+  isInterworkingProtoStub(runtimeProtostubURL) {
+
+    let _this = this;
+
+    if (!(runtimeProtostubURL.includes('/protostub/')))
+      return false;
+
+    let filtered = Object.keys(_this.protostubsList).filter((key) => {
+        return _this.protostubsList[key].url === runtimeProtostubURL;
+      }).map((key) => {
+
+        if (_this.protostubsList[key].hasOwnProperty('interworking'))
+          return _this.protostubsList[key].interworking;
+        else
+          return false;
+      });
+
+    return false;
+  }
 }
 
 export default Registry;

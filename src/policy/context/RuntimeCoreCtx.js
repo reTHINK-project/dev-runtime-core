@@ -261,6 +261,9 @@ class RuntimeCoreCtx extends ReThinkCtx {
     let isToHyperty = divideURL(message.to).type === 'hyperty';
     let isToDataObject = isDataObjectURL(message.to);
 
+    // todo: return false for messages coming from interworking stubs.
+    // Get descriptor from runtime catalogue and check interworking field.
+
     return (isCreate && isFromHyperty && isToHyperty) || (isCreate && isFromHyperty && isToDataObject) || message.type === 'handshake' || message.type === 'update';
   }
 

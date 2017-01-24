@@ -204,6 +204,7 @@ class IdentityModule {
               return reject(err);
             });
           } else {
+
             _this.getIdToken(fromURL).then(function(identity) {
               console.log('[Identity.IdentityModule.getToken] getIdToken', identity);
               return resolve(identity);
@@ -251,6 +252,9 @@ class IdentityModule {
           } else {
             return reject('no identity was found ');
           }
+        }).catch((reason) => {
+          console.error('no identity was found: ', reason);
+          reject(reason);
         });
       } else {
         let userURL = _this.registry.getHypertyOwner(hypertyURL);

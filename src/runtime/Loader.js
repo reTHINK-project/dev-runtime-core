@@ -407,7 +407,7 @@ class Loader {
           _stubSandbox = sandbox;
 
           // we need register stub on registry - step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-          return this.registry.registerStub(_stubSandbox, domain);
+          return this.registry.registerStub(_stubSandbox, domain, protostubURL, _stubDescriptor);
         }, handleError)
         .then((runtimeProtoStubURL) => {
           if (haveError) return false;

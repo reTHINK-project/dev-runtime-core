@@ -158,6 +158,11 @@ class PEP {
     let splitTo = (message.to).split('://');
     let toSchema =  splitTo[0];
 
+    // hack to disable Identity verification for messages coming from legacy domains while solution is not implemented
+
+    if (this.context.runtimeRegistry.isInterworkingProtoStub(message.from))
+      return false;
+
     if (message.from === fromSchema || message.to === toSchema || message.type === 'read' || message.type === 'response' || (isHypertyURL(message.from) && message.type === 'delete')) {
       return false;
     } else {
