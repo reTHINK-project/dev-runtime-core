@@ -109,38 +109,38 @@ class RuntimeCoreCtx extends ReThinkCtx {
     return new Promise((resolve, reject) => {
 
       // TODO remove this validation. When the Nodejs auth was completed this should work like browser;
-      this.runtimeCapabilities.isAvailable('node').then(isNode => {
+      //this.runtimeCapabilities.isAvailable('node').then(isNode => {
 
-        if (isNode) {
-          resolve(message);
+        //if (isNode) {
+          //resolve(message);
+        //} else {
+
+      if (isIncoming & result) {
+        let isSubscription = message.type === 'subscribe';
+        let isFromRemoteSM = _this.isFromRemoteSM(message.from);
+        if (isSubscription & isFromRemoteSM) {
+          _this.doMutualAuthentication(message).then(() => {
+            resolve(message);
+          }, (error) => {
+            reject(error);
+          });
         } else {
-
-          if (isIncoming & result) {
-            let isSubscription = message.type === 'subscribe';
-            let isFromRemoteSM = _this.isFromRemoteSM(message.from);
-            if (isSubscription & isFromRemoteSM) {
-              _this.doMutualAuthentication(message).then(() => {
-                resolve(message);
-              }, (error) => {
-                reject(error);
-              });
-            } else {
-              resolve(message);
-            }
-          } else {
-            if (_this._isToCypherModule(message)) {
-              _this.idModule.encryptMessage(message).then((message) => {
-                resolve(message);
-              }, (error) => {
-                reject(error);
-              });
-            } else {
-              resolve(message);
-            }
-          }
-
+          resolve(message);
         }
-      });
+      } else {
+        if (_this._isToCypherModule(message)) {
+          _this.idModule.encryptMessage(message).then((message) => {
+            resolve(message);
+          }, (error) => {
+            reject(error);
+          });
+        } else {
+          resolve(message);
+        }
+      }
+
+      //}
+      //});
 
     });
   }

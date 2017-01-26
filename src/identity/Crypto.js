@@ -4,9 +4,17 @@
 */
 class Crypto {
 
-  constructor() {
+  constructor(runtimeFactory) {
     let _this = this;
 
+    _this.runtimeFactory = runtimeFactory;
+
+    if (typeof runtimeFactory.createWebcrypto === 'function') {
+      console.log('TIAGO: Webcrypto');
+    } else {
+      console.log('TIAGO: crypto');
+    }
+    _this._crypto = typeof runtimeFactory.createWebcrypto === 'function' ? runtimeFactory.createWebcrypto() : crypto;
   }
 
   /**
@@ -33,7 +41,7 @@ class Crypto {
     return new Promise(function(resolve, reject) {
       _this._importRSAencryptKey(new Uint8Array(pubKey)).then(function(publicKey) {
 
-        crypto.subtle.encrypt(
+        _this._crypto.subtle.encrypt(
             {
               name: 'RSA-OAEP'
             },
@@ -62,7 +70,7 @@ class Crypto {
     return new Promise(function(resolve, reject) {
       _this._importRSAdecryptKey(privKey).then(function(privateKey) {
 
-        crypto.subtle.decrypt(
+        _this._crypto.subtle.decrypt(
             {
               name: 'RSA-OAEP'
             },
@@ -91,7 +99,7 @@ class Crypto {
     return new Promise(function(resolve, reject) {
       _this._importRSAsignKey(privKey).then(function(privateKey) {
 
-        crypto.subtle.sign(
+        _this._crypto.subtle.sign(
             {
               name: 'RSASSA-PKCS1-v1_5'
             },
@@ -119,7 +127,7 @@ class Crypto {
     return new Promise(function(resolve, reject) {
       _this._importRSAverifyKey(pubKey).then(function(publicKey) {
 
-        crypto.subtle.verify(
+        _this._crypto.subtle.verify(
             {
               name: 'RSASSA-PKCS1-v1_5'
             },
@@ -148,7 +156,7 @@ class Crypto {
     return new Promise(function(resolve, reject) {
       _this._importAESkey(key).then(function(aesKey) {
 
-        crypto.subtle.encrypt(
+        _this._crypto.subtle.encrypt(
             {
               name: 'AES-CBC',
               //Don't re-use initialization vectors!
@@ -179,7 +187,7 @@ class Crypto {
     return new Promise(function(resolve, reject) {
       _this._importAESkey(key).then(function(aesKey) {
 
-        crypto.subtle.decrypt(
+        _this._crypto.subtle.decrypt(
             {
               name: 'AES-CBC',
               iv: iv
@@ -216,7 +224,7 @@ class Crypto {
 
       _this._importHMACkey(key).then(function(hmacKey) {
 
-        crypto.subtle.sign(
+        _this._crypto.subtle.sign(
         {
           name: 'HMAC'
         },
@@ -251,7 +259,7 @@ class Crypto {
 
       _this._importHMACkey(key).then(function(hmacKey) {
 
-        crypto.subtle.verify(
+        _this._crypto.subtle.verify(
           {
             name: 'HMAC'
           },
@@ -282,7 +290,7 @@ class Crypto {
     let keyPair = {};
 
     return new Promise(function(resolve, reject) {
-      crypto.subtle.generateKey(
+      _this._crypto.subtle.generateKey(
       {
         name: 'RSA-PSS',
         modulusLength: 2048, //can be 1024, 2048, or 4096
@@ -296,13 +304,13 @@ class Crypto {
         //returns a keypair object
         //console.log(key);
 
-        crypto.subtle.exportKey(
+        _this._crypto.subtle.exportKey(
           'spki', //can be 'jwk' (public or private), 'spki' (public only), or 'pkcs8' (private only)
           key.publicKey //can be a publicKey or privateKey, as long as extractable was true
         ).then(function(publicKey) {
           //returns the exported key data
           keyPair.public  = new Uint8Array(publicKey);
-          return crypto.subtle.exportKey(
+          return _this._crypto.subtle.exportKey(
             'pkcs8', //can be 'jwk' (public or private), 'spki' (public only), or 'pkcs8' (private only)
             key.privateKey //can be a publicKey or privateKey, as long as extractable was true
           );
@@ -332,7 +340,7 @@ class Crypto {
     let _this = this;
 
     let array = new  Uint8Array(16);
-    crypto.getRandomValues(array);
+    _this._crypto.getRandomValues(array);
 
     return array;
   }
@@ -346,7 +354,7 @@ class Crypto {
     let _this = this;
 
     let array = new  Uint8Array(32);
-    crypto.getRandomValues(array);
+    _this._crypto.getRandomValues(array);
 
     let date = Date.now();
     let dateEncoded = _this._utf8Encode(date);
@@ -367,7 +375,7 @@ class Crypto {
     let _this = this;
 
     let array = new Uint8Array(48);
-    crypto.getRandomValues(array);
+    _this._crypto.getRandomValues(array);
     return array;
   }
 
@@ -454,7 +462,7 @@ class Crypto {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
-      crypto.subtle.importKey(
+      _this._crypto.subtle.importKey(
           'pkcs8', //can be 'jwk' (public or private), 'spki' (public only), or 'pkcs8' (private only)
           privKey,
           {   //these are the algorithm options
@@ -480,7 +488,7 @@ class Crypto {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
-      crypto.subtle.importKey(
+      _this._crypto.subtle.importKey(
           'spki', //can be 'jwk' (public or private), 'spki' (public only), or 'pkcs8' (private only)
           pubKey,
           {   //these are the algorithm options
@@ -506,7 +514,7 @@ class Crypto {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
-      crypto.subtle.importKey(
+      _this._crypto.subtle.importKey(
           'spki', //can be 'jwk' (public or private), 'spki' (public only), or 'pkcs8' (private only)
           pubKey,
           {   //these are the algorithm options
@@ -533,7 +541,7 @@ class Crypto {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
-      crypto.subtle.importKey(
+      _this._crypto.subtle.importKey(
           'pkcs8', //can be 'jwk' (public or private), 'spki' (public only), or 'pkcs8' (private only)
           privKey,
           {   //these are the algorithm options
@@ -581,7 +589,7 @@ class Crypto {
 
   _generate256bitKey() {
     let array = new  Uint8Array(32);
-    crypto.getRandomValues(array);
+    _this._crypto.getRandomValues(array);
 
     return array;
   }
@@ -598,7 +606,7 @@ class Crypto {
 
       _this._digest(arrayBuffer).then((key) => {
 
-        crypto.subtle.importKey(
+        _this._crypto.subtle.importKey(
         'raw', //can be 'jwk' or 'raw'
         key,
         {   //this is the algorithm options
@@ -624,7 +632,7 @@ class Crypto {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
-      crypto.subtle.digest(
+      _this._crypto.subtle.digest(
           {
             name: 'SHA-256'
           },
@@ -644,8 +652,9 @@ class Crypto {
   }
 
   _importAESkey(arrayBuffer) {
+    let _this = this;
     return new Promise(function(resolve, reject) {
-      crypto.subtle.importKey(
+      _this._crypto.subtle.importKey(
           'raw', //can be 'jwk' or 'raw'
           arrayBuffer,
           {   //this is the algorithm options

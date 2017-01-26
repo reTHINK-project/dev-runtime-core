@@ -111,7 +111,7 @@ class RuntimeUA {
     _this.runtimeCatalogue.runtimeURL = runtimeURL;
 
     // Instantiate the identity Module
-    _this.identityModule = new IdentityModule(runtimeURL, _this.runtimeCapabilities);
+    _this.identityModule = new IdentityModule(runtimeURL, _this.runtimeCapabilities, runtimeFactory);
 
     // Use the sandbox factory to create an AppSandbox;
     // In the future can be decided by policyEngine if we need

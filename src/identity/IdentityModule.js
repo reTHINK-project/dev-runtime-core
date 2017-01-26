@@ -37,12 +37,13 @@ class IdentityModule {
   /**
   * This is the constructor to initialise the Identity Module it does not require any input.
   */
-  constructor(runtimeURL, runtimeCapabilities) {
+  constructor(runtimeURL, runtimeCapabilities, runtimeFactory) {
     let _this = this;
 
     if (!runtimeURL) throw new Error('runtimeURL is missing.');
 
     _this._runtimeURL = runtimeURL;
+    _this.runtimeFactory = runtimeFactory;
     _this._idmURL = _this._runtimeURL + '/idm';
     _this._guiURL = _this._runtimeURL + '/identity-gui';
     _this.runtimeCapabilities = runtimeCapabilities;
@@ -54,7 +55,7 @@ class IdentityModule {
     _this.emailsList = [];
     let newIdentity = new Identity('guid','HUMAN');
     _this.identity = newIdentity;
-    _this.crypto = new Crypto();
+    _this.crypto = new Crypto(_this.runtimeFactory);
 
     //stores the association of the dataObject and the Hyperty registered within
     _this.dataObjectsIdentity = {};
@@ -146,6 +147,8 @@ class IdentityModule {
   deployGUI() {
     let _this = this;
     _this.guiDeployed = true;
+
+    console.log('GUI deployed');
   }
 
   getIdentityOfHyperty(hypertyURL) {
@@ -319,6 +322,16 @@ class IdentityModule {
         _this.guiDeployed = true;
       }
 
+      // TIAGO - issue 67
+      /*_this._messageBus.addListener(_this._idmURL, msg => {
+        if (msg.body.code === 200) {
+          console.log('HELLO WORLD! 2');
+          console.log(msg.body.value);
+        } else {
+          console.log('error on requesting HELLO WORLD! 2');
+        }
+      });*/
+
       let message = {type:'create', to: _this._guiURL, from: _this._idmURL,
                     body: {value: {identities: identities, idps: idps}}};
 
@@ -483,6 +496,7 @@ class IdentityModule {
       //generates the RSA key pair
       _this.crypto.generateRSAKeyPair().then(function(keyPair) {
 
+        console.log('TIAGO: callGenerateMethods');
         publicKey = btoa(keyPair.public);
         userkeyPair = keyPair;
         return _this.generateAssertion(publicKey, origin, '', userkeyPair, idp);
@@ -561,6 +575,7 @@ class IdentityModule {
       let newIdentity = {userProfile: userProfileBundle, idp: result.idp.domain, assertion: result.assertion};
       result.messageInfo = newIdentity;
       result.keyPair = keyPair;
+      console.log('TIAGO: storeIdentity');
 
       _this.currentIdentity = newIdentity;
 
@@ -611,7 +626,7 @@ class IdentityModule {
   generateAssertion(contents, origin, usernameHint, keyPair, idpDomain) {
     let _this = this;
 
-    console.log('generateAssertion');
+    console.log('TIAGO: generateAssertion');
 
     return new Promise(function(resolve,reject) {
 
@@ -1524,6 +1539,9 @@ class IdentityModule {
     let to = (receiver) ? message.from : message.to;
 
     let userInfo = _this.getIdentity(userURL);
+
+    console.log('TIAGO: UserInfo: ', userInfo);
+    console.log('TIAGO: UserInfo.keyPair: ', userInfo.keyPair);
 
     let newChatCrypto =
     {
