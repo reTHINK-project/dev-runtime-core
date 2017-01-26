@@ -132,14 +132,14 @@ class RuntimeUA {
             return this._loadP2PHandler();
           } else {
             console.info('[RuntimeUA - init] P2P not supported');
-            reject('P2P Not Supported');
+            return ('P2P Not Supported');
           }
         })
         .then((result) => {
           console.info('[runtime ua - init] - status: ', result);
           resolve(true);
         }, (reason) => {
-          console.info('ERROR: ', reason);
+          console.error('ERROR: ', reason);
           resolve(true);
         });
 
@@ -157,7 +157,7 @@ class RuntimeUA {
 
       let runtimeDescriptor = runtimeUtils.runtimeDescriptor;
       let p2pStubHandler = runtimeDescriptor.p2pHandlerStub;
-      console.log('P2PStubHandler: ', p2pStubHandler);
+      console.log('[RuntimeUA loadP2PHandler] P2PStubHandler: ', p2pStubHandler);
 
       let p2pConfig = {
         isHandlerStub: true,

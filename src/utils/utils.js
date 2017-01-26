@@ -255,3 +255,29 @@ export function getUserIdentityDomain(url) {
   let domain = splitedDomain[splitedLength - 2] + '.' + splitedDomain[splitedLength - 1];
   return domain;
 }
+
+/**
+ * Check if URL is from a backend service
+ * @param  {string} url     URL to be processed
+ * @return {boolean}
+ */
+
+export function isBackendServiceURL(url) {
+  let dividedURL = divideURL(url);
+  let splitedDomain = dividedURL.domain.split('.');
+  let backendSchemes = ['domain','global','domain-idp']; // should be defined in the runtime configuration
+  let backendSubDomains = ['registry','msg-node']; // should be defined in the runtime configuration
+  let subDomain;
+
+  if (splitedDomain.length > 1) {
+    subDomain = splitedDomain[0];
+  }
+
+  if (subDomain && backendSubDomains.indexOf(subDomain))
+   return true;
+
+  if (dividedURL.type)
+   return (backendSchemes.indexOf(dividedURL.type) !== -1);
+
+  return false;
+}

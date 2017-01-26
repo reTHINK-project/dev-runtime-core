@@ -27,7 +27,7 @@ import AddressAllocation from '../allocation/AddressAllocation';
 import HypertyInstance from './HypertyInstance';
 
 import {MessageFactory} from 'service-framework/dist/MessageFactory';
-import {divideURL, isHypertyURL, isURL, isUserURL, generateGUID, getUserIdentityDomain, isLegacy} from '../utils/utils.js';
+import {divideURL, isHypertyURL, isURL, isUserURL, generateGUID, getUserIdentityDomain, isLegacy, isBackendServiceURL} from '../utils/utils.js';
 
 import Discovery from './Discovery';
 import DiscoveryServiceFramework from './DiscoveryServiceFramework';
@@ -1192,11 +1192,11 @@ class Registry {
         };
 
         if (descriptorURL)
-	         _this.protostubsList[stubID].descriptorURL = descriptorURL;
+        _this.protostubsList[stubID].descriptorURL = descriptorURL;
 
-         if (_stubDescriptor && (_stubDescriptor.hasOwnProperty('interworking'))) {
-	         _this.protostubsList[stubID].interworking = _stubDescriptor.interworking;
-       }
+        if (_stubDescriptor && (_stubDescriptor.interworking)) {
+          _this.protostubsList[stubID].interworking = _stubDescriptor.interworking;
+        }
 
         _this.sandboxesList.sandbox[runtimeProtoStubURL] = sandbox;
 
@@ -1524,7 +1524,9 @@ class Registry {
       //split the url to find the domainURL. deals with the url for example as:
       //"hyperty-runtime://sp1/protostub/123",
 
-      if (url.includes('domain') || url.includes('global')) {
+      // Skip p2p procedure when not supported by the Runtime or for backend services
+
+      if (!_this.p2pHandlerStub[_this.runtimeURL] || isBackendServiceURL(url)) {
 
         _this.resolveNormalStub(url).then((returnURL) => {
           resolve(returnURL);
