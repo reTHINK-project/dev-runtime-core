@@ -218,6 +218,16 @@ class RuntimeCoreCtx extends ReThinkCtx {
     let splitFrom = (message.from).split('://');
     let fromSchema = splitFrom[0];
 
+    let _from = message.from;
+
+    if (message.body && message.body.hasOwnProperty('source'))
+      _from = message.body.source;
+
+    // Signalling Messages between P2P Stubs don't have Identities. FFS
+
+    if (_from.includes('/p2prequester/') || _from.includes('/p2phandler/'))
+      return false;
+
     return schemasToIgnore.indexOf(fromSchema) === -1;
   }
 

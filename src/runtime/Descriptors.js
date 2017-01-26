@@ -30,7 +30,7 @@ class Descriptors {
       if (stubURL.includes('://')) {
         let dividedURL = divideURL(stubURL);
         domain = dividedURL.domain;
-        path = dividedURL.identity;
+        let path = dividedURL.identity;
         if (path)
           protostub = path.substring(path.lastIndexOf('/') + 1);
         else {
@@ -102,7 +102,7 @@ class Descriptors {
       if (idpProxyURL.includes('://')) {
         let dividedURL = divideURL(idpProxyURL);
         domain = dividedURL.domain;
-        path = dividedURL.identity;
+        let path = dividedURL.identity;
         if (path)
           idpproxy = path.substring(path.lastIndexOf('/') + 1);
         else {

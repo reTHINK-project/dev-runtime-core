@@ -285,13 +285,14 @@ class Loader {
   * @param  {URL.URL}     domain          domain
   * @param  {Object}      p2pConfig       configuration of p2p
   */
-
-  loadStub(protostubURL) {
+  loadStub(protostubURL, p2pConfig) {
 
     if (!this._readyToUse()) return false;
-    if (!protostubURL) throw new Error('ProtoStub descriptor url parameter is needed');
+    if (!protostubURL) throw new   Error('[Runtime.Loader.loadStub]ProtoStub descriptor url parameter is needed');
 
     return new Promise((resolve, reject) => {
+
+      // to analyse if domain for p2pHandlers should be something else and not the default domain itself
 
       let domain = divideURL(protostubURL).domain;
 
@@ -304,9 +305,10 @@ class Loader {
       let _runtimeProtoStubURL;
       let _stubSourcePackage;
       let haveError = false;
+      let stubId;
 
       let errorReason = (reason) => {
-        console.error('Something failed on the deploy of protocolstub: ', reason);
+        console.  Error('[Runtime.Loader.loadStub]Something failed on the deploy of protocolstub: ', reason);
         reject(reason);
       };
 
@@ -316,37 +318,61 @@ class Loader {
       };
 
       // Discover Protocol Stub
-      console.info('------------------- ProtoStub ---------------------------\n');
-      console.info('Discover or Create a new ProtoStub for domain: ', domain);
-      this.registry.discoverProtostub(domain).then((runtimeProtoStubURL) => {
+      let discoverStub;
+      let isP2PHandler = false;
+      let isP2PRequester = false;
+
+      console.info('[Runtime.Loader.loadStub] starting loading ', protostubURL, ' p2pconfig ', p2pConfig);
+      console.info('[Runtime.Loader.loadStub]Discover or Create a new ProtoStub for domain: ', domain);
+
+      // step 2 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+      try {
+        if (p2pConfig) {
+
+          if (p2pConfig.hasOwnProperty('isHandlerStub') && p2pConfig.isHandlerStub) {
+            // step 6 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+            isP2PHandler = true;
+            stubId = this.runtimeURL;
+            discoverStub = this.registry.discoverP2PStub();
+          } else {
+            isP2PRequester = true;
+            let p2pHandlerRuntimeURL = p2pConfig.remoteRuntimeURL;
+            stubId = p2pHandlerRuntimeURL;
+
+            // step 4 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+
+            // step 5 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+            discoverStub = this.registry.discoverP2PStub(p2pHandlerRuntimeURL);
+          }
+
+        } else {
+          // step 3 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          stubId = domain;
+          discoverStub = this.registry.discoverProtostub(domain);
+        }
+
         // Is registed?
-        console.info('1. Proto Stub Discovered for ', domain, ': ', runtimeProtoStubURL);
+        console.info('[Runtime.Loader.loadStub]1. Proto Stub Discovered for ', protostubURL, ': ', discoverStub);
 
-        // we have completed step 2 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+        // step 23 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+        resolve(discoverStub);
+        console.info(' [Runtime.Loader]------------------- END ---------------------------\n');
 
-        // TODO: Check if the status is saved in the status of sandbox;
-        // let stub = {
-        //   runtimeProtoStubURL: runtimeProtoStubURL,
-        //   status: 'deployed'
-        // };
-        let stub = this.registry.protostubsList[domain];
-        resolve(stub);
-        console.info('------------------- END ---------------------------\n');
-      })
-      .catch((reason) => {
+      }
+
+      catch (reason) {
 
         // is not registed?
-        console.info('1. Proto Stub not found ' + reason);
+        console.info('[Runtime.Loader.loadStub]1. Proto Stub not found ' + reason);
 
-        // we have completed step 3 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-
-        // we need to get ProtoStub descriptor step 4 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+        // step 8 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
         this.descriptors.getStubDescriptor(protostubURL)
         .then((stubDescriptor) => {
-          if (haveError) return false;
-          console.info('2. return the ProtoStub descriptor');
 
-          // we have completed step 5 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          if (haveError) return false;
+          console.info('[Runtime.Loader.loadStub]2. return the ProtoStub descriptor');
+
+          // step 9 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
           _stubDescriptor = stubDescriptor;
 
           let sourcePackageURL = stubDescriptor.sourcePackageURL;
@@ -355,67 +381,74 @@ class Loader {
             return stubDescriptor.sourcePackage;
           }
 
-          // we need to get ProtoStub Source code from descriptor - step 6 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          // step 10 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
           return this.runtimeCatalogue.getSourcePackageFromURL(sourcePackageURL);
         }, handleError)
         .catch(errorReason)
         .then((stubSourcePackage) => {
           if (haveError) return false;
-          console.info('3. return the ProtoStub Source Code');
 
-          // we have completed step 7 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-
+          // step 11 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          console.info('[Runtime.Loader.loadStub]3. return the ProtoStub Source Code');
           _stubSourcePackage = stubSourcePackage;
 
-          // TODO: Check on PEP (policy Engine) if we need the sandbox and check if the Sandbox Factory have the context sandbox;
-          let policy = true;
-          return policy;
-        }, handleError)
-        .then((policy) => {
-          if (haveError) return false;
-
           // this will return the sandbox or one promise to getSandbox;
+          // step 12 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
           return this.registry.getSandbox(domain);
         })
         .then((stubSandbox) => {
           if (haveError) return false;
-          console.info('4. if the sandbox is registered then return the sandbox ', stubSandbox);
 
-          // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          // step 15 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          console.info('[Runtime.Loader.loadStub]4. if the sandbox is registered then return the sandbox ', stubSandbox);
 
           _stubSandbox = stubSandbox;
           return stubSandbox;
         })
         .catch((reason) => {
           if (haveError) return false;
-          console.info('5. Sandbox was not found, creating a new one ', reason);
+
+          // step 13 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          console.info('[Runtime.Loader.loadStub]5. Sandbox was not found, creating a new one ', reason);
 
           // check if the sandbox is registed for this stub descriptor url;
-          // Make Steps xxx --- xxx
-          // Instantiate the Sandbox
-          let sandbox = this._runtimeFactory.createSandbox();
-          sandbox.addListener('*', (msg) => {
-            this.messageBus.postMessage(msg);
+
+          // According to debug, it seems RuntimeCatalogue does not support yet constraints. It appears empty!!!!
+
+          let stubCapabilities = {};
+          if (_stubDescriptor && _stubDescriptor.hasOwnProperty('constraints')) {
+            stubCapabilities = _stubDescriptor.stubCapabilities;
+          }
+
+          // step 14 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          return this._runtimeFactory.createSandbox(stubCapabilities).then((sandbox) => {
+
+            sandbox.addListener('*', (msg) => {
+              this.messageBus.postMessage(msg);
+            });
+
+            return sandbox;
           });
 
-          return sandbox;
         })
         .then((sandbox) => {
           if (haveError) return false;
-          console.info('6. return the sandbox instance and register', sandbox, 'to domain ', domain);
+
+          // step 16 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          console.info('[Runtime.Loader.loadStub]6. return the sandbox instance and register', sandbox, 'to domain ', domain);
 
           _stubSandbox = sandbox;
 
           // we need register stub on registry - step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-          return this.registry.registerStub(_stubSandbox, domain, protostubURL, _stubDescriptor);
+          return this.registry.registerStub(_stubSandbox, stubId, p2pConfig, protostubURL, _stubDescriptor);
         }, handleError)
-        .then((runtimeProtoStubURL) => {
+        .then((runtimeProtoStub) => {
           if (haveError) return false;
-          console.info('7. return the runtime protostub url: ', runtimeProtoStubURL);
 
-          // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          // step 23 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          console.info('[Runtime.Loader.loadStub] 7. return the runtime protostub url: ', runtimeProtoStub);
 
-          _runtimeProtoStubURL = runtimeProtoStubURL;
+          _runtimeProtoStubURL = runtimeProtoStub.url;
 
           // Extend original hyperty configuration;
           let configuration = {};
@@ -427,45 +460,56 @@ class Loader {
             }
           }
 
-          configuration.runtimeURL = this._runtimeURL;
+          if (p2pConfig) {
+            try {
+              configuration = Object.assign(configuration, JSON.parse(p2pConfig));
+            } catch (e) {
+              configuration = Object.assign(configuration, p2pConfig);
+            }
+          }
 
-          // Deploy Component step xxx
+          // required for protostub session
+
+           configuration.runtimeURL = this._runtimeURL;
+
+          // step 24 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
           try {
-            return _stubSandbox.deployComponent(_stubSourcePackage.sourceCode, runtimeProtoStubURL, configuration);
+            return _stubSandbox.deployComponent(_stubSourcePackage.sourceCode, _runtimeProtoStubURL, configuration);
           } catch (e) {
-            console.error('Error on deploy component:', e);
+            console.    Error('[Runtime.Loader.loadStub] Error on deploy component:', e);
             reject(e);
           }
         }, handleError)
         .then((deployComponentStatus) => {
           if (haveError) return false;
-          console.info('8: return deploy component for sandbox status: ', deployComponentStatus);
 
-          // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          // step 26 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          console.info('[Runtime.Loader.loadStub] 8: return deploy component for sandbox status: ', deployComponentStatus);
 
+          // step 27 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
           // Add the message bus listener
           this.messageBus.addListener(_runtimeProtoStubURL, (msg) => {
             _stubSandbox.postMessage(msg);
           });
 
-          // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-          let stub = this.registry.protostubsList[domain];
+          // step 28 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          let stub;
+          if (p2pConfig) {
+            console.log('[Runtime.Loader.loadStub] p2pConfig: ', p2pConfig);
 
-          // // Load Stub function resolved with success;
-          // let stub = {
-          //   runtimeProtoStubURL: _runtimeProtoStubURL,
-          //   status: deployComponentStatus
-          // };
+            if (p2pConfig.hasOwnProperty('isHandlerStub')) stub = this.registry.p2pHandlerStub[this._runtimeURL];
+            if (p2pConfig.hasOwnProperty('p2pRequesterStub')) stub = this.registry.p2pRequesterStub[p2pConfig.remoteRuntimeURL];
+          } else {
+            stub = this.registry.protostubsList[domain];
+          }
 
-          console.log('Deployed: ', stub, domain, this.registry.protostubsList);
-
-          resolve(stub);
-          console.info('------------------- END ---------------------------\n');
-
+          console.log('[Runtime.Loader.loadStub] Stub: ', stub);
+          resolve(stub.url);
+          console.info('[Runtime.Loader.loadStub]------------------- END ---------------------------\n');
         }, handleError)
         .catch(errorReason);
 
-      });
+      };
 
     });
 
@@ -479,7 +523,7 @@ class Loader {
   loadIdpProxy(idpProxyURL) {
 
     if (!this._readyToUse()) return false;
-    if (!idpProxyURL) throw new Error('IdpProxy descriptor url parameter is needed');
+    if (!idpProxyURL) throw new   Error('[Runtime.Loader] IdpProxy descriptor url parameter is needed');
 
     return new Promise((resolve, reject) => {
 
@@ -496,7 +540,7 @@ class Loader {
       let haveError = false;
 
       let errorReason = (reason) => {
-        console.error('Something failed on the deploy of IdpProxy: ', reason);
+        console.  Error('[Runtime.Loader] Something failed on the deploy of IdpProxy: ', reason);
         reject(reason);
       };
 
@@ -506,12 +550,13 @@ class Loader {
       };
 
       // Discover IDPProxy
-      console.info('------------------- IDP Proxy Deploy ---------------------------\n');
-      console.info('Discover or Create a new IdpProxy for domain/URL: ', domain);
-      return this.registry.discoverIdpProxy(domain)
-      .then((runtimeIdpProxyURL) => {
+      console.info('[Runtime.Loader] ------------------- IDP Proxy Deploy ---------------------------\n');
+      console.info('[Runtime.Loader] Discover or Create a new IdpProxy for domain/URL: ', domain);
+
+      try {
+        let runtimeIdpProxyURL = this.registry.discoverIdpProxy(domain);
         // Is registed?
-        console.info('1. IDPProxy Discovered: ', runtimeIdpProxyURL);
+        console.info('[Runtime.Loader] 1. IDPProxy Discovered: ', runtimeIdpProxyURL);
 
         // we have completed step 2 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
@@ -519,12 +564,13 @@ class Loader {
         console.log('Deployed: ', idpProxy);
 
         resolve(idpProxy);
-        console.info('------------------- END ---------------------------\n');
-      })
-      .catch((reason) => {
+        console.info('[Runtime.Loader] ------------------- END ---------------------------\n');
+      }
+
+      catch(reason) {
 
         // is not registed?
-        console.info('1. IdpProxy not found:', reason);
+        console.info('[Runtime.Loader] 1. IdpProxy not found:', reason);
 
         // we have completed step 3 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
@@ -532,7 +578,7 @@ class Loader {
         this.descriptors.getIdpProxyDescriptor(idpProxyURL)
         .then((proxyDescriptor) => {
 
-          console.info('2. Return the IDPProxy descriptor');
+          console.info('[Runtime.Loader] 2. Return the IDPProxy descriptor');
 
           // we have completed step 5 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
           _proxyDescriptor = proxyDescriptor;
@@ -548,7 +594,7 @@ class Loader {
         }, handleError)
         .then((sourcePackage) => {
           if (haveError) return false;
-          console.info('3. return the IDPProxy source package');
+          console.info('[Runtime.Loader] 3. return the IDPProxy source package');
 
           // we have completed step 7 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
@@ -566,28 +612,31 @@ class Loader {
         })
         .then((proxySandbox) => {
           if (haveError) return false;
-          console.info('4. if the sandbox is registered then return the sandbox', proxySandbox);
+          console.info('[Runtime.Loader] 4. if the sandbox is registered then return the sandbox', proxySandbox);
 
           _proxySandbox = proxySandbox;
           return proxySandbox;
         })
         .catch((reason) => {
           if (haveError) return false;
-          console.info('5. Sandbox was not found, creating a new one', reason);
+          console.info('[Runtime.Loader] 5. Sandbox was not found, creating a new one', reason);
 
-          // check if the sandbox is registed for this proxy descriptor url;
-          // Make Steps xxx --- xxx
-          // Instantiate the Sandbox
-          let sandbox = this._runtimeFactory.createSandbox();
-          sandbox.addListener('*', (msg) => {
-            this.messageBus.postMessage(msg);
+          let proxyCapabilities = {};
+          if (_proxyDescriptor && _proxyDescriptor.hasOwnProperty('capabilities')) {
+            _proxyDescriptor = _proxyDescriptor.stubCapabilities;
+          }
+
+          return this._runtimeFactory.createSandbox(proxyCapabilities).then((sandbox) => {
+
+            sandbox.addListener('*', (msg) => {
+                this.messageBus.postMessage(msg);
+              });
+            return sandbox;
           });
-
-          return sandbox;
         })
         .then((sandbox) => {
           if (haveError) return false;
-          console.info('6. return the sandbox instance and register', sandbox, 'to domain ', domain);
+          console.info('[Runtime.Loader] 6. return the sandbox instance and register', sandbox, 'to domain ', domain);
 
           _proxySandbox = sandbox;
 
@@ -596,7 +645,7 @@ class Loader {
         }, handleError)
         .then((runtimeIdpProxyURL) => {
           if (haveError) return false;
-          console.info('7. Return the runtime Idp Proxy URL: ', runtimeIdpProxyURL);
+          console.info('[Runtime.Loader] 7. Return the runtime Idp Proxy URL: ', runtimeIdpProxyURL);
 
           // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
@@ -617,13 +666,13 @@ class Loader {
           try {
             return _proxySandbox.deployComponent(_proxySourcePackage.sourceCode, runtimeIdpProxyURL, configuration);
           } catch (e) {
-            console.error('Error on deploy component:', e);
+            console.  Error('[Runtime.Loader] Error on deploy component:', e);
             reject(e);
           }
         }, handleError)
         .then((deployComponentStatus) => {
           if (haveError) return false;
-          console.info('8: return deploy component for sandbox status: ', deployComponentStatus);
+          console.info('[Runtime.Loader] 8: return deploy component for sandbox status: ', deployComponentStatus);
 
           // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
@@ -646,11 +695,11 @@ class Loader {
           console.log('Deployed: ', idpProxy);
 
           resolve(idpProxy);
-          console.info('------------------- END ---------------------------\n');
+          console.info('[Runtime.Loader] ------------------- END ---------------------------\n');
 
         }, handleError)
         .catch(errorReason);
-      });
+      }
 
     });
   }

@@ -28,7 +28,7 @@ import Registry from '../registry/Registry';
 import IdentityModule from '../identity/IdentityModule';
 import PEP from '../policy/PEP';
 import MessageBus from '../bus/MessageBus';
-import { generateGUID, divideURL } from '../utils/utils';
+import { generateGUID } from '../utils/utils';
 
 import Loader from './Loader';
 import Descriptors from './Descriptors';
@@ -72,6 +72,12 @@ class RuntimeUA {
     this.runtimeFactory = runtimeFactory;
     this.runtimeCatalogue = runtimeFactory.createRuntimeCatalogue();
 
+      if (runtimeDescriptor.p2pHandlerStub && typeof runtimeDescriptor.p2pHandlerStub  === 'string' && runtimeDescriptor.p2pHandlerStub.includes('://')) {
+        this.p2p = true;
+      } else {
+        this.p2p = false;
+      }
+
     runtimeUtils.runtimeDescriptor = runtimeDescriptor;
 
     if (typeof runtimeFactory.createRuntimeCatalogue === 'function') {
@@ -100,7 +106,6 @@ class RuntimeUA {
   }
 
   init() {
-
     return new Promise((resolve, reject) => {
 
       this.domain = this.runtimeConfiguration.domain;
@@ -121,16 +126,21 @@ class RuntimeUA {
 
           return this._loadComponents();
         }).then((status) => {
-          console.info('[runtime ua - install p2p] - status: ', status);
-          // return this._loadP2PHandler();
+
+          if (this.p2p) {
+            console.info('[RuntimeUA - init] load p2pHandler: ', status);
+            return this._loadP2PHandler();
+          } else {
+            console.info('[RuntimeUA - init] P2P not supported');
+            reject('P2P Not Supported');
+          }
         })
         .then((result) => {
-          console.info('[runtime ua - installation p2p] - status: ', result);
+          console.info('[runtime ua - init] - status: ', result);
           resolve(true);
-        })
-        .catch((error) => {
-          console.error('ERROR: ', error);
-          reject(error);
+        }, (reason) => {
+          console.info('ERROR: ', reason);
+          resolve(true);
         });
 
       } catch (e) {
@@ -148,20 +158,21 @@ class RuntimeUA {
       let runtimeDescriptor = runtimeUtils.runtimeDescriptor;
       let p2pStubHandler = runtimeDescriptor.p2pHandlerStub;
       console.log('P2PStubHandler: ', p2pStubHandler);
-      this.loadStub(p2pStubHandler).then((result) => {
-        console.log('Result: ', result);
 
-        // "type" : "subscribe",
-        // "from" : "hyperty-runtime://<p2p-handler-sp-domain>/<p2p-handler-runtime-instance-identifier>/ua",
-        // "to" : "domain://msg-node.<p2p-handler-sp-domain>/sm",
-        // "body" : { "subscribe" : ["<P2PHandlerStubURL>"], "source" : "hyperty-runtime://<p2p-handler-sp-domain>/<p2p-handler-runtime-instance-identifier>" }
+      let p2pConfig = {
+        isHandlerStub: true,
+        runtimeURL: this.runtimeURL
+      };
+
+      this.loadStub(p2pStubHandler, p2pConfig).then((result) => {
+
         let runtimeUAURL = this.runtimeURL + '/ua';
         let msg = {
           type: 'subscribe',
           from: runtimeUAURL,
           to: 'domain://msg-node.' + this.domain + '/sm',
           body: {
-            subscribe: [result.url],
+            subscribe: [result],
             source: this.runtimeURL
           }
         };
@@ -174,7 +185,7 @@ class RuntimeUA {
           console.log('[runtime ua - postMessage] - reply: ', reply);
         });
 
-        console.info('[runtime ua - p2p installation] - success: ');
+        console.info('[runtime ua - p2p installation] - success: ', result);
         resolve(true);
       }).catch((reason) => {
         console.info('[runtime ua - p2p installation] - fail: ', reason);

@@ -26,7 +26,7 @@
 */
 class RegistryDataModel {
 
-  constructor(id, url, descriptorURL, startingTime, lastModified, status, stubs, stubsConfiguration, p2pRequester) {
+  constructor(id, url, descriptorURL, p2pRequester, startingTime, lastModified, status, stubs, stubsConfiguration) {
     let _this = this;
 
     _this._id = id;
@@ -53,6 +53,16 @@ class RegistryDataModel {
   get descriptor() {
     let _this = this;
     return _this._descriptorURL;
+  }
+
+  get p2pRequester() {
+    let _this = this;
+    return _this._p2pRequester;
+  }
+
+  get lastModified() {
+    let _this = this;
+    return _this._lastModified;
   }
 
 }

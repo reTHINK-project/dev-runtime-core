@@ -10,7 +10,6 @@ let expect = chai.expect;
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
 
-import Descriptors from '../src/runtime/Descriptors';
 import { descriptors } from './resources/descriptors.js';
 
 // Testing Module

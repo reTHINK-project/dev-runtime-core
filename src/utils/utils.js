@@ -40,8 +40,6 @@
  */
 export function divideURL(url) {
 
-  if (!url) throw Error('URL is needed to split');
-
 	function recurse(value) {
 		const regex = /([a-zA-Z-]*)(:\/\/(?:\.)?|:)([-a-zA-Z0-9@:%._\+~#=]{2,256})([-a-zA-Z0-9@:%._\+~#=\/]*)/gi;
     const subst = '$1,$3,$4';
@@ -85,18 +83,8 @@ export function divideURL(url) {
     identity: parts[2]
   };
 
-  return result;
-}
+    return result;
 
-export function divideEmail(email) {
-  let indexOfAt = email.indexOf('@');
-
-  let result = {
-    username: email.substring(0, indexOfAt),
-    domain: email.substring(indexOfAt + 1, email.length)
-  };
-
-  return result;
 }
 
 /**

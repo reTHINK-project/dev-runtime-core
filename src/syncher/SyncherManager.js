@@ -155,6 +155,16 @@ class SyncherManager {
     let owner = msg.from;
     let domain = divideURL(msg.from).domain;
 
+    // Hack to ignore data object address reusage request
+    if (!msg.body.schema) {
+/*      _this._bus.postMessage({
+        id: msg.id, type: 'response', from: msg.to, to: msg.from,
+        body: { code: 404, description: 'not found' }
+      });*/
+
+      return;
+    }
+
     if (msg.body.resource) {
       _this._authorise(msg, msg.body.resource);
       return;
@@ -300,6 +310,14 @@ class SyncherManager {
   //FLOW-IN: message received from local Syncher -> subscribe
   _onLocalSubscribe(msg) {
     let _this = this;
+
+    if (!msg.body.resource) {
+    /*  _this._bus.postMessage({
+        id: msg.id, type: 'response', from: msg.to, to: msg.from,
+        body: { code: 404, description: 'not found' }
+      });*/
+      return;
+    }
 
     let hypertyURL = msg.from;
     let objURL = msg.body.resource;

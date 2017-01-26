@@ -54,8 +54,7 @@ class PEP {
   }
 
   authorise(message) {
-    console.log('--- Policy Engine ---');
-    console.log(JSON.stringify(message));
+    console.log('[Policy.PEP Authorise] ', message);
     console.log(message);
     if (!message) throw new Error('message is not defined');
     if (!message.from) throw new Error('message.from is not defined');
@@ -157,6 +156,11 @@ class PEP {
     let fromSchema = splitFrom[0];
     let splitTo = (message.to).split('://');
     let toSchema =  splitTo[0];
+
+    // Signalling messages between P2P Stubs don't have to be verified. FFS
+
+    if (message.from.includes('/p2phandler/') || message.from.includes('/p2prequester/') || message.to.includes('/p2phandler/') || message.to.includes('/p2prequester/'))
+      return false;
 
     // hack to disable Identity verification for messages coming from legacy domains while solution is not implemented
 
