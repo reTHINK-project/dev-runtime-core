@@ -897,8 +897,13 @@ class Registry {
       }
 
       _this.idModule.getIdentityAssertion().then(function(result) {
+
         let userProfile = result.userProfile;
         let identityURL = userProfile.userURL;
+
+        // hack while domain registry does not support discovery per email
+        let email = userProfile.userURL.split('://')[1].split('/')[1];
+        let emailURL = 'user://' + email.split('@')[1] + '/' + email.split('@')[0];
 
         if (_this._messageBus === undefined) {
           reject('MessageBus not found on registerStub');
@@ -957,7 +962,7 @@ class Registry {
                   console.log('[Registry registerHyperty] registering new Hyperty URL', addressURL.address[0]);
 
                   messageValue = {
-                    user: identityURL,
+                    user: emailURL,
                     descriptor: descriptorURL,
                     url: addressURL.address[0],
                     expires: _this.expiresTime,
@@ -983,7 +988,7 @@ class Registry {
                     type: 'update',
                     to: 'domain://registry.' + _this.registryDomain + '/',
                     from: _this.registryURL,
-                    body: {resource: addressURL.address[0], value: { status: 'live', user: identityURL }}
+                    body: {resource: addressURL.address[0], value: { status: 'live', user: emailURL }}
                   };
 
                   if (p2pHandler) {
