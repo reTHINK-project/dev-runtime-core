@@ -414,6 +414,8 @@ class IdentityModule {
       _this._messageBus.addResponseListener(_this._idmURL, id, msg => {
         _this._messageBus.removeResponseListener(_this._idmURL, id);
 
+        // todo: to return the user URL and not the email or identifier
+
         if (msg.body.code === 200) {
           let selectedIdentity = msg.body;
 
@@ -489,7 +491,10 @@ class IdentityModule {
 
           if (value.type === 'identity') {
 
-            let chosenID = getUserURLFromEmail(value.value);
+          //  let chosenID = getUserURLFromEmail(value.value);
+          // hack while the user url is not returned from requestIdentityToGUI;
+
+          let chosenID = 'user://' + _this.currentIdentity.idp + '/' + value.value;
 
             // returns the identity info from the chosen id
             for (let i in _this.identities) {
@@ -622,9 +627,13 @@ class IdentityModule {
         idToken = assertionParsed;
       }
 
+      idToken.idp = result.idp;
+
       let email = idToken.email || idToken.sub;
 
-      let identifier = getUserURLFromEmail(email);
+      // let identifier = getUserURLFromEmail(email);
+
+      let identifier = 'user://' + idToken.idp.domain + '/' + email;
 
       result.identity = identifier;
 

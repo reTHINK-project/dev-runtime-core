@@ -213,6 +213,14 @@ class RuntimeCoreCtx extends ReThinkCtx {
     return splitFrom[0] === 'runtime' && from !== this.runtimeRegistry.runtimeURL + '/sm';
   }
 
+  isLocal(url) {
+    return this.runtimeRegistry.isLocal(url);
+  }
+
+  isInterworkingProtoStub(url) {
+    return this.runtimeRegistry.isInterworkingProtoStub(url);
+  }
+
   _isToSetID(message) {
     let schemasToIgnore = ['domain-idp', 'runtime', 'domain'];
     let splitFrom = (message.from).split('://');

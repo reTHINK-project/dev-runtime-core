@@ -141,7 +141,7 @@ class PEP {
 
   _isIncomingMessage(message) {
 
-    return !(this.context.runtimeRegistry.isLocal(message.from));
+    return !(this.context.isLocal(message.from));
   }
 
   /**
@@ -156,15 +156,17 @@ class PEP {
     let fromSchema = splitFrom[0];
     let splitTo = (message.to).split('://');
     let toSchema =  splitTo[0];
+    let fromPath = (message.from).split('/');
+    let toPath = (message.to).split('/');
 
     // Signalling messages between P2P Stubs don't have to be verified. FFS
 
-    if (message.from.includes('/p2phandler/') || message.from.includes('/p2prequester/') || message.to.includes('/p2phandler/') || message.to.includes('/p2prequester/'))
+    if (fromPath.indexOf('p2phandler') !== -1 || fromPath.indexOf('p2prequester') !== -1 || toPath.indexOf('p2phandler') !== -1 || toPath.indexOf('p2prequester') !== -1)
       return false;
 
     // hack to disable Identity verification for messages coming from legacy domains while solution is not implemented
 
-    if (this.context.runtimeRegistry.isInterworkingProtoStub(message.from))
+    if (this.context.isInterworkingProtoStub(message.from))
       return false;
 
     if (message.from === fromSchema || message.to === toSchema || message.type === 'read' || message.type === 'response' || (isHypertyURL(message.from) && message.type === 'delete')) {
