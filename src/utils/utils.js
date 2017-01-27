@@ -201,6 +201,11 @@ export function buildURL(configuration, component, resource, type, useFallback =
   return url;
 }
 
+/**
+ * Generate a Global Unique ID
+ *
+ * @returns String;
+ */
 export function generateGUID() {
 
   function s4() {
@@ -210,5 +215,22 @@ export function generateGUID() {
   }
 
   return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+
+}
+
+/**
+ * Check if a string is a URL
+ *  
+ * @param {any} str
+ * @returns
+ */
+export function isURL(str) {
+  var pattern = /([a-zA-Z-]*):\/\/(?:\.)?([-a-zA-Z0-9@:%._\+~#=]{2,256})([-a-zA-Z0-9@:%._\+~#=\/]*)/gi;
+
+  if (!pattern.test(str)) {
+    return false;
+  } else {
+    return true;
+  }
 
 }

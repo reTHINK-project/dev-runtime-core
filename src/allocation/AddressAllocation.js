@@ -22,6 +22,8 @@
 **/
 // import MessageFactory from '../../resources/MessageFactory';
 
+import {isURL} from '../utils/utils';
+
 /**
  * Class will ask to the message node for addresses
  */
@@ -53,62 +55,95 @@ class AddressAllocation {
    */
   get url() { return this._url; }
 
+
   /**
+   *
    * Ask for creation of a number of Hyperty addresses, to the domain message node.
-   * @param  {Domain} domain - Domain of the message node.
-   * @param  {number} number - Number of addresses to request
-   * @returns {Promise<HypertyURL>}  A list of HypertyURL's
+   *
+   * @param {Domain} domain - domain of the message node
+   * @param {Number} number - number of address to be allocated
+   * @param {Descriptor} info - descriptor to search for the hyperty (TODO:// this should be confirmed)
+   * @see https://github.com/reTHINK-project/specs/blob/master/datamodel/core/hyperty-catalogue/readme.md#catalogue-data-model
+   * @param {scheme} scheme - scheme of address to be created or reused, like: hyperty, comm, context, etc;
+   * @param {boolean|URL.HypertyURL} reuseURL - reuseURL is used to reuse the hypertyURL previously registred;
+   * @returns {Promise<Object, Error>} this is Promise and returns an object with the address information
+   *
+   * @memberOf AddressAllocation
    */
   create(domain, number, info, scheme, reuseURL) {
     let _this = this;
 
     return new Promise((resolve, reject) => {
 
-      if (reuseURL) {
+      if (typeof(reuseURL) === 'boolean') {
+
+        if (reuseURL) {
+
+          _this._registry.checkRegisteredURLs(info).then((urls) => {
+
+            if (urls) {
+              console.info('[AddressAllocation - ' + scheme + '] - Reuse URL');
+              let value = {newAddress: false, address: urls};
+              resolve(value);
+            } else {
+              console.info('[AddressAllocation - reuseURL] - Object ' + reuseURL + ' not found');
+              reject('URL Not Found');
+            }
+
+          }).catch((reason) => {
+            reject(reason);
+          });
+
+        } else {
+
+          _this._registry.checkRegisteredURLs(info).then((urls) => {
+
+            // if there is already a URL, then returns that URL, otherwise request a new URL
+            if (urls) {
+
+              console.info('[AddressAllocation - ' + scheme + '] - Reuse URL');
+              let value = {newAddress: false, address: urls};
+              resolve(value);
+
+            } else {
+
+              // if there is no URL saved request a new URL
+              _this._allocateNewAddress(domain, scheme, number).then((allocated) => {
+                resolve(allocated);
+              }).catch((reason) => {
+                reject(reason);
+              });
+
+            }
+          }).catch((reason) => {
+            reject(reason);
+          });
+
+        }
+
+      } else if (typeof(reuseURL) === 'string' && isURL(reuseURL)) {
+        console.info('[AddressAllocation] - will use your URL: ', reuseURL);
 
         _this._registry.checkRegisteredURLs(info).then((urls) => {
-
-          if (urls) {
-            console.info('[AddressAllocation - ' + scheme + '] - Reuse URL');
-            let value = {newAddress: false, address: urls};
-            resolve(value);
-          } else {
-            console.info('[AddressAllocation - reuseURL] - Object ' + reuseURL + ' not found');
-            reject('URL Not Found');
-          }
-
-        }).catch((reason) => {
-          reject(reason);
+          console.info('[AddressAllocation - ' + scheme + '] - Reuse URL');
+          let value = {newAddress: false, address: urls};
+          resolve(value);
         });
 
       } else {
+        console.info('-------------------------------------------------------------');
+        console.info('[AddressAllocation] - the provided url (' + reuseURL + ' ) is not valid.');
+        console.info('[AddressAllocation] - new address will be allocated');
 
-        _this._registry.checkRegisteredURLs(info).then((urls) => {
-
-          // if there is already a URL, then returns that URL, otherwise request a new URL
-          if (urls) {
-
-            console.info('[AddressAllocation - ' + scheme + '] - Reuse URL');
-            let value = {newAddress: false, address: urls};
-            resolve(value);
-
-          } else {
-
-            // if there is no URL saved request a new URL
-            _this._allocateNewAddress(domain, scheme, number).then((allocated) => {
-              resolve(allocated);
-            }).catch((reason) => {
-              reject(reason);
-            });
-
-          }
+        // if there is no URL saved request a new URL
+        _this._allocateNewAddress(domain, scheme, number).then((allocated) => {
+          resolve(allocated);
         }).catch((reason) => {
           reject(reason);
         });
 
       }
     });
-
   }
 
   _allocateNewAddress(domain, scheme, number) {
