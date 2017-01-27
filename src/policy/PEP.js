@@ -166,7 +166,12 @@ class PEP {
 
     // hack to disable Identity verification for messages coming from legacy domains while solution is not implemented
 
-    if (this.context.isInterworkingProtoStub(message.from))
+    let from = message.from;
+
+    if (message.body && message.body.source)
+     from = message.body.source;
+
+    if (this.context.isInterworkingProtoStub(from))
       return false;
 
     if (message.from === fromSchema || message.to === toSchema || message.type === 'read' || message.type === 'response' || (isHypertyURL(message.from) && message.type === 'delete')) {

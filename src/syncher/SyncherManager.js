@@ -58,6 +58,7 @@ class SyncherManager {
     _this._storageManager = storageManager;
 
     //TODO: these should be saved in persistence engine?
+    _this.runtimeURL = runtimeURL;
     _this._url = runtimeURL + '/sm';
     _this._objectURL = runtimeURL + '/object-allocation';
 
@@ -154,6 +155,10 @@ class SyncherManager {
     let _this = this;
     let owner = msg.from;
     let domain = divideURL(msg.from).domain;
+
+    // if reporter is in a Interworking Protostub the runtime domain backend services will be used
+    if (_this._registry.isInterworkingProtoStub(msg.from))
+      domain = divideURL(_this.runtimeURL).domain;
 
     // Hack to ignore data object address reusage request
     if (!msg.body.schema) {

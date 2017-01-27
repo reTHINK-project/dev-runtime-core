@@ -13,7 +13,7 @@ class ReporterObject {
     _this._bus = parent._bus;
     _this._storageManager = parent._storageManager;
 
-    _this._domain = divideURL(owner).domain;
+    _this._domain = divideURL(url).domain;
     _this._objSubscriptorURL = _this._url + '/subscription';
 
     _this._subscriptions = {};

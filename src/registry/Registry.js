@@ -642,9 +642,16 @@ class Registry {
         //update the list with the new elements
         urlsList[identifier + dataObjectschema + resources + dataObjectReporter] = addressURL.address;
 
-        let runtime = 'runtime://domain/dataObjectXPTO';
+        let p2pHandler;
+        let p2pRequester;
+
+        if (Object.keys(_this.p2pHandlerStub).length !== 0) {
+          p2pHandler = _this.p2pHandlerStub[_this.runtimeURL].url;
+          p2pRequester = runtimeUtils.runtimeDescriptor.p2pRequesterStub;
+        }
+
+        let runtime = _this.runtimeURL;
         let status = 'live';
-        let p2pRequester = 'dataObject://domain/requester';
 
         //message to register the new hyperty, within the domain registry
         let messageValue = {
@@ -658,9 +665,16 @@ class Registry {
           preAuth: authorise,
           subscribers: [],
           runtime: runtime,
-          status: status,
-          p2pRequester: p2pRequester
+          status: status
         };
+
+        if (p2pHandler) {
+          messageValue.p2pHandler = p2pHandler;
+          messageValue.p2pRequester = p2pRequester;
+        }
+
+        if (_this.isInterworkingProtoStub(dataObjectReporter))
+          messageValue.interworking = true;
 
         let message;
 
@@ -1218,7 +1232,6 @@ class Registry {
               });
           } else {
 
-
             let remoteRuntimeURL = msg.body.resource;
 
             let p2pConnection = _this.p2pConnectionList[remoteRuntimeURL];
@@ -1659,7 +1672,14 @@ class Registry {
       url = url.substring(0, url.indexOf('/subscription'));
     }
 
-    return this.dataObjectList.hasOwnProperty(url);
+    let dataObject = this.dataObjectList[url];
+
+    if (dataObject) {
+      if (dataObject.interworking)
+        return !dataObject.interworking;
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -1683,9 +1703,9 @@ class Registry {
           return _this.protostubsList[key].interworking;
         else
           return false;
-      });
+      })[0];
 
-    return false;
+    return filtered;
   }
 }
 
