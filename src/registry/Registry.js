@@ -1225,49 +1225,84 @@ class Registry {
       // resolve(runtimeProtoStubURL);
 
       _this._messageBus.addListener(runtimeProtoStubURL + '/status', (msg) => {
-        if (msg.resource === msg.to + '/status') {
-          console.log('RuntimeProtostubURL/status message: ', msg.body.value);
+        debugger;
 
-          if (runtimeProtoStubURL.includes('protostub')) {
-
-            let filtered = Object.keys(_this.protostubsList).filter((key) => {
-              	return _this.protostubsList[key].url === runtimeProtoStubURL;
-              }).map((key) => {
-              	_this.protostubsList[key].status = msg.body.value;
-              });
-          } else {
-
-            let remoteRuntimeURL = msg.body.resource;
-
-            let p2pConnection = _this.p2pConnectionList[remoteRuntimeURL];
-
-            if (p2pConnection) {
-              _this.p2pConnectionList[remoteRuntimeURL].status =  msg.body.value;
-              _this.p2pConnectionList[remoteRuntimeURL].url =  runtimeProtoStubURL;
-            } else {
-
-              p2pConnection = {
-                status: msg.body.value,
-                url: runtimeProtoStubURL
-              };
-
-              _this.p2pConnectionList[remoteRuntimeURL] =  p2pConnection;
-            }
-
-          if (runtimeProtoStubURL.includes('p2prequester')) {
-
-            let filtered = Object.keys(protostubList).filter((key) => {
-              	return protostubList[key].url === runtimeProtoStubURL;
-              }).map((key) => {
-              	p2pRequesterStub[key].status = msg.body.value;
-              });
-          }
-        }
-
-        }
-      });
+        _this._onProtostubStatusEvent(msg);
+        });
     });
 
+  }
+
+  /**
+  * To Process status events fired by protostubs
+  * @param  {Message}   message     Event Message
+  */
+
+  _onProtostubStatusEvent(msg) {
+
+      let _this = this;
+
+      console.log('[Registry onProtostubStatusEvent]: ', msg);
+
+      let runtimeProtoStubURL = msg.from;
+
+      if (!msg.to.includes('/status')) {
+        console.error('[Registry onProtostubStatusEvent] Not Status Event: ', msg);
+        return;
+      }
+
+      // process status events from message node protostubs
+      // TODO: uncomment below when protostubs are updated with new status value "live"
+
+    /*  if (runtimeProtoStubURL.includes('/protostub/')) {
+
+        let filtered = Object.keys(_this.protostubsList).filter((key) => {
+            return _this.protostubsList[key].url === runtimeProtoStubURL;
+          }).map((key) => {
+            _this.protostubsList[key].status = msg.body.value;
+          });
+      }*/
+
+      // process status events from message P2P Handler protostubs
+
+      if (runtimeProtoStubURL.includes('/p2phandler/')) {
+
+        // process status events from p2p connections at message P2P Handler protostubs
+
+        if ( msg.body.resource ) {
+
+          let remoteRuntimeURL = msg.body.resource;
+
+          let p2pConnection = _this.p2pConnectionList[remoteRuntimeURL];
+
+          if (p2pConnection) {
+            _this.p2pConnectionList[remoteRuntimeURL].status =  msg.body.value;
+            _this.p2pConnectionList[remoteRuntimeURL].url =  runtimeProtoStubURL;
+          } else { // process status events from P2P Handler protostub
+
+            _this.protostubsList[key].status = msg.body.value;
+
+            p2pConnection = {
+              status: msg.body.value,
+              url: runtimeProtoStubURL
+            };
+
+            _this.p2pConnectionList[remoteRuntimeURL] =  p2pConnection;
+          }
+        } else {
+          _this.p2pHandlerStub[_this.runtimeURL].status = msg.body.value;
+
+        }
+      }
+
+      if (runtimeProtoStubURL.includes('/p2prequester/')) {
+
+        let filtered = Object.keys(protostubList).filter((key) => {
+            return protostubList[key].url === runtimeProtoStubURL;
+          }).map((key) => {
+            p2pRequesterStub[key].status = msg.body.value;
+          });
+      }
   }
 
   /**
