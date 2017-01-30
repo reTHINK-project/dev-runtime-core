@@ -264,7 +264,6 @@ class GraphConnector {
     let record = this.globalRegistryRecord.getRecord();
     let recordString = JSON.stringify(record);
     let recordStringBase64 = base64url.encode(recordString);
-
     let jwtTemp = jsrsasign.KJUR.jws.JWS.sign(null, {alg: 'ES256'}, {data: recordStringBase64}, this._prvKey);
     let encodedString = jwtTemp.split('.').slice(0, 2).join('.');
 
@@ -1025,7 +1024,17 @@ class GraphConnector {
 
         _this.storageManager.get('graphConnector:globalRegistryRecord').then((globalRegistryRecord) => {
             if (globalRegistryRecord) {
-              _this.globalRegistryRecord = globalRegistryRecord;
+              _this.globalRegistryRecord.timeout = globalRegistryRecord.timeout;
+              _this.globalRegistryRecord.active = globalRegistryRecord.active;
+              _this.globalRegistryRecord.defaults.chat = globalRegistryRecord.defaults.chat;
+              _this.globalRegistryRecord.defaults.video = globalRegistryRecord.defaults.video;
+              _this.globalRegistryRecord.defaults.voice = globalRegistryRecord.defaults.voice;
+              _this.globalRegistryRecord.guid = globalRegistryRecord.guid;
+              _this.globalRegistryRecord.lastUpdate = globalRegistryRecord.lastUpdate;
+              _this.globalRegistryRecord.publicKey = globalRegistryRecord.publicKey;
+              _this.globalRegistryRecord.revoked = globalRegistryRecord.revoked;
+              _this.globalRegistryRecord.salt = globalRegistryRecord.salt;
+              _this.globalRegistryRecord.schemaVersion = globalRegistryRecord.schemaVersion;
             }
             resolve();
           });
@@ -1044,6 +1053,28 @@ class GraphConnector {
             resolve();
           });
 
+        _this.storageManager.get('graphConnector:privateKey').then((privateKey) => {
+            if (privateKey) {
+              _this.privateKey = privateKey;
+              _this._prvKey = jsrsasign.KEYUTIL.getKey(privateKey, 'PKCS8PRV');
+            }
+            resolve();
+          });
+
+        _this.storageManager.get('graphConnector:firstName').then((firstName) => {
+            if (firstName) {
+              _this.firstName = firstName;
+            }
+            resolve();
+          });
+
+        _this.storageManager.get('graphConnector:lastName').then((lastName) => {
+            if (lastName) {
+              _this.lastName = lastName;
+            }
+            resolve();
+          });
+
       });
   }
 
@@ -1052,10 +1083,13 @@ class GraphConnector {
    */
   storeGraphConnector() {
     let _this = this;
+
     _this.storageManager.set('graphConnector:globalRegistryRecord', 0, _this.globalRegistryRecord);
     _this.storageManager.set('graphConnector:contacts', 0, _this.contacts);
     _this.storageManager.set('graphConnector:groups', 0, _this.groups);
-
+    _this.storageManager.set('graphConnector:privateKey', 0, _this.privateKey);
+    _this.storageManager.set('graphConnector:firstName', 0, _this.firstName);
+    _this.storageManager.set('graphConnector:lastName', 0, _this.lastName);
   }
 }
 
