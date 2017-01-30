@@ -1,3 +1,5 @@
+import {encodeUTF8, decodeUTF8} from './utf8.js';
+
 /**
 * Class with the cryptographic functions for the authentication protocol
 *
@@ -9,11 +11,11 @@ class Crypto {
 
     _this.runtimeFactory = runtimeFactory;
 
-    if (typeof runtimeFactory.createWebcrypto === 'function') {
+    /*if (typeof runtimeFactory.createWebcrypto === 'function') {
       console.log('TIAGO: Webcrypto');
     } else {
       console.log('TIAGO: crypto');
-    }
+    }*/
     _this._crypto = typeof runtimeFactory.createWebcrypto === 'function' ? runtimeFactory.createWebcrypto() : crypto;
   }
 
@@ -99,6 +101,7 @@ class Crypto {
     return new Promise(function(resolve, reject) {
       _this._importRSAsignKey(privKey).then(function(privateKey) {
 
+        //console.log('TIAGO: signRSA data', data);
         _this._crypto.subtle.sign(
             {
               name: 'RSASSA-PKCS1-v1_5'
@@ -127,6 +130,7 @@ class Crypto {
     return new Promise(function(resolve, reject) {
       _this._importRSAverifyKey(pubKey).then(function(publicKey) {
 
+        //console.log('TIAGO: verifyRSA data', data);
         _this._crypto.subtle.verify(
             {
               name: 'RSASSA-PKCS1-v1_5'
@@ -156,6 +160,7 @@ class Crypto {
     return new Promise(function(resolve, reject) {
       _this._importAESkey(key).then(function(aesKey) {
 
+        //console.log('TIAGO: encryptAES data', data);
         _this._crypto.subtle.encrypt(
             {
               name: 'AES-CBC',
@@ -224,6 +229,7 @@ class Crypto {
 
       _this._importHMACkey(key).then(function(hmacKey) {
 
+        //console.log('TIAGO: hashHMAC data', data);
         _this._crypto.subtle.sign(
         {
           name: 'HMAC'
@@ -259,6 +265,7 @@ class Crypto {
 
       _this._importHMACkey(key).then(function(hmacKey) {
 
+        //console.log('TIAGO: verifyHMAC data', data);
         _this._crypto.subtle.verify(
           {
             name: 'HMAC'
@@ -357,7 +364,9 @@ class Crypto {
     _this._crypto.getRandomValues(array);
 
     let date = Date.now();
-    let dateEncoded = _this._utf8Encode(date);
+
+    //console.log('TIAGO: generateRandom data', date.toString());
+    let dateEncoded = _this._utf8Encode(date.toString());
 
     //extract the least significant 4 bytes in the date
     let finalDate = dateEncoded.slice(dateEncoded.length - 4, dateEncoded.length);
@@ -676,11 +685,13 @@ class Crypto {
   }
 
   _utf8Encode(s) {
-    return new TextEncoder('utf-8').encode(s);
+    //return new TextEncoder('utf-8').encode(s);
+    return encodeUTF8(s);
   }
 
   _utf8Decode(s) {
-    return new TextDecoder('utf-8').decode(s);
+    //return new TextDecoder('utf-8').decode(s);
+    return decodeUTF8(s);
   }
 }
 

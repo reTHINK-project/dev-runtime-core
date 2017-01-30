@@ -462,20 +462,35 @@ class IdentityModule {
             userURL: 'user://nodejs.com/nodejs-' + randomNumber
           };
 
-          let identityBundle = {
-            assertion: 'assertion',
-            idp:'nodejs',
-            identity: 'user://nodejs.com/nodejs-' + randomNumber,
-            messageInfo: {
+          // TIAGO
+          _this.crypto.generateRSAKeyPair().then(function(keys) {
+
+            let publicKey = btoa(keys.public);
+            let privateKey = btoa(keys.private);
+            let keyPair = {
+              private: privateKey,
+              public: publicKey
+            };
+
+            //console.log('TIAGO: keyPair promise ', keyPair);
+
+            let identityBundle = {
               assertion: 'assertion',
               idp:'nodejs',
-              userProfile: userProfile
-            },
-            userProfile: userProfile
-          };
-          _this.currentIdentity = identityBundle;
-          _this.identities.push(identityBundle);
-          return resolve(identityBundle);
+              identity: 'user://nodejs.com/nodejs-' + randomNumber,
+              messageInfo: {
+                assertion: 'assertion',
+                idp:'nodejs',
+                userProfile: userProfile
+              },
+              userProfile: userProfile,
+              keyPair: keyPair
+            };
+            _this.currentIdentity = identityBundle;
+            _this.identities.push(identityBundle);
+            return resolve(identityBundle);
+
+          });
         }
 
       }).catch(error => {
@@ -496,7 +511,6 @@ class IdentityModule {
       //generates the RSA key pair
       _this.crypto.generateRSAKeyPair().then(function(keyPair) {
 
-        console.log('TIAGO: callGenerateMethods');
         publicKey = btoa(keyPair.public);
         userkeyPair = keyPair;
         return _this.generateAssertion(publicKey, origin, '', userkeyPair, idp);
@@ -575,7 +589,6 @@ class IdentityModule {
       let newIdentity = {userProfile: userProfileBundle, idp: result.idp.domain, assertion: result.assertion};
       result.messageInfo = newIdentity;
       result.keyPair = keyPair;
-      console.log('TIAGO: storeIdentity');
 
       _this.currentIdentity = newIdentity;
 
@@ -625,8 +638,6 @@ class IdentityModule {
   */
   generateAssertion(contents, origin, usernameHint, keyPair, idpDomain) {
     let _this = this;
-
-    console.log('TIAGO: generateAssertion');
 
     return new Promise(function(resolve,reject) {
 
@@ -1540,8 +1551,8 @@ class IdentityModule {
 
     let userInfo = _this.getIdentity(userURL);
 
-    console.log('TIAGO: UserInfo: ', userInfo);
-    console.log('TIAGO: UserInfo.keyPair: ', userInfo.keyPair);
+    //console.log('TIAGO: UserInfo: ', userInfo);
+    //console.log('TIAGO: UserInfo.keyPair: ', userInfo.keyPair);
 
     let newChatCrypto =
     {
