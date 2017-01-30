@@ -155,6 +155,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
       if (isDataObjectSubscription & isFromRemoteSM) {
         to.pop();
         let dataObjectURL = to[0] + '//' + to[2] + '/' + to[3];
+        console.log('TIAGO: message ', message);
         _this.idModule.doMutualAuthentication(dataObjectURL, message.body.subscriber).then(() => {
           _this.runtimeRegistry.registerSubscriber(dataObjectURL, message.body.subscriber);
           resolve();

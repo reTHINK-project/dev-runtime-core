@@ -93,7 +93,70 @@ class IdentityModule {
   set messageBus(messageBus) {
     let _this = this;
     _this._messageBus = messageBus;
+    _this.addGUIListeners();
+  }
 
+  addGUIListeners() {
+    let _this = this;
+
+    // TIAGO
+    _this._messageBus.addListener(_this._idmURL, (msg) => {
+      let funcName = msg.body.method;
+
+      //console.log('TIAGO: executing ', funcName);
+
+      let returnedValue;
+      if (funcName === 'deployGUI') {
+        returnedValue = _this.deployGUI();
+      } else if (funcName === 'getIdentitiesToChoose') {
+        returnedValue = _this.getIdentitiesToChoose();
+      } else if (funcName === 'unregisterIdentity') {
+        let email = msg.body.params.email;
+        returnedValue = _this.unregisterIdentity(email);
+      } else if (funcName === 'generateRSAKeyPair') {
+        // because generateRSAKeyPair is a promise
+        // we have to send the message only after getting the key pair
+        _this.crypto.generateRSAKeyPair().then((keyPair) => {
+          let value = {type: 'execute', value: keyPair, code: 200};
+          let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
+          _this._messageBus.postMessage(replyMsg);
+        });
+        return;
+      } else if (funcName === 'sendGenerateMessage') {
+        let contents = msg.body.params.contents;
+        let origin = msg.body.params.origin;
+        let usernameHint = msg.body.params.usernameHint;
+        let ipDomain = msg.body.params.ipDomain;
+        _this.sendGenerateMessage(contents, origin, usernameHint, ipDomain).then((returnedValue) => {
+          let value = {type: 'execute', value: returnedValue, code: 200};
+          let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
+          _this._messageBus.postMessage(replyMsg);
+        });
+        return;
+      } else if (funcName === 'openPopup') {
+        let urlreceived = msg.body.params.urlreceived;
+        _this.openPopup(urlreceived).then((returnedValue) => {
+          let value = {type: 'execute', value: returnedValue, code: 200};
+          let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
+          _this._messageBus.postMessage(replyMsg);
+        });
+        return;
+      } else if (funcName === 'storeIdentity') {
+        let result = msg.body.params.result;
+        let keyPair = msg.body.params.keyPair;
+        _this.storeIdentity(result, keyPair).then((returnedValue) => {
+          let value = {type: 'execute', value: returnedValue, code: 200};
+          let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
+          _this._messageBus.postMessage(replyMsg);
+        });
+        return;
+      }
+
+      // if the function requested is not a promise
+      let value = {type: 'execute', value: returnedValue, code: 200};
+      let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
+      _this._messageBus.postMessage(replyMsg);
+    });
   }
 
   /**
