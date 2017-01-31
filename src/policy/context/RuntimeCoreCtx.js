@@ -123,10 +123,12 @@ class RuntimeCoreCtx extends ReThinkCtx {
     return new Promise((resolve, reject) => {
 
       // TODO remove this validation. When the Nodejs auth was completed this should work like browser;
-      if (this.runtimeCapabilities.isAvailable('node')).then(() => {
+      this.runtimeCapabilities.isAvailable('node').then((result) => {
 
-        return resolve(message);
-       });
+        if (result) {
+          return resolve(message);
+        }
+      });
 
       if (isIncoming & result) {
         let isSubscription = message.type === 'subscribe';
