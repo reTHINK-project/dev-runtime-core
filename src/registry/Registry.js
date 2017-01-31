@@ -1161,9 +1161,9 @@ class Registry {
 
       console.info('[Registry - registerStub] - stubID ', stubID);
 
-      if (!stubID.indexOf('msg-node.')) {
+  /*    if (!stubID.indexOf('msg-node.')) {
         stubID = stubID.substring(stubID.indexOf('.') + 1);
-      }
+      }*/
 
       let isP2PHandler = false;
       let P2PRequesterStub;
@@ -1225,7 +1225,6 @@ class Registry {
       // resolve(runtimeProtoStubURL);
 
       _this._messageBus.addListener(runtimeProtoStubURL + '/status', (msg) => {
-        debugger;
 
         _this._onProtostubStatusEvent(msg);
         });
@@ -1701,9 +1700,18 @@ class Registry {
     }
 
     // Process Hyperty URLs
+    // Todo: hypertiesList should be an object not an array
 
     if (hypertyScheme.indexOf(urlScheme) !== -1) {
-      return this.hypertiesList.hasOwnProperty(url);
+
+      for (let index in this.hypertiesList) {
+        let hyperty = this.hypertiesList[index];
+        if (hyperty.hypertyURL === url) {
+          return true;
+        }
+      }
+
+      return false;
     }
 
     // Process Data Object URLs
