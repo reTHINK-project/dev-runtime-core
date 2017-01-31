@@ -281,3 +281,14 @@ export function isBackendServiceURL(url) {
 
   return false;
 }
+
+export function divideEmail(email) {
+  let indexOfAt = email.indexOf('@');
+
+  let result = {
+    username: email.substring(0, indexOfAt),
+    domain: email.substring(indexOfAt + 1, email.length)
+  };
+
+  return result;
+}
