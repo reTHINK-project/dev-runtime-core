@@ -229,7 +229,6 @@ class Crypto {
 
       _this._importHMACkey(key).then(function(hmacKey) {
 
-        //console.log('TIAGO: hashHMAC data', data);
         _this._crypto.subtle.sign(
         {
           name: 'HMAC'
