@@ -95,14 +95,23 @@ class Loader {
     return this._runtimeFactory;
   }
 
+
   /**
-  * Deploy Hyperty from Catalogue URL
-  * @param  {URL.HypertyCatalogueURL}    hyperty hypertyDescriptor url;
-  */
-  loadHyperty(hypertyDescriptorURL) {
+   * Deploy Hyperty from Catalogue URL
+   *
+   * @see https://github.com/reTHINK-project/specs/tree/master/datamodel/core/address
+   *
+   * @param {URL.HypertyCatalogueURL} hypertyCatalogueURL - The Catalogue URL used to identify descriptors in the Catalogue.
+   * @param {boolean|URL.HypertyURL} [reuseURL=false] reuseURL - reuseURL is used to reuse the hypertyURL previously registred, by default the reuse is disabled;
+   * @param {URL} appURL - the app url address; // TODO: improve this description;
+   * @returns {Promise<Boolean, Error>} this is Promise and returns true if all components are loaded with success or an error if someone fails.
+   *
+   * @memberOf Loader
+   */
+  loadHyperty(hypertyCatalogueURL, reuseURL = false, appURL) {
 
     if (!this._readyToUse()) return false;
-    if (!hypertyDescriptorURL) throw new Error('Hyperty descriptor url parameter is needed');
+    if (!hypertyCatalogueURL) throw new Error('Hyperty descriptor url parameter is needed');
 
     return new Promise((resolve, reject) => {
 
@@ -127,8 +136,8 @@ class Loader {
       // because at this moment it is incompatible with nodejs;
       // Probably we need to pass a factory like we do for sandboxes;
       console.info('------------------ Hyperty ------------------------');
-      console.info('Get hyperty descriptor for :', hypertyDescriptorURL);
-      return this.descriptors.getHypertyDescriptor(hypertyDescriptorURL)
+      console.info('Get hyperty descriptor for :', hypertyCatalogueURL);
+      return this.descriptors.getHypertyDescriptor(hypertyCatalogueURL)
       .then((hypertyDescriptor) => {
         // at this point, we have completed "step 2 and 3" as shown in https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md
         console.info('1: return hyperty descriptor');
@@ -189,7 +198,7 @@ class Loader {
           // we have completed step 11 here.
         } else {
 
-          let domain = divideURL(hypertyDescriptorURL).domain;
+          let domain = divideURL(hypertyCatalogueURL).domain;
 
           // getSandbox, this will return a promise;
           sandbox = this.registry.getSandbox(domain);
@@ -227,14 +236,14 @@ class Loader {
         _hypertySandbox = sandbox;
 
         let numberOfAddresses = 1;
-        return this._addressAllocation.create(this._registry._domain, numberOfAddresses, _hypertyDescriptor, 'hyperty');
+        return this._addressAllocation.create(this._registry._domain, numberOfAddresses, _hypertyDescriptor, 'hyperty', reuseURL);
       }, handleError)
       .then((addresses) => {
         if (haveError) return false;
-        console.info('6: return the addresses for the hyperty');
+        console.info('6: return the addresses for the hyperty', addresses);
 
         // Register hyperty
-        return this.registry.registerHyperty(_hypertySandbox, hypertyDescriptorURL, _hypertyDescriptor, addresses);
+        return this.registry.registerHyperty(_hypertySandbox, hypertyCatalogueURL, _hypertyDescriptor, addresses);
       }, handleError)
       .then((hypertyURL) => {
         if (haveError) return false;

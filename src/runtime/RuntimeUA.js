@@ -32,10 +32,12 @@ import { generateGUID } from '../utils/utils';
 
 import Loader from './Loader';
 import { runtimeConfiguration } from './runtimeConfiguration';
+
 // import GraphConnector from '../graphconnector/GraphConnector';
 
 import SyncherManager from '../syncher/SyncherManager';
 import RuntimeCoreCtx from '../policy/context/RuntimeCoreCtx';
+
 /**
  * Runtime User Agent Interface will process all the dependecies of the core runtime;
  * @author Vitor Silva [vitor-t-silva@telecom.pt]
@@ -93,6 +95,14 @@ class RuntimeUA {
 
   }
 
+  /**
+   * Intialize the installation of runtime
+   *
+   * @access public
+   * @return {Promise<Boolean, Error>} this is Promise and if the installation process happened without any problems returns true otherwise the error.
+   *
+   * @memberOf RuntimeUA
+   */
   init() {
 
     return new Promise((resolve, reject) => {
@@ -130,6 +140,13 @@ class RuntimeUA {
 
   }
 
+  /**
+   *
+   * @access private
+   * @return {Promise<Boolean, Error>} this is Promise and returns true if all components are loaded with success or an error if someone fails.
+   *
+   * @memberOf RuntimeUA
+   */
   _loadComponents() {
 
     return new Promise((resolve, reject) => {
@@ -211,24 +228,21 @@ class RuntimeUA {
   }
 
   /**
-  * Deploy Hyperty from Catalogue URL
-  * @param  {URL.HypertyCatalogueURL}    hyperty hypertyDescriptor url;
-  */
-  loadHyperty(hypertyDescriptorURL) {
+   * Deploy Hyperty from Catalogue URL
+   *
+   * @see https://github.com/reTHINK-project/specs/tree/master/datamodel/core/address
+   *
+   * @param {URL.HypertyCatalogueURL} hypertyCatalogueURL - The Catalogue URL used to identify descriptors in the Catalogue.
+   * @param {boolean|URL.HypertyURL} [reuseURL=false] reuseURL - reuseURL is used to reuse the hypertyURL previously registred, by default the reuse is disabled;
+   * @param {URL} appURL - the app url address; // TODO: improve this description;
+   * @returns {Promise<Boolean, Error>} this is Promise and returns true if all components are loaded with success or an error if someone fails.
+   *
+   * @memberOf RuntimeUA
+   */
+  loadHyperty(hypertyCatalogueURL, reuseURL = false, appURL) {
 
-    if (!hypertyDescriptorURL) throw new Error('Hyperty descriptor url parameter is needed');
-
-    return new Promise((resolve, reject) => {
-
-      this.loader.loadHyperty(hypertyDescriptorURL)
-      .then((result) => {
-        resolve(result);
-      })
-      .catch((reason) => {
-        reject(reason);
-      });
-
-    });
+    if (!hypertyCatalogueURL) throw new Error('Hyperty descriptor url parameter is needed');
+    return this.loader.loadHyperty(hypertyCatalogueURL, reuseURL, appURL);
 
   }
 
@@ -236,21 +250,10 @@ class RuntimeUA {
   * Deploy Stub from Catalogue URL or domain url
   * @param  {URL.URL}     domain          domain
   */
-  loadStub(protostubURL) {
+  loadStub(protocolstubCatalogueURL) {
 
-    if (!protostubURL) throw new Error('ProtoStub descriptor url parameter is needed');
-
-    return new Promise((resolve, reject) => {
-
-      this.loader.loadStub(protostubURL)
-      .then((result) => {
-        resolve(result);
-      })
-      .catch((reason) => {
-        reject(reason);
-      });
-
-    });
+    if (!protocolstubCatalogueURL) throw new Error('ProtoStub descriptor url parameter is needed');
+    return this.loader.loadStub(protocolstubCatalogueURL);
 
   }
 
@@ -258,20 +261,10 @@ class RuntimeUA {
   * Deploy idpProxy from Catalogue URL or domain url
   * @param  {URL.URL}     domain          domain
   */
-  loadIdpProxy(idpProxyURL) {
+  loadIdpProxy(ipdProxyCatalogueURL) {
 
-    if (!idpProxyURL) throw new Error('The IDP Proxy URL is a needed parameter, could be a DOMAIN or a URL');
-
-    return new Promise((resolve, reject) => {
-      this.loader.loadIdpProxy(idpProxyURL)
-      .then((result) => {
-        resolve(result);
-      })
-      .catch((reason) => {
-        reject(reason);
-      });
-    });
-
+    if (!ipdProxyCatalogueURL) throw new Error('The IDP Proxy URL is a needed parameter, could be a DOMAIN or a URL');
+    return this.loader.loadIdpProxy(ipdProxyCatalogueURL);
   }
 
   /**

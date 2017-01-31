@@ -333,9 +333,10 @@ class Registry {
   getReporterURL(dataObjectURL) {
     let _this = this;
 
-    let dataObject = _this.dataObjectList[dataObjectURL];
-
     return new Promise(function(resolve, reject) {
+
+      let dataObject = _this.dataObjectList[dataObjectURL];
+
       if (dataObject) {
         resolve(dataObject.reporter);
       } else {
@@ -626,17 +627,37 @@ class Registry {
   * @param  {JSON}        info           object or hyperty charateristics info
   * @return {addressURL}  addressURL     return the URL if there is any previousy registered URL, return undefined otherwise
   */
-  checkRegisteredURLs(info) {
+  checkRegisteredURLs(info, reuseURL) {
     let _this = this;
 
     return new Promise((resolve, reject) => {
 
       let objectType = (info.reporter) ? 'registry:DataObjectURLs' : 'registry:HypertyURLs';
 
+      if (typeof(reuseURL) === 'string') {
+        objectType = reuseURL && divideURL(reuseURL).type !== 'hyperty' ? 'registry:DataObjectURLs' : 'registry:HypertyURLs';
+      }
+
       _this.storageManager.get(objectType).then((urlsList) => {
 
         if (!urlsList) {
           urlsList = {};
+        }
+
+        if (typeof(reuseURL) === 'string') {
+          console.info('[Registry - checkRegisteredURLs] - look for ' + reuseURL + ' on ', urlsList);
+
+          let searchResult = Object.keys(urlsList).map((key) => {
+            let indexOf = urlsList[key].indexOf(reuseURL);
+            return urlsList[key][indexOf];
+          });
+
+          console.info('[Registry - checkRegisteredURLs] - found ' + searchResult.length + ' results on ', searchResult);
+          if (searchResult.length === 1) {
+            return resolve(searchResult);
+          } else {
+            return resolve(undefined);
+          }
         }
 
         if (objectType === 'registry:HypertyURLs') {
