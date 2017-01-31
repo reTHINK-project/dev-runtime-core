@@ -141,7 +141,7 @@ class PEP {
 
   _isIncomingMessage(message) {
 
-    return !(this.context.isLocal(message.from));
+    return !this.context.isLocal(message.from);
   }
 
   /**

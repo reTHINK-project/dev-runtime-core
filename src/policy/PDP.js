@@ -17,7 +17,6 @@ class PDP {
   evaluatePolicies(message, isIncomingMessage) {
     let policies = this.context.getPolicies(message, isIncomingMessage);
     let result = 'Not Applicable';
-
     if (policies !== undefined) {
       result = this.evaluatePolicy(message, policies.serviceProviderPolicy, isIncomingMessage);
       if (result || result === 'Not Applicable') {
