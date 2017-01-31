@@ -20,8 +20,6 @@ class ReporterObject {
     _this._childrens = [];
     _this._childrenListeners = [];
 
-    _this._storageSubscriptions = {};
-
     _this._forwards = {};
 
     _this._allocateListeners();
@@ -43,18 +41,22 @@ class ReporterObject {
     let changeURL = _this._url + '/changes';
     _this._changeListener = _this._bus.addListener(changeURL, (msg) => {
       //TODO: what todo here? Save changes?
+      if (msg.body.attribute) {
+        _this._parent._storeDataObjects.updateData(_this._url, 'data', msg.body.attribute, msg.body.value, true);
+      }
       console.log('SyncherManager-' + changeURL + '-RCV: ', msg);
     });
-
-    _this._storageSubscriptions[_this._url] = {url: _this._url, owner: _this._owner, childrens: _this._childrens, subscriptions: []};
-    _this._storageManager.set('syncherManager:Reporter', 1, _this._storageSubscriptions);
   }
 
   resumeSubscriptions(subscriptions) {
     let _this = this;
-    subscriptions.forEach((hypertyURL) => {
-      console.log('[Reporter Object] - resume subscriptions: ', hypertyURL);
-      _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, _this._childrens, true);
+
+    Object.keys(subscriptions).forEach((key) => {
+      let hypertyURL = subscriptions[key];
+
+      if (!_this._subscriptions[hypertyURL]) {
+        _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, _this._childrens, true);
+      }
     });
 
   }
@@ -222,13 +224,16 @@ class ReporterObject {
 
     //validate if subscription already exists?
     if (_this._subscriptions[hypertyURL]) {
-      let errorMsg = {
-        id: msg.id, type: 'response', from: msg.to, to: hypertyURL,
-        body: { code: 500, desc: 'Subscription for (' + _this._url + ' : ' +  hypertyURL + ') already exists!' }
-      };
+      // let errorMsg = {
+      //   id: msg.id, type: 'response', from: msg.to, to: hypertyURL,
+      //   body: { code: 500, desc: 'Subscription for (' + _this._url + ' : ' +  hypertyURL + ') already exists!' }
+      // };
+      //
+      // _this._bus.postMessage(errorMsg);
+      // return;
 
-      _this._bus.postMessage(errorMsg);
-      return;
+      // new version because of reusage
+      _this._subscriptions[hypertyURL]._releaseListeners();
     }
 
     //ask to subscribe to Syncher? (depends on the operation mode)
@@ -248,12 +253,16 @@ class ReporterObject {
           if (!_this._subscriptions[hypertyURL]) {
             _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, _this._childrens, true);
           }
-
-          let subscriptions = Object.keys(_this._subscriptions);
-          _this._storageSubscriptions[_this._url].subscriptions = subscriptions;
-          _this._storageManager.set('syncherManager:Reporter', 1, _this._storageSubscriptions);
-
         }
+
+        // Store for each reporter hyperty the dataObject
+        let userURL;
+        if (msg.body.identity && msg.body.identity.userProfile.userURL) {
+          userURL = msg.body.identity.userProfile.userURL;
+          _this._parent._storeDataObjects.update(_this._url, 'subscriberUsers', userURL);
+        }
+
+        _this._parent._storeDataObjects.update(_this._url, 'subscriptions', hypertyURL);
 
         //FLOW-OUT: subscription response sent (forward from internal Hyperty)
         _this._bus.postMessage({

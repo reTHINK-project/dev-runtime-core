@@ -6,7 +6,7 @@ import ReThinkCtx from '../ReThinkCtx';
 
 class RuntimeCoreCtx extends ReThinkCtx {
 
-  constructor(idModule, runtimeRegistry, storageManager) {
+  constructor(idModule, runtimeRegistry, storageManager, runtimeCapabilities) {
     super();
     this.idModule = idModule;
     this.runtimeRegistry = runtimeRegistry;
@@ -14,6 +14,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
     this.serviceProviderPolicy = {};
     this.userPolicies = {};
     this.storageManager = storageManager;
+    this.runtimeCapabilities = runtimeCapabilities;
   }
 
   get subscription() {
@@ -121,8 +122,11 @@ class RuntimeCoreCtx extends ReThinkCtx {
     let _this = this;
     return new Promise((resolve, reject) => {
 
-      // hack to disable mutual authentication until #147 is fixed
-      resolve(message);
+      // TODO remove this validation. When the Nodejs auth was completed this should work like browser;
+      if (this.runtimeCapabilities.isAvailable('node')).then(() => {
+
+        return resolve(message);
+       });
 
       if (isIncoming & result) {
         let isSubscription = message.type === 'subscribe';

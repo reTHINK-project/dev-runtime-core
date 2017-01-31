@@ -62,6 +62,14 @@ let allowedSubscribeMessage = { body: { auth: true, identity: { userProfile: { u
 let badSubscribeMessage = { body: { identity: { userProfile: { username: 'user@domain' } }, subscriber: 'hyperty://domain/not-preauthorised-hyperty-instance' }, id: 1, type: 'subscribe', from: 'runtime://localhost/7600/sm', to: 'comm://domain/data-object-url/subscription' };
 
 /********** TESTS **********/
+let runtimeCapabilities = {
+  isAvailable: () => {
+    return new Promise((resolve) => {
+      resolve(false);
+    });
+  }
+};
+
 let runtimeCtx = new RuntimeCoreCtx();
 
 describe('Policies management', () => {
@@ -217,7 +225,7 @@ describe('Policy Engine with Runtime Core context', () => {
     }
   };
   let storageManager = runtimeFactory.storageManager();
-  let policyEngine = new PEP(new RuntimeCoreCtx(identityModule, runtimeRegistry, storageManager));
+  let policyEngine = new PEP(new RuntimeCoreCtx(identityModule, runtimeRegistry, storageManager, runtimeCapabilities));
 
   describe('initial filtering', () => {
     it('message that loads an hyperty should not be validated by policies', () => {

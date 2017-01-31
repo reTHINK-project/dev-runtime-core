@@ -1,61 +1,29 @@
-// Karma configuration
-// Generated on Wed Sep 16 2015 12:17:06 GMT+0100 (WEST)
-
 module.exports = function(config) {
   config.set({
-
-    // base path that will be used to resolve all patterns (eg. files, exclude)
     basePath: '',
-
-    // frameworks to use
-    // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['mocha', 'browserify'],
-
-    // list of files / patterns to load in the browser
+    frameworks: ['mocha', 'chai', 'sinon'],
     files: [
-      'node_modules/object.observe/dist/object-observe.js',
-      'node_modules/array.observe/array-observe.js',
-      'src/**/*.js',
-      'test/**/*.spec.js'
+      './test/*.spec.js'
     ],
-
-    // Define the root
-    urlRoot: '/',
-
-    // list of files to exclude
     exclude: [
       'test/GraphConnector.spec.js'
     ],
-
-    // preprocess matching files before serving them to the browser
-    // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-      'src/**/*.js': ['browserify'],
-      'test/**/*.spec.js': ['browserify']
+      './test/*.spec.js': ['webpack']
     },
 
-    browserify: {
-      transform: [
-        ['babelify', {presets: ['es2016'], plugins: ['add-module-exports']}]
-      ]
-    },
-
-    // test results reporter to use
-    // possible values: 'dots', 'progress'
-    // available reporters: https://npmjs.org/browse/keyword/karma-reporter
+    // webpack configuration
+    webpack: require('./webpack.config.js'),
     reporters: ['mocha'],
 
-    // web server port
+    client: {
+      mocha: {
+        reporter: 'html'
+      }
+    },
     port: 9876,
-
-    // enable / disable colors in the output (reporters and logs)
     colors: true,
-
-    // level of logging
-    // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
     logLevel: config.LOG_INFO,
-
-    // enable / disable watching file and executing tests whenever any file changes
     autoWatch: true,
 
     client: {
@@ -70,9 +38,9 @@ module.exports = function(config) {
       ChromeTravis: {
         base: 'Chrome',
         flags: [
-         '--disable-web-security',
-         '--ignore-certificate-errors'
-       ]
+          '--disable-web-security',
+          '--ignore-certificate-errors'
+        ]
       }
     },
 
@@ -80,5 +48,4 @@ module.exports = function(config) {
     // if true, Karma captures browsers, runs the tests and exits
     singleRun: true
   });
-
 };
