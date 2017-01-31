@@ -290,21 +290,44 @@ getRegistry.then(function(registry) {
           return response;
         })).to.be.fulfilled.and.eventually.to.be.equal(undefined).and.notify(done);
       });
+
+      it('should return an hyperty url based on given address', function(done) {
+
+        let descriptor = {
+          _objectName: 'hyperty-chat',
+          dataObjects: ['url'],
+          hypertyType: ['comm']
+        };
+
+        let reuseURL = 'hyperty://ua.pt/1';
+
+        expect(registry.checkRegisteredURLs(descriptor, reuseURL)).to.eventually
+        .to.be.eql(['hyperty://ua.pt/1'])
+        .and.to.be.fulfilled
+        .and.notify(done);
+
+      });
+
     });
 
     describe('getReporterURL(dataObjectURL)', function() {
+
       it('should return the reporterURL associated with the dataobject URL', function(done) {
         let dataObjectURL = 'comm://localhost/9303b707-f301-4929-ad7d-65a89a356871';
-        let fakedataObjectURL = 'comm://fake';
 
         expect(registry.getReporterURL(dataObjectURL).then(function(response) {
           return response;
         })).to.be.fulfilled.and.eventually.equal('hyperty://localhost/d692091f-192c-420c-a763-a180f13e626a').and.notify(done);
+      });
 
+      it('should not found the reporter the reporterURL associated with the dataobject URL', function(done) {
+        let fakedataObjectURL = 'comm://fake';
         expect(registry.getReporterURL(fakedataObjectURL).then(function(response) {
           return response;
-        })).to.be.fulfilled.and.eventually.equal('No reporter was found').and.notify(done);
+        })).eventually.equal('No reporter was found').and.to.be.rejected.and.notify(done);
+
       });
+
     });
 
     describe('getPreAuthSubscribers(dataObjectURL)', function() {

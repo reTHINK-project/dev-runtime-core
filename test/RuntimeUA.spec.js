@@ -2,6 +2,8 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import sinonChai from 'sinon-chai';
 
+import { Communication } from './resources/communication';
+
 chai.config.truncateThreshold = 0;
 
 let expect = chai.expect;
@@ -77,7 +79,7 @@ describe('RuntimeUA', function() {
         signature: '',
         messageSchemas: '',
         configuration: {
-          url: 'wss://127.0.0.1:9090/ws'
+          url: 'wss://msg-node.localhost:9090/ws'
         },
         constraints: '',
         hypertyCapabilities: '',
@@ -115,6 +117,32 @@ describe('RuntimeUA', function() {
       }
     };
 
+    let DataSchemas = {
+      Communication: {
+        cguid: '1',
+        type: '0',
+        version: '0.1',
+        description: 'description of Communication DataSchema',
+        objectName: 'Communication',
+        sourcePackageURL: '/sourcePackage',
+        sourcePackage: {
+          sourceCode: Communication,
+          sourceCodeClassname: 'Communication',
+          encoding: 'utf-8',
+          signature: ''
+        },
+        language: 'Javascript ECMA5',
+        signature: '',
+        messageSchemas: '',
+        configuration: {},
+        constraints: '',
+        hypertyCapabilities: '',
+        protocolCapabilities: '',
+        policies: '',
+        dataObjects: []
+      }
+    };
+
     getDescriptor = (url) => {
 
       return new Promise(function(resolve, reject) {
@@ -130,14 +158,14 @@ describe('RuntimeUA', function() {
 
         let result;
 
-        if (url.includes('Hyperties') || url.includes('Hyperty')) {
+        if (url.includes('hyperty')) {
           try {
             result = Hyperties[identity];
           } catch (e) {
             reject(e);
           }
 
-        } else if (!(url.includes('Hyperties') || url.includes('Hyperty')) || url.includes('ProtoStubs') || url.includes('protostub')) {
+        } else if (url.includes('protocolstub') || url === dividedURL.domain) {
           try {
             result = ProtoStubs[identity];
           } catch (e) {
@@ -149,9 +177,16 @@ describe('RuntimeUA', function() {
           } catch (e) {
             reject(e);
           }
+        } else if (url.includes('dataschema')) {
+          try {
+            result = DataSchemas[identity];
+          } catch (e) {
+            reject(e);
+          }
+
         }
 
-        console.log(result);
+        console.log('AQUI:', result);
         resolve(result);
 
       });
@@ -171,6 +206,13 @@ describe('RuntimeUA', function() {
 
       expect(runtime.init().then((result) => {
 
+        sinon.stub(runtime.messageBus, 'postMessage', function(msg, replyCallback) {
+          replyCallback({
+            id: 1, type: 'response', from: 'domain://msg-node.sp.domain/address-allocation', to: 'local://fake.url',
+            body: {code: 200, value: {allocated: msg.body.scheme + '://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d'}}
+          });
+        });
+
         sinon.stub(runtime.loader.descriptors, 'getHypertyDescriptor', (hypertyURL) => {
           return getDescriptor(hypertyURL);
         });
@@ -183,15 +225,38 @@ describe('RuntimeUA', function() {
           return getDescriptor(idpProxyURL);
         });
 
-        sinon.stub(runtime.registry, 'registerHyperty')
-        .returns(new Promise(function(resolve) {
-          resolve('hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d');
-        }));
+        sinon.stub(runtime.runtimeCatalogue, 'getDataSchemaDescriptor', (dataSchemaURL) => {
+          return getDescriptor(dataSchemaURL);
+        });
 
-        sinon.stub(runtime.registry, 'checkRegisteredURLs')
-        .returns(new Promise((resolve) => {
-          resolve('hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d');
-        }));
+        sinon.stub(runtime.registry, 'registerHyperty', (sandbox, descriptorURL, descriptor, addressURL) => {
+          return new Promise(function(resolve) {
+            console.log('AQIO:', addressURL);
+            if (addressURL.newAddress) {
+              resolve('hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d');
+            } else {
+              resolve(addressURL.address);
+            }
+          });
+
+        });
+
+        sinon.stub(runtime.registry, 'checkRegisteredURLs', (info, reuseURL) => {
+
+          return new Promise((resolve) => {
+            console.log('checkRegisteredURLs:', typeof(reuseURL), reuseURL);
+            if (typeof(reuseURL) === 'boolean') {
+              resolve('hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d');
+            } else if (typeof(reuseURL) === 'string') {
+              console.log('checkRegisteredURLs is string:', reuseURL);
+              resolve(reuseURL);
+            } else {
+              resolve('hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d');
+            }
+
+          });
+
+        });
 
         return result;
       }))
@@ -260,11 +325,39 @@ describe('RuntimeUA', function() {
       let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL);
       let hypertyResolved = ['runtimeHypertyURL', 'status'];
 
+      expect(loadHyperty).to.eventually.to.have.all.keys(hypertyResolved)
+      .and.to.be.fulfilled
+      .and.notify(done);
+
+    });
+
+    it('should load an hyperty based on given true value for the reuse', function(done) {
+
+      let hypertyDescriptorURL = 'hyperty-catalogue://catalogue.sp.domain/.well-known/hyperty/HelloHyperty';
+      let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL, true);
+      let hypertyResolved = ['runtimeHypertyURL', 'status'];
+
       expect(loadHyperty).to.be.fulfilled
       .and.eventually.to.have.all.keys(hypertyResolved)
       .and.notify(done);
 
     });
+
+    it('should load an hyperty based on given reuse URL address', function(done) {
+
+      let hypertyDescriptorURL = 'hyperty-catalogue://catalogue.sp.domain/.well-known/hyperty/HelloHyperty';
+      let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL, 'hyperty://sp.domain/1');
+      let hypertyResolved = {
+        runtimeHypertyURL: 'hyperty://sp.domain/1',
+        status: 'deployed'
+      };
+
+      expect(loadHyperty).to.eventually.to.deep.equal(hypertyResolved)
+      .and.to.be.fulfilled
+      .and.notify(done);
+
+    });
+
 
   });
 

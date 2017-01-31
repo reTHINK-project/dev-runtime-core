@@ -71,78 +71,59 @@ class AddressAllocation {
    * @memberOf AddressAllocation
    */
   create(domain, number, info, scheme, reuseURL) {
-    let _this = this;
 
-    return new Promise((resolve, reject) => {
+    console.log('typeof(reuseURL)', typeof(reuseURL), reuseURL);
+
+    if (reuseURL) {
 
       if (typeof(reuseURL) === 'boolean') {
 
         if (reuseURL) {
-
-          _this._registry.checkRegisteredURLs(info).then((urls) => {
-
-            if (urls) {
-              console.info('[AddressAllocation - ' + scheme + '] - Reuse URL');
-              let value = {newAddress: false, address: urls};
-              resolve(value);
-            } else {
-              console.info('[AddressAllocation - reuseURL] - Object ' + reuseURL + ' not found');
-              reject('URL Not Found');
-            }
-
-          }).catch((reason) => {
-            reject(reason);
-          });
-
+          return this._reuseAllocatedAddress(domain, number, info, scheme, reuseURL);
         } else {
-
-          _this._registry.checkRegisteredURLs(info).then((urls) => {
-
-            // if there is already a URL, then returns that URL, otherwise request a new URL
-            if (urls) {
-
-              console.info('[AddressAllocation - ' + scheme + '] - Reuse URL');
-              let value = {newAddress: false, address: urls};
-              resolve(value);
-
-            } else {
-
-              // if there is no URL saved request a new URL
-              _this._allocateNewAddress(domain, scheme, number).then((allocated) => {
-                resolve(allocated);
-              }).catch((reason) => {
-                reject(reason);
-              });
-
-            }
-          }).catch((reason) => {
-            reject(reason);
-          });
-
+          return this._allocateNewAddress(domain, scheme, number);
         }
 
-      } else if (typeof(reuseURL) === 'string' && isURL(reuseURL)) {
-        console.info('[AddressAllocation] - will use your URL: ', reuseURL);
+      }
 
-        _this._registry.checkRegisteredURLs(info).then((urls) => {
+      if (typeof(reuseURL) === 'string' && isURL(reuseURL)) {
+        return this._reuseAllocatedAddress(domain, number, info, scheme, reuseURL);
+      }
+
+    } else {
+      console.info('[AddressAllocation] - new address will be allocated');
+
+      // if there is no URL saved request a new URL
+      return this._allocateNewAddress(domain, scheme, number);
+    }
+
+  }
+
+  _reuseAllocatedAddress(domain, number, info, scheme, reuseURL) {
+
+    return new Promise((resolve, reject) => {
+
+      this._registry.checkRegisteredURLs(info, reuseURL).then((urls) => {
+
+        if (urls) {
           console.info('[AddressAllocation - ' + scheme + '] - Reuse URL');
           let value = {newAddress: false, address: urls};
           resolve(value);
-        });
+        } else {
 
-      } else {
-        console.info('-------------------------------------------------------------');
-        console.info('[AddressAllocation] - the provided url (' + reuseURL + ' ) is not valid.');
-        console.info('[AddressAllocation] - new address will be allocated');
+          if (typeof(reuseURL) === 'string') {
+            console.info('[AddressAllocation - reuseURL] - Object ' + reuseURL + ' not found');
+            reject('URL Not Found');
+          } else if (typeof(reuseURL) === 'boolean') {
+            this._allocateNewAddress(domain, scheme, number).then(resolve).catch(reject);
+          } else {
+            reject('URL Not Found');
+          }
 
-        // if there is no URL saved request a new URL
-        _this._allocateNewAddress(domain, scheme, number).then((allocated) => {
-          resolve(allocated);
-        }).catch((reason) => {
-          reject(reason);
-        });
+        }
 
-      }
+      });
+
     });
   }
 

@@ -240,7 +240,7 @@ class Loader {
       }, handleError)
       .then((addresses) => {
         if (haveError) return false;
-        console.info('6: return the addresses for the hyperty');
+        console.info('6: return the addresses for the hyperty', addresses);
 
         // Register hyperty
         return this.registry.registerHyperty(_hypertySandbox, hypertyCatalogueURL, _hypertyDescriptor, addresses);
