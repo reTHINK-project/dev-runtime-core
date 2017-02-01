@@ -3,10 +3,11 @@ module.exports = function(config) {
     basePath: '',
     frameworks: ['mocha', 'chai', 'sinon'],
     files: [
-      './test/PolicyEngine.spec.js'
+      './test/Registry.spec.js'
     ],
     exclude: [
-      'test/GraphConnector.spec.js'
+      './test/GraphConnector.spec.js',
+      './test/PolicyEngine.spec.js'
     ],
     preprocessors: {
       './test/*.spec.js': ['webpack']
@@ -46,6 +47,6 @@ module.exports = function(config) {
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
-    singleRun: true
+    singleRun: false
   });
 };

@@ -156,6 +156,7 @@ describe('Registry', function() {
 
     it('should register a stub', function(done) {
       expect(registry.registerStub(sandboxDummy, domainURL).then((deployed) => {
+        console.log('Depoyed->', deployed);
         return deployed.url;
       })).to.be.fulfilled.and.eventually.to.contain('msg-node.ua.pt/protostub/').and.notify(done);
 
