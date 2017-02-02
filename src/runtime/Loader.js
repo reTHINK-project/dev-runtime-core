@@ -33,8 +33,10 @@ class Loader {
     this._registry = value;
 
     // Install AddressAllocation
-    let addressAllocation = new AddressAllocation(this._runtimeURL, this._messagesBus, this._registry);
+    let addressAllocation = AddressAllocation.instance;
     this._addressAllocation = addressAllocation;
+
+    console.log('[Loader - AddressAllocation] - ', addressAllocation);
   }
 
   /**
