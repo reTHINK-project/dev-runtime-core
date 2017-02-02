@@ -1034,6 +1034,7 @@ class GraphConnector {
               _this.globalRegistryRecord.publicKey = globalRegistryRecord.publicKey;
               _this.globalRegistryRecord.revoked = globalRegistryRecord.revoked;
               _this.globalRegistryRecord.salt = globalRegistryRecord.salt;
+              _this.globalRegistryRecord.userIDs = globalRegistryRecord.userIDs;
               _this.globalRegistryRecord.schemaVersion = globalRegistryRecord.schemaVersion;
             }
             resolve();
