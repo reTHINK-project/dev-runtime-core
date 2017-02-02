@@ -35,7 +35,7 @@ class Loader {
     this._registry = value;
 
     // Install AddressAllocation
-    let addressAllocation = new AddressAllocation(this._runtimeURL, this._messagesBus, this._registry);
+    let addressAllocation = new AddressAllocation(this._registry.registryURL, this._messagesBus, this._registry);
     this._addressAllocation = addressAllocation;
   }
 
@@ -322,7 +322,7 @@ class Loader {
       let isP2PHandler = false;
       let isP2PRequester = false;
 
-      console.info('[Runtime.Loader.loadStub] starting loading ', protostubURL, ' p2pconfig ', p2pConfig);
+      console.info('[Runtime.Loader.loadStub] starting loading for ', protostubURL, ' with p2pconfig ', p2pConfig);
       console.info('[Runtime.Loader.loadStub]Discover or Create a new ProtoStub for domain: ', domain);
 
       // step 2 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md

@@ -78,7 +78,7 @@ class SyncherManager {
     if (allocator) {
       _this._allocator = allocator;
     } else {
-      _this._allocator = new AddressAllocation(_this._objectURL, bus, _this._registry);
+      _this._allocator = new AddressAllocation(_this._registry.registryURL, bus, _this._registry);
     }
 
     bus.addListener(_this._url, (msg) => {

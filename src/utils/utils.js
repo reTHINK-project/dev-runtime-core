@@ -58,7 +58,7 @@ export function divideURL(url) {
       identity: ""
     };
 
-    console.error('[DivideURL] DivideURL don\'t support url without scheme. Please review your url address', url);
+    console.warn('[DivideURL] DivideURL don\'t support url without scheme. Please review your url address', url);
 
     return result;
   }

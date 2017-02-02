@@ -131,7 +131,8 @@ class Registry {
     _this._messageBus = messageBus;
 
     _this._messageBus.addListener(_this.registryURL, function(msg) {
-      console.log('[Registry] listener messageBus');
+
+      console.log('[Registry listener] ', msg);
 
       let isHyperty = isHypertyURL(msg.from);
       let isDiscovery = msg.from.substring(msg.from.length - 10, msg.from.length) === '/discovery';
@@ -222,6 +223,14 @@ class Registry {
         }
 
       } else {
+
+        //hack to skip responses to responses
+
+        if (msg.type === 'response') {
+          console.error('[Register listener] skipping ', msg);
+          return;
+        }
+
         // msg sent by identity manager library
         let userUrl = _this._getIdentityAssociated(msg.body.resource, msg.body.criteria);
 
@@ -1573,12 +1582,10 @@ class Registry {
 
     return new Promise((resolve, reject) => {
 
-      //split the url to find the domainURL. deals with the url for example as:
-      //"hyperty-runtime://sp1/protostub/123",
 
       // Skip p2p procedure when not supported by the Runtime or for backend services
 
-      if (!_this.p2pHandlerStub[_this.runtimeURL] || isBackendServiceURL(url)) {
+      if (!_this.p2pHandlerStub[_this.runtimeURL] || isBackendServiceURL(url) || url.includes(_this.runtimeURL)) {
 
         _this.resolveNormalStub(url).then((returnURL) => {
           resolve(returnURL);
