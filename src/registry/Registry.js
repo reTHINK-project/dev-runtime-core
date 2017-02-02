@@ -130,8 +130,10 @@ class Registry {
     _this.idModule.messageBus = messageBus;
 
     // Install AddressAllocation
-    let addressAllocation = new AddressAllocation(_this.registryURL, messageBus, _this);
+    let addressAllocation = AddressAllocation.instance;
     _this.addressAllocation = addressAllocation;
+
+    console.log('[Registry - AddressAllocation] - ', addressAllocation);
 
   }
 

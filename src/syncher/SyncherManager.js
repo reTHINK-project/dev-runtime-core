@@ -77,8 +77,10 @@ class SyncherManager {
     if (allocator) {
       _this._allocator = allocator;
     } else {
-      _this._allocator = new AddressAllocation(_this._objectURL, bus, _this._registry);
+      _this._allocator = AddressAllocation.instance;
     }
+
+    console.log('[SyncherManager - AddressAllocation] - ', _this._allocator);
 
     bus.addListener(_this._url, (msg) => {
       console.log('SyncherManager-RCV: ', msg);

@@ -29,6 +29,7 @@ import IdentityModule from '../identity/IdentityModule';
 import PEP from '../policy/PEP';
 import MessageBus from '../bus/MessageBus';
 import { generateGUID } from '../utils/utils';
+import AddressAllocation from '../allocation/AddressAllocation';
 
 import Loader from './Loader';
 import { runtimeConfiguration } from './runtimeConfiguration';
@@ -172,6 +173,9 @@ class RuntimeUA {
 
         // Instantiate the Message Bus
         this.messageBus = new MessageBus(this.registry);
+
+        // Prepare the address allocation instance;
+        this.addressAllocation = new AddressAllocation(this.runtimeURL, this.messageBus, this.registry);
 
         // Instantiate the Policy Engine
         this.policyEngine = new PEP(new RuntimeCoreCtx(this.identityModule, this.registry, this.storageManager, this.runtimeCapabilities));

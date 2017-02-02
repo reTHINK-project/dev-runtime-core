@@ -24,6 +24,10 @@
 
 import {isURL} from '../utils/utils';
 
+// TODO: this could not be the best way to do a Singleton but at this moment it works;
+
+let instance;
+
 /**
  * Class will ask to the message node for addresses
  */
@@ -39,14 +43,23 @@ class AddressAllocation {
    * @param  {MiniBus}      bus - MiniBus used for address allocation
    */
   constructor(url, bus, registry) {
-    let _this = this;
 
-    // let messageFactory = new MessageFactory();
-    //
-    // _this._messageFactory = messageFactory;
-    _this._url = url;
-    _this._bus = bus;
-    _this._registry = registry;
+    if (!instance) {
+      this._url = url + '/address-allocation';
+      this._bus = bus;
+      this._registry = registry;
+      instance = this;
+    } else {
+      return instance;
+    }
+  }
+
+  static get instance() {
+    if (!instance) {
+      throw new Error('The address allocation was not instaniated');
+    }
+
+    return instance
   }
 
   /**
