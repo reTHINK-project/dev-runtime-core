@@ -55,8 +55,8 @@ class GraphConnector {
 
     this.groups = [];
     this.residenceLocation;
-    this.firstName;
-    this.lastName;
+    this.firstName = '';
+    this.lastName = '';
 
     this._messageBus = messageBus;
     this._hypertyRuntimeURL = hypertyRuntimeURL;
@@ -264,6 +264,8 @@ class GraphConnector {
     let record = this.globalRegistryRecord.getRecord();
     let recordString = JSON.stringify(record);
     let recordStringBase64 = base64url.encode(recordString);
+    console.info('signGlobalRegistryRecord Record :', record);
+    console.info('signGlobalRegistryRecord recordString :', recordString);
     let jwtTemp = jsrsasign.KJUR.jws.JWS.sign(null, {alg: 'ES256'}, {data: recordStringBase64}, this._prvKey);
     let encodedString = jwtTemp.split('.').slice(0, 2).join('.');
 
@@ -1064,6 +1066,7 @@ class GraphConnector {
 
         _this.storageManager.get('graphConnector:firstName').then((firstName) => {
             if (firstName) {
+              console.info('graphConnector:firstName:', firstName);
               _this.firstName = firstName;
             }
             resolve();
@@ -1071,6 +1074,7 @@ class GraphConnector {
 
         _this.storageManager.get('graphConnector:lastName').then((lastName) => {
             if (lastName) {
+              console.info('graphConnector:lastName:', lastName);
               _this.lastName = lastName;
             }
             resolve();
