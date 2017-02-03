@@ -19,6 +19,8 @@ import { descriptors } from './resources/descriptors';
 import {divideURL} from '../src/utils/utils';
 import { runtimeFactory } from './resources/runtimeFactory';
 
+import AddressAllocation from '../src/allocation/AddressAllocation';
+
 // Testing Registry
 let runtimeURL = 'hyperty-runtime://ua.pt/123';
 
@@ -36,7 +38,7 @@ describe('Registry', function() {
     let identityModule = {
       getIdentityAssertion: () => {
         let identityBundle = {userProfile: {email: 'openidtest10@gmail.com', token: 'idToken', userURL: 'user://gmail.com/openidtest10'}};
-        return new Promise(function(resolve, reject) {
+        return new Promise(function(resolve) {
           resolve(identityBundle);
         });
       }
@@ -44,12 +46,16 @@ describe('Registry', function() {
 
     let runtimeCatalogue = {
       getDataSchemaDescriptor: () => {
-        return new Promise(function(resolve, reject) {
+        return new Promise(function(resolve) {
           let dataschema = {sourcePackage: {sourceCode: {properties: {scheme: {constant: 'value'}}}}};
           resolve(dataschema);
         });
       }
     };
+
+    let msgbus = new MessageBus(registry);
+
+    new AddressAllocation(runtimeURL, msgbus);
 
     registry = new Registry(runtimeURL, appSandbox, identityModule, runtimeCatalogue, 'runtimeCapabilities', storageManager);
 
@@ -63,7 +69,6 @@ describe('Registry', function() {
     loader.registry = registry;
     loader.runtimeFactory = runtimeFactory;
 
-    let msgbus = new MessageBus(registry);
     loader.messageBus = msgbus;
 
     registry._runtimeURL = runtimeURL;
@@ -72,8 +77,7 @@ describe('Registry', function() {
 
     registry.messageBus.addListener('domain://registry.ua.pt/', (msg) => {
       console.log('MSG BUS LISTENER: ', msg);
-      let responseMessage = {id: msg.id, type: 'response', to: msg.from, from: msg.to,
-                              body: {code: 200}};
+      let responseMessage = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: {code: 200}};
 
       msgbus.postMessage(responseMessage);
     });
@@ -387,7 +391,6 @@ describe('Registry', function() {
     });
 
     it('should return a undefined value if the dataObjectURL is not previously registered', function(done) {
-
       let fakeInfo = {
         name: 'fake',
         schema: 'hyperty-catalogue://catalogue.localhost/.well-known/dataschema/unknown',
@@ -398,21 +401,44 @@ describe('Registry', function() {
         return response;
       })).to.be.fulfilled.and.eventually.to.be.equal(undefined).and.notify(done);
     });
+
+    it('should return an hyperty url based on given address', function(done) {
+
+      let descriptor = {
+        _objectName: 'hyperty-chat',
+        dataObjects: ['url'],
+        hypertyType: ['comm']
+      };
+
+      let reuseURL = 'hyperty://ua.pt/1';
+
+      expect(registry.checkRegisteredURLs(descriptor, reuseURL)).to.eventually
+      .to.be.eql(['hyperty://ua.pt/1'])
+      .and.to.be.fulfilled
+      .and.notify(done);
+
+    });
+
   });
 
   describe('getReporterURL(dataObjectURL)', function() {
+
     it('should return the reporterURL associated with the dataobject URL', function(done) {
       let dataObjectURL = 'comm://localhost/9303b707-f301-4929-ad7d-65a89a356871';
-      let fakedataObjectURL = 'comm://fake';
 
       expect(registry.getReporterURL(dataObjectURL).then(function(response) {
         return response;
       })).to.be.fulfilled.and.eventually.equal('hyperty://localhost/d692091f-192c-420c-a763-a180f13e626a').and.notify(done);
+    });
 
+    it('should not found the reporter the reporterURL associated with the dataobject URL', function(done) {
+      let fakedataObjectURL = 'comm://fake';
       expect(registry.getReporterURL(fakedataObjectURL).then(function(response) {
         return response;
-      })).to.be.fulfilled.and.eventually.equal('No reporter was found').and.notify(done);
+      })).eventually.equal('No reporter was found').and.to.be.rejected.and.notify(done);
+
     });
+
   });
 
   describe('getPreAuthSubscribers(dataObjectURL)', function() {
@@ -429,7 +455,6 @@ describe('Registry', function() {
   describe('getDataObjectSubscribers(dataObjectURL)', function() {
     it('should return the list of pre authorised users', function() {
       let dataObjectURL = 'comm://localhost/9303b707-f301-4929-ad7d-65a89a356871';
-      let fakedataObjectURL = 'comm://fake';
       let subscriberURL = 'hyperty://localhost/00-00-sub1';
 
       registry.registerSubscriber(dataObjectURL, subscriberURL);

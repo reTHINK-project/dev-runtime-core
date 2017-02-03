@@ -12,7 +12,7 @@ chai.use(sinonChai);
 import { descriptors } from './resources/descriptors.js';
 
 // Testing Module
-import RuntimeUA from '../src/runtime/RuntimeUA';
+import RuntimeUA from  '../src/runtime/RuntimeUA';
 
 // Main dependecies
 import Registry from '../src/registry/Registry';
@@ -50,14 +50,14 @@ describe('RuntimeUA', function() {
 
         let result;
 
-        if (url.includes('Hyperties') || url.includes('Hyperty')) {
+        if (url.includes('hyperty')) {
           try {
             result = descriptors.Hyperties[identity];
           } catch (e) {
             reject(e);
           }
 
-        } else if (!(url.includes('Hyperties') || url.includes('Hyperty')) || url.includes('ProtoStubs') || url.includes('protostub')) {
+        } else if (url.includes('protocolstub') || url === dividedURL.domain) {
           try {
             result = descriptors.ProtoStubs[identity];
           } catch (e) {
@@ -69,9 +69,15 @@ describe('RuntimeUA', function() {
           } catch (e) {
             reject(e);
           }
+        } else if (url.includes('dataschema')) {
+          try {
+            result = descriptors.DataSchemas[identity];
+          } catch (e) {
+            reject(e);
+          }
+
         }
 
-        console.log(result);
         resolve(result);
 
       });
@@ -90,6 +96,13 @@ describe('RuntimeUA', function() {
 
       expect(runtime.init().then((result) => {
 
+        sinon.stub(runtime.messageBus, 'postMessage', function(msg, replyCallback) {
+          replyCallback({
+            id: 1, type: 'response', from: 'domain://msg-node.sp.domain/address-allocation', to: 'local://fake.url',
+            body: {code: 200, value: {allocated: msg.body.scheme + '://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d'}}
+          });
+        });
+
         sinon.stub(runtime.descriptorInstance, 'getHypertyDescriptor', (hypertyURL) => {
           return getDescriptor(hypertyURL);
         });
@@ -102,15 +115,38 @@ describe('RuntimeUA', function() {
           return getDescriptor(idpProxyURL);
         });
 
-        sinon.stub(runtime.registry, 'registerHyperty')
-        .returns(new Promise(function(resolve) {
-          resolve('hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d');
-        }));
+        sinon.stub(runtime.runtimeCatalogue, 'getDataSchemaDescriptor', (dataSchemaURL) => {
+          return getDescriptor(dataSchemaURL);
+        });
 
-        sinon.stub(runtime.registry, 'checkRegisteredURLs')
-        .returns(new Promise((resolve) => {
-          resolve('hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d');
-        }));
+        sinon.stub(runtime.registry, 'registerHyperty', (sandbox, descriptorURL, descriptor, addressURL) => {
+          return new Promise(function(resolve) {
+            console.log('AQIO:', addressURL);
+            if (addressURL.newAddress) {
+              resolve('hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d');
+            } else {
+              resolve(addressURL.address);
+            }
+          });
+
+        });
+
+        sinon.stub(runtime.registry, 'checkRegisteredURLs', (info, reuseURL) => {
+
+          return new Promise((resolve) => {
+            console.log('checkRegisteredURLs:', typeof(reuseURL), reuseURL);
+            if (typeof(reuseURL) === 'boolean') {
+              resolve('hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d');
+            } else if (typeof(reuseURL) === 'string') {
+              console.log('checkRegisteredURLs is string:', reuseURL);
+              resolve(reuseURL);
+            } else {
+              resolve('hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d');
+            }
+
+          });
+
+        });
 
         return result;
       }))
@@ -179,11 +215,39 @@ describe('RuntimeUA', function() {
       let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL);
       let hypertyResolved = ['runtimeHypertyURL', 'status'];
 
+      expect(loadHyperty).to.eventually.to.have.all.keys(hypertyResolved)
+      .and.to.be.fulfilled
+      .and.notify(done);
+
+    });
+
+    it('should load an hyperty based on given true value for the reuse', function(done) {
+
+      let hypertyDescriptorURL = 'hyperty-catalogue://catalogue.sp.domain/.well-known/hyperty/HelloHyperty';
+      let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL, true);
+      let hypertyResolved = ['runtimeHypertyURL', 'status'];
+
       expect(loadHyperty).to.be.fulfilled
       .and.eventually.to.have.all.keys(hypertyResolved)
       .and.notify(done);
 
     });
+
+    it('should load an hyperty based on given reuse URL address', function(done) {
+
+      let hypertyDescriptorURL = 'hyperty-catalogue://catalogue.sp.domain/.well-known/hyperty/HelloHyperty';
+      let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL, 'hyperty://sp.domain/1');
+      let hypertyResolved = {
+        runtimeHypertyURL: 'hyperty://sp.domain/1',
+        status: 'deployed'
+      };
+
+      expect(loadHyperty).to.eventually.to.deep.equal(hypertyResolved)
+      .and.to.be.fulfilled
+      .and.notify(done);
+
+    });
+
 
   });
 

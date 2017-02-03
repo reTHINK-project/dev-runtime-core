@@ -2,6 +2,7 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import sinonChai from 'sinon-chai';
 
+import { generateGUID } from '../src/utils/utils';
 import AddressAllocation from '../src/allocation/AddressAllocation';
 
 chai.config.truncateThreshold = 0;
@@ -13,49 +14,116 @@ chai.use(sinonChai);
 
 describe('AddressAllocation', function() {
 
-  let registry = {
-    registerHyperty: () => {},
-    checkRegisteredURLs: () => {}
-  };
+  let aa;
+  let registry;
+  let bus;
+  let guid = generateGUID();
+  let domain = 'sp.domain';
 
   before(() => {
-    sinon.stub(registry, 'checkRegisteredURLs')
-    .returns(new Promise((resolve) => {
-      resolve('hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21e');
-    }));
-  });
 
-  // TODO: should update the messages
-  it('creation message and reply', function(done) {
-    let bus = {
+    registry = {
+      registerHyperty: () => {},
+      checkRegisteredURLs: () => {}
+    };
+
+    bus = {
       postMessage: (msg, replyCallback) => {
 
-        // TODO Should improve this test and test also the scheme and other properties;
-        expect(msg).to.eql({
-          type: 'create', from: 'local://fake.url', to: 'domain://msg-node.sp.domain/address-allocation',
-          body: {scheme: undefined, value: {number: 2}}
-        });
+        if (!msg.body.scheme) { msg.body.scheme = 'hyperty'; }
 
         replyCallback({
           id: 1, type: 'response', from: 'domain://msg-node.sp.domain/address-allocation', to: 'local://fake.url',
-          body: {code: 200, value: {allocated: 'hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21e'}}
+          body: {code: 200, value: {allocated: msg.body.scheme + '://' + domain + '/' + guid}}
         });
+
       }
     };
 
-    // TODO Should improve this test and check the first time and 2 second when a hyperty will be reused;
-    let aa = new AddressAllocation('local://fake.url', bus, registry);
-    let domain = 'sp.domain';
+    sinon.stub(registry, 'checkRegisteredURLs', (info) => {
+
+      return new Promise((resolve) => {
+
+        console.log('CHECK REGISTER: ', info);
+
+        if (info.reporter.length === 0) {
+          resolve('hyperty://' + domain + '/' + guid);
+        } else {
+          resolve('comm://' + domain + '/' + guid);
+        }
+
+      });
+
+    });
+
+    let runtimeURL = 'hyperty-runtime://ua.pt/123';
+    new AddressAllocation(runtimeURL, bus, registry);
+    aa = AddressAllocation.instance;
+  });
+
+  it('should create a new hyperty address', function(done) {
+
     let number = 2;
+    let scheme = 'hyperty';
     let info = {
       name: 'test',
-      schema: 'hyperty-catalogue://sp.domain/.well-known/dataschema/hello',
+      schema: 'hyperty-catalogue://' + domain + '/.well-known/dataschema/hello',
+      reporter: [],
+      resources: []
+    };
+    expect(aa.create(domain, number, info, scheme))
+    .eventually.to.eql({newAddress: true, address: 'hyperty://' + domain + '/' + guid})
+    .notify(done);
+  });
+
+  it('should create a new data Object address', function(done) {
+
+    let number = 2;
+    let scheme = 'comm';
+    let info = {
+      name: 'dataObjectName',
+      schema: 'hyperty-catalogue://' + domain + '/.well-known/dataschema/communication',
+      reporter: ['comm://' + domain + '/' + guid],
+      resources: ['chat']
+    };
+    expect(aa.create(domain, number, info, scheme))
+    .eventually.to.eql({newAddress: true, address: 'comm://' + domain + '/' + guid})
+    .notify(done);
+  });
+
+
+  it('should reuse an hyperty url address based on reuse option', function(done) {
+
+    let number = 1;
+    let scheme = 'hyperty';
+    let info = {
+      name: 'test',
+      schema: 'hyperty-catalogue://' + domain + '/.well-known/dataschema/hello',
       reporter: [],
       resources: []
     };
 
-    expect(aa.create(domain, number, info).then((list) => {
-      expect(list).to.eql({newAddress: false, address: 'hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21e'});
-    })).notify(done);
+    expect(aa.create(domain, number, info, scheme, true))
+    .eventually.to.eql({newAddress: false, address: 'hyperty://' + domain + '/' + guid})
+    .notify(done);
+
   });
+
+  it('should reuse an hyperty url address based on an given url', function(done) {
+
+    let number = 1;
+    let scheme = 'hyperty';
+    let info = {
+      name: 'test',
+      schema: 'hyperty-catalogue://' + domain + '/.well-known/dataschema/hello',
+      reporter: [],
+      resources: []
+    };
+
+    expect(aa.create(domain, number, info, scheme, 'hyperty://' + domain + '/' + guid))
+    .eventually.to.eql({newAddress: false, address: 'hyperty://' + domain + '/' + guid})
+    .notify(done);
+
+  });
+
 });

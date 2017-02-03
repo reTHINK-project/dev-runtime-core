@@ -3,7 +3,7 @@ module.exports = function(config) {
     basePath: '',
     frameworks: ['mocha', 'chai', 'sinon'],
     files: [
-      './test/Registry.spec.js'
+      './test/*.spec.js'
     ],
     exclude: [
       './test/GraphConnector.spec.js',
@@ -20,16 +20,13 @@ module.exports = function(config) {
     client: {
       mocha: {
         reporter: 'html'
-      }
+      },
+      captureConsole: true
     },
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
     autoWatch: true,
-
-    client: {
-      captureConsole: true
-    },
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
