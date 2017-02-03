@@ -99,10 +99,16 @@ class SyncherManager {
   //FLOW-IN: message received from Syncher -> create
   _onCreate(msg) {
 
-    if (msg.body.hasOwnProperty('resume') && !msg.body.resume) {
+    if (!msg.body.hasOwnProperty('resume') || (msg.body.hasOwnProperty('resume') && !msg.body.resume)) {
+
+      // If from the hyperty side, don't call the resumeReporter we will have resume = false'
+      // so we will create a not resumed object and always create a new object;
       console.info('[SyncherManager - Create New Object]', msg);
       this._newCreate(msg);
     } else {
+
+      // If from the hyperty side, call the resumeReporter we will have resume = true'
+      // so we will create an resumed object and will try to resume the object previously saved;
       this._storeDataObjects.getResourcesByCriteria(msg, true).then((result) => {
 
         console.info('[SyncherManager - Create Resumed Object]', msg);
