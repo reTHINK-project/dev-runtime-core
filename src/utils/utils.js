@@ -40,22 +40,22 @@
  */
 export function divideURL(url) {
 
-	function recurse(value) {
-		const regex = /([a-zA-Z-]*)(:\/\/(?:\.)?|:)([-a-zA-Z0-9@:%._\+~#=]{2,256})([-a-zA-Z0-9@:%._\+~#=\/]*)/gi;
+  function recurse(value) {
+    const regex = /([a-zA-Z-]*)(:\/\/(?:\.)?|:)([-a-zA-Z0-9@:%._\+~#=]{2,256})([-a-zA-Z0-9@:%._\+~#=\/]*)/gi;
     const subst = '$1,$3,$4';
-	  let parts = value.replace(regex, subst).split(',');
-		return parts;
-	}
+    let parts = value.replace(regex, subst).split(',');
+    return parts;
+  }
 
-	let parts = recurse(url);
+  let parts = recurse(url);
 
   // If the url has no scheme
   if (parts[0] === url && !parts[0].includes('@')) {
 
     let result = {
-      type: "",
+      type: '',
       domain: url,
-      identity: ""
+      identity: ''
     };
 
     console.warn('[DivideURL] DivideURL don\'t support url without scheme. Please review your url address', url);
@@ -64,16 +64,16 @@ export function divideURL(url) {
   }
 
 	// check if the url has the scheme and includes an @
-	if (parts[0] === url && parts[0].includes('@')) {
-		let scheme = parts[0] === url ? 'smtp' : parts[0];
-		parts = recurse(scheme + '://' + parts[0]);
-	}
+  if (parts[0] === url && parts[0].includes('@')) {
+    let scheme = parts[0] === url ? 'smtp' : parts[0];
+    parts = recurse(scheme + '://' + parts[0]);
+  }
 
 	// if the domain includes an @, divide it to domain and identity respectively
-	if (parts[1].includes('@')) {
-		parts[2] = parts[0] + '://' + parts[1];
-		parts[1] = parts[1].substr(parts[1].indexOf('@') + 1)
-    } 	/*else if (parts[2].includes('/')) {
+  if (parts[1].includes('@')) {
+    parts[2] = parts[0] + '://' + parts[1];
+    parts[1] = parts[1].substr(parts[1].indexOf('@') + 1);
+  } 	/*else if (parts[2].includes('/')) {
     parts[2] = parts[2].substr(parts[2].lastIndexOf('/')+1);
   }*/
 
@@ -83,7 +83,7 @@ export function divideURL(url) {
     identity: parts[2]
   };
 
-    return result;
+  return result;
 
 }
 
@@ -164,10 +164,11 @@ export function isDataObjectURL(url) {
 }
 
 export function isLegacy(url) {
-  if (url.split('@').length > 1)
+  if (url.split('@').length > 1) {
     return true;
-  else
+  } else {
     return false;
+  }
 }
 
 export function isURL(url) {
@@ -233,6 +234,11 @@ export function buildURL(configuration, component, resource, type, useFallback =
   return url;
 }
 
+/**
+ * Generate a Global Unique ID
+ *
+ * @returns String;
+ */
 export function generateGUID() {
 
   function s4() {
@@ -265,19 +271,21 @@ export function getUserIdentityDomain(url) {
 export function isBackendServiceURL(url) {
   let dividedURL = divideURL(url);
   let splitedDomain = dividedURL.domain.split('.');
-  let backendSchemes = ['domain','global','domain-idp']; // should be defined in the runtime configuration
-  let backendSubDomains = ['registry','msg-node']; // should be defined in the runtime configuration
+  let backendSchemes = ['domain', 'global', 'domain-idp']; // should be defined in the runtime configuration
+  let backendSubDomains = ['registry', 'msg-node']; // should be defined in the runtime configuration
   let subDomain;
 
   if (splitedDomain.length > 1) {
     subDomain = splitedDomain[0];
   }
 
-  if (subDomain && backendSubDomains.indexOf(subDomain))
-   return true;
+  if (subDomain && backendSubDomains.indexOf(subDomain)) {
+    return true;
+  }
 
-  if (dividedURL.type)
-   return (backendSchemes.indexOf(dividedURL.type) !== -1);
+  if (dividedURL.type) {
+    return (backendSchemes.indexOf(dividedURL.type) !== -1);
+  }
 
   return false;
 }

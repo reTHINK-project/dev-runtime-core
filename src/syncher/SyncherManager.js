@@ -78,8 +78,10 @@ class SyncherManager {
     if (allocator) {
       _this._allocator = allocator;
     } else {
-      _this._allocator = new AddressAllocation(_this._registry.registryURL, bus, _this._registry);
+      _this._allocator = AddressAllocation.instance;
     }
+
+    console.log('[SyncherManager - AddressAllocation] - ', _this._allocator);
 
     bus.addListener(_this._url, (msg) => {
       console.log('SyncherManager-RCV: ', msg);
@@ -139,9 +141,9 @@ class SyncherManager {
     let domain = divideURL(msg.from).domain;
 
     // if reporter is in a Interworking Protostub the runtime domain backend services will be used
-    if (_this._registry.isInterworkingProtoStub(msg.from))
+    if (_this._registry.isInterworkingProtoStub(msg.from)) {
       domain = divideURL(_this.runtimeURL).domain;
-
+    }
 
     if (msg.body.resource) {
       _this._authorise(msg, msg.body.resource);
@@ -168,9 +170,10 @@ class SyncherManager {
 
       // should resuse data object url if it passed
       let reuseDataObject = msg.body.value.resource;
+      let numOfAddress = 1;
 
       //request address allocation of a new object from the msg-node
-      _this._allocator.create(domain, 1, objectInfo, scheme, reuseDataObject).then((allocated) => {
+      _this._allocator.create(domain, numOfAddress, objectInfo, scheme, reuseDataObject).then((allocated) => {
         let objURL = allocated.address[0];
 
         console.log('ALLOCATOR CREATE:', allocated);

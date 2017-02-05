@@ -1,3 +1,5 @@
+import { Communication } from './communication';
+
 export const descriptors = {
 
   Runtimes: {
@@ -160,6 +162,32 @@ export const descriptors = {
       configuration: {
         url: 'wss://127.0.0.1:9090/ws'
       },
+      constraints: '',
+      hypertyCapabilities: '',
+      protocolCapabilities: '',
+      policies: '',
+      dataObjects: []
+    }
+  },
+
+  DataSchemas: {
+    Communication: {
+      cguid: '1',
+      type: '0',
+      version: '0.1',
+      description: 'description of Communication DataSchema',
+      objectName: 'Communication',
+      sourcePackageURL: '/sourcePackage',
+      sourcePackage: {
+        sourceCode: Communication,
+        sourceCodeClassname: 'Communication',
+        encoding: 'utf-8',
+        signature: ''
+      },
+      language: 'Javascript ECMA5',
+      signature: '',
+      messageSchemas: '',
+      configuration: {},
       constraints: '',
       hypertyCapabilities: '',
       protocolCapabilities: '',

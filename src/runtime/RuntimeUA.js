@@ -29,6 +29,7 @@ import IdentityModule from '../identity/IdentityModule';
 import PEP from '../policy/PEP';
 import MessageBus from '../bus/MessageBus';
 import { generateGUID } from '../utils/utils';
+import AddressAllocation from '../allocation/AddressAllocation';
 
 import Loader from './Loader';
 import Descriptors from './Descriptors';
@@ -40,6 +41,7 @@ import { runtimeUtils } from './runtimeUtils';
 
 import SyncherManager from '../syncher/SyncherManager';
 import RuntimeCoreCtx from '../policy/context/RuntimeCoreCtx';
+
 /**
  * Runtime User Agent Interface will process all the dependecies of the core runtime;
  * @author Vitor Silva [vitor-t-silva@telecom.pt]
@@ -72,11 +74,11 @@ class RuntimeUA {
     this.runtimeFactory = runtimeFactory;
     this.runtimeCatalogue = runtimeFactory.createRuntimeCatalogue();
 
-      if (runtimeDescriptor.p2pHandlerStub && typeof runtimeDescriptor.p2pHandlerStub  === 'string' && runtimeDescriptor.p2pHandlerStub.includes('://')) {
-        this.p2p = true;
-      } else {
-        this.p2p = false;
-      }
+    if (runtimeDescriptor.p2pHandlerStub && typeof runtimeDescriptor.p2pHandlerStub  === 'string' && runtimeDescriptor.p2pHandlerStub.includes('://')) {
+      this.p2p = true;
+    } else {
+      this.p2p = false;
+    }
 
     runtimeUtils.runtimeDescriptor = runtimeDescriptor;
 
@@ -105,6 +107,14 @@ class RuntimeUA {
 
   }
 
+  /**
+   * Intialize the installation of runtime
+   *
+   * @access public
+   * @return {Promise<Boolean, Error>} this is Promise and if the installation process happened without any problems returns true otherwise the error.
+   *
+   * @memberOf RuntimeUA
+   */
   init() {
     return new Promise((resolve, reject) => {
 
@@ -196,6 +206,13 @@ class RuntimeUA {
 
   }
 
+  /**
+   *
+   * @access private
+   * @return {Promise<Boolean, Error>} this is Promise and returns true if all components are loaded with success or an error if someone fails.
+   *
+   * @memberOf RuntimeUA
+   */
   _loadComponents() {
 
     return new Promise((resolve, reject) => {
@@ -224,6 +241,9 @@ class RuntimeUA {
 
         // Instantiate the Message Bus
         this.messageBus = new MessageBus(this.registry);
+
+        // Prepare the address allocation instance;
+        this.addressAllocation = new AddressAllocation(this.runtimeURL, this.messageBus, this.registry);
 
         // Instantiate the Policy Engine
         this.policyEngine = new PEP(new RuntimeCoreCtx(this.identityModule, this.registry, this.storageManager, this.runtimeCapabilities));
@@ -280,24 +300,21 @@ class RuntimeUA {
   }
 
   /**
-  * Deploy Hyperty from Catalogue URL
-  * @param  {URL.HypertyCatalogueURL}    hyperty hypertyDescriptor url;
-  */
-  loadHyperty(hypertyDescriptorURL) {
+   * Deploy Hyperty from Catalogue URL
+   *
+   * @see https://github.com/reTHINK-project/specs/tree/master/datamodel/core/address
+   *
+   * @param {URL.HypertyCatalogueURL} hypertyCatalogueURL - The Catalogue URL used to identify descriptors in the Catalogue.
+   * @param {boolean|URL.HypertyURL} [reuseURL=false] reuseURL - reuseURL is used to reuse the hypertyURL previously registred, by default the reuse is disabled;
+   * @param {URL} appURL - the app url address; // TODO: improve this description;
+   * @returns {Promise<Boolean, Error>} this is Promise and returns true if all components are loaded with success or an error if someone fails.
+   *
+   * @memberOf RuntimeUA
+   */
+  loadHyperty(hypertyCatalogueURL, reuseURL = false, appURL) {
 
-    if (!hypertyDescriptorURL) throw new Error('Hyperty descriptor url parameter is needed');
-
-    return new Promise((resolve, reject) => {
-
-      this.loader.loadHyperty(hypertyDescriptorURL)
-      .then((result) => {
-        resolve(result);
-      })
-      .catch((reason) => {
-        reject(reason);
-      });
-
-    });
+    if (!hypertyCatalogueURL) throw new Error('Hyperty descriptor url parameter is needed');
+    return this.loader.loadHyperty(hypertyCatalogueURL, reuseURL, appURL);
 
   }
 
@@ -305,21 +322,10 @@ class RuntimeUA {
   * Deploy Stub from Catalogue URL or domain url
   * @param  {URL.URL}     domain          domain
   */
-  loadStub(protostubURL, p2pConfig) {
+  loadStub(protocolstubCatalogueURL) {
 
-    if (!protostubURL) throw new Error('ProtoStub descriptor url parameter is needed');
-
-    return new Promise((resolve, reject) => {
-
-      this.loader.loadStub(protostubURL, p2pConfig)
-      .then((result) => {
-        resolve(result);
-      })
-      .catch((reason) => {
-        reject(reason);
-      });
-
-    });
+    if (!protocolstubCatalogueURL) throw new Error('ProtoStub descriptor url parameter is needed');
+    return this.loader.loadStub(protocolstubCatalogueURL);
 
   }
 
@@ -327,20 +333,10 @@ class RuntimeUA {
   * Deploy idpProxy from Catalogue URL or domain url
   * @param  {URL.URL}     domain          domain
   */
-  loadIdpProxy(idpProxyURL) {
+  loadIdpProxy(ipdProxyCatalogueURL) {
 
-    if (!idpProxyURL) throw new Error('The IDP Proxy URL is a needed parameter, could be a DOMAIN or a URL');
-
-    return new Promise((resolve, reject) => {
-      this.loader.loadIdpProxy(idpProxyURL)
-      .then((result) => {
-        resolve(result);
-      })
-      .catch((reason) => {
-        reject(reason);
-      });
-    });
-
+    if (!ipdProxyCatalogueURL) throw new Error('The IDP Proxy URL is a needed parameter, could be a DOMAIN or a URL');
+    return this.loader.loadIdpProxy(ipdProxyCatalogueURL);
   }
 
   /**

@@ -12,11 +12,11 @@ class Descriptors {
     this.catalogue = catalogue;
   }
 
-  getHypertyDescriptor (hypertyURL) {
+  getHypertyDescriptor(hypertyURL) {
     return this.catalogue.getHypertyDescriptor(hypertyURL);
   }
 
-  getStubDescriptor (stubURL) {
+  getStubDescriptor(stubURL) {
 
     return new Promise((resolve, reject) => {
 
