@@ -156,20 +156,21 @@ class PEP {
     let fromSchema = splitFrom[0];
     let splitTo = (message.to).split('://');
     let toSchema =  splitTo[0];
-    let fromPath = (message.from).split('/');
-    let toPath = (message.to).split('/');
+    let from = message.from;
+    let to = message.to;
 
     // Signalling messages between P2P Stubs don't have to be verified. FFS
 
-    if (fromPath.indexOf('p2phandler') !== -1 || fromPath.indexOf('p2prequester') !== -1 || toPath.indexOf('p2phandler') !== -1 || toPath.indexOf('p2prequester') !== -1)
+    if (message.body && message.body.source)
+     from = message.body.source;
+
+    if (message.body && message.body.subscriber)
+      from = message.body.subscriber;
+
+    if (from.includes('/p2phandler/') || from.includes('/p2prequester/') || to.includes('/p2phandler/') || to.includes('/p2prequester/'))
       return false;
 
     // hack to disable Identity verification for messages coming from legacy domains while solution is not implemented
-
-    let from = message.from;
-
-    if (message.body && message.body.source)
-     from = message.body.source;
 
     if (this.context.isInterworkingProtoStub(from))
       return false;

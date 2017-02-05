@@ -1582,10 +1582,9 @@ class Registry {
 
     return new Promise((resolve, reject) => {
 
-
       // Skip p2p procedure when not supported by the Runtime or for backend services
 
-      if (!_this.p2pHandlerStub[_this.runtimeURL] || isBackendServiceURL(url) || url.includes(_this.runtimeURL)) {
+      if (!_this.p2pHandlerStub[_this.runtimeURL] || isBackendServiceURL(url) || url.includes(_this.runtimeURL) || url.includes('/p2phandler/') || url.includes('/p2prequester/')) {
 
         _this.resolveNormalStub(url).then((returnURL) => {
           resolve(returnURL);
