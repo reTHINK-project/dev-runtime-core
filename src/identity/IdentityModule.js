@@ -855,7 +855,7 @@ class IdentityModule {
 
         // TIAGO - persistence issue #147
         _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
-          let dataObjectKey = sessionKeys[dataObjectURL];
+          let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
 
           //if no key exists, create a new one if is the reporter of dataObject
           if (!dataObjectKey) {
