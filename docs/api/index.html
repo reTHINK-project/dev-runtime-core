@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <base data-ice="baseUrl">
-  <title data-ice="title">API Document</title>
+  <title data-ice="title">Service Framework API Document</title>
   <link type="text/css" rel="stylesheet" href="css/style.css">
   <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
   <script src="script/prettify/prettify.js"></script>
@@ -18,8 +18,8 @@
   
   <a href="identifiers.html">Reference</a>
   <a href="source.html">Source</a>
+  <a href="test.html" data-ice="testLink">Test</a>
   
-  <a data-ice="repoURL" href="git+ssh://git@github.com:reTHINK-project/dev-runtime-core.git">Repository</a>
   <div class="search-box">
   <span>
     <img src="./image/search.png">
@@ -32,7 +32,8 @@
 <nav class="navigation" data-ice="nav"><div>
   <ul>
     
-  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html">Bus</a></span></span></li>
+  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">allocation</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/allocation/AddressAllocation.js~AddressAllocation.html">AddressAllocation</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html">Bus</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html">MiniBus</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Pipeline.js~Pipeline.html">Pipeline</a></span></span></li>
@@ -40,159 +41,212 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GlobalRegistryRecord.js~GlobalRegistryRecord.html">GlobalRegistryRecord</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html">GraphConnector</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html">GraphConnectorContactData</a></span></span></li>
-<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">identity</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/IdentityModule.js~IdentityModule.html">IdentityModule</a></span></span></li>
-<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">persistence</div><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-persistenceManager">persistenceManager</a></span></span></li>
-<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/PolicyEngine.js~PolicyEngine.html">PolicyEngine</a></span></span></li>
-<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">protostub</div><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-activate">activate</a></span></span></li>
-<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">registry</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/AddressAllocation.js~AddressAllocation.html">AddressAllocation</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/HypertyDiscovery.js~HypertyDiscovery.html">HypertyDiscovery</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">identity</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/Crypto.js~Crypto.html">Crypto</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/GuiFake.js~GuiFake.html">GuiFake</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/Identity.js~Identity.html">Identity</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/IdentityModule.js~IdentityModule.html">IdentityModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/OpenIdLib.js~OpenIdLib.html">OpenIdLib</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/ActionsService.js~ActionsService.html">ActionsService</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/CombiningAlgorithm.js~CombiningAlgorithm.html">CombiningAlgorithm</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Operators.js~Operators.html">Operators</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/PDP.js~PDP.html">PDP</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/PEP.js~PEP.html">PEP</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Policy.js~Policy.html">Policy</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/ReThinkCtx.js~ReThinkCtx.html">ReThinkCtx</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Rule.js~Rule.html">Rule</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/combiningAlgorithms</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/AllowOverrides.js~AllowOverrides.html">AllowOverrides</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/BlockOverrides.js~BlockOverrides.html">BlockOverrides</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/FirstApplicable.js~FirstApplicable.html">FirstApplicable</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/conditions</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/AdvancedCondition.js~AdvancedCondition.html">AdvancedCondition</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/Condition.js~Condition.html">Condition</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/SubscriptionCondition.js~SubscriptionCondition.html">SubscriptionCondition</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/context</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html">RuntimeCoreCtx</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">protostub</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/protostub/IdpProxyStub.js~IdpProxyStub.html">IdpProxyStub</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-activate">activate</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">registry</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/Discovery.js~Discovery.html">Discovery</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/DiscoveryServiceFramework.js~DiscoveryServiceFramework.html">DiscoveryServiceFramework</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/HypertyInstance.js~HypertyInstance.html">HypertyInstance</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html">Registry</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/RegistryDataModel.js~RegistryDataModel.html">RegistryDataModel</a></span></span></li>
-<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">runtime</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/RuntimeCatalogue-Local.js~RuntimeCatalogue.html">RuntimeCatalogue</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/RuntimeCatalogue.js~RuntimeCatalogue.html">RuntimeCatalogue</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">runtime</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/Descriptors.js~Descriptors.html">Descriptors</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/Loader - Copy.js~Loader.html">Loader</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/Loader.js~Loader.html">Loader</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/RuntimeUA.js~RuntimeUA.html">RuntimeUA</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-runtimeConfiguration">runtimeConfiguration</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-runtimeUtils">runtimeUtils</a></span></span></li>
 <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">sandbox</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/sandbox/Sandbox.js~Sandbox.html">Sandbox</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/sandbox/SandboxRegistry.js~SandboxRegistry.html">SandboxRegistry</a></span></span></li>
-<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">syncher</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/ObjectAllocation.js~ObjectAllocation.html">ObjectAllocation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-SandboxType">SandboxType</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">syncher</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/ObserverObject.js~ObserverObject.html">ObserverObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/ReporterObject.js~ReporterObject.html">ReporterObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/StoreDataObjects.js~StoreDataObjects.html">StoreDataObjects</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/Subscription.js~Subscription.html">Subscription</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/SyncherManager.js~SyncherManager.html">SyncherManager</a></span></span></li>
 <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">utils</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/utils/EventEmitter.js~EventEmitter.html">EventEmitter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-schemaValidation">schemaValidation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-buildURL">buildURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-convertToUserURL">convertToUserURL</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-deepClone">deepClone</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-divideEmail">divideEmail</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-divideURL">divideURL</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-emptyObject">emptyObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-generateGUID">generateGUID</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getConfigurationResources">getConfigurationResources</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserEmailFromURL">getUserEmailFromURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserIdentityDomain">getUserIdentityDomain</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserURLFromEmail">getUserURLFromEmail</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isBackendServiceURL">isBackendServiceURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isDataObjectURL">isDataObjectURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isHypertyURL">isHypertyURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isLegacy">isLegacy</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isURL">isURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isUserURL">isUserURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-removePathFromURL">removePathFromURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-tv4">tv4</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-divideURL">divideURL</a></span></span></li>
 </ul>
 </div>
 </nav>
 
-<div class="content" data-ice="content"><div data-ice="index" class="github-markdown"><h2 id="runtime-core">Runtime-Core</h2>
-<ul>
-<li><a href="release_notes_0.1.0.md">Release 0.1.0</a></li>
-<li><a href="#example">Example</a></li>
-<li><a href="#tasks">Tasks</a></li>
-<li><a href="#notes">Notes</a></li>
-</ul>
-<h3 id="setup-environment">Setup Environment</h3>
-<p>On the first time you are cloning this repository, you need to run the command:<code>npm run init-setup</code></p>
-<p>After running successfully this command you will have 2 folders (node_modules and vendor), these folders are excluded from the commit process, and are only for development.</p>
-<p>if you already have the project configured on your machine, you only need run the next command to add new dependencies:<code>npm install
-jspm install</code></p>
-<p><strong>Private Repository Note</strong></p>
-<p>if you have problems with the <code>npm install</code> command, like &quot;access was forbidden&quot;, &quot;404 not found&quot;, and have the service framework module reference, it is an authentication problem;</p>
-<p>you may need following the steps present on <a href="https://help.github.com/articles/generating-ssh-keys/">Github Help</a>. and select operation system you are using.</p>
-<p>This could happen because it is a private module and need your GitHub authentication to allow cloning the repository.</p>
-<p>If you have some troubles with authentication on windows using the Git Shell, you can try <a href="https://help.github.com/articles/caching-your-github-password-in-git/#platform-windows">caching your GitHub password</a>. This should avoid the constant prompt for username and password;</p>
-<p><strong>Instalation through jspm</strong></p>
-<p>We need configure jspm config using github tokens, for that, following this (based on issue <a href="https://github.com/reTHINK-project/dev-runtime-browser/issues/3">3</a>):</p>
-<ol>
-<li><a href="https://github.com/settings/tokens">Here</a>, generate token with public_repo permission enabled</li>
-<li>Save the token generated;</li>
-<li>Execute the command <code>jspm registry config github</code> and you&apos;ll be asked for the credentials;</li>
-<li>Now you can execute command <code>jspm install -y and the runtime-core</code> or <code>jspm install runtime-core=github:reTHINK-project/dev-runtime-core</code> or only <code>jspm install</code>;</li>
-</ol>
+<div class="content" data-ice="content"><div data-ice="index" class="github-markdown"><h1 id="hyperty-runtime-core-build-status-https-travis-ci-org-rethink-project-dev-runtime-core-svg-branch-dev-interworking-https-travis-ci-org-rethink-project-dev-runtime-core-">Hyperty Runtime Core <a href="https://travis-ci.org/reTHINK-project/dev-runtime-core"><img src="https://travis-ci.org/reTHINK-project/dev-runtime-core.svg?branch=dev-interworking" alt="Build Status"></a></h1>
 <hr>
-<p><strong>Issues</strong></p>
+<ul>
+<li><a href="#overview">Overview</a></li>
+<li><a href="#user-view">User View: How to include the Hyperty Runtime Core in other Projects</a></li>
+<li><a href="#developer-view">Developer View</a></li>
+<li><a href="#tasks">Tasks</a></li>
+</ul>
+<h2 id="-a-id-note-note-a-"><a id="note">Note</a></h2>
+<p>In order to try speed up the instalation process, we remove the first verification of global modules, so, if you want install this repository, you should install globaly this modules:</p>
+<pre><code class="lang-shell"><code class="source-code prettyprint">npm install -g karma-cli</code>
+</code></pre>
+<h2 id="-a-id-overview-overview-a-"><a id="overview">Overview</a></h2>
+<p>This repository contains the source code and associated documentation of the core components required to support the deployment and execution of Hyperties in user devices or in network servers. More information about the Hyperty concept and the reTHINK framework in general is provided <a href="https://github.com/reTHINK-project/dev-service-framework/blob/master/README.md">here</a>.</p>
+<p>The Hyperty Runtime architecture follows a security by design approach since it was highly influenced by a careful <a href="docs/specs/securityanalysis.md">security analysis</a> where different types of components are executed in isolated sandboxes. Thus, components downloaded from a specific Service Provider are executed in sandboxes that are different from the sandboxes used to execute components downloaded from another service provider. Communication between components running in different sandboxes is only possible through messages exchanged through a Message Bus functionality provided by the Hyperty Runtime Core Sandbox. On the other hand, and according to the <a href="https://github.com/reTHINK-project/dev-service-framework/blob/master/docs/manuals/hyperty-messaging-framework.md#protocol-on-the-fly-protofly-and-protostubs">ProtoOFly concept</a>, the protocol stub is executed in isolated sandbox and provides the bridge for the Hperty Runtime to communicate with associated Service Provider. The detailed specification of the Hyperty Runtime Core is provided <a href="docs/specs/readme.md">here</a>.</p>
+<p>Hyperty Core Runtime components are platform agnostic and are to be included in platform specific Hyperty Runtimes, like Web Browsers and Nodejs based platforms.</p>
+<h2 id="-a-id-user-view-user-view-a-"><a id="user-view">User View</a></h2>
+<p><strong>How to include the Hyperty Runtime Core in other Projects</strong></p>
+<p>How to include this repository in other runtime platforms, like <a href="https://github.com/reTHINK-project/dev-runtime-browser">dev-runtime-browser</a> or <a href="https://github.com/reTHINK-project/dev-runtime-node">dev-runtime-node</a>;</p>
+<p>Install the runtime-core like a npm module;</p>
+<pre><code class="lang-shell"><code class="source-code prettyprint">npm install github:rethink-project/dev-runtime-core#master --save</code>
+</code></pre>
+<h3 id="browser-environment">Browser Environment</h3>
+<pre><code class="lang-javascript"><code class="source-code prettyprint">
+import {Sandbox, SandboxRegistry, SandboxType} from &apos;runtime-core/dist/sandbox&apos;
+import MiniBus from &apos;runtime-core/dist/minibus&apos;;
+
+console.log(&apos;Sandbox: &apos;, Sandbox, SandboxRegistry);
+console.log(&apos;MiniBus: &apos;, MiniBus);</code>
+</code></pre>
+<h3 id="nodejs-environment">Nodejs Environment</h3>
+<blockquote>
+<p><strong>This code, probably, needs to be updated</strong></p>
+</blockquote>
+<pre><code class="lang-javascript"><code class="source-code prettyprint">
+var Sandbox = require(&apos;runtime-core&apos;).sandbox;
+var MiniBus = require(&apos;runtime-core&apos;).minibus;
+
+console.log(&apos;Sandbox: &apos;, Sandbox);
+console.log(&apos;MiniBus: &apos;, MiniBus);</code>
+</code></pre>
+<p>if you found some issues, please submit them into the respective repository;</p>
+<hr>
+<h2 id="-a-id-developer-view-developer-view-a-"><a id="developer-view">Developer view</a></h2>
+<h3 id="setup-environment">Setup Environment</h3>
+<p>To install the runtime-core repository in your machine, you can clone the github and run the following command;</p>
+<pre><code class="lang-shell"><code class="source-code prettyprint"># install all the dependencies
+npm install</code>
+</code></pre>
+<hr>
+<h3 id="issues">Issues</h3>
 <p>if you have some trouble with the environment, you can open an issue;</p>
 <h3 id="javascript-environment">Javascript Environment</h3>
 <p>JavaScript code should be written in ES6. There are direct dependencies from nodejs and npm, these can be installed separately or in conjunction with <a href="https://github.com/creationix/nvm">nvm</a></p>
 <h4 id="dependencies">Dependencies</h4>
 <ul>
-<li>nodejs</li>
-<li>npm</li>
-<li>karma - Make the communication between unit test tool and jenkins. See more on <a href="http://karma-runner.github.io/0.13/index.html">karma</a></li>
-<li>mocha - Unit test tool. See more on <a href="http://mochajs.org/">http://mochajs.org</a></li>
-<li>jspm - Don&apos;t need compile the code, it uses babel (or traucer or typescript) to run ES6 code on browser. Know more in <a href="http://jspm.io/">jspm.io</a></li>
-<li>gulp - Automate and enhance your workflow. See more about gulp on <a href="http://gulpjs.com/">gulp</a></li>
+<li><p>nodejs</p>
+</li>
+<li><p>npm</p>
+</li>
+<li><p>karma - Make the communication between unit test tool and jenkins. See more on <a href="http://karma-runner.github.io/0.13/index.html">karma</a></p>
+</li>
+<li><p>mocha - Unit test tool. See more on <a href="http://mochajs.org/">http://mochajs.org</a></p>
+<p>&#x200B;</p>
+</li>
 </ul>
 <h4 id="code-style-and-hinting">Code Style and Hinting</h4>
-<p>On the root directory you will find <strong>.jshintrc</strong> and <strong>.jscsrc</strong>, these files are helpers to maintain syntax consistency, it signals syntax mistakes and makes the code equal for all developers.</p>
+<p>On the root directory you will find <strong>.eslintrc.yml</strong> based on the <a href="http://eslint.org/docs/user-guide/migrating-from-jscs#converting-presets">google style code</a> without some restrictions, this file are helpers to maintain syntax consistency (this could be changed if we understand), it signals syntax mistakes and makes the code equal for all developers.</p>
 <ul>
-<li><a href="http://jscs.info/">jscs</a> - Maintain JavaScript Code Style</li>
-<li><a href="http://jshint.com/">jshint</a> - Detect errors and potential problems in JavaScript code.</li>
+<li><a href="http://eslint.org/">eslint</a> - Maintain JavaScript Code Style</li>
 </ul>
 <p>All IDE&apos;s and Text Editors can handle these tools.</p>
+<pre><code class="lang-shell"><code class="source-code prettyprint"># to check if the code is aligned with the style code
+npm run test:lint</code>
+</code></pre>
 <h4 id="documentation">Documentation</h4>
-<p>To generates api documentation you can run <code>gulp doc</code></p>
-<h3 id="unit-testing">Unit Testing</h3>
+<p>To generates api documentation, check <a href="#documentation-task">here</a>;</p>
+<h4 id="unit-testing">Unit Testing</h4>
 <p>Unit testing can be launched manually with <strong>karma start</strong>.</p>
 <p><del>It&apos;s advisable to use <a href="https://github.com/Automattic/expect.js">expect.js</a> instead of assert.</del></p>
 <p>After investigate and testing the <a href="https://github.com/Automattic/expect.js">expect.js</a> it don&apos;t support some features for ES6, because this tool hasn&apos;t activity at some time, that is why, it is recomended use the <a href="http://chaijs.com/">chaijs</a> it is more versatile and have expect.js (but updated) and others tools that can be useful;</p>
-<hr>
-<h3 id="how-to-include-this-runtime-core-code-into-others-parts-of-rethink-project-">How to include this runtime-core code into others parts of reTHINK Project;</h3>
-<p>How to include this repository in other software parts, like <a href="https://github.com/reTHINK-project/dev-runtime-browser">dev-runtime-browser</a> or <a href="https://github.com/reTHINK-project/dev-runtime-node">dev-runtime-node</a> - for example;</p>
-<h4 id="browser-project">browser project</h4>
-<p>example: <a href="https://github.com/reTHINK-project/dev-runtime-browser">dev-runtime-browser</a></p>
-<p>Verify these use cases: 1. if you will create a new repository, you can use this template, and can configure your development environment; 2. if you already have an respository cloned;</p>
-<p>for both cases you just have run the command:</p>
-<pre><code><code class="source-code prettyprint">jspm install runtime-core=github:rethink-project/dev-runtime-core@dev-0.2</code>
-</code></pre><p>and on javascript code you need import the script like other modules;</p>
-<pre><code><code class="source-code prettyprint">import RuntimeUA from &apos;runtime-core/dist/runtimeUA&apos;;
-import {Sandbox, SandboxRegistry} from &apos;runtime-core/dist/sandbox&apos;
-import MiniBus from &apos;runtime-core/dist/minibus&apos;;
-
-console.log(&apos;Runtime: &apos;, RuntimeUA);
-console.log(&apos;Sandbox: &apos;, Sandbox, SandboxRegistry);
-console.log(&apos;MiniBus: &apos;, MiniBus);</code>
-</code></pre><h4 id="nodejs">nodejs</h4>
-<p><a href="https://github.com/reTHINK-project/dev-runtime-node">dev-runtime-node</a></p>
-<pre><code><code class="source-code prettyprint">npm install github:rethink-project/dev-runtime-core#dev-0.2 --save</code>
-</code></pre><p>after this you can require the runtime-core like other modules on node;</p>
-<pre><code><code class="source-code prettyprint">var RuntimeUA = require(&apos;runtime-core&apos;).runtimeUA;
-
-var runtime = new RuntimeUA();</code>
-</code></pre><p>if you found some issues, please submit them into the respective repository;</p>
-<hr>
-<h3 id="karma">Karma</h3>
+<h5 id="karma">Karma</h5>
 <p>if you have some problems starting the karma tests, try running this commands for the following order:</p>
 <ol>
-<li><code>npm uninstall karma karma-browserify karma-mocha karma-mocha-reporter karma-chrome-launcher -g</code></li>
-<li><code>npm install karma-cli -g</code></li>
-<li><code>npm install</code></li>
-<li><code>jspm update</code></li>
+<li><p><code>npm uninstall karma karma-browserify karma-mocha karma-mocha-reporter karma-chrome-launcher -g</code></p>
+</li>
+<li><p><code>npm install karma-cli -g</code></p>
+</li>
+<li><p><code>npm install</code></p>
+<p>&#x200B;</p>
+</li>
 </ol>
-<h4 id="note">Note</h4>
+<h5 id="note">Note</h5>
 <p>This repository is ready to start working on development of runtime-core. The code will go to the <strong>src</strong> folder. The unit tests will be on <strong>test</strong> folder, following the name standard &lt;component&gt;.spec.js</p>
-<p>To run karma tests is mandatory to run <strong>live-server</strong> because of the mock-up&apos;s dependencies:``` live-server --port=4000</p>
-<h2 id="-">```</h2>
-<h3 id="-a-id-tasks-tasks-a-"><a id="Tasks">Tasks</a></h3>
+<hr>
+<h2 id="-a-id-tasks-gulp-tasks-a-"><a id="tasks">Gulp Tasks</a></h2>
 <ul>
-<li><a href="#documentation">Documentation</a></li>
+<li><a href="#documentation-task">Documentation</a></li>
+<li><a href="#license">License</a></li>
 <li><a href="#dist">Dist</a></li>
-<li><a href="#build">Build</a></li>
-<li><a href="#encode">Encode</a></li>
 </ul>
-<h5 id="documentation">Documentation</h5>
+<h3 id="-a-id-documentation-task-documentation-a-"><a id="documentation-task">Documentation</a></h3>
+<pre><code class="lang-shell"><code class="source-code prettyprint"># Generate all the associated to the runtime core;
+npm run build:doc</code>
+</code></pre>
+<blockquote>
 <p>Generate all documentation associated to runtime core;</p>
 <ul>
-<li><p>if you run <strong>gulp doc</strong> the documentation based on jsdoc3 will be generated on folder docs/jsdoc and you can interact;<code>gulp doc</code></p>
+<li><p>if you run <strong>gulp doc</strong> the documentation based on jsdoc3 will be generated on folder docs/jsdoc and you can interact;</p>
+<p><code>gulp doc</code>  <strong>deprecated</strong></p>
 </li>
-<li><p>if you run <strong>gulp api</strong> the documentation is generate based on docs/jsdoc/*.html files, and converted to markdown;<code>gulp api</code></p>
+<li><p>if you run <strong>gulp api</strong> the documentation is generate based on docs/api/ html files, and converted to markdown;</p>
+<p><code>gulp api</code>  <strong>deprecated</strong></p>
 </li>
-<li><p>if you run <strong>gulp docx</strong> should be generated an .docx file, but <strong>this process should be optimized</strong>, is not working very well;<code>gulp docx</code></p>
+<li><p>if you run <strong>gulp docx</strong> should be generated an .docx file, but <strong>this process should be optimized</strong>, is not working very well;</p>
+<p><code>gulp docx</code> <strong>deprecated</strong></p>
 </li>
 </ul>
-<h5 id="dist">Dist</h5>
+</blockquote>
+<h3 id="license">License</h3>
+<p>The license text will be added to all files after it build</p>
+<blockquote>
+<p>To add the license text to all files in src folder;</p>
+<p><code>gulp license</code> <strong>deprecated</strong></p>
+</blockquote>
+<h3 id="dist">Dist</h3>
 <p>To distribute the runtime-core, you can make a distribution file.</p>
-<p>Run the command:<code>// compact true | false;
-gulp dist --compact=false</code></p>
-<h5 id="build">Build</h5>
-<p>To distribute the runtime-core, but with the source code maps, and to detect where is some error.</p>
-<p>Run the command:<code>gulp build</code></p>
-<h5 id="encode">Encode</h5>
-<p>In this repository, we have some tasks which can help you. If you need change some resource file, like an Hyperty or ProtoStub, and load it to the Hyperties.json or ProtoStubs.json, run the following command, and answer to the questions;</p>
-<pre><code><code class="source-code prettyprint">gulp compile --file=path/to/file;</code>
-</code></pre><hr>
-<h3 id="-a-id-example-example-a-"><a id="example">Example</a></h3>
-<p>This repository have a folder with an working example of Hyperty Connector and we can send message and make a WebRTC call between remote hyperties through the vertx;</p>
-<p>To run the demo on example folder: - this example have a dependecy from <a href="https://github.com/reTHINK-project/dev-msg-node-vertx/tree/dev-0.2#unit-testing">dev-msg-node-vertx</a> and <a href="https://github.com/reTHINK-project/dev-registry-domain#dev-registry-domain">dev-registry-domain</a> for communication between hyperties in two distinct browsers or tabs. <strong>At this moment you need run locally <a href="https://github.com/reTHINK-project/dev-msg-node-vertx/tree/dev-0.2#unit-testing">dev-msg-node-vertx</a> and <a href="https://github.com/reTHINK-project/dev-registry-domain#dev-registry-domain">dev-registry-domain</a></strong> - you need, in the root folder, run command: <code>npm start</code> - in your browser, access to <a href="https://127.0.0.1:8080/example">https://127.0.0.1:8080/example</a></p>
-<hr>
-<h3 id="-a-ide-notes-notes-a-"><a>Notes</a></h3>
-<p>It was done an version of RuntimeCatalogue for local instances, based on the RuntimeCatalogue, and is activated by default;</p>
+<p>Run the command:</p>
+<pre><code class="lang-shell"><code class="source-code prettyprint"># make a build of core components to be used for development; The files could be a little large because include the sourceMaps;
+npm run build:dev
+
+# make a build of core components to be used form production;
+npm run build:prod</code>
+</code></pre>
 </div>
 </div>
 
 <footer class="footer">
-  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.4)</span></a>
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.5.2)</span><img src="./image/esdoc-logo-mini-black.png"></a>
 </footer>
 
 <script src="script/search_index.js"></script>
