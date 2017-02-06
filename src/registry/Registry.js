@@ -1318,10 +1318,10 @@ class Registry {
           _this.p2pConnectionList[remoteRuntimeURL] =  p2pConnection;
         }
 
-        console.error('[Registry - onProtostubStatusEvent] - P2PRequester Stub status: ', _this.p2pConnectionList[remoteRuntimeURL]);
+        console.log('[Registry - onProtostubStatusEvent] - P2PConnection status: ', _this.p2pConnectionList[remoteRuntimeURL]);
       } else {
         _this.p2pHandlerStub[_this.runtimeURL].status = msg.body.value;
-        console.error('[Registry - onProtostubStatusEvent] - P2PRequester Stub status: ', _this.p2pHandlerStub[_this.runtimeURL]);
+        console.log('[Registry - onProtostubStatusEvent] - P2PHandler Stub status: ', _this.p2pHandlerStub[_this.runtimeURL]);
       }
 
     }
@@ -1335,7 +1335,7 @@ class Registry {
         _this.p2pRequesterStub[key].status = msg.body.value;
       });
 
-      console.error('[Registry - onProtostubStatusEvent] - P2PRequester Stub status: ', filtered);
+      console.log('[Registry - onProtostubStatusEvent] - P2PRequester Stub status: ', filtered);
     }
   }
 
@@ -1565,7 +1565,7 @@ class Registry {
 
             // this process will load the idp proxy, because is not yet registered;
             console.info('[Registry.resolve] trigger new IDPProxy: ', domainUrl);
-            _this._loader.loadIdpProxy(domainUrl).then(() => {
+            _this.loader.loadIdpProxy(domainUrl).then(() => {
 
               registredComponent  = _this.idpProxyList[domainUrl];
               _this.idpProxyList[domainUrl].status = STATUS.DEPLOYED;
@@ -1581,7 +1581,7 @@ class Registry {
 
             // this process will load the Protocols stub, because is not yet registered;
             console.info('[Registry.resolve] trigger new ProtocolStub: ', domainUrl);
-            _this._loader.loadStub(domainUrl).then(() => {
+            _this.loader.loadStub(domainUrl).then(() => {
 
               registredComponent  = _this.protostubsList[domainUrl];
               console.info('[Registry.resolve] Resolved: ', registredComponent.url, registredComponent.status);
@@ -1651,7 +1651,7 @@ class Registry {
               let p2pConfig = { remoteRuntimeURL: hypertyInfo.runtimeURL, p2pHandler: hypertyInfo.p2pHandler, p2pRequesterStub: true };
 
               // TODO stub load
-              _this._loader.loadStub(hypertyInfo.p2pRequester, p2pConfig).then((protostubInfo) => {
+              _this.loader.loadStub(hypertyInfo.p2pRequester, p2pConfig).then((protostubInfo) => {
                 p2pConnection.status = STATUS.CREATED;
                 _this.p2pConnectionList[hypertyInfo.runtimeURL] = p2pConnection;
 
