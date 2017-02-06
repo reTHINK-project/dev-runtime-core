@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <base data-ice="baseUrl" href="../../../">
-  <title data-ice="title">Registry | API Document</title>
+  <title data-ice="title">Registry | Service Framework API Document</title>
   <link type="text/css" rel="stylesheet" href="css/style.css">
   <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
   <script src="script/prettify/prettify.js"></script>
@@ -18,8 +18,8 @@
   
   <a href="identifiers.html">Reference</a>
   <a href="source.html">Source</a>
+  <a href="test.html" data-ice="testLink">Test</a>
   
-  <a data-ice="repoURL" href="git+ssh://git@github.com:reTHINK-project/dev-runtime-core.git">Repository</a>
   <div class="search-box">
   <span>
     <img src="./image/search.png">
@@ -32,7 +32,8 @@
 <nav class="navigation" data-ice="nav"><div>
   <ul>
     
-  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html">Bus</a></span></span></li>
+  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">allocation</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/allocation/AddressAllocation.js~AddressAllocation.html">AddressAllocation</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html">Bus</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html">MiniBus</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Pipeline.js~Pipeline.html">Pipeline</a></span></span></li>
@@ -40,39 +41,81 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GlobalRegistryRecord.js~GlobalRegistryRecord.html">GlobalRegistryRecord</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html">GraphConnector</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html">GraphConnectorContactData</a></span></span></li>
-<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">identity</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/IdentityModule.js~IdentityModule.html">IdentityModule</a></span></span></li>
-<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">persistence</div><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-persistenceManager">persistenceManager</a></span></span></li>
-<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/PolicyEngine.js~PolicyEngine.html">PolicyEngine</a></span></span></li>
-<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">protostub</div><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-activate">activate</a></span></span></li>
-<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">registry</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/AddressAllocation.js~AddressAllocation.html">AddressAllocation</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/HypertyDiscovery.js~HypertyDiscovery.html">HypertyDiscovery</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">identity</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/Crypto.js~Crypto.html">Crypto</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/GuiFake.js~GuiFake.html">GuiFake</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/Identity.js~Identity.html">Identity</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/IdentityModule.js~IdentityModule.html">IdentityModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/OpenIdLib.js~OpenIdLib.html">OpenIdLib</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/ActionsService.js~ActionsService.html">ActionsService</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/CombiningAlgorithm.js~CombiningAlgorithm.html">CombiningAlgorithm</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Operators.js~Operators.html">Operators</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/PDP.js~PDP.html">PDP</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/PEP.js~PEP.html">PEP</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Policy.js~Policy.html">Policy</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/ReThinkCtx.js~ReThinkCtx.html">ReThinkCtx</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Rule.js~Rule.html">Rule</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/combiningAlgorithms</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/AllowOverrides.js~AllowOverrides.html">AllowOverrides</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/BlockOverrides.js~BlockOverrides.html">BlockOverrides</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/FirstApplicable.js~FirstApplicable.html">FirstApplicable</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/conditions</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/AdvancedCondition.js~AdvancedCondition.html">AdvancedCondition</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/Condition.js~Condition.html">Condition</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/SubscriptionCondition.js~SubscriptionCondition.html">SubscriptionCondition</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/context</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html">RuntimeCoreCtx</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">protostub</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/protostub/IdpProxyStub.js~IdpProxyStub.html">IdpProxyStub</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-activate">activate</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">registry</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/Discovery.js~Discovery.html">Discovery</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/DiscoveryServiceFramework.js~DiscoveryServiceFramework.html">DiscoveryServiceFramework</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/HypertyInstance.js~HypertyInstance.html">HypertyInstance</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html">Registry</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/RegistryDataModel.js~RegistryDataModel.html">RegistryDataModel</a></span></span></li>
-<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">runtime</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/RuntimeCatalogue-Local.js~RuntimeCatalogue.html">RuntimeCatalogue</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/RuntimeCatalogue.js~RuntimeCatalogue.html">RuntimeCatalogue</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">runtime</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/Descriptors.js~Descriptors.html">Descriptors</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/Loader - Copy.js~Loader.html">Loader</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/Loader.js~Loader.html">Loader</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/RuntimeUA.js~RuntimeUA.html">RuntimeUA</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-runtimeConfiguration">runtimeConfiguration</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-runtimeUtils">runtimeUtils</a></span></span></li>
 <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">sandbox</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/sandbox/Sandbox.js~Sandbox.html">Sandbox</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/sandbox/SandboxRegistry.js~SandboxRegistry.html">SandboxRegistry</a></span></span></li>
-<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">syncher</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/ObjectAllocation.js~ObjectAllocation.html">ObjectAllocation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-SandboxType">SandboxType</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">syncher</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/ObserverObject.js~ObserverObject.html">ObserverObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/ReporterObject.js~ReporterObject.html">ReporterObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/StoreDataObjects.js~StoreDataObjects.html">StoreDataObjects</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/Subscription.js~Subscription.html">Subscription</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/SyncherManager.js~SyncherManager.html">SyncherManager</a></span></span></li>
 <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">utils</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/utils/EventEmitter.js~EventEmitter.html">EventEmitter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-schemaValidation">schemaValidation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-buildURL">buildURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-convertToUserURL">convertToUserURL</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-deepClone">deepClone</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-divideEmail">divideEmail</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-divideURL">divideURL</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-emptyObject">emptyObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-generateGUID">generateGUID</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getConfigurationResources">getConfigurationResources</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserEmailFromURL">getUserEmailFromURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserIdentityDomain">getUserIdentityDomain</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserURLFromEmail">getUserURLFromEmail</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isBackendServiceURL">isBackendServiceURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isDataObjectURL">isDataObjectURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isHypertyURL">isHypertyURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isLegacy">isLegacy</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isURL">isURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isUserURL">isUserURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-removePathFromURL">removePathFromURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-tv4">tv4</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-divideURL">divideURL</a></span></span></li>
 </ul>
 </div>
 </nav>
 
 <div class="content" data-ice="content"><div class="header-notice">
-  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import Registry from &apos;<span><a href="file/src/registry/Registry.js.html#lineNumber11">runtime-core/src/registry/Registry.js</a></span>&apos;</code></pre></div>
+  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import Registry from &apos;<span><a href="file/src/registry/Registry.js.html#lineNumber44">runtime-core/src/registry/Registry.js</a></span>&apos;</code></pre></div>
   <span data-ice="access">public</span>
   <span data-ice="kind">class</span>
   
   
   
-  <span data-ice="source">| <span><a href="file/src/registry/Registry.js.html#lineNumber11">source</a></span></span>
+  <span data-ice="source">| <span><a href="file/src/registry/Registry.js.html#lineNumber44">source</a></span></span>
 </div>
 
 <div class="self-detail detail">
@@ -82,7 +125,7 @@
 
   
   
-  <div class="flat-list" data-ice="extendsChain"><h4>Extends:</h4><div><span><a href="class/src/utils/EventEmitter.js~EventEmitter.html">EventEmitter</a></span> &#x2192; Registry</div></div>
+  
   
   
   
@@ -94,6 +137,7 @@
   
   <div class="description" data-ice="description"><p>Runtime Registry Interface</p>
 </div>
+  
 
   
 
@@ -121,7 +165,9 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-constructor-constructor">constructor</a></span></span><span data-ice="signature">(msgbus: <span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span>, runtimeURL: <span>HypertyRuntimeURL</span>, appSandbox: <span>AppSandbox</span>, remoteRegistry: <span>DomainURL</span>)</span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-constructor-constructor">constructor</a></span></span><span data-ice="signature">(msgbus: <span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span>, runtimeURL: <span>HypertyRuntimeURL</span>, appSandbox: <span>AppSandbox</span>, runtimeCatalogue: <span><a href="class/src/runtime/RuntimeUA.js~RuntimeUA.html#instance-member-runtimeCatalogue">runtimeCatalogue</a></span>, remoteRegistry: <span>DomainURL</span>, storageManager: <span><a href="class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-member-storageManager">storageManager</a></span>)</span>
         </p>
       </div>
       <div>
@@ -147,6 +193,33 @@
     <td>
       <span class="access" data-ice="access">public</span>
       
+      <span class="kind" data-ice="kind">set</span>
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-set-loader">loader</a></span></span><span data-ice="signature">: <span>*</span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
       <span class="kind" data-ice="kind">get</span>
       
       <span class="override" data-ice="override"></span>
@@ -154,7 +227,36 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-get-messageBus">messageBus</a></span></span><span data-ice="signature">(messageBus: <span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span>): <span>*</span></span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-get-loader">loader</a></span></span><span data-ice="signature">: <span>*</span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      <span class="kind" data-ice="kind">get</span>
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-get-messageBus">messageBus</a></span></span><span data-ice="signature">(messageBus: <span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span>): <span>*</span></span>
         </p>
       </div>
       <div>
@@ -180,7 +282,9 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-set-messageBus">messageBus</a></span></span><span data-ice="signature">(messageBus: <span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span>): <span>*</span></span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-set-messageBus">messageBus</a></span></span><span data-ice="signature">(messageBus: <span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span>): <span>*</span></span>
         </p>
       </div>
       <div>
@@ -213,7 +317,177 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-discoverProtostub">discoverProtostub</a></span></span><span data-ice="signature">(DomainURL: <span>DomainURL</span>): <span>RuntimeURL</span></span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-checkHypertyP2PHandler">checkHypertyP2PHandler</a></span></span><span data-ice="signature">(hypertyURL: <span>*</span>): <span>*</span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-checkRegisteredURLs">checkRegisteredURLs</a></span></span><span data-ice="signature">(info: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON">JSON</a></span>): <span>addressURL</span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>method that returns previously registered Hyperty or DataObjects URLS, for given characteristics</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-deleteDataObjectInstance">deleteDataObjectInstance</a></span></span><span data-ice="signature">(name: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>)</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p> function to delete an dataObjectInstance in the Domain Registry</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-discoverDataObjectPerURL">discoverDataObjectPerURL</a></span></span><span data-ice="signature">(url: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON">JSON</a></span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>query the domain registry for information from a dataObject URL</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-discoverHypertyPerUser">discoverHypertyPerUser</a></span></span><span data-ice="signature">(email: <span>email</span>, domain: <span><a href="class/src/policy/ReThinkCtx.js~ReThinkCtx.html#instance-get-domain">domain</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>function to request about users registered in domain registry, and
+return the last hyperty instance registered by the user.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-discoverIdpProxy">discoverIdpProxy</a></span></span><span data-ice="signature">(DomainURL: <span>DomainURL</span>): <span>RuntimeURL</span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>To discover idpProxy stubs available in the runtime for a certain domain.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-discoverP2PStub">discoverP2PStub</a></span></span><span data-ice="signature">(RuntimeURL: <span>RuntimeURL</span>): <span>RuntimeURL</span></span>
         </p>
       </div>
       <div>
@@ -239,7 +513,37 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-getAppSandbox">getAppSandbox</a></span></span><span data-ice="signature">(): <span>*</span></span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-discoverProtostub">discoverProtostub</a></span></span><span data-ice="signature">(DomainURL: <span>DomainURL</span>): <span>RuntimeURL</span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>To discover protocol stubs available in the runtime for a certain domain.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-getAppSandbox">getAppSandbox</a></span></span><span data-ice="signature">(): <span>*</span></span>
         </p>
       </div>
       <div>
@@ -265,7 +569,205 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-getSandbox">getSandbox</a></span></span><span data-ice="signature">(DomainURL: <span>DomainURL</span>): <span>RuntimeSandbox</span></span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-getDataObjectSubscriberHyperty">getDataObjectSubscriberHyperty</a></span></span><span data-ice="signature">(url: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>returns the hyperty URL that subscribed the dataObject</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-getDataObjectSubscribers">getDataObjectSubscribers</a></span></span><span data-ice="signature">(dataObjectURL: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>, Substribers: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a></span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>&gt;): <span>*</span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>get the subscribers registered within a dataObject</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-getHypertyName">getHypertyName</a></span></span><span data-ice="signature">(url: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>returns the hyperty Name from a given url.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-getHypertyOwner">getHypertyOwner</a></span></span><span data-ice="signature">(hypertyURL: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>This function returns the user associated to the hyperty URL</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-getPreAuthSubscribers">getPreAuthSubscribers</a></span></span><span data-ice="signature">(dataObjectURL: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a></span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>&gt;</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Function to return the list of pre authorised users received in the creation of a data object</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-getReporterURL">getReporterURL</a></span></span><span data-ice="signature">(dataObjectURL: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>function to return the reporterURL associated with the dataobject URL</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-getReporterURLSynchonous">getReporterURLSynchonous</a></span></span><span data-ice="signature">(dataObjectURL: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>function to return the reporterURL associated with the dataobject URL.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-getSandbox">getSandbox</a></span></span><span data-ice="signature">(DomainURL: <span>DomainURL</span>): <span>RuntimeSandbox</span></span>
         </p>
       </div>
       <div>
@@ -291,13 +793,15 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-getUserHyperty">getUserHyperty</a></span></span><span data-ice="signature">(email: <span>*</span>): <span>*</span></span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-isInterworkingProtoStub">isInterworkingProtoStub</a></span></span><span data-ice="signature">(runtimeProtostubURL: <span>URL.URL</span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span></span>
         </p>
       </div>
       <div>
         
         
-        <div data-ice="description"><p>Function to query the Domain registry, with an user email.</p>
+        <div data-ice="description"><p>To verify if protostub is to interwork with a legacy domain.</p>
 </div>
       </div>
     </td>
@@ -317,13 +821,15 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-onEvent">onEvent</a></span></span><span data-ice="signature">()</span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-isLegacy">isLegacy</a></span></span><span data-ice="signature">(url: <span>URL.URL</span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span></span>
         </p>
       </div>
       <div>
         
         
-        <div data-ice="description"><p>To receive status events from components registered in the Registry.</p>
+        <div data-ice="description"><p>To verify if url is from a legacy domain.</p>
 </div>
       </div>
     </td>
@@ -343,7 +849,65 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-registerHyperty">registerHyperty</a></span></span><span data-ice="signature">(sandbox: <span><a href="class/src/sandbox/Sandbox.js~Sandbox.html">Sandbox</a></span>, HypertyCatalogueURL: <span>HypertyCatalogueURL</span>): <span>HypertyURL</span></span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-isLocal">isLocal</a></span></span><span data-ice="signature">(url: <span>URL.URL</span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>To verify if URL is locally registered or not.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-registerDataObject">registerDataObject</a></span></span><span data-ice="signature">(identifier: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>, dataObjectschema: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>, dataObjectUrl: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>, dataObjectReporter: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>, resources: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a></span>, authorise: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a></span>): <span>*</span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>To register a new Data Object in the runtime which returns the dataObjectURL allocated to the new Data Object.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-registerHyperty">registerHyperty</a></span></span><span data-ice="signature">(sandbox: <span><a href="class/src/sandbox/Sandbox.js~Sandbox.html">Sandbox</a></span>, HypertyCatalogueURL: <span>HypertyCatalogueURL</span>): <span>HypertyURL</span></span>
         </p>
       </div>
       <div>
@@ -369,7 +933,37 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-registerPEP">registerPEP</a></span></span><span data-ice="signature">(postMessage: <span>Message.Message</span>, HypertyURL: <span>HypertyURL</span>): <span>HypertyRuntimeURL</span></span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-registerIdpProxy">registerIdpProxy</a></span></span><span data-ice="signature">(Sandbox: <span><a href="class/src/sandbox/Sandbox.js~Sandbox.html">Sandbox</a></span>, DomainURL: <span>DomainURL</span>): <span>RuntimeIdpProxyURL</span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>To register a new Identity Provider proxy in the runtime including as input parameters the function to postMessage, the DomainURL that is connected with the stub, which returns the RuntimeURL allocated to the new ProtocolStub.</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-registerPEP">registerPEP</a></span></span><span data-ice="signature">(postMessage: <span>Message.Message</span>, HypertyURL: <span>HypertyURL</span>): <span>HypertyRuntimeURL</span></span>
         </p>
       </div>
       <div>
@@ -395,7 +989,9 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-registerStub">registerStub</a></span></span><span data-ice="signature">(Sandbox: <span><a href="class/src/sandbox/Sandbox.js~Sandbox.html">Sandbox</a></span>, DomainURL: <span>DomainURL</span>): <span>RuntimeProtoStubURL</span></span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-registerStub">registerStub</a></span></span><span data-ice="signature">(Sandbox: <span><a href="class/src/sandbox/Sandbox.js~Sandbox.html">Sandbox</a></span>, Domain: <span>stubID</span>, Catalogue: <span>descriptorURL</span>, Protostub: <span><a href="class/src/registry/HypertyInstance.js~HypertyInstance.html#instance-get-descriptor">descriptor</a></span>): <span>RuntimeProtoStubURL</span></span>
         </p>
       </div>
       <div>
@@ -421,7 +1017,65 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-resolve">resolve</a></span></span><span data-ice="signature">(url: <span>URL.URL</span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>URL.URL</span>&gt;</span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-registerSubscribedDataObject">registerSubscribedDataObject</a></span></span><span data-ice="signature">(dataObjectURL: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>)</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>register a desired dataObject to subscribe</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-registerSubscriber">registerSubscriber</a></span></span><span data-ice="signature">(dataObjectURL: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>, subscriberURL: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>)</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>register a new subscriber in the dataObject registered</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-resolve">resolve</a></span></span><span data-ice="signature">(url: <span>URL.URL</span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>URL.URL</span>&gt;</span>
         </p>
       </div>
       <div>
@@ -447,7 +1101,64 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-unregisterHyperty">unregisterHyperty</a></span></span><span data-ice="signature">(HypertyURL: <span>HypertyURL</span>): <span>*</span></span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-resolveNormalStub">resolveNormalStub</a></span></span><span data-ice="signature">(url: <span>*</span>): <span>*</span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-unregisterAllHyperties">unregisterAllHyperties</a></span></span><span data-ice="signature">(): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>send requests to unregister all hyperties registered in domain registry</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-unregisterHyperty">unregisterHyperty</a></span></span><span data-ice="signature">(HypertyURL: <span>HypertyURL</span>): <span>*</span></span>
         </p>
       </div>
       <div>
@@ -473,7 +1184,37 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-unregisterPEP">unregisterPEP</a></span></span><span data-ice="signature">(HypertyRuntimeURL: <span>HypertyRuntimeURL</span>): <span>*</span></span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-unregisterHypertyInstance">unregisterHypertyInstance</a></span></span><span data-ice="signature">(user: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>, hypertyInstance: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>)</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p> function to unregister an hypertyInstance in the Domain Registry</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-unregisterPEP">unregisterPEP</a></span></span><span data-ice="signature">(HypertyRuntimeURL: <span>HypertyRuntimeURL</span>): <span>*</span></span>
         </p>
       </div>
       <div>
@@ -499,13 +1240,43 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-unregisterStub">unregisterStub</a></span></span><span data-ice="signature">(HypertyRuntimeURL: <span>HypertyRuntimeURL</span>): <span>*</span></span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-unregisterStub">unregisterStub</a></span></span><span data-ice="signature">(HypertyRuntimeURL: <span>HypertyRuntimeURL</span>): <span>*</span></span>
         </p>
       </div>
       <div>
         
         
         <div data-ice="description"><p>To unregister a previously registered protocol stub</p>
+</div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          <span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html#instance-method-updateHypertyInstance">updateHypertyInstance</a></span></span><span data-ice="signature">(resource: <span>*</span>, value: <span>*</span>)</span>
+        </p>
+      </div>
+      <div>
+        
+        
+        <div data-ice="description"><p>Function to update an Hyperty</p>
 </div>
       </div>
     </td>
@@ -518,65 +1289,7 @@
 </table>
 </div>
 
-<div class="inherited-summary" data-ice="inheritedSummary"><h2>Inherited Summary</h2><table class="summary" data-ice="summary">
-  <thead><tr><td data-ice="title" colspan="3"><span class="toggle closed"></span> From class <span><a href="class/src/utils/EventEmitter.js~EventEmitter.html">EventEmitter</a></span></td></tr></thead>
-  <tbody>
-  
-  <tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-           <span data-ice="name"><span><a href="class/src/utils/EventEmitter.js~EventEmitter.html#instance-method-addEventListener">addEventListener</a></span></span><span data-ice="signature">(eventType: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, cb: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">Function</a></span>)</span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>addEventListener listen for an eventType</p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-<tr data-ice="target">
-    <td>
-      <span class="access" data-ice="access">public</span>
-      
-      
-      
-      <span class="override" data-ice="override"></span>
-    </td>
-    <td>
-      <div>
-        <p>
-           <span data-ice="name"><span><a href="class/src/utils/EventEmitter.js~EventEmitter.html#instance-method-trigger">trigger</a></span></span><span data-ice="signature">(eventType: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, params: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></span>)</span>
-        </p>
-      </div>
-      <div>
-        
-        
-        <div data-ice="description"><p>Invoke the eventType</p>
-</div>
-      </div>
-    </td>
-    <td>
-      
-      
-    </td>
-  </tr>
-</tbody>
-</table>
-</div>
+
 
 
 
@@ -589,11 +1302,12 @@
     
     
     
-    <span data-ice="name">constructor</span><span data-ice="signature">(msgbus: <span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span>, runtimeURL: <span>HypertyRuntimeURL</span>, appSandbox: <span>AppSandbox</span>, remoteRegistry: <span>DomainURL</span>)</span>
+    
+    <span data-ice="name">constructor</span><span data-ice="signature">(msgbus: <span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span>, runtimeURL: <span>HypertyRuntimeURL</span>, appSandbox: <span>AppSandbox</span>, runtimeCatalogue: <span><a href="class/src/runtime/RuntimeUA.js~RuntimeUA.html#instance-member-runtimeCatalogue">runtimeCatalogue</a></span>, remoteRegistry: <span>DomainURL</span>, storageManager: <span><a href="class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-member-storageManager">storageManager</a></span>)</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber20">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber55">source</a></span></span>
     </span>
   </h3>
 
@@ -635,16 +1349,31 @@
 </td>
     </tr>
 <tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">runtimeCatalogue</td>
+      <td data-ice="type"><span><a href="class/src/runtime/RuntimeUA.js~RuntimeUA.html#instance-member-runtimeCatalogue">runtimeCatalogue</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>runtimeCatalogue</p>
+</td>
+    </tr>
+<tr data-ice="property" data-depth="0">
       <td data-ice="name" data-depth="0">remoteRegistry</td>
       <td data-ice="type"><span>DomainURL</span></td>
       <td data-ice="appendix"></td>
       <td data-ice="description"><p>remoteRegistry</p>
 </td>
     </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">storageManager</td>
+      <td data-ice="type"><span><a href="class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-member-storageManager">storageManager</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"></td>
+    </tr>
 </tbody>
   </table>
 </div>
 </div>
+
+  
 
   
 
@@ -665,17 +1394,104 @@
 <div data-ice="memberDetails"><h2 data-ice="title">Public Members</h2>
 
 <div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-set-loader">
+    <span class="access" data-ice="access">public</span>
+    
+    <span class="kind" data-ice="kind">set</span>
+    
+    
+    
+    <span data-ice="name">loader</span><span data-ice="signature">: <span>*</span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber108">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  
+
+  
+
+  <div data-ice="properties">
+</div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-get-loader">
+    <span class="access" data-ice="access">public</span>
+    
+    <span class="kind" data-ice="kind">get</span>
+    
+    
+    
+    <span data-ice="name">loader</span><span data-ice="signature">: <span>*</span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber113">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  
+
+  
+
+  <div data-ice="properties">
+</div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-get-messageBus">
     <span class="access" data-ice="access">public</span>
     
     <span class="kind" data-ice="kind">get</span>
     
     
+    
     <span data-ice="name">messageBus</span><span data-ice="signature">(messageBus: <span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span>): <span>*</span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber56">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber122">source</a></span></span>
     </span>
   </h3>
 
@@ -703,6 +1519,8 @@
   
 
   
+
+  
   
 </div>
 <div class="detail" data-ice="detail">
@@ -712,11 +1530,12 @@
     <span class="kind" data-ice="kind">set</span>
     
     
+    
     <span data-ice="name">messageBus</span><span data-ice="signature">(messageBus: <span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span>): <span>*</span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber65">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber131">source</a></span></span>
     </span>
   </h3>
 
@@ -744,14 +1563,526 @@
   
 
   
+
+  
   
 </div>
 </div>
 <div data-ice="methodDetails"><h2 data-ice="title">Public Methods</h2>
 
 <div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-checkHypertyP2PHandler">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span data-ice="name">checkHypertyP2PHandler</span><span data-ice="signature">(hypertyURL: <span>*</span>): <span>*</span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber849">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">hypertyURL</td>
+      <td data-ice="type"><span>*</span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"></td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span>*</span></td>
+          
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-checkRegisteredURLs">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span data-ice="name">checkRegisteredURLs</span><span data-ice="signature">(info: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON">JSON</a></span>): <span>addressURL</span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber788">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>method that returns previously registered Hyperty or DataObjects URLS, for given characteristics</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">info</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON">JSON</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>object or hyperty charateristics info</p>
+</td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span>addressURL</span></td>
+          <td class="return-desc" data-ice="returnDescription"><p>addressURL     return the URL if there is any previousy registered URL, return undefined otherwise</p>
+</td>
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-deleteDataObjectInstance">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span data-ice="name">deleteDataObjectInstance</span><span data-ice="signature">(name: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>)</span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber572">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p> function to delete an dataObjectInstance in the Domain Registry</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">name</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>DataObjectName</p>
+</td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-discoverDataObjectPerURL">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span data-ice="name">discoverDataObjectPerURL</span><span data-ice="signature">(url: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON">JSON</a></span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber370">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>query the domain registry for information from a dataObject URL</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">url</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>dataObject URL</p>
+</td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON">JSON</a></span></td>
+          <td class="return-desc" data-ice="returnDescription"><p>dataObject     data object</p>
+</td>
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-discoverHypertyPerUser">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span data-ice="name">discoverHypertyPerUser</span><span data-ice="signature">(email: <span>email</span>, domain: <span><a href="class/src/policy/ReThinkCtx.js~ReThinkCtx.html#instance-get-domain">domain</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber273">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>function to request about users registered in domain registry, and
+return the last hyperty instance registered by the user.</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">email</td>
+      <td data-ice="type"><span>email</span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"></td>
+    </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">domain</td>
+      <td data-ice="type"><span><a href="class/src/policy/ReThinkCtx.js~ReThinkCtx.html#instance-get-domain">domain</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>(Optional)</p>
+</td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span></td>
+          <td class="return-desc" data-ice="returnDescription"><p>Promise</p>
+</td>
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-discoverIdpProxy">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span data-ice="name">discoverIdpProxy</span><span data-ice="signature">(DomainURL: <span>DomainURL</span>): <span>RuntimeURL</span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber1407">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>To discover idpProxy stubs available in the runtime for a certain domain. If available, it returns the runtime url for the idpProxy stub that connects to the requested domain. Required by the runtime BUS to route messages to remote servers or peers</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">DomainURL</td>
+      <td data-ice="type"><span>DomainURL</span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>url</p>
+</td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span>RuntimeURL</span></td>
+          <td class="return-desc" data-ice="returnDescription"><p>RuntimeURL         idpProxyUrl</p>
+</td>
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-discoverP2PStub">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span data-ice="name">discoverP2PStub</span><span data-ice="signature">(RuntimeURL: <span>RuntimeURL</span>): <span>RuntimeURL</span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber1141">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>To discover protocol stubs available in the runtime for a certain domain. If available, it returns the runtime url for the protocol stub that connects to the requested domain. Required by the runtime BUS to route messages to remote servers or peers (do we need something similar for Hyperties?).</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">RuntimeURL</td>
+      <td data-ice="type"><span>RuntimeURL</span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>url</p>
+</td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span>RuntimeURL</span></td>
+          <td class="return-desc" data-ice="returnDescription"><p>RuntimeURL</p>
+</td>
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
   <h3 data-ice="anchor" id="instance-method-discoverProtostub">
     <span class="access" data-ice="access">public</span>
+    
     
     
     
@@ -760,7 +2091,7 @@
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber224">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber1115">source</a></span></span>
     </span>
   </h3>
 
@@ -795,15 +2126,19 @@
   <div class="return-params" data-ice="returnParams">
     <h4>Return:</h4>
     <table>
-      <tr>
-        <td class="return-type" data-ice="returnType"><span>RuntimeURL</span></td>
-        <td class="return-desc" data-ice="returnDescription"><p>RuntimeURL</p>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span>RuntimeURL</span></td>
+          <td class="return-desc" data-ice="returnDescription"><p>RuntimeURL</p>
 </td>
-      </tr>
+        </tr>
+      </tbody>
     </table>
     <div data-ice="returnProperties">
 </div>
   </div>
+
+  
 
   
 
@@ -825,11 +2160,12 @@
     
     
     
+    
     <span data-ice="name">getAppSandbox</span><span data-ice="signature">(): <span>*</span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber77">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber404">source</a></span></span>
     </span>
   </h3>
 
@@ -847,14 +2183,542 @@
   <div class="return-params" data-ice="returnParams">
     <h4>Return:</h4>
     <table>
-      <tr>
-        <td class="return-type" data-ice="returnType"><span>*</span></td>
-        
-      </tr>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span>*</span></td>
+          
+        </tr>
+      </tbody>
     </table>
     <div data-ice="returnProperties">
 </div>
   </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-getDataObjectSubscriberHyperty">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span data-ice="name">getDataObjectSubscriberHyperty</span><span data-ice="signature">(url: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber492">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>returns the hyperty URL that subscribed the dataObject</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">url</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>url format</p>
+</td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+          <td class="return-desc" data-ice="returnDescription"><p>Hyperty URL subscribed to the URL</p>
+</td>
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-getDataObjectSubscribers">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span data-ice="name">getDataObjectSubscribers</span><span data-ice="signature">(dataObjectURL: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>, Substribers: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a></span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>&gt;): <span>*</span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber619">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>get the subscribers registered within a dataObject</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">dataObjectURL</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>dataObject URL</p>
+</td>
+    </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">Substribers</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a></span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>&gt;</td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>List</p>
+</td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span>*</span></td>
+          
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-getHypertyName">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span data-ice="name">getHypertyName</span><span data-ice="signature">(url: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber433">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>returns the hyperty Name from a given url. This url could be from a dataObject or hyperty</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">url</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>hyperty or dataObject URL</p>
+</td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+          <td class="return-desc" data-ice="returnDescription"><p>hypertyName     hyperty Name</p>
+</td>
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-getHypertyOwner">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span data-ice="name">getHypertyOwner</span><span data-ice="signature">(hypertyURL: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber414">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>This function returns the user associated to the hyperty URL</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">hypertyURL</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>hyperty URL</p>
+</td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+          <td class="return-desc" data-ice="returnDescription"><p>userURL         user URL</p>
+</td>
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-getPreAuthSubscribers">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span data-ice="name">getPreAuthSubscribers</span><span data-ice="signature">(dataObjectURL: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a></span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>&gt;</span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber514">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Function to return the list of pre authorised users received in the creation of a data object</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">dataObjectURL</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>dataObjectURL</p>
+</td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a></span>&lt;<span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>&gt;</td>
+          <td class="return-desc" data-ice="returnDescription"><p>preAuth         List of pre authorised users</p>
+</td>
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-getReporterURL">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span data-ice="name">getReporterURL</span><span data-ice="signature">(dataObjectURL: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber459">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>function to return the reporterURL associated with the dataobject URL</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">dataObjectURL</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>dataObjectURL</p>
+</td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+          <td class="return-desc" data-ice="returnDescription"><p>reporterURL      reporterURL</p>
+</td>
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-getReporterURLSynchonous">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span data-ice="name">getReporterURLSynchonous</span><span data-ice="signature">(dataObjectURL: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber479">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>function to return the reporterURL associated with the dataobject URL. no promise returned</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">dataObjectURL</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>dataObjectURL</p>
+</td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+          <td class="return-desc" data-ice="returnDescription"><p>reporterURL      reporterURL</p>
+</td>
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
 
   
 
@@ -876,11 +2740,12 @@
     
     
     
+    
     <span data-ice="name">getSandbox</span><span data-ice="signature">(DomainURL: <span>DomainURL</span>): <span>RuntimeSandbox</span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber356">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber1470">source</a></span></span>
     </span>
   </h3>
 
@@ -915,11 +2780,13 @@
   <div class="return-params" data-ice="returnParams">
     <h4>Return:</h4>
     <table>
-      <tr>
-        <td class="return-type" data-ice="returnType"><span>RuntimeSandbox</span></td>
-        <td class="return-desc" data-ice="returnDescription"><p>RuntimeSandbox</p>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span>RuntimeSandbox</span></td>
+          <td class="return-desc" data-ice="returnDescription"><p>RuntimeSandbox</p>
 </td>
-      </tr>
+        </tr>
+      </tbody>
     </table>
     <div data-ice="returnProperties">
 </div>
@@ -936,27 +2803,30 @@
   
 
   
+
+  
   
 </div>
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-getUserHyperty">
+  <h3 data-ice="anchor" id="instance-method-isInterworkingProtoStub">
     <span class="access" data-ice="access">public</span>
     
     
     
     
-    <span data-ice="name">getUserHyperty</span><span data-ice="signature">(email: <span>*</span>): <span>*</span></span>
+    
+    <span data-ice="name">isInterworkingProtoStub</span><span data-ice="signature">(runtimeProtostubURL: <span>URL.URL</span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber85">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber1794">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  <div data-ice="description"><p>Function to query the Domain registry, with an user email.</p>
+  <div data-ice="description"><p>To verify if protostub is to interwork with a legacy domain.</p>
 </div>
 
   
@@ -970,10 +2840,11 @@
     <tbody>
     
     <tr data-ice="property" data-depth="0">
-      <td data-ice="name" data-depth="0">email</td>
-      <td data-ice="type"><span>*</span></td>
+      <td data-ice="name" data-depth="0">runtimeProtostubURL</td>
+      <td data-ice="type"><span>URL.URL</span></td>
       <td data-ice="appendix"></td>
-      <td data-ice="description"></td>
+      <td data-ice="description"><p>The runtime URL of the Protostub</p>
+</td>
     </tr>
 </tbody>
   </table>
@@ -983,10 +2854,12 @@
   <div class="return-params" data-ice="returnParams">
     <h4>Return:</h4>
     <table>
-      <tr>
-        <td class="return-type" data-ice="returnType"><span>*</span></td>
-        
-      </tr>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span></td>
+          
+        </tr>
+      </tbody>
     </table>
     <div data-ice="returnProperties">
 </div>
@@ -1003,27 +2876,30 @@
   
 
   
+
+  
   
 </div>
 <div class="detail" data-ice="detail">
-  <h3 data-ice="anchor" id="instance-method-onEvent">
+  <h3 data-ice="anchor" id="instance-method-isLegacy">
     <span class="access" data-ice="access">public</span>
     
     
     
     
-    <span data-ice="name">onEvent</span><span data-ice="signature">()</span>
+    
+    <span data-ice="name">isLegacy</span><span data-ice="signature">(url: <span>URL.URL</span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber347">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber1682">source</a></span></span>
     </span>
   </h3>
 
   
   
   
-  <div data-ice="description"><p>To receive status events from components registered in the Registry.</p>
+  <div data-ice="description"><p>To verify if url is from a legacy domain.</p>
 </div>
 
   
@@ -1036,17 +2912,212 @@
     </thead>
     <tbody>
     
-    <tr data-ice="property" data-depth="1">
-      <td data-ice="name" data-depth="1">Message.Message</td>
-      <td data-ice="type"><span>Message.Message</span></td>
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">url</td>
+      <td data-ice="type"><span>URL.URL</span></td>
       <td data-ice="appendix"></td>
-      <td data-ice="description"><p>event</p>
+      <td data-ice="description"><p>url</p>
 </td>
     </tr>
 </tbody>
   </table>
 </div>
 </div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span></td>
+          
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-isLocal">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span data-ice="name">isLocal</span><span data-ice="signature">(url: <span>URL.URL</span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber1742">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>To verify if URL is locally registered or not.</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">url</td>
+      <td data-ice="type"><span>URL.URL</span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>url</p>
+</td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></span></td>
+          
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-registerDataObject">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span data-ice="name">registerDataObject</span><span data-ice="signature">(identifier: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>, dataObjectschema: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>, dataObjectUrl: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>, dataObjectReporter: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>, resources: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a></span>, authorise: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a></span>): <span>*</span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber639">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>To register a new Data Object in the runtime which returns the dataObjectURL allocated to the new Data Object.</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">identifier</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>identifier</p>
+</td>
+    </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">dataObjectschema</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>dataObjectschema</p>
+</td>
+    </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">dataObjectUrl</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>dataObjectUrl</p>
+</td>
+    </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">dataObjectReporter</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>dataObjectReporter</p>
+</td>
+    </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">resources</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>dataObject resources</p>
+</td>
+    </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">authorise</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>list of pre authorised authorised IDs</p>
+</td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span>*</span></td>
+          
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
 
   
 
@@ -1070,11 +3141,12 @@
     
     
     
+    
     <span data-ice="name">registerHyperty</span><span data-ice="signature">(sandbox: <span><a href="class/src/sandbox/Sandbox.js~Sandbox.html">Sandbox</a></span>, HypertyCatalogueURL: <span>HypertyCatalogueURL</span>): <span>HypertyURL</span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber121">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber917">source</a></span></span>
     </span>
   </h3>
 
@@ -1116,15 +3188,98 @@
   <div class="return-params" data-ice="returnParams">
     <h4>Return:</h4>
     <table>
-      <tr>
-        <td class="return-type" data-ice="returnType"><span>HypertyURL</span></td>
-        <td class="return-desc" data-ice="returnDescription"><p>HypertyURL</p>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span>HypertyURL</span></td>
+          <td class="return-desc" data-ice="returnDescription"><p>HypertyURL</p>
 </td>
-      </tr>
+        </tr>
+      </tbody>
     </table>
     <div data-ice="returnProperties">
 </div>
   </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-registerIdpProxy">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span data-ice="name">registerIdpProxy</span><span data-ice="signature">(Sandbox: <span><a href="class/src/sandbox/Sandbox.js~Sandbox.html">Sandbox</a></span>, DomainURL: <span>DomainURL</span>): <span>RuntimeIdpProxyURL</span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber1366">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>To register a new Identity Provider proxy in the runtime including as input parameters the function to postMessage, the DomainURL that is connected with the stub, which returns the RuntimeURL allocated to the new ProtocolStub.</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">Sandbox</td>
+      <td data-ice="type"><span><a href="class/src/sandbox/Sandbox.js~Sandbox.html">Sandbox</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"></td>
+    </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">DomainURL</td>
+      <td data-ice="type"><span>DomainURL</span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>service provider domain</p>
+</td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span>RuntimeIdpProxyURL</span></td>
+          
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
 
   
 
@@ -1146,11 +3301,12 @@
     
     
     
+    
     <span data-ice="name">registerPEP</span><span data-ice="signature">(postMessage: <span>Message.Message</span>, HypertyURL: <span>HypertyURL</span>): <span>HypertyRuntimeURL</span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber312">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber1434">source</a></span></span>
     </span>
   </h3>
 
@@ -1192,15 +3348,19 @@
   <div class="return-params" data-ice="returnParams">
     <h4>Return:</h4>
     <table>
-      <tr>
-        <td class="return-type" data-ice="returnType"><span>HypertyRuntimeURL</span></td>
-        <td class="return-desc" data-ice="returnDescription"><p>HypertyRuntimeURL</p>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span>HypertyRuntimeURL</span></td>
+          <td class="return-desc" data-ice="returnDescription"><p>HypertyRuntimeURL</p>
 </td>
-      </tr>
+        </tr>
+      </tbody>
     </table>
     <div data-ice="returnProperties">
 </div>
   </div>
+
+  
 
   
 
@@ -1222,11 +3382,12 @@
     
     
     
-    <span data-ice="name">registerStub</span><span data-ice="signature">(Sandbox: <span><a href="class/src/sandbox/Sandbox.js~Sandbox.html">Sandbox</a></span>, DomainURL: <span>DomainURL</span>): <span>RuntimeProtoStubURL</span></span>
+    
+    <span data-ice="name">registerStub</span><span data-ice="signature">(Sandbox: <span><a href="class/src/sandbox/Sandbox.js~Sandbox.html">Sandbox</a></span>, Domain: <span>stubID</span>, Catalogue: <span>descriptorURL</span>, Protostub: <span><a href="class/src/registry/HypertyInstance.js~HypertyInstance.html#instance-get-descriptor">descriptor</a></span>): <span>RuntimeProtoStubURL</span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber247">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber1180">source</a></span></span>
     </span>
   </h3>
 
@@ -1253,10 +3414,24 @@
       <td data-ice="description"></td>
     </tr>
 <tr data-ice="property" data-depth="0">
-      <td data-ice="name" data-depth="0">DomainURL</td>
-      <td data-ice="type"><span>DomainURL</span></td>
+      <td data-ice="name" data-depth="0">Domain</td>
+      <td data-ice="type"><span>stubID</span></td>
       <td data-ice="appendix"></td>
-      <td data-ice="description"><p>service provider domain</p>
+      <td data-ice="description"><p>or hyperty runtime to register the stub</p>
+</td>
+    </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">Catalogue</td>
+      <td data-ice="type"><span>descriptorURL</span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>URL of the Protostub descriptor</p>
+</td>
+    </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">Protostub</td>
+      <td data-ice="type"><span><a href="class/src/registry/HypertyInstance.js~HypertyInstance.html#instance-get-descriptor">descriptor</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>descriptor</p>
 </td>
     </tr>
 </tbody>
@@ -1267,14 +3442,147 @@
   <div class="return-params" data-ice="returnParams">
     <h4>Return:</h4>
     <table>
-      <tr>
-        <td class="return-type" data-ice="returnType"><span>RuntimeProtoStubURL</span></td>
-        
-      </tr>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span>RuntimeProtoStubURL</span></td>
+          
+        </tr>
+      </tbody>
     </table>
     <div data-ice="returnProperties">
 </div>
   </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-registerSubscribedDataObject">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span data-ice="name">registerSubscribedDataObject</span><span data-ice="signature">(dataObjectURL: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>)</span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber502">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>register a desired dataObject to subscribe</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">dataObjectURL</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>dataObject URL</p>
+</td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-registerSubscriber">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span data-ice="name">registerSubscriber</span><span data-ice="signature">(dataObjectURL: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>, subscriberURL: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>)</span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber604">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>register a new subscriber in the dataObject registered</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">dataObjectURL</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>dataObject URL</p>
+</td>
+    </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">subscriberURL</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>subscriber URL</p>
+</td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  
+
+  
 
   
 
@@ -1296,11 +3604,12 @@
     
     
     
+    
     <span data-ice="name">resolve</span><span data-ice="signature">(url: <span>URL.URL</span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>URL.URL</span>&gt;</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber401">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber1614">source</a></span></span>
     </span>
   </h3>
 
@@ -1335,15 +3644,147 @@
   <div class="return-params" data-ice="returnParams">
     <h4>Return:</h4>
     <table>
-      <tr>
-        <td class="return-type" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>URL.URL</span>&gt;</td>
-        <td class="return-desc" data-ice="returnDescription"><p>Promise &lt;URL.URL&gt;</p>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span>&lt;<span>URL.URL</span>&gt;</td>
+          <td class="return-desc" data-ice="returnDescription"><p>Promise &lt;URL.URL&gt;</p>
 </td>
-      </tr>
+        </tr>
+      </tbody>
     </table>
     <div data-ice="returnProperties">
 </div>
   </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-resolveNormalStub">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span data-ice="name">resolveNormalStub</span><span data-ice="signature">(url: <span>*</span>): <span>*</span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber1515">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">url</td>
+      <td data-ice="type"><span>*</span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"></td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span>*</span></td>
+          
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-unregisterAllHyperties">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span data-ice="name">unregisterAllHyperties</span><span data-ice="signature">(): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber529">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>send requests to unregister all hyperties registered in domain registry</p>
+</div>
+
+  
+
+  <div data-ice="properties">
+</div>
+
+  <div class="return-params" data-ice="returnParams">
+    <h4>Return:</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span></td>
+          <td class="return-desc" data-ice="returnDescription"><p>return a promise if the result of unregistration all hyperties</p>
+</td>
+        </tr>
+      </tbody>
+    </table>
+    <div data-ice="returnProperties">
+</div>
+  </div>
+
+  
 
   
 
@@ -1365,11 +3806,12 @@
     
     
     
+    
     <span data-ice="name">unregisterHyperty</span><span data-ice="signature">(HypertyURL: <span>HypertyURL</span>): <span>*</span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber191">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber1082">source</a></span></span>
     </span>
   </h3>
 
@@ -1404,14 +3846,86 @@
   <div class="return-params" data-ice="returnParams">
     <h4>Return:</h4>
     <table>
-      <tr>
-        <td class="return-type" data-ice="returnType"><span>*</span></td>
-        
-      </tr>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span>*</span></td>
+          
+        </tr>
+      </tbody>
     </table>
     <div data-ice="returnProperties">
 </div>
   </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-unregisterHypertyInstance">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span data-ice="name">unregisterHypertyInstance</span><span data-ice="signature">(user: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>, hypertyInstance: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span>)</span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber555">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p> function to unregister an hypertyInstance in the Domain Registry</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">user</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>user url</p>
+</td>
+    </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">hypertyInstance</td>
+      <td data-ice="type"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"><p>HypertyInsntance url</p>
+</td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  
+
+  
 
   
 
@@ -1433,11 +3947,12 @@
     
     
     
+    
     <span data-ice="name">unregisterPEP</span><span data-ice="signature">(HypertyRuntimeURL: <span>HypertyRuntimeURL</span>): <span>*</span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber327">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber1449">source</a></span></span>
     </span>
   </h3>
 
@@ -1472,14 +3987,18 @@
   <div class="return-params" data-ice="returnParams">
     <h4>Return:</h4>
     <table>
-      <tr>
-        <td class="return-type" data-ice="returnType"><span>*</span></td>
-        
-      </tr>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span>*</span></td>
+          
+        </tr>
+      </tbody>
     </table>
     <div data-ice="returnProperties">
 </div>
   </div>
+
+  
 
   
 
@@ -1501,11 +4020,12 @@
     
     
     
+    
     <span data-ice="name">unregisterStub</span><span data-ice="signature">(HypertyRuntimeURL: <span>HypertyRuntimeURL</span>): <span>*</span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber288">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber1346">source</a></span></span>
     </span>
   </h3>
 
@@ -1540,14 +4060,84 @@
   <div class="return-params" data-ice="returnParams">
     <h4>Return:</h4>
     <table>
-      <tr>
-        <td class="return-type" data-ice="returnType"><span>*</span></td>
-        
-      </tr>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span>*</span></td>
+          
+        </tr>
+      </tbody>
     </table>
     <div data-ice="returnProperties">
 </div>
   </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-method-updateHypertyInstance">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span data-ice="name">updateHypertyInstance</span><span data-ice="signature">(resource: <span>*</span>, value: <span>*</span>)</span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/registry/Registry.js.html#lineNumber587">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  <div data-ice="description"><p>Function to update an Hyperty</p>
+</div>
+
+  
+
+  <div data-ice="properties"><div data-ice="properties">
+  <h4 data-ice="title">Params:</h4>
+  <table class="params">
+    <thead>
+    <tr><td>Name</td><td>Type</td><td>Attribute</td><td>Description</td></tr>
+    </thead>
+    <tbody>
+    
+    <tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">resource</td>
+      <td data-ice="type"><span>*</span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"></td>
+    </tr>
+<tr data-ice="property" data-depth="0">
+      <td data-ice="name" data-depth="0">value</td>
+      <td data-ice="type"><span>*</span></td>
+      <td data-ice="appendix"></td>
+      <td data-ice="description"></td>
+    </tr>
+</tbody>
+  </table>
+</div>
+</div>
+
+  
+
+  
 
   
 
@@ -1566,7 +4156,7 @@
 </div>
 
 <footer class="footer">
-  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.4)</span></a>
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.5.2)</span><img src="./image/esdoc-logo-mini-black.png"></a>
 </footer>
 
 <script src="script/search_index.js"></script>

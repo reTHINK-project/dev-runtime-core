@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <base data-ice="baseUrl" href="../../../">
-  <title data-ice="title">GraphConnector | API Document</title>
+  <title data-ice="title">GraphConnector | Service Framework API Document</title>
   <link type="text/css" rel="stylesheet" href="css/style.css">
   <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
   <script src="script/prettify/prettify.js"></script>
@@ -18,8 +18,8 @@
   
   <a href="identifiers.html">Reference</a>
   <a href="source.html">Source</a>
+  <a href="test.html" data-ice="testLink">Test</a>
   
-  <a data-ice="repoURL" href="git+ssh://git@github.com:reTHINK-project/dev-runtime-core.git">Repository</a>
   <div class="search-box">
   <span>
     <img src="./image/search.png">
@@ -32,7 +32,8 @@
 <nav class="navigation" data-ice="nav"><div>
   <ul>
     
-  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html">Bus</a></span></span></li>
+  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">allocation</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/allocation/AddressAllocation.js~AddressAllocation.html">AddressAllocation</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html">Bus</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html">MiniBus</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Pipeline.js~Pipeline.html">Pipeline</a></span></span></li>
@@ -40,39 +41,81 @@
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GlobalRegistryRecord.js~GlobalRegistryRecord.html">GlobalRegistryRecord</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html">GraphConnector</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html">GraphConnectorContactData</a></span></span></li>
-<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">identity</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/IdentityModule.js~IdentityModule.html">IdentityModule</a></span></span></li>
-<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">persistence</div><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-persistenceManager">persistenceManager</a></span></span></li>
-<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/PolicyEngine.js~PolicyEngine.html">PolicyEngine</a></span></span></li>
-<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">protostub</div><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-activate">activate</a></span></span></li>
-<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">registry</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/AddressAllocation.js~AddressAllocation.html">AddressAllocation</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/HypertyDiscovery.js~HypertyDiscovery.html">HypertyDiscovery</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">identity</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/Crypto.js~Crypto.html">Crypto</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/GuiFake.js~GuiFake.html">GuiFake</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/Identity.js~Identity.html">Identity</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/IdentityModule.js~IdentityModule.html">IdentityModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/OpenIdLib.js~OpenIdLib.html">OpenIdLib</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/ActionsService.js~ActionsService.html">ActionsService</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/CombiningAlgorithm.js~CombiningAlgorithm.html">CombiningAlgorithm</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Operators.js~Operators.html">Operators</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/PDP.js~PDP.html">PDP</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/PEP.js~PEP.html">PEP</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Policy.js~Policy.html">Policy</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/ReThinkCtx.js~ReThinkCtx.html">ReThinkCtx</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Rule.js~Rule.html">Rule</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/combiningAlgorithms</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/AllowOverrides.js~AllowOverrides.html">AllowOverrides</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/BlockOverrides.js~BlockOverrides.html">BlockOverrides</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/FirstApplicable.js~FirstApplicable.html">FirstApplicable</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/conditions</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/AdvancedCondition.js~AdvancedCondition.html">AdvancedCondition</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/Condition.js~Condition.html">Condition</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/SubscriptionCondition.js~SubscriptionCondition.html">SubscriptionCondition</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/context</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html">RuntimeCoreCtx</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">protostub</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/protostub/IdpProxyStub.js~IdpProxyStub.html">IdpProxyStub</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-activate">activate</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">registry</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/Discovery.js~Discovery.html">Discovery</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/DiscoveryServiceFramework.js~DiscoveryServiceFramework.html">DiscoveryServiceFramework</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/HypertyInstance.js~HypertyInstance.html">HypertyInstance</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html">Registry</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/RegistryDataModel.js~RegistryDataModel.html">RegistryDataModel</a></span></span></li>
-<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">runtime</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/RuntimeCatalogue-Local.js~RuntimeCatalogue.html">RuntimeCatalogue</a></span></span></li>
-<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/RuntimeCatalogue.js~RuntimeCatalogue.html">RuntimeCatalogue</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">runtime</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/Descriptors.js~Descriptors.html">Descriptors</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/Loader - Copy.js~Loader.html">Loader</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/Loader.js~Loader.html">Loader</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/RuntimeUA.js~RuntimeUA.html">RuntimeUA</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-runtimeConfiguration">runtimeConfiguration</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-runtimeUtils">runtimeUtils</a></span></span></li>
 <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">sandbox</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/sandbox/Sandbox.js~Sandbox.html">Sandbox</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/sandbox/SandboxRegistry.js~SandboxRegistry.html">SandboxRegistry</a></span></span></li>
-<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">syncher</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/ObjectAllocation.js~ObjectAllocation.html">ObjectAllocation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-SandboxType">SandboxType</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">syncher</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/ObserverObject.js~ObserverObject.html">ObserverObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/ReporterObject.js~ReporterObject.html">ReporterObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/StoreDataObjects.js~StoreDataObjects.html">StoreDataObjects</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/Subscription.js~Subscription.html">Subscription</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/SyncherManager.js~SyncherManager.html">SyncherManager</a></span></span></li>
 <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">utils</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/utils/EventEmitter.js~EventEmitter.html">EventEmitter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-schemaValidation">schemaValidation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-buildURL">buildURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-convertToUserURL">convertToUserURL</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-deepClone">deepClone</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-divideEmail">divideEmail</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-divideURL">divideURL</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-emptyObject">emptyObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-generateGUID">generateGUID</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getConfigurationResources">getConfigurationResources</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserEmailFromURL">getUserEmailFromURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserIdentityDomain">getUserIdentityDomain</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserURLFromEmail">getUserURLFromEmail</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isBackendServiceURL">isBackendServiceURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isDataObjectURL">isDataObjectURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isHypertyURL">isHypertyURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isLegacy">isLegacy</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isURL">isURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isUserURL">isUserURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-removePathFromURL">removePathFromURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-tv4">tv4</a></span></span></li>
 <li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-divideURL">divideURL</a></span></span></li>
 </ul>
 </div>
 </nav>
 
 <div class="content" data-ice="content"><div class="header-notice">
-  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import GraphConnector from &apos;<span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber14">runtime-core/src/graphconnector/GraphConnector.js</a></span>&apos;</code></pre></div>
+  <div data-ice="importPath" class="import-path"><pre class="prettyprint"><code data-ice="importPathCode">import GraphConnector from &apos;<span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber38">runtime-core/src/graphconnector/GraphConnector.js</a></span>&apos;</code></pre></div>
   <span data-ice="access">public</span>
   <span data-ice="kind">class</span>
   
   
   
-  <span data-ice="source">| <span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber14">source</a></span></span>
+  <span data-ice="source">| <span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber38">source</a></span></span>
 </div>
 
 <div class="self-detail detail">
@@ -94,6 +137,7 @@
   
   <div class="description" data-ice="description"><p>The Graph Connector contains the contact list/address book.</p>
 </div>
+  
 
   
 
@@ -121,7 +165,9 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-constructor-constructor">constructor</a></span></span><span data-ice="signature">(HypertyRuntimeURL: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, MessageBus: <span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-get-messageBus">messageBus</a></span>)</span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-constructor-constructor">constructor</a></span></span><span data-ice="signature">(HypertyRuntimeURL: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, MessageBus: <span><a href="class/src/registry/Registry.js~Registry.html#instance-set-messageBus">messageBus</a></span>)</span>
         </p>
       </div>
       <div>
@@ -154,7 +200,9 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-member-contacts">contacts</a></span></span><span data-ice="signature">: <span>*</span></span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-member-contacts">contacts</a></span></span><span data-ice="signature">: <span><span>*</span><span>[]</span></span></span>
         </p>
       </div>
       <div>
@@ -179,7 +227,9 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-member-contactsBloomFilter1Hop">contactsBloomFilter1Hop</a></span></span><span data-ice="signature">: <span>*</span></span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-member-contactsBloomFilter1Hop">contactsBloomFilter1Hop</a></span></span><span data-ice="signature">: <span>*</span></span>
         </p>
       </div>
       <div>
@@ -204,7 +254,9 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-member-globalRegistryRecord">globalRegistryRecord</a></span></span><span data-ice="signature">: <span>*</span></span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-member-globalRegistryRecord">globalRegistryRecord</a></span></span><span data-ice="signature">: <span>*</span></span>
         </p>
       </div>
       <div>
@@ -229,7 +281,9 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-member-groups">groups</a></span></span><span data-ice="signature">: <span>*</span></span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-member-groups">groups</a></span></span><span data-ice="signature">: <span><span>*</span><span>[]</span></span></span>
         </p>
       </div>
       <div>
@@ -254,7 +308,9 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-member-lastCalculationBloomFilter1Hop">lastCalculationBloomFilter1Hop</a></span></span><span data-ice="signature">: <span>*</span></span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-member-lastCalculationBloomFilter1Hop">lastCalculationBloomFilter1Hop</a></span></span><span data-ice="signature">: <span>*</span></span>
         </p>
       </div>
       <div>
@@ -279,7 +335,9 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-get-messageBus">messageBus</a></span></span><span data-ice="signature">(messageBus: <span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span>): <span>*</span></span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-get-messageBus">messageBus</a></span></span><span data-ice="signature">(messageBus: <span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span>): <span>*</span></span>
         </p>
       </div>
       <div>
@@ -305,7 +363,9 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-set-messageBus">messageBus</a></span></span><span data-ice="signature">(messageBus: <span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span>): <span>*</span></span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-set-messageBus">messageBus</a></span></span><span data-ice="signature">(messageBus: <span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span>): <span>*</span></span>
         </p>
       </div>
       <div>
@@ -313,6 +373,33 @@
         
         <div data-ice="description"><p>Sets the MessageBus.</p>
 </div>
+      </div>
+    </td>
+    <td>
+      
+      
+    </td>
+  </tr>
+<tr data-ice="target">
+    <td>
+      <span class="access" data-ice="access">public</span>
+      
+      
+      
+      <span class="override" data-ice="override"></span>
+    </td>
+    <td>
+      <div>
+        <p>
+          
+          
+          <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-member-privateKey">privateKey</a></span></span><span data-ice="signature">: <span>*</span></span>
+        </p>
+      </div>
+      <div>
+        
+        
+        
       </div>
     </td>
     <td>
@@ -338,7 +425,9 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-method-addContact">addContact</a></span></span><span data-ice="signature">(guid: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, firstName: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, lastname: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>)</span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-method-addContact">addContact</a></span></span><span data-ice="signature">(guid: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, firstName: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, lastname: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>)</span>
         </p>
       </div>
       <div>
@@ -364,7 +453,9 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-method-addUserID">addUserID</a></span></span><span data-ice="signature">(userID: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>)</span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-method-addUserID">addUserID</a></span></span><span data-ice="signature">(userID: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>)</span>
         </p>
       </div>
       <div>
@@ -390,7 +481,9 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-method-calculateBloomFilter1Hop">calculateBloomFilter1Hop</a></span></span><span data-ice="signature">()</span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-method-calculateBloomFilter1Hop">calculateBloomFilter1Hop</a></span></span><span data-ice="signature">()</span>
         </p>
       </div>
       <div>
@@ -416,7 +509,9 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-method-checkGUID">checkGUID</a></span></span><span data-ice="signature">(guid: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span>array</span></span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-method-checkGUID">checkGUID</a></span></span><span data-ice="signature">(guid: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span>array</span></span>
         </p>
       </div>
       <div>
@@ -442,7 +537,9 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-method-generateGUID">generateGUID</a></span></span><span data-ice="signature">(): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-method-generateGUID">generateGUID</a></span></span><span data-ice="signature">(): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></span>
         </p>
       </div>
       <div>
@@ -468,7 +565,9 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-method-getContact">getContact</a></span></span><span data-ice="signature">(name: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span>array</span></span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-method-getContact">getContact</a></span></span><span data-ice="signature">(name: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span>array</span></span>
         </p>
       </div>
       <div>
@@ -494,7 +593,9 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-method-queryGlobalRegistry">queryGlobalRegistry</a></span></span><span data-ice="signature">(guid: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span></span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-method-queryGlobalRegistry">queryGlobalRegistry</a></span></span><span data-ice="signature">(guid: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span></span>
         </p>
       </div>
       <div>
@@ -520,7 +621,9 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-method-removeContact">removeContact</a></span></span><span data-ice="signature">(guid: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>)</span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-method-removeContact">removeContact</a></span></span><span data-ice="signature">(guid: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>)</span>
         </p>
       </div>
       <div>
@@ -546,7 +649,9 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-method-removeUserID">removeUserID</a></span></span><span data-ice="signature">(userID: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>)</span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-method-removeUserID">removeUserID</a></span></span><span data-ice="signature">(userID: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>)</span>
         </p>
       </div>
       <div>
@@ -572,7 +677,9 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-method-sendGlobalRegistryRecord">sendGlobalRegistryRecord</a></span></span><span data-ice="signature">(jwt: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span>Propmise</span></span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-method-sendGlobalRegistryRecord">sendGlobalRegistryRecord</a></span></span><span data-ice="signature">(jwt: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span>Propmise</span></span>
         </p>
       </div>
       <div>
@@ -598,7 +705,9 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-method-signGlobalRegistryRecord">signGlobalRegistryRecord</a></span></span><span data-ice="signature">(): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-method-signGlobalRegistryRecord">signGlobalRegistryRecord</a></span></span><span data-ice="signature">(): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></span>
         </p>
       </div>
       <div>
@@ -624,7 +733,9 @@
     <td>
       <div>
         <p>
-           <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-method-useGUID">useGUID</a></span></span><span data-ice="signature">(mnemonicAndSalt: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span></span>
+          
+          
+          <span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-method-useGUID">useGUID</a></span></span><span data-ice="signature">(mnemonicAndSalt: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span></span>
         </p>
       </div>
       <div>
@@ -656,11 +767,12 @@
     
     
     
-    <span data-ice="name">constructor</span><span data-ice="signature">(HypertyRuntimeURL: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, MessageBus: <span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-get-messageBus">messageBus</a></span>)</span>
+    
+    <span data-ice="name">constructor</span><span data-ice="signature">(HypertyRuntimeURL: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, MessageBus: <span><a href="class/src/registry/Registry.js~Registry.html#instance-set-messageBus">messageBus</a></span>)</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber23">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber47">source</a></span></span>
     </span>
   </h3>
 
@@ -689,7 +801,7 @@
     </tr>
 <tr data-ice="property" data-depth="0">
       <td data-ice="name" data-depth="0">MessageBus</td>
-      <td data-ice="type"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-get-messageBus">messageBus</a></span></td>
+      <td data-ice="type"><span><a href="class/src/registry/Registry.js~Registry.html#instance-set-messageBus">messageBus</a></span></td>
       <td data-ice="appendix"></td>
       <td data-ice="description"><p>The Message Bus.</p>
 </td>
@@ -698,6 +810,8 @@
   </table>
 </div>
 </div>
+
+  
 
   
 
@@ -724,11 +838,12 @@
     
     
     
-    <span data-ice="name">contacts</span><span data-ice="signature">: <span>*</span></span>
+    
+    <span data-ice="name">contacts</span><span data-ice="signature">: <span><span>*</span><span>[]</span></span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber24">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber48">source</a></span></span>
     </span>
   </h3>
 
@@ -741,6 +856,8 @@
 
   <div data-ice="properties">
 </div>
+
+  
 
   
 
@@ -764,11 +881,12 @@
     
     
     
+    
     <span data-ice="name">contactsBloomFilter1Hop</span><span data-ice="signature">: <span>*</span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber368">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber417">source</a></span></span>
     </span>
   </h3>
 
@@ -781,6 +899,8 @@
 
   <div data-ice="properties">
 </div>
+
+  
 
   
 
@@ -804,11 +924,12 @@
     
     
     
+    
     <span data-ice="name">globalRegistryRecord</span><span data-ice="signature">: <span>*</span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber27">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber51">source</a></span></span>
     </span>
   </h3>
 
@@ -821,6 +942,8 @@
 
   <div data-ice="properties">
 </div>
+
+  
 
   
 
@@ -844,11 +967,12 @@
     
     
     
-    <span data-ice="name">groups</span><span data-ice="signature">: <span>*</span></span>
+    
+    <span data-ice="name">groups</span><span data-ice="signature">: <span><span>*</span><span>[]</span></span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber30">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber55">source</a></span></span>
     </span>
   </h3>
 
@@ -861,6 +985,8 @@
 
   <div data-ice="properties">
 </div>
+
+  
 
   
 
@@ -884,11 +1010,12 @@
     
     
     
+    
     <span data-ice="name">lastCalculationBloomFilter1Hop</span><span data-ice="signature">: <span>*</span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber25">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber49">source</a></span></span>
     </span>
   </h3>
 
@@ -915,6 +1042,8 @@
   
 
   
+
+  
   
 </div>
 <div class="detail" data-ice="detail">
@@ -924,11 +1053,12 @@
     <span class="kind" data-ice="kind">get</span>
     
     
+    
     <span data-ice="name">messageBus</span><span data-ice="signature">(messageBus: <span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span>): <span>*</span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber43">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber68">source</a></span></span>
     </span>
   </h3>
 
@@ -956,6 +1086,8 @@
   
 
   
+
+  
   
 </div>
 <div class="detail" data-ice="detail">
@@ -965,11 +1097,12 @@
     <span class="kind" data-ice="kind">set</span>
     
     
+    
     <span data-ice="name">messageBus</span><span data-ice="signature">(messageBus: <span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span>): <span>*</span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber51">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber76">source</a></span></span>
     </span>
   </h3>
 
@@ -997,6 +1130,51 @@
   
 
   
+
+  
+  
+</div>
+<div class="detail" data-ice="detail">
+  <h3 data-ice="anchor" id="instance-member-privateKey">
+    <span class="access" data-ice="access">public</span>
+    
+    
+    
+    
+    
+    <span data-ice="name">privateKey</span><span data-ice="signature">: <span>*</span></span>
+    <span class="right-info">
+      
+      
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber207">source</a></span></span>
+    </span>
+  </h3>
+
+  
+  
+  
+  
+
+  
+
+  <div data-ice="properties">
+</div>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
   
 </div>
 </div>
@@ -1009,11 +1187,12 @@
     
     
     
+    
     <span data-ice="name">addContact</span><span data-ice="signature">(guid: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, firstName: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>, lastname: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>)</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber331">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber380">source</a></span></span>
     </span>
   </h3>
 
@@ -1072,6 +1251,8 @@
   
 
   
+
+  
   
 </div>
 <div class="detail" data-ice="detail">
@@ -1081,11 +1262,12 @@
     
     
     
+    
     <span data-ice="name">addUserID</span><span data-ice="signature">(userID: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>)</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber300">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber349">source</a></span></span>
     </span>
   </h3>
 
@@ -1130,6 +1312,8 @@
   
 
   
+
+  
   
 </div>
 <div class="detail" data-ice="detail">
@@ -1139,11 +1323,12 @@
     
     
     
+    
     <span data-ice="name">calculateBloomFilter1Hop</span><span data-ice="signature">()</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber358">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber407">source</a></span></span>
     </span>
   </h3>
 
@@ -1171,6 +1356,8 @@
   
 
   
+
+  
   
 </div>
 <div class="detail" data-ice="detail">
@@ -1180,11 +1367,12 @@
     
     
     
+    
     <span data-ice="name">checkGUID</span><span data-ice="signature">(guid: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span>array</span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber393">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber442">source</a></span></span>
     </span>
   </h3>
 
@@ -1219,15 +1407,19 @@
   <div class="return-params" data-ice="returnParams">
     <h4>Return:</h4>
     <table>
-      <tr>
-        <td class="return-type" data-ice="returnType"><span>array</span></td>
-        <td class="return-desc" data-ice="returnDescription"><p>relatedContacts     List of related direct contacts and of related friends-of-friends contacts.The format is: RelatedContacts&lt;Direct&lt;GraphConnectorContactData&gt;,FoF&lt;GraphConnectorContactData&gt;&gt;.</p>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span>array</span></td>
+          <td class="return-desc" data-ice="returnDescription"><p>relatedContacts     List of related direct contacts and of related friends-of-friends contacts.The format is: RelatedContacts&lt;Direct&lt;GraphConnectorContactData&gt;,FoF&lt;GraphConnectorContactData&gt;&gt;.</p>
 </td>
-      </tr>
+        </tr>
+      </tbody>
     </table>
     <div data-ice="returnProperties">
 </div>
   </div>
+
+  
 
   
 
@@ -1249,11 +1441,12 @@
     
     
     
+    
     <span data-ice="name">generateGUID</span><span data-ice="signature">(): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber59">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber84">source</a></span></span>
     </span>
   </h3>
 
@@ -1271,15 +1464,19 @@
   <div class="return-params" data-ice="returnParams">
     <h4>Return:</h4>
     <table>
-      <tr>
-        <td class="return-type" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
-        <td class="return-desc" data-ice="returnDescription"><p>mnemonic      A string with 16 words.</p>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
+          <td class="return-desc" data-ice="returnDescription"><p>mnemonic      A string with 16 words.</p>
 </td>
-      </tr>
+        </tr>
+      </tbody>
     </table>
     <div data-ice="returnProperties">
 </div>
   </div>
+
+  
 
   
 
@@ -1301,11 +1498,12 @@
     
     
     
+    
     <span data-ice="name">getContact</span><span data-ice="signature">(name: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span>array</span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber377">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber426">source</a></span></span>
     </span>
   </h3>
 
@@ -1340,15 +1538,19 @@
   <div class="return-params" data-ice="returnParams">
     <h4>Return:</h4>
     <table>
-      <tr>
-        <td class="return-type" data-ice="returnType"><span>array</span></td>
-        <td class="return-desc" data-ice="returnDescription"><p>matchingContacts       Contacts matching the given name. The format is: Contacts&lt;GraphConnectorContactData&gt;.</p>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span>array</span></td>
+          <td class="return-desc" data-ice="returnDescription"><p>matchingContacts       Contacts matching the given name. The format is: Contacts&lt;GraphConnectorContactData&gt;.</p>
 </td>
-      </tr>
+        </tr>
+      </tbody>
     </table>
     <div data-ice="returnProperties">
 </div>
   </div>
+
+  
 
   
 
@@ -1370,11 +1572,12 @@
     
     
     
+    
     <span data-ice="name">queryGlobalRegistry</span><span data-ice="signature">(guid: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber254">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber296">source</a></span></span>
     </span>
   </h3>
 
@@ -1410,15 +1613,19 @@ Returns a Graph Connector Contact Data as a Promise.</p>
   <div class="return-params" data-ice="returnParams">
     <h4>Return:</h4>
     <table>
-      <tr>
-        <td class="return-type" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span></td>
-        <td class="return-desc" data-ice="returnDescription"><p>Promise   Graph Connector Contact Data containing UserIDs.</p>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span></td>
+          <td class="return-desc" data-ice="returnDescription"><p>Promise   Graph Connector Contact Data containing UserIDs.</p>
 </td>
-      </tr>
+        </tr>
+      </tbody>
     </table>
     <div data-ice="returnProperties">
 </div>
   </div>
+
+  
 
   
 
@@ -1440,11 +1647,12 @@ Returns a Graph Connector Contact Data as a Promise.</p>
     
     
     
+    
     <span data-ice="name">removeContact</span><span data-ice="signature">(guid: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>)</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber343">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber392">source</a></span></span>
     </span>
   </h3>
 
@@ -1489,6 +1697,8 @@ Returns a Graph Connector Contact Data as a Promise.</p>
   
 
   
+
+  
   
 </div>
 <div class="detail" data-ice="detail">
@@ -1498,11 +1708,12 @@ Returns a Graph Connector Contact Data as a Promise.</p>
     
     
     
+    
     <span data-ice="name">removeUserID</span><span data-ice="signature">(userID: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>)</span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber317">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber366">source</a></span></span>
     </span>
   </h3>
 
@@ -1547,6 +1758,8 @@ Returns a Graph Connector Contact Data as a Promise.</p>
   
 
   
+
+  
   
 </div>
 <div class="detail" data-ice="detail">
@@ -1556,11 +1769,12 @@ Returns a Graph Connector Contact Data as a Promise.</p>
     
     
     
+    
     <span data-ice="name">sendGlobalRegistryRecord</span><span data-ice="signature">(jwt: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span>Propmise</span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber214">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber256">source</a></span></span>
     </span>
   </h3>
 
@@ -1596,15 +1810,19 @@ Returns the response code of the REST-interface of the Global Registry as a Prom
   <div class="return-params" data-ice="returnParams">
     <h4>Return:</h4>
     <table>
-      <tr>
-        <td class="return-type" data-ice="returnType"><span>Propmise</span></td>
-        <td class="return-desc" data-ice="returnDescription"><p>Promise Response Code from Global Registry.</p>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span>Propmise</span></td>
+          <td class="return-desc" data-ice="returnDescription"><p>Promise Response Code from Global Registry.</p>
 </td>
-      </tr>
+        </tr>
+      </tbody>
     </table>
     <div data-ice="returnProperties">
 </div>
   </div>
+
+  
 
   
 
@@ -1626,11 +1844,12 @@ Returns the response code of the REST-interface of the Global Registry as a Prom
     
     
     
+    
     <span data-ice="name">signGlobalRegistryRecord</span><span data-ice="signature">(): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber198">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber231">source</a></span></span>
     </span>
   </h3>
 
@@ -1648,15 +1867,19 @@ Returns the response code of the REST-interface of the Global Registry as a Prom
   <div class="return-params" data-ice="returnParams">
     <h4>Return:</h4>
     <table>
-      <tr>
-        <td class="return-type" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
-        <td class="return-desc" data-ice="returnDescription"><p>JWT     JSON Web Token ready to commit to Global Registry.</p>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span></td>
+          <td class="return-desc" data-ice="returnDescription"><p>JWT     JSON Web Token ready to commit to Global Registry.</p>
 </td>
-      </tr>
+        </tr>
+      </tbody>
     </table>
     <div data-ice="returnProperties">
 </div>
   </div>
+
+  
 
   
 
@@ -1678,11 +1901,12 @@ Returns the response code of the REST-interface of the Global Registry as a Prom
     
     
     
+    
     <span data-ice="name">useGUID</span><span data-ice="signature">(mnemonicAndSalt: <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>): <span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span></span>
     <span class="right-info">
       
       
-      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber92">source</a></span></span>
+      <span data-ice="source"><span><a href="file/src/graphconnector/GraphConnector.js.html#lineNumber117">source</a></span></span>
     </span>
   </h3>
 
@@ -1719,15 +1943,19 @@ Retrieves data from the Global Registry.</p>
   <div class="return-params" data-ice="returnParams">
     <h4>Return:</h4>
     <table>
-      <tr>
-        <td class="return-type" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span></td>
-        <td class="return-desc" data-ice="returnDescription"><p>Promise          Global Registry Record.</p>
+      <tbody>
+        <tr>
+          <td class="return-type" data-ice="returnType"><span><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">Promise</a></span></td>
+          <td class="return-desc" data-ice="returnDescription"><p>Promise          Global Registry Record.</p>
 </td>
-      </tr>
+        </tr>
+      </tbody>
     </table>
     <div data-ice="returnProperties">
 </div>
   </div>
+
+  
 
   
 
@@ -1746,7 +1974,7 @@ Retrieves data from the Global Registry.</p>
 </div>
 
 <footer class="footer">
-  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.4.4)</span></a>
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.5.2)</span><img src="./image/esdoc-logo-mini-black.png"></a>
 </footer>
 
 <script src="script/search_index.js"></script>
