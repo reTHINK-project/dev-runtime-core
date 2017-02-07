@@ -167,14 +167,15 @@ class RuntimeUA {
 
       let runtimeDescriptor = runtimeUtils.runtimeDescriptor;
       let p2pStubHandler = runtimeDescriptor.p2pHandlerStub;
-      console.log('[RuntimeUA loadP2PHandler] P2PStubHandler: ', p2pStubHandler);
 
       let p2pConfig = {
         isHandlerStub: true,
         runtimeURL: this.runtimeURL
       };
 
-      this.loadStub(p2pStubHandler, p2pConfig).then((result) => {
+      console.log('[RuntimeUA loadP2PHandler] P2PStubHandler: ', p2pStubHandler);
+
+      this.loader.loadStub(p2pStubHandler, p2pConfig).then((result) => {
 
         let runtimeUAURL = this.runtimeURL + '/ua';
         let msg = {
