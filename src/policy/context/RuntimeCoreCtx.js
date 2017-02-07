@@ -121,6 +121,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
   prepareToForward(message, isIncoming, result) {
     let _this = this;
     return new Promise((resolve, reject) => {
+      console.log('[Policy.RuntimeCoreCtx.prepareToForward]', message);
 
       // TODO remove this validation. When the Nodejs auth was completed this should work like browser;
       this.runtimeCapabilities.isAvailable('node').then((result) => {
@@ -280,15 +281,19 @@ class RuntimeCoreCtx extends ReThinkCtx {
   *                     or if its type equals 'handshake'; false otherwise
   */
   _isToCypherModule(message) {
+    console.log('[Policy.RuntimeCoreCtx.istoChyperModule]', message);
     let isCreate = message.type === 'create';
     let isFromHyperty = divideURL(message.from).type === 'hyperty';
     let isToHyperty = divideURL(message.to).type === 'hyperty';
     let isToDataObject = isDataObjectURL(message.to);
 
+    //TODO: For Further Study
+    let doMutualAuthentication = message.body.hasOwnProperty('mutualAuthentication') ? message.body.mutualAuthentication : true;
+
     // todo: return false for messages coming from interworking stubs.
     // Get descriptor from runtime catalogue and check interworking field.
 
-    return (isCreate && isFromHyperty && isToHyperty) || (isCreate && isFromHyperty && isToDataObject) || message.type === 'handshake' || message.type === 'update';
+    return ((isCreate && isFromHyperty && isToHyperty) || (isCreate && isFromHyperty && isToDataObject) || message.type === 'handshake' || message.type === 'update') && doMutualAuthentication;
   }
 
   /**

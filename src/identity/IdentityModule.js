@@ -851,7 +851,9 @@ class IdentityModule {
 
       //if from hyperty to a dataObjectURL
       } else if (isFromHyperty && isToDataObject) {
+
         console.log('dataObject value to encrypt: ', message.body.value);
+        console.log('IdentityModule - encrypt from hyperty to dataobject ', message);
 
         // TIAGO - persistence issue #147
         _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {

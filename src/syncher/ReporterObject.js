@@ -247,6 +247,9 @@ class ReporterObject {
         body: { type: msg.type, from: hypertyURL, to: _this._url, identity: msg.body.identity }
       };
 
+      //TODO: For Further Study
+      if(msg.body.hasOwnProperty('mutualAuthentication')) forwardMsg.body.mutualAuthentication = msg.body.mutualAuthentication;
+
       _this._bus.postMessage(forwardMsg, (reply) => {
         console.log('forward-reply: ', reply);
         if (reply.body.code === 200) {

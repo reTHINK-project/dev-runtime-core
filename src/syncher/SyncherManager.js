@@ -417,6 +417,9 @@ class SyncherManager {
             body: { identity: nodeSubscribeMsg.body.identity, subscriber: hypertyURL }
           };
 
+          //TODO: For Further Study
+          if(msg.body.hasOwnProperty('mutualAuthentication')) objSubscribeMsg.body.mutualAuthentication = msg.body.mutualAuthentication;
+          console.log('[SyncherManager._newSubscription]', objSubscribeMsg, msg);
           //subscribe to reporter SM
           _this._bus.postMessage(objSubscribeMsg, (reply) => {
             console.log('reporter-subscribe-response-new: ', reply);
@@ -448,6 +451,8 @@ class SyncherManager {
               reply.body.schema = msg.body.schema;
               reply.body.resource = msg.body.resource;
 
+              //TODO: For Further Study
+              if(msg.body.hasOwnProperty('mutualAuthentication')) reply.body.mutualAuthentication = msg.body.mutualAuthentication;
               console.log('[subscribe] - new subscription: ', msg, reply, observer);
 
               this._bus.postMessage(reply);
