@@ -288,11 +288,17 @@ class IdentityModule {
     let length = urlSplit.length;*/
 
     let domainToCheck = divideURL(url).domain;
-
+    let identityToReturn;
     for (let index in _this.identities) {
       let identity = _this.identities[index];
       if (identity.hasOwnProperty('interworking') && identity.interworking.domain === domainToCheck) {
-        return identity.interworking.access_token;
+        if (identity.hasOwnProperty('messageInfo') && identity.messageInfo.hasOwnProperty('userProfile') && identity.messageInfo.userProfile) {
+          identityToReturn = { userProfile: identity.messageInfo.userProfile, access_token: identity.interworking.access_token };
+          if (identity.hasOwnProperty('infoToken') && identity.infoToken.hasOwnProperty('id')) {
+            identityToReturn.userProfile.id = identity.infoToken.id;
+          }
+        }
+        return identityToReturn;
       }
     }
 
@@ -854,7 +860,7 @@ class IdentityModule {
 
         console.log('dataObject value to encrypt: ', message.body.value);
         console.log('IdentityModule - encrypt from hyperty to dataobject ', message);
-
+        
         // TIAGO - persistence issue #147
         _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
           let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
