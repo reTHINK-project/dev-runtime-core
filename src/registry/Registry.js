@@ -1155,14 +1155,14 @@ class Registry {
       }
     } else {
 
-      if (_this.p2pHandlerStub.hasOwnProperty(_this.runtimeURL) && _this.p2pHandlerStub[_this.runtimeURL].status === STATUS.LIVE) {
+      if (_this.p2pHandlerStub.hasOwnProperty(_this.runtimeURL) ) {
         return (_this.p2pHandlerStub[_this.runtimeURL]);
       } else {
         _this.p2pHandlerStub[_this.runtimeURL] = {
           status: STATUS.CREATED
         };
 
-        throw new Error('[Registry - discoverP2PStub ] P2P Handler Stub Not Found. Creating one');
+        throw new Error('[Registry - discoverP2PStub ] P2P Handler Stub Not Found.');
       }
 
     }
@@ -1212,7 +1212,7 @@ class Registry {
 
           _this.p2pHandlerAssociation[_this.runtimeURL] = [];
 
-          _this.sandboxesList.sandbox[runtimeProtoStubURL] = sandbox;
+          _this.sandboxesList.sandbox[stubID] = sandbox;
           resolve(_this.p2pHandlerStub[stubID]);
         } else {
           P2PRequesterStub = p2pConfig.p2pRequesterStub;
@@ -1227,7 +1227,7 @@ class Registry {
             status: STATUS.CREATED
           };
 
-          _this.sandboxesList.sandbox[runtimeProtoStubURL] = sandbox;
+          _this.sandboxesList.sandbox[stubID] = sandbox;
           resolve(_this.p2pRequesterStub[stubID]);
         }
       } else {
@@ -1463,13 +1463,13 @@ class Registry {
   }
 
   /**
-  * To discover sandboxes available in the runtime for a certain domain. Required by the runtime UA to avoid more than one sandbox for the same domain.
+  * To discover sandboxes available in the runtime for a certain domain and a certain set of capabilities. Required by the runtime UA to avoid more than one sandbox for the same domain.
   * @param  {DomainURL} DomainURL url
   * @return {RuntimeSandbox}           RuntimeSandbox
   */
-  getSandbox(url) {
+  getSandbox(url, constraints) {
     if (!url) throw new Error('Parameter url needed');
-    console.log('[Registry getSandbox] getSandbox: ', url);
+    console.log('[Registry getSandbox] getSandbox for: ', url , ' and capabilities: ', capabilities);
 
     let _this = this;
     return new Promise(function(resolve, reject) {
@@ -1495,7 +1495,7 @@ class Registry {
 
           // search in the sandboxes list for a entry containing the domain given
           for (let sandbox in _this.sandboxesList.sandbox) {
-            if (sandbox.includes(domain)) {
+            if (sandbox.includes(domain) && _this.sandboxesList.sandbox[sandbox].matches(constraints)) {
               request = _this.sandboxesList.sandbox[sandbox];
               break;
             }

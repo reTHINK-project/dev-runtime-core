@@ -332,6 +332,7 @@ class Loader {
       let discoverStub;
       let isP2PHandler = false;
       let isP2PRequester = false;
+      let stubCapabilities = {};
 
       console.info('[Runtime.Loader.loadStub] starting loading for ', protostubURL, ' with p2pconfig ', p2pConfig);
       console.info('[Runtime.Loader.loadStub]Discover or Create a new ProtoStub for domain: ', domain);
@@ -397,13 +398,19 @@ class Loader {
         .then((stubSourcePackage) => {
           if (haveError) return false;
 
+          // According to debug, it seems RuntimeCatalogue does not support yet constraints. It appears empty!!!!
+
+          if (_stubDescriptor && _stubDescriptor.constraints) {
+            stubCapabilities = _stubDescriptor.constraints;
+          }
+
           // step 11 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
           console.info('[Runtime.Loader.loadStub]3. return the ProtoStub Source Code');
           _stubSourcePackage = stubSourcePackage;
 
           // this will return the sandbox or one promise to getSandbox;
           // step 12 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-          return this.registry.getSandbox(domain);
+          return this.registry.getSandbox(domain, stubCapabilities);
         })
         .then((stubSandbox) => {
           if (haveError) return false;
@@ -422,12 +429,6 @@ class Loader {
 
           // check if the sandbox is registed for this stub descriptor url;
 
-          // According to debug, it seems RuntimeCatalogue does not support yet constraints. It appears empty!!!!
-
-          let stubCapabilities = {};
-          if (_stubDescriptor && _stubDescriptor.hasOwnProperty('constraints')) {
-            stubCapabilities = _stubDescriptor.stubCapabilities;
-          }
 
           // step 14 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
           return this._runtimeFactory.createSandbox(stubCapabilities).then((sandbox) => {

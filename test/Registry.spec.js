@@ -162,36 +162,39 @@ describe('Registry', function() {
       expect(registry.registerStub(sandboxDummy, domainURL).then((deployed) => {
         console.log('Depoyed->', deployed);
         return deployed.url;
-      })).to.be.fulfilled.and.eventually.to.contain('msg-node.ua.pt/protostub/').and.notify(done);
+      })).to.be.fulfilled.and.eventually.to.contain('runtime://ua.pt/protostub/').and.notify(done);
 
     });
 
     it('should register a P2P Handler Stub', (done) => {
       let p2pConfig = {
-        isHandlerStub: true
+        isHandlerStub: true,
+        runtimeURL: runtimeURL
       };
 
       expect(registry.registerStub(sandboxDummy, domainURL, p2pConfig).then((deployed) => {
         return deployed.url;
-      })).to.be.fulfilled.and.eventually.to.contain('msg-node.ua.pt/protostub/').and.notify(done);
+      })).to.be.fulfilled.and.eventually.to.contain('runtime://ua.pt/p2phandler/').and.notify(done);
     });
 
     it('should register a P2P Requester Stub', (done) => {
 
       let p2pConfig = {
-        p2pRequesterStub: 'https://localhost/.well-known/protocolstub/P2PRequesterStub'
+        remoteRuntimeURL: "runtime://ua.pt/1234566",
+        p2pHandler: 'runtime://ua.pt/p2phandler/1234',
+        p2pRequesterStub: true
       };
 
       expect(registry.registerStub(sandboxDummy, domainURL, p2pConfig).then((deployed) => {
         return deployed.url;
-      })).to.be.fulfilled.and.eventually.to.contain('msg-node.ua.pt/protostub/').and.notify(done);
+      })).to.be.fulfilled.and.eventually.to.contain('runtime://ua.pt/p2prequester/').and.notify(done);
     });
 
     it('should discover P2PHandlerStub', (done) => {
       expect(registry.discoverP2PStub().then((discovered) => {
         return discovered.url;
       })).to.be.fulfilled
-      .and.eventually.to.contain('msg-node.ua.pt/protostub/').and.notify(done);
+      .and.eventually.to.contain('runtime://ua.pt/p2phandler/').and.notify(done);
     });
 
   });
@@ -201,7 +204,7 @@ describe('Registry', function() {
     it('should discover a ProtocolStub', function(done) {
       let url = 'ua.pt';
       expect(registry.discoverProtostub(url).then((result) => {
-        expect(result).to.have.property('url').include('msg-node.ua.pt/protostub/');
+        expect(result).to.have.property('url').include('runtime://ua.pt/protostub/');
         expect(result).to.have.property('status', 'deployed');
         protostubURL = result.url;
         return result;
