@@ -30,6 +30,7 @@ import {MessageFactory} from 'service-framework/dist/MessageFactory';
 import {divideURL, isHypertyURL, isURL, isUserURL, generateGUID, getUserIdentityDomain, isBackendServiceURL} from '../utils/utils.js';
 
 import Discovery from './Discovery';
+import 'proxy-observe';
 
 // import DiscoveryServiceFramework from './DiscoveryServiceFramework';
 
@@ -1228,6 +1229,23 @@ class Registry {
           };
 
           _this.sandboxesList.sandbox[stubID] = sandbox;
+
+          //Setup P2P Requester path into MN
+
+          let msg = {
+            type: 'subscribe',
+            from: _this.registryURL,
+            to: 'domain://msg-node.' + _this._domain + '/sm',
+            body: {
+              subscribe: [runtimeProtoStubURL],
+              source: _this.registryURL
+            }
+          };
+
+          _this._messageBus.postMessage(msg, (reply) => {
+            console.log('[Registry - register Stub] p2pRequester path setup: ', reply);
+          });
+
           resolve(_this.p2pRequesterStub[stubID]);
         }
       } else {
@@ -1299,7 +1317,6 @@ class Registry {
 
       // process status events from p2p connections at message P2P Handler protostubs
       if (msg.body.resource) {
-
         let remoteRuntimeURL = msg.body.resource;
 
         let p2pConnection = _this.p2pConnectionList[remoteRuntimeURL];
@@ -1643,8 +1660,10 @@ class Registry {
                 resolve(returnURL);
               });
             } else {
+              /*
               p2pConnection.status = STATUS.CREATED;
               _this.p2pConnectionList[hypertyInfo.runtimeURL] = p2pConnection;
+              */
 
               console.log('[Registry - resolve] loadStub with p2pRequester: ', hypertyInfo);
 
@@ -1652,10 +1671,27 @@ class Registry {
 
               // TODO stub load
               _this.loader.loadStub(hypertyInfo.p2pRequester, p2pConfig).then((protostubInfo) => {
-                p2pConnection.status = STATUS.CREATED;
-                _this.p2pConnectionList[hypertyInfo.runtimeURL] = p2pConnection;
 
-                resolve(protostubInfo.url);
+                console.log('[Registry - resolve] p2pRequester deployed: ', protostubInfo);
+
+                // Wait until P2P Connection is established
+                // todo: move to this to a function to be used by any stub deployment
+
+                Object.deepObserve(protostubInfo, (changes) => {
+
+                	changes.every((change) => {
+                		console.log('Update the status of protocolstub:', protostubInfo);
+
+                		if (change.type === 'update' && change.name === 'status' && change.newValue === 'live') {
+                      console.log('[Registry - resolve] p2pRequester is live: ', protostubInfo);
+                			resolve(protostubInfo.url);
+
+                    if (change.type === 'update' && change.name === 'status' && change.newValue === 'failed') {
+                      console.log('[Registry - resolve] p2pRequester failed: ', protostubInfo);
+                      reject('[Registry resolve] p2p requester failed');
+                		}
+                	});
+                });
               }).catch((error) => {
                 reject(error);
               });

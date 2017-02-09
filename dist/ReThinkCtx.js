@@ -1,11 +1,5 @@
 // version: 0.7.1
-<<<<<<< HEAD
-// date: Wed Feb 08 2017 17:38:01 GMT+0000 (GMT Standard Time)
-||||||| merged common ancestors
-// date: Tue Feb 07 2017 16:13:00 GMT+0000 (WET)
-=======
-// date: Wed Feb 08 2017 15:34:58 GMT+0000 (WET)
->>>>>>> fa1803c5fe2ff08d06fd0dfd0b72df28b0997ed0
+// date: Thu Feb 09 2017 17:38:46 GMT+0000 (GMT Standard Time)
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
