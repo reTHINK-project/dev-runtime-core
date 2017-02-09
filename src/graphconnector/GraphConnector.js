@@ -568,77 +568,83 @@ class GraphConnector {
    */
   addContact(guid, firstName, lastName) {
 
-    // TODO: reject invalid GUIDs
-    let success = false;
-    if (!this.guidExist(guid)) {
+    //for test accept any guid
 
-      let _this = this;
+    let queriedContact = new GraphConnectorContactData(guid, firstName, lastName);
+    this.contacts.push(queriedContact);
+    this.storageManager.set('graphConnector:contacts', 0, this.contacts);
 
-      let msg = {
-          type: 'READ',
-          from: this._hypertyRuntimeURL + '/graph-connector',
-          to: 'global://registry/',
-          body: {guid: guid}
-        };
-      return new Promise(function(resolve, reject) {
+    return true;
+    /* let success = false;
+     if (!this.guidExist(guid)) {
 
-          if (_this.messageBus === undefined) {
-            reject('MessageBus not found on GraphConnector');
-          } else {
+       let _this = this;
 
-            _this.messageBus.postMessage(msg, (reply) => {
+       let msg = {
+           type: 'READ',
+           from: this._hypertyRuntimeURL + '/graph-connector',
+           to: 'global://registry/',
+           body: {guid: guid}
+         };
+       return new Promise(function(resolve, reject) {
 
-                console.log(reply);
+           if (_this.messageBus === undefined) {
+             reject('MessageBus not found on GraphConnector');
+           } else {
 
-                // reply should be the JSON returned from the Global Registry REST-interface
-                let jwt = reply.body.Value;
-                if (typeof jwt !== 'undefined') {
+             _this.messageBus.postMessage(msg, (reply) => {
 
-                  if (reply.body.Code == 200) {
-                    console.log('Response code is 200');
-                    console.log('verify JWT');
-                    let unwrappedJWT = jsrsasign.KJUR.jws.JWS.parse(reply.body.Value);
-                    let dataEncoded = unwrappedJWT.payloadObj.data;
-                    let dataDecoded = base64url.decode(dataEncoded);
-                    let dataJSON = JSON.parse(dataDecoded);
-                    let publicKeyObject = jsrsasign.KEYUTIL.getKey(dataJSON.publicKey);
-                    let encodedString = jwt.split('.').slice(0, 2).join('.');
-                    let sigValueHex = unwrappedJWT.sigHex;
-                    let sig = new jsrsasign.KJUR.crypto.Signature({alg: 'SHA256withECDSA'});
-                    sig.init(publicKeyObject);
-                    sig.updateString(encodedString);
-                    let isValid = sig.verify(sigValueHex);
-                    if (!isValid) {
-                      console.log('invalid JWT');
-                      resolve(false);
-                    } else {
-                      console.log('valid JWT');
-                      let queriedContact = new GraphConnectorContactData(dataJSON.guid, firstName, lastName);
-                      if (typeof dataJSON.userIDs != 'undefined' && dataJSON.userIDs != null) {
-                        queriedContact.userIDs = dataJSON.userIDs;
+                 console.log(reply);
 
-                      }
-                      _this.contacts.push(queriedContact);
-                      _this.storageManager.set('graphConnector:contacts', 0, _this.contacts);
-                      resolve(true);
-                    }
-                  }else {
-                    console.log('Response code is not 200');
-                    resolve(false);
-                  }
-                } else {
-                  console.log(' undefined Response');
-                  resolve(false);
-                }
-              });
-          }
-        });
+                 // reply should be the JSON returned from the Global Registry REST-interface
+                 let jwt = reply.body.Value;
+                 if (typeof jwt !== 'undefined') {
 
-    }else {
-      return new Promise(function(resolve, reject) {
-          resolve(false);
-        });
-    }
+                   if (reply.body.Code == 200) {
+                     console.log('Response code is 200');
+                     console.log('verify JWT');
+                     let unwrappedJWT = jsrsasign.KJUR.jws.JWS.parse(reply.body.Value);
+                     let dataEncoded = unwrappedJWT.payloadObj.data;
+                     let dataDecoded = base64url.decode(dataEncoded);
+                     let dataJSON = JSON.parse(dataDecoded);
+                     let publicKeyObject = jsrsasign.KEYUTIL.getKey(dataJSON.publicKey);
+                     let encodedString = jwt.split('.').slice(0, 2).join('.');
+                     let sigValueHex = unwrappedJWT.sigHex;
+                     let sig = new jsrsasign.KJUR.crypto.Signature({alg: 'SHA256withECDSA'});
+                     sig.init(publicKeyObject);
+                     sig.updateString(encodedString);
+                     let isValid = sig.verify(sigValueHex);
+                     if (!isValid) {
+                       console.log('invalid JWT');
+                       resolve(false);
+                     } else {
+                       console.log('valid JWT');
+                       let queriedContact = new GraphConnectorContactData(dataJSON.guid, firstName, lastName);
+                       if (typeof dataJSON.userIDs != 'undefined' && dataJSON.userIDs != null) {
+                         queriedContact.userIDs = dataJSON.userIDs;
+
+                       }
+                       _this.contacts.push(queriedContact);
+                       _this.storageManager.set('graphConnector:contacts', 0, _this.contacts);
+                       resolve(true);
+                     }
+                   }else {
+                     console.log('Response code is not 200');
+                     resolve(false);
+                   }
+                 } else {
+                   console.log(' undefined Response');
+                   resolve(false);
+                 }
+               });
+           }
+         });
+
+     }else {
+       return new Promise(function(resolve, reject) {
+           resolve(false);
+         });
+     }*/
   }
 
   /**
