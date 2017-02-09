@@ -54,7 +54,7 @@ class GraphConnector {
     this.privateKey;
 
     this.groups = [];
-    this.residenceLocation;
+    this.residenceLocation = '';
     this.firstName = '';
     this.lastName = '';
 
@@ -97,6 +97,9 @@ class GraphConnector {
       }
       status = true;
     }
+    this.storageManager.set('graphConnector:firstName', 0, this.firstName);
+    this.storageManager.set('graphConnector:lastName', 0, this.lastName);
+
     return status;
   }
 
@@ -127,6 +130,10 @@ class GraphConnector {
 
     // return mnemonic
     let rtn = mnemonic + ' ' + saltWord;
+    //save to the storage
+    this.storageManager.set('graphConnector:globalRegistryRecord', 0, this.globalRegistryRecord);
+    this.storageManager.set('graphConnector:privateKey', 0, this.privateKey);
+
     return rtn;
   }
 
@@ -198,6 +205,10 @@ class GraphConnector {
                     _this.globalRegistryRecord.active = dataJSON.active;
                     _this.globalRegistryRecord.revoked = dataJSON.revoked;
                     _this.globalRegistryRecord.defaults = dataJSON.defaults;
+
+                    _this.storageManager.set('graphConnector:globalRegistryRecord', 0, _this.globalRegistryRecord);
+                    _this.storageManager.set('graphConnector:privateKey', 0, _this.privateKey);
+
                     resolve(_this.globalRegistryRecord);
                   }
                 }
@@ -264,8 +275,6 @@ class GraphConnector {
     let record = this.globalRegistryRecord.getRecord();
     let recordString = JSON.stringify(record);
     let recordStringBase64 = base64url.encode(recordString);
-    console.info('signGlobalRegistryRecord Record :', record);
-    console.info('signGlobalRegistryRecord recordString :', recordString);
     let jwtTemp = jsrsasign.KJUR.jws.JWS.sign(null, {alg: 'ES256'}, {data: recordStringBase64}, this._prvKey);
     let encodedString = jwtTemp.split('.').slice(0, 2).join('.');
 
@@ -276,6 +285,8 @@ class GraphConnector {
     let signatureHex = sig.sign();
     let signature = hex64.toBase64(signatureHex);
     let jwt = encodedString + '.' + signature;
+    this.storageManager.set('graphConnector:globalRegistryRecord', 0, this.globalRegistryRecord);
+    this.storageManager.set('graphConnector:privateKey', 0, this.privateKey);
     return jwt;
   }
 
@@ -363,6 +374,8 @@ class GraphConnector {
         }
       }
     }
+    this.storageManager.set('graphConnector:contacts', 0, this.contacts);
+
     return rtnArray;
   }
 
@@ -500,6 +513,9 @@ class GraphConnector {
       this.globalRegistryRecord.lastUpdate = new Date().toISOString();
 
     }
+
+    this.storageManager.set('graphConnector:globalRegistryRecord', 0, this.globalRegistryRecord);
+
     return found;
   }
 
@@ -518,6 +534,9 @@ class GraphConnector {
         found = true;
       }
     }
+
+    this.storageManager.set('graphConnector:globalRegistryRecord', 0, this.globalRegistryRecord);
+
     return found;
   }
 
@@ -534,6 +553,8 @@ class GraphConnector {
     this.globalRegistryRecord.defaults.chat = chat;
     this.globalRegistryRecord.defaults.video = video;
     this.globalRegistryRecord.lastUpdate = new Date().toISOString();
+
+    this.storageManager.set('graphConnector:globalRegistryRecord', 0, this.globalRegistryRecord);
 
     return true;
   }
@@ -598,6 +619,7 @@ class GraphConnector {
 
                       }
                       _this.contacts.push(queriedContact);
+                      _this.storageManager.set('graphConnector:contacts', 0, _this.contacts);
                       resolve(true);
                     }
                   }else {
@@ -637,6 +659,10 @@ class GraphConnector {
         }
       }
     }
+
+    this.storageManager.set('graphConnector:contacts', 0, this.contacts);
+    this.storageManager.set('graphConnector:residenceLocation', 0, this.residenceLocation);
+
     return success;
   }
 
@@ -662,6 +688,10 @@ class GraphConnector {
       }
 
     }
+
+    this.storageManager.set('graphConnector:contacts', 0, this.contacts);
+    this.storageManager.set('graphConnector:residenceLocation', 0, this.residenceLocation);
+
     return success;
   }
 
@@ -742,6 +772,10 @@ class GraphConnector {
         }
       }
     }
+
+    this.storageManager.set('graphConnector:contacts', 0, this.contacts);
+    this.storageManager.set('graphConnector:groups', 0, this.groups);
+
     return success;
   }
 
@@ -774,6 +808,9 @@ class GraphConnector {
         }
       }
     }
+    this.storageManager.set('graphConnector:contacts', 0, this.contacts);
+    this.storageManager.set('graphConnector:groups', 0, this.groups);
+
     return success;
   }
 
@@ -802,6 +839,7 @@ class GraphConnector {
 
     // re-calculate BF1hop
     this.calculateBloomFilter1Hop();
+    this.storageManager.set('graphConnector:contacts', 0, this.contacts);
 
     return status;
   }
@@ -820,6 +858,8 @@ class GraphConnector {
         success = true;
       }
     }
+    this.storageManager.set('graphConnector:contacts', 0, this.contacts);
+
     return success;
   }
 
@@ -838,6 +878,7 @@ class GraphConnector {
     }
     this.contactsBloomFilter1Hop = bf;
     this.lastCalculationBloomFilter1Hop = new Date().toISOString();
+    this.storageManager.set('graphConnector:lastCalculationBloomFilter1Hop', 0, this.lastCalculationBloomFilter1Hop);
   }
 
   /**
@@ -894,6 +935,9 @@ class GraphConnector {
         success = true;
       }
     }
+
+    this.storageManager.set('graphConnector:contacts', 0, this.contacts);
+
     return success;
   }
 
@@ -932,6 +976,7 @@ class GraphConnector {
     if (typeof int === 'number') {
       this.globalRegistryRecord.active = int;
       this.globalRegistryRecord.lastUpdate = new Date().toISOString();
+      this.storageManager.set('graphConnector:globalRegistryRecord', 0, this.globalRegistryRecord);
       return true;
     }
     return false;
@@ -946,6 +991,8 @@ class GraphConnector {
     if (typeof int === 'number') {
       this.globalRegistryRecord.revoked = int;
       this.globalRegistryRecord.lastUpdate = new Date().toISOString();
+      this.storageManager.set('graphConnector:globalRegistryRecord', 0, this.globalRegistryRecord);
+
       return true;
     }
     return false;
@@ -961,6 +1008,8 @@ class GraphConnector {
     if (typeof Timeout == 'object' && Timeout instanceof Date && Timeout > now) {
       this.globalRegistryRecord.timeout = Timeout.toISOString();
       this.globalRegistryRecord.lastUpdate = new Date().toISOString();
+      this.storageManager.set('graphConnector:globalRegistryRecord', 0, this.globalRegistryRecord);
+
       return true;
     }
     return false;
@@ -1080,7 +1129,23 @@ class GraphConnector {
             resolve();
           });
 
+        _this.storageManager.get('graphConnector:lastCalculationBloomFilter1Hop').then((lastCalculationBloomFilter1Hop) => {
+            if (lastCalculationBloomFilter1Hop) {
+              console.info('graphConnector:lastName:', lastCalculationBloomFilter1Hop);
+              _this.lastCalculationBloomFilter1Hop = lastCalculationBloomFilter1Hop;
+            }
+            resolve();
+          });
+
+        _this.storageManager.get('graphConnector:residenceLocation').then((residenceLocation) => {
+            if (residenceLocation) {
+              console.info('graphConnector:lastName:', residenceLocation);
+              _this.residenceLocation = residenceLocation;
+            }
+            resolve();
+          });
       });
+
   }
 
   /**
@@ -1095,6 +1160,9 @@ class GraphConnector {
     _this.storageManager.set('graphConnector:privateKey', 0, _this.privateKey);
     _this.storageManager.set('graphConnector:firstName', 0, _this.firstName);
     _this.storageManager.set('graphConnector:lastName', 0, _this.lastName);
+    _this.storageManager.set('graphConnector:lastCalculationBloomFilter1Hop', 0, _this.lastCalculationBloomFilter1Hop);
+    _this.storageManager.set('graphConnector:residenceLocation', 0, _this.residenceLocation);
+
   }
 }
 
