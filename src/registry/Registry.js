@@ -1301,33 +1301,26 @@ class Registry {
     }
 
     // process status events from message node protostubs
+
+  if (runtimeProtoStubURL.includes('/protostub/')) {
+
     // TODO: uncomment below when protostubs are updated with new status value "live"
-
-  /*  if (runtimeProtoStubURL.includes('/protostub/')) {
-
-      let filtered = Object.keys(_this.protostubsList).filter((key) => {
+    /*  let filtered = Object.keys(_this.protostubsList).filter((key) => {
           return _this.protostubsList[key].url === runtimeProtoStubURL;
         }).map((key) => {
           _this.protostubsList[key].status = msg.body.value;
-        });
-    }*/
+        });*/
+    } else {// process status events from p2p connections
 
-    // process status events from message P2P Handler protostubs
-    if (runtimeProtoStubURL.includes('/p2phandler/')) {
-
-      // process status events from p2p connections at message P2P Handler protostubs
       if (msg.body.resource) {
         let remoteRuntimeURL = msg.body.resource;
 
-        let p2pConnection = _this.p2pConnectionList[remoteRuntimeURL];
-
-        if (p2pConnection) {
+        if (_this.p2pConnectionList[remoteRuntimeURL]) {
           _this.p2pConnectionList[remoteRuntimeURL].status =  msg.body.value;
           _this.p2pConnectionList[remoteRuntimeURL].url =  runtimeProtoStubURL;
         } else {
 
-          // process status events from P2P Handler protostub
-          p2pConnection = {
+        let  p2pConnection = {
             status: msg.body.value,
             url: runtimeProtoStubURL
           };
@@ -1336,24 +1329,26 @@ class Registry {
         }
 
         console.log('[Registry - onProtostubStatusEvent] - P2PConnection status: ', _this.p2pConnectionList[remoteRuntimeURL]);
+        // Update P2P Requester protostub if it is coming from there
+        if (runtimeProtoStubURL.includes('/p2prequester/')) {
+          _this.p2pRequesterStub[remoteRuntimeURL].status = msg.body.value;
+          console.log('[Registry - onProtostubStatusEvent] - P2P Requester status: ', _this.p2pRequesterStub[remoteRuntimeURL]);
+        }
+
       } else {
-        _this.p2pHandlerStub[_this.runtimeURL].status = msg.body.value;
-        console.log('[Registry - onProtostubStatusEvent] - P2PHandler Stub status: ', _this.p2pHandlerStub[_this.runtimeURL]);
+          if (runtimeProtoStubURL.includes('/p2prequester/')) {
+            // It is an event from P2P Requester without mandatory "resource" field
+            console.error('[Registry onProtostubStatusEvent] resource missing: ', msg);
+            return;
+          } else {
+            // It is an event from P2P Handler
+            _this.p2pHandlerStub[_this.runtimeURL].status = msg.body.value;
+            console.log('[Registry - onProtostubStatusEvent] - P2PHandler Stub status: ', _this.p2pHandlerStub[_this.runtimeURL]);
+          }
       }
 
     }
 
-    // process status events from message P2P Requester protostubs
-    if (runtimeProtoStubURL.includes('/p2prequester/')) {
-
-      let filtered = Object.keys(_this.p2pRequesterStub).filter((key) => {
-        return _this.p2pRequesterStub[key].url === runtimeProtoStubURL;
-      }).map((key) => {
-        _this.p2pRequesterStub[key].status = msg.body.value;
-      });
-
-      console.log('[Registry - onProtostubStatusEvent] - P2PRequester Stub status: ', filtered);
-    }
   }
 
   /**
@@ -1670,28 +1665,35 @@ class Registry {
               let p2pConfig = { remoteRuntimeURL: hypertyInfo.runtimeURL, p2pHandler: hypertyInfo.p2pHandler, p2pRequesterStub: true };
 
               // TODO stub load
-              _this.loader.loadStub(hypertyInfo.p2pRequester, p2pConfig).then((protostubInfo) => {
+              _this.loader.loadStub(hypertyInfo.p2pRequester, p2pConfig).then((stubURL) => {
 
-                console.log('[Registry - resolve] p2pRequester deployed: ', protostubInfo);
+                console.log('[Registry - resolve] p2pRequester deployed: ', _this.p2pRequesterStub[remoteRuntimeURL]);
 
-                // Wait until P2P Connection is established
+
                 // todo: move to this to a function to be used by any stub deployment
+                if (_this.p2pRequesterStub[remoteRuntimeURL].status === STATUS.LIVE)
+                  resolve(stubURL);
+                else { // Wait until P2P Connection is established
 
-                Object.deepObserve(protostubInfo, (changes) => {
+                  Object.deepObserve(_this.p2pRequesterStub[remoteRuntimeURL], (changes) => {
 
-                	changes.every((change) => {
-                		console.log('Update the status of protocolstub:', protostubInfo);
+                  	changes.every((change) => {
+                  		console.log('Update the status of protocolstub:', _this.p2pRequesterStub[remoteRuntimeURL]);
 
-                		if (change.type === 'update' && change.name === 'status' && change.newValue === 'live') {
-                      console.log('[Registry - resolve] p2pRequester is live: ', protostubInfo);
-                			resolve(protostubInfo.url);
+                  		if (change.type === 'update' && change.name === 'status' && change.newValue === 'live') {
+                        console.log('[Registry - resolve] p2pRequester is live: ', _this.p2pRequesterStub[remoteRuntimeURL]);
+                  			resolve(stubURL);
+                      }
 
-                    if (change.type === 'update' && change.name === 'status' && change.newValue === 'failed') {
-                      console.log('[Registry - resolve] p2pRequester failed: ', protostubInfo);
-                      reject('[Registry resolve] p2p requester failed');
-                		}
-                	});
-                });
+                      if (change.type === 'update' && change.name === 'status' && change.newValue === 'failed') {
+                        console.log('[Registry - resolve] p2pRequester failed: ', _this.p2pRequesterStub[remoteRuntimeURL]);
+                        reject('[Registry resolve] p2p requester failed');
+                  		}
+                  	});
+                  });
+
+                }
+
               }).catch((error) => {
                 reject(error);
               });
