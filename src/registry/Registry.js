@@ -31,6 +31,7 @@ import {divideURL, isHypertyURL, isURL, isUserURL, generateGUID, getUserIdentity
 
 import Discovery from './Discovery';
 import 'proxy-observe';
+import { WatchingYou } from 'service-framework/dist/Utils';
 
 // import DiscoveryServiceFramework from './DiscoveryServiceFramework';
 
@@ -87,9 +88,10 @@ class Registry {
     _this.remoteHypertyList = [];
     _this.idpLegacyProxyList = {};
 
+    _this.watchingYou = new WatchingYou();
     _this.p2pHandlerStub = {};
-    _this.p2pRequesterStub = {};
-    _this.p2pConnectionList = {};
+    _this.p2pRequesterStub = _this.watchingYou.watch('p2pRequesterStub', {}, true);
+    _this.p2pConnectionList = _this.watchingYou.watch('p2pConnectionList', {}, true);
     _this.p2pHandlerAssociation = {};
 
     _this.protostubsList = {};
@@ -104,6 +106,7 @@ class Registry {
     _this.sandboxesList.appSandbox[runtimeURL] = appSandbox;
     let msgFactory = new MessageFactory('false', '{}');
     _this.messageFactory = msgFactory;
+
   }
 
   set loader(loader) {
@@ -1156,7 +1159,7 @@ class Registry {
       }
     } else {
 
-      if (_this.p2pHandlerStub.hasOwnProperty(_this.runtimeURL) ) {
+      if (_this.p2pHandlerStub.hasOwnProperty(_this.runtimeURL)) {
         return (_this.p2pHandlerStub[_this.runtimeURL]);
       } else {
         _this.p2pHandlerStub[_this.runtimeURL] = {
@@ -1302,7 +1305,7 @@ class Registry {
 
     // process status events from message node protostubs
 
-  if (runtimeProtoStubURL.includes('/protostub/')) {
+    if (runtimeProtoStubURL.includes('/protostub/')) {
 
     // TODO: uncomment below when protostubs are updated with new status value "live"
     /*  let filtered = Object.keys(_this.protostubsList).filter((key) => {
@@ -1310,7 +1313,7 @@ class Registry {
         }).map((key) => {
           _this.protostubsList[key].status = msg.body.value;
         });*/
-    } else {// process status events from p2p connections
+    } else { // process status events from p2p connections
 
       if (msg.body.resource) {
         let remoteRuntimeURL = msg.body.resource;
@@ -1320,7 +1323,7 @@ class Registry {
           _this.p2pConnectionList[remoteRuntimeURL].url =  runtimeProtoStubURL;
         } else {
 
-        let  p2pConnection = {
+          let  p2pConnection = {
             status: msg.body.value,
             url: runtimeProtoStubURL
           };
@@ -1329,6 +1332,7 @@ class Registry {
         }
 
         console.log('[Registry - onProtostubStatusEvent] - P2PConnection status: ', _this.p2pConnectionList[remoteRuntimeURL]);
+
         // Update P2P Requester protostub if it is coming from there
         if (runtimeProtoStubURL.includes('/p2prequester/')) {
           _this.p2pRequesterStub[remoteRuntimeURL].status = msg.body.value;
@@ -1336,15 +1340,15 @@ class Registry {
         }
 
       } else {
-          if (runtimeProtoStubURL.includes('/p2prequester/')) {
+        if (runtimeProtoStubURL.includes('/p2prequester/')) {
             // It is an event from P2P Requester without mandatory "resource" field
-            console.error('[Registry onProtostubStatusEvent] resource missing: ', msg);
-            return;
-          } else {
+          console.error('[Registry onProtostubStatusEvent] resource missing: ', msg);
+          return;
+        } else {
             // It is an event from P2P Handler
-            _this.p2pHandlerStub[_this.runtimeURL].status = msg.body.value;
-            console.log('[Registry - onProtostubStatusEvent] - P2PHandler Stub status: ', _this.p2pHandlerStub[_this.runtimeURL]);
-          }
+          _this.p2pHandlerStub[_this.runtimeURL].status = msg.body.value;
+          console.log('[Registry - onProtostubStatusEvent] - P2PHandler Stub status: ', _this.p2pHandlerStub[_this.runtimeURL]);
+        }
       }
 
     }
@@ -1481,7 +1485,7 @@ class Registry {
   */
   getSandbox(url, constraints) {
     if (!url) throw new Error('Parameter url needed');
-    console.log('[Registry getSandbox] getSandbox for: ', url , ' and capabilities: ', capabilities);
+    console.log('[Registry getSandbox] getSandbox for: ', url, ' and capabilities: ', constraints);
 
     let _this = this;
     return new Promise(function(resolve, reject) {
@@ -1662,37 +1666,24 @@ class Registry {
 
               console.log('[Registry - resolve] loadStub with p2pRequester: ', hypertyInfo);
 
-              let p2pConfig = { remoteRuntimeURL: hypertyInfo.runtimeURL, p2pHandler: hypertyInfo.p2pHandler, p2pRequesterStub: true };
+              let remoteRuntime = hypertyInfo.runtimeURL;
 
-              // TODO stub load
-              _this.loader.loadStub(hypertyInfo.p2pRequester, p2pConfig).then((stubURL) => {
+              let p2pConfig = { remoteRuntimeURL: remoteRuntime, p2pHandler: hypertyInfo.p2pHandler, p2pRequesterStub: true };
 
-                console.log('[Registry - resolve] p2pRequester deployed: ', _this.p2pRequesterStub[remoteRuntimeURL]);
+              //  stub load
+              _this.loader.loadStub(hypertyInfo.p2pRequester, p2pConfig).then(() => {
 
+                console.log('[Registry - resolve] p2pRequester deployed: ', _this.p2pRequesterStub[remoteRuntime]);
 
-                // todo: move to this to a function to be used by any stub deployment
-                if (_this.p2pRequesterStub[remoteRuntimeURL].status === STATUS.LIVE)
-                  resolve(stubURL);
-                else { // Wait until P2P Connection is established
+                _this.watchingYou.observe('p2pRequesterStub', (change) => {
 
-                  Object.deepObserve(_this.p2pRequesterStub[remoteRuntimeURL], (changes) => {
+                  console.log('[Registry - resolve] p2pRequesterStubs changed ' + _this.p2pRequesterStub);
 
-                  	changes.every((change) => {
-                  		console.log('Update the status of protocolstub:', _this.p2pRequesterStub[remoteRuntimeURL]);
-
-                  		if (change.type === 'update' && change.name === 'status' && change.newValue === 'live') {
-                        console.log('[Registry - resolve] p2pRequester is live: ', _this.p2pRequesterStub[remoteRuntimeURL]);
-                  			resolve(stubURL);
-                      }
-
-                      if (change.type === 'update' && change.name === 'status' && change.newValue === 'failed') {
-                        console.log('[Registry - resolve] p2pRequester failed: ', _this.p2pRequesterStub[remoteRuntimeURL]);
-                        reject('[Registry resolve] p2p requester failed');
-                  		}
-                  	});
-                  });
-
-                }
+                  if (change.keypath.split('.')[0] === remoteRuntime && change.name === 'status' && change.newValue === STATUS.LIVE) {
+                    console.log('[Registry - resolve] p2pRequester is live ' + _this.p2pRequesterStub[remoteRuntime]);
+                    resolve(_this.p2pRequesterStub[remoteRuntime].url);
+                  }
+                });
 
               }).catch((error) => {
                 reject(error);
