@@ -1023,6 +1023,8 @@ class Registry {
         if (type === 'domain-idp') {
           // _this.trigger('runtime:loadIdpProxy', domainUrl);
 
+          console.log('TIAGO: domainUrl', domainUrl);
+
           _this._loader.loadIdpProxy(domainUrl).then((result) => {
             registredComponent  = _this.idpProxyList[domainUrl];
             console.info('Resolved IDPProxy: ', registredComponent, result);
