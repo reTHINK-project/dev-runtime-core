@@ -34,6 +34,7 @@ class GlobalRegistryRecord {
     this.guid;
     this.salt;
     this.userIDs = [];
+    this.legacyIDs = [];
     this.lastUpdate;
     this.timeout;
     this.publicKey;
@@ -61,6 +62,7 @@ class GlobalRegistryRecord {
     record.active = this.active;
     record.revoked = this.revoked;
     record.defaults = this.defaults;
+    record.legacyIDs = this.legacyIDs;
 
     return record;
   }

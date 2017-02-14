@@ -36,6 +36,7 @@ class GraphConnectorContactData {
     this._schemaVersion = 1;
     this._guid = guid;
     this._userIDs = [];
+    this._legacyIDs = [];
     this._firstName = firstName;
     this._lastName = lastName;
     this._privateContact = false;
@@ -94,6 +95,22 @@ class GraphConnectorContactData {
   set userIDs(userIDs) {
     this._userIDs = userIDs;
     this._lastSyncDomainUserIDs = new Date().toISOString();
+  }
+
+  /**
+   * Returns the user IDs.
+   * @returns  {List<object>}     legacyIDs        legacyIDs of the contact.
+   */
+  get legacyIDs() {
+    return this._legacyIDs;
+  }
+
+  /**
+   * Sets the legacyIDs.
+   * @param  {List<object>}     legacyIDs        legacyIDs of the contat.
+   */
+  set legacyIDs(legacyIDs) {
+    this._legacyIDs = legacyIDs;
   }
 
   /**

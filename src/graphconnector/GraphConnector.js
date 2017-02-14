@@ -199,6 +199,9 @@ class GraphConnector {
                     if (typeof dataJSON.userIDs != 'undefined' && dataJSON.userIDs != null) {
                       _this.globalRegistryRecord.userIDs = dataJSON.userIDs;
                     }
+                    if (typeof dataJSON.legacyIDs != 'undefined' && dataJSON.legacyIDs != null) {
+                      _this.globalRegistryRecord.legacyIDs = dataJSON.legacyIDs;
+                    }
                     _this.globalRegistryRecord.lastUpdate = dataJSON.lastUpdate;
                     _this.globalRegistryRecord.timeout = dataJSON.timeout;
                     _this.globalRegistryRecord.salt = dataJSON.salt;
@@ -409,6 +412,7 @@ class GraphConnector {
     owner.residenceLocation = this.residenceLocation;
     owner.contactsBloomFilter1Hop = this.contactsBloomFilter1Hop;
     owner.userIDs = this.globalRegistryRecord.userIDs;
+    owner.legacyIDs = this.globalRegistryRecord.legacyIDs;
     owner.defaults = this.globalRegistryRecord.defaults;
 
     return owner;
@@ -474,6 +478,18 @@ class GraphConnector {
                       }
 
                     }
+
+                    if (typeof dataJSON.legacyIDs != 'undefined' && dataJSON.legacyIDs != null) {
+                      queriedContact.legacyIDs = dataJSON.legacyIDs;
+
+                      for (let i = 0; i < _this.contacts.length; i++) {
+                        if (_this.contacts[i]._guid == guid) {
+                          _this.contacts[i]._legacyIDs = dataJSON.legacyIDs;
+                        }
+                      }
+
+                    }
+
                     resolve(queriedContact);
                   }
                 }else {
@@ -530,6 +546,61 @@ class GraphConnector {
     for (let i = 0; i < this.globalRegistryRecord.userIDs.length; i++) {
       if (this.globalRegistryRecord.userIDs[i].uid == uid && this.globalRegistryRecord.userIDs[i].domain == domain) {
         this.globalRegistryRecord.userIDs.splice(i, 1);
+        this.globalRegistryRecord.lastUpdate = new Date().toISOString();
+        found = true;
+      }
+    }
+
+    this.storageManager.set('graphConnector:globalRegistryRecord', 0, this.globalRegistryRecord);
+
+    return found;
+  }
+
+  /**
+   * Adds a Legacy ID for the user.
+   * @param {string} type.
+   * @param {string} category.
+   * @param {string} description.
+   * @param {string} id.
+   * @returns  {boolean}   returns false if the ID exists and the Legacy ID will not be added, true otherwise.
+   */
+  addLegacyID(type, category, description, id) {
+    // check if already inside
+    let found = true;
+    for (let i = 0; i < this.globalRegistryRecord.legacyIDs.length; i++) {
+      if (this.globalRegistryRecord.legacyIDs[i].id == id) {
+        found = false;
+      }
+    }
+    if (found) {
+      let item = new Object();
+      item.type = type;
+      item.category = category;
+      item.description = description;
+      item.id = id;
+      this.globalRegistryRecord.legacyIDs.push(item);
+      this.globalRegistryRecord.lastUpdate = new Date().toISOString();
+    }
+
+    this.storageManager.set('graphConnector:globalRegistryRecord', 0, this.globalRegistryRecord);
+
+    return found;
+  }
+
+  /**
+   * Removes a LegacyID for the user.
+   * @param {string} type
+   * @param {string} category
+   * @param {string} description
+   * @param {string} id
+   * @returns  {boolean}   true if the LegacyID exists and deleted, false otherwise.
+   */
+  removeLegacyID(type, category, description, id) {
+    let found = false;
+    for (let i = 0; i < this.globalRegistryRecord.legacyIDs.length; i++) {
+      if (this.globalRegistryRecord.legacyIDs[i].type == type && this.globalRegistryRecord.legacyIDs[i].category == category
+          && this.globalRegistryRecord.legacyIDs[i].description == description && this.globalRegistryRecord.legacyIDs[i].id == id) {
+        this.globalRegistryRecord.legacyIDs.splice(i, 1);
         this.globalRegistryRecord.lastUpdate = new Date().toISOString();
         found = true;
       }
@@ -734,6 +805,7 @@ class GraphConnector {
           ownerTmp = new GraphConnectorContactData(this.globalRegistryRecord.guid, this.firstName, this.lastName);
           (typeof this.residenceLocation == 'undefined') ? ownerTmp.residenceLocation = '' : ownerTmp.residenceLocation = this.residenceLocation;
           ownerTmp.userIDs = this.globalRegistryRecord.userIDs;
+          ownerTmp.legacyIDs = this.globalRegistryRecord.legacyIDs;
           ownerTmp.defaults = this.globalRegistryRecord.defaults;
           ownerTmp.groups = this.groups;
           ownerTmp.contactsBloomFilter1Hop = this.contactsBloomFilter1Hop;
@@ -1092,6 +1164,7 @@ class GraphConnector {
               _this.globalRegistryRecord.revoked = globalRegistryRecord.revoked;
               _this.globalRegistryRecord.salt = globalRegistryRecord.salt;
               _this.globalRegistryRecord.userIDs = globalRegistryRecord.userIDs;
+              _this.globalRegistryRecord.legacyIDs = globalRegistryRecord.legacyIDs;
               _this.globalRegistryRecord.schemaVersion = globalRegistryRecord.schemaVersion;
             }
             resolve();
