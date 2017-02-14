@@ -6,8 +6,11 @@ import ReThinkCtx from '../ReThinkCtx';
 
 class RuntimeCoreCtx extends ReThinkCtx {
 
-  constructor(idModule, runtimeRegistry, persistenceManager, runtimeCapabilities) {
+  constructor(runtimeURL, idModule, runtimeRegistry, persistenceManager, runtimeCapabilities) {
     super();
+    this._runtimeURL = runtimeURL;
+    this._pepURL = this._runtimeURL + '/pep';
+    this._guiURL = this._runtimeURL + '/policy-gui';
     this.idModule = idModule;
     this.runtimeRegistry = runtimeRegistry;
     this.activeUserPolicy = undefined;
@@ -15,6 +18,39 @@ class RuntimeCoreCtx extends ReThinkCtx {
     this.userPolicies = {};
     this.persistenceManager = persistenceManager;
     this.runtimeCapabilities = runtimeCapabilities;
+  }
+
+  get pepURL() {
+    let _this = this;
+    return _this._pepURL;
+  }
+
+  get guiURL() {
+    let _this = this;
+    return _this._guiURL;
+  }
+
+  get runtimeURL() {
+    let _this = this;
+    return _this._runtimeURL;
+  }
+
+  /**
+  * return the messageBus in this Registry
+  * @param {MessageBus}           messageBus
+  */
+  get messageBus() {
+    let _this = this;
+    return _this._messageBus;
+  }
+
+  /**
+  * Set the messageBus in this Registry
+  * @param {MessageBus}           messageBus
+  */
+  set messageBus(messageBus) {
+    let _this = this;
+    _this._messageBus = messageBus;
   }
 
   get subscription() {

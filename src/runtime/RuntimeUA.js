@@ -128,7 +128,7 @@ class RuntimeUA {
     _this.messageBus = new MessageBus(_this.registry);
 
     // Instantiate the Policy Engine
-    _this.policyEngine = new PEP(new RuntimeCoreCtx(_this.identityModule, _this.registry, _this.persistenceManager, _this.runtimeCapabilities));
+    _this.policyEngine = new PEP(new RuntimeCoreCtx(_this.runtimeURL, _this.identityModule, _this.registry, _this.persistenceManager, _this.runtimeCapabilities));
 
     _this.messageBus.pipeline.handlers = [
 
@@ -151,6 +151,9 @@ class RuntimeUA {
 
     // Register messageBus on Registry
     _this.registry.messageBus = _this.messageBus;
+
+    // Policy Engine
+    _this.policyEngine.messageBus = _this.messageBus;
 
     // Register registry on IdentityModule
     _this.identityModule.registry = _this.registry;
