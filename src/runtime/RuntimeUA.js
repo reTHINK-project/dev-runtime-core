@@ -97,6 +97,9 @@ class RuntimeUA {
       console.info('Check your RuntimeFactory because it need the Runtime Capabilities implementation');
     }
 
+    _this.persistenceManager = runtimeFactory.persistenceManager();
+
+
     // Prepare the loader to load the hyperties, protostubs and idpproxy;
     _this.loader = new Loader(_this.runtimeConfiguration);
 
@@ -111,7 +114,7 @@ class RuntimeUA {
     _this.runtimeCatalogue.runtimeURL = runtimeURL;
 
     // Instantiate the identity Module
-    _this.identityModule = new IdentityModule(runtimeURL, _this.runtimeCapabilities);
+    _this.identityModule = new IdentityModule(runtimeURL);
 
     // Use the sandbox factory to create an AppSandbox;
     // In the future can be decided by policyEngine if we need
@@ -119,7 +122,7 @@ class RuntimeUA {
     let appSandbox = runtimeFactory.createAppSandbox();
 
     // Instantiate the Registry Module
-    _this.registry = new Registry(runtimeURL, appSandbox, _this.identityModule, _this.runtimeCatalogue, _this.runtimeCapabilities);
+    _this.registry = new Registry(runtimeURL, appSandbox, _this.identityModule, _this.runtimeCatalogue);
 
     // Set the loader to load Hyperties, Stubs and IdpProxies
     _this.registry.loader = _this.loader;

@@ -45,7 +45,7 @@ class Registry {
   * @param  {runtimeCatalogue}    runtimeCatalogue      runtimeCatalogue
   * @param  {DomainURL}           remoteRegistry        remoteRegistry
   */
-  constructor(runtimeURL, appSandbox, identityModule, runtimeCatalogue, runtimeCapabilities, remoteRegistry) {
+  constructor(runtimeURL, appSandbox, identityModule, runtimeCatalogue, remoteRegistry) {
 
     // how some functions receive the parameters for example:
     // new Registry('hyperty-runtime://sp1/123', appSandbox, idModule, remoteRegistry);
@@ -64,7 +64,6 @@ class Registry {
     _this.runtimeCatalogue = runtimeCatalogue;
     _this.remoteRegistry = remoteRegistry;
     _this.idModule = identityModule;
-    _this.runtimeCapabilities = runtimeCapabilities;
     _this.identifier = Math.floor((Math.random() * 10000) + 1);
 
     // the expires in 3600, represents 1 hour
