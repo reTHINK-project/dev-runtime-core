@@ -69,11 +69,31 @@ class PEP {
       } else if(funcName === 'userPolicies') {
         returnedValue = _this.context.userPolicies;
       } else if(funcName === 'activeUserPolicy') {
+        let userPolicy = msg.body.params.userPolicy;
+        if (userPolicy) { _this.context.activeUserPolicy = userPolicy; }
         returnedValue = _this.context.activeUserPolicy;
       } else if(funcName === 'userPolicy') {
         let key = msg.body.params.key;
         returnedValue = _this.context.userPolicies[key];
-      }
+      } else if(funcName === 'saveActivePolicy') {
+        returnedValue = _this.context.saveActivePolicy();
+      } else if(funcName === 'getMyEmails') {
+        returnedValue = _this.context.getMyEmails();
+      } else if(funcName === 'getMyHyperties') {
+        returnedValue = _this.context.getMyHyperties();
+      } else if(funcName === 'groups') {
+        returnedValue = _this.context.groups;
+      } else if(funcName === 'getGroupsNames') {
+        returnedValue = _this.context.getGroupsNames();
+      } if (funcName === 'removeFromGroup') {
+        let groupName = msg.body.params.groupName;
+        let userEmail = msg.body.params.userEmail;
+        returnedValue = _this.context.removeFromGroup(groupName, userEmail);
+      } /*else if(funcName === 'getList') {
+        let scope = msg.body.params.scope;
+        let condition = msg.body.params.condition;
+        returnedValue = _this.getList(scope, condition);
+      }*/
 
 
 
