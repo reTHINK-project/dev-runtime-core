@@ -38,7 +38,6 @@ class PEP {
   addGUIListeners() {
     let _this = this;
 
-    // TIAGO
     _this.context.messageBus.addListener(_this.context.pepURL, (msg) => {
       let funcName = msg.body.method;
 
@@ -89,26 +88,8 @@ class PEP {
         let groupName = msg.body.params.groupName;
         let userEmail = msg.body.params.userEmail;
         returnedValue = _this.context.removeFromGroup(groupName, userEmail);
-      } /*else if(funcName === 'getList') {
-        let scope = msg.body.params.scope;
-        let condition = msg.body.params.condition;
-        returnedValue = _this.getList(scope, condition);
-      }*/
+      }
 
-
-
-      /*else if (funcName === 'storeIdentity') {
-        let result = msg.body.params.result;
-        let keyPair = msg.body.params.keyPair;
-        _this.storeIdentity(result, keyPair).then((returnedValue) => {
-          let value = {type: 'execute', value: returnedValue, code: 200};
-          let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
-          _this._messageBus.postMessage(replyMsg);
-        });
-        return;
-      }*/
-
-      // if the function requested is not a promise
       let value = {type: 'execute', value: returnedValue, code: 200};
       let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
       _this.context.messageBus.postMessage(replyMsg);
