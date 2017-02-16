@@ -161,19 +161,23 @@ class PEP {
 
     // Signalling messages between P2P Stubs don't have to be verified. FFS
 
-    if (message.body && message.body.source)
-     from = message.body.source;
+    if (message.body && message.body.source) {
+      from = message.body.source;
+    }
 
-    if (message.body && message.body.subscriber)
+    if (message.body && message.body.subscriber) {
       from = message.body.subscriber;
+    }
 
-    if (from.includes('/p2phandler/') || from.includes('/p2prequester/') || to.includes('/p2phandler/') || to.includes('/p2prequester/'))
+    if (from.indexOf('/p2phandler/') !== -1 || from.indexOf('/p2prequester/') !== -1 || to.indexOf('/p2phandler/') !== -1 || to.indexOf('/p2prequester/')) {
       return false;
+    }
 
     // hack to disable Identity verification for messages coming from legacy domains while solution is not implemented
 
-    if (this.context.isInterworkingProtoStub(from))
+    if (this.context.isInterworkingProtoStub(from)) {
       return false;
+    }
 
     if (message.from === fromSchema || message.to === toSchema || message.type === 'read' || message.type === 'response' || (isHypertyURL(message.from) && message.type === 'delete')) {
       return false;
