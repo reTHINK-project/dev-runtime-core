@@ -86,6 +86,7 @@ class Registry {
     _this.hypertiesListToRemove = {};
     _this.hypertiesList = [];
     _this.remoteHypertyList = [];
+    _this.remoteDataObjectList = [];
     _this.idpLegacyProxyList = {};
 
     _this.watchingYou = new WatchingYou();
@@ -669,7 +670,7 @@ class Registry {
         let runtime = _this.runtimeURL;
         let status = 'live';
 
-        //message to register the new hyperty, within the domain registry
+        //message to register the new data object, within the domain registry
         let messageValue = {
           name: identifier,
           resources: resources,
@@ -850,33 +851,156 @@ class Registry {
     });
   }
 
-  checkHypertyP2PHandler(hypertyURL) {
+  /**
+  * Verifies if remote Entity can be reached with a P2P Connection.
+  * @param  {URL.URL}        info           object URL
+  * @return {HypertyDataObjectInstance}  addressURL     return the Data Object instance registered URL, return undefined otherwise
+  */
+
+  checkP2P(url) {
+
+    if (url.includes('runtime://') && url.includes('/sm')) {
+
+      url = url = url.substring(0, url.indexOf('/sm'));
+      return this.checkP2PRuntime(url);
+    }
+
+    if (url.includes('hyperty://')) {
+      return this.checkP2PHyperty(url);
+    } else {
+
+        // remove data object suffixes
+      if (url.includes('/subscription')) {
+        url = url.substring(0, url.indexOf('/subscription'));
+      }
+
+      if (url.includes('/changes')) {
+        url = url.substring(0, url.indexOf('/changes'));
+      }
+
+      if (url.includes('/children/')) {
+        url = url.substring(0, url.indexOf('/children/'));
+      }
+
+      return this.checkP2PDataObject(url);
+    }
+  }
+
+  /**
+  * Verifies if remote Runtime can be reached with a P2P Connection.
+  * @param  {URL.URL}        runtimeURL           Runtime URL
+  * @return {Object}  p2pConnection    return the P2PConnection instance registered URL, return undefined otherwise
+  */
+
+  checkP2PRuntime(runtimeURL) {
+    let _this = this;
+
+    // look on locally stored p2p connections
+    return new Promise((resolve, reject) => {
+      if (_this.p2pConnectionList[runtimeURL]) {
+        let registeredRuntime = _this.p2pConnectionList[runtimeURL];
+        registeredRuntime.runtime = runtimeURL;
+        resolve(registeredRuntime);
+      } else {
+        reject('[Registry checkP2PRuntime] No P2P Connection for runtime ', runtimeURL);
+      }
+    });
+
+  }
+
+  /**
+  * Verifies if remote Data Object can be reached with a P2P Connection.
+  * @param  {URL.URL}        DataObjectURL           object URL
+  * @return {HypertyDataObjectInstance}  addressURL     return the Data Object instance registered URL, return undefined otherwise
+  */
+
+  checkP2PDataObject(dataObjectURL) {
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+
+      // look on locally stored hyperties
+
+      let dataobject = _this.remoteDataObjectList.filter((i) => {
+        return (_this.remoteDataObjectList[i].url === dataObjectURL);
+      });
+
+      if (dataobject.length !== 0 && dataobject[0].p2pRequester) {
+        resolve(dataobject[0]);
+      } else if (dataobject.length !== 0) {
+        reject('[Registry checkP2PDataObject] Data Object found does not support P2P', dataobject[0]);
+      } else {
+
+      // look on Domain Registry
+
+        let message = {
+          type: 'read',
+          from: _this.registryURL,
+          to: 'domain://registry.' + _this._domain + '/',
+          body: {
+            resource: dataObjectURL
+          }
+        };
+
+        _this._messageBus.postMessage(message, (reply) => {
+          console.log('discover data object per url reply', reply);
+          if ('value' in reply.body) {
+
+            //todo: store retrieved hyperty
+            let resolvedDataObject = reply.body.value;
+
+            _this.remoteDataObjectList.push(resolvedDataObject);
+
+            if (resolvedDataObject.p2pRequester) {
+              resolve(resolvedDataObject);
+            } else {
+              reject('[Registry checkP2PDataObject] Data Object found does not support P2P', reply.body.value);
+            }
+
+          } else {
+            reject('[Registry checkP2PDataObject] not found', reply.body.code);
+          }
+        });
+      }
+    });
+  }
+
+  /**
+  * Verifies if remote Hyperty can be reached with a P2P Connection.
+  * @param  {JSON}        info           object or hyperty charateristics info
+  * @return {addressURL}  addressURL     return the URL if there is any previousy registered URL, return undefined otherwise
+  */
+
+  checkP2PHyperty(hypertyURL) {
     let _this = this;
 
     return new Promise((resolve, reject) => {
       let hyperty;
 
+
+      // look on locally stored hyperties
+
       for (let i in _this.remoteHypertyList) {
         hyperty = _this.remoteHypertyList[i];
 
-        console.log('[Registry - checkHypertyP2PHandler] - for each Hyperty: ', hyperty);
+        console.log('[Registry - checkP2PHyperty] - for each Hyperty: ', hyperty);
 
-        if (hyperty.hypertyURL === hypertyURL) {
+        // todo: change to "hyperty.url" to be aligned with hyperty instance data model spec
+
+        if (hyperty.hypertyID === hypertyURL) {
 
           if (hyperty.hasOwnProperty('p2pHandler')) {
-            resolve({
-              p2pHandler: hyperty.p2pHandler,
-              p2pRequester: hyperty.p2pRequester,
-              runtimeURL: hyperty.runtimeURL
-            });
+            resolve(hyperty);
           } else {
-            reject('[Registry checkHypertyP2PHandler] Hyperty found does not support P2P', hyperty);
+            reject('[Registry checkP2PHyperty] Hyperty found does not support P2P', hyperty);
           }
         }
       }
 
+      // look on Domain Registry
+
       if (!hyperty) {
-        console.log('[Registry - checkHypertyP2PHandler] - Hyperty: ', hyperty);
+        console.log('[Registry - checkP2PHyperty] - search in Domain Registry: ', hyperty);
 
         let message = {
           type: 'read',
@@ -888,24 +1012,22 @@ class Registry {
         };
 
         _this._messageBus.postMessage(message, (reply) => {
-          console.log('discover hyperty per url reply', reply);
+          console.log('[Registry - checkP2PHyperty] Domain Registry reply', reply);
           if ('value' in reply.body) {
 
             //todo: store retrieved hyperty
             let resolvedHyperty = reply.body.value;
 
+            _this.remoteHypertyList.push(resolvedHyperty);
+
             if (resolvedHyperty.hasOwnProperty('p2pHandler')) {
-              resolve({
-                p2pHandler: resolvedHyperty.p2pHandler,
-                p2pRequester: resolvedHyperty.p2pRequester,
-                runtimeURL: resolvedHyperty.runtime
-              });
+              resolve(resolvedHyperty);
             } else {
-              reject('[Registry checkHypertyP2PHandler] Hyperty found does not support P2P', reply.body.value);
+              reject('[Registry checkP2PHyperty] Hyperty found does not support P2P', reply.body.value);
             }
 
           } else {
-            reject('Hyperty with P2PHandler not found', reply.body.code);
+            reject('[Registry checkP2PHyperty] Hyperty with P2PHandler not found', reply.body.code);
           }
         });
       }
@@ -1138,9 +1260,10 @@ class Registry {
   }
 
   /**
-  * To discover protocol stubs available in the runtime for a certain domain. If available, it returns the runtime url for the protocol stub that connects to the requested domain. Required by the runtime BUS to route messages to remote servers or peers (do we need something similar for Hyperties?).
+  * To discover protocol stubs available in the runtime for a certain remote runtime URL. If available, it returns the runtime url for the protocol stub that connects to the requested domain.
+  * Required by the runtime BUS to route messages to remote servers or peers (do we need something similar for Hyperties?).
   * @param  {RuntimeURL}           RuntimeURL            url
-  * @return {RuntimeURL}           RuntimeURL
+  * @return {p2pRequester}           RuntimeURL
   */
   discoverP2PStub(runtimeURL) {
     let _this = this;
@@ -1642,9 +1765,11 @@ class Registry {
         });
 
       } else {
-        _this.checkHypertyP2PHandler(url).then((hypertyInfo) => {
+        _this.checkP2P(url).then((registeredP2P) => {
 
-          let p2pConnection = _this.p2pConnectionList[hypertyInfo.runtimeURL];
+          console.log('[Registry - resolve] found registered P2P: ', registeredP2P);
+
+          let p2pConnection = _this.p2pConnectionList[registeredP2P.runtime];
 
           if (!p2pConnection) {
             p2pConnection = {};
@@ -1654,24 +1779,24 @@ class Registry {
             resolve(p2pConnection.url);
           } else {
 
-            if (p2pConnection.status === STATUS.CREATED) {
+            if (p2pConnection.status === STATUS.CREATED || p2pConnection.status === STATUS.PROGRESS) {
               _this.resolveNormalStub(url).then((returnURL) => {
                 resolve(returnURL);
               });
             } else {
               /*
               p2pConnection.status = STATUS.CREATED;
-              _this.p2pConnectionList[hypertyInfo.runtimeURL] = p2pConnection;
+              _this.p2pConnectionList[registeredP2P.runtimeURL] = p2pConnection;
               */
 
-              console.log('[Registry - resolve] loadStub with p2pRequester: ', hypertyInfo);
+              console.log('[Registry - resolve] loadStub with p2pRequester: ', registeredP2P);
 
-              let remoteRuntime = hypertyInfo.runtimeURL;
+              let remoteRuntime = registeredP2P.runtime;
 
-              let p2pConfig = { remoteRuntimeURL: remoteRuntime, p2pHandler: hypertyInfo.p2pHandler, p2pRequesterStub: true };
+              let p2pConfig = { remoteRuntimeURL: remoteRuntime, p2pHandler: registeredP2P.p2pHandler, p2pRequesterStub: true };
 
               //  stub load
-              _this.loader.loadStub(hypertyInfo.p2pRequester, p2pConfig).then(() => {
+              _this.loader.loadStub(registeredP2P.p2pRequester, p2pConfig).then(() => {
 
                 console.log('[Registry - resolve] p2pRequester deployed: ', _this.p2pRequesterStub[remoteRuntime]);
 
@@ -1691,7 +1816,7 @@ class Registry {
             }
           }
         }, (reason) => {
-          console.error('[Registry - Resolve] - Reason: ', reason);
+          console.info('[Registry - Resolve] - Reason: ', reason);
 
           _this.resolveNormalStub(url).then((returnURL) => {
             resolve(returnURL);
