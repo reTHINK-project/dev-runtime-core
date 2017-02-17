@@ -278,10 +278,11 @@ describe('RuntimeUA', function() {
     it('should be deployed', function(done) {
       let spDomain = 'sp.domain';
       let loadStubPromise = runtime.loadStub(spDomain);
-      let stubResolved = ['url', 'status'];
+
+      //let stubResolved = ['url', 'status'];
 
       expect(loadStubPromise).to.be.fulfilled
-      .and.eventually.to.have.all.keys(stubResolved)
+      .and.eventually.to.contain('runtime://sp.domain/protostub')
       .and.notify(done);
     });
 

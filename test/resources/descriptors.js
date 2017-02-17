@@ -96,7 +96,7 @@ export const descriptors = {
       policies: '',
       dataObjects: []
     },
-    'slack.com': {
+    'slack.slack.com': {
       sourcePackage: {
         sourceCode: '',
         sourceCodeClassname: 'SlackProtoStub',
@@ -167,6 +167,28 @@ export const descriptors = {
       protocolCapabilities: '',
       policies: '',
       dataObjects: []
+    },
+    'slack.com': {
+      sourcePackage: {
+        sourceCode: '',
+        sourceCodeClassname: 'SlackProxyStub',
+        encoding: 'base64',
+        signature: ''
+      },
+      sourcePackageURL: '/sourcePackage',
+      cguid: '5-59580981-c95f-7ed8-8775-ab2669f3239a3',
+      version: 0.7999999999999999,
+      description: 'Description of SlackProxyStub',
+      language: 'Javascript',
+      type: 'IDPProxys',
+      constraints: {},
+      interworking: true,
+      objectName: 'SlackProxyStub',
+      configuration: {},
+      messageSchemas: '',
+      signature: '',
+      dataObjects: [],
+      accessControlPolicy: 'somePolicy'
     }
   },
 

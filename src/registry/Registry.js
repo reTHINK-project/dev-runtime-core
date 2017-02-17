@@ -1634,7 +1634,8 @@ class Registry {
 
           // search in the sandboxes list for a entry containing the domain given
           for (let sandbox in _this.sandboxesList.sandbox) {
-            if (sandbox.includes(domain) && _this.sandboxesList.sandbox[sandbox].matches(constraints)) {
+            //todo: uncomment sandbox constraints match condition with runtime sharing
+            if (sandbox.includes(domain) /*&& _this.sandboxesList.sandbox[sandbox].matches(constraints)*/) {
               request = _this.sandboxesList.sandbox[sandbox];
               break;
             }

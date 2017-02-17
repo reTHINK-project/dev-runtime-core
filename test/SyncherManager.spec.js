@@ -70,6 +70,11 @@ describe('SyncherManager', function() {
       return new Promise((resolve) => {
         resolve('ok');
       });
+    },
+
+    isInterworkingProtoStub: (url) => {
+      console.log('isInterworkingProtoStub: ', url);
+      return false;
     }
   };
 
@@ -86,6 +91,14 @@ describe('SyncherManager', function() {
     },
     registerSubscribedDataObject: () => {},
     registerSubscriber: () => {},
+    isInterworkingProtoStub: (url) => {
+      console.log('isInterworkingProtoStub: ', url);
+      return false;
+    },
+    isLocal: (url) => {
+      console.log('isLocal: ', url);
+      return false;
+    },
     runtimeURL: 'runtime://localhost/7601'
   };
 

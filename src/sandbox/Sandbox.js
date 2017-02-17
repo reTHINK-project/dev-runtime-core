@@ -39,8 +39,7 @@ class Sandbox extends MiniBus {
 
     let _this = this;
 
-    if (capabilities)
-      _this.capabilities = capabilities;
+    if (capabilities)      { _this.capabilities = capabilities; }
 
     // Add Message Factory
     // let messageFactory = new MessageFactory();
@@ -116,13 +115,12 @@ class Sandbox extends MiniBus {
     let _this = this;
 
     let filtered = Object.keys(constraints).filter((key) => {
-          return !(_this.capabilities[key] && _this.capabilities[key] === constraints[key]);
-        });
+      return !(_this.capabilities[key] && _this.capabilities[key] === constraints[key]);
+    });
 
-    if (filtered.length === 0)
-      return true;
-    else
-      return !(constraints[filtered]);  }
+    if (filtered.length === 0)      { return true; }    else      { return !(constraints[filtered]); }
+  }
+
 }
 
 export default Sandbox;

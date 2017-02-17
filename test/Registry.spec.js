@@ -26,8 +26,12 @@ let runtimeURL = 'hyperty-runtime://ua.pt/123';
 
 let storageManager = runtimeFactory.storageManager();
 let appSandbox = runtimeFactory.createAppSandbox();
-let sandboxDummy = {sandbox: 'sandbox', type: 'normal'};
-let protostubURL = 'url';
+let sandboxDummyCapabilities = {browser: true};
+
+// let sandboxDummy = {sandbox: 'sandbox', type: 'normal', capabilities: sandboxDummyCapabilities};
+let protostubURL;
+let sandboxDummy = new Sandbox(sandboxDummyCapabilities);
+sandboxDummy.type = 'normal';
 
 //registry = new Registry(msgbus, runtimeURL, appSandbox);
 describe('Registry', function() {
@@ -51,7 +55,17 @@ describe('Registry', function() {
           resolve(dataschema);
         });
       }
+
+      /*getIdpProxyDescriptor: () => {
+        return new Promise(function(resolve) {
+          let idpproxy = {sourcePackage: {sourceCode: {properties: {scheme: {constant: 'value'}}}}, interworking: true};
+          resolve(idpproxy);
+        });
+      }*/
     };
+
+
+//    sandboxDummy.sandbox = sandbox;
 
     let msgbus = new MessageBus(registry);
 
@@ -75,8 +89,19 @@ describe('Registry', function() {
     registry._loader = loader;
     registry.messageBus = msgbus;
 
+    // to emulate registrations
+
     registry.messageBus.addListener('domain://registry.ua.pt/', (msg) => {
-      console.log('MSG BUS LISTENER: ', msg);
+      console.log('MSG BUS LISTENER for Domain Registry: ', msg);
+      let responseMessage = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: {code: 200}};
+
+      msgbus.postMessage(responseMessage);
+    });
+
+    // to emulate MN subscriptions
+
+    registry.messageBus.addListener('domain://msg-node.ua.pt/sm', (msg) => {
+      console.log('MSG BUS LISTENER for MN Subscription Manager: ', msg);
       let responseMessage = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: {code: 200}};
 
       msgbus.postMessage(responseMessage);
@@ -97,14 +122,14 @@ describe('Registry', function() {
 
         let result;
 
-        if (url.includes('Hyperties') || url.includes('Hyperty')) {
+        if (url.includes('hyperty')) {
           try {
             result = descriptors.Hyperties[identity];
           } catch (e) {
             reject(e);
           }
 
-        } else if (!(url.includes('Hyperties') || url.includes('Hyperty')) || url.includes('ProtoStubs') || url.includes('protostub')) {
+        } else if (url.includes('protocolstub') || url === dividedURL.domain) {
           try {
             result = descriptors.ProtoStubs[identity];
           } catch (e) {
@@ -116,11 +141,14 @@ describe('Registry', function() {
           } catch (e) {
             reject(e);
           }
+        } else if (url.includes('dataschema')) {
+          try {
+            result = descriptors.DataSchemas[identity];
+          } catch (e) {
+            reject(e);
+          }
         }
-
-        console.log(result);
         resolve(result);
-
       });
     };
 
@@ -135,7 +163,7 @@ describe('Registry', function() {
     });
 
     sinon.stub(descriptorInstance, 'getIdpProxyDescriptor', (idpProxyURL) => {
-      return getDescriptor(idpProxyURL);
+      return getDescriptor('https://catalogue.ua.pt/.well-known/idp-proxy/' + idpProxyURL);
     });
 
   });
@@ -161,6 +189,7 @@ describe('Registry', function() {
     it('should register a stub', function(done) {
       expect(registry.registerStub(sandboxDummy, domainURL).then((deployed) => {
         console.log('Depoyed->', deployed);
+        protostubURL = deployed.url;
         return deployed.url;
       })).to.be.fulfilled.and.eventually.to.contain('runtime://ua.pt/protostub/').and.notify(done);
 
@@ -172,7 +201,7 @@ describe('Registry', function() {
         runtimeURL: runtimeURL
       };
 
-      expect(registry.registerStub(sandboxDummy, domainURL, p2pConfig).then((deployed) => {
+      expect(registry.registerStub(sandboxDummy, registry.runtimeURL, p2pConfig).then((deployed) => {
         return deployed.url;
       })).to.be.fulfilled.and.eventually.to.contain('runtime://ua.pt/p2phandler/').and.notify(done);
     });
@@ -180,10 +209,12 @@ describe('Registry', function() {
     it('should register a P2P Requester Stub', (done) => {
 
       let p2pConfig = {
-        remoteRuntimeURL: "runtime://ua.pt/1234566",
+        remoteRuntimeURL: 'runtime://ua.pt/1234566',
         p2pHandler: 'runtime://ua.pt/p2phandler/1234',
         p2pRequesterStub: true
       };
+
+      registry.p2pHandlerAssociation[registry.runtimeURL] = [];
 
       expect(registry.registerStub(sandboxDummy, domainURL, p2pConfig).then((deployed) => {
         return deployed.url;
@@ -191,10 +222,9 @@ describe('Registry', function() {
     });
 
     it('should discover P2PHandlerStub', (done) => {
-      expect(registry.discoverP2PStub().then((discovered) => {
-        return discovered.url;
-      })).to.be.fulfilled
-      .and.eventually.to.contain('runtime://ua.pt/p2phandler/').and.notify(done);
+
+      expect(registry.discoverP2PStub()).to.have.property('url').contain('runtime://ua.pt/p2phandler/');
+      done();
     });
 
   });
@@ -202,16 +232,20 @@ describe('Registry', function() {
   describe('discoverProtostub(url)', function() {
 
     it('should discover a ProtocolStub', function(done) {
-      let url = 'ua.pt';
-      expect(registry.discoverProtostub(url).then((result) => {
-        expect(result).to.have.property('url').include('runtime://ua.pt/protostub/');
-        expect(result).to.have.property('status', 'deployed');
-        protostubURL = result.url;
-        return result;
-      }))
-      .and.eventually.to.have.all.keys('url', 'status')
-      .and.to.be.fulfilled
-      .and.notify(done);
+
+  /*    let Stub = {
+        status: 'live',
+        url: 'runtime://ua.pt/protostub/1234'
+      };*/
+
+      let domain = 'ua.pt';
+
+      registry.protostubsList[domain].status = 'live';
+
+    //  registry.protostubsList[domain] = Stub;
+
+      expect(registry.discoverProtostub(domain)).to.have.property('url').contain('runtime://ua.pt/protostub/');
+      done();
     });
   });
 
@@ -277,33 +311,48 @@ describe('Registry', function() {
 
     it('should get a sandbox from a specific protostubURL', function(done) {
 
-      expect(registry.getSandbox(protostubURL))
+    //  let protostubURL = 'runtime://ua.pt/protostub/123';
+
+      expect(registry.getSandbox(protostubURL, sandboxDummyCapabilities))
       .to.be.fulfilled
       .and.eventually.to.be.eql(sandboxDummy)
       .and.notify(done);
     });
 
-    it('should get a sandbox from a protoStub URL containing the domain', function(done) {
+
+    let sandbox1 = new Sandbox(sandboxDummyCapabilities);
+
+    let anotherSandbox = { sandbox: sandbox1, type: 'normal', capabilities: sandboxDummyCapabilities};
+
+    it('should register a anotherdomain protoStub URL', function(done) {
       let domainURL = 'anotherDomain.pt';
 
-      registry.registerStub(sandboxDummy, domainURL).then(function() {
-        expect(registry.getSandbox('anotherDomain.pt').then(function(response) {
-          return response;
-        })).to.be.fulfilled.and.eventually.equal(sandboxDummy).and.notify(done);
-      });
-
+      expect(registry.registerStub(anotherSandbox, domainURL).then(function(response) {
+        return response.url;
+      })).to.be.fulfilled.and.eventually.contain(domainURL).and.notify(done);
     });
+
+
+    it('should get a sandbox from another domain', function(done) {
+      let domainURL = 'anotherDomain.pt';
+
+      expect(registry.getSandbox(domainURL, sandboxDummyCapabilities).then(function(response) {
+        return response;
+      })).to.be.fulfilled.and.eventually.to.be.equal(anotherSandbox).and.notify(done);
+    });
+
+  //  });
 
   });
 
   describe('resolve(url)', function() {
 
     it('should return a protostub url', function(done) {
-      let url = 'hyperty-runtime://ua.pt/protostub/123';
+      let url = 'hyperty://ua.pt/123-dhsdhsg';
 
       expect(registry.resolve(url).then(function(response) {
         return response;
-      })).to.be.fulfilled.and.eventually.to.contain('msg-node.ua.pt/protostub/').and.notify(done);
+      })).to.be.fulfilled.and.eventually.to.contain('runtime://ua.pt/protostub/').and.notify(done);
 
     });
   });
@@ -479,7 +528,7 @@ describe('Registry', function() {
   describe('isLegacy(url)', function() {
 
     it('should return a protostub', function(done) {
-      let url = 'slack://user@team.slack.com';
+      let url = 'slack://user@slack.com';
 
       expect(registry.isLegacy(url).then(function(response) {
         console.log('ProtoSTUB->', response);

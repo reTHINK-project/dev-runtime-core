@@ -169,7 +169,7 @@ class PEP {
       from = message.body.subscriber;
     }
 
-    if (from.indexOf('/p2phandler/') !== -1 || from.indexOf('/p2prequester/') !== -1 || to.indexOf('/p2phandler/') !== -1 || to.indexOf('/p2prequester/')) {
+    if (from.indexOf('/p2phandler/') !== -1 || from.indexOf('/p2prequester/') !== -1 || to.indexOf('/p2phandler/') !== -1 || to.indexOf('/p2prequester/') !== -1) {
       return false;
     }
 
