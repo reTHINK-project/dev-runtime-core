@@ -285,7 +285,7 @@ class SyncherManager {
 
       _this._reporters[resource] = reporter;
 
-      reporter.resumeSubscriptions(storedObject.subscriptions);
+      // reporter.resumeSubscriptions(storedObject.subscriptions);
 
       //FLOW-OUT: message response to Syncher -> create
       _this._bus.postMessage({
@@ -418,8 +418,9 @@ class SyncherManager {
           };
 
           //TODO: For Further Study
-          if(msg.body.hasOwnProperty('mutualAuthentication')) objSubscribeMsg.body.mutualAuthentication = msg.body.mutualAuthentication;
+          if (msg.body.hasOwnProperty('mutualAuthentication')) objSubscribeMsg.body.mutualAuthentication = msg.body.mutualAuthentication;
           console.log('[SyncherManager._newSubscription]', objSubscribeMsg, msg);
+
           //subscribe to reporter SM
           _this._bus.postMessage(objSubscribeMsg, (reply) => {
             console.log('reporter-subscribe-response-new: ', reply);
@@ -452,7 +453,7 @@ class SyncherManager {
               reply.body.resource = msg.body.resource;
 
               //TODO: For Further Study
-              if(msg.body.hasOwnProperty('mutualAuthentication')) reply.body.mutualAuthentication = msg.body.mutualAuthentication;
+              if (msg.body.hasOwnProperty('mutualAuthentication')) reply.body.mutualAuthentication = msg.body.mutualAuthentication;
               console.log('[subscribe] - new subscription: ', msg, reply, observer);
 
               this._bus.postMessage(reply);

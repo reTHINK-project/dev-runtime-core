@@ -14,3 +14,5 @@ build
 node_modules
 resources/bundle.js
 *.komodoproject
+
+.vscode/

@@ -48,19 +48,6 @@ class ReporterObject {
     });
   }
 
-  resumeSubscriptions(subscriptions) {
-    let _this = this;
-
-    Object.keys(subscriptions).forEach((key) => {
-      let hypertyURL = subscriptions[key];
-
-      if (!_this._subscriptions[hypertyURL]) {
-        _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, _this._childrens, true);
-      }
-    });
-
-  }
-
   _releaseListeners() {
     let _this = this;
 
@@ -144,7 +131,9 @@ class ReporterObject {
       }
 
       let childBaseURL = _this._url + '/children/';
-      _this._childrens.push(childrens);
+      childrens.forEach((child) => {
+        _this._childrens.push(child);
+      });
 
       /*
       _this._childrens.forEach((child) => {
@@ -248,12 +237,13 @@ class ReporterObject {
       };
 
       //TODO: For Further Study
-      if(msg.body.hasOwnProperty('mutualAuthentication')) forwardMsg.body.mutualAuthentication = msg.body.mutualAuthentication;
+      if (msg.body.hasOwnProperty('mutualAuthentication')) forwardMsg.body.mutualAuthentication = msg.body.mutualAuthentication;
 
       _this._bus.postMessage(forwardMsg, (reply) => {
         console.log('forward-reply: ', reply);
         if (reply.body.code === 200) {
           if (!_this._subscriptions[hypertyURL]) {
+            console.log('[Reporter Object] - _onRemoteSubscribe:', _this._childrens);
             _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, _this._childrens, true);
           }
         }
