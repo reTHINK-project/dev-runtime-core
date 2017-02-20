@@ -1,5 +1,5 @@
 
-import {divideURL, getUserURLFromEmail, getUserEmailFromURL, isDataObjectURL, convertToUserURL} from '../utils/utils.js';
+import {divideURL, getUserURLFromEmail, getUserEmailFromURL, isDataObjectURL, convertToUserURL, getUserIdentityDomain, isLegacy} from '../utils/utils.js';
 import Identity from './Identity';
 import Crypto from './Crypto';
 import GuiFake from './GuiFake';
@@ -166,14 +166,81 @@ class IdentityModule {
     _this.guiDeployed = true;
   }
 
-  getIdentityOfHyperty(hypertyURL) {
-    let _this = this;
 
+  /**
+  * get a Token to be added to a message
+  * @param  {String}  fromURL     origin of the message
+  * @param  {String}  toURL     target of the message
+  * @return {JSON}    token    token to be added to the message
+  */
+
+  getToken(fromURL, toUrl) {
+    let _this = this;
+    return new Promise(function(resolve, reject) {
+      console.log('[Identity.IdentityModule.getToken] from->', fromURL, '  to->', toUrl);
+      if (toUrl && toUrl.split('@').length > 1) {
+//        console.log('toUrl', toUrl);
+        _this.registry.isLegacy(toUrl).then(function(result) {
+          console.log('[Identity.IdentityModule.getToken] isLEGACY: ', result);
+          if (result) {
+
+            let token = _this.getAccessToken(toUrl);
+            if (token)
+              return resolve(token);
+
+            console.log('[Identity.IdentityModule.getToken] NO Identity.. Login now');
+            let domain = getUserIdentityDomain(toUrl);
+            console.log('[Identity.IdentityModule.getToken] domain->', domain);
+            _this.callGenerateMethods(domain).then((value) => {
+              console.log('[Identity.IdentityModule.getToken] CallGeneratemethods', value);
+              let token = _this.getAccessToken(toUrl);
+              if (token)
+                return resolve(token);
+              else {
+                return reject('No Access token found');
+              }
+            }, (err) => {
+              console.error('[Identity.IdentityModule.getToken] error CallGeneratemethods');
+              return reject(err);
+            });
+          } else {
+
+            _this.getIdToken(fromURL).then(function(identity) {
+              console.log('[Identity.IdentityModule.getToken] getIdToken', identity);
+              return resolve(identity);
+            }).catch(function(error) {
+              console.error('[Identity.IdentityModule.getToken] error on getToken', error);
+              return reject(error);
+            });
+          }
+        });
+      } else {
+        _this.getIdToken(fromURL).then(function(identity) {
+          console.log('[Identity.IdentityModule.getToken] from getIdToken', identity);
+          return resolve(identity);
+        }).catch(function(error) {
+          return reject(error);
+        });
+      }
+    });
+  }
+
+  /**
+  * get an Id Token for a HypertyURL
+  * @param  {String}  hypertyURL     the Hyperty address
+  * @return {JSON}    token    Id token to be added to the message
+  */
+
+
+  getIdToken(hypertyURL) {
+    let _this = this;
     return new Promise(function(resolve, reject) {
       let splitURL = hypertyURL.split('://');
       if (splitURL[0] !== 'hyperty') {
+
         _this._getHypertyFromDataObject(hypertyURL).then((returnedHypertyURL) => {
           let userURL = _this.registry.getHypertyOwner(returnedHypertyURL);
+
           if (userURL) {
 
             for (let index in _this.identities) {
@@ -185,6 +252,9 @@ class IdentityModule {
           } else {
             return reject('no identity was found ');
           }
+        }).catch((reason) => {
+          console.error('no identity was found: ', reason);
+          reject(reason);
         });
       } else {
         let userURL = _this.registry.getHypertyOwner(hypertyURL);
@@ -193,7 +263,7 @@ class IdentityModule {
           for (let index in _this.identities) {
             let identity = _this.identities[index];
             if (identity.identity === userURL) {
-              // TODO check this getIdentityOfHyperty when we run on nodejs environment;
+              // TODO check this getIdToken when we run on nodejs environment;
               if (identity.hasOwnProperty('messageInfo')) return resolve(identity.messageInfo);
               else return resolve(identity);
             }
@@ -205,10 +275,40 @@ class IdentityModule {
     });
   }
 
+  /**
+  * get an Access Token for a legacyURL
+  * @param  {String}  legacyURL     the legacy address
+  * @return {JSON}    token    Access token to be added to the message
+  */
+
+  getAccessToken(url) {
+    let _this = this;
+
+  /*  let urlSplit = url.split('.');
+    let length = urlSplit.length;*/
+
+    let domainToCheck = divideURL(url).domain;
+    let identityToReturn;
+    for (let index in _this.identities) {
+      let identity = _this.identities[index];
+      if (identity.hasOwnProperty('interworking') && identity.interworking.domain === domainToCheck) {
+        if (identity.hasOwnProperty('messageInfo') && identity.messageInfo.hasOwnProperty('userProfile') && identity.messageInfo.userProfile) {
+          identityToReturn = { userProfile: identity.messageInfo.userProfile, access_token: identity.interworking.access_token };
+          if (identity.hasOwnProperty('infoToken') && identity.infoToken.hasOwnProperty('id')) {
+            identityToReturn.userProfile.id = identity.infoToken.id;
+          }
+        }
+        return identityToReturn;
+      }
+    }
+
+    return null;
+  }
+
   getIdentitiesToChoose() {
     let _this = this;
     let identities = _this.emailsList;
-    let idps = ['google.com', 'microsoft.com', 'orange.fr'];
+    let idps = [{domain: 'google.com', type: 'idToken'},{domain: 'microsoft.com', type: 'idToken'}, {domain: 'orange.fr', type: 'idToken'}, {domain: 'slack.com', type: 'Legacy'}];
 
     return {identities: identities, idps: idps};
   }
@@ -322,6 +422,8 @@ class IdentityModule {
       _this._messageBus.addResponseListener(_this._idmURL, id, msg => {
         _this._messageBus.removeResponseListener(_this._idmURL, id);
 
+        // todo: to return the user URL and not the email or identifier
+
         if (msg.body.code === 200) {
           let selectedIdentity = msg.body;
 
@@ -397,7 +499,10 @@ class IdentityModule {
 
           if (value.type === 'identity') {
 
-            let chosenID = getUserURLFromEmail(value.value);
+          //  let chosenID = getUserURLFromEmail(value.value);
+          // hack while the user url is not returned from requestIdentityToGUI;
+
+          let chosenID = 'user://' + _this.currentIdentity.idp + '/' + value.value;
 
             // returns the identity info from the chosen id
             for (let i in _this.identities) {
@@ -540,9 +645,13 @@ class IdentityModule {
         idToken = assertionParsed;
       }
 
+      idToken.idp = result.idp;
+
       let email = idToken.email || idToken.sub;
 
-      let identifier = getUserURLFromEmail(email);
+      // let identifier = getUserURLFromEmail(email);
+
+      let identifier = 'user://' + idToken.idp.domain + '/' + email;
 
       result.identity = identifier;
 
@@ -692,6 +801,7 @@ class IdentityModule {
       }
 
       let isToDataObject = isDataObjectURL(dataObjectURL);
+      let isToLegacyIdentity = isLegacy(message.to);
       let isFromHyperty = divideURL(message.from).type === 'hyperty';
       let isToHyperty = divideURL(message.to).type === 'hyperty';
 
@@ -699,7 +809,9 @@ class IdentityModule {
         resolve(message);
       }
 
-      if (isFromHyperty && isToHyperty) {
+      if (isToLegacyIdentity) {
+        resolve(message);
+      } else if (isFromHyperty && isToHyperty) {
         let userURL = _this._registry.getHypertyOwner(message.from);
         if (userURL) {
 
@@ -745,11 +857,13 @@ class IdentityModule {
 
       //if from hyperty to a dataObjectURL
       } else if (isFromHyperty && isToDataObject) {
-        console.log('dataObject value to encrypt: ', message.body.value);
 
+        console.log('dataObject value to encrypt: ', message.body.value);
+        console.log('IdentityModule - encrypt from hyperty to dataobject ', message);
+        
         // TIAGO - persistence issue #147
         _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
-          let dataObjectKey = sessionKeys[dataObjectURL];
+          let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
 
           //if no key exists, create a new one if is the reporter of dataObject
           if (!dataObjectKey) {
@@ -1323,7 +1437,7 @@ class IdentityModule {
           let dataObjectURL;
           let receiverAcknowledgeMsg;
 
-          console.log('[reporterSessionKey] - decryptAES: ', chatKeys.keys.hypertyToSessionKey, encryptedValue, iv);
+          console.log('[IdentityModule reporterSessionKey] - decryptAES: ', chatKeys.keys.hypertyToSessionKey, encryptedValue, iv);
 
           _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, encryptedValue, iv).then(decryptedValue => {
 

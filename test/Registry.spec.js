@@ -1,368 +1,541 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
+import sinonChai from 'sinon-chai';
 
 chai.config.truncateThreshold = 0;
 
 let expect = chai.expect;
+
 chai.use(chaiAsPromised);
+chai.use(sinonChai);
 
 // Main dependecies
 import Registry from '../src/registry/Registry';
 import Sandbox from '../src/sandbox/Sandbox';
 import MessageBus from '../src/bus/MessageBus';
-
+import Loader from '../src/runtime/Loader';
+import Descriptors from '../src/runtime/Descriptors';
+import { descriptors } from './resources/descriptors';
+import {divideURL} from '../src/utils/utils';
 import { runtimeFactory } from './resources/runtimeFactory';
+
+import AddressAllocation from '../src/allocation/AddressAllocation';
 
 // Testing Registry
 let runtimeURL = 'hyperty-runtime://ua.pt/123';
 
 let storageManager = runtimeFactory.storageManager();
 let appSandbox = runtimeFactory.createAppSandbox();
-let sandboxDummy = {sandbox: 'sandbox', type: 'normal'};
-let hypertyURL;
-let protostubURL = 'url';
-let identityModule = {
-  getIdentityAssertion: () => {
-    let identityBundle = {userProfile: {email: 'openidtest10@gmail.com', token: 'idToken', userURL: 'user://gmail.com/openidtest10'}};
-    return new Promise(function(resolve, reject) {
-      resolve(identityBundle);
-    });
-  }
-};
+let sandboxDummyCapabilities = {browser: true};
 
-let runtimeCatalogue = {
-  getDataSchemaDescriptor: () => {
-    return new Promise(function(resolve, reject) {
-      let dataschema = {sourcePackage: {sourceCode: {properties: {scheme: {constant: 'value'}}}}};
-      resolve(dataschema);
-    });
-  }
-};
-
-let getRegistry = new Promise(function(resolve) {
-  let registry = new Registry(runtimeURL, appSandbox, identityModule, runtimeCatalogue, 'runtimeCapabilities', storageManager);
-  resolve(registry);
-});
+// let sandboxDummy = {sandbox: 'sandbox', type: 'normal', capabilities: sandboxDummyCapabilities};
+let protostubURL;
+let sandboxDummy = new Sandbox(sandboxDummyCapabilities);
+sandboxDummy.type = 'normal';
 
 //registry = new Registry(msgbus, runtimeURL, appSandbox);
-getRegistry.then(function(registry) {
-  describe('Registry', function() {
+describe('Registry', function() {
+
+  let registry;
+
+  before(() => {
+    let identityModule = {
+      getIdentityAssertion: () => {
+        let identityBundle = {userProfile: {email: 'openidtest10@gmail.com', token: 'idToken', userURL: 'user://gmail.com/openidtest10'}};
+        return new Promise(function(resolve) {
+          resolve(identityBundle);
+        });
+      }
+    };
+
+    let runtimeCatalogue = {
+      getDataSchemaDescriptor: () => {
+        return new Promise(function(resolve) {
+          let dataschema = {sourcePackage: {sourceCode: {properties: {scheme: {constant: 'value'}}}}};
+          resolve(dataschema);
+        });
+      }
+
+      /*getIdpProxyDescriptor: () => {
+        return new Promise(function(resolve) {
+          let idpproxy = {sourcePackage: {sourceCode: {properties: {scheme: {constant: 'value'}}}}, interworking: true};
+          resolve(idpproxy);
+        });
+      }*/
+    };
+
+
+//    sandboxDummy.sandbox = sandbox;
+
     let msgbus = new MessageBus(registry);
+
+    new AddressAllocation(runtimeURL, msgbus);
+
+    registry = new Registry(runtimeURL, appSandbox, identityModule, runtimeCatalogue, 'runtimeCapabilities', storageManager);
+
+    // Prepare the on instance to handle with the fallbacks and runtimeCatalogue;
+    let descriptorInstance = new Descriptors(runtimeURL, runtimeCatalogue, {});
+
+    // Prepare the loader to load the hyperties, protostubs and idpproxy;
+    let loader = new Loader(runtimeURL, {}, descriptorInstance);
+    loader.runtimeURL = runtimeURL;
+    loader.runtimeCatalogue = runtimeCatalogue;
+    loader.registry = registry;
+    loader.runtimeFactory = runtimeFactory;
+
+    loader.messageBus = msgbus;
+
+    registry._runtimeURL = runtimeURL;
+    registry._loader = loader;
     registry.messageBus = msgbus;
 
+    // to emulate registrations
+
     registry.messageBus.addListener('domain://registry.ua.pt/', (msg) => {
-      let responseMessage = {id: msg.id, type: 'response', to: msg.from, from: msg.to,
-                              body: {code: 200}};
+      console.log('MSG BUS LISTENER for Domain Registry: ', msg);
+      let responseMessage = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: {code: 200}};
 
       msgbus.postMessage(responseMessage);
     });
 
-    describe('constructor()', function() {
+    // to emulate MN subscriptions
 
-      it('depends of the MessageBus', function() {
-        expect(registry.messageBus).to.be.instanceof(MessageBus);
-      });
+    registry.messageBus.addListener('domain://msg-node.ua.pt/sm', (msg) => {
+      console.log('MSG BUS LISTENER for MN Subscription Manager: ', msg);
+      let responseMessage = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: {code: 200}};
+
+      msgbus.postMessage(responseMessage);
     });
 
-    describe('getAppSandbox()', function() {
-      it('return AppSandbox()', function() {
-        let sandbox = registry.getAppSandbox();
-        expect(sandbox).to.be.instanceof(Sandbox);
+    let getDescriptor = (url) => {
+
+      return new Promise(function(resolve, reject) {
+
+        let dividedURL = divideURL(url);
+        let identity = dividedURL.identity;
+
+        if (!identity) {
+          identity = 'default';
+        } else {
+          identity = identity.substring(identity.lastIndexOf('/') + 1);
+        }
+
+        let result;
+
+        if (url.includes('hyperty')) {
+          try {
+            result = descriptors.Hyperties[identity];
+          } catch (e) {
+            reject(e);
+          }
+
+        } else if (url.includes('protocolstub') || url === dividedURL.domain) {
+          try {
+            result = descriptors.ProtoStubs[identity];
+          } catch (e) {
+            reject(e);
+          }
+        } else if (url.includes('idp-proxy')) {
+          try {
+            result = descriptors.IdpProxies[identity];
+          } catch (e) {
+            reject(e);
+          }
+        } else if (url.includes('dataschema')) {
+          try {
+            result = descriptors.DataSchemas[identity];
+          } catch (e) {
+            reject(e);
+          }
+        }
+        resolve(result);
       });
+    };
+
+    console.log('registry ', descriptorInstance);
+    sinon.stub(descriptorInstance, 'getHypertyDescriptor', (hypertyURL) => {
+      return getDescriptor(hypertyURL);
     });
 
-    describe('registerStub(sandBox, domainURL)', function() {
-
-      it('should register a stub', function(done) {
-        let domainURL = 'ua.pt';
-
-        expect(registry.registerStub(sandboxDummy, domainURL).then(function(done) {
-          return done;
-        })).to.be.fulfilled.and.eventually.to.contain('msg-node.ua.pt/protostub/').and.notify(done);
-
-      });
+    sinon.stub(descriptorInstance, 'getStubDescriptor', (stubURL) => {
+      //console.log('get descriptor for:', stubURL);
+      return getDescriptor('https://catalogue.ua.pt/.well-known/protocolstub/' + stubURL);
     });
 
-    describe('discoverProtostub(url)', function() {
-
-      it('should discover a ProtocolStub', function(done) {
-        let url = 'ua.pt';
-        expect(registry.discoverProtostub(url).then((result) => {
-          expect(result).to.have.property('url').include('msg-node.ua.pt/protostub/');
-          expect(result).to.have.property('status', 'deployed');
-          protostubURL = result.url;
-          return result;
-        }))
-        .and.eventually.to.have.all.keys('url', 'status')
-        .and.to.be.fulfilled
-        .and.notify(done);
-      });
+    sinon.stub(descriptorInstance, 'getIdpProxyDescriptor', (idpProxyURL) => {
+      return getDescriptor('https://catalogue.ua.pt/.well-known/idp-proxy/' + idpProxyURL);
     });
 
-    describe('registerPEP(postMessage, hyperty)', function() {
+  });
 
-      it('should register PEP', function(done) {
-        let postMessage = {};
-        let hyperty = 'hyperty-catalogue://ua.pt/HelloHyperty';
+  describe('constructor()', function() {
 
-        expect(registry.registerPEP(postMessage, hyperty).then(function(response) {
-          return response;
-        })).to.be.fulfilled.and.eventually.equal('PEP registered with success').and.notify(done);
-
-      });
+    it('depends of the MessageBus', function() {
+      expect(registry.messageBus).to.be.instanceof(MessageBus);
     });
+  });
 
-    describe('unregisterPEP(HypertyRuntimeURL)', function() {
-
-      it('should unregister PEP', function(done) {
-        let HypertyRuntimeURL = 'hyperty-catalogue://ua.pt/HelloHyperty';
-
-        expect(registry.unregisterPEP(HypertyRuntimeURL).then(function(response) {
-          return response;
-        })).to.be.fulfilled.and.eventually.equal('PEP successfully removed.').and.notify(done);
-
-      });
+  describe('getAppSandbox()', function() {
+    it('return AppSandbox()', function() {
+      let sandbox = registry.getAppSandbox();
+      expect(sandbox).to.be.instanceof(Sandbox);
     });
+  });
 
-    describe('registerHyperty(sandbox, descriptorURL, descriptor)', function() {
+  describe('registerStub(sandBox, domainURL)', function() {
 
-      it('should register an Hyperty', function(done) {
+    let domainURL = 'ua.pt';
 
-        let descriptorURL = 'hyperty-catalogue://ua.pt/<catalogue-object-identifier>';
-        let descriptor = {
-          _objectName: 'hyperty-chat',
-          dataObjects: ['url'],
-          hypertyType: ['comm']
-        };
-        let addressURL = {newAddress: true, address: ['hyperty://ua.pt/1']};
-
-        expect(registry.registerHyperty(sandboxDummy, descriptorURL, descriptor, addressURL)).to.be.fulfilled.and.eventually.equal('hyperty://ua.pt/1').and.notify(done);
-
-      });
-    });
-
-    describe('getSandbox(url)', function() {
-
-      it('should get a sandbox from a domain', function(done) {
-        let domain = 'ua.pt';
-
-        expect(registry.getSandbox(domain).then(function(response) {
-          return response;
-        })).to.be.fulfilled.and.eventually.to.be.eql(sandboxDummy).and.notify(done);
-
-      });
-
-      it('should get a sandbox from a specific hypertyIstance', function(done) {
-        let hypertyInstance = 'hyperty://ua.pt/1';
-
-        expect(registry.getSandbox(hypertyInstance).then(function(response) {
-          return response;
-        })).to.be.fulfilled.and.eventually.to.be.eql(sandboxDummy).and.notify(done);
-      });
-
-      it('should get a sandbox from a specific protostubURL', function(done) {
-
-        expect(registry.getSandbox(protostubURL))
-        .to.be.fulfilled
-        .and.eventually.to.be.eql(sandboxDummy)
-        .and.notify(done);
-      });
-
-      it('should get a sandbox from a protoStub URL containing the domain', function(done) {
-        let domainURL = 'anotherDomain.pt';
-
-        registry.registerStub(sandboxDummy, domainURL).then(function() {
-          expect(registry.getSandbox('anotherDomain.pt').then(function(response) {
-            return response;
-          })).to.be.fulfilled.and.eventually.equal(sandboxDummy).and.notify(done);
-        });
-
-      });
+    it('should register a stub', function(done) {
+      expect(registry.registerStub(sandboxDummy, domainURL).then((deployed) => {
+        console.log('Depoyed->', deployed);
+        protostubURL = deployed.url;
+        return deployed.url;
+      })).to.be.fulfilled.and.eventually.to.contain('runtime://ua.pt/protostub/').and.notify(done);
 
     });
 
-    describe('resolve(url)', function() {
+    it('should register a P2P Handler Stub', (done) => {
+      let p2pConfig = {
+        isHandlerStub: true,
+        runtimeURL: runtimeURL
+      };
 
-      it('should return a protostub url', function(done) {
-        let url = 'hyperty-runtime://ua.pt/protostub/123';
-
-        expect(registry.resolve(url).then(function(response) {
-          return response;
-        })).to.be.fulfilled.and.eventually.to.contain('msg-node.ua.pt/protostub/').and.notify(done);
-
-      });
+      expect(registry.registerStub(sandboxDummy, registry.runtimeURL, p2pConfig).then((deployed) => {
+        return deployed.url;
+      })).to.be.fulfilled.and.eventually.to.contain('runtime://ua.pt/p2phandler/').and.notify(done);
     });
 
-    describe('unregisterStub(url)', function() {
+    it('should register a P2P Requester Stub', (done) => {
 
-      it('should unregister a ProtocolStub', function(done) {
-        let url = 'ua.pt';
+      let p2pConfig = {
+        remoteRuntimeURL: 'runtime://ua.pt/1234566',
+        p2pHandler: 'runtime://ua.pt/p2phandler/1234',
+        p2pRequesterStub: true
+      };
 
-        expect(registry.unregisterStub(url).then(function(response) {
-          return response;
-        })).to.be.fulfilled.and.eventually.equal('ProtostubURL removed').and.notify(done);
+      registry.p2pHandlerAssociation[registry.runtimeURL] = [];
 
-      });
+      expect(registry.registerStub(sandboxDummy, domainURL, p2pConfig).then((deployed) => {
+        return deployed.url;
+      })).to.be.fulfilled.and.eventually.to.contain('runtime://ua.pt/p2prequester/').and.notify(done);
     });
 
-    describe('getHypertyOwner(hypertyURL)', function() {
-      it('should return the user associated to the hyperty URL', function() {
-        let url = 'hyperty://ua.pt/1';
-        expect(registry.getHypertyOwner(url)).to.be.eql('user://gmail.com/openidtest10');
-      });
+    it('should discover P2PHandlerStub', (done) => {
+
+      expect(registry.discoverP2PStub()).to.have.property('url').contain('runtime://ua.pt/p2phandler/');
+      done();
     });
 
-    describe('getHypertyName(hypertyURL)', function() {
-      it('should return the hyperty Name from a given hypertyURL', function() {
-        let url = 'hyperty://ua.pt/1';
+  });
 
-        expect(registry.getHypertyName(url)).to.be.equal('hyperty-chat');
-      });
+  describe('discoverProtostub(url)', function() {
+
+    it('should discover a ProtocolStub', function(done) {
+
+  /*    let Stub = {
+        status: 'live',
+        url: 'runtime://ua.pt/protostub/1234'
+      };*/
+
+      let domain = 'ua.pt';
+
+      registry.protostubsList[domain].status = 'live';
+
+    //  registry.protostubsList[domain] = Stub;
+
+      expect(registry.discoverProtostub(domain)).to.have.property('url').contain('runtime://ua.pt/protostub/');
+      done();
     });
+  });
 
-    describe('registerDataObject(identifier, dataObjectschema, dataObjectUrl, dataObjectReporter, authorise)', function() {
-      it('should register a new Data Object in the runtime registry', function(done) {
-        let identifier = 'hello-chat';
-        let dataObjectschema = 'hyperty-catalogue://catalogue.localhost/.well-known/dataschema/Communication';
-        let dataObjectUrl = 'comm://localhost/9303b707-f301-4929-ad7d-65a89a356871';
-        let dataObjectReporter = 'hyperty://localhost/d692091f-192c-420c-a763-a180f13e626a';
-        let authorise = ['user://gmail.com/user15'];
-        let addressURL = {newAddress: true, address: ['comm://localhost/9303b707-f301-4929-ad7d-65a89a356871']};
+  describe('registerPEP(postMessage, hyperty)', function() {
 
-        expect(registry.registerDataObject(identifier, dataObjectschema, dataObjectUrl, dataObjectReporter, ['fake'], addressURL, authorise).then(function(response) {
-          return response;
-        })).to.be.fulfilled.and.eventually.equal('ok').and.notify(done);
-      });
+    it('should register PEP', function(done) {
+      let postMessage = {};
+      let hyperty = 'hyperty-catalogue://ua.pt/HelloHyperty';
+
+      expect(registry.registerPEP(postMessage, hyperty).then(function(response) {
+        return response;
+      })).to.be.fulfilled.and.eventually.equal('PEP registered with success').and.notify(done);
+
     });
+  });
 
-    describe('checkRegisteredURLs(info)', function() {
+  describe('unregisterPEP(HypertyRuntimeURL)', function() {
 
-      it('should return a previously registered Hyperty URL', function(done) {
+    it('should unregister PEP', function(done) {
+      let HypertyRuntimeURL = 'hyperty-catalogue://ua.pt/HelloHyperty';
 
-        let descriptor = {
-          _objectName: 'hyperty-chat',
-          dataObjects: ['url'],
-          hypertyType: ['comm']
-        };
+      expect(registry.unregisterPEP(HypertyRuntimeURL).then(function(response) {
+        return response;
+      })).to.be.fulfilled.and.eventually.equal('PEP successfully removed.').and.notify(done);
 
-        expect(registry.checkRegisteredURLs(descriptor).then(function(response) {
-          return response;
-        })).to.be.fulfilled.and.eventually.to.be.eql(['hyperty://ua.pt/1']).and.notify(done);
+    });
+  });
 
-      });
+  describe('registerHyperty(sandbox, descriptorURL, descriptor)', function() {
 
-      it('should return a undefined value if the Hyperty is not previously registered', function(done) {
+    it('should register an Hyperty', function(done) {
 
-        let fakeDescriptor = {
-          _objectName: 'hyperty-fake',
-          dataObjects: ['url2'],
-          hypertyType: ['comm2']
-        };
-        expect(registry.checkRegisteredURLs(fakeDescriptor).then(function(response) {
-          return response;
-        })).to.be.fulfilled.and.eventually.to.be.equal(undefined).and.notify(done);
-      });
+      let descriptorURL = 'hyperty-catalogue://ua.pt/<catalogue-object-identifier>';
+      let descriptor = {
+        _objectName: 'hyperty-chat',
+        dataObjects: ['url'],
+        hypertyType: ['comm']
+      };
+      let addressURL = {newAddress: true, address: ['hyperty://ua.pt/1']};
+      expect(registry.registerHyperty(sandboxDummy, descriptorURL, descriptor, addressURL)).to.be.fulfilled.and.eventually.equal('hyperty://ua.pt/1').and.notify(done);
 
-      it('should return a previously registered Data Object URL', function(done) {
+    });
+  });
 
-        let info = {
-          name: 'hello-chat',
-          schema: 'hyperty-catalogue://catalogue.localhost/.well-known/dataschema/Communication',
-          resources: ['fake'],
-          reporter: 'hyperty://localhost/d692091f-192c-420c-a763-a180f13e626a'
-        };
+  describe('getSandbox(url)', function() {
 
-        expect(registry.checkRegisteredURLs(info).then(function(response) {
-          return response;
-        })).to.be.fulfilled.and.eventually.to.be.eql(['comm://localhost/9303b707-f301-4929-ad7d-65a89a356871']).and.notify(done);
+    it('should get a sandbox from a domain', function(done) {
+      let domain = 'ua.pt';
 
-      });
-
-      it('should return a undefined value if the dataObjectURL is not previously registered', function(done) {
-
-        let fakeInfo = {
-          name: 'fake',
-          schema: 'hyperty-catalogue://catalogue.localhost/.well-known/dataschema/unknown',
-          resources: ['fake'],
-          reporter: 'hyperty://localhost/anotherURL123'
-        };
-        expect(registry.checkRegisteredURLs(fakeInfo).then(function(response) {
-          return response;
-        })).to.be.fulfilled.and.eventually.to.be.equal(undefined).and.notify(done);
-      });
-
-      it('should return an hyperty url based on given address', function(done) {
-
-        let descriptor = {
-          _objectName: 'hyperty-chat',
-          dataObjects: ['url'],
-          hypertyType: ['comm']
-        };
-
-        let reuseURL = 'hyperty://ua.pt/1';
-
-        expect(registry.checkRegisteredURLs(descriptor, reuseURL)).to.eventually
-        .to.be.eql(['hyperty://ua.pt/1'])
-        .and.to.be.fulfilled
-        .and.notify(done);
-
-      });
+      expect(registry.getSandbox(domain).then(function(response) {
+        return response;
+      })).to.be.fulfilled.and.eventually.to.be.eql(sandboxDummy).and.notify(done);
 
     });
 
-    describe('getReporterURL(dataObjectURL)', function() {
+    it('should get a sandbox from a specific hypertyIstance', function(done) {
+      let hypertyInstance = 'hyperty://ua.pt/1';
 
-      it('should return the reporterURL associated with the dataobject URL', function(done) {
-        let dataObjectURL = 'comm://localhost/9303b707-f301-4929-ad7d-65a89a356871';
+      expect(registry.getSandbox(hypertyInstance).then(function(response) {
+        return response;
+      })).to.be.fulfilled.and.eventually.to.be.eql(sandboxDummy).and.notify(done);
+    });
 
-        expect(registry.getReporterURL(dataObjectURL).then(function(response) {
-          return response;
-        })).to.be.fulfilled.and.eventually.equal('hyperty://localhost/d692091f-192c-420c-a763-a180f13e626a').and.notify(done);
-      });
+    it('should get a sandbox from a specific protostubURL', function(done) {
 
-      it('should not found the reporter the reporterURL associated with the dataobject URL', function(done) {
-        let fakedataObjectURL = 'comm://fake';
-        expect(registry.getReporterURL(fakedataObjectURL).then(function(response) {
-          return response;
-        })).eventually.equal('No reporter was found').and.to.be.rejected.and.notify(done);
+    //  let protostubURL = 'runtime://ua.pt/protostub/123';
 
-      });
+      expect(registry.getSandbox(protostubURL, sandboxDummyCapabilities))
+      .to.be.fulfilled
+      .and.eventually.to.be.eql(sandboxDummy)
+      .and.notify(done);
+    });
+
+
+    let sandbox1 = new Sandbox(sandboxDummyCapabilities);
+
+    let anotherSandbox = { sandbox: sandbox1, type: 'normal', capabilities: sandboxDummyCapabilities};
+
+    it('should register a anotherdomain protoStub URL', function(done) {
+      let domainURL = 'anotherDomain.pt';
+
+      expect(registry.registerStub(anotherSandbox, domainURL).then(function(response) {
+        return response.url;
+      })).to.be.fulfilled.and.eventually.contain(domainURL).and.notify(done);
+    });
+
+
+    it('should get a sandbox from another domain', function(done) {
+      let domainURL = 'anotherDomain.pt';
+
+      expect(registry.getSandbox(domainURL, sandboxDummyCapabilities).then(function(response) {
+        return response;
+      })).to.be.fulfilled.and.eventually.to.be.equal(anotherSandbox).and.notify(done);
+    });
+
+  //  });
+
+  });
+
+  describe('resolve(url)', function() {
+
+    it('should return a protostub url', function(done) {
+      let url = 'hyperty://ua.pt/123-dhsdhsg';
+
+      expect(registry.resolve(url).then(function(response) {
+        return response;
+      })).to.be.fulfilled.and.eventually.to.contain('runtime://ua.pt/protostub/').and.notify(done);
+
+    });
+  });
+
+  describe('unregisterStub(url)', function() {
+
+    it('should unregister a ProtocolStub', function(done) {
+      let url = 'ua.pt';
+
+      expect(registry.unregisterStub(url).then(function(response) {
+        return response;
+      })).to.be.fulfilled.and.eventually.equal('ProtostubURL removed').and.notify(done);
+
+    });
+  });
+
+  describe('getHypertyOwner(hypertyURL)', function() {
+    it('should return the user associated to the hyperty URL', function() {
+      let url = 'hyperty://ua.pt/1';
+      expect(registry.getHypertyOwner(url)).to.be.eql('user://gmail.com/openidtest10');
+    });
+  });
+
+  describe('getHypertyName(hypertyURL)', function() {
+    it('should return the hyperty Name from a given hypertyURL', function() {
+      let url = 'hyperty://ua.pt/1';
+
+      expect(registry.getHypertyName(url)).to.be.equal('hyperty-chat');
+    });
+  });
+
+  describe('registerDataObject(identifier, dataObjectschema, dataObjectUrl, dataObjectReporter, authorise)', function() {
+    it('should register a new Data Object in the runtime registry', function(done) {
+      let identifier = 'hello-chat';
+      let dataObjectschema = 'hyperty-catalogue://catalogue.localhost/.well-known/dataschema/Communication';
+      let dataObjectUrl = 'comm://localhost/9303b707-f301-4929-ad7d-65a89a356871';
+      let dataObjectReporter = 'hyperty://localhost/d692091f-192c-420c-a763-a180f13e626a';
+      let authorise = ['user://gmail.com/user15'];
+      let addressURL = {newAddress: true, address: ['comm://localhost/9303b707-f301-4929-ad7d-65a89a356871']};
+
+      expect(registry.registerDataObject(identifier, dataObjectschema, dataObjectUrl, dataObjectReporter, ['fake'], addressURL, authorise).then(function(response) {
+        return response;
+      })).to.be.fulfilled.and.eventually.equal('ok').and.notify(done);
+    });
+  });
+
+  describe('checkRegisteredURLs(info)', function() {
+
+    it('should return a previously registered Hyperty URL', function(done) {
+
+      let descriptor = {
+        _objectName: 'hyperty-chat',
+        dataObjects: ['url'],
+        hypertyType: ['comm']
+      };
+
+      expect(registry.checkRegisteredURLs(descriptor).then(function(response) {
+        return response;
+      })).to.be.fulfilled.and.eventually.to.be.eql(['hyperty://ua.pt/1']).and.notify(done);
 
     });
 
-    describe('getPreAuthSubscribers(dataObjectURL)', function() {
-      it('should return the list of pre authorised users', function() {
-        let dataObjectURL = 'comm://localhost/9303b707-f301-4929-ad7d-65a89a356871';
-        let fakedataObjectURL = 'comm://fake';
+    it('should return a undefined value if the Hyperty is not previously registered', function(done) {
 
-        expect(registry.getPreAuthSubscribers(dataObjectURL)).to.be.eql(['user://gmail.com/user15']);
-
-        expect(registry.getPreAuthSubscribers(fakedataObjectURL)).to.be.eql([]);
-      });
+      let fakeDescriptor = {
+        _objectName: 'hyperty-fake',
+        dataObjects: ['url2'],
+        hypertyType: ['comm2']
+      };
+      expect(registry.checkRegisteredURLs(fakeDescriptor).then(function(response) {
+        return response;
+      })).to.be.fulfilled.and.eventually.to.be.equal(undefined).and.notify(done);
     });
 
-    describe('getDataObjectSubscribers(dataObjectURL)', function() {
-      it('should return the list of pre authorised users', function() {
-        let dataObjectURL = 'comm://localhost/9303b707-f301-4929-ad7d-65a89a356871';
-        let fakedataObjectURL = 'comm://fake';
-        let subscriberURL = 'hyperty://localhost/00-00-sub1';
+    it('should return a previously registered Data Object URL', function(done) {
 
-        registry.registerSubscriber(dataObjectURL, subscriberURL);
+      let info = {
+        name: 'hello-chat',
+        schema: 'hyperty-catalogue://catalogue.localhost/.well-known/dataschema/Communication',
+        resources: ['fake'],
+        reporter: 'hyperty://localhost/d692091f-192c-420c-a763-a180f13e626a'
+      };
 
-        expect(registry.getDataObjectSubscribers(dataObjectURL)).to.be.eql(['hyperty://localhost/00-00-sub1']);
-      });
+      expect(registry.checkRegisteredURLs(info).then(function(response) {
+        return response;
+      })).to.be.fulfilled.and.eventually.to.be.eql(['comm://localhost/9303b707-f301-4929-ad7d-65a89a356871']).and.notify(done);
+
     });
 
-    describe('unregisterHyperty(url)', function() {
-      it('should unregister an Hyperty', function(done) {
-        let url = 'hyperty://ua.pt/1';
-
-        expect(registry.unregisterHyperty(url).then(function(response) {
-          return response;
-        })).to.be.fulfilled.and.eventually.equal('Hyperty successfully deleted').and.notify(done);
-      });
+    it('should return a undefined value if the dataObjectURL is not previously registered', function(done) {
+      let fakeInfo = {
+        name: 'fake',
+        schema: 'hyperty-catalogue://catalogue.localhost/.well-known/dataschema/unknown',
+        resources: ['fake'],
+        reporter: 'hyperty://localhost/anotherURL123'
+      };
+      expect(registry.checkRegisteredURLs(fakeInfo).then(function(response) {
+        return response;
+      })).to.be.fulfilled.and.eventually.to.be.equal(undefined).and.notify(done);
     });
 
+    it('should return an hyperty url based on given address', function(done) {
+
+      let descriptor = {
+        _objectName: 'hyperty-chat',
+        dataObjects: ['url'],
+        hypertyType: ['comm']
+      };
+
+      let reuseURL = 'hyperty://ua.pt/1';
+
+      expect(registry.checkRegisteredURLs(descriptor, reuseURL)).to.eventually
+      .to.be.eql(['hyperty://ua.pt/1'])
+      .and.to.be.fulfilled
+      .and.notify(done);
+
+    });
+
+  });
+
+  describe('getReporterURL(dataObjectURL)', function() {
+
+    it('should return the reporterURL associated with the dataobject URL', function(done) {
+      let dataObjectURL = 'comm://localhost/9303b707-f301-4929-ad7d-65a89a356871';
+
+      expect(registry.getReporterURL(dataObjectURL).then(function(response) {
+        return response;
+      })).to.be.fulfilled.and.eventually.equal('hyperty://localhost/d692091f-192c-420c-a763-a180f13e626a').and.notify(done);
+    });
+
+    it('should not found the reporter the reporterURL associated with the dataobject URL', function(done) {
+      let fakedataObjectURL = 'comm://fake';
+      expect(registry.getReporterURL(fakedataObjectURL).then(function(response) {
+        return response;
+      })).eventually.equal('No reporter was found').and.to.be.rejected.and.notify(done);
+
+    });
+
+  });
+
+  describe('getPreAuthSubscribers(dataObjectURL)', function() {
+    it('should return the list of pre authorised users', function() {
+      let dataObjectURL = 'comm://localhost/9303b707-f301-4929-ad7d-65a89a356871';
+      let fakedataObjectURL = 'comm://fake';
+
+      expect(registry.getPreAuthSubscribers(dataObjectURL)).to.be.eql(['user://gmail.com/user15']);
+
+      expect(registry.getPreAuthSubscribers(fakedataObjectURL)).to.be.eql([]);
+    });
+  });
+
+  describe('getDataObjectSubscribers(dataObjectURL)', function() {
+    it('should return the list of pre authorised users', function() {
+      let dataObjectURL = 'comm://localhost/9303b707-f301-4929-ad7d-65a89a356871';
+      let subscriberURL = 'hyperty://localhost/00-00-sub1';
+
+      registry.registerSubscriber(dataObjectURL, subscriberURL);
+
+      expect(registry.getDataObjectSubscribers(dataObjectURL)).to.be.eql(['hyperty://localhost/00-00-sub1']);
+    });
+  });
+
+  describe('unregisterHyperty(url)', function() {
+    it('should unregister an Hyperty', function(done) {
+      let url = 'hyperty://ua.pt/1';
+
+      expect(registry.unregisterHyperty(url).then(function(response) {
+        return response;
+      })).to.be.fulfilled.and.eventually.equal('Hyperty successfully deleted').and.notify(done);
+    });
+  });
+
+  describe('isLegacy(url)', function() {
+
+    it('should return a protostub', function(done) {
+      let url = 'slack://user@slack.com';
+
+      expect(registry.isLegacy(url).then(function(response) {
+        console.log('ProtoSTUB->', response);
+        return response;
+      })).to.be.fulfilled.and.eventually.to.equal(true).and.notify(done);
+
+    });
   });
 
 });

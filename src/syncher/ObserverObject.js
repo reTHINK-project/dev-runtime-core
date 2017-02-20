@@ -21,7 +21,11 @@ class ObserverObject {
   _newSubscription(hyperty) {
     let _this = this;
 
-    _this._subscriptions[hyperty] = new Subscription(_this._bus, hyperty, _this._url, _this._childrens, false);
+    let subscription = _this._subscriptions[hyperty];
+    console.log('[Observer Object - new subscription] - ',  _this._subscriptions, hyperty, _this._subscriptions.hasOwnProperty(hyperty));
+    if (!subscription) {
+      _this._subscriptions[hyperty] = new Subscription(_this._bus, hyperty, _this._url, _this._childrens, false);
+    }
   }
 
   addSubscription(hyperty) {

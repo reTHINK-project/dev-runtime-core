@@ -32,7 +32,10 @@ import { generateGUID } from '../utils/utils';
 import AddressAllocation from '../allocation/AddressAllocation';
 
 import Loader from './Loader';
+import Descriptors from './Descriptors';
+
 import { runtimeConfiguration } from './runtimeConfiguration';
+import { runtimeUtils } from './runtimeUtils';
 
 // import GraphConnector from '../graphconnector/GraphConnector';
 
@@ -57,19 +60,27 @@ class RuntimeUA {
 
   /**
    * Create a new instance of Runtime User Agent
+   * @param {descriptor} runtimeDescriptor - pass all the hyperty runtime descriptor
    * @param {runtimeFactory} runtimeFactory - Specific implementation for the environment where the core runtime will run;
    * @param {domain} domainURL - specify the domain base for the runtime;
    */
-  constructor(runtimeFactory, domain) {
-
+  constructor(runtimeDescriptor, runtimeFactory, domain) {
+    if (!runtimeDescriptor) throw new Error('The runtime descriptor is a needed parameter');
     if (!runtimeFactory) throw new Error('The sandbox factory is a needed parameter');
     if (!domain) throw new Error('You need the domain of runtime');
 
     // Configuration object with information related with servers
     this.runtimeConfiguration = Object.assign({domain: domain}, runtimeConfiguration);
-
     this.runtimeFactory = runtimeFactory;
     this.runtimeCatalogue = runtimeFactory.createRuntimeCatalogue();
+
+    if (runtimeDescriptor.p2pHandlerStub && typeof runtimeDescriptor.p2pHandlerStub  === 'string' && runtimeDescriptor.p2pHandlerStub.includes('://')) {
+      this.p2p = true;
+    } else {
+      this.p2p = false;
+    }
+
+    runtimeUtils.runtimeDescriptor = runtimeDescriptor;
 
     if (typeof runtimeFactory.createRuntimeCatalogue === 'function') {
       this.persistenceManager = runtimeFactory.createRuntimeCatalogue();
@@ -105,7 +116,6 @@ class RuntimeUA {
    * @memberOf RuntimeUA
    */
   init() {
-
     return new Promise((resolve, reject) => {
 
       this.domain = this.runtimeConfiguration.domain;
@@ -125,17 +135,73 @@ class RuntimeUA {
           this.capabilities = results[1];
 
           return this._loadComponents();
-
         }).then((status) => {
-          resolve(status);
-        }).catch((error) => {
-          console.error('ERROR: ', error);
-          reject(error);
+
+          if (this.p2p) {
+            console.info('[RuntimeUA - init] load p2pHandler: ', status);
+            return this._loadP2PHandler();
+          } else {
+            console.info('[RuntimeUA - init] P2P not supported');
+            return ('P2P Not Supported');
+          }
+        })
+        .then((result) => {
+          console.info('[runtime ua - init] - status: ', result);
+          resolve(true);
+        }, (reason) => {
+          console.error('ERROR: ', reason);
+          resolve(true);
         });
 
       } catch (e) {
         reject(e);
       }
+
+    });
+
+  }
+
+  _loadP2PHandler() {
+
+    return new Promise((resolve) => {
+
+      let runtimeDescriptor = runtimeUtils.runtimeDescriptor;
+      let p2pStubHandler = runtimeDescriptor.p2pHandlerStub;
+
+      let p2pConfig = {
+        isHandlerStub: true,
+        runtimeURL: this.runtimeURL
+      };
+
+      console.log('[RuntimeUA loadP2PHandler] P2PStubHandler: ', p2pStubHandler);
+
+      this.loader.loadStub(p2pStubHandler, p2pConfig).then((result) => {
+
+        let runtimeUAURL = this.runtimeURL + '/ua';
+        let msg = {
+          type: 'subscribe',
+          from: runtimeUAURL,
+          to: 'domain://msg-node.' + this.domain + '/sm',
+          body: {
+            subscribe: [result],
+            source: this.runtimeURL
+          }
+        };
+
+        this.messageBus.addListener(runtimeUAURL, (msg) => {
+          console.log('[runtime ua - listener] - receive msg: ', msg);
+        });
+
+        this.messageBus.postMessage(msg, (reply) => {
+          console.log('[runtime ua - postMessage] - reply: ', reply);
+        });
+
+        console.info('[runtime ua - p2p installation] - success: ', result);
+        resolve(true);
+      }).catch((reason) => {
+        console.info('[runtime ua - p2p installation] - fail: ', reason);
+        resolve(false);
+      });
 
     });
 
@@ -154,8 +220,11 @@ class RuntimeUA {
 
       try {
 
+        // Prepare the on instance to handle with the fallbacks and runtimeCatalogue;
+        this.descriptorInstance = new Descriptors(this.runtimeURL, this.runtimeCatalogue, this.runtimeConfiguration);
+
         // Prepare the loader to load the hyperties, protostubs and idpproxy;
-        this.loader = new Loader(this.runtimeConfiguration);
+        this.loader = new Loader(this.runtimeURL, this.runtimeConfiguration, this.descriptorInstance);
 
         // Instantiate the identity Module
         this.identityModule = new IdentityModule(this.runtimeURL, this.runtimeCapabilities, this.storageManager);
@@ -221,8 +290,8 @@ class RuntimeUA {
 
         // Instantiate the Graph Connector
         // _this.graphConnector = new GraphConnector(_this.runtimeURL, _this.messageBus);
-
         resolve(true);
+
       } catch (e) {
         reject(e);
       }

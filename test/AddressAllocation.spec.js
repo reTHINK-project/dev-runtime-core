@@ -30,6 +30,8 @@ describe('AddressAllocation', function() {
     bus = {
       postMessage: (msg, replyCallback) => {
 
+        if (!msg.body.scheme) { msg.body.scheme = 'hyperty'; }
+
         replyCallback({
           id: 1, type: 'response', from: 'domain://msg-node.sp.domain/address-allocation', to: 'local://fake.url',
           body: {code: 200, value: {allocated: msg.body.scheme + '://' + domain + '/' + guid}}
@@ -54,7 +56,9 @@ describe('AddressAllocation', function() {
 
     });
 
-    aa = new AddressAllocation('local://fake.url', bus, registry);
+    let runtimeURL = 'hyperty-runtime://ua.pt/123';
+    new AddressAllocation(runtimeURL, bus, registry);
+    aa = AddressAllocation.instance;
   });
 
   it('should create a new hyperty address', function(done) {

@@ -40,18 +40,42 @@
  */
 export function divideURL(url) {
 
-  if (!url) throw Error('URL is needed to split');
-
-  // let re = /([a-zA-Z-]*)?:\/\/(?:\.)?([-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b)*(\/[\/\d\w\.-]*)*(?:[\?])*(.+)*/gi;
-  let re = /([a-zA-Z-]*):\/\/(?:\.)?([-a-zA-Z0-9@:%._\+~#=]{2,256})([-a-zA-Z0-9@:%._\+~#=\/]*)/gi;
-  let subst = '$1,$2,$3';
-  let parts = url.replace(re, subst).split(',');
-
-  // If the url has no protocol, the default protocol set is https
-  if (parts[0] === url) {
-    parts[0] = 'https';
-    parts[1] = url;
+  function recurse(value) {
+    const regex = /([a-zA-Z-]*)(:\/\/(?:\.)?|:)([-a-zA-Z0-9@:%._\+~#=]{2,256})([-a-zA-Z0-9@:%._\+~#=\/]*)/gi;
+    const subst = '$1,$3,$4';
+    let parts = value.replace(regex, subst).split(',');
+    return parts;
   }
+
+  let parts = recurse(url);
+
+  // If the url has no scheme
+  if (parts[0] === url && !parts[0].includes('@')) {
+
+    let result = {
+      type: '',
+      domain: url,
+      identity: ''
+    };
+
+    console.warn('[DivideURL] DivideURL don\'t support url without scheme. Please review your url address', url);
+
+    return result;
+  }
+
+	// check if the url has the scheme and includes an @
+  if (parts[0] === url && parts[0].includes('@')) {
+    let scheme = parts[0] === url ? 'smtp' : parts[0];
+    parts = recurse(scheme + '://' + parts[0]);
+  }
+
+	// if the domain includes an @, divide it to domain and identity respectively
+  if (parts[1].includes('@')) {
+    parts[2] = parts[0] + '://' + parts[1];
+    parts[1] = parts[1].substr(parts[1].indexOf('@') + 1);
+  } 	/*else if (parts[2].includes('/')) {
+    parts[2] = parts[2].substr(parts[2].lastIndexOf('/')+1);
+  }*/
 
   let result = {
     type: parts[0],
@@ -60,17 +84,7 @@ export function divideURL(url) {
   };
 
   return result;
-}
 
-export function divideEmail(email) {
-  let indexOfAt = email.indexOf('@');
-
-  let result = {
-    username: email.substring(0, indexOfAt),
-    domain: email.substring(indexOfAt + 1, email.length)
-  };
-
-  return result;
 }
 
 /**
@@ -117,7 +131,6 @@ export function getUserEmailFromURL(userURL) {
   return url.identity.replace('/', '') + '@' + url.domain; // identity field has '/exampleID' instead of 'exampleID'
 }
 
-
 /**
  * Check if the user identifier is already in the URL format, if not, convert to URL format
  * @param  {string}   identifier  user identifier
@@ -148,6 +161,26 @@ export function isDataObjectURL(url) {
   let urlSchema = splitURL[0];
 
   return schemasToIgnore.indexOf(urlSchema) === -1;
+}
+
+export function isLegacy(url) {
+  if (url.split('@').length > 1) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+export function isURL(url) {
+  return (url).split('/').length >= 3;
+}
+
+export function isUserURL(url) {
+  return divideURL(url).type === 'user';
+}
+
+export function isHypertyURL(url) {
+  return divideURL(url).type === 'hyperty';
 }
 
 /**
@@ -218,19 +251,52 @@ export function generateGUID() {
 
 }
 
-/**
- * Check if a string is a URL
- *  
- * @param {any} str
- * @returns
- */
-export function isURL(str) {
-  var pattern = /([a-zA-Z-]*):\/\/(?:\.)?([-a-zA-Z0-9@:%._\+~#=]{2,256})([-a-zA-Z0-9@:%._\+~#=\/]*)/gi;
+export function getUserIdentityDomain(url) {
+  let dividedURL = divideURL(url);
+  let splitedDomain = dividedURL.domain.split('.');
+  let splitedLength = splitedDomain.length;
+  if (splitedLength == 1) {
+    return splitedDomain[splitedLength - 1];
+  }
+  let domain = splitedDomain[splitedLength - 2] + '.' + splitedDomain[splitedLength - 1];
+  return domain;
+}
 
-  if (!pattern.test(str)) {
-    return false;
-  } else {
+/**
+ * Check if URL is from a backend service
+ * @param  {string} url     URL to be processed
+ * @return {boolean}
+ */
+
+export function isBackendServiceURL(url) {
+  let dividedURL = divideURL(url);
+  let splitedDomain = dividedURL.domain.split('.');
+  let backendSchemes = ['domain', 'global', 'domain-idp']; // should be defined in the runtime configuration
+  let backendSubDomains = ['registry', 'msg-node']; // should be defined in the runtime configuration
+  let subDomain;
+
+  if (splitedDomain.length > 1) {
+    subDomain = splitedDomain[0];
+  }
+
+  if (subDomain && backendSubDomains.indexOf(subDomain)) {
     return true;
   }
 
+  if (dividedURL.type) {
+    return (backendSchemes.indexOf(dividedURL.type) !== -1);
+  }
+
+  return false;
+}
+
+export function divideEmail(email) {
+  let indexOfAt = email.indexOf('@');
+
+  let result = {
+    username: email.substring(0, indexOfAt),
+    domain: email.substring(indexOfAt + 1, email.length)
+  };
+
+  return result;
 }

@@ -2,8 +2,6 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import sinonChai from 'sinon-chai';
 
-import { Communication } from './resources/communication';
-
 chai.config.truncateThreshold = 0;
 
 let expect = chai.expect;
@@ -11,8 +9,10 @@ let expect = chai.expect;
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
 
+import { descriptors } from './resources/descriptors.js';
+
 // Testing Module
-import RuntimeUA from '../src/runtime/RuntimeUA';
+import RuntimeUA from  '../src/runtime/RuntimeUA';
 
 // Main dependecies
 import Registry from '../src/registry/Registry';
@@ -27,121 +27,13 @@ import { runtimeFactory } from './resources/runtimeFactory';
 /// import { runtimeConfiguration } from './resources/runtimeConfiguration';
 
 // Testing runtimeUA;
+let domain = 'localhost';
 describe('RuntimeUA', function() {
 
-  let runtime = new RuntimeUA(runtimeFactory, 'localhost');
+  let runtime = new RuntimeUA(descriptors.Runtimes.Runtime, runtimeFactory, domain);
   let getDescriptor;
 
   before(function() {
-
-    let Hyperties = {
-      HelloHyperty: {
-        sourcePackage: {
-          sourceCode: '',
-          sourceCodeClassname: 'HelloHyperty',
-          encoding: 'UTF-8',
-          signature: ''
-        },
-        cguid: 10003,
-        version: 0.1,
-        description: 'Description of GroupChat',
-        objectName: 'HelloHyperty',
-        configuration: {},
-        hypertyType: [
-          'chat'
-        ],
-        sourcePackageURL: '/sourcePackage',
-        language: 'javascript',
-        signature: '',
-        messageSchemas: '',
-        dataObjects: [
-          'https://catalogue.sp.domain/.well-known/dataschema/Communication'
-        ],
-        accessControlPolicy: 'somePolicy'
-      }
-    };
-
-    let ProtoStubs = {
-      default: {
-        cguid: '1',
-        type: '0',
-        version: '0.1',
-        description: 'description of VertxProtoStub',
-        objectName: 'VertxProtoStub',
-        sourcePackageURL: '/sourcePackage',
-        sourcePackage: {
-          sourceCode: '',
-          sourceCodeClassname: 'VertxProtoStub',
-          encoding: 'Base64',
-          signature: ''
-        },
-        language: 'Javascript ECMA5',
-        signature: '',
-        messageSchemas: '',
-        configuration: {
-          url: 'wss://msg-node.localhost:9090/ws'
-        },
-        constraints: '',
-        hypertyCapabilities: '',
-        protocolCapabilities: '',
-        policies: '',
-        dataObjects: []
-      }
-    };
-
-    let IdpProxies = {
-      default: {
-        cguid: '1',
-        type: '0',
-        version: '0.1',
-        description: 'description of VertxProtoStub',
-        objectName: 'VertxProtoStub',
-        sourcePackageURL: '/sourcePackage',
-        sourcePackage: {
-          sourceCode: '',
-          sourceCodeClassname: 'VertxProtoStub',
-          encoding: 'Base64',
-          signature: ''
-        },
-        language: 'Javascript ECMA5',
-        signature: '',
-        messageSchemas: '',
-        configuration: {
-          url: 'wss://127.0.0.1:9090/ws'
-        },
-        constraints: '',
-        hypertyCapabilities: '',
-        protocolCapabilities: '',
-        policies: '',
-        dataObjects: []
-      }
-    };
-
-    let DataSchemas = {
-      Communication: {
-        cguid: '1',
-        type: '0',
-        version: '0.1',
-        description: 'description of Communication DataSchema',
-        objectName: 'Communication',
-        sourcePackageURL: '/sourcePackage',
-        sourcePackage: {
-          sourceCode: Communication,
-          sourceCodeClassname: 'Communication',
-          encoding: 'utf-8',
-          signature: ''
-        },
-        language: 'Javascript ECMA5',
-        signature: '',
-        messageSchemas: '',
-        configuration: {},
-        constraints: '',
-        hypertyCapabilities: '',
-        protocolCapabilities: '',
-        policies: '',
-        dataObjects: []
-      }
-    };
 
     getDescriptor = (url) => {
 
@@ -160,44 +52,42 @@ describe('RuntimeUA', function() {
 
         if (url.includes('hyperty')) {
           try {
-            result = Hyperties[identity];
+            result = descriptors.Hyperties[identity];
           } catch (e) {
             reject(e);
           }
 
         } else if (url.includes('protocolstub') || url === dividedURL.domain) {
           try {
-            result = ProtoStubs[identity];
+            result = descriptors.ProtoStubs[identity];
           } catch (e) {
             reject(e);
           }
         } else if (url.includes('idp-proxy')) {
           try {
-            result = IdpProxies[identity];
+            result = descriptors.IdpProxies[identity];
           } catch (e) {
             reject(e);
           }
         } else if (url.includes('dataschema')) {
           try {
-            result = DataSchemas[identity];
+            result = descriptors.DataSchemas[identity];
           } catch (e) {
             reject(e);
           }
 
         }
 
-        console.log('AQUI:', result);
         resolve(result);
 
       });
     };
-
   });
 
   after(function() {
-    runtime.loader.descriptors.getHypertyDescriptor.restore();
-    runtime.loader.descriptors.getStubDescriptor.restore();
-    runtime.loader.descriptors.getIdpProxyDescriptor.restore();
+    runtime.descriptorInstance.getHypertyDescriptor.restore();
+    runtime.descriptorInstance.getStubDescriptor.restore();
+    runtime.descriptorInstance.getIdpProxyDescriptor.restore();
   });
 
   describe('constructor()', function() {
@@ -213,15 +103,15 @@ describe('RuntimeUA', function() {
           });
         });
 
-        sinon.stub(runtime.loader.descriptors, 'getHypertyDescriptor', (hypertyURL) => {
+        sinon.stub(runtime.descriptorInstance, 'getHypertyDescriptor', (hypertyURL) => {
           return getDescriptor(hypertyURL);
         });
 
-        sinon.stub(runtime.loader.descriptors, 'getStubDescriptor', (stubURL) => {
+        sinon.stub(runtime.descriptorInstance, 'getStubDescriptor', (stubURL) => {
           return getDescriptor(stubURL);
         });
 
-        sinon.stub(runtime.loader.descriptors, 'getIdpProxyDescriptor', (idpProxyURL) => {
+        sinon.stub(runtime.descriptorInstance, 'getIdpProxyDescriptor', (idpProxyURL) => {
           return getDescriptor(idpProxyURL);
         });
 
@@ -388,10 +278,11 @@ describe('RuntimeUA', function() {
     it('should be deployed', function(done) {
       let spDomain = 'sp.domain';
       let loadStubPromise = runtime.loadStub(spDomain);
-      let stubResolved = ['url', 'status'];
+
+      //let stubResolved = ['url', 'status'];
 
       expect(loadStubPromise).to.be.fulfilled
-      .and.eventually.to.have.all.keys(stubResolved)
+      .and.eventually.to.contain('runtime://sp.domain/protostub')
       .and.notify(done);
     });
 

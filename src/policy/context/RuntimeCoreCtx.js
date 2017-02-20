@@ -71,6 +71,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
           resolve(message);
         }
       } else {
+        console.log('ON prepareForEvaluation', message);
         if (_this._isToSetID(message)) {
           _this._getIdentity(message).then(identity => {
             message.body.identity = identity;
@@ -120,41 +121,39 @@ class RuntimeCoreCtx extends ReThinkCtx {
   prepareToForward(message, isIncoming, result) {
     let _this = this;
     return new Promise((resolve, reject) => {
+      console.log('[Policy.RuntimeCoreCtx.prepareToForward]', message);
 
       // TODO remove this validation. When the Nodejs auth was completed this should work like browser;
-      this.runtimeCapabilities.isAvailable('node').then(isNode => {
+      this.runtimeCapabilities.isAvailable('node').then((result) => {
 
-        if (isNode) {
-          resolve(message);
-        } else {
-
-          if (isIncoming & result) {
-            let isSubscription = message.type === 'subscribe';
-            let isFromRemoteSM = _this.isFromRemoteSM(message.from);
-            if (isSubscription & isFromRemoteSM) {
-              _this.doMutualAuthentication(message).then(() => {
-                resolve(message);
-              }, (error) => {
-                reject(error);
-              });
-            } else {
-              resolve(message);
-            }
-          } else {
-            if (_this._isToCypherModule(message)) {
-              _this.idModule.encryptMessage(message).then((message) => {
-                resolve(message);
-              }, (error) => {
-                reject(error);
-              });
-            } else {
-              resolve(message);
-            }
-          }
-
+        if (result) {
+          return resolve(message);
         }
       });
 
+      if (isIncoming & result) {
+        let isSubscription = message.type === 'subscribe';
+        let isFromRemoteSM = _this.isFromRemoteSM(message.from);
+        if (isSubscription & isFromRemoteSM) {
+          _this.doMutualAuthentication(message).then(() => {
+            resolve(message);
+          }, (error) => {
+            reject(error);
+          });
+        } else {
+          resolve(message);
+        }
+      } else {
+        if (_this._isToCypherModule(message)) {
+          _this.idModule.encryptMessage(message).then((message) => {
+            resolve(message);
+          }, (error) => {
+            reject(error);
+          });
+        } else {
+          resolve(message);
+        }
+      }
     });
   }
 
@@ -221,10 +220,28 @@ class RuntimeCoreCtx extends ReThinkCtx {
     return splitFrom[0] === 'runtime' && from !== this.runtimeRegistry.runtimeURL + '/sm';
   }
 
+  isLocal(url) {
+    return this.runtimeRegistry.isLocal(url);
+  }
+
+  isInterworkingProtoStub(url) {
+    return this.runtimeRegistry.isInterworkingProtoStub(url);
+  }
+
   _isToSetID(message) {
     let schemasToIgnore = ['domain-idp', 'runtime', 'domain'];
     let splitFrom = (message.from).split('://');
     let fromSchema = splitFrom[0];
+
+    let _from = message.from;
+
+    if (message.body && message.body.hasOwnProperty('source'))
+      _from = message.body.source;
+
+    // Signalling Messages between P2P Stubs don't have Identities. FFS
+
+    if (_from.includes('/p2prequester/') || _from.includes('/p2phandler/'))
+      return false;
 
     return schemasToIgnore.indexOf(fromSchema) === -1;
   }
@@ -235,19 +252,25 @@ class RuntimeCoreCtx extends ReThinkCtx {
   }
 
   _getIdentity(message) {
-    if (message.type === 'update') {
-      return this.idModule.getIdentityOfHyperty(message.body.source);
+    console.log('[Policy.RuntimeCoreCtx.getIdentity] ', message);
+
+    if (message.body.source !== undefined) {
+      return this.idModule.getToken(message.body.source, message.to);
+    } else
+
+/*    if (message.type === 'update') {
+      return this.idModule.getToken(message.body.source);
     }
 
     if (message.type === 'response' && message.body.source !== undefined) {
-      return this.idModule.getIdentityOfHyperty(message.body.source);
-    }
+      return this.idModule.getToken(message.body.source);
+    }*/
 
-    if (divideURL(message.from).type === 'hyperty') {
-      return this.idModule.getIdentityOfHyperty(message.from);
-    } else {
-      return this.idModule.getIdentityOfHyperty(this.getURL(message.from));
-    }
+//    if (divideURL(message.from).type === 'hyperty') {
+      return this.idModule.getToken(message.from, message.to);
+/*    } else {
+      return this.idModule.getToken(this.getURL(message.from));
+    }*/
   }
 
   /**
@@ -258,12 +281,19 @@ class RuntimeCoreCtx extends ReThinkCtx {
   *                     or if its type equals 'handshake'; false otherwise
   */
   _isToCypherModule(message) {
+    console.log('[Policy.RuntimeCoreCtx.istoChyperModule]', message);
     let isCreate = message.type === 'create';
     let isFromHyperty = divideURL(message.from).type === 'hyperty';
     let isToHyperty = divideURL(message.to).type === 'hyperty';
     let isToDataObject = isDataObjectURL(message.to);
 
-    return (isCreate && isFromHyperty && isToHyperty) || (isCreate && isFromHyperty && isToDataObject) || message.type === 'handshake' || message.type === 'update';
+    //TODO: For Further Study
+    let doMutualAuthentication = message.body.hasOwnProperty('mutualAuthentication') ? message.body.mutualAuthentication : true;
+
+    // todo: return false for messages coming from interworking stubs.
+    // Get descriptor from runtime catalogue and check interworking field.
+
+    return ((isCreate && isFromHyperty && isToHyperty) || (isCreate && isFromHyperty && isToDataObject) || message.type === 'handshake' || message.type === 'update') && doMutualAuthentication;
   }
 
   /**
