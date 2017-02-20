@@ -28,8 +28,8 @@ import RegistryDataModel from './RegistryDataModel';
 */
 class HypertyInstance extends RegistryDataModel {
 
-  constructor(id, url, descriptorURL,descriptor, hypertyURL, user, guid, runtime, context) {
-    super(id, url, descriptorURL);
+  constructor(id, url, descriptorURL, descriptor, hypertyURL, user, guid, runtime, context, p2pHandler, p2pRequester, dataSchemes, resources, startingTime, lastModified) {
+    super(id, url, descriptorURL, p2pRequester, startingTime, lastModified);
     let _this = this;
     _this._descriptor = descriptor;
     _this._hypertyURL = hypertyURL;
@@ -37,6 +37,9 @@ class HypertyInstance extends RegistryDataModel {
     _this._guid = guid;
     _this._runtime = runtime;
     _this._context = context;
+    _this._p2pHandler = p2pHandler;
+    _this._dataSchemes = dataSchemes;
+    _this._resources = resources;
   }
 
   set user(identity) {
@@ -62,6 +65,26 @@ class HypertyInstance extends RegistryDataModel {
   get objectName() {
     let _this = this;
     return _this._descriptor._objectName;
+  }
+
+  get p2pHandler() {
+    let _this = this;
+    return _this._p2pHandler;
+  }
+
+  get dataSchemes() {
+    let _this = this;
+    return _this._dataSchemes;
+  }
+
+  get resources() {
+    let _this = this;
+    return _this._resources;
+  }
+
+  get runtimeURL() {
+    let _this = this;
+    return _this._runtime;
   }
 }
 

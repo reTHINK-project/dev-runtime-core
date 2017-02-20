@@ -166,6 +166,12 @@ describe('Policies management', () => {
 
 describe('Policy Engine with Runtime Core context', () => {
   let runtimeRegistry = {
+    isInterworkingProtoStub: () => {
+      return false;
+    },
+    isLocal: () => {
+      return true;
+    },
     getPreAuthSubscribers: () => {
       return ['hyperty://domain/hyperty-instance'];
     },
@@ -211,7 +217,12 @@ describe('Policy Engine with Runtime Core context', () => {
         resolve(message);
       });
     },
-    getIdentityOfHyperty: () => {
+    getIdentity: () => {
+      return new Promise((resolve) => {
+        resolve({ userProfile: {username: 'user@domain' } });
+      });
+    },
+    getToken: () => {
       return new Promise((resolve) => {
         resolve({ userProfile: {username: 'user@domain' } });
       });

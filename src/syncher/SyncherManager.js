@@ -61,6 +61,7 @@ class SyncherManager {
     _this._storageManager = storageManager;
 
     //TODO: these should be saved in persistence engine?
+    _this.runtimeURL = runtimeURL;
     _this._url = runtimeURL + '/sm';
     _this._objectURL = runtimeURL + '/object-allocation';
 
@@ -144,6 +145,11 @@ class SyncherManager {
 
     let owner = msg.from;
     let domain = divideURL(msg.from).domain;
+
+    // if reporter is in a Interworking Protostub the runtime domain backend services will be used
+    if (_this._registry.isInterworkingProtoStub(msg.from)) {
+      domain = divideURL(_this.runtimeURL).domain;
+    }
 
     if (msg.body.resource) {
       _this._authorise(msg, msg.body.resource);
@@ -285,7 +291,7 @@ class SyncherManager {
 
       _this._reporters[resource] = reporter;
 
-      reporter.resumeSubscriptions(storedObject.subscriptions);
+      // reporter.resumeSubscriptions(storedObject.subscriptions);
 
       //FLOW-OUT: message response to Syncher -> create
       _this._bus.postMessage({
@@ -417,6 +423,10 @@ class SyncherManager {
             body: { identity: nodeSubscribeMsg.body.identity, subscriber: hypertyURL }
           };
 
+          //TODO: For Further Study
+          if (msg.body.hasOwnProperty('mutualAuthentication')) objSubscribeMsg.body.mutualAuthentication = msg.body.mutualAuthentication;
+          console.log('[SyncherManager._newSubscription]', objSubscribeMsg, msg);
+
           //subscribe to reporter SM
           _this._bus.postMessage(objSubscribeMsg, (reply) => {
             console.log('reporter-subscribe-response-new: ', reply);
@@ -448,6 +458,8 @@ class SyncherManager {
               reply.body.schema = msg.body.schema;
               reply.body.resource = msg.body.resource;
 
+              //TODO: For Further Study
+              if (msg.body.hasOwnProperty('mutualAuthentication')) reply.body.mutualAuthentication = msg.body.mutualAuthentication;
               console.log('[subscribe] - new subscription: ', msg, reply, observer);
 
               this._bus.postMessage(reply);

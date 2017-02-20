@@ -10,7 +10,11 @@ import Dexie from 'dexie';
 export const runtimeFactory = {
 
   createSandbox() {
-    return new SandboxBrowser();
+
+    return new Promise((resolve) => {
+      resolve(new SandboxBrowser());
+    });
+
   },
 
   createAppSandbox() {

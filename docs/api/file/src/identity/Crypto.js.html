@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">src/identity/Crypto.js | Service Framework API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  <a href="test.html" data-ice="testLink">Test</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">allocation</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/allocation/AddressAllocation.js~AddressAllocation.html">AddressAllocation</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html">Bus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html">MiniBus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Pipeline.js~Pipeline.html">Pipeline</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">graphconnector</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/BloomFilter.js~BloomFilter.html">BloomFilter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GlobalRegistryRecord.js~GlobalRegistryRecord.html">GlobalRegistryRecord</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html">GraphConnector</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html">GraphConnectorContactData</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">identity</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/Crypto.js~Crypto.html">Crypto</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/GuiFake.js~GuiFake.html">GuiFake</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/Identity.js~Identity.html">Identity</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/IdentityModule.js~IdentityModule.html">IdentityModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/OpenIdLib.js~OpenIdLib.html">OpenIdLib</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/ActionsService.js~ActionsService.html">ActionsService</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/CombiningAlgorithm.js~CombiningAlgorithm.html">CombiningAlgorithm</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Operators.js~Operators.html">Operators</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/PDP.js~PDP.html">PDP</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/PEP.js~PEP.html">PEP</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Policy.js~Policy.html">Policy</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/ReThinkCtx.js~ReThinkCtx.html">ReThinkCtx</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Rule.js~Rule.html">Rule</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/combiningAlgorithms</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/AllowOverrides.js~AllowOverrides.html">AllowOverrides</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/BlockOverrides.js~BlockOverrides.html">BlockOverrides</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/FirstApplicable.js~FirstApplicable.html">FirstApplicable</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/conditions</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/AdvancedCondition.js~AdvancedCondition.html">AdvancedCondition</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/Condition.js~Condition.html">Condition</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/SubscriptionCondition.js~SubscriptionCondition.html">SubscriptionCondition</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/context</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html">RuntimeCoreCtx</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">protostub</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/protostub/IdpProxyStub.js~IdpProxyStub.html">IdpProxyStub</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-activate">activate</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">registry</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/Discovery.js~Discovery.html">Discovery</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/DiscoveryServiceFramework.js~DiscoveryServiceFramework.html">DiscoveryServiceFramework</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/HypertyInstance.js~HypertyInstance.html">HypertyInstance</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html">Registry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/RegistryDataModel.js~RegistryDataModel.html">RegistryDataModel</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">runtime</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/Descriptors.js~Descriptors.html">Descriptors</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/Loader.js~Loader.html">Loader</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/RuntimeUA.js~RuntimeUA.html">RuntimeUA</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-runtimeConfiguration">runtimeConfiguration</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-runtimeUtils">runtimeUtils</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">sandbox</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/sandbox/Sandbox.js~Sandbox.html">Sandbox</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/sandbox/SandboxRegistry.js~SandboxRegistry.html">SandboxRegistry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-SandboxType">SandboxType</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">syncher</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/ObserverObject.js~ObserverObject.html">ObserverObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/ReporterObject.js~ReporterObject.html">ReporterObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/StoreDataObjects.js~StoreDataObjects.html">StoreDataObjects</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/Subscription.js~Subscription.html">Subscription</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/SyncherManager.js~SyncherManager.html">SyncherManager</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">utils</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/utils/EventEmitter.js~EventEmitter.html">EventEmitter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-schemaValidation">schemaValidation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-buildURL">buildURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-convertToUserURL">convertToUserURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-deepClone">deepClone</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-divideEmail">divideEmail</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-divideURL">divideURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-emptyObject">emptyObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-generateGUID">generateGUID</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getConfigurationResources">getConfigurationResources</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserEmailFromURL">getUserEmailFromURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserIdentityDomain">getUserIdentityDomain</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserURLFromEmail">getUserURLFromEmail</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isBackendServiceURL">isBackendServiceURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isDataObjectURL">isDataObjectURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isHypertyURL">isHypertyURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isLegacy">isLegacy</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isURL">isURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isUserURL">isUserURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-removePathFromURL">removePathFromURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-tv4">tv4</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-divideURL">divideURL</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/identity/Crypto.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">/**
+* Class with the cryptographic functions for the authentication protocol
+*
+*/
+class Crypto {
+
+  constructor() {
+    let _this = this;
+
+  }
+
+  /**
+  * encode a byteArray value in base 64 encode
+  * @param   {byteArray}    value    byteArray value
+  * @return  {string}   encoded value
+  */
+  encode(value) {
+    return btoa(value);
+  }
+
+  /**
+  * decode a base64 value in a new Uint8Array
+  * @param   {string}    value    value encoded in base 64
+  * @return  {byteArray} decodedValue
+  */
+  decode(value) {
+    return new Uint8Array(JSON.parse(&apos;[&apos; + atob(value) + &apos;]&apos;));
+  }
+
+  encryptRSA(pubKey, data) {
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+      _this._importRSAencryptKey(new Uint8Array(pubKey)).then(function(publicKey) {
+
+        crypto.subtle.encrypt(
+            {
+              name: &apos;RSA-OAEP&apos;
+            },
+            publicKey, //from generateKey or importKey above
+            data //ArrayBuffer of data you want to encrypt
+        )
+        .then(function(encrypted) {
+          //returns an ArrayBuffer containing the encrypted data
+          //console.log(&apos;crypto-encryptRSA&apos;, new Uint8Array(encrypted));
+          resolve(new Uint8Array(encrypted));
+
+        }).catch(function(err) {
+          console.log(&apos;crypto-encryptRSA&apos;, err);
+          reject(err);
+        });
+
+      });
+
+    });
+
+  }
+
+  decryptRSA(privKey, data) {
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+      _this._importRSAdecryptKey(privKey).then(function(privateKey) {
+
+        crypto.subtle.decrypt(
+            {
+              name: &apos;RSA-OAEP&apos;
+            },
+            privateKey, //from generateKey or importKey above
+            data //ArrayBuffer of the data
+        )
+        .then(function(decrypted) {
+
+          let decryptedData = new Uint8Array(decrypted);
+
+          //console.log(&apos;crypto-decryptRSA&apos;, decryptedData);
+          resolve(decryptedData);
+
+        }).catch(function(err) {
+          console.log(&apos;crypto-decryptRSA&apos;, err);
+          reject(err);
+        });
+      });
+
+    });
+  }
+
+  signRSA(privKey, data) {
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+      _this._importRSAsignKey(privKey).then(function(privateKey) {
+
+        crypto.subtle.sign(
+            {
+              name: &apos;RSASSA-PKCS1-v1_5&apos;
+            },
+            privateKey, //from generateKey or importKey above
+            _this._utf8Encode(data) //ArrayBuffer of data you want to sign
+        )
+        .then(function(signature) {
+          //returns an ArrayBuffer containing the signature
+          //console.log(&apos;crypto-signRSA&apos;, new Uint8Array(signature));
+          resolve(new Uint8Array(signature));
+
+        }).catch(function(err) {
+          console.log(&apos;crypto-signRSA&apos;, err);
+          reject(err);
+        });
+
+      });
+
+    });
+  }
+
+  verifyRSA(pubKey, data, signature) {
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+      _this._importRSAverifyKey(pubKey).then(function(publicKey) {
+
+        crypto.subtle.verify(
+            {
+              name: &apos;RSASSA-PKCS1-v1_5&apos;
+            },
+            publicKey, //from generateKey or importKey above
+            signature, //ArrayBuffer of the signature
+            _this._utf8Encode(data) //ArrayBuffer of the data
+        )
+        .then(function(isvalid) {
+          //returns a boolean on whether the signature is true or not
+          //console.log(&apos;crypto-verifyRSA&apos;, isvalid);
+          resolve(isvalid);
+
+        }).catch(function(err) {
+          console.log(&apos;crypto-verifyRSA&apos;, err);
+          reject(err);
+        });
+
+      });
+
+    });
+  }
+
+  encryptAES(key, data, iv) {
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+      _this._importAESkey(key).then(function(aesKey) {
+
+        crypto.subtle.encrypt(
+            {
+              name: &apos;AES-CBC&apos;,
+              //Don&apos;t re-use initialization vectors!
+              //Always generate a new iv every time your encrypt!
+              iv: iv
+            },
+            aesKey, //from generateKey or importKey above
+            _this._utf8Encode(data) //ArrayBuffer of data you want to encrypt
+        )
+        .then(function(encrypted) {
+          //returns an ArrayBuffer containing the encrypted data
+          //console.log(&apos;crypto-encryptAES&apos;, new Uint8Array(encrypted));
+          resolve(new Uint8Array(encrypted));
+
+        }).catch(function(err) {
+          console.log(&apos;crypto-encryptAES&apos;, err);
+          reject(err);
+        });
+
+      });
+
+    });
+  }
+
+  decryptAES(key, data, iv) {
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+      _this._importAESkey(key).then(function(aesKey) {
+
+        crypto.subtle.decrypt(
+            {
+              name: &apos;AES-CBC&apos;,
+              iv: iv
+            },
+            aesKey, //from generateKey or importKey above
+            data //ArrayBuffer of the data
+        )
+        .then(function(decrypted) {
+
+          let decodedData = _this._utf8Decode(new Uint8Array(decrypted));
+          //console.log(&apos;crypto-decryptAES&apos;, decodedData);
+          resolve(decodedData);
+
+        }).catch(function(err) {
+          console.log(&apos;crypto-decryptAES&apos;, err);
+          reject(err);
+        });
+
+      });
+
+    });
+  }
+
+  /**
+  * creates a hash using the HMAC algorithm
+  * @param  {byteArray}    key       key to be used in the hmac
+  * @param  {string}      data       information to be hashed
+  * @return  {byteArray}   signature  resulting hash
+  */
+  hashHMAC(key, data) {
+    let _this = this;
+
+    return new Promise(function(resolve,reject) {
+
+      _this._importHMACkey(key).then(function(hmacKey) {
+
+        crypto.subtle.sign(
+        {
+          name: &apos;HMAC&apos;
+        },
+        hmacKey, //from generateKey or importKey above
+        _this._utf8Encode(data) //ArrayBuffer of data you want to sign
+        )
+        .then(function(signature) {
+          //console.log(&apos;crypto-hashHMAC&apos;, signature);
+
+          //returns an ArrayBuffer containing the signature
+          resolve(new Uint8Array(signature));
+
+        }).catch(function(err) {
+          console.log(&apos;crypto-hashHMAC&apos;, err);
+          reject(err);
+        });
+      });
+    });
+  }
+
+  /**
+  * verifies an hash using the HMAC algorithm
+  * @param  {byteArray}    key       key to be used in the hmac
+  * @param  {string}      data       information to be hashed to compare
+  * @param  {byteArray}  signature   hash to compare with the received data
+  * @return  {boolean}   isvalid     boolean saying if the data corresponds to the hash received
+  */
+  verifyHMAC(key, data, signature) {
+    let _this = this;
+
+    return new Promise(function(resolve,reject) {
+
+      _this._importHMACkey(key).then(function(hmacKey) {
+
+        crypto.subtle.verify(
+          {
+            name: &apos;HMAC&apos;
+          },
+          hmacKey, //from generateKey or importKey above
+          signature, //ArrayBuffer of the signature
+          _this._utf8Encode(data) //ArrayBuffer of the data
+        )
+        .then(function(isvalid) {
+          //returns a boolean on whether the signature is true or not
+          //console.log(&apos;crypto-verifyHMAC&apos;, isvalid);
+          (isvalid) ? resolve(isvalid) : reject(isvalid);
+
+        }).catch(function(err) {
+          console.error(&apos;crypto-verifyHMAC&apos;, err);
+          reject(err);
+        });
+
+      });
+    });
+  }
+
+  /**
+  * generates a RSA public/private key pair with a modulus length of 2048 bits
+  * @return  {JSON}   keyPair    json containing the public and private keys
+  */
+  generateRSAKeyPair() {
+    let _this = this;
+    let keyPair = {};
+
+    return new Promise(function(resolve, reject) {
+      crypto.subtle.generateKey(
+      {
+        name: &apos;RSA-PSS&apos;,
+        modulusLength: 2048, //can be 1024, 2048, or 4096
+        publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
+        hash: {name: &apos;SHA-256&apos;} //can be &apos;SHA-1&apos;, &apos;SHA-256&apos;, &apos;SHA-384&apos;, or &apos;SHA-512&apos;
+      },
+      true, //whether the key is extractable (i.e. can be used in exportKey)
+      [&apos;sign&apos;, &apos;verify&apos;] //can be any combination of &apos;sign&apos; and &apos;verify&apos;
+
+      ).then(function(key) {
+        //returns a keypair object
+        //console.log(key);
+
+        crypto.subtle.exportKey(
+          &apos;spki&apos;, //can be &apos;jwk&apos; (public or private), &apos;spki&apos; (public only), or &apos;pkcs8&apos; (private only)
+          key.publicKey //can be a publicKey or privateKey, as long as extractable was true
+        ).then(function(publicKey) {
+          //returns the exported key data
+          keyPair.public  = new Uint8Array(publicKey);
+          return crypto.subtle.exportKey(
+            &apos;pkcs8&apos;, //can be &apos;jwk&apos; (public or private), &apos;spki&apos; (public only), or &apos;pkcs8&apos; (private only)
+            key.privateKey //can be a publicKey or privateKey, as long as extractable was true
+          );
+        }).then(function(privateKey) {
+          keyPair.private  = new Uint8Array(privateKey);
+          //console.log(&apos;crypto-generateRSAKeyPair&apos;, keyPair);
+
+          resolve(keyPair);
+
+        }).catch(function(err) {
+          console.error(err);
+          reject(err);
+        });
+
+      }).catch(function(err) {
+        console.error(err);
+        reject(err);
+      });
+    });
+  }
+
+  /**
+  * Generates a 128 bit random value.
+  * @return {byteArray}  array    random value
+  */
+  generateIV() {
+    let _this = this;
+
+    let array = new  Uint8Array(16);
+    crypto.getRandomValues(array);
+
+    return array;
+  }
+
+  /**
+  * Generates a 256 bit random value. 32 bits are extrated from the machine time,
+  * the remaining are generated randomly
+  * @return {byteArray}  array    random value
+  */
+  generateRandom() {
+    let _this = this;
+
+    let array = new  Uint8Array(32);
+    crypto.getRandomValues(array);
+
+    let date = Date.now();
+    let dateEncoded = _this._utf8Encode(date);
+
+    //extract the least significant 4 bytes in the date
+    let finalDate = dateEncoded.slice(dateEncoded.length - 4, dateEncoded.length);
+
+    // add in the first 4 bytes of the array the bytes extracted previously;
+    for (let i = 0; i &lt; 4; i++) { array[i] = finalDate[i]; }
+    return array;
+  }
+
+  /**
+  * generates a premaster secret (PMS) of 48 bytes (384 bits) randomly
+  * @return {byteArray}  array    premaster secret key
+  */
+  generatePMS() {
+    let _this = this;
+
+    let array = new Uint8Array(48);
+    crypto.getRandomValues(array);
+    return array;
+  }
+
+  /**
+  * generates a masterKey secret (PMS) of 48 bytes (384 bits) using the premaster secret and
+  * two randoms
+  * @return {byteArray}  array    master secret key with 48 bytes
+  */
+  generateMasterSecret(hmacKey, data) {
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+      let key = new Uint8Array(48);
+      let seed = data;
+
+      _this._digest(hmacKey).then((digestedKey) =&gt; {
+
+        _this.hashHMAC(digestedKey, seed).then(function(keypart0) {
+
+          //copy the first 32 bytes into the key
+          for (let i = 0; i &lt; 32; i++) { key[i] = keypart0[i]; }
+          return _this.hashHMAC(digestedKey, seed + keypart0);
+
+        }).then(function(keypart1) {
+
+          //copy the first 16 bytes to the key remaining 16 bytes
+          for (let i = 0; i &lt; 16; i++) { key[i + 32] = keypart1[i]; }
+          //console.log(&apos;crypto-generateMasterSecret&apos;, key);
+          resolve(key);
+
+        }).catch(function(err) {
+          console.log(&apos;crypto-generateMasterSecret&apos;, err);
+          reject(err);
+        });
+      });
+
+    });
+  }
+
+  /**
+  * generates both users MAC and encryption keys. generate as output an array
+  * with 4 byteArray each with 32 bytes
+  * @param  {byteArray}        secret       secret to be used in the HMAC function
+  * @param  {String}           data         information to be used as seed
+  * @return {Array&lt;byteArray&gt;} key          array with the information to generate keys
+  */
+  generateKeys(hmacKey, data) {
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+
+      let key = [];
+      let seed = data;
+
+      // iterate 4 times to obtain a 1024 key size
+      _this.hashHMAC(hmacKey, seed).then(function(keypart0) {
+        key.push(keypart0);
+        return _this.hashHMAC(hmacKey, seed + keypart0);
+
+      }).then(function(keypart1) {
+        key.push(keypart1);
+        return _this.hashHMAC(hmacKey, seed + keypart1);
+
+      }).then(function(keypart2) {
+        key.push(keypart2);
+        return _this.hashHMAC(hmacKey, seed + keypart2);
+
+      }).then(function(keypart3) {
+        key.push(keypart3);
+
+        //console.log(&apos;crypto-generateKeys&apos;, key);
+        resolve(key);
+
+      }).catch(function(err) {
+        //console.log(&apos;crypto-generateKeys&apos;, err);
+        reject(err);
+      });
+
+      //console.log(hmacKey, data);
+    });
+  }
+
+  _importRSAsignKey(privKey) {
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+      crypto.subtle.importKey(
+          &apos;pkcs8&apos;, //can be &apos;jwk&apos; (public or private), &apos;spki&apos; (public only), or &apos;pkcs8&apos; (private only)
+          privKey,
+          {   //these are the algorithm options
+            name: &apos;RSASSA-PKCS1-v1_5&apos;,
+            hash: {name: &apos;SHA-256&apos;} //can be &apos;SHA-1&apos;, &apos;SHA-256&apos;, &apos;SHA-384&apos;, or &apos;SHA-512&apos;
+          },
+          true, //whether the key is extractable (i.e. can be used in exportKey)
+          [&apos;sign&apos;] //&apos;verify&apos; for public key import, &apos;sign&apos; for private key imports
+      )
+      .then(function(privateKey) {
+        //returns a publicKey (or privateKey if you are importing a private key)
+        //console.log(&apos;crypto-_importRSAsignKey&apos;, privateKey);
+        resolve(privateKey);
+
+      }).catch(function(err) {
+        console.error(&apos;crypto-_importRSAsignKey&apos;, err);
+        reject(err);
+      });
+    });
+  }
+
+  _importRSAverifyKey(pubKey) {
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+      crypto.subtle.importKey(
+          &apos;spki&apos;, //can be &apos;jwk&apos; (public or private), &apos;spki&apos; (public only), or &apos;pkcs8&apos; (private only)
+          pubKey,
+          {   //these are the algorithm options
+            name: &apos;RSASSA-PKCS1-v1_5&apos;,
+            hash: {name: &apos;SHA-256&apos;} //can be &apos;SHA-1&apos;, &apos;SHA-256&apos;, &apos;SHA-384&apos;, or &apos;SHA-512&apos;
+          },
+          true, //whether the key is extractable (i.e. can be used in exportKey)
+          [&apos;verify&apos;] //&apos;verify&apos; for public key import, &apos;sign&apos; for private key imports
+      )
+      .then(function(publicKey) {
+        //returns a publicKey (or privateKey if you are importing a private key)
+        //console.log(&apos;crypto-_importRSAverifyKey&apos;, publicKey);
+        resolve(publicKey);
+
+      }).catch(function(err) {
+        console.error(&apos;crypto-_importRSAverifyKey&apos;, err);
+        reject(err);
+      });
+    });
+  }
+
+  _importRSAencryptKey(pubKey) {
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+      crypto.subtle.importKey(
+          &apos;spki&apos;, //can be &apos;jwk&apos; (public or private), &apos;spki&apos; (public only), or &apos;pkcs8&apos; (private only)
+          pubKey,
+          {   //these are the algorithm options
+            name: &apos;RSA-OAEP&apos;,
+            hash: {name: &apos;SHA-256&apos;} //can be &apos;SHA-1&apos;, &apos;SHA-256&apos;, &apos;SHA-384&apos;, or &apos;SHA-512&apos;
+          },
+          true, //whether the key is extractable (i.e. can be used in exportKey)
+          [&apos;encrypt&apos;] //&apos;encrypt&apos; or &apos;wrapKey&apos; for public key import or
+                      //&apos;decrypt&apos; or &apos;unwrapKey&apos; for private key imports
+      )
+      .then(function(publicKey) {
+        //returns a publicKey (or privateKey if you are importing a private key)
+        //console.log(&apos;crypto-_importRSAencryptKey&apos;, publicKey);
+        resolve(publicKey);
+
+      }).catch(function(err) {
+        console.error(&apos;crypto-_importRSAencryptKey&apos;, err);
+        reject(err);
+      });
+    });
+  }
+
+  _importRSAdecryptKey(privKey) {
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+      crypto.subtle.importKey(
+          &apos;pkcs8&apos;, //can be &apos;jwk&apos; (public or private), &apos;spki&apos; (public only), or &apos;pkcs8&apos; (private only)
+          privKey,
+          {   //these are the algorithm options
+            name: &apos;RSA-OAEP&apos;,
+            hash: {name: &apos;SHA-256&apos;} //can be &apos;SHA-1&apos;, &apos;SHA-256&apos;, &apos;SHA-384&apos;, or &apos;SHA-512&apos;
+          },
+          true, //whether the key is extractable (i.e. can be used in exportKey)
+          [&apos;decrypt&apos;] //&apos;encrypt&apos; or &apos;wrapKey&apos; for public key import or
+                      //&apos;decrypt&apos; or &apos;unwrapKey&apos; for private key imports
+      )
+      .then(function(privateKey) {
+        //returns a publicKey (or privateKey if you are importing a private key)
+        //console.log(&apos;crypto-_importRSAdecryptKey&apos;, privateKey);
+        resolve(privateKey);
+
+      }).catch(function(err) {
+        console.error(&apos;crypto-_importRSAdecryptKey&apos;, err);
+        reject(err);
+      });
+    });
+  }
+
+  concatPMSwithRandoms(pms, toRandom, fromRandom) {
+    let _this = this;
+
+    let finalKey = new Uint8Array(pms.length + toRandom.length + fromRandom.length);
+
+    // add PremasterKey
+    for (let i = 0; i &lt; pms.length; i++) {
+      finalKey[i] = pms[i];
+    }
+
+    //add to random
+    for (let i = 0; i &lt; toRandom.length; i++) {
+      finalKey[i + pms.length] = pms[i];
+    }
+
+    //add from random
+    for (let i = 0; i &lt; fromRandom.length; i++) {
+      finalKey[i + pms.length + toRandom.length] = pms[i];
+    }
+
+    return finalKey;
+  }
+
+  _generate256bitKey() {
+    let array = new  Uint8Array(32);
+    crypto.getRandomValues(array);
+
+    return array;
+  }
+
+  /**
+  * imports the secret to the HMAC function
+  * @param  {byteArray}   arrayBuffer     bytes to import as key
+  * @return {JSON}       key              key ready to be used in the HMAC cryptographic function
+  */
+  _importHMACkey(arrayBuffer) {
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+
+      _this._digest(arrayBuffer).then((key) =&gt; {
+
+        crypto.subtle.importKey(
+        &apos;raw&apos;, //can be &apos;jwk&apos; or &apos;raw&apos;
+        key,
+        {   //this is the algorithm options
+          name: &apos;HMAC&apos;,
+          hash: {name: &apos;SHA-256&apos;}, //can be &apos;SHA-1&apos;, &apos;SHA-256&apos;, &apos;SHA-384&apos;, or &apos;SHA-512&apos;
+          length: 256 //optional, if you want your key length to differ from the hash function&apos;s block length
+        },
+        true, //whether the key is extractable (i.e. can be used in exportKey)
+        [&apos;sign&apos;, &apos;verify&apos;] //can be any combination of &apos;sign&apos; and &apos;verify&apos;
+        ).then(function(key) {
+          //returns the symmetric key
+          //console.log(&apos;crypto-_importHMACkey&apos;, key);
+          resolve(key);
+        })
+        .catch(function(err) {
+          reject(err);
+        });
+      });
+    });
+  }
+
+  _digest(value) {
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+      crypto.subtle.digest(
+          {
+            name: &apos;SHA-256&apos;
+          },
+          value //The data you want to hash as an ArrayBuffer
+      )
+      .then(function(hash) {
+        //returns the hash as an ArrayBuffer
+        //console.log(&apos;crypto-digest&apos;, new Uint8Array(hash));
+        resolve(new Uint8Array(hash));
+      })
+      .catch(function(err) {
+        console.error(err);
+        reject(err);
+      });
+
+    });
+  }
+
+  _importAESkey(arrayBuffer) {
+    return new Promise(function(resolve, reject) {
+      crypto.subtle.importKey(
+          &apos;raw&apos;, //can be &apos;jwk&apos; or &apos;raw&apos;
+          arrayBuffer,
+          {   //this is the algorithm options
+            name: &apos;AES-CBC&apos;
+          },
+          true, //whether the key is extractable (i.e. can be used in exportKey)
+          [&apos;encrypt&apos;, &apos;decrypt&apos;] //can be &apos;encrypt&apos;, &apos;decrypt&apos;, &apos;wrapKey&apos;, or &apos;unwrapKey&apos;
+      )
+      .then(function(key) {
+        //returns the symmetric key
+        //console.log(&apos;crypto-importAESkey&apos;, key);
+        resolve(key);
+      })
+      .catch(function(err) {
+        console.error(&apos;crypto-importAESkey&apos;, err);
+        reject(err);
+      });
+    });
+  }
+
+  _utf8Encode(s) {
+    return new TextEncoder(&apos;utf-8&apos;).encode(s);
+  }
+
+  _utf8Decode(s) {
+    return new TextDecoder(&apos;utf-8&apos;).decode(s);
+  }
+}
+
+export default Crypto;
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.5.2)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

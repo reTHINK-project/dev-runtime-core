@@ -20,23 +20,36 @@ class Descriptors {
 
     return new Promise((resolve, reject) => {
 
-      let dividedURL = divideURL(stubURL);
-      let domain = dividedURL.domain;
-      let protostub = dividedURL.identity;
+      let domain;
+      let protostub;
       let protoStubURL;
 
       let originDividedURL = divideURL(this.runtimeURL);
       let originDomain = originDividedURL.domain;
 
-      if (!domain) {
-        domain = idpProxyURL;
+      if (stubURL.includes('://')) {
+        let dividedURL = divideURL(stubURL);
+        domain = dividedURL.domain;
+        let path = dividedURL.identity;
+        if (path)
+          protostub = path.substring(path.lastIndexOf('/') + 1);
+        else {
+            protostub = 'default';
+          }
+      } else {
+        protostub = 'default';
+        domain = stubURL;
+      }
+
+  /*    if (!domain) {
+        domain = stubURL;
       }
 
       if (!protostub) {
         protostub = 'default';
       } else {
         protostub = protostub.substring(protostub.lastIndexOf('/') + 1);
-      }
+      }*/
 
       protoStubURL = buildURL(this.runtimeConfiguration, 'catalogueURLs', 'protocolstub', protostub);
       if (domain !== this.runtimeConfiguration.domain) {
@@ -79,22 +92,27 @@ class Descriptors {
   getIdpProxyDescriptor(idpProxyURL) {
     return new Promise((resolve, reject) => {
 
-      let dividedURL = divideURL(idpProxyURL);
-      let domain = dividedURL.domain;
-      let idpproxy = dividedURL.identity;
+      let domain;
+      let idpproxy;
+      let protoStubURL;
 
       let originDividedURL = divideURL(this.runtimeURL);
       let originDomain = originDividedURL.domain;
 
-      if (!domain) {
+      if (idpProxyURL.includes('://')) {
+        let dividedURL = divideURL(idpProxyURL);
+        domain = dividedURL.domain;
+        let path = dividedURL.identity;
+        if (path)
+          idpproxy = path.substring(path.lastIndexOf('/') + 1);
+        else {
+            idpproxy = 'default';
+          }
+      } else {
+        idpproxy = 'default';
         domain = idpProxyURL;
       }
 
-      if (domain === originDomain || !idpproxy) {
-        idpproxy = 'default';
-      } else {
-        idpproxy = idpproxy.substring(idpproxy.lastIndexOf('/') + 1);
-      }
 
       let resource = getConfigurationResources(this.runtimeConfiguration, 'catalogueURLs', 'idpProxy');
 
