@@ -1,4 +1,11 @@
-# Hyperty Runtime Core [![Build Status](https://travis-ci.org/reTHINK-project/dev-runtime-core.svg?branch=dev-interworking)](https://travis-ci.org/reTHINK-project/dev-runtime-core)
+# Hyperty Runtime Core
+
+### Build status
+
+| Master                                   | Develop                                  |
+| ---------------------------------------- | ---------------------------------------- |
+| [![Build Status](https://travis-ci.org/reTHINK-project/dev-runtime-core.svg?branch=master)](https://travis-ci.org/reTHINK-project/dev-runtime-core) | [![Build Status](https://travis-ci.org/reTHINK-project/dev-runtime-core.svg?branch=develop)](https://travis-ci.org/reTHINK-project/dev-runtime-core)
+
 
 --------------------
 
@@ -76,7 +83,8 @@ npm install
 
 ### Issues
 
-if you have some trouble with the environment, you can open an issue;
+if you have some trouble with the environment, you can open an issue [here](https://github.com/reTHINK-project/dev-runtime-core/issues);
+
 
 ### Javascript Environment
 
@@ -108,7 +116,6 @@ npm run test:lint
 ```
 
 
-
 #### Documentation
 
 To generates api documentation, check [here](#documentation-task);
@@ -116,10 +123,7 @@ To generates api documentation, check [here](#documentation-task);
 #### Unit Testing
 
 Unit testing can be launched manually with **karma start**.
-
-~~It's advisable to use [expect.js](https://github.com/Automattic/expect.js) instead of assert.~~
-
-After investigate and testing the [expect.js](https://github.com/Automattic/expect.js) it don't support some features for ES6, because this tool hasn't activity at some time, that is why, it is recomended use the [chaijs](http://chaijs.com/) it is more versatile and have expect.js (but updated) and others tools that can be useful;
+The tool to do the tests is the [chaijs](http://chaijs.com/), with expect;
 
 ##### Karma
 
