@@ -34,7 +34,11 @@ class Crypto {
   * @return  {byteArray} decodedValue
   */
   decode(value) {
-    return new Uint8Array(JSON.parse('[' + atob(value) + ']'));
+    console.log('TIAGO before decoding', value);
+    //let decoded = new Uint8Array(JSON.parse(JSON.stringify('[' + atob(value) + ']')));
+    let decoded = new Uint8Array(JSON.parse('[' + atob(value) + ']'));
+    console.log('TIAGO after decoding');
+    return decoded;
   }
 
   encryptRSA(pubKey, data) {
@@ -539,7 +543,7 @@ class Crypto {
         resolve(publicKey);
 
       }).catch(function(err) {
-        console.error('crypto-_importRSAencryptKey', err);
+        console.error('crypto-_importRSAencryptKey', err.name);
         reject(err);
       });
     });

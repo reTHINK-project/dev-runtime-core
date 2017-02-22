@@ -571,6 +571,7 @@ class Registry {
       }
 
       _this.idModule.getIdentityAssertion().then(function(result) {
+        console.log('TIAGO registry', result);
         let userProfile = result.userProfile;
         let identityURL = userProfile.userURL;
 
