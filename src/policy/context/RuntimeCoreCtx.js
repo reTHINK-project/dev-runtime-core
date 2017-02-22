@@ -126,34 +126,36 @@ class RuntimeCoreCtx extends ReThinkCtx {
       // TODO remove this validation. When the Nodejs auth was completed this should work like browser;
       this.runtimeCapabilities.isAvailable('node').then((result) => {
 
+        console.log('[RuntimeCoreCtx - isAvailable - node] - ', result);
         if (result) {
           return resolve(message);
+        } else {
+          if (isIncoming & result) {
+            let isSubscription = message.type === 'subscribe';
+            let isFromRemoteSM = _this.isFromRemoteSM(message.from);
+            if (isSubscription & isFromRemoteSM) {
+              _this.doMutualAuthentication(message).then(() => {
+                resolve(message);
+              }, (error) => {
+                reject(error);
+              });
+            } else {
+              resolve(message);
+            }
+          } else {
+            if (_this._isToCypherModule(message)) {
+              _this.idModule.encryptMessage(message).then((message) => {
+                resolve(message);
+              }, (error) => {
+                reject(error);
+              });
+            } else {
+              resolve(message);
+            }
+          }
         }
       });
 
-      if (isIncoming & result) {
-        let isSubscription = message.type === 'subscribe';
-        let isFromRemoteSM = _this.isFromRemoteSM(message.from);
-        if (isSubscription & isFromRemoteSM) {
-          _this.doMutualAuthentication(message).then(() => {
-            resolve(message);
-          }, (error) => {
-            reject(error);
-          });
-        } else {
-          resolve(message);
-        }
-      } else {
-        if (_this._isToCypherModule(message)) {
-          _this.idModule.encryptMessage(message).then((message) => {
-            resolve(message);
-          }, (error) => {
-            reject(error);
-          });
-        } else {
-          resolve(message);
-        }
-      }
     });
   }
 
