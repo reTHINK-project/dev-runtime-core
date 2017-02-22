@@ -34,7 +34,7 @@
   },
   "homepage": "https://rethink-project.eu/",
   "dependencies": {
-    "service-framework": "github:rethink-project/dev-service-framework#develop"
+    "service-framework": "github:rethink-project/dev-service-framework#fix-forward-msg"
   },
   "devDependencies": {
     "babel-core": "^6.21.0",

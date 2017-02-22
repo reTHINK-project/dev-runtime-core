@@ -69,6 +69,18 @@ class ReporterObject {
     });
   }
 
+  resumeSubscriptions(subscriptions) {
+    let _this = this;
+
+    Object.keys(subscriptions).forEach((key) => {
+      let hypertyURL = subscriptions[key];
+
+      if (!_this._subscriptions[hypertyURL]) {
+        _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, _this._childrens, true);
+      }
+    });
+  }
+
   /**
    * Register a listener in the msg-node and in the local MessageBus, so that messages on this address are forwarded to the reporter object
    * @param  {string} address - URL to register the listeners
@@ -131,6 +143,8 @@ class ReporterObject {
       }
 
       let childBaseURL = _this._url + '/children/';
+      console.log('[ReporterObject - addChildrens] - childrens: ', childrens, childBaseURL);
+
       childrens.forEach((child) => {
         _this._childrens.push(child);
       });

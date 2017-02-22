@@ -112,7 +112,7 @@ class SyncherManager {
       // so we will create an resumed object and will try to resume the object previously saved;
       this._storeDataObjects.getResourcesByCriteria(msg, true).then((result) => {
 
-        console.info('[SyncherManager - Create Resumed Object]', msg);
+        console.info('[SyncherManager - Create Resumed Object]', msg, result);
 
         if (result && Object.keys(result).length > 0) {
 
@@ -130,7 +130,7 @@ class SyncherManager {
           reply.type = 'response';
           reply.body = {
             code: 404,
-            desc: 'No data objects to be resumed'
+            desc: 'No data objects reporters to be resumed'
           };
           this._bus.postMessage(reply);
         }
@@ -291,20 +291,26 @@ class SyncherManager {
 
       _this._reporters[resource] = reporter;
 
-      // reporter.resumeSubscriptions(storedObject.subscriptions);
+      reporter.resumeSubscriptions(storedObject.subscriptions);
 
-      //FLOW-OUT: message response to Syncher -> create
-      _this._bus.postMessage({
-        id: msg.id, type: 'response', from: msg.to, to: owner,
-        body: { code: 200, resource: resource, childrenResources: childrens, schema: schema, value: storedObject.data }
+      reporter.addChildrens(childrens).then(() => {
+
+        _this._reporters[resource] = reporter;
+
+        //FLOW-OUT: message response to Syncher -> create
+        _this._bus.postMessage({
+          id: msg.id, type: 'response', from: msg.to, to: owner,
+          body: { code: 200, resource: resource, childrenResources: childrens, schema: schema, value: storedObject.data }
+        });
+
+        //send create to all observers, responses will be deliver to the Hyperty owner?
+        //schedule for next cycle needed, because the Reporter should be available.
+        setTimeout(() => {
+          //will invite other hyperties
+          _this._authorise(msg, resource);
+        });
+
       });
-
-      // //send create to all observers, responses will be deliver to the Hyperty owner?
-      // //schedule for next cycle needed, because the Reporter should be available.
-      // setTimeout(() => {
-      //   //will invite other hyperties
-      //   _this._authorise(authMsg, resource);
-      // });
 
     });
   }
@@ -370,7 +376,7 @@ class SyncherManager {
         reply.type = 'response';
         reply.body = {
           code: 404,
-          desc: 'No data objects to be resumed'
+          desc: 'No data objects observers to be resumed'
         };
         this._bus.postMessage(reply);
       }
@@ -510,7 +516,7 @@ class SyncherManager {
       //FLOW-OUT: subscribe message to remote ReporterObject -> _onRemoteSubscribe
       let objSubscribeMsg = {
         type: 'subscribe', from: this._url, to: objURLSubscription,
-        body: { subscriber: hypertyURL }
+        body: { subscriber: hypertyURL, identity: msg.body.identity }
       };
 
       //subscribe to reporter SM

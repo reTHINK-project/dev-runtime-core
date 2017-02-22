@@ -140,8 +140,8 @@ class PEP {
   }
 
   _isIncomingMessage(message) {
-
-    return !this.context.isLocal(message.from);
+    let from = message.type === 'forward' ? message.body.from : message.from;
+    return !this.context.isLocal(from);
   }
 
   /**
