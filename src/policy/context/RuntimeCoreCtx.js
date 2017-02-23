@@ -136,15 +136,15 @@ class RuntimeCoreCtx extends ReThinkCtx {
             if (isSubscription & isFromRemoteSM) {
 
               // TODO: should activate this to use the mutualAuthentication
-              resolve(message);
+              // resolve(message);
 
               // TODO: should verify why the mutualAuthentication is not working
               // TODO: this should uncommented
-              // _this.doMutualAuthentication(message).then(() => {
-              //   resolve(message);
-              // }, (error) => {
-              //   reject(error);
-              // });
+              _this.doMutualAuthentication(message).then(() => {
+                resolve(message);
+              }, (error) => {
+                reject(error);
+              });
 
             } else {
               resolve(message);
@@ -152,19 +152,19 @@ class RuntimeCoreCtx extends ReThinkCtx {
           } else {
 
             // TODO should encrypt messages and this should be removed;
-            resolve(message);
+            // resolve(message);
 
             // TODO: should verify why the mutualAuthentication is not working
             // TODO: this should uncommented
-            // if (_this._isToCypherModule(message)) {
-            //   _this.idModule.encryptMessage(message).then((message) => {
-            //     resolve(message);
-            //   }, (error) => {
-            //     reject(error);
-            //   });
-            // } else {
-            //   resolve(message);
-            // }
+            if (_this._isToCypherModule(message)) {
+              _this.idModule.encryptMessage(message).then((message) => {
+                resolve(message);
+              }, (error) => {
+                reject(error);
+              });
+            } else {
+              resolve(message);
+            }
           }
         }
       });
