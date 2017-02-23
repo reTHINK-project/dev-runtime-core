@@ -134,24 +134,37 @@ class RuntimeCoreCtx extends ReThinkCtx {
             let isSubscription = message.type === 'subscribe';
             let isFromRemoteSM = _this.isFromRemoteSM(message.from);
             if (isSubscription & isFromRemoteSM) {
-              _this.doMutualAuthentication(message).then(() => {
-                resolve(message);
-              }, (error) => {
-                reject(error);
-              });
+
+              // TODO: should activate this to use the mutualAuthentication
+              resolve(message);
+
+              // TODO: should verify why the mutualAuthentication is not working
+              // TODO: this should uncommented
+              // _this.doMutualAuthentication(message).then(() => {
+              //   resolve(message);
+              // }, (error) => {
+              //   reject(error);
+              // });
+
             } else {
               resolve(message);
             }
           } else {
-            if (_this._isToCypherModule(message)) {
-              _this.idModule.encryptMessage(message).then((message) => {
-                resolve(message);
-              }, (error) => {
-                reject(error);
-              });
-            } else {
-              resolve(message);
-            }
+
+            // TODO should encrypt messages and this should be removed;
+            resolve(message);
+
+            // TODO: should verify why the mutualAuthentication is not working
+            // TODO: this should uncommented
+            // if (_this._isToCypherModule(message)) {
+            //   _this.idModule.encryptMessage(message).then((message) => {
+            //     resolve(message);
+            //   }, (error) => {
+            //     reject(error);
+            //   });
+            // } else {
+            //   resolve(message);
+            // }
           }
         }
       });

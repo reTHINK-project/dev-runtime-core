@@ -1055,23 +1055,24 @@ class IdentityModule {
   doMutualAuthentication(sender, receiver) {
     console.log('doMutualAuthentication: ', sender, receiver);
     let _this = this;
-    let dataObjectURL;
-
-    // check if the sender is a dataObject and if so stores that value
-    let reporterURL = _this.registry.getReporterURLSynchonous(sender);
-    if (reporterURL) {
-      dataObjectURL = sender;
-      sender = reporterURL;
-    }
-
-    let msg = {
-      to: receiver,
-      from: sender,
-      callback: undefined,
-      body: {handshakePhase: 'startHandShake', ignore: 'ignoreMessage'}
-    };
 
     return new Promise(function(resolve, reject) {
+
+      let dataObjectURL;
+
+      // check if the sender is a dataObject and if so stores that value
+      let reporterURL = _this.registry.getReporterURLSynchonous(sender);
+      if (reporterURL) {
+        dataObjectURL = sender;
+        sender = reporterURL;
+      }
+
+      let msg = {
+        to: receiver,
+        from: sender,
+        callback: undefined,
+        body: {handshakePhase: 'startHandShake', ignore: 'ignoreMessage'}
+      };
 
       if (!sender || !receiver) {
         return reject('sender or receiver missing on doMutualAuthentication');
