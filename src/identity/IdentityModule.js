@@ -806,7 +806,7 @@ class IdentityModule {
       let isToHyperty = divideURL(message.to).type === 'hyperty';
 
       if (message.type === 'update') {
-        resolve(message);
+        return resolve(message);
       }
 
       if (isToLegacyIdentity) {
@@ -860,7 +860,7 @@ class IdentityModule {
 
         console.log('dataObject value to encrypt: ', message.body.value);
         console.log('IdentityModule - encrypt from hyperty to dataobject ', message);
-        
+
         // TIAGO - persistence issue #147
         _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
           let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
@@ -945,7 +945,7 @@ class IdentityModule {
       let isToHyperty = divideURL(message.to).type === 'hyperty';
 
       if (message.type === 'update') {
-        resolve(message);
+        return resolve(message);
       }
 
       //is is hyperty to hyperty communication
@@ -1005,7 +1005,7 @@ class IdentityModule {
 
         // TIAGO - persistence issue #147
         _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
-          let dataObjectKey = sessionKeys[dataObjectURL];
+          let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
 
           if (dataObjectKey) {
 
