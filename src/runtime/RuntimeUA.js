@@ -1,25 +1,25 @@
 /**
-* Copyright 2016 PT Inovação e Sistemas SA
-* Copyright 2016 INESC-ID
-* Copyright 2016 QUOBIS NETWORKS SL
-* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
-* Copyright 2016 ORANGE SA
-* Copyright 2016 Deutsche Telekom AG
-* Copyright 2016 Apizee
-* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*   http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-**/
+ * Copyright 2016 PT Inovação e Sistemas SA
+ * Copyright 2016 INESC-ID
+ * Copyright 2016 QUOBIS NETWORKS SL
+ * Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+ * Copyright 2016 ORANGE SA
+ * Copyright 2016 Deutsche Telekom AG
+ * Copyright 2016 Apizee
+ * Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
 
 import 'babel-polyfill';
 
@@ -31,7 +31,7 @@ import MessageBus from '../bus/MessageBus';
 
 import Loader from './Loader';
 import { runtimeConfiguration } from './runtimeConfiguration';
-// import GraphConnector from '../graphconnector/GraphConnector';
+import GraphConnector from '../graphconnector/GraphConnector';
 
 import SyncherManager from '../syncher/SyncherManager';
 import RuntimeCoreCtx from '../policy/context/RuntimeCoreCtx';
@@ -68,7 +68,37 @@ class RuntimeUA {
 
     _this.runtimeFactory = runtimeFactory;
     _this.runtimeCatalogue = runtimeFactory.createRuntimeCatalogue();
+
+    if (typeof runtimeFactory.createRuntimeCatalogue === 'function') {
+      _this.persistenceManager = runtimeFactory.createRuntimeCatalogue();
+    } else {
+      throw new Error('Check your Runtime Factory because it need the Runtime Catalogue implementation');
+    }
+
+    if (typeof runtimeFactory.persistenceManager === 'function') {
+      _this.persistenceManager = runtimeFactory.persistenceManager();
+    } else {
+      throw new Error('Check your Runtime Factory because it need the Persistence Manager implementation');
+    }
+
+    if (typeof runtimeFactory.storageManager === 'function') {
+      _this.storageManager = runtimeFactory.storageManager();
+    } else {
+      throw new Error('Check your Runtime Factory because it need the Storage Manager implementation');
+    }
+    if (typeof runtimeFactory.runtimeCapabilities === 'function') {
+      _this.runtimeCapabilities = runtimeFactory.runtimeCapabilities(_this.storageManager);
+      _this.runtimeCapabilities.getRuntimeCapabilities().then((result) => {
+          console.log('capabilities: ', result);
+        }).catch((err) => {
+          console.log('Error: ', err);
+        });
+    } else {
+      console.info('Check your RuntimeFactory because it need the Runtime Capabilities implementation');
+    }
+
     _this.persistenceManager = runtimeFactory.persistenceManager();
+
 
     // Prepare the loader to load the hyperties, protostubs and idpproxy;
     _this.loader = new Loader(_this.runtimeConfiguration);
@@ -105,22 +135,22 @@ class RuntimeUA {
 
     _this.messageBus.pipeline.handlers = [
 
-      // Policy message authorise
-      function(ctx) {
-        _this.policyEngine.authorise(ctx.msg).then(function(changedMgs) {
-          ctx.msg = changedMgs;
-          ctx.next();
-        }).catch(function(reason) {
-          console.error(reason);
-          ctx.fail(reason);
-        });
-      }
+        // Policy message authorise
+        function(ctx) {
+            _this.policyEngine.authorise(ctx.msg).then(function(changedMgs) {
+                ctx.msg = changedMgs;
+                ctx.next();
+              }).catch(function(reason) {
+                console.error(reason);
+                ctx.fail(reason);
+              });
+          }
     ];
 
     // Add to App Sandbox the listener;
     appSandbox.addListener('*', function(msg) {
-      _this.messageBus.postMessage(msg);
-    });
+        _this.messageBus.postMessage(msg);
+      });
 
     // Register messageBus on Registry
     _this.registry.messageBus = _this.messageBus;
@@ -143,88 +173,88 @@ class RuntimeUA {
     _this.loader.runtimeFactory = _this.runtimeFactory;
 
     // Instantiate the Graph Connector
-    // _this.graphConnector = new GraphConnector(_this.runtimeURL, _this.messageBus);
+    _this.graphConnector = new GraphConnector(_this.runtimeURL, _this.messageBus, _this.storageManager);
 
   }
 
   /**
-  * Accomodate interoperability in H2H and proto on the fly for newly discovered devices in M2M
-  * @param  {CatalogueDataObject.HypertyDescriptor}   descriptor    descriptor
-  */
+   * Accomodate interoperability in H2H and proto on the fly for newly discovered devices in M2M
+   * @param  {CatalogueDataObject.HypertyDescriptor}   descriptor    descriptor
+   */
   discoverHiperty(descriptor) {
     // Body...
   }
 
   /**
-  * Register Hyperty deployed by the App that is passed as input parameter. To be used when App and Hyperties are from the same domain otherwise the RuntimeUA will raise an exception and the App has to use the loadHyperty(..) function.
-  * @param  {Object} Object                   hypertyInstance
-  * @param  {URL.HypertyCatalogueURL}         descriptor      descriptor
-  */
+   * Register Hyperty deployed by the App that is passed as input parameter. To be used when App and Hyperties are from the same domain otherwise the RuntimeUA will raise an exception and the App has to use the loadHyperty(..) function.
+   * @param  {Object} Object                   hypertyInstance
+   * @param  {URL.HypertyCatalogueURL}         descriptor      descriptor
+   */
   registerHyperty(hypertyInstance, descriptor) {
     // Body...
   }
 
   /**
-  * Deploy Hyperty from Catalogue URL
-  * @param  {URL.HypertyCatalogueURL}    hyperty hypertyDescriptor url;
-  */
+   * Deploy Hyperty from Catalogue URL
+   * @param  {URL.HypertyCatalogueURL}    hyperty hypertyDescriptor url;
+   */
   loadHyperty(hypertyDescriptorURL) {
 
     if (!hypertyDescriptorURL) throw new Error('Hyperty descriptor url parameter is needed');
 
     return new Promise((resolve, reject) => {
 
-      this.loader.loadHyperty(hypertyDescriptorURL)
-      .then((result) => {
-        resolve(result);
-      })
-      .catch((reason) => {
-        reject(reason);
-      });
+        this.loader.loadHyperty(hypertyDescriptorURL)
+            .then((result) => {
+                resolve(result);
+              })
+            .catch((reason) => {
+                reject(reason);
+              });
 
-    });
+      });
 
   }
 
   /**
-  * Deploy Stub from Catalogue URL or domain url
-  * @param  {URL.URL}     domain          domain
-  */
+   * Deploy Stub from Catalogue URL or domain url
+   * @param  {URL.URL}     domain          domain
+   */
   loadStub(protostubURL) {
 
     if (!protostubURL) throw new Error('ProtoStub descriptor url parameter is needed');
 
     return new Promise((resolve, reject) => {
 
-      this.loader.loadStub(protostubURL)
-      .then((result) => {
-        resolve(result);
-      })
-      .catch((reason) => {
-        reject(reason);
-      });
+        this.loader.loadStub(protostubURL)
+            .then((result) => {
+                resolve(result);
+              })
+            .catch((reason) => {
+                reject(reason);
+              });
 
-    });
+      });
 
   }
 
   /**
-  * Deploy idpProxy from Catalogue URL or domain url
-  * @param  {URL.URL}     domain          domain
-  */
+   * Deploy idpProxy from Catalogue URL or domain url
+   * @param  {URL.URL}     domain          domain
+   */
   loadIdpProxy(idpProxyURL) {
 
     if (!idpProxyURL) throw new Error('The IDP Proxy URL is a needed parameter, could be a DOMAIN or a URL');
 
     return new Promise((resolve, reject) => {
-      this.loader.loadIdpProxy(idpProxyURL)
-      .then((result) => {
-        resolve(result);
-      })
-      .catch((reason) => {
-        reject(reason);
+        this.loader.loadIdpProxy(idpProxyURL)
+            .then((result) => {
+                resolve(result);
+              })
+            .catch((reason) => {
+                reject(reason);
+              });
       });
-    });
 
   }
 
@@ -236,24 +266,25 @@ class RuntimeUA {
     let _this = this;
 
     console.info('Unregister all hyperties');
+
     return new Promise(function(resolve, reject) {
 
-      _this.registry.unregisterAllHyperties().then(function(result) {
-        console.info('All the hyperties are unregisted with Success:', result);
-        resolve(true);
-      }).catch(function(reason) {
-        console.error('Failed to unregister the hyperties', reason);
-        reject(false);
-      });
+        _this.registry.unregisterAllHyperties().then(function(result) {
+            console.info('All the hyperties are unregisted with Success:', result);
+            resolve(true);
+          }).catch(function(reason) {
+            console.error('Failed to unregister the hyperties', reason);
+            reject(false);
+          });
 
-    });
+      });
 
   }
 
   /**
-  * Used to check for updates about components handled in the Catalogue including protocol stubs and Hyperties. check relationship with lifecycle management provided by Service Workers
-  * @param  {CatalogueURL}       url url
-  */
+   * Used to check for updates about components handled in the Catalogue including protocol stubs and Hyperties. check relationship with lifecycle management provided by Service Workers
+   * @param  {CatalogueURL}       url url
+   */
   checkForUpdate(url) {
     // Body...
   }
