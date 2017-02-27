@@ -1721,25 +1721,23 @@ class Registry {
 
           } else {
 
-            // this process will load the Protocols stub, because is not yet registered;
+            // The protoStub does not exist, let's prepare its deployment by watching its status
+
+            _this.watchingYou.observe('protostubsList', (change) => {
+
+              console.log('[Registry - resolveNormalStub] protostubsList changed ' + _this.protostubsList);
+
+              if (change.keypath.split('.')[0] === domainUrl && change.name === 'status' && change.newValue === STATUS.CREATED) {
+                console.log('[Registry - resolve] protostub is live ' + _this.protostubsList[domainUrl]);
+                resolve(_this.protostubsList[domainUrl].url);
+              }
+            });
+
+            // lets deploy the protostub
             console.info('[Registry.resolve] trigger new ProtocolStub: ', domainUrl);
             _this.loader.loadStub(domainUrl).then(() => {
 
-              registredComponent  = _this.protostubsList[domainUrl];
-
-              console.log('[Registry - resolveNormalStub] Stub deployed: ', registredComponent);
-
-              _this.watchingYou.observe('protostubsList', (change) => {
-
-                console.log('[Registry - resolveNormalStub] protostubsList changed ' + _this.protostubsList);
-
-                if (change.keypath.split('.')[0] === domainUrl && change.name === 'status' && change.newValue === STATUS.CREATED) {
-                  console.log('[Registry - resolve] protostub is live ' + registredComponent);
-                  resolve(registredComponent.url);
-                }
-              });
-
-
+              console.log('[Registry - resolveNormalStub] Stub deployed: ', _this.protostubsList[domainUrl]);
             }).catch((reason) => {
               console.error('[Registry.resolve] Error resolving Load ProtocolStub: ', reason);
               _this.protostubsList[domainUrl].status = 'deployment-failed';
@@ -1811,20 +1809,23 @@ class Registry {
 
               let p2pConfig = { remoteRuntimeURL: remoteRuntime, p2pHandler: registeredP2P.p2pHandler, p2pRequesterStub: true };
 
+              // lets prepare the p2pRequesterSTub deployment by setting an observer to its status changes
+
+              _this.watchingYou.observe('p2pRequesterStub', (change) => {
+
+                console.log('[Registry - resolve] p2pRequesterStubs changed ' + _this.p2pRequesterStub);
+
+                if (change.keypath.split('.')[0] === remoteRuntime && change.name === 'status' && change.newValue === STATUS.LIVE) {
+                  console.log('[Registry - resolve] p2pRequester is live ' + _this.p2pRequesterStub[remoteRuntime]);
+                  resolve(_this.p2pRequesterStub[remoteRuntime].url);
+                }
+              });
+
               //  stub load
               _this.loader.loadStub(registeredP2P.p2pRequester, p2pConfig).then(() => {
 
                 console.log('[Registry - resolve] p2pRequester deployed: ', _this.p2pRequesterStub[remoteRuntime]);
 
-                _this.watchingYou.observe('p2pRequesterStub', (change) => {
-
-                  console.log('[Registry - resolve] p2pRequesterStubs changed ' + _this.p2pRequesterStub);
-
-                  if (change.keypath.split('.')[0] === remoteRuntime && change.name === 'status' && change.newValue === STATUS.LIVE) {
-                    console.log('[Registry - resolve] p2pRequester is live ' + _this.p2pRequesterStub[remoteRuntime]);
-                    resolve(_this.p2pRequesterStub[remoteRuntime].url);
-                  }
-                });
 
               }).catch((error) => {
                 reject(error);
