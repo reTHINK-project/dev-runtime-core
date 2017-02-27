@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">src/syncher/StoreDataObjects.js | Service Framework API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  <a href="test.html" data-ice="testLink">Test</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">allocation</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/allocation/AddressAllocation.js~AddressAllocation.html">AddressAllocation</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html">Bus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html">MiniBus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Pipeline.js~Pipeline.html">Pipeline</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">graphconnector</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/BloomFilter.js~BloomFilter.html">BloomFilter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GlobalRegistryRecord.js~GlobalRegistryRecord.html">GlobalRegistryRecord</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html">GraphConnector</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html">GraphConnectorContactData</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">identity</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/Crypto.js~Crypto.html">Crypto</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/GuiFake.js~GuiFake.html">GuiFake</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/Identity.js~Identity.html">Identity</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/IdentityModule.js~IdentityModule.html">IdentityModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/OpenIdLib.js~OpenIdLib.html">OpenIdLib</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/ActionsService.js~ActionsService.html">ActionsService</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/CombiningAlgorithm.js~CombiningAlgorithm.html">CombiningAlgorithm</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Operators.js~Operators.html">Operators</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/PDP.js~PDP.html">PDP</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/PEP.js~PEP.html">PEP</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Policy.js~Policy.html">Policy</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/ReThinkCtx.js~ReThinkCtx.html">ReThinkCtx</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Rule.js~Rule.html">Rule</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/combiningAlgorithms</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/AllowOverrides.js~AllowOverrides.html">AllowOverrides</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/BlockOverrides.js~BlockOverrides.html">BlockOverrides</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/FirstApplicable.js~FirstApplicable.html">FirstApplicable</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/conditions</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/AdvancedCondition.js~AdvancedCondition.html">AdvancedCondition</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/Condition.js~Condition.html">Condition</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/SubscriptionCondition.js~SubscriptionCondition.html">SubscriptionCondition</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/context</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html">RuntimeCoreCtx</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">protostub</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/protostub/IdpProxyStub.js~IdpProxyStub.html">IdpProxyStub</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-activate">activate</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">registry</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/Discovery.js~Discovery.html">Discovery</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/DiscoveryServiceFramework.js~DiscoveryServiceFramework.html">DiscoveryServiceFramework</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/HypertyInstance.js~HypertyInstance.html">HypertyInstance</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html">Registry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/RegistryDataModel.js~RegistryDataModel.html">RegistryDataModel</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">runtime</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/Descriptors.js~Descriptors.html">Descriptors</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/Loader.js~Loader.html">Loader</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/RuntimeUA.js~RuntimeUA.html">RuntimeUA</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-runtimeConfiguration">runtimeConfiguration</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-runtimeUtils">runtimeUtils</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">sandbox</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/sandbox/Sandbox.js~Sandbox.html">Sandbox</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/sandbox/SandboxRegistry.js~SandboxRegistry.html">SandboxRegistry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-SandboxType">SandboxType</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">syncher</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/ObserverObject.js~ObserverObject.html">ObserverObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/ReporterObject.js~ReporterObject.html">ReporterObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/StoreDataObjects.js~StoreDataObjects.html">StoreDataObjects</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/Subscription.js~Subscription.html">Subscription</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/SyncherManager.js~SyncherManager.html">SyncherManager</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">utils</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/utils/EventEmitter.js~EventEmitter.html">EventEmitter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-schemaValidation">schemaValidation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-buildURL">buildURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-convertToUserURL">convertToUserURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-deepClone">deepClone</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-divideEmail">divideEmail</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-divideURL">divideURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-emptyObject">emptyObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-generateGUID">generateGUID</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getConfigurationResources">getConfigurationResources</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserEmailFromURL">getUserEmailFromURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserIdentityDomain">getUserIdentityDomain</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserURLFromEmail">getUserURLFromEmail</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isBackendServiceURL">isBackendServiceURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isDataObjectURL">isDataObjectURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isHypertyURL">isHypertyURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isLegacy">isLegacy</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isURL">isURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isUserURL">isUserURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-removePathFromURL">removePathFromURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-tv4">tv4</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-divideURL">divideURL</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/syncher/StoreDataObjects.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">class StoreDataObjects {
+
+  constructor(storageManager) {
+    if (!storageManager) throw new Error(&apos;[Store Data Objects] - Needs the storageManager component&apos;);
+
+    this._storageManager = storageManager;
+    this._storeDataObject = {};
+  }
+
+  set(resource, isReporter, schema, status, data, subscription, children, childrenResources, subscriberUser) {
+
+    let type = this._getTypeOfObject(isReporter);
+    if (!this._storeDataObject.hasOwnProperty(type)) this._storeDataObject[type] = {};
+
+    if (!this._storeDataObject[type].hasOwnProperty(resource)) {
+      this._storeDataObject[type][resource] = {
+        resource: resource,
+        isReporter: isReporter,
+        subscriptions: [],
+        subscriberUsers: []
+      };
+    }
+
+    if (data) this._storeDataObject[type][resource].data = data;
+    if (schema) this._storeDataObject[type][resource].schema = schema;
+    if (status) this._storeDataObject[type][resource].status = status;
+    if (children) this._storeDataObject[type][resource].children = children;
+    if (childrenResources) this._storeDataObject[type][resource].childrenResources = childrenResources;
+
+    if (subscription &amp;&amp; !isReporter) {
+      this._updateToArray(resource, &apos;subscriptions&apos;, subscription, type);
+    } else {
+      this._storeDataObject[type][resource].owner = subscription;
+    }
+
+    if (subscriberUser) {
+      if (this._storeDataObject[type][resource].subscriberUsers.indexOf(subscriberUser)) {
+        this._updateToArray(resource, &apos;subscriberUsers&apos;, subscriberUser, type);
+      }
+    }
+
+    return this._storageManager.set(&apos;syncherManager:ObjectURLs&apos;, 1, this._storeDataObject);
+  }
+
+  updateData(resource, key, attribute, value, isReporter = true) {
+    let type = this._getTypeOfObject(isReporter);
+
+    if (this._storeDataObject.hasOwnProperty(type) &amp;&amp; this._storeDataObject[type][resource] &amp;&amp; resource &amp;&amp; key &amp;&amp; value) {
+
+      if (key === &apos;subscriptions&apos; || key === &apos;subscriberUsers&apos;) {
+        this._updateToArray(resource, key, value, type);
+      } else {
+        this._storeDataObject[type][resource][key][attribute] = value;
+      }
+
+      return this._storageManager.set(&apos;syncherManager:ObjectURLs&apos;, 1, this._storeDataObject);
+
+    }
+  }
+
+  update(resource, key, value, isReporter = true) {
+    let type = this._getTypeOfObject(isReporter);
+
+    if (this._storeDataObject[type] &amp;&amp; this._storeDataObject[type][resource] &amp;&amp; resource &amp;&amp; key &amp;&amp; value) {
+
+      if (key === &apos;subscriptions&apos; || key === &apos;subscriberUsers&apos;) {
+        let update = true;
+
+        if (key === &apos;subscriptions&apos;) {
+          update = !this._isOwner(this._storeDataObject[type][resource], value);
+        }
+
+        if (update) this._updateToArray(resource, key, value, type);
+
+      } else {
+        this._storeDataObject[type][resource][key] = value;
+      }
+
+      return this._storageManager.set(&apos;syncherManager:ObjectURLs&apos;, 1, this._storeDataObject);
+
+    }
+  }
+
+  delete(resource, key, value, isReporter = true) {
+
+    let type = this._getTypeOfObject(isReporter);
+
+    if (this._storeDataObject[type] &amp;&amp; this._storeDataObject[type][resource] &amp;&amp; resource &amp;&amp; key &amp;&amp; value) {
+
+      if (key === &apos;subscriptions&apos; || key === &apos;subscriberUsers&apos;) {
+        this._removeFromArray(resource, key, value, type);
+      } else {
+        delete this._storeDataObject[type][resource][key];
+      }
+
+      return this._storageManager.set(&apos;syncherManager:ObjectURLs&apos;, 1, this._storeDataObject);
+
+    }
+
+  }
+
+  /**
+   * TODO: check if this process is viable because the storage manager ability to delete
+   * now the storageManager only can delete an specific key, but not the specific value inside that key;
+   */
+  deleteResource(resource) {
+    if (resource) {
+
+      return this.getAll().then((storedDataObjects) =&gt; {
+        let tmp = storedDataObjects;
+
+        if (tmp.hasOwnProperty(resource)) {
+          delete tmp.observers[resource];
+          delete tmp.reporters[resource];
+          return this._storageManager.set(&apos;syncherManager:ObjectURLs&apos;, 1, tmp);
+        }
+      });
+
+    } else {
+      throw new Error(&apos;[StoreDataObjects] - Can\&apos;t delete this &apos; + resource);
+    }
+
+  }
+
+  getAll() {
+    return this._storageManager.get(&apos;syncherManager:ObjectURLs&apos;);
+  }
+
+  get(resource) {
+    if (this._storeDataObject[resource]) {
+      return this._storeDataObject[resource];
+    } else {
+      throw new Error(&apos;[StoreDataObjects] - Can\&apos;t find this &apos; + resource);
+    }
+  }
+
+  /**
+   *
+   */
+  getResourcesByCriteria(msg, isReporter) {
+
+    return new Promise((resolve) =&gt; {
+
+      let type = this._getTypeOfObject(isReporter);
+
+      this.getAll().then((storedDataObjects) =&gt; {
+
+        if (!storedDataObjects) {
+          console.log(&apos;don\&apos;t have stored data objects&apos;);
+          return resolve(null);
+        }
+
+        if (msg.body &amp;&amp; msg.body.hasOwnProperty(&apos;resume&apos;) &amp;&amp; !msg.body.resume) {
+          return resolve(null);
+        }
+
+        // check if the message have other criteria
+        // if not search for on the &apos;from&apos; of the message.
+        let result = [];
+        let hasSubscription = this._hasSubscription(storedDataObjects[type], msg.from);
+        let isOwner = this._searchOwner(storedDataObjects[type], msg.from);
+
+        if (msg.hasOwnProperty(&apos;from&apos;) &amp;&amp; hasSubscription || isOwner) {
+          let resource = this._getResourcesBySubscription(storedDataObjects[type], msg.from);
+
+          let identityFoundData = [];
+          if (msg.body &amp;&amp; msg.body.identity) identityFoundData = this._getResourcesByIdentity(storedDataObjects[type], msg.body.identity);
+
+          let schemaFoundData = [];
+          if (msg.body &amp;&amp; msg.body.schema) schemaFoundData = this._getResourcesBySchema(storedDataObjects[type], msg.body.schema);
+
+          let dataFound = [];
+          if (msg.body &amp;&amp; msg.body.value) dataFound = this._getResourcesByData(storedDataObjects[type], msg.body.value);
+
+          // you can pass as arrays as you want.. it will be merged in on place
+          // removed duplicates;
+          result = this._intersection(resource, identityFoundData, schemaFoundData, dataFound);
+        } else {
+          return resolve(null);
+        }
+
+        let init = {};
+        result.forEach((key) =&gt; {
+          let currentIsReporter = storedDataObjects[type][key];
+          init[key] = currentIsReporter;
+          return init;
+        });
+
+        console.log(&apos;[Store Data Objects] - &apos;, init);
+
+        resolve(init);
+      });
+
+    });
+
+  }
+
+  _getResourcesByIdentity(storedData, userURL) {
+    if (!storedData) return [];
+
+    return Object.keys(storedData).filter((objectURL) =&gt; {
+      return storedData[objectURL].subscriberUsers.filter((current) =&gt; {
+        return current === userURL;
+      }).length;
+    });
+  }
+
+  _getResourcesBySubscription(storedData, subscription) {
+    if (!storedData) return [];
+
+    return Object.keys(storedData).filter((objectURL) =&gt; {
+      return storedData[objectURL].subscriptions.filter((current) =&gt; {
+        return current === subscription;
+      }).length;
+    });
+
+  }
+
+  _getResourcesBySchema(storedData, schema) {
+    return Object.keys(storedData).filter((objectURL) =&gt; {
+      let currentObject = storedData[objectURL];
+      return Object.keys(currentObject).filter((key) =&gt; {
+        return key === &apos;schema&apos; &amp;&amp; currentObject[key] === schema;
+      }).length;
+    });
+  }
+
+  _getResourcesByData(storedData, data) {
+    if (!data) return [];
+
+    return Object.keys(storedData).filter((objectURL) =&gt; {
+      let currentObject = storedData[objectURL].data;
+      return Object.keys(currentObject).filter((key) =&gt; {
+        // search on storeDataObjects for specific key provided from data;
+        return Object.keys(data).filter(searchFor =&gt; {
+          return key === searchFor &amp;&amp; currentObject[key] === data[searchFor];
+        }).length;
+
+      }).length;
+    });
+  }
+
+  _hasSubscription(storedData, subscription) {
+    if (!storedData) return false;
+
+    return Object.keys(storedData).filter((objectURL) =&gt; {
+      return storedData[objectURL].subscriptions.filter((current) =&gt; {
+        return current === subscription;
+      }).length;
+    }).length &gt; 0 ? true : false;
+  }
+
+  _searchOwner(storedData, from) {
+    if (!storedData) return false;
+
+    return Object.keys(storedData).filter((objectURL) =&gt; {
+      return storedData[objectURL].owner === from;
+    }).length &gt; 0 ? true : false;
+  }
+
+  _isOwner(value, url) {
+    if (!value) return false;
+    return value.owner === url ? true : false;
+  }
+
+  _intersection() {
+    let args = Array.from(arguments);
+
+    let result = args.reduce((first, second) =&gt; {
+      return first.concat(second);
+    }).filter((value, index, self) =&gt; {
+      return self.indexOf(value) === index;
+    });
+    console.log(&apos;Result an unique array of strings: &apos;, result);
+    return result;
+  }
+
+  _updateToArray(resource, key, value, type) {
+    if (this._storeDataObject[type][resource][key].indexOf(value)) this._storeDataObject[type][resource][key].push(value);
+  }
+
+  _removeFromArray(resource, key, value, type) {
+    let indexOfValue = this._storeDataObject[type][resource][key].indexOf(value);
+    if (indexOfValue) this._storeDataObject[type][resource][key].splice(indexOfValue, 1);
+  }
+
+  _hasValue(obj, key, value) {
+    return obj.hasOwnProperty(key) &amp;&amp; obj[key] === value;
+  }
+
+  _getTypeOfObject(isReporter) {
+    return isReporter ? &apos;reporters&apos; : &apos;observers&apos;;
+  }
+
+}
+
+export default StoreDataObjects;
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.5.2)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

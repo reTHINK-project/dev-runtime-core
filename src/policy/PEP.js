@@ -1,6 +1,7 @@
 import ActionsService from './ActionsService';
 import PDP from './PDP';
 import Policy from './Policy';
+import {isHypertyURL} from '../utils/utils';
 
 class PEP {
 
@@ -9,10 +10,14 @@ class PEP {
   * @param    {Object}    context
   */
   constructor(context) {
-    this.pdp = new PDP(context);
-    this.actionsService = new ActionsService(context);
-    this.context = context;
-    context.pep = this;
+    let _this = this;
+
+    _this.pdp = new PDP(context);
+    _this.actionsService = new ActionsService(context);
+    _this.context = context;
+    context.pep = _this;
+
+    //TODO should be added a trigger to verify when the loadConfigurations is successfully completed
     context.loadConfigurations();
   }
 
@@ -49,7 +54,7 @@ class PEP {
   }
 
   authorise(message) {
-    console.log('--- Policy Engine ---');
+    console.log('[Policy.PEP Authorise] ', message);
     console.log(message);
     if (!message) throw new Error('message is not defined');
     if (!message.from) throw new Error('message.from is not defined');
@@ -135,7 +140,8 @@ class PEP {
   }
 
   _isIncomingMessage(message) {
-    return (message.body !== undefined && message.body.identity !== undefined) ? true : false;
+
+    return !this.context.isLocal(message.from);
   }
 
   /**
@@ -150,8 +156,30 @@ class PEP {
     let fromSchema = splitFrom[0];
     let splitTo = (message.to).split('://');
     let toSchema =  splitTo[0];
+    let from = message.from;
+    let to = message.to;
 
-    if (message.from === fromSchema || message.to === toSchema || message.type === 'read' || message.type === 'response') {
+    // Signalling messages between P2P Stubs don't have to be verified. FFS
+
+    if (message.body && message.body.source) {
+      from = message.body.source;
+    }
+
+    if (message.body && message.body.subscriber) {
+      from = message.body.subscriber;
+    }
+
+    if (from.indexOf('/p2phandler/') !== -1 || from.indexOf('/p2prequester/') !== -1 || to.indexOf('/p2phandler/') !== -1 || to.indexOf('/p2prequester/') !== -1) {
+      return false;
+    }
+
+    // hack to disable Identity verification for messages coming from legacy domains while solution is not implemented
+
+    if (this.context.isInterworkingProtoStub(from)) {
+      return false;
+    }
+
+    if (message.from === fromSchema || message.to === toSchema || message.type === 'read' || message.type === 'response' || (isHypertyURL(message.from) && message.type === 'delete')) {
       return false;
     } else {
       return schemasToIgnore.indexOf(fromSchema) === -1 || schemasToIgnore.indexOf(toSchema) === -1;

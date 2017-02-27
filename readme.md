@@ -1,4 +1,12 @@
-# Hyperty Runtime Core [![Build Status](https://travis-ci.org/reTHINK-project/dev-runtime-core.svg?branch=master)](https://travis-ci.org/reTHINK-project/dev-runtime-core)
+# Hyperty Runtime Core
+
+### Build status
+
+| Master                                   | Develop                                  |
+| ---------------------------------------- | ---------------------------------------- |
+| [![Build Status](https://travis-ci.org/reTHINK-project/dev-runtime-core.svg?branch=master)](https://travis-ci.org/reTHINK-project/dev-runtime-core) | [![Build Status](https://travis-ci.org/reTHINK-project/dev-runtime-core.svg?branch=develop)](https://travis-ci.org/reTHINK-project/dev-runtime-core)
+
+
 --------------------
 
 -	[Overview](#overview)
@@ -10,7 +18,7 @@
 In order to try speed up the instalation process, we remove the first verification of global modules, so, if you want install this repository, you should install globaly this modules:
 
 ```shell
-npm install -g karma-cli gulp-cli browserify
+npm install -g karma-cli
 ```
 
 ## <a id="overview">Overview</a>
@@ -68,13 +76,15 @@ if you found some issues, please submit them into the respective repository;
 To install the runtime-core repository in your machine, you can clone the github and run the following command;
 
 ```shell
+# install all the dependencies
 npm install
 ```
 ---
 
 ### Issues
 
-if you have some trouble with the environment, you can open an issue;
+if you have some trouble with the environment, you can open an issue [here](https://github.com/reTHINK-project/dev-runtime-core/issues);
+
 
 ### Javascript Environment
 
@@ -82,20 +92,29 @@ JavaScript code should be written in ES6. There are direct dependencies from nod
 
 #### Dependencies
 
--	nodejs
--	npm
--	karma - Make the communication between unit test tool and jenkins. See more on [karma](http://karma-runner.github.io/0.13/index.html)
--	mocha - Unit test tool. See more on [http://mochajs.org](http://mochajs.org/)
--	gulp - Automate and enhance your workflow. See more about gulp on [gulp](http://gulpjs.com/)
+-  nodejs
+
+-  npm
+
+-  karma - Make the communication between unit test tool and jenkins. See more on [karma](http://karma-runner.github.io/0.13/index.html)
+
+-  mocha - Unit test tool. See more on [http://mochajs.org](http://mochajs.org/)
+
+   ​
 
 #### Code Style and Hinting
 
-On the root directory you will find **.jshintrc** and **.jscsrc**, these files are helpers to maintain syntax consistency, it signals syntax mistakes and makes the code equal for all developers.
+On the root directory you will find **.eslintrc.yml** based on the [google style code](http://eslint.org/docs/user-guide/migrating-from-jscs#converting-presets) without some restrictions, this file are helpers to maintain syntax consistency (this could be changed if we understand), it signals syntax mistakes and makes the code equal for all developers.
 
--	[jscs](http://jscs.info/) - Maintain JavaScript Code Style
--	[jshint](http://jshint.com/) - Detect errors and potential problems in JavaScript code.
+-	[eslint](http://eslint.org/) - Maintain JavaScript Code Style
 
 All IDE's and Text Editors can handle these tools.
+
+```shell
+# to check if the code is aligned with the style code
+npm run test:lint
+```
+
 
 #### Documentation
 
@@ -104,18 +123,19 @@ To generates api documentation, check [here](#documentation-task);
 #### Unit Testing
 
 Unit testing can be launched manually with **karma start**.
-
-~~It's advisable to use [expect.js](https://github.com/Automattic/expect.js) instead of assert.~~
-
-After investigate and testing the [expect.js](https://github.com/Automattic/expect.js) it don't support some features for ES6, because this tool hasn't activity at some time, that is why, it is recomended use the [chaijs](http://chaijs.com/) it is more versatile and have expect.js (but updated) and others tools that can be useful;
+The tool to do the tests is the [chaijs](http://chaijs.com/), with expect;
 
 ##### Karma
 
 if you have some problems starting the karma tests, try running this commands for the following order:
 
-1.	`npm uninstall karma karma-browserify karma-mocha karma-mocha-reporter karma-chrome-launcher -g`
-2.	`npm install karma-cli -g`
-3.	`npm install`
+1.  `npm uninstall karma karma-browserify karma-mocha karma-mocha-reporter karma-chrome-launcher -g`
+
+2.  `npm install karma-cli -g`
+
+3.  `npm install`
+
+    ​
 
 ##### Note
 
@@ -131,25 +151,34 @@ This repository is ready to start working on development of runtime-core. The co
 
 ### <a id="documentation-task">Documentation</a>
 
-Generate all documentation associated to runtime core;
+```shell
+# Generate all the associated to the runtime core;
+npm run build:doc
+```
 
--	if you run **gulp doc** the documentation based on jsdoc3 will be generated on folder docs/jsdoc and you can interact;
-
-`gulp doc`
-
--	if you run **gulp api** the documentation is generate based on docs/api/ html files, and converted to markdown;
-
-`gulp api`
-
--	if you run **gulp docx** should be generated an .docx file, but **this process should be optimized**, is not working very well;
-
-`gulp docx`
+> Generate all documentation associated to runtime core;
+>
+> -  if you run **gulp doc** the documentation based on jsdoc3 will be generated on folder docs/jsdoc and you can interact;
+>
+>    `gulp doc`  **deprecated**
+>
+> -  if you run **gulp api** the documentation is generate based on docs/api/ html files, and converted to markdown;
+>
+>    `gulp api`  **deprecated**
+>
+> -  if you run **gulp docx** should be generated an .docx file, but **this process should be optimized**, is not working very well;
+>
+>    `gulp docx ` **deprecated**
 
 ### License
 
-To add the license text to all files in src folder;
+The license text will be added to all files after it build
 
-`gulp license`
+> To add the license text to all files in src folder;
+>
+> `gulp license` **deprecated**
+
+
 
 ### Dist
 
@@ -158,9 +187,9 @@ To distribute the runtime-core, you can make a distribution file.
 Run the command:
 
 ```shell
-# The distribution file will be compacted and uglified;
-gulp dist
+# make a build of core components to be used for development; The files could be a little large because include the sourceMaps;
+npm run build:dev
 
-# in development mode
-gulp dist --development
+# make a build of core components to be used form production;
+npm run build:prod
 ```

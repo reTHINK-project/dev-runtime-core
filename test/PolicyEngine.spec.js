@@ -62,6 +62,14 @@ let allowedSubscribeMessage = { body: { auth: true, identity: { userProfile: { u
 let badSubscribeMessage = { body: { identity: { userProfile: { username: 'user@domain' } }, subscriber: 'hyperty://domain/not-preauthorised-hyperty-instance' }, id: 1, type: 'subscribe', from: 'runtime://localhost/7600/sm', to: 'comm://domain/data-object-url/subscription' };
 
 /********** TESTS **********/
+let runtimeCapabilities = {
+  isAvailable: () => {
+    return new Promise((resolve) => {
+      resolve(false);
+    });
+  }
+};
+
 let runtimeCtx = new RuntimeCoreCtx();
 
 describe('Policies management', () => {
@@ -158,6 +166,12 @@ describe('Policies management', () => {
 
 describe('Policy Engine with Runtime Core context', () => {
   let runtimeRegistry = {
+    isInterworkingProtoStub: () => {
+      return false;
+    },
+    isLocal: () => {
+      return true;
+    },
     getPreAuthSubscribers: () => {
       return ['hyperty://domain/hyperty-instance'];
     },
@@ -203,7 +217,12 @@ describe('Policy Engine with Runtime Core context', () => {
         resolve(message);
       });
     },
-    getIdentityOfHyperty: () => {
+    getIdentity: () => {
+      return new Promise((resolve) => {
+        resolve({ userProfile: {username: 'user@domain' } });
+      });
+    },
+    getToken: () => {
       return new Promise((resolve) => {
         resolve({ userProfile: {username: 'user@domain' } });
       });
@@ -216,8 +235,8 @@ describe('Policy Engine with Runtime Core context', () => {
       });
     }
   };
-  let persistenceManager = runtimeFactory.persistenceManager();
-  let policyEngine = new PEP(new RuntimeCoreCtx(identityModule, runtimeRegistry, persistenceManager));
+  let storageManager = runtimeFactory.storageManager();
+  let policyEngine = new PEP(new RuntimeCoreCtx(identityModule, runtimeRegistry, storageManager, runtimeCapabilities));
 
   describe('initial filtering', () => {
     it('message that loads an hyperty should not be validated by policies', () => {

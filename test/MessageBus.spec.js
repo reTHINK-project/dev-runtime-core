@@ -1,5 +1,7 @@
-import expect from 'expect.js';
+import chai from 'chai';
 import MessageBus from '../src/bus/MessageBus';
+
+let expect = chai.expect;
 
 describe('MessageBus', function() {
   it('sending message', function(done) {

@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">src/bus/Bus.js | Service Framework API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  <a href="test.html" data-ice="testLink">Test</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">allocation</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/allocation/AddressAllocation.js~AddressAllocation.html">AddressAllocation</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html">Bus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html">MiniBus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Pipeline.js~Pipeline.html">Pipeline</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">graphconnector</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/BloomFilter.js~BloomFilter.html">BloomFilter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GlobalRegistryRecord.js~GlobalRegistryRecord.html">GlobalRegistryRecord</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html">GraphConnector</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html">GraphConnectorContactData</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">identity</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/Crypto.js~Crypto.html">Crypto</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/GuiFake.js~GuiFake.html">GuiFake</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/Identity.js~Identity.html">Identity</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/IdentityModule.js~IdentityModule.html">IdentityModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/OpenIdLib.js~OpenIdLib.html">OpenIdLib</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/ActionsService.js~ActionsService.html">ActionsService</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/CombiningAlgorithm.js~CombiningAlgorithm.html">CombiningAlgorithm</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Operators.js~Operators.html">Operators</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/PDP.js~PDP.html">PDP</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/PEP.js~PEP.html">PEP</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Policy.js~Policy.html">Policy</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/ReThinkCtx.js~ReThinkCtx.html">ReThinkCtx</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Rule.js~Rule.html">Rule</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/combiningAlgorithms</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/AllowOverrides.js~AllowOverrides.html">AllowOverrides</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/BlockOverrides.js~BlockOverrides.html">BlockOverrides</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/FirstApplicable.js~FirstApplicable.html">FirstApplicable</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/conditions</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/AdvancedCondition.js~AdvancedCondition.html">AdvancedCondition</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/Condition.js~Condition.html">Condition</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/SubscriptionCondition.js~SubscriptionCondition.html">SubscriptionCondition</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/context</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html">RuntimeCoreCtx</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">protostub</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/protostub/IdpProxyStub.js~IdpProxyStub.html">IdpProxyStub</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-activate">activate</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">registry</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/Discovery.js~Discovery.html">Discovery</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/DiscoveryServiceFramework.js~DiscoveryServiceFramework.html">DiscoveryServiceFramework</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/HypertyInstance.js~HypertyInstance.html">HypertyInstance</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html">Registry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/RegistryDataModel.js~RegistryDataModel.html">RegistryDataModel</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">runtime</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/Descriptors.js~Descriptors.html">Descriptors</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/Loader.js~Loader.html">Loader</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/RuntimeUA.js~RuntimeUA.html">RuntimeUA</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-runtimeConfiguration">runtimeConfiguration</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-runtimeUtils">runtimeUtils</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">sandbox</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/sandbox/Sandbox.js~Sandbox.html">Sandbox</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/sandbox/SandboxRegistry.js~SandboxRegistry.html">SandboxRegistry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-SandboxType">SandboxType</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">syncher</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/ObserverObject.js~ObserverObject.html">ObserverObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/ReporterObject.js~ReporterObject.html">ReporterObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/StoreDataObjects.js~StoreDataObjects.html">StoreDataObjects</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/Subscription.js~Subscription.html">Subscription</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/SyncherManager.js~SyncherManager.html">SyncherManager</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">utils</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/utils/EventEmitter.js~EventEmitter.html">EventEmitter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-schemaValidation">schemaValidation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-buildURL">buildURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-convertToUserURL">convertToUserURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-deepClone">deepClone</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-divideEmail">divideEmail</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-divideURL">divideURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-emptyObject">emptyObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-generateGUID">generateGUID</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getConfigurationResources">getConfigurationResources</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserEmailFromURL">getUserEmailFromURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserIdentityDomain">getUserIdentityDomain</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserURLFromEmail">getUserURLFromEmail</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isBackendServiceURL">isBackendServiceURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isDataObjectURL">isDataObjectURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isHypertyURL">isHypertyURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isLegacy">isLegacy</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isURL">isURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isUserURL">isUserURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-removePathFromURL">removePathFromURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-tv4">tv4</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-divideURL">divideURL</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/bus/Bus.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">/**
+* Copyright 2016 PT Inova&#xE7;&#xE3;o e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+/**
+* @author micaelpedrosa@gmail.com
+* Minimal interface and implementation to send and receive messages. It can be reused in many type of components.
+* Components that need a message system should receive this class as a dependency or extend it.
+* Extensions should implement the following private methods: _onPostMessage and _registerExternalListener
+*/
+class Bus {
+  /* private
+  _msgId: number;
+  _subscriptions: &lt;url: MsgListener[]&gt;
+
+  _responseTimeOut: number
+  _responseCallbacks: &lt;url+id: (msg) =&gt; void&gt;
+
+  */
+
+  constructor() {
+    let _this = this;
+    _this._msgId = 0;
+    _this._subscriptions = {};
+
+    _this._responseTimeOut = 5000; //default to 3s
+    _this._responseCallbacks = {};
+
+    _this._registerExternalListener();
+  }
+
+  /**
+  * Register listener to receive message when &quot;msg.to === url&quot;.
+  * Special url &quot;*&quot; for default listener is accepted to intercept all messages.
+  * @param {URL} url Address to intercept, tha is in the message &quot;to&quot;
+  * @param {Listener} listener listener
+  * @return {MsgListener} instance of MsgListener
+  */
+  addListener(url, listener) {
+    let _this = this;
+
+    let item = new MsgListener(_this._subscriptions, url, listener);
+    let itemList = _this._subscriptions[url];
+    if (!itemList) {
+      itemList = [];
+      _this._subscriptions[url] = itemList;
+    }
+
+    itemList.push(item);
+    return item;
+  }
+
+  /**
+   * Manually add a response listener. Only one listener per message ID should exist.
+   * ATENTION, there is no timeout for this listener.
+   * The listener should be removed with a removeResponseListener, failing to do this will result in a unreleased memory problem.
+   * @param {URL} url Origin address of the message sent, &quot;msg.from&quot;.
+   * @param {number} msgId Message ID that is returned from the postMessage.
+   * @param {Function} responseListener Callback function for the response
+   */
+  addResponseListener(url, msgId, responseListener) {
+    this._responseCallbacks[url + msgId] = responseListener;
+  }
+
+  /**
+   * Remove the response listener.
+   * @param {URL} url Origin address of the message sent, &quot;msg.from&quot;.
+   * @param {number} msgId  Message ID that is returned from the postMessage
+   */
+  removeResponseListener(url, msgId) {
+    delete this._responseCallbacks[url + msgId];
+  }
+
+  /**
+   * Remove all existent listeners for the URL
+   * @param  {URL} url Address registered
+   */
+  removeAllListenersOf(url) {
+    delete this._subscriptions[url];
+  }
+
+  /**
+   * Helper method to bind listeners (in both directions) into other MiniBus target.
+   * @param  {URL} outUrl Outbound URL, register listener for url in direction &quot;this -&gt; target&quot;
+   * @param  {URL} inUrl Inbound URL, register listener for url in direction &quot;target -&gt; this&quot;
+   * @param  {MiniBus} target The other target MiniBus
+   * @return {Bound} an object that contains the properties [thisListener, targetListener] and the unbind method.
+   */
+  bind(outUrl, inUrl, target) {
+    let _this = this;
+
+    let thisListn = _this.addListener(outUrl, (msg) =&gt; {
+      target.postMessage(msg);
+    });
+
+    let targetListn = target.addListener(inUrl, (msg) =&gt; {
+      _this.postMessage(msg);
+    });
+
+    return {
+      thisListener: thisListn,
+      targetListener: targetListn,
+      unbind: () =&gt; {
+        this.thisListener.remove();
+        this.targetListener.remove();
+      }
+    };
+  }
+
+  //publish on default listeners
+  _publishOnDefault(msg) {
+    //is there any &quot;*&quot; (default) listeners?
+    let itemList = this._subscriptions[&apos;*&apos;];
+    if (itemList) {
+      this._publishOn(itemList, msg);
+    }
+  }
+
+  //publish on a subscription list.
+  _publishOn(itemList, msg) {
+    itemList.forEach((sub) =&gt; {
+      sub._callback(msg);
+    });
+  }
+
+  _responseCallback(inMsg, responseCallback) {
+    let _this = this;
+
+    //automatic management of response handlers
+    if (responseCallback) {
+      let responseId = inMsg.from + inMsg.id;
+      _this._responseCallbacks[responseId] = responseCallback;
+
+      setTimeout(() =&gt; {
+        let responseFun = _this._responseCallbacks[responseId];
+        delete _this._responseCallbacks[responseId];
+
+        if (responseFun) {
+          let errorMsg = {
+            id: inMsg.id, type: &apos;response&apos;,
+            body: { code: 408, desc: &apos;Response timeout!&apos;, value: inMsg }
+          };
+
+          responseFun(errorMsg);
+        }
+      }, _this._responseTimeOut);
+    }
+  }
+
+  _onResponse(msg) {
+    let _this = this;
+
+    if (msg.type === &apos;response&apos;) {
+      let responseId = msg.to + msg.id;
+      let responseFun = _this._responseCallbacks[responseId];
+
+      //if it&apos;s a provisional response, don&apos;t delete response listener
+      if (msg.body.code &gt;= 200) {
+        delete _this._responseCallbacks[responseId];
+      }
+
+      if (responseFun) {
+        responseFun(msg);
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  //receive messages from external interface
+  _onMessage(msg) {
+    let _this = this;
+
+    if (!_this._onResponse(msg)) {
+      let itemList = _this._subscriptions[msg.to];
+      if (itemList) {
+        _this._publishOn(itemList, msg);
+      } else {
+        _this._publishOnDefault(msg);
+      }
+    }
+  }
+
+  _genId(inMsg) {
+    //TODO: how do we manage message ID&apos;s? Should it be a global runtime counter, or per URL address?
+    //Global counter will not work, because there will be multiple MiniBus instances!
+    //Per URL, can be a lot of data to maintain!
+    //Maybe a counter per MiniBus instance. This is the assumed solution for now.
+    if (!inMsg.id || inMsg.id === 0) {
+      this._msgId++;
+      inMsg.id = this._msgId;
+    }
+  }
+
+  /**
+  * Send messages to local listeners, or if not exists to external listeners.
+  * It&apos;s has an optional mechanism for automatic management of response handlers.
+  * The response handler will be unregistered after receiving the response, or after response timeout (default to 3s).
+  * @param  {Message} msg Message to send. Message ID is automatically added to the message.
+  * @param  {Function} responseCallback Optional parameter, if the developer what&apos;s automatic response management.
+  * @return {number} Returns the message ID, in case it should be needed for manual management of the response handler.
+  */
+  postMessage(inMsg, responseCallback) { }
+
+  /**
+   * Not public available, used by the class extension implementation, to process messages from the public &quot;postMessage&quot; without a registered listener.
+   * Used to send the message to an external interface, like a WebWorker, IFrame, etc.
+   * @param  {Message.Message} msg Message
+   */
+  _onPostMessage(msg) { /*implementation will send message to external system*/ }
+
+  /**
+   * Not public available, used by the class extension implementation, to process all messages that enter the MiniBus from an external interface, like a WebWorker, IFrame, etc.
+   * This method is called one time in the constructor to register external listeners.
+   * The implementation will probably call the &quot;_onMessage&quot; method to publish in the local listeners.
+   * DO NOT call &quot;postMessage&quot;, there is a danger that the message enters in a cycle!
+   */
+  _registerExternalListener() { /*implementation will register external listener and call &quot;this._onMessage(msg)&quot; */ }
+
+}
+
+class MsgListener {
+  /* private
+  _subscriptions: &lt;string: MsgListener[]&gt;;
+  _url: string;
+  _callback: (msg) =&gt; void;
+  */
+
+  constructor(subscriptions, url, callback) {
+    let _this = this;
+
+    _this._subscriptions = subscriptions;
+    _this._url = url;
+    _this._callback = callback;
+  }
+
+  get url() { return this._url; }
+
+  /**
+   * Remove this listener from the Bus
+   */
+  remove() {
+    let _this = this;
+
+    let subs = _this._subscriptions[_this._url];
+    if (subs) {
+      let index = subs.indexOf(_this);
+      subs.splice(index, 1);
+
+      //if there are no listeners, remove the subscription entirely.
+      if (subs.length === 0) {
+        delete _this._subscriptions[_this._url];
+      }
+    }
+  }
+}
+
+export default Bus;
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.5.2)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

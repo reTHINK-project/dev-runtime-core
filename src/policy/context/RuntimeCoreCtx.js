@@ -6,14 +6,15 @@ import ReThinkCtx from '../ReThinkCtx';
 
 class RuntimeCoreCtx extends ReThinkCtx {
 
-  constructor(idModule, runtimeRegistry, persistenceManager) {
+  constructor(idModule, runtimeRegistry, storageManager, runtimeCapabilities) {
     super();
     this.idModule = idModule;
     this.runtimeRegistry = runtimeRegistry;
     this.activeUserPolicy = undefined;
     this.serviceProviderPolicy = {};
     this.userPolicies = {};
-    this.persistenceManager = persistenceManager;
+    this.storageManager = storageManager;
+    this.runtimeCapabilities = runtimeCapabilities;
   }
 
   get subscription() {
@@ -25,15 +26,28 @@ class RuntimeCoreCtx extends ReThinkCtx {
   }
 
   loadConfigurations() {
-    this.activeUserPolicy = this.persistenceManager.get('rethink:activePolicy');
+    let _this = this;
 
-    let groups = this.persistenceManager.get('rethink:groups');
-    this.groups = (groups === undefined) ? {} : groups;
+    return new Promise((resolve, reject) => {
 
-    let spPolicies = this.persistenceManager.get('rethink:spPolicies');
-    this.serviceProviderPolicy = (spPolicies === undefined) ? {} : spPolicies;
+      _this.storageManager.get('rethink:activePolicy').then((value) => {
+        _this.activeUserPolicy = value;
 
-    this._loadUserPolicies();
+        return _this.storageManager.get('rethink:groups');
+      }).then((groupInfo) => {
+        let groups = groupInfo;
+        _this.groups = (groups === undefined) ? {} : groups;
+
+        return _this.storageManager.get('rethink:spPolicies');
+      }).then((policiesInfo) => {
+        let spPolicies = policiesInfo;
+        _this.serviceProviderPolicy = (spPolicies === undefined) ? {} : spPolicies;
+
+        _this._loadUserPolicies().then(() => {
+          resolve();
+        });
+      });
+    });
   }
 
   prepareForEvaluation(message, isIncoming) {
@@ -45,10 +59,10 @@ class RuntimeCoreCtx extends ReThinkCtx {
           _this.idModule.decryptMessage(message).then(function(message) {
             /*if (message.type === 'update') {
               _this._isValidUpdate(message).then(message => {*/
-                resolve(message);
-              }, (error) => {
-                reject(error);
-              /*});
+            resolve(message);
+          }, (error) => {
+            reject(error);
+            /*});
             } else {
               resolve(message);
             }*/
@@ -57,6 +71,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
           resolve(message);
         }
       } else {
+        console.log('ON prepareForEvaluation', message);
         if (_this._isToSetID(message)) {
           _this._getIdentity(message).then(identity => {
             message.body.identity = identity;
@@ -106,6 +121,16 @@ class RuntimeCoreCtx extends ReThinkCtx {
   prepareToForward(message, isIncoming, result) {
     let _this = this;
     return new Promise((resolve, reject) => {
+      console.log('[Policy.RuntimeCoreCtx.prepareToForward]', message);
+
+      // TODO remove this validation. When the Nodejs auth was completed this should work like browser;
+      this.runtimeCapabilities.isAvailable('node').then((result) => {
+
+        if (result) {
+          return resolve(message);
+        }
+      });
+
       if (isIncoming & result) {
         let isSubscription = message.type === 'subscribe';
         let isFromRemoteSM = _this.isFromRemoteSM(message.from);
@@ -195,10 +220,28 @@ class RuntimeCoreCtx extends ReThinkCtx {
     return splitFrom[0] === 'runtime' && from !== this.runtimeRegistry.runtimeURL + '/sm';
   }
 
+  isLocal(url) {
+    return this.runtimeRegistry.isLocal(url);
+  }
+
+  isInterworkingProtoStub(url) {
+    return this.runtimeRegistry.isInterworkingProtoStub(url);
+  }
+
   _isToSetID(message) {
     let schemasToIgnore = ['domain-idp', 'runtime', 'domain'];
     let splitFrom = (message.from).split('://');
     let fromSchema = splitFrom[0];
+
+    let _from = message.from;
+
+    if (message.body && message.body.hasOwnProperty('source'))
+      _from = message.body.source;
+
+    // Signalling Messages between P2P Stubs don't have Identities. FFS
+
+    if (_from.includes('/p2prequester/') || _from.includes('/p2phandler/'))
+      return false;
 
     return schemasToIgnore.indexOf(fromSchema) === -1;
   }
@@ -209,19 +252,25 @@ class RuntimeCoreCtx extends ReThinkCtx {
   }
 
   _getIdentity(message) {
-    if (message.type === 'update') {
-      return this.idModule.getIdentityOfHyperty(message.body.source);
+    console.log('[Policy.RuntimeCoreCtx.getIdentity] ', message);
+
+    if (message.body.source !== undefined) {
+      return this.idModule.getToken(message.body.source, message.to);
+    } else
+
+/*    if (message.type === 'update') {
+      return this.idModule.getToken(message.body.source);
     }
 
     if (message.type === 'response' && message.body.source !== undefined) {
-      return this.idModule.getIdentityOfHyperty(message.body.source);
-    }
+      return this.idModule.getToken(message.body.source);
+    }*/
 
-    if (divideURL(message.from).type === 'hyperty') {
-      return this.idModule.getIdentityOfHyperty(message.from);
-    } else {
-      return this.idModule.getIdentityOfHyperty(this.getURL(message.from));
-    }
+//    if (divideURL(message.from).type === 'hyperty') {
+      return this.idModule.getToken(message.from, message.to);
+/*    } else {
+      return this.idModule.getToken(this.getURL(message.from));
+    }*/
   }
 
   /**
@@ -232,12 +281,19 @@ class RuntimeCoreCtx extends ReThinkCtx {
   *                     or if its type equals 'handshake'; false otherwise
   */
   _isToCypherModule(message) {
+    console.log('[Policy.RuntimeCoreCtx.istoChyperModule]', message);
     let isCreate = message.type === 'create';
     let isFromHyperty = divideURL(message.from).type === 'hyperty';
     let isToHyperty = divideURL(message.to).type === 'hyperty';
     let isToDataObject = isDataObjectURL(message.to);
 
-    return (isCreate && isFromHyperty && isToHyperty) || (isCreate && isFromHyperty && isToDataObject) || message.type === 'handshake' || message.type === 'update';
+    //TODO: For Further Study
+    let doMutualAuthentication = message.body.hasOwnProperty('mutualAuthentication') ? message.body.mutualAuthentication : true;
+
+    // todo: return false for messages coming from interworking stubs.
+    // Get descriptor from runtime catalogue and check interworking field.
+
+    return ((isCreate && isFromHyperty && isToHyperty) || (isCreate && isFromHyperty && isToDataObject) || message.type === 'handshake' || message.type === 'update') && doMutualAuthentication;
   }
 
   /**
@@ -245,12 +301,21 @@ class RuntimeCoreCtx extends ReThinkCtx {
   * @param  {String}  groupName
   */
   _loadUserPolicies() {
-    let policies = this.persistenceManager.get('rethink:userPolicies');
-    if (policies !== undefined) {
-      for (let i in policies) {
-        this.pep.addPolicy('USER', i, policies[i]);
-      }
-    }
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+
+      _this.storageManager.get('rethink:userPolicies').then((value) => {
+        let policies = value;
+        if (policies !== undefined) {
+          for (let i in policies) {
+            this.pep.addPolicy('USER', i, policies[i]);
+          }
+        }
+        resolve();
+      });
+    });
+
   }
 
   _getLastComponentOfURL(url) {
@@ -280,11 +345,23 @@ class RuntimeCoreCtx extends ReThinkCtx {
   }
 
   saveActivePolicy() {
-    this.persistenceManager.set('rethink:activePolicy', 0, this.activeUserPolicy);
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+      _this.storageManager.set('rethink:activePolicy', 0, this.activeUserPolicy).then(() => {
+        resolve();
+      });
+    });
   }
 
   saveGroups() {
-    this.persistenceManager.set('rethink:groups', 0, this.groups);
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+      _this.storageManager.set('rethink:groups', 0, this.groups).then(() => {
+        resolve();
+      });
+    });
   }
 
   savePolicies(source, policy, key) {
@@ -294,7 +371,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
       case 'USER':
         policiesJson = JSON.stringify(this.userPolicies);
         policiesJson = this._getPoliciesJSON(JSON.parse(policiesJson));
-        this.persistenceManager.set('rethink:userPolicies', 0, policiesJson);
+        this.storageManager.set('rethink:userPolicies', 0, policiesJson);
         break;
       case 'SERVICE_PROVIDER':
         if (policy !== undefined & key !== undefined) {
@@ -302,7 +379,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
         }
         policiesJson = JSON.stringify(this.serviceProviderPolicy);
         policiesJson = this._getPoliciesJSON(JSON.parse(policiesJson));
-        this.persistenceManager.set('rethink:spPolicies', 0, policiesJson);
+        this.storageManager.set('rethink:spPolicies', 0, policiesJson);
         break;
       default:
         throw Error('Unknown policy source: ' + source);

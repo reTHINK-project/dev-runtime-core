@@ -3,11 +3,18 @@ import AppSandboxBrowser from './sandboxes/AppSandboxBrowser';
 import Request from './Request';
 import {RuntimeCatalogue} from 'service-framework/dist/RuntimeCatalogue';
 import PersistenceManager from 'service-framework/dist/PersistenceManager';
+import StorageManager from 'service-framework/dist/StorageManager';
+
+import Dexie from 'dexie';
 
 export const runtimeFactory = {
 
   createSandbox() {
-    return new SandboxBrowser();
+
+    return new Promise((resolve) => {
+      resolve(new SandboxBrowser());
+    });
+
   },
 
   createAppSandbox() {
@@ -29,23 +36,29 @@ export const runtimeFactory = {
   },
 
   storageManager() {
+   // Using the implementation of Service Framework
+   // Dexie is the IndexDB Wrapper
+   const db = new Dexie('cache');
+   const storeName = 'objects';
+
+   return new StorageManager(db, storeName);
+
+   // return new StorageManagerFake('a', 'b');
+ },
+
+  runtimeCapabilities: (storageManager) => {
     return {
-      set: function(key, version, value) {
+      getRuntimeCapabilities:() => {
         return new Promise((resolve) => {
           resolve(undefined);
         });
       },
-      get: function(key) {
+      isAvailable:(capability) => {
         return new Promise((resolve) => {
           resolve(undefined);
         });
       },
-      getVersion: function(key) {
-        return new Promise((resolve) => {
-          resolve(undefined);
-        });
-      },
-      delete: function(key) {
+      update:() => {
         return new Promise((resolve) => {
           resolve(undefined);
         });

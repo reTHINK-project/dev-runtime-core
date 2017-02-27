@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../">
+  <title data-ice="title">test/RuntimeUA.spec.js | Service Framework API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  <a href="test.html" data-ice="testLink">Test</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">allocation</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/allocation/AddressAllocation.js~AddressAllocation.html">AddressAllocation</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html">Bus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html">MiniBus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Pipeline.js~Pipeline.html">Pipeline</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">graphconnector</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/BloomFilter.js~BloomFilter.html">BloomFilter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GlobalRegistryRecord.js~GlobalRegistryRecord.html">GlobalRegistryRecord</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html">GraphConnector</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html">GraphConnectorContactData</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">identity</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/Crypto.js~Crypto.html">Crypto</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/GuiFake.js~GuiFake.html">GuiFake</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/Identity.js~Identity.html">Identity</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/IdentityModule.js~IdentityModule.html">IdentityModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/OpenIdLib.js~OpenIdLib.html">OpenIdLib</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/ActionsService.js~ActionsService.html">ActionsService</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/CombiningAlgorithm.js~CombiningAlgorithm.html">CombiningAlgorithm</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Operators.js~Operators.html">Operators</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/PDP.js~PDP.html">PDP</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/PEP.js~PEP.html">PEP</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Policy.js~Policy.html">Policy</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/ReThinkCtx.js~ReThinkCtx.html">ReThinkCtx</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Rule.js~Rule.html">Rule</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/combiningAlgorithms</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/AllowOverrides.js~AllowOverrides.html">AllowOverrides</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/BlockOverrides.js~BlockOverrides.html">BlockOverrides</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/FirstApplicable.js~FirstApplicable.html">FirstApplicable</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/conditions</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/AdvancedCondition.js~AdvancedCondition.html">AdvancedCondition</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/Condition.js~Condition.html">Condition</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/SubscriptionCondition.js~SubscriptionCondition.html">SubscriptionCondition</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/context</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html">RuntimeCoreCtx</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">protostub</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/protostub/IdpProxyStub.js~IdpProxyStub.html">IdpProxyStub</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-activate">activate</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">registry</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/Discovery.js~Discovery.html">Discovery</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/DiscoveryServiceFramework.js~DiscoveryServiceFramework.html">DiscoveryServiceFramework</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/HypertyInstance.js~HypertyInstance.html">HypertyInstance</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html">Registry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/RegistryDataModel.js~RegistryDataModel.html">RegistryDataModel</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">runtime</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/Descriptors.js~Descriptors.html">Descriptors</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/Loader.js~Loader.html">Loader</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/RuntimeUA.js~RuntimeUA.html">RuntimeUA</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-runtimeConfiguration">runtimeConfiguration</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-runtimeUtils">runtimeUtils</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">sandbox</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/sandbox/Sandbox.js~Sandbox.html">Sandbox</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/sandbox/SandboxRegistry.js~SandboxRegistry.html">SandboxRegistry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-SandboxType">SandboxType</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">syncher</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/ObserverObject.js~ObserverObject.html">ObserverObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/ReporterObject.js~ReporterObject.html">ReporterObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/StoreDataObjects.js~StoreDataObjects.html">StoreDataObjects</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/Subscription.js~Subscription.html">Subscription</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/SyncherManager.js~SyncherManager.html">SyncherManager</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">utils</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/utils/EventEmitter.js~EventEmitter.html">EventEmitter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-schemaValidation">schemaValidation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-buildURL">buildURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-convertToUserURL">convertToUserURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-deepClone">deepClone</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-divideEmail">divideEmail</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-divideURL">divideURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-emptyObject">emptyObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-generateGUID">generateGUID</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getConfigurationResources">getConfigurationResources</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserEmailFromURL">getUserEmailFromURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserIdentityDomain">getUserIdentityDomain</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserURLFromEmail">getUserURLFromEmail</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isBackendServiceURL">isBackendServiceURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isDataObjectURL">isDataObjectURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isHypertyURL">isHypertyURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isLegacy">isLegacy</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isURL">isURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isUserURL">isUserURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-removePathFromURL">removePathFromURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-tv4">tv4</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-divideURL">divideURL</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">test/RuntimeUA.spec.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import chai from &apos;chai&apos;;
+import chaiAsPromised from &apos;chai-as-promised&apos;;
+import sinonChai from &apos;sinon-chai&apos;;
+
+chai.config.truncateThreshold = 0;
+
+let expect = chai.expect;
+
+chai.use(chaiAsPromised);
+chai.use(sinonChai);
+
+import { descriptors } from &apos;./resources/descriptors.js&apos;;
+
+// Testing Module
+import RuntimeUA from  &apos;../src/runtime/RuntimeUA&apos;;
+
+// Main dependecies
+import Registry from &apos;../src/registry/Registry&apos;;
+import IdentityModule from &apos;../src/identity/IdentityModule&apos;;
+import PEP from &apos;../src/policy/PEP&apos;;
+import MessageBus from &apos;../src/bus/MessageBus&apos;;
+
+import { divideURL } from &apos;../src/utils/utils&apos;;
+
+import { runtimeFactory } from &apos;./resources/runtimeFactory&apos;;
+
+/// import { runtimeConfiguration } from &apos;./resources/runtimeConfiguration&apos;;
+
+// Testing runtimeUA;
+let domain = &apos;localhost&apos;;
+describe(&apos;RuntimeUA&apos;, function() {
+
+  let runtime = new RuntimeUA(descriptors.Runtimes.Runtime, runtimeFactory, domain);
+  let getDescriptor;
+
+  before(function() {
+
+    getDescriptor = (url) =&gt; {
+
+      return new Promise(function(resolve, reject) {
+
+        let dividedURL = divideURL(url);
+        let identity = dividedURL.identity;
+
+        if (!identity) {
+          identity = &apos;default&apos;;
+        } else {
+          identity = identity.substring(identity.lastIndexOf(&apos;/&apos;) + 1);
+        }
+
+        let result;
+
+        if (url.includes(&apos;hyperty&apos;)) {
+          try {
+            result = descriptors.Hyperties[identity];
+          } catch (e) {
+            reject(e);
+          }
+
+        } else if (url.includes(&apos;protocolstub&apos;) || url === dividedURL.domain) {
+          try {
+            result = descriptors.ProtoStubs[identity];
+          } catch (e) {
+            reject(e);
+          }
+        } else if (url.includes(&apos;idp-proxy&apos;)) {
+          try {
+            result = descriptors.IdpProxies[identity];
+          } catch (e) {
+            reject(e);
+          }
+        } else if (url.includes(&apos;dataschema&apos;)) {
+          try {
+            result = descriptors.DataSchemas[identity];
+          } catch (e) {
+            reject(e);
+          }
+
+        }
+
+        resolve(result);
+
+      });
+    };
+  });
+
+  after(function() {
+    runtime.descriptorInstance.getHypertyDescriptor.restore();
+    runtime.descriptorInstance.getStubDescriptor.restore();
+    runtime.descriptorInstance.getIdpProxyDescriptor.restore();
+  });
+
+  describe(&apos;constructor()&apos;, function() {
+
+    it(&apos;expects the runtime was ready&apos;, (done) =&gt; {
+
+      expect(runtime.init().then((result) =&gt; {
+
+        sinon.stub(runtime.messageBus, &apos;postMessage&apos;, function(msg, replyCallback) {
+          replyCallback({
+            id: 1, type: &apos;response&apos;, from: &apos;domain://msg-node.sp.domain/address-allocation&apos;, to: &apos;local://fake.url&apos;,
+            body: {code: 200, value: {allocated: msg.body.scheme + &apos;://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d&apos;}}
+          });
+        });
+
+        sinon.stub(runtime.descriptorInstance, &apos;getHypertyDescriptor&apos;, (hypertyURL) =&gt; {
+          return getDescriptor(hypertyURL);
+        });
+
+        sinon.stub(runtime.descriptorInstance, &apos;getStubDescriptor&apos;, (stubURL) =&gt; {
+          return getDescriptor(stubURL);
+        });
+
+        sinon.stub(runtime.descriptorInstance, &apos;getIdpProxyDescriptor&apos;, (idpProxyURL) =&gt; {
+          return getDescriptor(idpProxyURL);
+        });
+
+        sinon.stub(runtime.runtimeCatalogue, &apos;getDataSchemaDescriptor&apos;, (dataSchemaURL) =&gt; {
+          return getDescriptor(dataSchemaURL);
+        });
+
+        sinon.stub(runtime.registry, &apos;registerHyperty&apos;, (sandbox, descriptorURL, descriptor, addressURL) =&gt; {
+          return new Promise(function(resolve) {
+            console.log(&apos;AQIO:&apos;, addressURL);
+            if (addressURL.newAddress) {
+              resolve(&apos;hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d&apos;);
+            } else {
+              resolve(addressURL.address);
+            }
+          });
+
+        });
+
+        sinon.stub(runtime.registry, &apos;checkRegisteredURLs&apos;, (info, reuseURL) =&gt; {
+
+          return new Promise((resolve) =&gt; {
+            console.log(&apos;checkRegisteredURLs:&apos;, typeof(reuseURL), reuseURL);
+            if (typeof(reuseURL) === &apos;boolean&apos;) {
+              resolve(&apos;hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d&apos;);
+            } else if (typeof(reuseURL) === &apos;string&apos;) {
+              console.log(&apos;checkRegisteredURLs is string:&apos;, reuseURL);
+              resolve(reuseURL);
+            } else {
+              resolve(&apos;hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d&apos;);
+            }
+
+          });
+
+        });
+
+        return result;
+      }))
+      .to.be.fulfilled
+      .and.to.eventually.be.true
+      .and.notify(done);
+
+    });
+
+    it(&apos;depends of the Registry&apos;, function() {
+      expect(runtime.registry).to.be.instanceof(Registry);
+    });
+
+    it(&apos;depends of the Identity Module&apos;, function() {
+      expect(runtime.identityModule).to.be.instanceof(IdentityModule);
+    });
+
+    it(&apos;depends of the Policy Engine&apos;, function() {
+      expect(runtime.policyEngine).to.be.instanceof(PEP);
+    });
+
+    it(&apos;depends of the MessageBus&apos;, function() {
+      expect(runtime.messageBus).to.be.instanceof(MessageBus);
+    });
+
+    it(&apos;should throw when given no arguments&apos;, function() {
+      expect(runtime).to.have.property(&apos;runtimeFactory&apos;);
+      expect(runtime.runtimeFactory).to.have.property(&apos;atob&apos;);
+      expect(runtime.runtimeFactory).to.have.property(&apos;persistenceManager&apos;);
+      expect(runtime.runtimeFactory).to.have.property(&apos;runtimeCapabilities&apos;);
+      expect(runtime.runtimeFactory).to.have.property(&apos;storageManager&apos;);
+      expect(runtime.runtimeFactory).to.have.property(&apos;createSandbox&apos;);
+      expect(runtime.runtimeFactory).to.have.property(&apos;createAppSandbox&apos;);
+      expect(runtime.runtimeFactory).to.have.property(&apos;createHttpRequest&apos;);
+      expect(runtime.runtimeFactory).to.have.property(&apos;createRuntimeCatalogue&apos;);
+    });
+
+  });
+
+  describe(&apos;loadHyperty(hypertyDescriptorURL)&apos;, function() {
+
+    it(&apos;should throw when given no arguments&apos;, function(done) {
+      let hypertyDescriptorURL = &apos;hyperty-catalogue://catalogue.sp.domain/.well-known/hyperty/HelloHyperty&apos;;
+      let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL);
+
+      expect(loadHyperty)
+      .to.be.fulfilled
+      .and.notify(done);
+    });
+
+    it(&apos;should be a Promise&apos;, function(done) {
+
+      let hypertyDescriptorURL = &apos;hyperty-catalogue://catalogue.sp.domain/.well-known/hyperty/HelloHyperty&apos;;
+      let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL);
+
+      expect(loadHyperty)
+      .to.be.fulfilled
+      .and.to.be.instanceof(Promise)
+      .and.notify(done);
+
+    });
+
+    it(&apos;should be deployed&apos;, function(done) {
+
+      let hypertyDescriptorURL = &apos;hyperty-catalogue://catalogue.sp.domain/.well-known/hyperty/HelloHyperty&apos;;
+      let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL);
+      let hypertyResolved = [&apos;runtimeHypertyURL&apos;, &apos;status&apos;];
+
+      expect(loadHyperty).to.eventually.to.have.all.keys(hypertyResolved)
+      .and.to.be.fulfilled
+      .and.notify(done);
+
+    });
+
+    it(&apos;should load an hyperty based on given true value for the reuse&apos;, function(done) {
+
+      let hypertyDescriptorURL = &apos;hyperty-catalogue://catalogue.sp.domain/.well-known/hyperty/HelloHyperty&apos;;
+      let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL, true);
+      let hypertyResolved = [&apos;runtimeHypertyURL&apos;, &apos;status&apos;];
+
+      expect(loadHyperty).to.be.fulfilled
+      .and.eventually.to.have.all.keys(hypertyResolved)
+      .and.notify(done);
+
+    });
+
+    it(&apos;should load an hyperty based on given reuse URL address&apos;, function(done) {
+
+      let hypertyDescriptorURL = &apos;hyperty-catalogue://catalogue.sp.domain/.well-known/hyperty/HelloHyperty&apos;;
+      let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL, &apos;hyperty://sp.domain/1&apos;);
+      let hypertyResolved = {
+        runtimeHypertyURL: &apos;hyperty://sp.domain/1&apos;,
+        status: &apos;deployed&apos;
+      };
+
+      expect(loadHyperty).to.eventually.to.deep.equal(hypertyResolved)
+      .and.to.be.fulfilled
+      .and.notify(done);
+
+    });
+
+
+  });
+
+  describe(&apos;loadStub(sp-domain)&apos;, function() {
+
+    it(&apos;should throw when given no arguments&apos;, function(done) {
+      let spDomain = &apos;sp.domain&apos;;
+      let loadStubPromise = runtime.loadStub(spDomain);
+
+      expect(loadStubPromise).to.be.fulfilled.and.notify(done);
+    });
+
+    it(&apos;should be a Promise&apos;, function(done) {
+      let spDomain = &apos;sp.domain&apos;;
+      let loadStubPromise = runtime.loadStub(spDomain);
+
+      expect(loadStubPromise).to.be.fulfilled
+      .to.be.instanceof(Promise)
+      .and.notify(done);
+    });
+
+    it(&apos;should be deployed&apos;, function(done) {
+      let spDomain = &apos;sp.domain&apos;;
+      let loadStubPromise = runtime.loadStub(spDomain);
+
+      //let stubResolved = [&apos;url&apos;, &apos;status&apos;];
+
+      expect(loadStubPromise).to.be.fulfilled
+      .and.eventually.have.all.keys(&apos;url&apos;, &apos;status&apos;, &apos;descriptorURL&apos;)
+      .and.eventually.to.have.property(&apos;url&apos;).to.include(&apos;runtime://sp.domain/protostub/&apos;)
+      .and.notify(done);
+    });
+
+  });
+
+  describe(&apos;loadIdpProxy(google.com)&apos;, function() {
+
+    it(&apos;should throw when given no arguments&apos;, function(done) {
+      let domain = &apos;google.com&apos;;
+      let loadIdpPromise = runtime.loadIdpProxy(domain);
+
+      expect(loadIdpPromise).to.be.fulfilled.and.notify(done);
+    });
+
+    it(&apos;should be a Promise&apos;, function(done) {
+      let domain = &apos;google.com&apos;;
+      let loadIdpPromise = runtime.loadIdpProxy(domain);
+
+      expect(loadIdpPromise).to.be.fulfilled
+      .to.be.instanceof(Promise)
+      .and.notify(done);
+    });
+
+    it(&apos;should be deployed&apos;, function(done) {
+      let domain = &apos;google.com&apos;;
+      let loadIdpPromise = runtime.loadIdpProxy(domain);
+      let stubResolved = [&apos;url&apos;, &apos;status&apos;];
+
+      expect(loadIdpPromise).to.be.fulfilled
+      .and.eventually.to.have.all.keys(stubResolved)
+      .and.notify(done);
+    });
+
+  });
+
+});
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.5.2)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

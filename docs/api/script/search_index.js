@@ -1,8 +1,32 @@
 window.esdocSearchIndex = [
   [
-    "runtime-core/src/registry/addressallocation.js~addressallocation",
-    "class/src/registry/AddressAllocation.js~AddressAllocation.html",
-    "<span>AddressAllocation</span> <span class=\"search-result-import-path\">runtime-core/src/registry/AddressAllocation.js</span>",
+    "runtime-core/src/policy/actionsservice.js~actionsservice",
+    "class/src/policy/ActionsService.js~ActionsService.html",
+    "<span>ActionsService</span> <span class=\"search-result-import-path\">runtime-core/src/policy/ActionsService.js</span>",
+    "class"
+  ],
+  [
+    "runtime-core/src/allocation/addressallocation.js~addressallocation",
+    "class/src/allocation/AddressAllocation.js~AddressAllocation.html",
+    "<span>AddressAllocation</span> <span class=\"search-result-import-path\">runtime-core/src/allocation/AddressAllocation.js</span>",
+    "class"
+  ],
+  [
+    "runtime-core/src/policy/conditions/advancedcondition.js~advancedcondition",
+    "class/src/policy/conditions/AdvancedCondition.js~AdvancedCondition.html",
+    "<span>AdvancedCondition</span> <span class=\"search-result-import-path\">runtime-core/src/policy/conditions/AdvancedCondition.js</span>",
+    "class"
+  ],
+  [
+    "runtime-core/src/policy/combiningalgorithms/allowoverrides.js~allowoverrides",
+    "class/src/policy/combiningAlgorithms/AllowOverrides.js~AllowOverrides.html",
+    "<span>AllowOverrides</span> <span class=\"search-result-import-path\">runtime-core/src/policy/combiningAlgorithms/AllowOverrides.js</span>",
+    "class"
+  ],
+  [
+    "runtime-core/src/policy/combiningalgorithms/blockoverrides.js~blockoverrides",
+    "class/src/policy/combiningAlgorithms/BlockOverrides.js~BlockOverrides.html",
+    "<span>BlockOverrides</span> <span class=\"search-result-import-path\">runtime-core/src/policy/combiningAlgorithms/BlockOverrides.js</span>",
     "class"
   ],
   [
@@ -18,9 +42,51 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
+    "runtime-core/src/policy/combiningalgorithm.js~combiningalgorithm",
+    "class/src/policy/CombiningAlgorithm.js~CombiningAlgorithm.html",
+    "<span>CombiningAlgorithm</span> <span class=\"search-result-import-path\">runtime-core/src/policy/CombiningAlgorithm.js</span>",
+    "class"
+  ],
+  [
+    "runtime-core/src/policy/conditions/condition.js~condition",
+    "class/src/policy/conditions/Condition.js~Condition.html",
+    "<span>Condition</span> <span class=\"search-result-import-path\">runtime-core/src/policy/conditions/Condition.js</span>",
+    "class"
+  ],
+  [
+    "runtime-core/src/identity/crypto.js~crypto",
+    "class/src/identity/Crypto.js~Crypto.html",
+    "<span>Crypto</span> <span class=\"search-result-import-path\">runtime-core/src/identity/Crypto.js</span>",
+    "class"
+  ],
+  [
+    "runtime-core/src/runtime/descriptors.js~descriptors",
+    "class/src/runtime/Descriptors.js~Descriptors.html",
+    "<span>Descriptors</span> <span class=\"search-result-import-path\">runtime-core/src/runtime/Descriptors.js</span>",
+    "class"
+  ],
+  [
+    "runtime-core/src/registry/discovery.js~discovery",
+    "class/src/registry/Discovery.js~Discovery.html",
+    "<span>Discovery</span> <span class=\"search-result-import-path\">runtime-core/src/registry/Discovery.js</span>",
+    "class"
+  ],
+  [
+    "runtime-core/src/registry/discoveryserviceframework.js~discoveryserviceframework",
+    "class/src/registry/DiscoveryServiceFramework.js~DiscoveryServiceFramework.html",
+    "<span>DiscoveryServiceFramework</span> <span class=\"search-result-import-path\">runtime-core/src/registry/DiscoveryServiceFramework.js</span>",
+    "class"
+  ],
+  [
     "runtime-core/src/utils/eventemitter.js~eventemitter",
     "class/src/utils/EventEmitter.js~EventEmitter.html",
     "<span>EventEmitter</span> <span class=\"search-result-import-path\">runtime-core/src/utils/EventEmitter.js</span>",
+    "class"
+  ],
+  [
+    "runtime-core/src/policy/combiningalgorithms/firstapplicable.js~firstapplicable",
+    "class/src/policy/combiningAlgorithms/FirstApplicable.js~FirstApplicable.html",
+    "<span>FirstApplicable</span> <span class=\"search-result-import-path\">runtime-core/src/policy/combiningAlgorithms/FirstApplicable.js</span>",
     "class"
   ],
   [
@@ -42,9 +108,9 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
-    "runtime-core/src/registry/hypertydiscovery.js~hypertydiscovery",
-    "class/src/registry/HypertyDiscovery.js~HypertyDiscovery.html",
-    "<span>HypertyDiscovery</span> <span class=\"search-result-import-path\">runtime-core/src/registry/HypertyDiscovery.js</span>",
+    "runtime-core/src/identity/guifake.js~guifake",
+    "class/src/identity/GuiFake.js~GuiFake.html",
+    "<span>GuiFake</span> <span class=\"search-result-import-path\">runtime-core/src/identity/GuiFake.js</span>",
     "class"
   ],
   [
@@ -54,9 +120,27 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
+    "runtime-core/src/identity/identity.js~identity",
+    "class/src/identity/Identity.js~Identity.html",
+    "<span>Identity</span> <span class=\"search-result-import-path\">runtime-core/src/identity/Identity.js</span>",
+    "class"
+  ],
+  [
     "runtime-core/src/identity/identitymodule.js~identitymodule",
     "class/src/identity/IdentityModule.js~IdentityModule.html",
     "<span>IdentityModule</span> <span class=\"search-result-import-path\">runtime-core/src/identity/IdentityModule.js</span>",
+    "class"
+  ],
+  [
+    "runtime-core/src/protostub/idpproxystub.js~idpproxystub",
+    "class/src/protostub/IdpProxyStub.js~IdpProxyStub.html",
+    "<span>IdpProxyStub</span> <span class=\"search-result-import-path\">runtime-core/src/protostub/IdpProxyStub.js</span>",
+    "class"
+  ],
+  [
+    "runtime-core/src/runtime/loader.js~loader",
+    "class/src/runtime/Loader.js~Loader.html",
+    "<span>Loader</span> <span class=\"search-result-import-path\">runtime-core/src/runtime/Loader.js</span>",
     "class"
   ],
   [
@@ -72,9 +156,33 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
-    "runtime-core/src/syncher/objectallocation.js~objectallocation",
-    "class/src/syncher/ObjectAllocation.js~ObjectAllocation.html",
-    "<span>ObjectAllocation</span> <span class=\"search-result-import-path\">runtime-core/src/syncher/ObjectAllocation.js</span>",
+    "runtime-core/src/syncher/observerobject.js~observerobject",
+    "class/src/syncher/ObserverObject.js~ObserverObject.html",
+    "<span>ObserverObject</span> <span class=\"search-result-import-path\">runtime-core/src/syncher/ObserverObject.js</span>",
+    "class"
+  ],
+  [
+    "runtime-core/src/identity/openidlib.js~openidlib",
+    "class/src/identity/OpenIdLib.js~OpenIdLib.html",
+    "<span>OpenIdLib</span> <span class=\"search-result-import-path\">runtime-core/src/identity/OpenIdLib.js</span>",
+    "class"
+  ],
+  [
+    "runtime-core/src/policy/operators.js~operators",
+    "class/src/policy/Operators.js~Operators.html",
+    "<span>Operators</span> <span class=\"search-result-import-path\">runtime-core/src/policy/Operators.js</span>",
+    "class"
+  ],
+  [
+    "runtime-core/src/policy/pdp.js~pdp",
+    "class/src/policy/PDP.js~PDP.html",
+    "<span>PDP</span> <span class=\"search-result-import-path\">runtime-core/src/policy/PDP.js</span>",
+    "class"
+  ],
+  [
+    "runtime-core/src/policy/pep.js~pep",
+    "class/src/policy/PEP.js~PEP.html",
+    "<span>PEP</span> <span class=\"search-result-import-path\">runtime-core/src/policy/PEP.js</span>",
     "class"
   ],
   [
@@ -84,9 +192,15 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
-    "runtime-core/src/policy/policyengine.js~policyengine",
-    "class/src/policy/PolicyEngine.js~PolicyEngine.html",
-    "<span>PolicyEngine</span> <span class=\"search-result-import-path\">runtime-core/src/policy/PolicyEngine.js</span>",
+    "runtime-core/src/policy/policy.js~policy",
+    "class/src/policy/Policy.js~Policy.html",
+    "<span>Policy</span> <span class=\"search-result-import-path\">runtime-core/src/policy/Policy.js</span>",
+    "class"
+  ],
+  [
+    "runtime-core/src/policy/rethinkctx.js~rethinkctx",
+    "class/src/policy/ReThinkCtx.js~ReThinkCtx.html",
+    "<span>ReThinkCtx</span> <span class=\"search-result-import-path\">runtime-core/src/policy/ReThinkCtx.js</span>",
     "class"
   ],
   [
@@ -102,15 +216,21 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
-    "runtime-core/src/runtime/runtimecatalogue-local.js~runtimecatalogue",
-    "class/src/runtime/RuntimeCatalogue-Local.js~RuntimeCatalogue.html",
-    "<span>RuntimeCatalogue</span> <span class=\"search-result-import-path\">runtime-core/src/runtime/RuntimeCatalogue-Local.js</span>",
+    "runtime-core/src/syncher/reporterobject.js~reporterobject",
+    "class/src/syncher/ReporterObject.js~ReporterObject.html",
+    "<span>ReporterObject</span> <span class=\"search-result-import-path\">runtime-core/src/syncher/ReporterObject.js</span>",
     "class"
   ],
   [
-    "runtime-core/src/runtime/runtimecatalogue.js~runtimecatalogue",
-    "class/src/runtime/RuntimeCatalogue.js~RuntimeCatalogue.html",
-    "<span>RuntimeCatalogue</span> <span class=\"search-result-import-path\">runtime-core/src/runtime/RuntimeCatalogue.js</span>",
+    "runtime-core/src/policy/rule.js~rule",
+    "class/src/policy/Rule.js~Rule.html",
+    "<span>Rule</span> <span class=\"search-result-import-path\">runtime-core/src/policy/Rule.js</span>",
+    "class"
+  ],
+  [
+    "runtime-core/src/policy/context/runtimecorectx.js~runtimecorectx",
+    "class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html",
+    "<span>RuntimeCoreCtx</span> <span class=\"search-result-import-path\">runtime-core/src/policy/context/RuntimeCoreCtx.js</span>",
     "class"
   ],
   [
@@ -132,6 +252,30 @@ window.esdocSearchIndex = [
     "class"
   ],
   [
+    "runtime-core/src/sandbox/sandbox.js~sandboxtype",
+    "variable/index.html#static-variable-SandboxType",
+    "<span>SandboxType</span> <span class=\"search-result-import-path\">runtime-core/src/sandbox/Sandbox.js</span>",
+    "variable"
+  ],
+  [
+    "runtime-core/src/syncher/storedataobjects.js~storedataobjects",
+    "class/src/syncher/StoreDataObjects.js~StoreDataObjects.html",
+    "<span>StoreDataObjects</span> <span class=\"search-result-import-path\">runtime-core/src/syncher/StoreDataObjects.js</span>",
+    "class"
+  ],
+  [
+    "runtime-core/src/syncher/subscription.js~subscription",
+    "class/src/syncher/Subscription.js~Subscription.html",
+    "<span>Subscription</span> <span class=\"search-result-import-path\">runtime-core/src/syncher/Subscription.js</span>",
+    "class"
+  ],
+  [
+    "runtime-core/src/policy/conditions/subscriptioncondition.js~subscriptioncondition",
+    "class/src/policy/conditions/SubscriptionCondition.js~SubscriptionCondition.html",
+    "<span>SubscriptionCondition</span> <span class=\"search-result-import-path\">runtime-core/src/policy/conditions/SubscriptionCondition.js</span>",
+    "class"
+  ],
+  [
     "runtime-core/src/syncher/synchermanager.js~synchermanager",
     "class/src/syncher/SyncherManager.js~SyncherManager.html",
     "<span>SyncherManager</span> <span class=\"search-result-import-path\">runtime-core/src/syncher/SyncherManager.js</span>",
@@ -144,9 +288,27 @@ window.esdocSearchIndex = [
     "function"
   ],
   [
+    "runtime-core/src/utils/utils.js~buildurl",
+    "function/index.html#static-function-buildURL",
+    "<span>buildURL</span> <span class=\"search-result-import-path\">runtime-core/src/utils/utils.js</span>",
+    "function"
+  ],
+  [
+    "runtime-core/src/utils/utils.js~converttouserurl",
+    "function/index.html#static-function-convertToUserURL",
+    "<span>convertToUserURL</span> <span class=\"search-result-import-path\">runtime-core/src/utils/utils.js</span>",
+    "function"
+  ],
+  [
     "runtime-core/src/utils/utils.js~deepclone",
     "function/index.html#static-function-deepClone",
     "<span>deepClone</span> <span class=\"search-result-import-path\">runtime-core/src/utils/utils.js</span>",
+    "function"
+  ],
+  [
+    "runtime-core/src/utils/utils.js~divideemail",
+    "function/index.html#static-function-divideEmail",
+    "<span>divideEmail</span> <span class=\"search-result-import-path\">runtime-core/src/utils/utils.js</span>",
     "function"
   ],
   [
@@ -162,340 +324,1804 @@ window.esdocSearchIndex = [
     "function"
   ],
   [
-    "runtime-core/src/persistence/persistencemanager.js~persistencemanager",
-    "variable/index.html#static-variable-persistenceManager",
-    "<span>persistenceManager</span> <span class=\"search-result-import-path\">runtime-core/src/persistence/PersistenceManager.js</span>",
+    "runtime-core/src/utils/utils.js~generateguid",
+    "function/index.html#static-function-generateGUID",
+    "<span>generateGUID</span> <span class=\"search-result-import-path\">runtime-core/src/utils/utils.js</span>",
+    "function"
+  ],
+  [
+    "runtime-core/src/utils/utils.js~getconfigurationresources",
+    "function/index.html#static-function-getConfigurationResources",
+    "<span>getConfigurationResources</span> <span class=\"search-result-import-path\">runtime-core/src/utils/utils.js</span>",
+    "function"
+  ],
+  [
+    "runtime-core/src/utils/utils.js~getuseremailfromurl",
+    "function/index.html#static-function-getUserEmailFromURL",
+    "<span>getUserEmailFromURL</span> <span class=\"search-result-import-path\">runtime-core/src/utils/utils.js</span>",
+    "function"
+  ],
+  [
+    "runtime-core/src/utils/utils.js~getuseridentitydomain",
+    "function/index.html#static-function-getUserIdentityDomain",
+    "<span>getUserIdentityDomain</span> <span class=\"search-result-import-path\">runtime-core/src/utils/utils.js</span>",
+    "function"
+  ],
+  [
+    "runtime-core/src/utils/utils.js~getuserurlfromemail",
+    "function/index.html#static-function-getUserURLFromEmail",
+    "<span>getUserURLFromEmail</span> <span class=\"search-result-import-path\">runtime-core/src/utils/utils.js</span>",
+    "function"
+  ],
+  [
+    "runtime-core/src/utils/utils.js~isbackendserviceurl",
+    "function/index.html#static-function-isBackendServiceURL",
+    "<span>isBackendServiceURL</span> <span class=\"search-result-import-path\">runtime-core/src/utils/utils.js</span>",
+    "function"
+  ],
+  [
+    "runtime-core/src/utils/utils.js~isdataobjecturl",
+    "function/index.html#static-function-isDataObjectURL",
+    "<span>isDataObjectURL</span> <span class=\"search-result-import-path\">runtime-core/src/utils/utils.js</span>",
+    "function"
+  ],
+  [
+    "runtime-core/src/utils/utils.js~ishypertyurl",
+    "function/index.html#static-function-isHypertyURL",
+    "<span>isHypertyURL</span> <span class=\"search-result-import-path\">runtime-core/src/utils/utils.js</span>",
+    "function"
+  ],
+  [
+    "runtime-core/src/utils/utils.js~islegacy",
+    "function/index.html#static-function-isLegacy",
+    "<span>isLegacy</span> <span class=\"search-result-import-path\">runtime-core/src/utils/utils.js</span>",
+    "function"
+  ],
+  [
+    "runtime-core/src/utils/utils.js~isurl",
+    "function/index.html#static-function-isURL",
+    "<span>isURL</span> <span class=\"search-result-import-path\">runtime-core/src/utils/utils.js</span>",
+    "function"
+  ],
+  [
+    "runtime-core/src/utils/utils.js~isuserurl",
+    "function/index.html#static-function-isUserURL",
+    "<span>isUserURL</span> <span class=\"search-result-import-path\">runtime-core/src/utils/utils.js</span>",
+    "function"
+  ],
+  [
+    "runtime-core/src/utils/utils.js~removepathfromurl",
+    "function/index.html#static-function-removePathFromURL",
+    "<span>removePathFromURL</span> <span class=\"search-result-import-path\">runtime-core/src/utils/utils.js</span>",
+    "function"
+  ],
+  [
+    "runtime-core/src/runtime/runtimeconfiguration.js~runtimeconfiguration",
+    "variable/index.html#static-variable-runtimeConfiguration",
+    "<span>runtimeConfiguration</span> <span class=\"search-result-import-path\">runtime-core/src/runtime/runtimeConfiguration.js</span>",
     "variable"
   ],
   [
+    "runtime-core/src/runtime/runtimeutils.js~runtimeutils",
+    "variable/index.html#static-variable-runtimeUtils",
+    "<span>runtimeUtils</span> <span class=\"search-result-import-path\">runtime-core/src/runtime/runtimeUtils.js</span>",
+    "variable"
+  ],
+  [
+    "runtime-core/src/utils/schemavalidation.js~schemavalidation",
+    "function/index.html#static-function-schemaValidation",
+    "<span>schemaValidation</span> <span class=\"search-result-import-path\">runtime-core/src/utils/schemaValidation.js</span>",
+    "function"
+  ],
+  [
+    "runtime-core/src/utils/tv4.js~tv4",
+    "variable/index.html#static-variable-tv4",
+    "<span>tv4</span> <span class=\"search-result-import-path\">runtime-core/src/utils/tv4.js</span>",
+    "variable"
+  ],
+  [
+    "",
+    "test-file/test/AddressAllocation.spec.js.html#lineNumber15",
+    "AddressAllocation",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/AddressAllocation.spec.js.html#lineNumber79",
+    "AddressAllocation should create a new data Object address",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/AddressAllocation.spec.js.html#lineNumber64",
+    "AddressAllocation should create a new hyperty address",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/AddressAllocation.spec.js.html#lineNumber112",
+    "AddressAllocation should reuse an hyperty url address based on an given url",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/AddressAllocation.spec.js.html#lineNumber95",
+    "AddressAllocation should reuse an hyperty url address based on reuse option",
+    "test"
+  ],
+  [
     "builtinexternal/ecmascriptexternal.js~array",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array",
     "BuiltinExternal/ECMAScriptExternal.js~Array",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~arraybuffer",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer",
     "BuiltinExternal/ECMAScriptExternal.js~ArrayBuffer",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~boolean",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean",
     "BuiltinExternal/ECMAScriptExternal.js~Boolean",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~dataview",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DataView",
     "BuiltinExternal/ECMAScriptExternal.js~DataView",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~date",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date",
     "BuiltinExternal/ECMAScriptExternal.js~Date",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~error",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error",
     "BuiltinExternal/ECMAScriptExternal.js~Error",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~evalerror",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/EvalError",
     "BuiltinExternal/ECMAScriptExternal.js~EvalError",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~float32array",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Float32Array",
     "BuiltinExternal/ECMAScriptExternal.js~Float32Array",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~float64array",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Float64Array",
     "BuiltinExternal/ECMAScriptExternal.js~Float64Array",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~function",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function",
     "BuiltinExternal/ECMAScriptExternal.js~Function",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~generator",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Generator",
     "BuiltinExternal/ECMAScriptExternal.js~Generator",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~generatorfunction",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/GeneratorFunction",
     "BuiltinExternal/ECMAScriptExternal.js~GeneratorFunction",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~infinity",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Infinity",
     "BuiltinExternal/ECMAScriptExternal.js~Infinity",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~int16array",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Int16Array",
     "BuiltinExternal/ECMAScriptExternal.js~Int16Array",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~int32array",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Int32Array",
     "BuiltinExternal/ECMAScriptExternal.js~Int32Array",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~int8array",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Int8Array",
     "BuiltinExternal/ECMAScriptExternal.js~Int8Array",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~internalerror",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/InternalError",
     "BuiltinExternal/ECMAScriptExternal.js~InternalError",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~json",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON",
     "BuiltinExternal/ECMAScriptExternal.js~JSON",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~map",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map",
     "BuiltinExternal/ECMAScriptExternal.js~Map",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~nan",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/NaN",
     "BuiltinExternal/ECMAScriptExternal.js~NaN",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~number",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number",
     "BuiltinExternal/ECMAScriptExternal.js~Number",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~object",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object",
     "BuiltinExternal/ECMAScriptExternal.js~Object",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~promise",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise",
     "BuiltinExternal/ECMAScriptExternal.js~Promise",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~proxy",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy",
     "BuiltinExternal/ECMAScriptExternal.js~Proxy",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~rangeerror",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RangeError",
     "BuiltinExternal/ECMAScriptExternal.js~RangeError",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~referenceerror",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ReferenceError",
     "BuiltinExternal/ECMAScriptExternal.js~ReferenceError",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~reflect",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Reflect",
     "BuiltinExternal/ECMAScriptExternal.js~Reflect",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~regexp",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp",
     "BuiltinExternal/ECMAScriptExternal.js~RegExp",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~set",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set",
     "BuiltinExternal/ECMAScriptExternal.js~Set",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~string",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String",
     "BuiltinExternal/ECMAScriptExternal.js~String",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~symbol",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol",
     "BuiltinExternal/ECMAScriptExternal.js~Symbol",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~syntaxerror",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SyntaxError",
     "BuiltinExternal/ECMAScriptExternal.js~SyntaxError",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~typeerror",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypeError",
     "BuiltinExternal/ECMAScriptExternal.js~TypeError",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~urierror",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/URIError",
     "BuiltinExternal/ECMAScriptExternal.js~URIError",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~uint16array",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint16Array",
     "BuiltinExternal/ECMAScriptExternal.js~Uint16Array",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~uint32array",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint32Array",
     "BuiltinExternal/ECMAScriptExternal.js~Uint32Array",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~uint8array",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8Array",
     "BuiltinExternal/ECMAScriptExternal.js~Uint8Array",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~uint8clampedarray",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Uint8ClampedArray",
     "BuiltinExternal/ECMAScriptExternal.js~Uint8ClampedArray",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~weakmap",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap",
     "BuiltinExternal/ECMAScriptExternal.js~WeakMap",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~weakset",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakSet",
     "BuiltinExternal/ECMAScriptExternal.js~WeakSet",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~boolean",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean",
     "BuiltinExternal/ECMAScriptExternal.js~boolean",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~function",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function",
     "BuiltinExternal/ECMAScriptExternal.js~function",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~null",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/null",
     "BuiltinExternal/ECMAScriptExternal.js~null",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~number",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number",
     "BuiltinExternal/ECMAScriptExternal.js~number",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~object",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object",
     "BuiltinExternal/ECMAScriptExternal.js~object",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~string",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String",
     "BuiltinExternal/ECMAScriptExternal.js~string",
     "external"
   ],
   [
     "builtinexternal/ecmascriptexternal.js~undefined",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/undefined",
     "BuiltinExternal/ECMAScriptExternal.js~undefined",
     "external"
   ],
   [
     "builtinexternal/webapiexternal.js~audiocontext",
-    "external/index.html",
+    "https://developer.mozilla.org/en/docs/Web/API/AudioContext",
     "BuiltinExternal/WebAPIExternal.js~AudioContext",
     "external"
   ],
   [
     "builtinexternal/webapiexternal.js~canvasrenderingcontext2d",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D",
     "BuiltinExternal/WebAPIExternal.js~CanvasRenderingContext2D",
     "external"
   ],
   [
     "builtinexternal/webapiexternal.js~documentfragment",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment",
     "BuiltinExternal/WebAPIExternal.js~DocumentFragment",
     "external"
   ],
   [
     "builtinexternal/webapiexternal.js~element",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/API/Element",
     "BuiltinExternal/WebAPIExternal.js~Element",
     "external"
   ],
   [
     "builtinexternal/webapiexternal.js~event",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/API/Event",
     "BuiltinExternal/WebAPIExternal.js~Event",
     "external"
   ],
   [
     "builtinexternal/webapiexternal.js~node",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/API/Node",
     "BuiltinExternal/WebAPIExternal.js~Node",
     "external"
   ],
   [
     "builtinexternal/webapiexternal.js~nodelist",
-    "external/index.html",
+    "https://developer.mozilla.org/en-US/docs/Web/API/NodeList",
     "BuiltinExternal/WebAPIExternal.js~NodeList",
     "external"
   ],
   [
     "builtinexternal/webapiexternal.js~xmlhttprequest",
-    "external/index.html",
+    "https://developer.mozilla.org/en/docs/Web/API/XMLHttpRequest",
     "BuiltinExternal/WebAPIExternal.js~XMLHttpRequest",
     "external"
+  ],
+  [
+    "",
+    "test-file/test/GraphConnector.spec.js.html#lineNumber39",
+    "Graph Connector",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/GraphConnector.spec.js.html#lineNumber214",
+    "Graph Connector GUID",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/GraphConnector.spec.js.html#lineNumber220",
+    "Graph Connector GUID GUID generation",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/GraphConnector.spec.js.html#lineNumber231",
+    "Graph Connector GUID GUID re-generation",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/GraphConnector.spec.js.html#lineNumber271",
+    "Graph Connector Global Registry Connection - send",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/GraphConnector.spec.js.html#lineNumber277",
+    "Graph Connector Global Registry Connection - send send Global Registry Record",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/GraphConnector.spec.js.html#lineNumber304",
+    "Graph Connector Global Registry Connection - use GUID",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/GraphConnector.spec.js.html#lineNumber310",
+    "Graph Connector Global Registry Connection - use GUID re-use GUID and retrieve data from Global Registry",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/GraphConnector.spec.js.html#lineNumber339",
+    "Graph Connector Querying Global Registry",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/GraphConnector.spec.js.html#lineNumber345",
+    "Graph Connector Querying Global Registry query Global Registry",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/GraphConnector.spec.js.html#lineNumber41",
+    "Graph Connector construction",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/GraphConnector.spec.js.html#lineNumber42",
+    "Graph Connector construction create new GraphConnector instance with zero contacts",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/GraphConnector.spec.js.html#lineNumber50",
+    "Graph Connector create mock address book",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/GraphConnector.spec.js.html#lineNumber164",
+    "Graph Connector create mock address book bloom filter tests",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/GraphConnector.spec.js.html#lineNumber96",
+    "Graph Connector create mock address book check GUID when in direct contacts",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/GraphConnector.spec.js.html#lineNumber138",
+    "Graph Connector create mock address book check GUID when in friend-of-friend connection",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/GraphConnector.spec.js.html#lineNumber73",
+    "Graph Connector create mock address book create new GraphConnector with random contacts",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/GraphConnector.spec.js.html#lineNumber84",
+    "Graph Connector create mock address book get contact by first name",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/GraphConnector.spec.js.html#lineNumber90",
+    "Graph Connector create mock address book get contact by last name",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/GraphConnector.spec.js.html#lineNumber77",
+    "Graph Connector create mock address book remove some contacts from GraphConnector",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/GraphConnector.spec.js.html#lineNumber108",
+    "Graph Connector create mock address book test direct contacts bloom filter",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/GraphConnector.spec.js.html#lineNumber125",
+    "Graph Connector create mock address book test privacy setting for contacts",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber37",
+    "IdentityModule",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber39",
+    "IdentityModule constructor()",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber41",
+    "IdentityModule constructor() successfully instantiated",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber46",
+    "IdentityModule getIdentitiesToChoose()",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber57",
+    "IdentityModule getIdentitiesToChoose() should return a list of IdPs and a list of identities previously registered",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/MessageBus.spec.js.html#lineNumber6",
+    "MessageBus",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/MessageBus.spec.js.html#lineNumber39",
+    "MessageBus pipeline msg change",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/MessageBus.spec.js.html#lineNumber89",
+    "MessageBus publish unique messages",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/MessageBus.spec.js.html#lineNumber7",
+    "MessageBus sending message",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/MessageBus.spec.js.html#lineNumber56",
+    "MessageBus sending using external system",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/MiniBus.spec.js.html#lineNumber6",
+    "MiniBus",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/MiniBus.spec.js.html#lineNumber62",
+    "MiniBus send and publish",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/MiniBus.spec.js.html#lineNumber24",
+    "MiniBus send with external response",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/MiniBus.spec.js.html#lineNumber7",
+    "MiniBus simple sending message",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PersistenceManager.spec.js.html#lineNumber8",
+    "PersistenceManager",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PersistenceManager.spec.js.html#lineNumber35",
+    "PersistenceManager delete",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PersistenceManager.spec.js.html#lineNumber36",
+    "PersistenceManager delete should remove a value from PersistenceManager for a given key",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PersistenceManager.spec.js.html#lineNumber19",
+    "PersistenceManager get",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PersistenceManager.spec.js.html#lineNumber20",
+    "PersistenceManager get should get the value for a given key",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PersistenceManager.spec.js.html#lineNumber27",
+    "PersistenceManager getVersion",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PersistenceManager.spec.js.html#lineNumber28",
+    "PersistenceManager getVersion should get the value version for a given key",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PersistenceManager.spec.js.html#lineNumber11",
+    "PersistenceManager set",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PersistenceManager.spec.js.html#lineNumber12",
+    "PersistenceManager set should set the value for a given key-version tuple",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Pipeline.spec.js.html#lineNumber6",
+    "Pipeline",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Pipeline.spec.js.html#lineNumber37",
+    "Pipeline deliver detected",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Pipeline.spec.js.html#lineNumber7",
+    "Pipeline fail detected",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Pipeline.spec.js.html#lineNumber66",
+    "Pipeline sequence processor",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber75",
+    "Policies management",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber76",
+    "Policies management conditions management",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber128",
+    "Policies management conditions management correctly returns \"and not\" condition is not applicable",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber96",
+    "Policies management conditions management correctly returns \"and\" condition is applicable",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber100",
+    "Policies management conditions management correctly returns \"and\" condition is not applicable",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber120",
+    "Policies management conditions management correctly returns \"not\" condition is applicable",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber124",
+    "Policies management conditions management correctly returns \"not\" condition is not applicable",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber132",
+    "Policies management conditions management correctly returns \"or not\" condition is applicable",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber108",
+    "Policies management conditions management correctly returns \"or\" condition is applicable",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber112",
+    "Policies management conditions management correctly returns \"or\" condition is not applicable",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber77",
+    "Policies management conditions management creates a simple condition",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber89",
+    "Policies management conditions management creates an advanced condition - \"and\"",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber116",
+    "Policies management conditions management creates an advanced condition - \"not\"",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber104",
+    "Policies management conditions management creates an advanced condition - \"or\"",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber82",
+    "Policies management conditions management returns condition is applicable",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber85",
+    "Policies management conditions management returns condition is not applicable",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber152",
+    "Policies management policies management",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber153",
+    "Policies management policies management creates a service provider policy",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber161",
+    "Policies management policies management evaluates a service provider policy to \"Not Applicable\"",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber158",
+    "Policies management policies management evaluates a service provider policy to false",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber137",
+    "Policies management rules management",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber138",
+    "Policies management rules management creates a simple rule",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber147",
+    "Policies management rules management evaluates a simple rule to \"Not Applicable\"",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber144",
+    "Policies management rules management evaluates a simple rule to false",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber167",
+    "Policy Engine with Runtime Core context",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber437",
+    "Policy Engine with Runtime Core context data objects management",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber449",
+    "Policy Engine with Runtime Core context data objects management accepts a subscription attempt, as the policy accepts all",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber460",
+    "Policy Engine with Runtime Core context data objects management accepts a subscription attempt, as the policy accepts preauthorised subscribers and is preauthorised",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber438",
+    "Policy Engine with Runtime Core context data objects management rejects a subscription attempt, as the policy rejects all",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber471",
+    "Policy Engine with Runtime Core context data objects management rejects a subscription attempt, as the policy rejects non-preauthorised subscriber and is not preauthorised",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber416",
+    "Policy Engine with Runtime Core context functionality: domain",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber428",
+    "Policy Engine with Runtime Core context functionality: domain allows the message as it comes from a domain that is not blocked",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber417",
+    "Policy Engine with Runtime Core context functionality: domain rejects the message as it comes from a blocked domain",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber362",
+    "Policy Engine with Runtime Core context functionality: scheme",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber374",
+    "Policy Engine with Runtime Core context functionality: scheme allows the message as it comes from a scheme that is not blocked",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber363",
+    "Policy Engine with Runtime Core context functionality: scheme rejects the message as it is from a blocked scheme",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber383",
+    "Policy Engine with Runtime Core context functionality: source",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber407",
+    "Policy Engine with Runtime Core context functionality: source allows the message as it comes from a source that is not blocked",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber396",
+    "Policy Engine with Runtime Core context functionality: source rejects the message as it comes from a blocked source",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber385",
+    "Policy Engine with Runtime Core context functionality: source rejects the message as it comes from a blocked source",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber483",
+    "Policy Engine with Runtime Core context groups management",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber504",
+    "Policy Engine with Runtime Core context groups management adds a second email to a group",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber499",
+    "Policy Engine with Runtime Core context groups management adds an email to a group",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber489",
+    "Policy Engine with Runtime Core context groups management creates a group",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber494",
+    "Policy Engine with Runtime Core context groups management creates a second group",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber514",
+    "Policy Engine with Runtime Core context groups management deletes a group",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber509",
+    "Policy Engine with Runtime Core context groups management removes a user from a group",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber264",
+    "Policy Engine with Runtime Core context identity obtention",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber265",
+    "Policy Engine with Runtime Core context identity obtention should add an identity in the message body",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber273",
+    "Policy Engine with Runtime Core context identity obtention should maintain the identity in the message body",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber241",
+    "Policy Engine with Runtime Core context initial filtering",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber242",
+    "Policy Engine with Runtime Core context initial filtering message that loads an hyperty should not be validated by policies",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber282",
+    "Policy Engine with Runtime Core context policies management",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber304",
+    "Policy Engine with Runtime Core context policies management adds a second user policy to the engine",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber285",
+    "Policy Engine with Runtime Core context policies management adds a service provider policy to the engine",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber296",
+    "Policy Engine with Runtime Core context policies management adds a user policy to the engine",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber351",
+    "Policy Engine with Runtime Core context policies management applies a rule as it is its target",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber332",
+    "Policy Engine with Runtime Core context policies management does not apply rules as it is not its target",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber325",
+    "Policy Engine with Runtime Core context policies management removes all policies",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber311",
+    "Policy Engine with Runtime Core context policies management removes an existing user policy",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PolicyEngine.spec.js.html#lineNumber318",
+    "Policy Engine with Runtime Core context policies management tries to remove a policy that does not exist",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber37",
+    "Registry",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber402",
+    "Registry checkRegisteredURLs(info)",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber430",
+    "Registry checkRegisteredURLs(info) should return a previously registered Data Object URL",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber404",
+    "Registry checkRegisteredURLs(info) should return a previously registered Hyperty URL",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber418",
+    "Registry checkRegisteredURLs(info) should return a undefined value if the Hyperty is not previously registered",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber445",
+    "Registry checkRegisteredURLs(info) should return a undefined value if the dataObjectURL is not previously registered",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber457",
+    "Registry checkRegisteredURLs(info) should return an hyperty url based on given address",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber171",
+    "Registry constructor()",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber173",
+    "Registry constructor() depends of the MessageBus",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber232",
+    "Registry discoverProtostub(url)",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber234",
+    "Registry discoverProtostub(url) should discover a ProtocolStub",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber178",
+    "Registry getAppSandbox()",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber179",
+    "Registry getAppSandbox() return AppSandbox()",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber507",
+    "Registry getDataObjectSubscribers(dataObjectURL)",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber508",
+    "Registry getDataObjectSubscribers(dataObjectURL) should return the list of pre authorised users",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber379",
+    "Registry getHypertyName(hypertyURL)",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber380",
+    "Registry getHypertyName(hypertyURL) should return the hyperty Name from a given hypertyURL",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber372",
+    "Registry getHypertyOwner(hypertyURL)",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber373",
+    "Registry getHypertyOwner(hypertyURL) should return the user associated to the hyperty URL",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber496",
+    "Registry getPreAuthSubscribers(dataObjectURL)",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber497",
+    "Registry getPreAuthSubscribers(dataObjectURL) should return the list of pre authorised users",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber476",
+    "Registry getReporterURL(dataObjectURL)",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber486",
+    "Registry getReporterURL(dataObjectURL) should not found the reporter the reporterURL associated with the dataobject URL",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber478",
+    "Registry getReporterURL(dataObjectURL) should return the reporterURL associated with the dataobject URL",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber293",
+    "Registry getSandbox(url)",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber295",
+    "Registry getSandbox(url) should get a sandbox from a domain",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber304",
+    "Registry getSandbox(url) should get a sandbox from a specific hypertyIstance",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber312",
+    "Registry getSandbox(url) should get a sandbox from a specific protostubURL",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber336",
+    "Registry getSandbox(url) should get a sandbox from another domain",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber327",
+    "Registry getSandbox(url) should register a anotherdomain protoStub URL",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber528",
+    "Registry isLegacy(url)",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber530",
+    "Registry isLegacy(url) should return a protostub",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber387",
+    "Registry registerDataObject(identifier, dataObjectschema, dataObjectUrl, dataObjectReporter, authorise)",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber388",
+    "Registry registerDataObject(identifier, dataObjectschema, dataObjectUrl, dataObjectReporter, authorise) should register a new Data Object in the runtime registry",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber277",
+    "Registry registerHyperty(sandbox, descriptorURL, descriptor)",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber279",
+    "Registry registerHyperty(sandbox, descriptorURL, descriptor) should register an Hyperty",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber252",
+    "Registry registerPEP(postMessage, hyperty)",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber254",
+    "Registry registerPEP(postMessage, hyperty) should register PEP",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber185",
+    "Registry registerStub(sandBox, domainURL)",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber224",
+    "Registry registerStub(sandBox, domainURL) should discover P2PHandlerStub",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber198",
+    "Registry registerStub(sandBox, domainURL) should register a P2P Handler Stub",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber209",
+    "Registry registerStub(sandBox, domainURL) should register a P2P Requester Stub",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber189",
+    "Registry registerStub(sandBox, domainURL) should register a stub",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber348",
+    "Registry resolve(url)",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber350",
+    "Registry resolve(url) should return a protostub url",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber518",
+    "Registry unregisterHyperty(url)",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber519",
+    "Registry unregisterHyperty(url) should unregister an Hyperty",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber265",
+    "Registry unregisterPEP(HypertyRuntimeURL)",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber267",
+    "Registry unregisterPEP(HypertyRuntimeURL) should unregister PEP",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber360",
+    "Registry unregisterStub(url)",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Registry.spec.js.html#lineNumber362",
+    "Registry unregisterStub(url) should unregister a ProtocolStub",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber31",
+    "RuntimeUA",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber93",
+    "RuntimeUA constructor()",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber163",
+    "RuntimeUA constructor() depends of the Identity Module",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber171",
+    "RuntimeUA constructor() depends of the MessageBus",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber167",
+    "RuntimeUA constructor() depends of the Policy Engine",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber159",
+    "RuntimeUA constructor() depends of the Registry",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber95",
+    "RuntimeUA constructor() expects the runtime was ready",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber175",
+    "RuntimeUA constructor() should throw when given no arguments",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber189",
+    "RuntimeUA loadHyperty(hypertyDescriptorURL)",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber200",
+    "RuntimeUA loadHyperty(hypertyDescriptorURL) should be a Promise",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber212",
+    "RuntimeUA loadHyperty(hypertyDescriptorURL) should be deployed",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber236",
+    "RuntimeUA loadHyperty(hypertyDescriptorURL) should load an hyperty based on given reuse URL address",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber224",
+    "RuntimeUA loadHyperty(hypertyDescriptorURL) should load an hyperty based on given true value for the reuse",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber191",
+    "RuntimeUA loadHyperty(hypertyDescriptorURL) should throw when given no arguments",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber286",
+    "RuntimeUA loadIdpProxy(google.com)",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber295",
+    "RuntimeUA loadIdpProxy(google.com) should be a Promise",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber304",
+    "RuntimeUA loadIdpProxy(google.com) should be deployed",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber288",
+    "RuntimeUA loadIdpProxy(google.com) should throw when given no arguments",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber254",
+    "RuntimeUA loadStub(sp-domain)",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber263",
+    "RuntimeUA loadStub(sp-domain) should be a Promise",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber272",
+    "RuntimeUA loadStub(sp-domain) should be deployed",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber256",
+    "RuntimeUA loadStub(sp-domain) should throw when given no arguments",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Sandbox.spec.js.html#lineNumber10",
+    "Sandbox",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Sandbox.spec.js.html#lineNumber14",
+    "Sandbox deploy and undeploy",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Sandbox.spec.js.html#lineNumber76",
+    "Sandbox deploy url duplication rejected",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Descriptors.spec.js.html#lineNumber17",
+    "Should get configuration and parse to Descriptors",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Descriptors.spec.js.html#lineNumber60",
+    "Should get configuration and parse to Descriptors constructor should receive 3 arguments",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Descriptors.spec.js.html#lineNumber77",
+    "Should get configuration and parse to Descriptors should get hyperty",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Descriptors.spec.js.html#lineNumber87",
+    "Should get configuration and parse to Descriptors should get protocolstub",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/Descriptors.spec.js.html#lineNumber97",
+    "Should get configuration and parse to Descriptors should get protocolstub",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/StoreDataObjects.spec.js.html#lineNumber14",
+    "StoreDataObjects",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/StoreDataObjects.spec.js.html#lineNumber230",
+    "StoreDataObjects should delete a resource",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/StoreDataObjects.spec.js.html#lineNumber224",
+    "StoreDataObjects should delete a specific value from specific resource",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/StoreDataObjects.spec.js.html#lineNumber150",
+    "StoreDataObjects should get specific dataObject by hypertyURL",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/StoreDataObjects.spec.js.html#lineNumber165",
+    "StoreDataObjects should get specific dataObject by identity",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/StoreDataObjects.spec.js.html#lineNumber184",
+    "StoreDataObjects should get specific dataObject by schema",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/StoreDataObjects.spec.js.html#lineNumber203",
+    "StoreDataObjects should get specific dataObject by some data",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/StoreDataObjects.spec.js.html#lineNumber84",
+    "StoreDataObjects should set a bundle of information to be saved on storage like observers",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/StoreDataObjects.spec.js.html#lineNumber53",
+    "StoreDataObjects should set a bundle of information to be saved on storage like reporter",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/StoreDataObjects.spec.js.html#lineNumber33",
+    "StoreDataObjects should set dataObject information to be saved on storage",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/StoreDataObjects.spec.js.html#lineNumber128",
+    "StoreDataObjects should update a resource with new Subscriber Users",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/StoreDataObjects.spec.js.html#lineNumber113",
+    "StoreDataObjects should update a resource with new Subscription",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/SyncherManager.spec.js.html#lineNumber17",
+    "SyncherManager",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/SyncherManager.spec.js.html#lineNumber815",
+    "SyncherManager children deltas generate and process",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/SyncherManager.spec.js.html#lineNumber855",
+    "SyncherManager create and delete",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/SyncherManager.spec.js.html#lineNumber773",
+    "SyncherManager observer addChild",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/SyncherManager.spec.js.html#lineNumber754",
+    "SyncherManager reporter addChild",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/SyncherManager.spec.js.html#lineNumber183",
+    "SyncherManager reporter observer integration",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/SyncherManager.spec.js.html#lineNumber157",
+    "SyncherManager reporter read",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/SyncherManager.spec.js.html#lineNumber231",
+    "SyncherManager should resume observers",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/SyncherManager.spec.js.html#lineNumber285",
+    "SyncherManager should resume reporters",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/SyncherManager.spec.js.html#lineNumber958",
+    "SyncherManager should use the storageManager",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/SyncherManager.spec.js.html#lineNumber1037",
+    "SyncherManager should use the storageManager should resume the url stored on storageManager",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/SyncherManager.spec.js.html#lineNumber966",
+    "SyncherManager should use the storageManager should save the url on storageManager",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/SyncherManager.spec.js.html#lineNumber917",
+    "SyncherManager subscribe and unsubscribe",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/utils.spec.js.html#lineNumber17",
+    "Utils Module",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/utils.spec.js.html#lineNumber19",
+    "Utils Module should divide an url in 3 parts (type, domain, identity)",
+    "test"
+  ],
+  [
+    "src/allocation/addressallocation.js",
+    "file/src/allocation/AddressAllocation.js.html",
+    "src/allocation/AddressAllocation.js",
+    "file"
+  ],
+  [
+    "src/allocation/addressallocation.js~addressallocation#constructor",
+    "class/src/allocation/AddressAllocation.js~AddressAllocation.html#instance-constructor-constructor",
+    "src/allocation/AddressAllocation.js~AddressAllocation#constructor",
+    "method"
+  ],
+  [
+    "src/allocation/addressallocation.js~addressallocation#create",
+    "class/src/allocation/AddressAllocation.js~AddressAllocation.html#instance-method-create",
+    "src/allocation/AddressAllocation.js~AddressAllocation#create",
+    "method"
+  ],
+  [
+    "src/allocation/addressallocation.js~addressallocation#delete",
+    "class/src/allocation/AddressAllocation.js~AddressAllocation.html#instance-method-delete",
+    "src/allocation/AddressAllocation.js~AddressAllocation#delete",
+    "method"
+  ],
+  [
+    "src/allocation/addressallocation.js~addressallocation#url",
+    "class/src/allocation/AddressAllocation.js~AddressAllocation.html#instance-get-url",
+    "src/allocation/AddressAllocation.js~AddressAllocation#url",
+    "member"
+  ],
+  [
+    "src/allocation/addressallocation.js~addressallocation.instance",
+    "class/src/allocation/AddressAllocation.js~AddressAllocation.html#static-get-instance",
+    "src/allocation/AddressAllocation.js~AddressAllocation.instance",
+    "member"
   ],
   [
     "src/bus/bus.js",
@@ -558,9 +2184,21 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/bus/messagebus.js~messagebus#addpublish",
+    "class/src/bus/MessageBus.js~MessageBus.html#instance-method-addPublish",
+    "src/bus/MessageBus.js~MessageBus#addPublish",
+    "method"
+  ],
+  [
     "src/bus/messagebus.js~messagebus#constructor",
     "class/src/bus/MessageBus.js~MessageBus.html#instance-constructor-constructor",
     "src/bus/MessageBus.js~MessageBus#constructor",
+    "method"
+  ],
+  [
+    "src/bus/messagebus.js~messagebus#forward",
+    "class/src/bus/MessageBus.js~MessageBus.html#instance-method-forward",
+    "src/bus/MessageBus.js~MessageBus#forward",
     "method"
   ],
   [
@@ -816,6 +2454,12 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/graphconnector/graphconnector.js~graphconnector#privatekey",
+    "class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-member-privateKey",
+    "src/graphconnector/GraphConnector.js~GraphConnector#privateKey",
+    "member"
+  ],
+  [
     "src/graphconnector/graphconnector.js~graphconnector#queryglobalregistry",
     "class/src/graphconnector/GraphConnector.js~GraphConnector.html#instance-method-queryGlobalRegistry",
     "src/graphconnector/GraphConnector.js~GraphConnector#queryGlobalRegistry",
@@ -877,13 +2521,13 @@ window.esdocSearchIndex = [
   ],
   [
     "src/graphconnector/graphconnectorcontactdata.js~graphconnectorcontactdata#firstname",
-    "class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html#instance-set-firstName",
+    "class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html#instance-get-firstName",
     "src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData#firstName",
     "member"
   ],
   [
     "src/graphconnector/graphconnectorcontactdata.js~graphconnectorcontactdata#firstname",
-    "class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html#instance-get-firstName",
+    "class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html#instance-set-firstName",
     "src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData#firstName",
     "member"
   ],
@@ -937,20 +2581,14 @@ window.esdocSearchIndex = [
   ],
   [
     "src/graphconnector/graphconnectorcontactdata.js~graphconnectorcontactdata#residencelocation",
-    "class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html#instance-get-residenceLocation",
-    "src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData#residenceLocation",
-    "member"
-  ],
-  [
-    "src/graphconnector/graphconnectorcontactdata.js~graphconnectorcontactdata#residencelocation",
     "class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html#instance-set-residenceLocation",
     "src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData#residenceLocation",
     "member"
   ],
   [
-    "src/graphconnector/graphconnectorcontactdata.js~graphconnectorcontactdata#userids",
-    "class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html#instance-get-userIDs",
-    "src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData#userIDs",
+    "src/graphconnector/graphconnectorcontactdata.js~graphconnectorcontactdata#residencelocation",
+    "class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html#instance-get-residenceLocation",
+    "src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData#residenceLocation",
     "member"
   ],
   [
@@ -960,15 +2598,207 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/graphconnector/graphconnectorcontactdata.js~graphconnectorcontactdata#userids",
+    "class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html#instance-get-userIDs",
+    "src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData#userIDs",
+    "member"
+  ],
+  [
+    "src/identity/crypto.js",
+    "file/src/identity/Crypto.js.html",
+    "src/identity/Crypto.js",
+    "file"
+  ],
+  [
+    "src/identity/crypto.js~crypto#concatpmswithrandoms",
+    "class/src/identity/Crypto.js~Crypto.html#instance-method-concatPMSwithRandoms",
+    "src/identity/Crypto.js~Crypto#concatPMSwithRandoms",
+    "method"
+  ],
+  [
+    "src/identity/crypto.js~crypto#constructor",
+    "class/src/identity/Crypto.js~Crypto.html#instance-constructor-constructor",
+    "src/identity/Crypto.js~Crypto#constructor",
+    "method"
+  ],
+  [
+    "src/identity/crypto.js~crypto#decode",
+    "class/src/identity/Crypto.js~Crypto.html#instance-method-decode",
+    "src/identity/Crypto.js~Crypto#decode",
+    "method"
+  ],
+  [
+    "src/identity/crypto.js~crypto#decryptaes",
+    "class/src/identity/Crypto.js~Crypto.html#instance-method-decryptAES",
+    "src/identity/Crypto.js~Crypto#decryptAES",
+    "method"
+  ],
+  [
+    "src/identity/crypto.js~crypto#decryptrsa",
+    "class/src/identity/Crypto.js~Crypto.html#instance-method-decryptRSA",
+    "src/identity/Crypto.js~Crypto#decryptRSA",
+    "method"
+  ],
+  [
+    "src/identity/crypto.js~crypto#encode",
+    "class/src/identity/Crypto.js~Crypto.html#instance-method-encode",
+    "src/identity/Crypto.js~Crypto#encode",
+    "method"
+  ],
+  [
+    "src/identity/crypto.js~crypto#encryptaes",
+    "class/src/identity/Crypto.js~Crypto.html#instance-method-encryptAES",
+    "src/identity/Crypto.js~Crypto#encryptAES",
+    "method"
+  ],
+  [
+    "src/identity/crypto.js~crypto#encryptrsa",
+    "class/src/identity/Crypto.js~Crypto.html#instance-method-encryptRSA",
+    "src/identity/Crypto.js~Crypto#encryptRSA",
+    "method"
+  ],
+  [
+    "src/identity/crypto.js~crypto#generateiv",
+    "class/src/identity/Crypto.js~Crypto.html#instance-method-generateIV",
+    "src/identity/Crypto.js~Crypto#generateIV",
+    "method"
+  ],
+  [
+    "src/identity/crypto.js~crypto#generatekeys",
+    "class/src/identity/Crypto.js~Crypto.html#instance-method-generateKeys",
+    "src/identity/Crypto.js~Crypto#generateKeys",
+    "method"
+  ],
+  [
+    "src/identity/crypto.js~crypto#generatemastersecret",
+    "class/src/identity/Crypto.js~Crypto.html#instance-method-generateMasterSecret",
+    "src/identity/Crypto.js~Crypto#generateMasterSecret",
+    "method"
+  ],
+  [
+    "src/identity/crypto.js~crypto#generatepms",
+    "class/src/identity/Crypto.js~Crypto.html#instance-method-generatePMS",
+    "src/identity/Crypto.js~Crypto#generatePMS",
+    "method"
+  ],
+  [
+    "src/identity/crypto.js~crypto#generatersakeypair",
+    "class/src/identity/Crypto.js~Crypto.html#instance-method-generateRSAKeyPair",
+    "src/identity/Crypto.js~Crypto#generateRSAKeyPair",
+    "method"
+  ],
+  [
+    "src/identity/crypto.js~crypto#generaterandom",
+    "class/src/identity/Crypto.js~Crypto.html#instance-method-generateRandom",
+    "src/identity/Crypto.js~Crypto#generateRandom",
+    "method"
+  ],
+  [
+    "src/identity/crypto.js~crypto#hashhmac",
+    "class/src/identity/Crypto.js~Crypto.html#instance-method-hashHMAC",
+    "src/identity/Crypto.js~Crypto#hashHMAC",
+    "method"
+  ],
+  [
+    "src/identity/crypto.js~crypto#signrsa",
+    "class/src/identity/Crypto.js~Crypto.html#instance-method-signRSA",
+    "src/identity/Crypto.js~Crypto#signRSA",
+    "method"
+  ],
+  [
+    "src/identity/crypto.js~crypto#verifyhmac",
+    "class/src/identity/Crypto.js~Crypto.html#instance-method-verifyHMAC",
+    "src/identity/Crypto.js~Crypto#verifyHMAC",
+    "method"
+  ],
+  [
+    "src/identity/crypto.js~crypto#verifyrsa",
+    "class/src/identity/Crypto.js~Crypto.html#instance-method-verifyRSA",
+    "src/identity/Crypto.js~Crypto#verifyRSA",
+    "method"
+  ],
+  [
+    "src/identity/guifake.js",
+    "file/src/identity/GuiFake.js.html",
+    "src/identity/GuiFake.js",
+    "file"
+  ],
+  [
+    "src/identity/guifake.js~guifake#constructor",
+    "class/src/identity/GuiFake.js~GuiFake.html#instance-constructor-constructor",
+    "src/identity/GuiFake.js~GuiFake#constructor",
+    "method"
+  ],
+  [
+    "src/identity/identity.js",
+    "file/src/identity/Identity.js.html",
+    "src/identity/Identity.js",
+    "file"
+  ],
+  [
+    "src/identity/identity.js~identity#addidassertion",
+    "class/src/identity/Identity.js~Identity.html#instance-method-addIdAssertion",
+    "src/identity/Identity.js~Identity#addIdAssertion",
+    "method"
+  ],
+  [
+    "src/identity/identity.js~identity#addidentity",
+    "class/src/identity/Identity.js~Identity.html#instance-method-addIdentity",
+    "src/identity/Identity.js~Identity#addIdentity",
+    "method"
+  ],
+  [
+    "src/identity/identity.js~identity#constructor",
+    "class/src/identity/Identity.js~Identity.html#instance-constructor-constructor",
+    "src/identity/Identity.js~Identity#constructor",
+    "method"
+  ],
+  [
     "src/identity/identitymodule.js",
     "file/src/identity/IdentityModule.js.html",
     "src/identity/IdentityModule.js",
     "file"
   ],
   [
+    "src/identity/identitymodule.js~identitymodule#callgeneratemethods",
+    "class/src/identity/IdentityModule.js~IdentityModule.html#instance-method-callGenerateMethods",
+    "src/identity/IdentityModule.js~IdentityModule#callGenerateMethods",
+    "method"
+  ],
+  [
     "src/identity/identitymodule.js~identitymodule#constructor",
     "class/src/identity/IdentityModule.js~IdentityModule.html#instance-constructor-constructor",
     "src/identity/IdentityModule.js~IdentityModule#constructor",
+    "method"
+  ],
+  [
+    "src/identity/identitymodule.js~identitymodule#decryptmessage",
+    "class/src/identity/IdentityModule.js~IdentityModule.html#instance-method-decryptMessage",
+    "src/identity/IdentityModule.js~IdentityModule#decryptMessage",
+    "method"
+  ],
+  [
+    "src/identity/identitymodule.js~identitymodule#deleteidentity",
+    "class/src/identity/IdentityModule.js~IdentityModule.html#instance-method-deleteIdentity",
+    "src/identity/IdentityModule.js~IdentityModule#deleteIdentity",
+    "method"
+  ],
+  [
+    "src/identity/identitymodule.js~identitymodule#deploygui",
+    "class/src/identity/IdentityModule.js~IdentityModule.html#instance-method-deployGUI",
+    "src/identity/IdentityModule.js~IdentityModule#deployGUI",
+    "method"
+  ],
+  [
+    "src/identity/identitymodule.js~identitymodule#domutualauthentication",
+    "class/src/identity/IdentityModule.js~IdentityModule.html#instance-method-doMutualAuthentication",
+    "src/identity/IdentityModule.js~IdentityModule#doMutualAuthentication",
+    "method"
+  ],
+  [
+    "src/identity/identitymodule.js~identitymodule#encryptmessage",
+    "class/src/identity/IdentityModule.js~IdentityModule.html#instance-method-encryptMessage",
+    "src/identity/IdentityModule.js~IdentityModule#encryptMessage",
     "method"
   ],
   [
@@ -978,9 +2808,21 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/identity/identitymodule.js~identitymodule#getassertiontrustlevel",
-    "class/src/identity/IdentityModule.js~IdentityModule.html#instance-method-getAssertionTrustLevel",
-    "src/identity/IdentityModule.js~IdentityModule#getAssertionTrustLevel",
+    "src/identity/identitymodule.js~identitymodule#getaccesstoken",
+    "class/src/identity/IdentityModule.js~IdentityModule.html#instance-method-getAccessToken",
+    "src/identity/IdentityModule.js~IdentityModule#getAccessToken",
+    "method"
+  ],
+  [
+    "src/identity/identitymodule.js~identitymodule#getcurrentidentity",
+    "class/src/identity/IdentityModule.js~IdentityModule.html#instance-method-getCurrentIdentity",
+    "src/identity/IdentityModule.js~IdentityModule#getCurrentIdentity",
+    "method"
+  ],
+  [
+    "src/identity/identitymodule.js~identitymodule#getidtoken",
+    "class/src/identity/IdentityModule.js~IdentityModule.html#instance-method-getIdToken",
+    "src/identity/IdentityModule.js~IdentityModule#getIdToken",
     "method"
   ],
   [
@@ -990,27 +2832,93 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/identity/identitymodule.js~identitymodule#loginwithrp",
-    "class/src/identity/IdentityModule.js~IdentityModule.html#instance-method-loginWithRP",
-    "src/identity/IdentityModule.js~IdentityModule#loginWithRP",
+    "src/identity/identitymodule.js~identitymodule#getidentitiestochoose",
+    "class/src/identity/IdentityModule.js~IdentityModule.html#instance-method-getIdentitiesToChoose",
+    "src/identity/IdentityModule.js~IdentityModule#getIdentitiesToChoose",
     "method"
   ],
   [
-    "src/identity/identitymodule.js~identitymodule#registeridentity",
-    "class/src/identity/IdentityModule.js~IdentityModule.html#instance-method-registerIdentity",
-    "src/identity/IdentityModule.js~IdentityModule#registerIdentity",
+    "src/identity/identitymodule.js~identitymodule#getidentity",
+    "class/src/identity/IdentityModule.js~IdentityModule.html#instance-method-getIdentity",
+    "src/identity/IdentityModule.js~IdentityModule#getIdentity",
     "method"
   ],
   [
-    "src/identity/identitymodule.js~identitymodule#registerwithrp",
-    "class/src/identity/IdentityModule.js~IdentityModule.html#instance-method-registerWithRP",
-    "src/identity/IdentityModule.js~IdentityModule#registerWithRP",
+    "src/identity/identitymodule.js~identitymodule#getidentityassertion",
+    "class/src/identity/IdentityModule.js~IdentityModule.html#instance-method-getIdentityAssertion",
+    "src/identity/IdentityModule.js~IdentityModule#getIdentityAssertion",
     "method"
   ],
   [
-    "src/identity/identitymodule.js~identitymodule#sethypertyidentity",
-    "class/src/identity/IdentityModule.js~IdentityModule.html#instance-method-setHypertyIdentity",
-    "src/identity/IdentityModule.js~IdentityModule#setHypertyIdentity",
+    "src/identity/identitymodule.js~identitymodule#gettoken",
+    "class/src/identity/IdentityModule.js~IdentityModule.html#instance-method-getToken",
+    "src/identity/IdentityModule.js~IdentityModule#getToken",
+    "method"
+  ],
+  [
+    "src/identity/identitymodule.js~identitymodule#getusersids",
+    "class/src/identity/IdentityModule.js~IdentityModule.html#instance-method-getUsersIDs",
+    "src/identity/IdentityModule.js~IdentityModule#getUsersIDs",
+    "method"
+  ],
+  [
+    "src/identity/identitymodule.js~identitymodule#messagebus",
+    "class/src/identity/IdentityModule.js~IdentityModule.html#instance-get-messageBus",
+    "src/identity/IdentityModule.js~IdentityModule#messageBus",
+    "member"
+  ],
+  [
+    "src/identity/identitymodule.js~identitymodule#messagebus",
+    "class/src/identity/IdentityModule.js~IdentityModule.html#instance-set-messageBus",
+    "src/identity/IdentityModule.js~IdentityModule#messageBus",
+    "member"
+  ],
+  [
+    "src/identity/identitymodule.js~identitymodule#openpopup",
+    "class/src/identity/IdentityModule.js~IdentityModule.html#instance-method-openPopup",
+    "src/identity/IdentityModule.js~IdentityModule#openPopup",
+    "method"
+  ],
+  [
+    "src/identity/identitymodule.js~identitymodule#registry",
+    "class/src/identity/IdentityModule.js~IdentityModule.html#instance-get-registry",
+    "src/identity/IdentityModule.js~IdentityModule#registry",
+    "member"
+  ],
+  [
+    "src/identity/identitymodule.js~identitymodule#registry",
+    "class/src/identity/IdentityModule.js~IdentityModule.html#instance-set-registry",
+    "src/identity/IdentityModule.js~IdentityModule#registry",
+    "member"
+  ],
+  [
+    "src/identity/identitymodule.js~identitymodule#requestidentitytogui",
+    "class/src/identity/IdentityModule.js~IdentityModule.html#instance-method-requestIdentityToGUI",
+    "src/identity/IdentityModule.js~IdentityModule#requestIdentityToGUI",
+    "method"
+  ],
+  [
+    "src/identity/identitymodule.js~identitymodule#sendgeneratemessage",
+    "class/src/identity/IdentityModule.js~IdentityModule.html#instance-method-sendGenerateMessage",
+    "src/identity/IdentityModule.js~IdentityModule#sendGenerateMessage",
+    "method"
+  ],
+  [
+    "src/identity/identitymodule.js~identitymodule#setcurrentidentity",
+    "class/src/identity/IdentityModule.js~IdentityModule.html#instance-method-setCurrentIdentity",
+    "src/identity/IdentityModule.js~IdentityModule#setCurrentIdentity",
+    "method"
+  ],
+  [
+    "src/identity/identitymodule.js~identitymodule#storeidentity",
+    "class/src/identity/IdentityModule.js~IdentityModule.html#instance-method-storeIdentity",
+    "src/identity/IdentityModule.js~IdentityModule#storeIdentity",
+    "method"
+  ],
+  [
+    "src/identity/identitymodule.js~identitymodule#unregisteridentity",
+    "class/src/identity/IdentityModule.js~IdentityModule.html#instance-method-unregisterIdentity",
+    "src/identity/IdentityModule.js~IdentityModule#unregisterIdentity",
     "method"
   ],
   [
@@ -1020,51 +2928,831 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/identity/openidlib.js",
+    "file/src/identity/OpenIdLib.js.html",
+    "src/identity/OpenIdLib.js",
+    "file"
+  ],
+  [
+    "src/identity/openidlib.js~openidlib#constructor",
+    "class/src/identity/OpenIdLib.js~OpenIdLib.html#instance-constructor-constructor",
+    "src/identity/OpenIdLib.js~OpenIdLib#constructor",
+    "method"
+  ],
+  [
+    "src/identity/openidlib.js~openidlib#getinfotoken",
+    "class/src/identity/OpenIdLib.js~OpenIdLib.html#instance-method-getInfoToken",
+    "src/identity/OpenIdLib.js~OpenIdLib#getInfoToken",
+    "method"
+  ],
+  [
+    "src/identity/openidlib.js~openidlib#openpopup",
+    "class/src/identity/OpenIdLib.js~OpenIdLib.html#instance-method-openPopup",
+    "src/identity/OpenIdLib.js~OpenIdLib#openPopup",
+    "method"
+  ],
+  [
+    "src/identity/openidlib.js~openidlib#validatetoken",
+    "class/src/identity/OpenIdLib.js~OpenIdLib.html#instance-method-validateToken",
+    "src/identity/OpenIdLib.js~OpenIdLib#validateToken",
+    "method"
+  ],
+  [
     "src/minibus.js",
     "file/src/minibus.js.html",
     "src/minibus.js",
     "file"
   ],
   [
-    "src/persistence/persistencemanager.js",
-    "file/src/persistence/PersistenceManager.js.html",
-    "src/persistence/PersistenceManager.js",
+    "src/policy/actionsservice.js",
+    "file/src/policy/ActionsService.js.html",
+    "src/policy/ActionsService.js",
     "file"
   ],
   [
-    "src/policy/policyengine.js",
-    "file/src/policy/PolicyEngine.js.html",
-    "src/policy/PolicyEngine.js",
+    "src/policy/actionsservice.js~actionsservice#constructor",
+    "class/src/policy/ActionsService.js~ActionsService.html#instance-constructor-constructor",
+    "src/policy/ActionsService.js~ActionsService#constructor",
+    "method"
+  ],
+  [
+    "src/policy/actionsservice.js~actionsservice#context",
+    "class/src/policy/ActionsService.js~ActionsService.html#instance-member-context",
+    "src/policy/ActionsService.js~ActionsService#context",
+    "member"
+  ],
+  [
+    "src/policy/actionsservice.js~actionsservice#enforcepolicies",
+    "class/src/policy/ActionsService.js~ActionsService.html#instance-method-enforcePolicies",
+    "src/policy/ActionsService.js~ActionsService#enforcePolicies",
+    "method"
+  ],
+  [
+    "src/policy/actionsservice.js~actionsservice#forwardtohyperty",
+    "class/src/policy/ActionsService.js~ActionsService.html#instance-method-forwardToHyperty",
+    "src/policy/ActionsService.js~ActionsService#forwardToHyperty",
+    "method"
+  ],
+  [
+    "src/policy/actionsservice.js~actionsservice#forwardtoid",
+    "class/src/policy/ActionsService.js~ActionsService.html#instance-method-forwardToID",
+    "src/policy/ActionsService.js~ActionsService#forwardToID",
+    "method"
+  ],
+  [
+    "src/policy/actionsservice.js~actionsservice#sendautomaticmessage",
+    "class/src/policy/ActionsService.js~ActionsService.html#instance-method-sendAutomaticMessage",
+    "src/policy/ActionsService.js~ActionsService#sendAutomaticMessage",
+    "method"
+  ],
+  [
+    "src/policy/combiningalgorithm.js",
+    "file/src/policy/CombiningAlgorithm.js.html",
+    "src/policy/CombiningAlgorithm.js",
     "file"
   ],
   [
-    "src/policy/policyengine.js~policyengine#addpolicies",
-    "class/src/policy/PolicyEngine.js~PolicyEngine.html#instance-method-addPolicies",
-    "src/policy/PolicyEngine.js~PolicyEngine#addPolicies",
+    "src/policy/operators.js",
+    "file/src/policy/Operators.js.html",
+    "src/policy/Operators.js",
+    "file"
+  ],
+  [
+    "src/policy/operators.js~operators#and",
+    "class/src/policy/Operators.js~Operators.html#instance-method-and",
+    "src/policy/Operators.js~Operators#and",
     "method"
   ],
   [
-    "src/policy/policyengine.js~policyengine#authorise",
-    "class/src/policy/PolicyEngine.js~PolicyEngine.html#instance-method-authorise",
-    "src/policy/PolicyEngine.js~PolicyEngine#authorise",
+    "src/policy/operators.js~operators#between",
+    "class/src/policy/Operators.js~Operators.html#instance-method-between",
+    "src/policy/Operators.js~Operators#between",
     "method"
   ],
   [
-    "src/policy/policyengine.js~policyengine#checkpolicies",
-    "class/src/policy/PolicyEngine.js~PolicyEngine.html#instance-method-checkPolicies",
-    "src/policy/PolicyEngine.js~PolicyEngine#checkPolicies",
+    "src/policy/operators.js~operators#equals",
+    "class/src/policy/Operators.js~Operators.html#instance-method-equals",
+    "src/policy/Operators.js~Operators#equals",
     "method"
   ],
   [
-    "src/policy/policyengine.js~policyengine#constructor",
-    "class/src/policy/PolicyEngine.js~PolicyEngine.html#instance-constructor-constructor",
-    "src/policy/PolicyEngine.js~PolicyEngine#constructor",
+    "src/policy/operators.js~operators#greaterthan",
+    "class/src/policy/Operators.js~Operators.html#instance-method-greaterThan",
+    "src/policy/Operators.js~Operators#greaterThan",
     "method"
   ],
   [
-    "src/policy/policyengine.js~policyengine#removepolicies",
-    "class/src/policy/PolicyEngine.js~PolicyEngine.html#instance-method-removePolicies",
-    "src/policy/PolicyEngine.js~PolicyEngine#removePolicies",
+    "src/policy/operators.js~operators#in",
+    "class/src/policy/Operators.js~Operators.html#instance-method-in",
+    "src/policy/Operators.js~Operators#in",
+    "method"
+  ],
+  [
+    "src/policy/operators.js~operators#lessthan",
+    "class/src/policy/Operators.js~Operators.html#instance-method-lessThan",
+    "src/policy/Operators.js~Operators#lessThan",
+    "method"
+  ],
+  [
+    "src/policy/operators.js~operators#not",
+    "class/src/policy/Operators.js~Operators.html#instance-method-not",
+    "src/policy/Operators.js~Operators#not",
+    "method"
+  ],
+  [
+    "src/policy/operators.js~operators#or",
+    "class/src/policy/Operators.js~Operators.html#instance-method-or",
+    "src/policy/Operators.js~Operators#or",
+    "method"
+  ],
+  [
+    "src/policy/pdp.js",
+    "file/src/policy/PDP.js.html",
+    "src/policy/PDP.js",
+    "file"
+  ],
+  [
+    "src/policy/pdp.js~pdp#constructor",
+    "class/src/policy/PDP.js~PDP.html#instance-constructor-constructor",
+    "src/policy/PDP.js~PDP#constructor",
+    "method"
+  ],
+  [
+    "src/policy/pdp.js~pdp#context",
+    "class/src/policy/PDP.js~PDP.html#instance-member-context",
+    "src/policy/PDP.js~PDP#context",
+    "member"
+  ],
+  [
+    "src/policy/pdp.js~pdp#evaluatepolicies",
+    "class/src/policy/PDP.js~PDP.html#instance-method-evaluatePolicies",
+    "src/policy/PDP.js~PDP#evaluatePolicies",
+    "method"
+  ],
+  [
+    "src/policy/pdp.js~pdp#evaluatepolicy",
+    "class/src/policy/PDP.js~PDP.html#instance-method-evaluatePolicy",
+    "src/policy/PDP.js~PDP#evaluatePolicy",
+    "method"
+  ],
+  [
+    "src/policy/pdp.js~pdp#operators",
+    "class/src/policy/PDP.js~PDP.html#instance-member-operators",
+    "src/policy/PDP.js~PDP#operators",
+    "member"
+  ],
+  [
+    "src/policy/pep.js",
+    "file/src/policy/PEP.js.html",
+    "src/policy/PEP.js",
+    "file"
+  ],
+  [
+    "src/policy/pep.js~pep#addpolicy",
+    "class/src/policy/PEP.js~PEP.html#instance-method-addPolicy",
+    "src/policy/PEP.js~PEP#addPolicy",
+    "method"
+  ],
+  [
+    "src/policy/pep.js~pep#authorise",
+    "class/src/policy/PEP.js~PEP.html#instance-method-authorise",
+    "src/policy/PEP.js~PEP#authorise",
+    "method"
+  ],
+  [
+    "src/policy/pep.js~pep#authorisesync",
+    "class/src/policy/PEP.js~PEP.html#instance-method-authoriseSync",
+    "src/policy/PEP.js~PEP#authoriseSync",
+    "method"
+  ],
+  [
+    "src/policy/pep.js~pep#constructor",
+    "class/src/policy/PEP.js~PEP.html#instance-constructor-constructor",
+    "src/policy/PEP.js~PEP#constructor",
+    "method"
+  ],
+  [
+    "src/policy/pep.js~pep#removepolicy",
+    "class/src/policy/PEP.js~PEP.html#instance-method-removePolicy",
+    "src/policy/PEP.js~PEP#removePolicy",
+    "method"
+  ],
+  [
+    "src/policy/policy.js",
+    "file/src/policy/Policy.js.html",
+    "src/policy/Policy.js",
+    "file"
+  ],
+  [
+    "src/policy/policy.js~policy#actions",
+    "class/src/policy/Policy.js~Policy.html#instance-member-actions",
+    "src/policy/Policy.js~Policy#actions",
+    "member"
+  ],
+  [
+    "src/policy/policy.js~policy#addaction",
+    "class/src/policy/Policy.js~Policy.html#instance-method-addAction",
+    "src/policy/Policy.js~Policy#addAction",
+    "method"
+  ],
+  [
+    "src/policy/policy.js~policy#combiningalgorithm",
+    "class/src/policy/Policy.js~Policy.html#instance-member-combiningAlgorithm",
+    "src/policy/Policy.js~Policy#combiningAlgorithm",
+    "member"
+  ],
+  [
+    "src/policy/policy.js~policy#constructor",
+    "class/src/policy/Policy.js~Policy.html#instance-constructor-constructor",
+    "src/policy/Policy.js~Policy#constructor",
+    "method"
+  ],
+  [
+    "src/policy/policy.js~policy#createrule",
+    "class/src/policy/Policy.js~Policy.html#instance-method-createRule",
+    "src/policy/Policy.js~Policy#createRule",
+    "method"
+  ],
+  [
+    "src/policy/policy.js~policy#deleterule",
+    "class/src/policy/Policy.js~Policy.html#instance-method-deleteRule",
+    "src/policy/Policy.js~Policy#deleteRule",
+    "method"
+  ],
+  [
+    "src/policy/policy.js~policy#enforceactions",
+    "class/src/policy/Policy.js~Policy.html#instance-method-enforceActions",
+    "src/policy/Policy.js~Policy#enforceActions",
+    "method"
+  ],
+  [
+    "src/policy/policy.js~policy#evaluaterules",
+    "class/src/policy/Policy.js~Policy.html#instance-method-evaluateRules",
+    "src/policy/Policy.js~Policy#evaluateRules",
+    "method"
+  ],
+  [
+    "src/policy/policy.js~policy#getlastpriority",
+    "class/src/policy/Policy.js~Policy.html#instance-method-getLastPriority",
+    "src/policy/Policy.js~Policy#getLastPriority",
+    "method"
+  ],
+  [
+    "src/policy/policy.js~policy#getrulebypriority",
+    "class/src/policy/Policy.js~Policy.html#instance-method-getRuleByPriority",
+    "src/policy/Policy.js~Policy#getRuleByPriority",
+    "method"
+  ],
+  [
+    "src/policy/policy.js~policy#key",
+    "class/src/policy/Policy.js~Policy.html#instance-member-key",
+    "src/policy/Policy.js~Policy#key",
+    "member"
+  ],
+  [
+    "src/policy/policy.js~policy#rules",
+    "class/src/policy/Policy.js~Policy.html#instance-member-rules",
+    "src/policy/Policy.js~Policy#rules",
+    "member"
+  ],
+  [
+    "src/policy/policy.js~policy#sortrules",
+    "class/src/policy/Policy.js~Policy.html#instance-method-sortRules",
+    "src/policy/Policy.js~Policy#sortRules",
+    "method"
+  ],
+  [
+    "src/policy/rethinkctx.js",
+    "file/src/policy/ReThinkCtx.js.html",
+    "src/policy/ReThinkCtx.js",
+    "file"
+  ],
+  [
+    "src/policy/rethinkctx.js~rethinkctx#constructor",
+    "class/src/policy/ReThinkCtx.js~ReThinkCtx.html#instance-constructor-constructor",
+    "src/policy/ReThinkCtx.js~ReThinkCtx#constructor",
+    "method"
+  ],
+  [
+    "src/policy/rethinkctx.js~rethinkctx#date",
+    "class/src/policy/ReThinkCtx.js~ReThinkCtx.html#instance-get-date",
+    "src/policy/ReThinkCtx.js~ReThinkCtx#date",
+    "member"
+  ],
+  [
+    "src/policy/rethinkctx.js~rethinkctx#date",
+    "class/src/policy/ReThinkCtx.js~ReThinkCtx.html#instance-set-date",
+    "src/policy/ReThinkCtx.js~ReThinkCtx#date",
+    "member"
+  ],
+  [
+    "src/policy/rethinkctx.js~rethinkctx#defaultbehaviour",
+    "class/src/policy/ReThinkCtx.js~ReThinkCtx.html#instance-member-defaultBehaviour",
+    "src/policy/ReThinkCtx.js~ReThinkCtx#defaultBehaviour",
+    "member"
+  ],
+  [
+    "src/policy/rethinkctx.js~rethinkctx#domain",
+    "class/src/policy/ReThinkCtx.js~ReThinkCtx.html#instance-set-domain",
+    "src/policy/ReThinkCtx.js~ReThinkCtx#domain",
+    "member"
+  ],
+  [
+    "src/policy/rethinkctx.js~rethinkctx#domain",
+    "class/src/policy/ReThinkCtx.js~ReThinkCtx.html#instance-get-domain",
+    "src/policy/ReThinkCtx.js~ReThinkCtx#domain",
+    "member"
+  ],
+  [
+    "src/policy/rethinkctx.js~rethinkctx#groups",
+    "class/src/policy/ReThinkCtx.js~ReThinkCtx.html#instance-member-groups",
+    "src/policy/ReThinkCtx.js~ReThinkCtx#groups",
+    "member"
+  ],
+  [
+    "src/policy/rethinkctx.js~rethinkctx#scheme",
+    "class/src/policy/ReThinkCtx.js~ReThinkCtx.html#instance-get-scheme",
+    "src/policy/ReThinkCtx.js~ReThinkCtx#scheme",
+    "member"
+  ],
+  [
+    "src/policy/rethinkctx.js~rethinkctx#scheme",
+    "class/src/policy/ReThinkCtx.js~ReThinkCtx.html#instance-set-scheme",
+    "src/policy/ReThinkCtx.js~ReThinkCtx#scheme",
+    "member"
+  ],
+  [
+    "src/policy/rethinkctx.js~rethinkctx#source",
+    "class/src/policy/ReThinkCtx.js~ReThinkCtx.html#instance-set-source",
+    "src/policy/ReThinkCtx.js~ReThinkCtx#source",
+    "member"
+  ],
+  [
+    "src/policy/rethinkctx.js~rethinkctx#source",
+    "class/src/policy/ReThinkCtx.js~ReThinkCtx.html#instance-get-source",
+    "src/policy/ReThinkCtx.js~ReThinkCtx#source",
+    "member"
+  ],
+  [
+    "src/policy/rethinkctx.js~rethinkctx#time",
+    "class/src/policy/ReThinkCtx.js~ReThinkCtx.html#instance-set-time",
+    "src/policy/ReThinkCtx.js~ReThinkCtx#time",
+    "member"
+  ],
+  [
+    "src/policy/rethinkctx.js~rethinkctx#time",
+    "class/src/policy/ReThinkCtx.js~ReThinkCtx.html#instance-get-time",
+    "src/policy/ReThinkCtx.js~ReThinkCtx#time",
+    "member"
+  ],
+  [
+    "src/policy/rethinkctx.js~rethinkctx#type",
+    "class/src/policy/ReThinkCtx.js~ReThinkCtx.html#instance-get-type",
+    "src/policy/ReThinkCtx.js~ReThinkCtx#type",
+    "member"
+  ],
+  [
+    "src/policy/rethinkctx.js~rethinkctx#type",
+    "class/src/policy/ReThinkCtx.js~ReThinkCtx.html#instance-set-type",
+    "src/policy/ReThinkCtx.js~ReThinkCtx#type",
+    "member"
+  ],
+  [
+    "src/policy/rethinkctx.js~rethinkctx#weekday",
+    "class/src/policy/ReThinkCtx.js~ReThinkCtx.html#instance-get-weekday",
+    "src/policy/ReThinkCtx.js~ReThinkCtx#weekday",
+    "member"
+  ],
+  [
+    "src/policy/rethinkctx.js~rethinkctx#weekday",
+    "class/src/policy/ReThinkCtx.js~ReThinkCtx.html#instance-set-weekday",
+    "src/policy/ReThinkCtx.js~ReThinkCtx#weekday",
+    "member"
+  ],
+  [
+    "src/policy/rule.js",
+    "file/src/policy/Rule.js.html",
+    "src/policy/Rule.js",
+    "file"
+  ],
+  [
+    "src/policy/rule.js~rule#condition",
+    "class/src/policy/Rule.js~Rule.html#instance-member-condition",
+    "src/policy/Rule.js~Rule#condition",
+    "member"
+  ],
+  [
+    "src/policy/rule.js~rule#constructor",
+    "class/src/policy/Rule.js~Rule.html#instance-constructor-constructor",
+    "src/policy/Rule.js~Rule#constructor",
+    "method"
+  ],
+  [
+    "src/policy/rule.js~rule#decision",
+    "class/src/policy/Rule.js~Rule.html#instance-member-decision",
+    "src/policy/Rule.js~Rule#decision",
+    "member"
+  ],
+  [
+    "src/policy/rule.js~rule#evaluate",
+    "class/src/policy/Rule.js~Rule.html#instance-method-evaluate",
+    "src/policy/Rule.js~Rule#evaluate",
+    "method"
+  ],
+  [
+    "src/policy/rule.js~rule#priority",
+    "class/src/policy/Rule.js~Rule.html#instance-member-priority",
+    "src/policy/Rule.js~Rule#priority",
+    "member"
+  ],
+  [
+    "src/policy/rule.js~rule#scope",
+    "class/src/policy/Rule.js~Rule.html#instance-member-scope",
+    "src/policy/Rule.js~Rule#scope",
+    "member"
+  ],
+  [
+    "src/policy/rule.js~rule#setcondition",
+    "class/src/policy/Rule.js~Rule.html#instance-method-setCondition",
+    "src/policy/Rule.js~Rule#setCondition",
+    "method"
+  ],
+  [
+    "src/policy/rule.js~rule#target",
+    "class/src/policy/Rule.js~Rule.html#instance-member-target",
+    "src/policy/Rule.js~Rule#target",
+    "member"
+  ],
+  [
+    "src/policy/combiningalgorithms/allowoverrides.js",
+    "file/src/policy/combiningAlgorithms/AllowOverrides.js.html",
+    "src/policy/combiningAlgorithms/AllowOverrides.js",
+    "file"
+  ],
+  [
+    "src/policy/combiningalgorithms/allowoverrides.js~allowoverrides#combine",
+    "class/src/policy/combiningAlgorithms/AllowOverrides.js~AllowOverrides.html#instance-method-combine",
+    "src/policy/combiningAlgorithms/AllowOverrides.js~AllowOverrides#combine",
+    "method"
+  ],
+  [
+    "src/policy/combiningalgorithms/blockoverrides.js",
+    "file/src/policy/combiningAlgorithms/BlockOverrides.js.html",
+    "src/policy/combiningAlgorithms/BlockOverrides.js",
+    "file"
+  ],
+  [
+    "src/policy/combiningalgorithms/blockoverrides.js~blockoverrides#combine",
+    "class/src/policy/combiningAlgorithms/BlockOverrides.js~BlockOverrides.html#instance-method-combine",
+    "src/policy/combiningAlgorithms/BlockOverrides.js~BlockOverrides#combine",
+    "method"
+  ],
+  [
+    "src/policy/combiningalgorithms/firstapplicable.js",
+    "file/src/policy/combiningAlgorithms/FirstApplicable.js.html",
+    "src/policy/combiningAlgorithms/FirstApplicable.js",
+    "file"
+  ],
+  [
+    "src/policy/combiningalgorithms/firstapplicable.js~firstapplicable#combine",
+    "class/src/policy/combiningAlgorithms/FirstApplicable.js~FirstApplicable.html#instance-method-combine",
+    "src/policy/combiningAlgorithms/FirstApplicable.js~FirstApplicable#combine",
+    "method"
+  ],
+  [
+    "src/policy/conditions/advancedcondition.js",
+    "file/src/policy/conditions/AdvancedCondition.js.html",
+    "src/policy/conditions/AdvancedCondition.js",
+    "file"
+  ],
+  [
+    "src/policy/conditions/advancedcondition.js~advancedcondition#buildcondition",
+    "class/src/policy/conditions/AdvancedCondition.js~AdvancedCondition.html#instance-method-buildCondition",
+    "src/policy/conditions/AdvancedCondition.js~AdvancedCondition#buildCondition",
+    "method"
+  ],
+  [
+    "src/policy/conditions/advancedcondition.js~advancedcondition#condition",
+    "class/src/policy/conditions/AdvancedCondition.js~AdvancedCondition.html#instance-member-condition",
+    "src/policy/conditions/AdvancedCondition.js~AdvancedCondition#condition",
+    "member"
+  ],
+  [
+    "src/policy/conditions/advancedcondition.js~advancedcondition#constructor",
+    "class/src/policy/conditions/AdvancedCondition.js~AdvancedCondition.html#instance-constructor-constructor",
+    "src/policy/conditions/AdvancedCondition.js~AdvancedCondition#constructor",
+    "method"
+  ],
+  [
+    "src/policy/conditions/advancedcondition.js~advancedcondition#isapplicable",
+    "class/src/policy/conditions/AdvancedCondition.js~AdvancedCondition.html#instance-method-isApplicable",
+    "src/policy/conditions/AdvancedCondition.js~AdvancedCondition#isApplicable",
+    "method"
+  ],
+  [
+    "src/policy/conditions/advancedcondition.js~advancedcondition#operators",
+    "class/src/policy/conditions/AdvancedCondition.js~AdvancedCondition.html#instance-member-operators",
+    "src/policy/conditions/AdvancedCondition.js~AdvancedCondition#operators",
+    "member"
+  ],
+  [
+    "src/policy/conditions/condition.js",
+    "file/src/policy/conditions/Condition.js.html",
+    "src/policy/conditions/Condition.js",
+    "file"
+  ],
+  [
+    "src/policy/conditions/condition.js~condition#attribute",
+    "class/src/policy/conditions/Condition.js~Condition.html#instance-member-attribute",
+    "src/policy/conditions/Condition.js~Condition#attribute",
+    "member"
+  ],
+  [
+    "src/policy/conditions/condition.js~condition#constructor",
+    "class/src/policy/conditions/Condition.js~Condition.html#instance-constructor-constructor",
+    "src/policy/conditions/Condition.js~Condition#constructor",
+    "method"
+  ],
+  [
+    "src/policy/conditions/condition.js~condition#isapplicable",
+    "class/src/policy/conditions/Condition.js~Condition.html#instance-method-isApplicable",
+    "src/policy/conditions/Condition.js~Condition#isApplicable",
+    "method"
+  ],
+  [
+    "src/policy/conditions/condition.js~condition#operator",
+    "class/src/policy/conditions/Condition.js~Condition.html#instance-member-operator",
+    "src/policy/conditions/Condition.js~Condition#operator",
+    "member"
+  ],
+  [
+    "src/policy/conditions/condition.js~condition#operators",
+    "class/src/policy/conditions/Condition.js~Condition.html#instance-member-operators",
+    "src/policy/conditions/Condition.js~Condition#operators",
+    "member"
+  ],
+  [
+    "src/policy/conditions/condition.js~condition#params",
+    "class/src/policy/conditions/Condition.js~Condition.html#instance-member-params",
+    "src/policy/conditions/Condition.js~Condition#params",
+    "member"
+  ],
+  [
+    "src/policy/conditions/subscriptioncondition.js",
+    "file/src/policy/conditions/SubscriptionCondition.js.html",
+    "src/policy/conditions/SubscriptionCondition.js",
+    "file"
+  ],
+  [
+    "src/policy/conditions/subscriptioncondition.js~subscriptioncondition#constructor",
+    "class/src/policy/conditions/SubscriptionCondition.js~SubscriptionCondition.html#instance-constructor-constructor",
+    "src/policy/conditions/SubscriptionCondition.js~SubscriptionCondition#constructor",
+    "method"
+  ],
+  [
+    "src/policy/conditions/subscriptioncondition.js~subscriptioncondition#isapplicable",
+    "class/src/policy/conditions/SubscriptionCondition.js~SubscriptionCondition.html#instance-method-isApplicable",
+    "src/policy/conditions/SubscriptionCondition.js~SubscriptionCondition#isApplicable",
+    "method"
+  ],
+  [
+    "src/policy/context/runtimecorectx.js",
+    "file/src/policy/context/RuntimeCoreCtx.js.html",
+    "src/policy/context/RuntimeCoreCtx.js",
+    "file"
+  ],
+  [
+    "src/policy/context/runtimecorectx.js~runtimecorectx#activeuserpolicy",
+    "class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-member-activeUserPolicy",
+    "src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx#activeUserPolicy",
+    "member"
+  ],
+  [
+    "src/policy/context/runtimecorectx.js~runtimecorectx#addtogroup",
+    "class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-method-addToGroup",
+    "src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx#addToGroup",
+    "method"
+  ],
+  [
+    "src/policy/context/runtimecorectx.js~runtimecorectx#constructor",
+    "class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-constructor-constructor",
+    "src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx#constructor",
+    "method"
+  ],
+  [
+    "src/policy/context/runtimecorectx.js~runtimecorectx#creategroup",
+    "class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-method-createGroup",
+    "src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx#createGroup",
+    "method"
+  ],
+  [
+    "src/policy/context/runtimecorectx.js~runtimecorectx#deletegroup",
+    "class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-method-deleteGroup",
+    "src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx#deleteGroup",
+    "method"
+  ],
+  [
+    "src/policy/context/runtimecorectx.js~runtimecorectx#domutualauthentication",
+    "class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-method-doMutualAuthentication",
+    "src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx#doMutualAuthentication",
+    "method"
+  ],
+  [
+    "src/policy/context/runtimecorectx.js~runtimecorectx#getgroup",
+    "class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-method-getGroup",
+    "src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx#getGroup",
+    "method"
+  ],
+  [
+    "src/policy/context/runtimecorectx.js~runtimecorectx#getgroupsnames",
+    "class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-method-getGroupsNames",
+    "src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx#getGroupsNames",
+    "method"
+  ],
+  [
+    "src/policy/context/runtimecorectx.js~runtimecorectx#getmyemails",
+    "class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-method-getMyEmails",
+    "src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx#getMyEmails",
+    "method"
+  ],
+  [
+    "src/policy/context/runtimecorectx.js~runtimecorectx#getmyhyperties",
+    "class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-method-getMyHyperties",
+    "src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx#getMyHyperties",
+    "method"
+  ],
+  [
+    "src/policy/context/runtimecorectx.js~runtimecorectx#getpolicies",
+    "class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-method-getPolicies",
+    "src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx#getPolicies",
+    "method"
+  ],
+  [
+    "src/policy/context/runtimecorectx.js~runtimecorectx#getserviceproviderpolicy",
+    "class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-method-getServiceProviderPolicy",
+    "src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx#getServiceProviderPolicy",
+    "method"
+  ],
+  [
+    "src/policy/context/runtimecorectx.js~runtimecorectx#geturl",
+    "class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-method-getURL",
+    "src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx#getURL",
+    "method"
+  ],
+  [
+    "src/policy/context/runtimecorectx.js~runtimecorectx#idmodule",
+    "class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-member-idModule",
+    "src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx#idModule",
+    "member"
+  ],
+  [
+    "src/policy/context/runtimecorectx.js~runtimecorectx#isfromremotesm",
+    "class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-method-isFromRemoteSM",
+    "src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx#isFromRemoteSM",
+    "method"
+  ],
+  [
+    "src/policy/context/runtimecorectx.js~runtimecorectx#isinterworkingprotostub",
+    "class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-method-isInterworkingProtoStub",
+    "src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx#isInterworkingProtoStub",
+    "method"
+  ],
+  [
+    "src/policy/context/runtimecorectx.js~runtimecorectx#islocal",
+    "class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-method-isLocal",
+    "src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx#isLocal",
+    "method"
+  ],
+  [
+    "src/policy/context/runtimecorectx.js~runtimecorectx#loadconfigurations",
+    "class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-method-loadConfigurations",
+    "src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx#loadConfigurations",
+    "method"
+  ],
+  [
+    "src/policy/context/runtimecorectx.js~runtimecorectx#prepareforevaluation",
+    "class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-method-prepareForEvaluation",
+    "src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx#prepareForEvaluation",
+    "method"
+  ],
+  [
+    "src/policy/context/runtimecorectx.js~runtimecorectx#preparetoforward",
+    "class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-method-prepareToForward",
+    "src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx#prepareToForward",
+    "method"
+  ],
+  [
+    "src/policy/context/runtimecorectx.js~runtimecorectx#removefromgroup",
+    "class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-method-removeFromGroup",
+    "src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx#removeFromGroup",
+    "method"
+  ],
+  [
+    "src/policy/context/runtimecorectx.js~runtimecorectx#runtimecapabilities",
+    "class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-member-runtimeCapabilities",
+    "src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx#runtimeCapabilities",
+    "member"
+  ],
+  [
+    "src/policy/context/runtimecorectx.js~runtimecorectx#runtimeregistry",
+    "class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-member-runtimeRegistry",
+    "src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx#runtimeRegistry",
+    "member"
+  ],
+  [
+    "src/policy/context/runtimecorectx.js~runtimecorectx#saveactivepolicy",
+    "class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-method-saveActivePolicy",
+    "src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx#saveActivePolicy",
+    "method"
+  ],
+  [
+    "src/policy/context/runtimecorectx.js~runtimecorectx#savegroups",
+    "class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-method-saveGroups",
+    "src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx#saveGroups",
+    "method"
+  ],
+  [
+    "src/policy/context/runtimecorectx.js~runtimecorectx#savepolicies",
+    "class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-method-savePolicies",
+    "src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx#savePolicies",
+    "method"
+  ],
+  [
+    "src/policy/context/runtimecorectx.js~runtimecorectx#serviceproviderpolicy",
+    "class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-member-serviceProviderPolicy",
+    "src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx#serviceProviderPolicy",
+    "member"
+  ],
+  [
+    "src/policy/context/runtimecorectx.js~runtimecorectx#storagemanager",
+    "class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-member-storageManager",
+    "src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx#storageManager",
+    "member"
+  ],
+  [
+    "src/policy/context/runtimecorectx.js~runtimecorectx#subscription",
+    "class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-get-subscription",
+    "src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx#subscription",
+    "member"
+  ],
+  [
+    "src/policy/context/runtimecorectx.js~runtimecorectx#subscription",
+    "class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-set-subscription",
+    "src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx#subscription",
+    "member"
+  ],
+  [
+    "src/policy/context/runtimecorectx.js~runtimecorectx#userpolicies",
+    "class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html#instance-member-userPolicies",
+    "src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx#userPolicies",
+    "member"
+  ],
+  [
+    "src/protostub/idpproxystub.js",
+    "file/src/protostub/IdpProxyStub.js.html",
+    "src/protostub/IdpProxyStub.js",
+    "file"
+  ],
+  [
+    "src/protostub/idpproxystub.js~idpproxystub#constructor",
+    "class/src/protostub/IdpProxyStub.js~IdpProxyStub.html#instance-constructor-constructor",
+    "src/protostub/IdpProxyStub.js~IdpProxyStub#constructor",
+    "method"
+  ],
+  [
+    "src/protostub/idpproxystub.js~idpproxystub#generate",
+    "class/src/protostub/IdpProxyStub.js~IdpProxyStub.html#instance-method-generate",
+    "src/protostub/IdpProxyStub.js~IdpProxyStub#generate",
+    "method"
+  ],
+  [
+    "src/protostub/idpproxystub.js~idpproxystub#login",
+    "class/src/protostub/IdpProxyStub.js~IdpProxyStub.html#instance-method-login",
+    "src/protostub/IdpProxyStub.js~IdpProxyStub#login",
+    "method"
+  ],
+  [
+    "src/protostub/idpproxystub.js~idpproxystub#replymessage",
+    "class/src/protostub/IdpProxyStub.js~IdpProxyStub.html#instance-method-replyMessage",
+    "src/protostub/IdpProxyStub.js~IdpProxyStub#replyMessage",
+    "method"
+  ],
+  [
+    "src/protostub/idpproxystub.js~idpproxystub#requesttoidp",
+    "class/src/protostub/IdpProxyStub.js~IdpProxyStub.html#instance-method-requestToIdp",
+    "src/protostub/IdpProxyStub.js~IdpProxyStub#requestToIdp",
+    "method"
+  ],
+  [
+    "src/protostub/idpproxystub.js~idpproxystub#start",
+    "class/src/protostub/IdpProxyStub.js~IdpProxyStub.html#instance-method-start",
+    "src/protostub/IdpProxyStub.js~IdpProxyStub#start",
+    "method"
+  ],
+  [
+    "src/protostub/idpproxystub.js~idpproxystub#validate",
+    "class/src/protostub/IdpProxyStub.js~IdpProxyStub.html#instance-method-validate",
+    "src/protostub/IdpProxyStub.js~IdpProxyStub#validate",
     "method"
   ],
   [
@@ -1080,45 +3768,135 @@ window.esdocSearchIndex = [
     "file"
   ],
   [
-    "src/registry/addressallocation.js",
-    "file/src/registry/AddressAllocation.js.html",
-    "src/registry/AddressAllocation.js",
+    "src/registry/discovery.js",
+    "file/src/registry/Discovery.js.html",
+    "src/registry/Discovery.js",
     "file"
   ],
   [
-    "src/registry/addressallocation.js~addressallocation#constructor",
-    "class/src/registry/AddressAllocation.js~AddressAllocation.html#instance-constructor-constructor",
-    "src/registry/AddressAllocation.js~AddressAllocation#constructor",
+    "src/registry/discovery.js~discovery#constructor",
+    "class/src/registry/Discovery.js~Discovery.html#instance-constructor-constructor",
+    "src/registry/Discovery.js~Discovery#constructor",
     "method"
   ],
   [
-    "src/registry/addressallocation.js~addressallocation#create",
-    "class/src/registry/AddressAllocation.js~AddressAllocation.html#instance-method-create",
-    "src/registry/AddressAllocation.js~AddressAllocation#create",
+    "src/registry/discovery.js~discovery#deletedataobject",
+    "class/src/registry/Discovery.js~Discovery.html#instance-method-deleteDataObject",
+    "src/registry/Discovery.js~Discovery#deleteDataObject",
     "method"
   ],
   [
-    "src/registry/addressallocation.js~addressallocation#url",
-    "class/src/registry/AddressAllocation.js~AddressAllocation.html#instance-get-url",
-    "src/registry/AddressAllocation.js~AddressAllocation#url",
-    "member"
+    "src/registry/discovery.js~discovery#deletehyperty",
+    "class/src/registry/Discovery.js~Discovery.html#instance-method-deleteHyperty",
+    "src/registry/Discovery.js~Discovery#deleteHyperty",
+    "method"
   ],
   [
-    "src/registry/hypertydiscovery.js",
-    "file/src/registry/HypertyDiscovery.js.html",
-    "src/registry/HypertyDiscovery.js",
+    "src/registry/discovery.js~discovery#discoverdataobject",
+    "class/src/registry/Discovery.js~Discovery.html#instance-method-discoverDataObject",
+    "src/registry/Discovery.js~Discovery#discoverDataObject",
+    "method"
+  ],
+  [
+    "src/registry/discovery.js~discovery#discoverdataobjectpername",
+    "class/src/registry/Discovery.js~Discovery.html#instance-method-discoverDataObjectPerName",
+    "src/registry/Discovery.js~Discovery#discoverDataObjectPerName",
+    "method"
+  ],
+  [
+    "src/registry/discovery.js~discovery#discoverdataobjectperreporter",
+    "class/src/registry/Discovery.js~Discovery.html#instance-method-discoverDataObjectPerReporter",
+    "src/registry/Discovery.js~Discovery#discoverDataObjectPerReporter",
+    "method"
+  ],
+  [
+    "src/registry/discovery.js~discovery#discoverdataobjectperurl",
+    "class/src/registry/Discovery.js~Discovery.html#instance-method-discoverDataObjectPerURL",
+    "src/registry/Discovery.js~Discovery#discoverDataObjectPerURL",
+    "method"
+  ],
+  [
+    "src/registry/discovery.js~discovery#discoverhypertiesperuser",
+    "class/src/registry/Discovery.js~Discovery.html#instance-method-discoverHypertiesPerUser",
+    "src/registry/Discovery.js~Discovery#discoverHypertiesPerUser",
+    "method"
+  ],
+  [
+    "src/registry/discovery.js~discovery#discoverhyperty",
+    "class/src/registry/Discovery.js~Discovery.html#instance-method-discoverHyperty",
+    "src/registry/Discovery.js~Discovery#discoverHyperty",
+    "method"
+  ],
+  [
+    "src/registry/discovery.js~discovery#discoverhypertyperuser",
+    "class/src/registry/Discovery.js~Discovery.html#instance-method-discoverHypertyPerUser",
+    "src/registry/Discovery.js~Discovery#discoverHypertyPerUser",
+    "method"
+  ],
+  [
+    "src/registry/discoveryserviceframework.js",
+    "file/src/registry/DiscoveryServiceFramework.js.html",
+    "src/registry/DiscoveryServiceFramework.js",
     "file"
   ],
   [
-    "src/registry/hypertydiscovery.js~hypertydiscovery#constructor",
-    "class/src/registry/HypertyDiscovery.js~HypertyDiscovery.html#instance-constructor-constructor",
-    "src/registry/HypertyDiscovery.js~HypertyDiscovery#constructor",
+    "src/registry/discoveryserviceframework.js~discoveryserviceframework#constructor",
+    "class/src/registry/DiscoveryServiceFramework.js~DiscoveryServiceFramework.html#instance-constructor-constructor",
+    "src/registry/DiscoveryServiceFramework.js~DiscoveryServiceFramework#constructor",
     "method"
   ],
   [
-    "src/registry/hypertydiscovery.js~hypertydiscovery#discoverhypertyperuser",
-    "class/src/registry/HypertyDiscovery.js~HypertyDiscovery.html#instance-method-discoverHypertyPerUser",
-    "src/registry/HypertyDiscovery.js~HypertyDiscovery#discoverHypertyPerUser",
+    "src/registry/discoveryserviceframework.js~discoveryserviceframework#deletedataobject",
+    "class/src/registry/DiscoveryServiceFramework.js~DiscoveryServiceFramework.html#instance-method-deleteDataObject",
+    "src/registry/DiscoveryServiceFramework.js~DiscoveryServiceFramework#deleteDataObject",
+    "method"
+  ],
+  [
+    "src/registry/discoveryserviceframework.js~discoveryserviceframework#deletehyperty",
+    "class/src/registry/DiscoveryServiceFramework.js~DiscoveryServiceFramework.html#instance-method-deleteHyperty",
+    "src/registry/DiscoveryServiceFramework.js~DiscoveryServiceFramework#deleteHyperty",
+    "method"
+  ],
+  [
+    "src/registry/discoveryserviceframework.js~discoveryserviceframework#discoverdataobject",
+    "class/src/registry/DiscoveryServiceFramework.js~DiscoveryServiceFramework.html#instance-method-discoverDataObject",
+    "src/registry/DiscoveryServiceFramework.js~DiscoveryServiceFramework#discoverDataObject",
+    "method"
+  ],
+  [
+    "src/registry/discoveryserviceframework.js~discoveryserviceframework#discoverdataobjectpername",
+    "class/src/registry/DiscoveryServiceFramework.js~DiscoveryServiceFramework.html#instance-method-discoverDataObjectPerName",
+    "src/registry/DiscoveryServiceFramework.js~DiscoveryServiceFramework#discoverDataObjectPerName",
+    "method"
+  ],
+  [
+    "src/registry/discoveryserviceframework.js~discoveryserviceframework#discoverdataobjectperreporter",
+    "class/src/registry/DiscoveryServiceFramework.js~DiscoveryServiceFramework.html#instance-method-discoverDataObjectPerReporter",
+    "src/registry/DiscoveryServiceFramework.js~DiscoveryServiceFramework#discoverDataObjectPerReporter",
+    "method"
+  ],
+  [
+    "src/registry/discoveryserviceframework.js~discoveryserviceframework#discoverdataobjectperurl",
+    "class/src/registry/DiscoveryServiceFramework.js~DiscoveryServiceFramework.html#instance-method-discoverDataObjectPerURL",
+    "src/registry/DiscoveryServiceFramework.js~DiscoveryServiceFramework#discoverDataObjectPerURL",
+    "method"
+  ],
+  [
+    "src/registry/discoveryserviceframework.js~discoveryserviceframework#discoverhypertiesperuser",
+    "class/src/registry/DiscoveryServiceFramework.js~DiscoveryServiceFramework.html#instance-method-discoverHypertiesPerUser",
+    "src/registry/DiscoveryServiceFramework.js~DiscoveryServiceFramework#discoverHypertiesPerUser",
+    "method"
+  ],
+  [
+    "src/registry/discoveryserviceframework.js~discoveryserviceframework#discoverhyperty",
+    "class/src/registry/DiscoveryServiceFramework.js~DiscoveryServiceFramework.html#instance-method-discoverHyperty",
+    "src/registry/DiscoveryServiceFramework.js~DiscoveryServiceFramework#discoverHyperty",
+    "method"
+  ],
+  [
+    "src/registry/discoveryserviceframework.js~discoveryserviceframework#discoverhypertyperuser",
+    "class/src/registry/DiscoveryServiceFramework.js~DiscoveryServiceFramework.html#instance-method-discoverHypertyPerUser",
+    "src/registry/DiscoveryServiceFramework.js~DiscoveryServiceFramework#discoverHypertyPerUser",
     "method"
   ],
   [
@@ -1134,9 +3912,45 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/registry/hypertyinstance.js~hypertyinstance#dataschemes",
+    "class/src/registry/HypertyInstance.js~HypertyInstance.html#instance-get-dataSchemes",
+    "src/registry/HypertyInstance.js~HypertyInstance#dataSchemes",
+    "member"
+  ],
+  [
+    "src/registry/hypertyinstance.js~hypertyinstance#descriptor",
+    "class/src/registry/HypertyInstance.js~HypertyInstance.html#instance-get-descriptor",
+    "src/registry/HypertyInstance.js~HypertyInstance#descriptor",
+    "member"
+  ],
+  [
     "src/registry/hypertyinstance.js~hypertyinstance#hypertyurl",
     "class/src/registry/HypertyInstance.js~HypertyInstance.html#instance-get-hypertyURL",
     "src/registry/HypertyInstance.js~HypertyInstance#hypertyURL",
+    "member"
+  ],
+  [
+    "src/registry/hypertyinstance.js~hypertyinstance#objectname",
+    "class/src/registry/HypertyInstance.js~HypertyInstance.html#instance-get-objectName",
+    "src/registry/HypertyInstance.js~HypertyInstance#objectName",
+    "member"
+  ],
+  [
+    "src/registry/hypertyinstance.js~hypertyinstance#p2phandler",
+    "class/src/registry/HypertyInstance.js~HypertyInstance.html#instance-get-p2pHandler",
+    "src/registry/HypertyInstance.js~HypertyInstance#p2pHandler",
+    "member"
+  ],
+  [
+    "src/registry/hypertyinstance.js~hypertyinstance#resources",
+    "class/src/registry/HypertyInstance.js~HypertyInstance.html#instance-get-resources",
+    "src/registry/HypertyInstance.js~HypertyInstance#resources",
+    "member"
+  ],
+  [
+    "src/registry/hypertyinstance.js~hypertyinstance#runtimeurl",
+    "class/src/registry/HypertyInstance.js~HypertyInstance.html#instance-get-runtimeURL",
+    "src/registry/HypertyInstance.js~HypertyInstance#runtimeURL",
     "member"
   ],
   [
@@ -1158,9 +3972,69 @@ window.esdocSearchIndex = [
     "file"
   ],
   [
+    "src/registry/registry.js~registry#checkp2p",
+    "class/src/registry/Registry.js~Registry.html#instance-method-checkP2P",
+    "src/registry/Registry.js~Registry#checkP2P",
+    "method"
+  ],
+  [
+    "src/registry/registry.js~registry#checkp2pdataobject",
+    "class/src/registry/Registry.js~Registry.html#instance-method-checkP2PDataObject",
+    "src/registry/Registry.js~Registry#checkP2PDataObject",
+    "method"
+  ],
+  [
+    "src/registry/registry.js~registry#checkp2phyperty",
+    "class/src/registry/Registry.js~Registry.html#instance-method-checkP2PHyperty",
+    "src/registry/Registry.js~Registry#checkP2PHyperty",
+    "method"
+  ],
+  [
+    "src/registry/registry.js~registry#checkp2pruntime",
+    "class/src/registry/Registry.js~Registry.html#instance-method-checkP2PRuntime",
+    "src/registry/Registry.js~Registry#checkP2PRuntime",
+    "method"
+  ],
+  [
+    "src/registry/registry.js~registry#checkregisteredurls",
+    "class/src/registry/Registry.js~Registry.html#instance-method-checkRegisteredURLs",
+    "src/registry/Registry.js~Registry#checkRegisteredURLs",
+    "method"
+  ],
+  [
     "src/registry/registry.js~registry#constructor",
     "class/src/registry/Registry.js~Registry.html#instance-constructor-constructor",
     "src/registry/Registry.js~Registry#constructor",
+    "method"
+  ],
+  [
+    "src/registry/registry.js~registry#deletedataobjectinstance",
+    "class/src/registry/Registry.js~Registry.html#instance-method-deleteDataObjectInstance",
+    "src/registry/Registry.js~Registry#deleteDataObjectInstance",
+    "method"
+  ],
+  [
+    "src/registry/registry.js~registry#discoverdataobjectperurl",
+    "class/src/registry/Registry.js~Registry.html#instance-method-discoverDataObjectPerURL",
+    "src/registry/Registry.js~Registry#discoverDataObjectPerURL",
+    "method"
+  ],
+  [
+    "src/registry/registry.js~registry#discoverhypertyperuser",
+    "class/src/registry/Registry.js~Registry.html#instance-method-discoverHypertyPerUser",
+    "src/registry/Registry.js~Registry#discoverHypertyPerUser",
+    "method"
+  ],
+  [
+    "src/registry/registry.js~registry#discoveridpproxy",
+    "class/src/registry/Registry.js~Registry.html#instance-method-discoverIdpProxy",
+    "src/registry/Registry.js~Registry#discoverIdpProxy",
+    "method"
+  ],
+  [
+    "src/registry/registry.js~registry#discoverp2pstub",
+    "class/src/registry/Registry.js~Registry.html#instance-method-discoverP2PStub",
+    "src/registry/Registry.js~Registry#discoverP2PStub",
     "method"
   ],
   [
@@ -1176,21 +4050,81 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/registry/registry.js~registry#getdataobjectsubscriberhyperty",
+    "class/src/registry/Registry.js~Registry.html#instance-method-getDataObjectSubscriberHyperty",
+    "src/registry/Registry.js~Registry#getDataObjectSubscriberHyperty",
+    "method"
+  ],
+  [
+    "src/registry/registry.js~registry#getdataobjectsubscribers",
+    "class/src/registry/Registry.js~Registry.html#instance-method-getDataObjectSubscribers",
+    "src/registry/Registry.js~Registry#getDataObjectSubscribers",
+    "method"
+  ],
+  [
+    "src/registry/registry.js~registry#gethypertyname",
+    "class/src/registry/Registry.js~Registry.html#instance-method-getHypertyName",
+    "src/registry/Registry.js~Registry#getHypertyName",
+    "method"
+  ],
+  [
+    "src/registry/registry.js~registry#gethypertyowner",
+    "class/src/registry/Registry.js~Registry.html#instance-method-getHypertyOwner",
+    "src/registry/Registry.js~Registry#getHypertyOwner",
+    "method"
+  ],
+  [
+    "src/registry/registry.js~registry#getpreauthsubscribers",
+    "class/src/registry/Registry.js~Registry.html#instance-method-getPreAuthSubscribers",
+    "src/registry/Registry.js~Registry#getPreAuthSubscribers",
+    "method"
+  ],
+  [
+    "src/registry/registry.js~registry#getreporterurl",
+    "class/src/registry/Registry.js~Registry.html#instance-method-getReporterURL",
+    "src/registry/Registry.js~Registry#getReporterURL",
+    "method"
+  ],
+  [
+    "src/registry/registry.js~registry#getreporterurlsynchonous",
+    "class/src/registry/Registry.js~Registry.html#instance-method-getReporterURLSynchonous",
+    "src/registry/Registry.js~Registry#getReporterURLSynchonous",
+    "method"
+  ],
+  [
     "src/registry/registry.js~registry#getsandbox",
     "class/src/registry/Registry.js~Registry.html#instance-method-getSandbox",
     "src/registry/Registry.js~Registry#getSandbox",
     "method"
   ],
   [
-    "src/registry/registry.js~registry#getuserhyperty",
-    "class/src/registry/Registry.js~Registry.html#instance-method-getUserHyperty",
-    "src/registry/Registry.js~Registry#getUserHyperty",
+    "src/registry/registry.js~registry#isinterworkingprotostub",
+    "class/src/registry/Registry.js~Registry.html#instance-method-isInterworkingProtoStub",
+    "src/registry/Registry.js~Registry#isInterworkingProtoStub",
     "method"
   ],
   [
-    "src/registry/registry.js~registry#messagebus",
-    "class/src/registry/Registry.js~Registry.html#instance-set-messageBus",
-    "src/registry/Registry.js~Registry#messageBus",
+    "src/registry/registry.js~registry#islegacy",
+    "class/src/registry/Registry.js~Registry.html#instance-method-isLegacy",
+    "src/registry/Registry.js~Registry#isLegacy",
+    "method"
+  ],
+  [
+    "src/registry/registry.js~registry#islocal",
+    "class/src/registry/Registry.js~Registry.html#instance-method-isLocal",
+    "src/registry/Registry.js~Registry#isLocal",
+    "method"
+  ],
+  [
+    "src/registry/registry.js~registry#loader",
+    "class/src/registry/Registry.js~Registry.html#instance-get-loader",
+    "src/registry/Registry.js~Registry#loader",
+    "member"
+  ],
+  [
+    "src/registry/registry.js~registry#loader",
+    "class/src/registry/Registry.js~Registry.html#instance-set-loader",
+    "src/registry/Registry.js~Registry#loader",
     "member"
   ],
   [
@@ -1200,15 +4134,27 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
-    "src/registry/registry.js~registry#onevent",
-    "class/src/registry/Registry.js~Registry.html#instance-method-onEvent",
-    "src/registry/Registry.js~Registry#onEvent",
+    "src/registry/registry.js~registry#messagebus",
+    "class/src/registry/Registry.js~Registry.html#instance-set-messageBus",
+    "src/registry/Registry.js~Registry#messageBus",
+    "member"
+  ],
+  [
+    "src/registry/registry.js~registry#registerdataobject",
+    "class/src/registry/Registry.js~Registry.html#instance-method-registerDataObject",
+    "src/registry/Registry.js~Registry#registerDataObject",
     "method"
   ],
   [
     "src/registry/registry.js~registry#registerhyperty",
     "class/src/registry/Registry.js~Registry.html#instance-method-registerHyperty",
     "src/registry/Registry.js~Registry#registerHyperty",
+    "method"
+  ],
+  [
+    "src/registry/registry.js~registry#registeridpproxy",
+    "class/src/registry/Registry.js~Registry.html#instance-method-registerIdpProxy",
+    "src/registry/Registry.js~Registry#registerIdpProxy",
     "method"
   ],
   [
@@ -1224,15 +4170,45 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/registry/registry.js~registry#registersubscribeddataobject",
+    "class/src/registry/Registry.js~Registry.html#instance-method-registerSubscribedDataObject",
+    "src/registry/Registry.js~Registry#registerSubscribedDataObject",
+    "method"
+  ],
+  [
+    "src/registry/registry.js~registry#registersubscriber",
+    "class/src/registry/Registry.js~Registry.html#instance-method-registerSubscriber",
+    "src/registry/Registry.js~Registry#registerSubscriber",
+    "method"
+  ],
+  [
     "src/registry/registry.js~registry#resolve",
     "class/src/registry/Registry.js~Registry.html#instance-method-resolve",
     "src/registry/Registry.js~Registry#resolve",
     "method"
   ],
   [
+    "src/registry/registry.js~registry#resolvenormalstub",
+    "class/src/registry/Registry.js~Registry.html#instance-method-resolveNormalStub",
+    "src/registry/Registry.js~Registry#resolveNormalStub",
+    "method"
+  ],
+  [
+    "src/registry/registry.js~registry#unregisterallhyperties",
+    "class/src/registry/Registry.js~Registry.html#instance-method-unregisterAllHyperties",
+    "src/registry/Registry.js~Registry#unregisterAllHyperties",
+    "method"
+  ],
+  [
     "src/registry/registry.js~registry#unregisterhyperty",
     "class/src/registry/Registry.js~Registry.html#instance-method-unregisterHyperty",
     "src/registry/Registry.js~Registry#unregisterHyperty",
+    "method"
+  ],
+  [
+    "src/registry/registry.js~registry#unregisterhypertyinstance",
+    "class/src/registry/Registry.js~Registry.html#instance-method-unregisterHypertyInstance",
+    "src/registry/Registry.js~Registry#unregisterHypertyInstance",
     "method"
   ],
   [
@@ -1245,6 +4221,12 @@ window.esdocSearchIndex = [
     "src/registry/registry.js~registry#unregisterstub",
     "class/src/registry/Registry.js~Registry.html#instance-method-unregisterStub",
     "src/registry/Registry.js~Registry#unregisterStub",
+    "method"
+  ],
+  [
+    "src/registry/registry.js~registry#updatehypertyinstance",
+    "class/src/registry/Registry.js~Registry.html#instance-method-updateHypertyInstance",
+    "src/registry/Registry.js~Registry#updateHypertyInstance",
     "method"
   ],
   [
@@ -1272,147 +4254,159 @@ window.esdocSearchIndex = [
     "member"
   ],
   [
+    "src/registry/registrydatamodel.js~registrydatamodel#lastmodified",
+    "class/src/registry/RegistryDataModel.js~RegistryDataModel.html#instance-get-lastModified",
+    "src/registry/RegistryDataModel.js~RegistryDataModel#lastModified",
+    "member"
+  ],
+  [
+    "src/registry/registrydatamodel.js~registrydatamodel#p2prequester",
+    "class/src/registry/RegistryDataModel.js~RegistryDataModel.html#instance-get-p2pRequester",
+    "src/registry/RegistryDataModel.js~RegistryDataModel#p2pRequester",
+    "member"
+  ],
+  [
     "src/registry/registrydatamodel.js~registrydatamodel#url",
     "class/src/registry/RegistryDataModel.js~RegistryDataModel.html#instance-get-url",
     "src/registry/RegistryDataModel.js~RegistryDataModel#url",
     "member"
   ],
   [
-    "src/runtime/runtimecatalogue-local.js",
-    "file/src/runtime/RuntimeCatalogue-Local.js.html",
-    "src/runtime/RuntimeCatalogue-Local.js",
+    "src/runtime/descriptors.js",
+    "file/src/runtime/Descriptors.js.html",
+    "src/runtime/Descriptors.js",
     "file"
   ],
   [
-    "src/runtime/runtimecatalogue-local.js~runtimecatalogue#constructor",
-    "class/src/runtime/RuntimeCatalogue-Local.js~RuntimeCatalogue.html#instance-constructor-constructor",
-    "src/runtime/RuntimeCatalogue-Local.js~RuntimeCatalogue#constructor",
-    "method"
-  ],
-  [
-    "src/runtime/runtimecatalogue-local.js~runtimecatalogue#getdataschemadescriptor",
-    "class/src/runtime/RuntimeCatalogue-Local.js~RuntimeCatalogue.html#instance-method-getDataSchemaDescriptor",
-    "src/runtime/RuntimeCatalogue-Local.js~RuntimeCatalogue#getDataSchemaDescriptor",
-    "method"
-  ],
-  [
-    "src/runtime/runtimecatalogue-local.js~runtimecatalogue#gethypertydescriptor",
-    "class/src/runtime/RuntimeCatalogue-Local.js~RuntimeCatalogue.html#instance-method-getHypertyDescriptor",
-    "src/runtime/RuntimeCatalogue-Local.js~RuntimeCatalogue#getHypertyDescriptor",
-    "method"
-  ],
-  [
-    "src/runtime/runtimecatalogue-local.js~runtimecatalogue#gethypertyruntimeurl",
-    "class/src/runtime/RuntimeCatalogue-Local.js~RuntimeCatalogue.html#instance-method-getHypertyRuntimeURL",
-    "src/runtime/RuntimeCatalogue-Local.js~RuntimeCatalogue#getHypertyRuntimeURL",
-    "method"
-  ],
-  [
-    "src/runtime/runtimecatalogue-local.js~runtimecatalogue#getsourcepackagefromurl",
-    "class/src/runtime/RuntimeCatalogue-Local.js~RuntimeCatalogue.html#instance-method-getSourcePackageFromURL",
-    "src/runtime/RuntimeCatalogue-Local.js~RuntimeCatalogue#getSourcePackageFromURL",
-    "method"
-  ],
-  [
-    "src/runtime/runtimecatalogue-local.js~runtimecatalogue#getstubdescriptor",
-    "class/src/runtime/RuntimeCatalogue-Local.js~RuntimeCatalogue.html#instance-method-getStubDescriptor",
-    "src/runtime/RuntimeCatalogue-Local.js~RuntimeCatalogue#getStubDescriptor",
-    "method"
-  ],
-  [
-    "src/runtime/runtimecatalogue-local.js~runtimecatalogue#mockupdataschemadescriptor",
-    "class/src/runtime/RuntimeCatalogue-Local.js~RuntimeCatalogue.html#instance-method-mockupDataSchemaDescriptor",
-    "src/runtime/RuntimeCatalogue-Local.js~RuntimeCatalogue#mockupDataSchemaDescriptor",
-    "method"
-  ],
-  [
-    "src/runtime/runtimecatalogue-local.js~runtimecatalogue#mockuphypertydescriptor",
-    "class/src/runtime/RuntimeCatalogue-Local.js~RuntimeCatalogue.html#instance-method-mockupHypertyDescriptor",
-    "src/runtime/RuntimeCatalogue-Local.js~RuntimeCatalogue#mockupHypertyDescriptor",
-    "method"
-  ],
-  [
-    "src/runtime/runtimecatalogue-local.js~runtimecatalogue#mockupstubdescriptor",
-    "class/src/runtime/RuntimeCatalogue-Local.js~RuntimeCatalogue.html#instance-method-mockupStubDescriptor",
-    "src/runtime/RuntimeCatalogue-Local.js~RuntimeCatalogue#mockupStubDescriptor",
-    "method"
-  ],
-  [
-    "src/runtime/runtimecatalogue-local.js~runtimecatalogue#runtimeurl",
-    "class/src/runtime/RuntimeCatalogue-Local.js~RuntimeCatalogue.html#instance-get-runtimeURL",
-    "src/runtime/RuntimeCatalogue-Local.js~RuntimeCatalogue#runtimeURL",
+    "src/runtime/descriptors.js~descriptors#catalogue",
+    "class/src/runtime/Descriptors.js~Descriptors.html#instance-member-catalogue",
+    "src/runtime/Descriptors.js~Descriptors#catalogue",
     "member"
   ],
   [
-    "src/runtime/runtimecatalogue-local.js~runtimecatalogue#runtimeurl",
-    "class/src/runtime/RuntimeCatalogue-Local.js~RuntimeCatalogue.html#instance-set-runtimeURL",
-    "src/runtime/RuntimeCatalogue-Local.js~RuntimeCatalogue#runtimeURL",
+    "src/runtime/descriptors.js~descriptors#constructor",
+    "class/src/runtime/Descriptors.js~Descriptors.html#instance-constructor-constructor",
+    "src/runtime/Descriptors.js~Descriptors#constructor",
+    "method"
+  ],
+  [
+    "src/runtime/descriptors.js~descriptors#gethypertydescriptor",
+    "class/src/runtime/Descriptors.js~Descriptors.html#instance-method-getHypertyDescriptor",
+    "src/runtime/Descriptors.js~Descriptors#getHypertyDescriptor",
+    "method"
+  ],
+  [
+    "src/runtime/descriptors.js~descriptors#getidpproxydescriptor",
+    "class/src/runtime/Descriptors.js~Descriptors.html#instance-method-getIdpProxyDescriptor",
+    "src/runtime/Descriptors.js~Descriptors#getIdpProxyDescriptor",
+    "method"
+  ],
+  [
+    "src/runtime/descriptors.js~descriptors#getstubdescriptor",
+    "class/src/runtime/Descriptors.js~Descriptors.html#instance-method-getStubDescriptor",
+    "src/runtime/Descriptors.js~Descriptors#getStubDescriptor",
+    "method"
+  ],
+  [
+    "src/runtime/descriptors.js~descriptors#runtimeconfiguration",
+    "class/src/runtime/Descriptors.js~Descriptors.html#instance-member-runtimeConfiguration",
+    "src/runtime/Descriptors.js~Descriptors#runtimeConfiguration",
     "member"
   ],
   [
-    "src/runtime/runtimecatalogue.js",
-    "file/src/runtime/RuntimeCatalogue.js.html",
-    "src/runtime/RuntimeCatalogue.js",
+    "src/runtime/descriptors.js~descriptors#runtimeurl",
+    "class/src/runtime/Descriptors.js~Descriptors.html#instance-member-runtimeURL",
+    "src/runtime/Descriptors.js~Descriptors#runtimeURL",
+    "member"
+  ],
+  [
+    "src/runtime/loader.js",
+    "file/src/runtime/Loader.js.html",
+    "src/runtime/Loader.js",
     "file"
   ],
   [
-    "src/runtime/runtimecatalogue.js~runtimecatalogue#constructor",
-    "class/src/runtime/RuntimeCatalogue.js~RuntimeCatalogue.html#instance-constructor-constructor",
-    "src/runtime/RuntimeCatalogue.js~RuntimeCatalogue#constructor",
+    "src/runtime/loader.js~loader#constructor",
+    "class/src/runtime/Loader.js~Loader.html#instance-constructor-constructor",
+    "src/runtime/Loader.js~Loader#constructor",
     "method"
   ],
   [
-    "src/runtime/runtimecatalogue.js~runtimecatalogue#getdataschemadescriptor",
-    "class/src/runtime/RuntimeCatalogue.js~RuntimeCatalogue.html#instance-method-getDataSchemaDescriptor",
-    "src/runtime/RuntimeCatalogue.js~RuntimeCatalogue#getDataSchemaDescriptor",
-    "method"
-  ],
-  [
-    "src/runtime/runtimecatalogue.js~runtimecatalogue#gethypertydescriptor",
-    "class/src/runtime/RuntimeCatalogue.js~RuntimeCatalogue.html#instance-method-getHypertyDescriptor",
-    "src/runtime/RuntimeCatalogue.js~RuntimeCatalogue#getHypertyDescriptor",
-    "method"
-  ],
-  [
-    "src/runtime/runtimecatalogue.js~runtimecatalogue#gethypertyruntimeurl",
-    "class/src/runtime/RuntimeCatalogue.js~RuntimeCatalogue.html#instance-method-getHypertyRuntimeURL",
-    "src/runtime/RuntimeCatalogue.js~RuntimeCatalogue#getHypertyRuntimeURL",
-    "method"
-  ],
-  [
-    "src/runtime/runtimecatalogue.js~runtimecatalogue#getruntimedescriptor",
-    "class/src/runtime/RuntimeCatalogue.js~RuntimeCatalogue.html#instance-method-getRuntimeDescriptor",
-    "src/runtime/RuntimeCatalogue.js~RuntimeCatalogue#getRuntimeDescriptor",
-    "method"
-  ],
-  [
-    "src/runtime/runtimecatalogue.js~runtimecatalogue#getsourcecodefromdescriptor",
-    "class/src/runtime/RuntimeCatalogue.js~RuntimeCatalogue.html#instance-method-getSourceCodeFromDescriptor",
-    "src/runtime/RuntimeCatalogue.js~RuntimeCatalogue#getSourceCodeFromDescriptor",
-    "method"
-  ],
-  [
-    "src/runtime/runtimecatalogue.js~runtimecatalogue#getsourcepackagefromurl",
-    "class/src/runtime/RuntimeCatalogue.js~RuntimeCatalogue.html#instance-method-getSourcePackageFromURL",
-    "src/runtime/RuntimeCatalogue.js~RuntimeCatalogue#getSourcePackageFromURL",
-    "method"
-  ],
-  [
-    "src/runtime/runtimecatalogue.js~runtimecatalogue#getstubdescriptor",
-    "class/src/runtime/RuntimeCatalogue.js~RuntimeCatalogue.html#instance-method-getStubDescriptor",
-    "src/runtime/RuntimeCatalogue.js~RuntimeCatalogue#getStubDescriptor",
-    "method"
-  ],
-  [
-    "src/runtime/runtimecatalogue.js~runtimecatalogue#runtimeurl",
-    "class/src/runtime/RuntimeCatalogue.js~RuntimeCatalogue.html#instance-set-runtimeURL",
-    "src/runtime/RuntimeCatalogue.js~RuntimeCatalogue#runtimeURL",
+    "src/runtime/loader.js~loader#descriptors",
+    "class/src/runtime/Loader.js~Loader.html#instance-member-descriptors",
+    "src/runtime/Loader.js~Loader#descriptors",
     "member"
   ],
   [
-    "src/runtime/runtimecatalogue.js~runtimecatalogue#runtimeurl",
-    "class/src/runtime/RuntimeCatalogue.js~RuntimeCatalogue.html#instance-get-runtimeURL",
-    "src/runtime/RuntimeCatalogue.js~RuntimeCatalogue#runtimeURL",
+    "src/runtime/loader.js~loader#loadhyperty",
+    "class/src/runtime/Loader.js~Loader.html#instance-method-loadHyperty",
+    "src/runtime/Loader.js~Loader#loadHyperty",
+    "method"
+  ],
+  [
+    "src/runtime/loader.js~loader#loadidpproxy",
+    "class/src/runtime/Loader.js~Loader.html#instance-method-loadIdpProxy",
+    "src/runtime/Loader.js~Loader#loadIdpProxy",
+    "method"
+  ],
+  [
+    "src/runtime/loader.js~loader#loadstub",
+    "class/src/runtime/Loader.js~Loader.html#instance-method-loadStub",
+    "src/runtime/Loader.js~Loader#loadStub",
+    "method"
+  ],
+  [
+    "src/runtime/loader.js~loader#messagebus",
+    "class/src/runtime/Loader.js~Loader.html#instance-set-messageBus",
+    "src/runtime/Loader.js~Loader#messageBus",
+    "member"
+  ],
+  [
+    "src/runtime/loader.js~loader#messagebus",
+    "class/src/runtime/Loader.js~Loader.html#instance-get-messageBus",
+    "src/runtime/Loader.js~Loader#messageBus",
+    "member"
+  ],
+  [
+    "src/runtime/loader.js~loader#registry",
+    "class/src/runtime/Loader.js~Loader.html#instance-get-registry",
+    "src/runtime/Loader.js~Loader#registry",
+    "member"
+  ],
+  [
+    "src/runtime/loader.js~loader#registry",
+    "class/src/runtime/Loader.js~Loader.html#instance-set-registry",
+    "src/runtime/Loader.js~Loader#registry",
+    "member"
+  ],
+  [
+    "src/runtime/loader.js~loader#runtimeconfiguration",
+    "class/src/runtime/Loader.js~Loader.html#instance-member-runtimeConfiguration",
+    "src/runtime/Loader.js~Loader#runtimeConfiguration",
+    "member"
+  ],
+  [
+    "src/runtime/loader.js~loader#runtimefactory",
+    "class/src/runtime/Loader.js~Loader.html#instance-set-runtimeFactory",
+    "src/runtime/Loader.js~Loader#runtimeFactory",
+    "member"
+  ],
+  [
+    "src/runtime/loader.js~loader#runtimefactory",
+    "class/src/runtime/Loader.js~Loader.html#instance-get-runtimeFactory",
+    "src/runtime/Loader.js~Loader#runtimeFactory",
+    "member"
+  ],
+  [
+    "src/runtime/loader.js~loader#runtimeurl",
+    "class/src/runtime/Loader.js~Loader.html#instance-set-runtimeURL",
+    "src/runtime/Loader.js~Loader#runtimeURL",
+    "member"
+  ],
+  [
+    "src/runtime/loader.js~loader#runtimeurl",
+    "class/src/runtime/Loader.js~Loader.html#instance-get-runtimeURL",
+    "src/runtime/Loader.js~Loader#runtimeURL",
     "member"
   ],
   [
@@ -1422,9 +4416,21 @@ window.esdocSearchIndex = [
     "file"
   ],
   [
-    "src/runtime/runtimeua.js~runtimeua#checkforupdate",
-    "class/src/runtime/RuntimeUA.js~RuntimeUA.html#instance-method-checkForUpdate",
-    "src/runtime/RuntimeUA.js~RuntimeUA#checkForUpdate",
+    "src/runtime/runtimeua.js~runtimeua#addressallocation",
+    "class/src/runtime/RuntimeUA.js~RuntimeUA.html#instance-member-addressAllocation",
+    "src/runtime/RuntimeUA.js~RuntimeUA#addressAllocation",
+    "member"
+  ],
+  [
+    "src/runtime/runtimeua.js~runtimeua#capabilities",
+    "class/src/runtime/RuntimeUA.js~RuntimeUA.html#instance-member-capabilities",
+    "src/runtime/RuntimeUA.js~RuntimeUA#capabilities",
+    "member"
+  ],
+  [
+    "src/runtime/runtimeua.js~runtimeua#close",
+    "class/src/runtime/RuntimeUA.js~RuntimeUA.html#instance-method-close",
+    "src/runtime/RuntimeUA.js~RuntimeUA#close",
     "method"
   ],
   [
@@ -1434,9 +4440,27 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/runtime/runtimeua.js~runtimeua#discoverhiperty",
-    "class/src/runtime/RuntimeUA.js~RuntimeUA.html#instance-method-discoverHiperty",
-    "src/runtime/RuntimeUA.js~RuntimeUA#discoverHiperty",
+    "src/runtime/runtimeua.js~runtimeua#descriptorinstance",
+    "class/src/runtime/RuntimeUA.js~RuntimeUA.html#instance-member-descriptorInstance",
+    "src/runtime/RuntimeUA.js~RuntimeUA#descriptorInstance",
+    "member"
+  ],
+  [
+    "src/runtime/runtimeua.js~runtimeua#domain",
+    "class/src/runtime/RuntimeUA.js~RuntimeUA.html#instance-member-domain",
+    "src/runtime/RuntimeUA.js~RuntimeUA#domain",
+    "member"
+  ],
+  [
+    "src/runtime/runtimeua.js~runtimeua#identitymodule",
+    "class/src/runtime/RuntimeUA.js~RuntimeUA.html#instance-member-identityModule",
+    "src/runtime/RuntimeUA.js~RuntimeUA#identityModule",
+    "member"
+  ],
+  [
+    "src/runtime/runtimeua.js~runtimeua#init",
+    "class/src/runtime/RuntimeUA.js~RuntimeUA.html#instance-method-init",
+    "src/runtime/RuntimeUA.js~RuntimeUA#init",
     "method"
   ],
   [
@@ -1446,21 +4470,105 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/runtime/runtimeua.js~runtimeua#loadidpproxy",
+    "class/src/runtime/RuntimeUA.js~RuntimeUA.html#instance-method-loadIdpProxy",
+    "src/runtime/RuntimeUA.js~RuntimeUA#loadIdpProxy",
+    "method"
+  ],
+  [
     "src/runtime/runtimeua.js~runtimeua#loadstub",
     "class/src/runtime/RuntimeUA.js~RuntimeUA.html#instance-method-loadStub",
     "src/runtime/RuntimeUA.js~RuntimeUA#loadStub",
     "method"
   ],
   [
-    "src/runtime/runtimeua.js~runtimeua#registerhyperty",
-    "class/src/runtime/RuntimeUA.js~RuntimeUA.html#instance-method-registerHyperty",
-    "src/runtime/RuntimeUA.js~RuntimeUA#registerHyperty",
-    "method"
+    "src/runtime/runtimeua.js~runtimeua#loader",
+    "class/src/runtime/RuntimeUA.js~RuntimeUA.html#instance-member-loader",
+    "src/runtime/RuntimeUA.js~RuntimeUA#loader",
+    "member"
   ],
   [
-    "src/runtimeua.js",
-    "file/src/runtimeUA.js.html",
-    "src/runtimeUA.js",
+    "src/runtime/runtimeua.js~runtimeua#messagebus",
+    "class/src/runtime/RuntimeUA.js~RuntimeUA.html#instance-member-messageBus",
+    "src/runtime/RuntimeUA.js~RuntimeUA#messageBus",
+    "member"
+  ],
+  [
+    "src/runtime/runtimeua.js~runtimeua#p2p",
+    "class/src/runtime/RuntimeUA.js~RuntimeUA.html#instance-member-p2p",
+    "src/runtime/RuntimeUA.js~RuntimeUA#p2p",
+    "member"
+  ],
+  [
+    "src/runtime/runtimeua.js~runtimeua#persistencemanager",
+    "class/src/runtime/RuntimeUA.js~RuntimeUA.html#instance-member-persistenceManager",
+    "src/runtime/RuntimeUA.js~RuntimeUA#persistenceManager",
+    "member"
+  ],
+  [
+    "src/runtime/runtimeua.js~runtimeua#policyengine",
+    "class/src/runtime/RuntimeUA.js~RuntimeUA.html#instance-member-policyEngine",
+    "src/runtime/RuntimeUA.js~RuntimeUA#policyEngine",
+    "member"
+  ],
+  [
+    "src/runtime/runtimeua.js~runtimeua#registry",
+    "class/src/runtime/RuntimeUA.js~RuntimeUA.html#instance-member-registry",
+    "src/runtime/RuntimeUA.js~RuntimeUA#registry",
+    "member"
+  ],
+  [
+    "src/runtime/runtimeua.js~runtimeua#runtimecapabilities",
+    "class/src/runtime/RuntimeUA.js~RuntimeUA.html#instance-member-runtimeCapabilities",
+    "src/runtime/RuntimeUA.js~RuntimeUA#runtimeCapabilities",
+    "member"
+  ],
+  [
+    "src/runtime/runtimeua.js~runtimeua#runtimecatalogue",
+    "class/src/runtime/RuntimeUA.js~RuntimeUA.html#instance-member-runtimeCatalogue",
+    "src/runtime/RuntimeUA.js~RuntimeUA#runtimeCatalogue",
+    "member"
+  ],
+  [
+    "src/runtime/runtimeua.js~runtimeua#runtimeconfiguration",
+    "class/src/runtime/RuntimeUA.js~RuntimeUA.html#instance-member-runtimeConfiguration",
+    "src/runtime/RuntimeUA.js~RuntimeUA#runtimeConfiguration",
+    "member"
+  ],
+  [
+    "src/runtime/runtimeua.js~runtimeua#runtimefactory",
+    "class/src/runtime/RuntimeUA.js~RuntimeUA.html#instance-member-runtimeFactory",
+    "src/runtime/RuntimeUA.js~RuntimeUA#runtimeFactory",
+    "member"
+  ],
+  [
+    "src/runtime/runtimeua.js~runtimeua#runtimeurl",
+    "class/src/runtime/RuntimeUA.js~RuntimeUA.html#instance-member-runtimeURL",
+    "src/runtime/RuntimeUA.js~RuntimeUA#runtimeURL",
+    "member"
+  ],
+  [
+    "src/runtime/runtimeua.js~runtimeua#storagemanager",
+    "class/src/runtime/RuntimeUA.js~RuntimeUA.html#instance-member-storageManager",
+    "src/runtime/RuntimeUA.js~RuntimeUA#storageManager",
+    "member"
+  ],
+  [
+    "src/runtime/runtimeua.js~runtimeua#synchermanager",
+    "class/src/runtime/RuntimeUA.js~RuntimeUA.html#instance-member-syncherManager",
+    "src/runtime/RuntimeUA.js~RuntimeUA#syncherManager",
+    "member"
+  ],
+  [
+    "src/runtime/runtimeconfiguration.js",
+    "file/src/runtime/runtimeConfiguration.js.html",
+    "src/runtime/runtimeConfiguration.js",
+    "file"
+  ],
+  [
+    "src/runtime/runtimeutils.js",
+    "file/src/runtime/runtimeUtils.js.html",
+    "src/runtime/runtimeUtils.js",
     "file"
   ],
   [
@@ -1488,6 +4596,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/sandbox/sandbox.js~sandbox#matches",
+    "class/src/sandbox/Sandbox.js~Sandbox.html#instance-method-matches",
+    "src/sandbox/Sandbox.js~Sandbox#matches",
+    "method"
+  ],
+  [
     "src/sandbox/sandbox.js~sandbox#removecomponent",
     "class/src/sandbox/Sandbox.js~Sandbox.html#instance-method-removeComponent",
     "src/sandbox/Sandbox.js~Sandbox#removeComponent",
@@ -1512,28 +4626,136 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
-    "src/syncher/objectallocation.js",
-    "file/src/syncher/ObjectAllocation.js.html",
-    "src/syncher/ObjectAllocation.js",
+    "src/syncher/observerobject.js",
+    "file/src/syncher/ObserverObject.js.html",
+    "src/syncher/ObserverObject.js",
     "file"
   ],
   [
-    "src/syncher/objectallocation.js~objectallocation#constructor",
-    "class/src/syncher/ObjectAllocation.js~ObjectAllocation.html#instance-constructor-constructor",
-    "src/syncher/ObjectAllocation.js~ObjectAllocation#constructor",
+    "src/syncher/observerobject.js~observerobject#addsubscription",
+    "class/src/syncher/ObserverObject.js~ObserverObject.html#instance-method-addSubscription",
+    "src/syncher/ObserverObject.js~ObserverObject#addSubscription",
     "method"
   ],
   [
-    "src/syncher/objectallocation.js~objectallocation#create",
-    "class/src/syncher/ObjectAllocation.js~ObjectAllocation.html#instance-method-create",
-    "src/syncher/ObjectAllocation.js~ObjectAllocation#create",
+    "src/syncher/observerobject.js~observerobject#constructor",
+    "class/src/syncher/ObserverObject.js~ObserverObject.html#instance-constructor-constructor",
+    "src/syncher/ObserverObject.js~ObserverObject#constructor",
     "method"
   ],
   [
-    "src/syncher/objectallocation.js~objectallocation#url",
-    "class/src/syncher/ObjectAllocation.js~ObjectAllocation.html#instance-get-url",
-    "src/syncher/ObjectAllocation.js~ObjectAllocation#url",
-    "member"
+    "src/syncher/observerobject.js~observerobject#removesubscription",
+    "class/src/syncher/ObserverObject.js~ObserverObject.html#instance-method-removeSubscription",
+    "src/syncher/ObserverObject.js~ObserverObject#removeSubscription",
+    "method"
+  ],
+  [
+    "src/syncher/reporterobject.js",
+    "file/src/syncher/ReporterObject.js.html",
+    "src/syncher/ReporterObject.js",
+    "file"
+  ],
+  [
+    "src/syncher/reporterobject.js~reporterobject#addchildrens",
+    "class/src/syncher/ReporterObject.js~ReporterObject.html#instance-method-addChildrens",
+    "src/syncher/ReporterObject.js~ReporterObject#addChildrens",
+    "method"
+  ],
+  [
+    "src/syncher/reporterobject.js~reporterobject#constructor",
+    "class/src/syncher/ReporterObject.js~ReporterObject.html#instance-constructor-constructor",
+    "src/syncher/ReporterObject.js~ReporterObject#constructor",
+    "method"
+  ],
+  [
+    "src/syncher/reporterobject.js~reporterobject#delete",
+    "class/src/syncher/ReporterObject.js~ReporterObject.html#instance-method-delete",
+    "src/syncher/ReporterObject.js~ReporterObject#delete",
+    "method"
+  ],
+  [
+    "src/syncher/reporterobject.js~reporterobject#forwardsubscribe",
+    "class/src/syncher/ReporterObject.js~ReporterObject.html#instance-method-forwardSubscribe",
+    "src/syncher/ReporterObject.js~ReporterObject#forwardSubscribe",
+    "method"
+  ],
+  [
+    "src/syncher/reporterobject.js~reporterobject#forwardunsubscribe",
+    "class/src/syncher/ReporterObject.js~ReporterObject.html#instance-method-forwardUnSubscribe",
+    "src/syncher/ReporterObject.js~ReporterObject#forwardUnSubscribe",
+    "method"
+  ],
+  [
+    "src/syncher/storedataobjects.js",
+    "file/src/syncher/StoreDataObjects.js.html",
+    "src/syncher/StoreDataObjects.js",
+    "file"
+  ],
+  [
+    "src/syncher/storedataobjects.js~storedataobjects#constructor",
+    "class/src/syncher/StoreDataObjects.js~StoreDataObjects.html#instance-constructor-constructor",
+    "src/syncher/StoreDataObjects.js~StoreDataObjects#constructor",
+    "method"
+  ],
+  [
+    "src/syncher/storedataobjects.js~storedataobjects#delete",
+    "class/src/syncher/StoreDataObjects.js~StoreDataObjects.html#instance-method-delete",
+    "src/syncher/StoreDataObjects.js~StoreDataObjects#delete",
+    "method"
+  ],
+  [
+    "src/syncher/storedataobjects.js~storedataobjects#deleteresource",
+    "class/src/syncher/StoreDataObjects.js~StoreDataObjects.html#instance-method-deleteResource",
+    "src/syncher/StoreDataObjects.js~StoreDataObjects#deleteResource",
+    "method"
+  ],
+  [
+    "src/syncher/storedataobjects.js~storedataobjects#get",
+    "class/src/syncher/StoreDataObjects.js~StoreDataObjects.html#instance-method-get",
+    "src/syncher/StoreDataObjects.js~StoreDataObjects#get",
+    "method"
+  ],
+  [
+    "src/syncher/storedataobjects.js~storedataobjects#getall",
+    "class/src/syncher/StoreDataObjects.js~StoreDataObjects.html#instance-method-getAll",
+    "src/syncher/StoreDataObjects.js~StoreDataObjects#getAll",
+    "method"
+  ],
+  [
+    "src/syncher/storedataobjects.js~storedataobjects#getresourcesbycriteria",
+    "class/src/syncher/StoreDataObjects.js~StoreDataObjects.html#instance-method-getResourcesByCriteria",
+    "src/syncher/StoreDataObjects.js~StoreDataObjects#getResourcesByCriteria",
+    "method"
+  ],
+  [
+    "src/syncher/storedataobjects.js~storedataobjects#set",
+    "class/src/syncher/StoreDataObjects.js~StoreDataObjects.html#instance-method-set",
+    "src/syncher/StoreDataObjects.js~StoreDataObjects#set",
+    "method"
+  ],
+  [
+    "src/syncher/storedataobjects.js~storedataobjects#update",
+    "class/src/syncher/StoreDataObjects.js~StoreDataObjects.html#instance-method-update",
+    "src/syncher/StoreDataObjects.js~StoreDataObjects#update",
+    "method"
+  ],
+  [
+    "src/syncher/storedataobjects.js~storedataobjects#updatedata",
+    "class/src/syncher/StoreDataObjects.js~StoreDataObjects.html#instance-method-updateData",
+    "src/syncher/StoreDataObjects.js~StoreDataObjects#updateData",
+    "method"
+  ],
+  [
+    "src/syncher/subscription.js",
+    "file/src/syncher/Subscription.js.html",
+    "src/syncher/Subscription.js",
+    "file"
+  ],
+  [
+    "src/syncher/subscription.js~subscription#constructor",
+    "class/src/syncher/Subscription.js~Subscription.html#instance-constructor-constructor",
+    "src/syncher/Subscription.js~Subscription#constructor",
+    "method"
   ],
   [
     "src/syncher/synchermanager.js",
@@ -1572,6 +4794,18 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/utils/schemavalidation.js",
+    "file/src/utils/schemaValidation.js.html",
+    "src/utils/schemaValidation.js",
+    "file"
+  ],
+  [
+    "src/utils/tv4.js",
+    "file/src/utils/tv4.js.html",
+    "src/utils/tv4.js",
+    "file"
+  ],
+  [
     "src/utils/utils.js",
     "file/src/utils/utils.js.html",
     "src/utils/utils.js",
@@ -1582,5 +4816,95 @@ window.esdocSearchIndex = [
     "typedef/index.html#static-typedef-divideURL",
     "src/utils/utils.js~divideURL",
     "typedef"
+  ],
+  [
+    "test/addressallocation.spec.js",
+    "test-file/test/AddressAllocation.spec.js.html",
+    "test/AddressAllocation.spec.js",
+    "testFile"
+  ],
+  [
+    "test/descriptors.spec.js",
+    "test-file/test/Descriptors.spec.js.html",
+    "test/Descriptors.spec.js",
+    "testFile"
+  ],
+  [
+    "test/graphconnector.spec.js",
+    "test-file/test/GraphConnector.spec.js.html",
+    "test/GraphConnector.spec.js",
+    "testFile"
+  ],
+  [
+    "test/identitymodule.spec.js",
+    "test-file/test/IdentityModule.spec.js.html",
+    "test/IdentityModule.spec.js",
+    "testFile"
+  ],
+  [
+    "test/messagebus.spec.js",
+    "test-file/test/MessageBus.spec.js.html",
+    "test/MessageBus.spec.js",
+    "testFile"
+  ],
+  [
+    "test/minibus.spec.js",
+    "test-file/test/MiniBus.spec.js.html",
+    "test/MiniBus.spec.js",
+    "testFile"
+  ],
+  [
+    "test/persistencemanager.spec.js",
+    "test-file/test/PersistenceManager.spec.js.html",
+    "test/PersistenceManager.spec.js",
+    "testFile"
+  ],
+  [
+    "test/pipeline.spec.js",
+    "test-file/test/Pipeline.spec.js.html",
+    "test/Pipeline.spec.js",
+    "testFile"
+  ],
+  [
+    "test/policyengine.spec.js",
+    "test-file/test/PolicyEngine.spec.js.html",
+    "test/PolicyEngine.spec.js",
+    "testFile"
+  ],
+  [
+    "test/registry.spec.js",
+    "test-file/test/Registry.spec.js.html",
+    "test/Registry.spec.js",
+    "testFile"
+  ],
+  [
+    "test/runtimeua.spec.js",
+    "test-file/test/RuntimeUA.spec.js.html",
+    "test/RuntimeUA.spec.js",
+    "testFile"
+  ],
+  [
+    "test/sandbox.spec.js",
+    "test-file/test/Sandbox.spec.js.html",
+    "test/Sandbox.spec.js",
+    "testFile"
+  ],
+  [
+    "test/storedataobjects.spec.js",
+    "test-file/test/StoreDataObjects.spec.js.html",
+    "test/StoreDataObjects.spec.js",
+    "testFile"
+  ],
+  [
+    "test/synchermanager.spec.js",
+    "test-file/test/SyncherManager.spec.js.html",
+    "test/SyncherManager.spec.js",
+    "testFile"
+  ],
+  [
+    "test/utils.spec.js",
+    "test-file/test/utils.spec.js.html",
+    "test/utils.spec.js",
+    "testFile"
   ]
 ]
