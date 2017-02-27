@@ -37,7 +37,7 @@ import Descriptors from './Descriptors';
 import { runtimeConfiguration } from './runtimeConfiguration';
 import { runtimeUtils } from './runtimeUtils';
 
-// import GraphConnector from '../graphconnector/GraphConnector';
+import GraphConnector from '../graphconnector/GraphConnector';
 
 import SyncherManager from '../syncher/SyncherManager';
 import RuntimeCoreCtx from '../policy/context/RuntimeCoreCtx';
@@ -262,10 +262,9 @@ class RuntimeUA {
             });
           }
         ];
-	
-	// Instantiate the Graph Connector
-	this.graphConnector = new GraphConnector(this.runtimeURL, this.messageBus, this.storageManager);
-	
+
+        // Instantiate the Graph Connector
+        this.graphConnector = new GraphConnector(this.runtimeURL, this.messageBus, this.storageManager);
 
         // Add to App Sandbox the listener;
         appSandbox.addListener('*', (msg) => {
