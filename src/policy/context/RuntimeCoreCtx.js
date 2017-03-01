@@ -62,10 +62,12 @@ class RuntimeCoreCtx extends ReThinkCtx {
             resolve(message);
           }, (error) => {
             reject(error);
+
             /*});
             } else {
               resolve(message);
             }*/
+
           });
         } else {
           resolve(message);
@@ -250,13 +252,15 @@ class RuntimeCoreCtx extends ReThinkCtx {
 
     let _from = message.from;
 
-    if (message.body && message.body.hasOwnProperty('source'))
+    if (message.body && message.body.hasOwnProperty('source')) {
       _from = message.body.source;
+    }
 
     // Signalling Messages between P2P Stubs don't have Identities. FFS
 
-    if (_from.includes('/p2prequester/') || _from.includes('/p2phandler/'))
+    if (_from.includes('/p2prequester/') || _from.includes('/p2phandler/')) {
       return false;
+    }
 
     return schemasToIgnore.indexOf(fromSchema) === -1;
   }
@@ -271,7 +275,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
 
     if (message.body.source !== undefined) {
       return this.idModule.getToken(message.body.source, message.to);
-    } else
+    } else {
 
 /*    if (message.type === 'update') {
       return this.idModule.getToken(message.body.source);
@@ -282,8 +286,11 @@ class RuntimeCoreCtx extends ReThinkCtx {
     }*/
 
 //    if (divideURL(message.from).type === 'hyperty') {
+
       return this.idModule.getToken(message.from, message.to);
-/*    } else {
+    }
+
+/*    else {
       return this.idModule.getToken(this.getURL(message.from));
     }*/
   }

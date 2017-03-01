@@ -153,6 +153,11 @@ class PEP {
       //TODO: the syncher and syncher manager not following the correct spec;
       console.info('[PEP - isIncomingMessage] - message.body.subscriber: ', message.body.subscriber);
       from = message.body.subscriber;
+    }  else if (message.body.hasOwnProperty('reporter') && message.body.reporter) {
+      //TODO: this subscriber validation should not exist, because is outdated
+      //TODO: the syncher and syncher manager not following the correct spec;
+      console.info('[PEP - isIncomingMessage] - message.body.reporter: ', message.body.reporter);
+      from = message.body.reporter;
     } else {
       console.info('[PEP - isIncomingMessage] - message.from ', message.from);
       from = message.from;
