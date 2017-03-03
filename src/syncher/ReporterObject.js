@@ -42,7 +42,7 @@ class ReporterObject {
     _this._changeListener = _this._bus.addListener(changeURL, (msg) => {
       //TODO: what todo here? Save changes?
       if (msg.body.attribute) {
-        _this._parent._storeDataObjects.updateData(_this._url, 'data', msg.body.attribute, msg.body.value, true);
+        _this._parent._storeDataObjects.saveData(true, _this._url, msg.body.attribute, msg.body.value);
       }
       console.log('SyncherManager-' + changeURL + '-RCV: ', msg);
     });
@@ -266,10 +266,12 @@ class ReporterObject {
         let userURL;
         if (msg.body.identity && msg.body.identity.userProfile.userURL) {
           userURL = msg.body.identity.userProfile.userURL;
-          _this._parent._storeDataObjects.update(_this._url, 'subscriberUsers', userURL);
+          _this._parent._storeDataObjects.update(true, _this._url, 'subscriberUsers', userURL);
         }
 
-        _this._parent._storeDataObjects.update(_this._url, 'subscriptions', hypertyURL);
+        _this._parent._storeDataObjects.update(true, _this._url, 'subscriptions', hypertyURL);
+
+        reply.body.owner = _this._owner;
 
         //FLOW-OUT: subscription response sent (forward from internal Hyperty)
         _this._bus.postMessage({

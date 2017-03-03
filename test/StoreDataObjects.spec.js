@@ -1,9 +1,7 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 
-import {generateGUID} from '../src/utils/utils';
-
-import StoreDataObjects from '../src/syncher/StoreDataObjects';
+import StoreDataObjects from '../src//store-objects/StoreDataObjects';
 import { runtimeFactory } from './resources/runtimeFactory';
 
 chai.config.truncateThreshold = 0;
@@ -18,6 +16,7 @@ describe('StoreDataObjects', function() {
   let runtimeURL = 'hyperty-runtime://fake-runtime';
   let syncherManagerURL = runtimeURL + '/sm';
 
+  let owner = 'hyperty://<domain>/id-owner';
   let resource = 'resource://obj1';
   let userURL = 'user://<domain>/<my-name>';
   let schema = 'schema://fake-schema-url';
@@ -26,7 +25,7 @@ describe('StoreDataObjects', function() {
   before(() => {
 
     storageManager = runtimeFactory.storageManager();
-    storeDataObjects = new StoreDataObjects(storageManager);
+    storeDataObjects = new StoreDataObjects(storageManager, {});
 
   });
 
@@ -42,10 +41,31 @@ describe('StoreDataObjects', function() {
     let owner = 'hyperty://<domain>/id-3';
     let subscription = 'hyperty://<domain>/id-2';
 
-    storeDataObjects.set(resource, isReporter, schema, status, data, owner);
-    storeDataObjects.update(resource, 'subscriptions', subscription, isReporter);
+    expect(storeDataObjects.set(resource, isReporter, schema, status, owner))
+    .to.have.keys('isReporter', 'owner', 'resource', 'schema', 'status', 'subscriptions', 'subscriberUsers');
 
-    expect(storeDataObjects._storeDataObject.reporters[resource]).have.any.keys('resource', 'isReporter', 'schema');
+    expect(storeDataObjects.saveData(true, resource, null, data)).to.be.deep.equal({
+      isReporter: isReporter,
+      resource: resource,
+      subscriptions: [],
+      schema: schema,
+      status: status,
+      owner: owner,
+      subscriberUsers: [],
+      data: data
+    });
+
+    expect(storeDataObjects.update(isReporter, resource, 'subscriptions', subscription)).to.be.deep.equal({
+      isReporter: isReporter,
+      resource: resource,
+      subscriptions: [subscription],
+      schema: schema,
+      status: status,
+      owner: owner,
+      subscriberUsers: [],
+      data: data
+    });
+
     done();
 
   });
@@ -68,10 +88,34 @@ describe('StoreDataObjects', function() {
       let type = isReporter ? 'reporters' : 'observers';
 
       // resource, isReporter, schema, status, data, subscription, children, childrenResources, subscriberUser
-      storeDataObjects.set(resource, isReporter, randomSchema, status, data, owner);
-      storeDataObjects.update(resource, 'subscriptions', subscription, isReporter);
+      expect(storeDataObjects.set(resource, isReporter, randomSchema, status, owner)).to.be.deep.equal({
+        resource: resource,
+        isReporter: isReporter,
+        subscriptions: [],
+        subscriberUsers: [],
+        schema: randomSchema,
+        status: 'on',
+        owner: owner
+      });
 
-      expect(storeDataObjects._storeDataObject[type][resource]).have.any.keys('resource', 'isReporter', 'schema');
+      storeDataObjects.saveData(isReporter, resource, 'participants.1', {name: 'vitor', last: 'silva'});
+
+      expect(storeDataObjects.update(isReporter, resource, 'subscriptions', subscription)).to.be.deep.equal({
+        resource: resource,
+        isReporter: isReporter,
+        subscriptions: [subscription],
+        subscriberUsers: [],
+        schema: randomSchema,
+        status: 'on',
+        owner: owner,
+        data: {
+          participants: {
+            1: {
+              name: 'vitor', last: 'silva'
+            }
+          }
+        }
+      });
 
       if (i === num - 1) {
         console.log('DONE', i);
@@ -99,9 +143,15 @@ describe('StoreDataObjects', function() {
       let type = isReporter ? 'reporters' : 'observers';
 
       // resource, isReporter, schema, status, data, subscription, children, childrenResources, subscriberUser
-      storeDataObjects.set(resource, isReporter, randomSchema, status, data, subscription);
-
-      expect(storeDataObjects._storeDataObject[type][resource]).have.any.keys('resource', 'isReporter', 'schema');
+      expect(storeDataObjects.set(resource, isReporter, randomSchema, status, owner, subscription)).to.be.deep.equal({
+        resource: resource,
+        isReporter: isReporter,
+        subscriptions: [subscription],
+        subscriberUsers: [],
+        schema: randomSchema,
+        status: 'on',
+        owner: owner
+      });
 
       if (i === num - 1) {
         done();
@@ -116,23 +166,20 @@ describe('StoreDataObjects', function() {
     let isReporter = true;
     let type = isReporter ? 'reporters' : 'observers';
 
-    storeDataObjects.update(resource, 'subscriptions', subscriptions[0], isReporter);
-    storeDataObjects.update(resource, 'subscriptions', subscriptions[1], isReporter);
+    expect(storeDataObjects.update(isReporter, resource, 'subscriptions', subscriptions[0]).subscriptions).to.contains(subscriptions[0], subscriptions[1]);
 
-    console.log('AQUI: ', storeDataObjects._storeDataObject[type][resource]);
+    // .to.have.deep.property('subscriptions', ['hyperty://<domain>/id-4', 'hyperty://<domain>/id-3']);
 
-    expect(storeDataObjects._storeDataObject[type][resource].subscriptions).to.contains(subscriptions[0], subscriptions[1]);
+    // expect(storeDataObjects._storeDataObject[type][resource].subscriptions).to.contains(subscriptions[0], subscriptions[1]);
     done();
   });
 
   it('should update a resource with new Subscriber Users', (done) => {
     let resource = '<scheme>://<domain>/id-2';
     let isReporter = true;
-    storeDataObjects.update(resource, 'subscriberUsers', userURL, isReporter);
-
     let type = isReporter ? 'reporters' : 'observers';
 
-    expect(storeDataObjects._storeDataObject[type][resource].subscriberUsers).to.contains(userURL);
+    expect(storeDataObjects.update(isReporter, resource, 'subscriberUsers', userURL).subscriberUsers).to.contains(userURL);
     done();
   });
 
@@ -157,7 +204,7 @@ describe('StoreDataObjects', function() {
 
     expect(storeDataObjects.getResourcesByCriteria(msg, true))
     .to.be.fulfilled
-    .and.eventually.to.include.keys('<scheme>://<domain>/id-3', 'resource://obj1')
+    .and.eventually.to.include.keys('<scheme>://<domain>/id-2')
     .and.notify(done);
 
   });
@@ -224,12 +271,22 @@ describe('StoreDataObjects', function() {
   it('should delete a specific value from specific resource', (done) => {
     let resource = '<scheme>://<domain>/id-3';
     let subscription = 'hyperty://<domain>/id-1';
-    expect(storeDataObjects.delete(resource, 'subscriptions', subscription)).to.be.fulfilled.and.notify(done);
+    storeDataObjects.delete(resource, 'subscriptions', subscription)
+
+    done();
+  });
+
+  it('should not delete a resource', (done) => {
+    let resource = '<scheme>://<domain>/id-8';
+    expect(storeDataObjects.deleteResource(resource)).to.be.fulfilled
+    .and.eventually.to.be.eq('The ' + resource + ' dosen\t exists, nothing was deleted').and.notify(done);
   });
 
   it('should delete a resource', (done) => {
-    let resource = '<scheme>://<domain>/id-3';
-    expect(storeDataObjects.deleteResource(resource)).to.be.fulfilled.and.notify(done);
+    let resource = '<scheme>://<domain>/id-1';
+    expect(storeDataObjects.deleteResource(resource))
+    .to.be.fulfilled
+    .and.eventually.to.be.undefined.and.notify(done);
   });
 
 });
