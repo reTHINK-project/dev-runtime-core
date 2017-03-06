@@ -39,7 +39,7 @@ import { runtimeUtils } from './runtimeUtils';
 
 // import GraphConnector from '../graphconnector/GraphConnector';
 
-import StoreDataObjects from '../store-objects/StoreDataObjects';
+import DataObjectsStorage from '../store-objects/DataObjectsStorage';
 import SyncherManager from '../syncher/SyncherManager';
 import RuntimeCoreCtx from '../policy/context/RuntimeCoreCtx';
 
@@ -138,7 +138,7 @@ class RuntimeUA {
           this.capabilities = results[1];
           Object.assign(runtimeUtils.runtimeCapabilities.constraints, results[1]);
 
-          this._storeDataObjects = new StoreDataObjects(this.storageManager, results[2] || {});
+          this._dataObjectsStorage = new DataObjectsStorage(this.storageManager, results[2] || {});
 
           return this._loadComponents();
         }).then((status) => {
@@ -285,7 +285,7 @@ class RuntimeUA {
         this.runtimeFactory.messageBus = this.messageBus;
 
         // Instanciate the SyncherManager;
-        this.syncherManager = new SyncherManager(this.runtimeURL, this.messageBus, this.registry, this.runtimeCatalogue, this.storageManager, null, this._storeDataObjects);
+        this.syncherManager = new SyncherManager(this.runtimeURL, this.messageBus, this.registry, this.runtimeCatalogue, this.storageManager, null, this._dataObjectsStorage);
 
         // Set into loader the needed components;
         this.loader.runtimeURL = this.runtimeURL;

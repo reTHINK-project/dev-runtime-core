@@ -1,7 +1,7 @@
 import { runtimeFactory } from './resources/runtimeFactory';
 import {Syncher, DataObjectReporter, DataObjectObserver} from 'service-framework/dist/Syncher';
 import SyncherManager from '../src/syncher/SyncherManager';
-import StoreDataObjects from '../src//store-objects/StoreDataObjects';
+import DataObjectsStorage from '../src//store-objects/DataObjectsStorage';
 import MessageBus from '../src/bus/MessageBus';
 
 import PEP from '../src/policy/PEP';
@@ -17,7 +17,7 @@ chai.use(chaiAsPromised);
 
 describe('SyncherManager', function() {
   let storageManager = runtimeFactory.storageManager();
-  let storeDataObjects = new StoreDataObjects(storageManager, {});
+  let dataObjectsStorage = new DataObjectsStorage(storageManager, {});
 
   let schemaURL = 'schema://fake-schema-url';
   let runtimeURL = 'hyperty-runtime://fake-runtime';
@@ -164,7 +164,7 @@ describe('SyncherManager', function() {
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, storeDataObjects);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
@@ -190,7 +190,7 @@ describe('SyncherManager', function() {
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, storeDataObjects);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
@@ -244,7 +244,7 @@ describe('SyncherManager', function() {
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, storeDataObjects);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.resumeObservers({}).then((doo) => {
@@ -267,7 +267,7 @@ describe('SyncherManager', function() {
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, storeDataObjects);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage);
 
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
 
@@ -714,7 +714,7 @@ describe('SyncherManager', function() {
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, storeDataObjects);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage);
 
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
     sync1.create(schemaURL, [], initialData).then((dor) => {
@@ -733,7 +733,7 @@ describe('SyncherManager', function() {
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, storeDataObjects);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
@@ -777,7 +777,7 @@ describe('SyncherManager', function() {
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, storeDataObjects);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
@@ -834,7 +834,7 @@ describe('SyncherManager', function() {
       }
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, storeDataObjects);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
@@ -890,7 +890,7 @@ describe('SyncherManager', function() {
       }
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, storeDataObjects);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
@@ -956,7 +956,7 @@ describe('SyncherManager', function() {
         }
       };
 
-      new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, storeDataObjects);
+      new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage);
 
       let hypertyURL3 = 'hyperty://h1.domain/' + guid();
       hyperties.h3 = hypertyURL3;
@@ -1024,7 +1024,7 @@ describe('SyncherManager', function() {
         }
       };
 
-      new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, storeDataObjects);
+      new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage);
 
       let sync3 = new Syncher(hyperties.h3, bus, { runtimeURL: runtimeURL });
       sync3.onNotification((notifyEvent) => {

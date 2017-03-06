@@ -1,6 +1,6 @@
 import { assign, deepClone } from '../utils/utils';
 
-class StoreDataObjects {
+class DataObjectsStorage {
 
   constructor(storageManager, storedDataObjects) {
     if (!storageManager) throw new Error('[Store Data Objects] - Needs the storageManager component');
@@ -465,4 +465,4 @@ class StoreDataObjects {
 
 }
 
-export default StoreDataObjects;
+export default DataObjectsStorage;

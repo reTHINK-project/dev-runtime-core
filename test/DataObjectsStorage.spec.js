@@ -1,7 +1,7 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 
-import StoreDataObjects from '../src//store-objects/StoreDataObjects';
+import DataObjectsStorage from '../src/store-objects/DataObjectsStorage';
 import { runtimeFactory } from './resources/runtimeFactory';
 
 chai.config.truncateThreshold = 0;
@@ -9,10 +9,10 @@ chai.config.truncateThreshold = 0;
 let expect = chai.expect;
 chai.use(chaiAsPromised);
 
-describe('StoreDataObjects', function() {
+describe('dataObjectsStorage', function() {
 
   let storageManager;
-  let storeDataObjects;
+  let dataObjectsStorage;
   let runtimeURL = 'hyperty-runtime://fake-runtime';
   let syncherManagerURL = runtimeURL + '/sm';
 
@@ -25,7 +25,7 @@ describe('StoreDataObjects', function() {
   before(() => {
 
     storageManager = runtimeFactory.storageManager();
-    storeDataObjects = new StoreDataObjects(storageManager, {});
+    dataObjectsStorage = new DataObjectsStorage(storageManager, {});
 
   });
 
@@ -41,10 +41,10 @@ describe('StoreDataObjects', function() {
     let owner = 'hyperty://<domain>/id-3';
     let subscription = 'hyperty://<domain>/id-2';
 
-    expect(storeDataObjects.set(resource, isReporter, schema, status, owner))
+    expect(dataObjectsStorage.set(resource, isReporter, schema, status, owner))
     .to.have.keys('isReporter', 'owner', 'resource', 'schema', 'status', 'subscriptions', 'subscriberUsers');
 
-    expect(storeDataObjects.saveData(true, resource, null, data)).to.be.deep.equal({
+    expect(dataObjectsStorage.saveData(true, resource, null, data)).to.be.deep.equal({
       isReporter: isReporter,
       resource: resource,
       subscriptions: [],
@@ -55,7 +55,7 @@ describe('StoreDataObjects', function() {
       data: data
     });
 
-    expect(storeDataObjects.update(isReporter, resource, 'subscriptions', subscription)).to.be.deep.equal({
+    expect(dataObjectsStorage.update(isReporter, resource, 'subscriptions', subscription)).to.be.deep.equal({
       isReporter: isReporter,
       resource: resource,
       subscriptions: [subscription],
@@ -88,7 +88,7 @@ describe('StoreDataObjects', function() {
       let type = isReporter ? 'reporters' : 'observers';
 
       // resource, isReporter, schema, status, data, subscription, children, childrenResources, subscriberUser
-      expect(storeDataObjects.set(resource, isReporter, randomSchema, status, owner)).to.be.deep.equal({
+      expect(dataObjectsStorage.set(resource, isReporter, randomSchema, status, owner)).to.be.deep.equal({
         resource: resource,
         isReporter: isReporter,
         subscriptions: [],
@@ -98,9 +98,9 @@ describe('StoreDataObjects', function() {
         owner: owner
       });
 
-      storeDataObjects.saveData(isReporter, resource, 'participants.1', {name: 'vitor', last: 'silva'});
+      dataObjectsStorage.saveData(isReporter, resource, 'participants.1', {name: 'vitor', last: 'silva'});
 
-      expect(storeDataObjects.update(isReporter, resource, 'subscriptions', subscription)).to.be.deep.equal({
+      expect(dataObjectsStorage.update(isReporter, resource, 'subscriptions', subscription)).to.be.deep.equal({
         resource: resource,
         isReporter: isReporter,
         subscriptions: [subscription],
@@ -143,7 +143,7 @@ describe('StoreDataObjects', function() {
       let type = isReporter ? 'reporters' : 'observers';
 
       // resource, isReporter, schema, status, data, subscription, children, childrenResources, subscriberUser
-      expect(storeDataObjects.set(resource, isReporter, randomSchema, status, owner, subscription)).to.be.deep.equal({
+      expect(dataObjectsStorage.set(resource, isReporter, randomSchema, status, owner, subscription)).to.be.deep.equal({
         resource: resource,
         isReporter: isReporter,
         subscriptions: [subscription],
@@ -166,11 +166,11 @@ describe('StoreDataObjects', function() {
     let isReporter = true;
     let type = isReporter ? 'reporters' : 'observers';
 
-    expect(storeDataObjects.update(isReporter, resource, 'subscriptions', subscriptions[0]).subscriptions).to.contains(subscriptions[0], subscriptions[1]);
+    expect(dataObjectsStorage.update(isReporter, resource, 'subscriptions', subscriptions[0]).subscriptions).to.contains(subscriptions[0], subscriptions[1]);
 
     // .to.have.deep.property('subscriptions', ['hyperty://<domain>/id-4', 'hyperty://<domain>/id-3']);
 
-    // expect(storeDataObjects._storeDataObject[type][resource].subscriptions).to.contains(subscriptions[0], subscriptions[1]);
+    // expect(dataObjectsStorage._storeDataObject[type][resource].subscriptions).to.contains(subscriptions[0], subscriptions[1]);
     done();
   });
 
@@ -179,18 +179,18 @@ describe('StoreDataObjects', function() {
     let isReporter = true;
     let type = isReporter ? 'reporters' : 'observers';
 
-    expect(storeDataObjects.update(isReporter, resource, 'subscriberUsers', userURL).subscriberUsers).to.contains(userURL);
+    expect(dataObjectsStorage.update(isReporter, resource, 'subscriberUsers', userURL).subscriberUsers).to.contains(userURL);
     done();
   });
 
   // it('should update the data resource', (done) => {
   //   let resource = '<scheme>://<domain>/id-2';
   //   let isReporter = true;
-  //   storeDataObjects.updateData(resource, 'subscriberUsers', userURL, isReporter);
+  //   dataObjectsStorage.updateData(resource, 'subscriberUsers', userURL, isReporter);
   //
   //   let type = isReporter ? 'reporters' : 'observers';
   //
-  //   expect(storeDataObjects._storeDataObject[type][resource].subscriberUsers).to.contains(userURL);
+  //   expect(dataObjectsStorage._storeDataObject[type][resource].subscriberUsers).to.contains(userURL);
   //   done();
   // });
 
@@ -202,7 +202,7 @@ describe('StoreDataObjects', function() {
       to: syncherManagerURL
     };
 
-    expect(storeDataObjects.getResourcesByCriteria(msg, true))
+    expect(dataObjectsStorage.getResourcesByCriteria(msg, true))
     .to.be.fulfilled
     .and.eventually.to.include.keys('<scheme>://<domain>/id-2')
     .and.notify(done);
@@ -221,7 +221,7 @@ describe('StoreDataObjects', function() {
 
     };
 
-    expect(storeDataObjects.getResourcesByCriteria(msg, true))
+    expect(dataObjectsStorage.getResourcesByCriteria(msg, true))
     .to.be.fulfilled
     .and.eventually.to.include.keys('<scheme>://<domain>/id-2')
     .and.notify(done);
@@ -240,7 +240,7 @@ describe('StoreDataObjects', function() {
 
     };
 
-    expect(storeDataObjects.getResourcesByCriteria(msg, true))
+    expect(dataObjectsStorage.getResourcesByCriteria(msg, true))
     .to.be.fulfilled
     .and.eventually.to.include.keys(resource)
     .and.notify(done);
@@ -261,7 +261,7 @@ describe('StoreDataObjects', function() {
 
     };
 
-    expect(storeDataObjects.getResourcesByCriteria(msg, true))
+    expect(dataObjectsStorage.getResourcesByCriteria(msg, true))
     .to.be.fulfilled
     .and.eventually.to.include.keys(resource)
     .and.notify(done);
@@ -271,20 +271,20 @@ describe('StoreDataObjects', function() {
   it('should delete a specific value from specific resource', (done) => {
     let resource = '<scheme>://<domain>/id-3';
     let subscription = 'hyperty://<domain>/id-1';
-    storeDataObjects.delete(resource, 'subscriptions', subscription)
+    dataObjectsStorage.delete(resource, 'subscriptions', subscription)
 
     done();
   });
 
   it('should not delete a resource', (done) => {
     let resource = '<scheme>://<domain>/id-8';
-    expect(storeDataObjects.deleteResource(resource)).to.be.fulfilled
+    expect(dataObjectsStorage.deleteResource(resource)).to.be.fulfilled
     .and.eventually.to.be.eq('The ' + resource + ' dosen\t exists, nothing was deleted').and.notify(done);
   });
 
   it('should delete a resource', (done) => {
     let resource = '<scheme>://<domain>/id-1';
-    expect(storeDataObjects.deleteResource(resource))
+    expect(dataObjectsStorage.deleteResource(resource))
     .to.be.fulfilled
     .and.eventually.to.be.undefined.and.notify(done);
   });

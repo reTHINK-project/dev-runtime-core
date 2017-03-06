@@ -66,7 +66,7 @@ class SyncherManager {
     _this._reporters = {};
     _this._observers = {};
 
-    _this._storeDataObjects = storeDataObjects;
+    _this._dataObjectsStorage = storeDataObjects;
 
     //TODO: this should not be hardcoded!
     _this._domain = divideURL(runtimeURL).domain;
@@ -108,7 +108,7 @@ class SyncherManager {
 
       // If from the hyperty side, call the resumeReporter we will have resume = true'
       // so we will create an resumed object and will try to resume the object previously saved;
-      this._storeDataObjects.getResourcesByCriteria(msg, true).then((result) => {
+      this._dataObjectsStorage.getResourcesByCriteria(msg, true).then((result) => {
 
         console.info('[SyncherManager - Create Resumed Object]', msg, result);
 
@@ -209,10 +209,10 @@ class SyncherManager {
           }
 
           // Store the dataObject information
-          _this._storeDataObjects.set(objURL, true, msg.body.schema, 'on', owner, null, null, childrens, userURL);
+          _this._dataObjectsStorage.set(objURL, true, msg.body.schema, 'on', owner, null, null, childrens, userURL);
 
           if (msg.body.hasOwnProperty('store') && msg.body.store) {
-            _this._storeDataObjects.saveData(true, objURL, null, msg.body.value);
+            _this._dataObjectsStorage.saveData(true, objURL, null, msg.body.value);
           }
 
           reporter.forwardSubscribe([objURL, subscriptionURL]).then(() => {
@@ -338,7 +338,7 @@ class SyncherManager {
       //TODO: is there any policy verification before delete?
       object.delete();
 
-      this._storeDataObjects.deleteResource(objURL);
+      this._dataObjectsStorage.deleteResource(objURL);
 
       //TODO: unregister object?
       _this._bus.postMessage({
@@ -351,7 +351,7 @@ class SyncherManager {
   //FLOW-IN: message received from local Syncher -> subscribe
   _onLocalSubscribe(msg) {
 
-    this._storeDataObjects.getResourcesByCriteria(msg, false).then((result) => {
+    this._dataObjectsStorage.getResourcesByCriteria(msg, false).then((result) => {
 
       console.log('[SyncherManager - Subscribe] - filter result', result);
 
@@ -449,10 +449,10 @@ class SyncherManager {
                 userURL = msg.body.identity.userProfile.userURL;
               }
 
-              _this._storeDataObjects.set(objURL, false, msg.body.schema, 'on', reply.body.owner, hypertyURL, null, childrens, userURL);
+              _this._dataObjectsStorage.set(objURL, false, msg.body.schema, 'on', reply.body.owner, hypertyURL, null, childrens, userURL);
 
               if (msg.body.hasOwnProperty('store') && msg.body.store) {
-                _this._storeDataObjects.saveData(false, objURL, null, reply.body.value);
+                _this._dataObjectsStorage.saveData(false, objURL, null, reply.body.value);
               }
 
               //register new hyperty subscription
@@ -570,7 +570,7 @@ class SyncherManager {
         body: { code: 200 }
       });
 
-      this._storeDataObjects.delete(true, objURL, 'subscriptions', hypertyURL);
+      this._dataObjectsStorage.delete(true, objURL, 'subscriptions', hypertyURL);
 
       //TODO: remove Object if no more subscription?
       //delete _this._observers[objURL];

@@ -42,7 +42,7 @@ class ReporterObject {
     _this._changeListener = _this._bus.addListener(changeURL, (msg) => {
       //TODO: what todo here? Save changes?
       if (msg.body.attribute) {
-        _this._parent._storeDataObjects.saveData(true, _this._url, msg.body.attribute, msg.body.value);
+        _this._parent._dataObjectsStorage.saveData(true, _this._url, msg.body.attribute, msg.body.value);
       }
       console.log('SyncherManager-' + changeURL + '-RCV: ', msg);
     });
@@ -266,10 +266,10 @@ class ReporterObject {
         let userURL;
         if (msg.body.identity && msg.body.identity.userProfile.userURL) {
           userURL = msg.body.identity.userProfile.userURL;
-          _this._parent._storeDataObjects.update(true, _this._url, 'subscriberUsers', userURL);
+          _this._parent._dataObjectsStorage.update(true, _this._url, 'subscriberUsers', userURL);
         }
 
-        _this._parent._storeDataObjects.update(true, _this._url, 'subscriptions', hypertyURL);
+        _this._parent._dataObjectsStorage.update(true, _this._url, 'subscriptions', hypertyURL);
 
         reply.body.owner = _this._owner;
 
