@@ -79,6 +79,8 @@ class IdentityModule {
 
     _this._loadIdentities();
 
+    _this.count = 0;
+
   }
 
   /**
@@ -147,6 +149,7 @@ class IdentityModule {
     throw 'identity not found';
   }
 
+
   _loadIdentities() {
     let _this = this;
     return new Promise((resolve) => {
@@ -209,7 +212,16 @@ class IdentityModule {
               console.log('[Identity.IdentityModule.getToken] getIdToken', identity);
               return resolve(identity);
             }).catch(function(error) {
-              console.error('[Identity.IdentityModule.getToken] error on getToken', error);
+              //console.error('[Identity.IdentityModule.getToken] error on getToken', error);
+              console.log('TIAGO: Invalid id token');
+              /*let domain = getUserIdentityDomain(fromURL);
+              console.log('[Identity.IdentityModule.getToken] domain->', domain);
+              _this.callGenerateMethods(domain).then((value) => {
+                _this.getIdToken(fromURL).then(function(identity) {
+                  console.log('[Identity.IdentityModule.getToken] from getIdToken', identity);
+                  return resolve(identity);
+                });
+              });*/
               return reject(error);
             });
           }
@@ -219,6 +231,15 @@ class IdentityModule {
           console.log('[Identity.IdentityModule.getToken] from getIdToken', identity);
           return resolve(identity);
         }).catch(function(error) {
+          console.log('TIAGO: Invalid id token');
+          /*let domain = getUserIdentityDomain(fromURL);
+          console.log('[Identity.IdentityModule.getToken] domain->', domain);
+          _this.callGenerateMethods(domain).then((value) => {
+            _this.getIdToken(fromURL).then(function(identity) {
+              console.log('[Identity.IdentityModule.getToken] from getIdToken', identity);
+              return resolve(identity);
+            });
+          });*/
           return reject(error);
         });
       }
@@ -226,12 +247,27 @@ class IdentityModule {
   }
 
   /**
+   * Check to see if an identity did not expire
+   * @param  {JSON}     identity
+   * @return {Boolean}  true if valid, false otherwise
+   */
+  isValidIdentity(identity) {
+    let _this = this;
+    console.log('TIAGO: validate identity');
+    /*if (_this.count === 0) {
+      _this.count++;
+      return false;
+    } else {
+      return true;
+    }*/
+    return true;
+  }
+
+  /**
   * get an Id Token for a HypertyURL
   * @param  {String}  hypertyURL     the Hyperty address
   * @return {JSON}    token    Id token to be added to the message
   */
-
-
   getIdToken(hypertyURL) {
     let _this = this;
     return new Promise(function(resolve, reject) {
@@ -241,12 +277,18 @@ class IdentityModule {
         _this._getHypertyFromDataObject(hypertyURL).then((returnedHypertyURL) => {
           let userURL = _this.registry.getHypertyOwner(returnedHypertyURL);
 
+          console.log('TIAGO option 1');
+
           if (userURL) {
 
             for (let index in _this.identities) {
               let identity = _this.identities[index];
               if (identity.identity === userURL) {
-                return resolve(identity.messageInfo);
+                if (_this.isValidIdentity(identity)) {
+                  return resolve(identity.messageInfo);
+                } else {
+                  reject('identity expired!');
+                }
               }
             }
           } else {
@@ -257,6 +299,7 @@ class IdentityModule {
           reject(reason);
         });
       } else {
+        console.log('TIAGO option 2');
         let userURL = _this.registry.getHypertyOwner(hypertyURL);
         if (userURL) {
 
@@ -264,8 +307,15 @@ class IdentityModule {
             let identity = _this.identities[index];
             if (identity.identity === userURL) {
               // TODO check this getIdToken when we run on nodejs environment;
-              if (identity.hasOwnProperty('messageInfo')) return resolve(identity.messageInfo);
-              else return resolve(identity);
+              if (_this.isValidIdentity(identity)) {
+                if (identity.hasOwnProperty('messageInfo')) {
+                  return resolve(identity.messageInfo);
+                } else {
+                  return resolve(identity);
+                }
+              } else {
+                reject('identity expired!');
+              }
             }
           }
         } else {
@@ -899,6 +949,7 @@ class IdentityModule {
                   let newValue = {value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv), hash: _this.crypto.encode(hash)};
 
                   message.body.value = JSON.stringify(newValue);
+                  console.log('TIAGO outgoing:', message);
                   resolve(message);
                 });
               });
@@ -1027,6 +1078,7 @@ class IdentityModule {
                   //console.log('result of hash verification! ', result);
 
                   message.body.assertedIdentity = true;
+                  console.log('TIAGO incoming:', message);
                   resolve(message);
                 });
               });
@@ -1279,6 +1331,7 @@ class IdentityModule {
           console.log('senderCertificate');
           let receivedValue = JSON.parse(atob(message.body.value));
 
+          console.log('TIAGO identity', message.body);
           _this.validateAssertion(message.body.identity.assertion, undefined, message.body.identity.idp).then((value) => {
             let encryptedPMS = _this.crypto.decode(receivedValue.assymetricEncryption);
 
