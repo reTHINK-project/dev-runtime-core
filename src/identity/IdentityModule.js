@@ -806,7 +806,7 @@ class IdentityModule {
       let isToHyperty = divideURL(message.to).type === 'hyperty';
 
       if (message.type === 'update') {
-        resolve(message);
+        return resolve(message);
       }
 
       if (isToLegacyIdentity) {
@@ -860,7 +860,7 @@ class IdentityModule {
 
         console.log('dataObject value to encrypt: ', message.body.value);
         console.log('IdentityModule - encrypt from hyperty to dataobject ', message);
-        
+
         // TIAGO - persistence issue #147
         _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
           let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
@@ -945,7 +945,7 @@ class IdentityModule {
       let isToHyperty = divideURL(message.to).type === 'hyperty';
 
       if (message.type === 'update') {
-        resolve(message);
+        return resolve(message);
       }
 
       //is is hyperty to hyperty communication
@@ -1005,7 +1005,7 @@ class IdentityModule {
 
         // TIAGO - persistence issue #147
         _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
-          let dataObjectKey = sessionKeys[dataObjectURL];
+          let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
 
           if (dataObjectKey) {
 
@@ -1055,23 +1055,24 @@ class IdentityModule {
   doMutualAuthentication(sender, receiver) {
     console.log('doMutualAuthentication: ', sender, receiver);
     let _this = this;
-    let dataObjectURL;
-
-    // check if the sender is a dataObject and if so stores that value
-    let reporterURL = _this.registry.getReporterURLSynchonous(sender);
-    if (reporterURL) {
-      dataObjectURL = sender;
-      sender = reporterURL;
-    }
-
-    let msg = {
-      to: receiver,
-      from: sender,
-      callback: undefined,
-      body: {handshakePhase: 'startHandShake', ignore: 'ignoreMessage'}
-    };
 
     return new Promise(function(resolve, reject) {
+
+      let dataObjectURL;
+
+      // check if the sender is a dataObject and if so stores that value
+      let reporterURL = _this.registry.getReporterURLSynchonous(sender);
+      if (reporterURL) {
+        dataObjectURL = sender;
+        sender = reporterURL;
+      }
+
+      let msg = {
+        to: receiver,
+        from: sender,
+        callback: undefined,
+        body: {handshakePhase: 'startHandShake', ignore: 'ignoreMessage'}
+      };
 
       if (!sender || !receiver) {
         return reject('sender or receiver missing on doMutualAuthentication');

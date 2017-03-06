@@ -62,10 +62,12 @@ class RuntimeCoreCtx extends ReThinkCtx {
             resolve(message);
           }, (error) => {
             reject(error);
+
             /*});
             } else {
               resolve(message);
             }*/
+
           });
         } else {
           resolve(message);
@@ -126,34 +128,49 @@ class RuntimeCoreCtx extends ReThinkCtx {
       // TODO remove this validation. When the Nodejs auth was completed this should work like browser;
       this.runtimeCapabilities.isAvailable('node').then((result) => {
 
+        console.log('[RuntimeCoreCtx - isAvailable - node] - ', result);
         if (result) {
           return resolve(message);
+        } else {
+          if (isIncoming & result) {
+            let isSubscription = message.type === 'subscribe';
+            let isFromRemoteSM = _this.isFromRemoteSM(message.from);
+            if (isSubscription & isFromRemoteSM) {
+
+              // TODO: should do mutualAuthentication and this should be removed
+              resolve(message);
+
+              // TODO: should verify why the mutualAuthentication is not working
+              // TODO: this should uncommented
+              /*_this.doMutualAuthentication(message).then(() => {
+                resolve(message);
+              }, (error) => {
+                reject(error);
+              });*/
+
+            } else {
+              resolve(message);
+            }
+          } else {
+
+            // TODO should encrypt messages and this should be removed;
+            resolve(message);
+
+            // TODO: should verify why the mutualAuthentication is not working
+            // TODO: this should uncommented
+            /*if (_this._isToCypherModule(message)) {
+              _this.idModule.encryptMessage(message).then((message) => {
+                resolve(message);
+              }, (error) => {
+                reject(error);
+              });
+            } else {
+              resolve(message);
+            }*/
+          }
         }
       });
 
-      if (isIncoming & result) {
-        let isSubscription = message.type === 'subscribe';
-        let isFromRemoteSM = _this.isFromRemoteSM(message.from);
-        if (isSubscription & isFromRemoteSM) {
-          _this.doMutualAuthentication(message).then(() => {
-            resolve(message);
-          }, (error) => {
-            reject(error);
-          });
-        } else {
-          resolve(message);
-        }
-      } else {
-        if (_this._isToCypherModule(message)) {
-          _this.idModule.encryptMessage(message).then((message) => {
-            resolve(message);
-          }, (error) => {
-            reject(error);
-          });
-        } else {
-          resolve(message);
-        }
-      }
     });
   }
 
@@ -235,13 +252,15 @@ class RuntimeCoreCtx extends ReThinkCtx {
 
     let _from = message.from;
 
-    if (message.body && message.body.hasOwnProperty('source'))
+    if (message.body && message.body.hasOwnProperty('source')) {
       _from = message.body.source;
+    }
 
     // Signalling Messages between P2P Stubs don't have Identities. FFS
 
-    if (_from.includes('/p2prequester/') || _from.includes('/p2phandler/'))
+    if (_from.includes('/p2prequester/') || _from.includes('/p2phandler/')) {
       return false;
+    }
 
     return schemasToIgnore.indexOf(fromSchema) === -1;
   }
@@ -256,7 +275,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
 
     if (message.body.source !== undefined) {
       return this.idModule.getToken(message.body.source, message.to);
-    } else
+    } else {
 
 /*    if (message.type === 'update') {
       return this.idModule.getToken(message.body.source);
@@ -267,8 +286,11 @@ class RuntimeCoreCtx extends ReThinkCtx {
     }*/
 
 //    if (divideURL(message.from).type === 'hyperty') {
+
       return this.idModule.getToken(message.from, message.to);
-/*    } else {
+    }
+
+/*    else {
       return this.idModule.getToken(this.getURL(message.from));
     }*/
   }
