@@ -147,6 +147,10 @@ class IdentityModule {
     throw 'identity not found';
   }
 
+  _seconds_since_epoch() {
+    return Math.floor( Date.now() / 1000 );
+  }
+
   _loadIdentities() {
     let _this = this;
     return new Promise((resolve) => {
@@ -166,6 +170,54 @@ class IdentityModule {
     _this.guiDeployed = true;
   }
 
+  /**
+   * GetValidToken is for non legacy hyperties and verifies if the Token is still valid
+   * if the token is invalid it requests a new token
+   * @param  {String} hypertyURL hypertyURL
+   * @return {Promise}           
+   */
+  _getValidToken(hypertyURL) {
+    let _this = this;
+    return new Promise((resolve, reject) => {
+      _this.getIdToken(hypertyURL).then(function(identity) {
+        console.log('[Identity.IdentityModule.getTokenAux] Token', identity);
+        let time_now = _this._seconds_since_epoch();
+        let complete_id = _this.getIdentity(identity.userProfile.userURL);
+        let expiration_date = undefined;
+
+        if (!complete_id.info.expires) {
+          if (!complete_id.info.tokenIDJSON.exp) {
+            throw 'The ID Token does not have an expiration time';
+          } else {
+            expiration_date = complete_id.info.tokenIDJSON.exp;
+          }
+        } else {
+          expiration_date = complete_id.info.expires;
+        }
+
+        console.log('[Identity.IdentityModule.getTokenAux] Token expires in', expiration_date);
+        console.log('[Identity.IdentityModule.getTokenAux] time now:', time_now);
+
+        // TODO: this should not be verified in this way
+        // we should contact the IDP to verify this instead of using the local clock
+        // but this works for now...
+        if (time_now >= expiration_date) {
+          // delete current identity
+          _this.deleteIdentity(complete_id.identity);
+
+          // generate new idToken
+          _this.callGenerateMethods(identity.idp).then((value) => {
+            resolve(value.messageInfo);
+          });
+        } else {
+          resolve(identity);
+        }
+      }).catch(function(error) {
+        console.error('[Identity.IdentityModule.getToken] error on getToken', error);
+        reject(error);
+      });
+    });
+  }
 
   /**
   * get a Token to be added to a message
@@ -173,7 +225,6 @@ class IdentityModule {
   * @param  {String}  toURL     target of the message
   * @return {JSON}    token    token to be added to the message
   */
-
   getToken(fromURL, toUrl) {
     let _this = this;
     return new Promise(function(resolve, reject) {
@@ -184,6 +235,8 @@ class IdentityModule {
           console.log('[Identity.IdentityModule.getToken] isLEGACY: ', result);
           if (result) {
 
+            // TODO: check if in the future other legacy hyperties have expiration times
+            // if so the check should be made here (or in the getAccessToken function)
             let token = _this.getAccessToken(toUrl);
             if (token)
               return resolve(token);
@@ -204,22 +257,14 @@ class IdentityModule {
               return reject(err);
             });
           } else {
-
-            _this.getIdToken(fromURL).then(function(identity) {
-              console.log('[Identity.IdentityModule.getToken] getIdToken', identity);
-              return resolve(identity);
-            }).catch(function(error) {
-              console.error('[Identity.IdentityModule.getToken] error on getToken', error);
-              return reject(error);
+            _this._getValidToken(fromURL).then((identity) => {
+              resolve(identity);
             });
           }
         });
       } else {
-        _this.getIdToken(fromURL).then(function(identity) {
-          console.log('[Identity.IdentityModule.getToken] from getIdToken', identity);
-          return resolve(identity);
-        }).catch(function(error) {
-          return reject(error);
+        _this._getValidToken(fromURL).then((identity) => {
+          resolve(identity);
         });
       }
     });
@@ -230,8 +275,6 @@ class IdentityModule {
   * @param  {String}  hypertyURL     the Hyperty address
   * @return {JSON}    token    Id token to be added to the message
   */
-
-
   getIdToken(hypertyURL) {
     let _this = this;
     return new Promise(function(resolve, reject) {
@@ -264,8 +307,11 @@ class IdentityModule {
             let identity = _this.identities[index];
             if (identity.identity === userURL) {
               // TODO check this getIdToken when we run on nodejs environment;
-              if (identity.hasOwnProperty('messageInfo')) return resolve(identity.messageInfo);
-              else return resolve(identity);
+              if (identity.hasOwnProperty('messageInfo')) {
+                return resolve(identity.messageInfo);
+              } else {
+                return resolve(identity);
+              }
             }
           }
         } else {
@@ -353,16 +399,17 @@ class IdentityModule {
 
   /**
   * Function to remove an identity from the Identities array
-  * @param {String}    userID      userID
+  * @param {String}    userURL      userURL
   */
-  deleteIdentity(userID) {
+  deleteIdentity(userURL) {
     let _this = this;
 
-    let userURL = convertToUserURL(userID);
+    //let userURL = convertToUserURL(userID);
+    console.log('TIAGO userURL', userURL);
 
     for (let identity in _this.identities) {
       if (_this.identities[identity].identity === userURL) {
-        _this.identities.splice(identity, 1);
+        console.log('TIAGO splice', _this.identities.splice(identity, 1));
       }
     }
   }
@@ -899,6 +946,7 @@ class IdentityModule {
                   let newValue = {value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv), hash: _this.crypto.encode(hash)};
 
                   message.body.value = JSON.stringify(newValue);
+                  console.log('TIAGO outgoing:', message);
                   resolve(message);
                 });
               });
@@ -1027,6 +1075,7 @@ class IdentityModule {
                   //console.log('result of hash verification! ', result);
 
                   message.body.assertedIdentity = true;
+                  console.log('TIAGO incoming:', message);
                   resolve(message);
                 });
               });
@@ -1279,6 +1328,7 @@ class IdentityModule {
           console.log('senderCertificate');
           let receivedValue = JSON.parse(atob(message.body.value));
 
+          console.log('TIAGO identity', message.body);
           _this.validateAssertion(message.body.identity.assertion, undefined, message.body.identity.idp).then((value) => {
             let encryptedPMS = _this.crypto.decode(receivedValue.assymetricEncryption);
 

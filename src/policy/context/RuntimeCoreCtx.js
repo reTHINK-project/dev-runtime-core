@@ -272,27 +272,13 @@ class RuntimeCoreCtx extends ReThinkCtx {
 
   _getIdentity(message) {
     console.log('[Policy.RuntimeCoreCtx.getIdentity] ', message);
-
+    let sourceURL = undefined;
     if (message.body.source !== undefined) {
-      return this.idModule.getToken(message.body.source, message.to);
+      sourceURL = message.body.source;
     } else {
-
-/*    if (message.type === 'update') {
-      return this.idModule.getToken(message.body.source);
+      sourceURL = message.from;
     }
-
-    if (message.type === 'response' && message.body.source !== undefined) {
-      return this.idModule.getToken(message.body.source);
-    }*/
-
-//    if (divideURL(message.from).type === 'hyperty') {
-
-      return this.idModule.getToken(message.from, message.to);
-    }
-
-/*    else {
-      return this.idModule.getToken(this.getURL(message.from));
-    }*/
+    return this.idModule.getToken(sourceURL, message.to);
   }
 
   /**
