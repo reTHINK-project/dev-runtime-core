@@ -79,8 +79,6 @@ class IdentityModule {
 
     _this._loadIdentities();
 
-    _this.count = 0;
-
   }
 
   /**
