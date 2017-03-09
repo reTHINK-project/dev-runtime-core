@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../">
+  <title data-ice="title">test/PolicyEngine.spec.js | Service Framework API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  <a href="test.html" data-ice="testLink">Test</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">allocation</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/allocation/AddressAllocation.js~AddressAllocation.html">AddressAllocation</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html">Bus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html">MiniBus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Pipeline.js~Pipeline.html">Pipeline</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">graphconnector</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/BloomFilter.js~BloomFilter.html">BloomFilter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GlobalRegistryRecord.js~GlobalRegistryRecord.html">GlobalRegistryRecord</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html">GraphConnector</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html">GraphConnectorContactData</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">identity</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/Crypto.js~Crypto.html">Crypto</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/GuiFake.js~GuiFake.html">GuiFake</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/Identity.js~Identity.html">Identity</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/IdentityModule.js~IdentityModule.html">IdentityModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/OpenIdLib.js~OpenIdLib.html">OpenIdLib</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/ActionsService.js~ActionsService.html">ActionsService</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/CombiningAlgorithm.js~CombiningAlgorithm.html">CombiningAlgorithm</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Operators.js~Operators.html">Operators</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/PDP.js~PDP.html">PDP</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/PEP.js~PEP.html">PEP</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Policy.js~Policy.html">Policy</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/ReThinkCtx.js~ReThinkCtx.html">ReThinkCtx</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Rule.js~Rule.html">Rule</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/combiningAlgorithms</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/AllowOverrides.js~AllowOverrides.html">AllowOverrides</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/BlockOverrides.js~BlockOverrides.html">BlockOverrides</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/FirstApplicable.js~FirstApplicable.html">FirstApplicable</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/conditions</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/AdvancedCondition.js~AdvancedCondition.html">AdvancedCondition</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/Condition.js~Condition.html">Condition</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/SubscriptionCondition.js~SubscriptionCondition.html">SubscriptionCondition</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/context</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html">RuntimeCoreCtx</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">protostub</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/protostub/IdpProxyStub.js~IdpProxyStub.html">IdpProxyStub</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-activate">activate</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">registry</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/Discovery.js~Discovery.html">Discovery</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/DiscoveryServiceFramework.js~DiscoveryServiceFramework.html">DiscoveryServiceFramework</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/HypertyInstance.js~HypertyInstance.html">HypertyInstance</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html">Registry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/RegistryDataModel.js~RegistryDataModel.html">RegistryDataModel</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">runtime</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/Descriptors.js~Descriptors.html">Descriptors</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/Loader.js~Loader.html">Loader</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/RuntimeUA.js~RuntimeUA.html">RuntimeUA</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-runtimeConfiguration">runtimeConfiguration</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-runtimeUtils">runtimeUtils</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">sandbox</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/sandbox/Sandbox.js~Sandbox.html">Sandbox</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/sandbox/SandboxRegistry.js~SandboxRegistry.html">SandboxRegistry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-SandboxType">SandboxType</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">syncher</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/ObserverObject.js~ObserverObject.html">ObserverObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/ReporterObject.js~ReporterObject.html">ReporterObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/StoreDataObjects.js~StoreDataObjects.html">StoreDataObjects</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/Subscription.js~Subscription.html">Subscription</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/SyncherManager.js~SyncherManager.html">SyncherManager</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">utils</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/utils/EventEmitter.js~EventEmitter.html">EventEmitter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-schemaValidation">schemaValidation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-buildURL">buildURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-convertToUserURL">convertToUserURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-deepClone">deepClone</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-divideEmail">divideEmail</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-divideURL">divideURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-emptyObject">emptyObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-generateGUID">generateGUID</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getConfigurationResources">getConfigurationResources</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserEmailFromURL">getUserEmailFromURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserIdentityDomain">getUserIdentityDomain</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserURLFromEmail">getUserURLFromEmail</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isBackendServiceURL">isBackendServiceURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isDataObjectURL">isDataObjectURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isHypertyURL">isHypertyURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isLegacy">isLegacy</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isURL">isURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isUserURL">isUserURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-removePathFromURL">removePathFromURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-tv4">tv4</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-divideURL">divideURL</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">test/PolicyEngine.spec.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import chai from &apos;chai&apos;;
+import chaiAsPromised from &apos;chai-as-promised&apos;;
+
+chai.config.truncateThreshold = 0;
+
+let expect = chai.expect;
+chai.use(chaiAsPromised);
+
+import AdvancedCondition from &apos;../src/policy/conditions/AdvancedCondition&apos;;
+import AllowOverrides from &apos;../src/policy/combiningAlgorithms/AllowOverrides&apos;;
+import Condition from &apos;../src/policy/conditions/Condition&apos;;
+import PEP from &apos;../src/policy/PEP&apos;;
+import Rule from &apos;../src/policy/Rule&apos;;
+import RuntimeCoreCtx from &apos;../src/policy/context/RuntimeCoreCtx&apos;;
+import Policy from &apos;../src/policy/Policy&apos;;
+import SubscriptionCondition from &apos;../src/policy/conditions/SubscriptionCondition&apos;;
+import { runtimeFactory } from &apos;./resources/runtimeFactory&apos;;
+
+/********** CONDITIONS **********/
+let simpleCondition = new Condition(&apos;source&apos;, &apos;equals&apos;, &apos;user1@domain1&apos;);
+let andCondition = new AdvancedCondition([&apos;and&apos;, new Condition(&apos;source&apos;, &apos;equals&apos;, &apos;user1@domain1&apos;), new Condition(&apos;domain&apos;, &apos;equals&apos;, &apos;domain1&apos;)]);
+let orCondition = new AdvancedCondition([&apos;or&apos;, new Condition(&apos;source&apos;, &apos;equals&apos;, &apos;user1@domain1&apos;), new Condition(&apos;domain&apos;, &apos;equals&apos;, &apos;domain1&apos;)]);
+let notCondition = new AdvancedCondition([&apos;not&apos;, new Condition(&apos;source&apos;, &apos;equals&apos;, &apos;user2@domain2&apos;)]);
+let andNotCondition = new AdvancedCondition([&apos;and&apos;, new Condition(&apos;source&apos;, &apos;equals&apos;, &apos;user1@domain1&apos;), [&apos;not&apos;, new Condition(&apos;domain&apos;, &apos;equals&apos;, &apos;domain1&apos;)]]);
+let orNotCondition = new AdvancedCondition([&apos;or&apos;, [&apos;not&apos;, new Condition(&apos;domain&apos;, &apos;equals&apos;, &apos;domain1&apos;)], new Condition(&apos;source&apos;, &apos;equals&apos;, &apos;user1@domain1&apos;)]);
+
+/********** RULES **********/
+let simpleRule = new Rule(false, simpleCondition, &apos;global&apos;, &apos;global&apos;, 0);
+let acceptAnySubscriptionRule = new Rule(true, new SubscriptionCondition(&apos;subscription&apos;, &apos;equals&apos;, &apos;*&apos;), &apos;global&apos;, &apos;global&apos;, 0);
+let acceptPreAuthSubscriptionRule = new Rule(true, new SubscriptionCondition(&apos;subscription&apos;, &apos;in&apos;, &apos;preauthorised&apos;), &apos;global&apos;, &apos;global&apos;, 0);
+let blockAnySubscriptionRule = new Rule(false, new SubscriptionCondition(&apos;subscription&apos;, &apos;equals&apos;, &apos;*&apos;), &apos;global&apos;, &apos;global&apos;, 0);
+let blockPreAuthSubscriptionRule = new Rule(false, new AdvancedCondition([&apos;not&apos;, new SubscriptionCondition(&apos;subscription&apos;, &apos;in&apos;, &apos;preauthorised&apos;)]), &apos;global&apos;, &apos;global&apos;, 0);
+let schemeRule = new Rule(false, new Condition(&apos;scheme&apos;, &apos;equals&apos;, &apos;comm&apos;), &apos;global&apos;, &apos;global&apos;, 0);
+let dateRule = new Rule(false, new Condition(&apos;date&apos;, &apos;equals&apos;, &apos;01/01/2016&apos;), &apos;global&apos;, &apos;global&apos;, 0);
+let domainRule = new Rule(false, new Condition(&apos;domain&apos;, &apos;equals&apos;, &apos;blockedDomain&apos;), &apos;global&apos;, &apos;global&apos;, 0);
+let sourceRule = new Rule(false, new Condition(&apos;source&apos;, &apos;equals&apos;, &apos;user@blockedDomain&apos;), &apos;global&apos;, &apos;global&apos;, 0);
+let sourceRuleForConn = new Rule(false, new Condition(&apos;source&apos;, &apos;equals&apos;, &apos;user@blockedDomain&apos;), &apos;hyperty&apos;, &apos;Connector&apos;, 0);
+let sourceRuleForUser1 = new Rule(false, new Condition(&apos;source&apos;, &apos;equals&apos;, &apos;user@blockedDomain&apos;), &apos;identity&apos;, &apos;user1@work,&apos;, 0);
+
+/********** POLICIES **********/
+let sourcePolicy = new Policy(&apos;HypertyChat&apos;, [simpleRule], [], &apos;allowOverrides&apos;);
+
+/********** MESSAGES **********/
+let messageFromChat = { body: { identity: { userProfile: { username: &apos;user@blockedDomain&apos; } } }, id: 1, type: &apos;subscribe&apos;, from: &apos;hyperty://domain/hyperty-123&apos;, to: &apos;hyperty://domain/hyperty-456&apos; };
+
+let messageFromConn = { body: { identity: { userProfile: { username: &apos;user@blockedDomain&apos; } } }, id: 1, type: &apos;subscribe&apos;, from: &apos;hyperty://domain/hyperty-012&apos;, to: &apos;hyperty://domain/hyperty-789&apos; };
+
+let messageFromUser1 = { body: { identity: { userProfile: { username: &apos;user1@domain1&apos; } } }, id: 1, type: &apos;subscribe&apos;, from: &apos;scheme://domain/data-object-instance&apos;, to: &apos;comm://domain/data-object-instance&apos; };
+
+let messageFromUser2 = { body: { identity: { userProfile: { username: &apos;user2@domain2&apos; } } }, id: 1, type: &apos;subscribe&apos;, from: &apos;scheme://domain/data-object-instance&apos;, to: &apos;comm://domain/data-object-instance&apos; };
+
+let noIdMessage = { from: &apos;hyperty://domain/hyperty-url&apos;, id: 1, to: &apos;comm://domain/hyperty-instance&apos;, type: &apos;subscribe&apos; };
+
+let message = { body: { auth: false, identity: { userProfile: { username: &apos;user@domain&apos; } } }, from: &apos;hyperty://domain/hyperty-url&apos;, id: 1, to: &apos;comm://domain/hyperty-instance&apos;, type: &apos;subscribe&apos; };
+
+let messageFromBlocked = { body: { identity: { userProfile: { username: &apos;user@blockedDomain&apos; } } }, id: 1, type: &apos;subscribe&apos;, from: &apos;comm://domain/data-object-instance&apos;, to: &apos;comm://domain/hyperty-instance&apos; };
+
+let subscribeMessage = { body: { identity: { userProfile: { username: &apos;user@domain&apos; } }, subscriber: &apos;hyperty://domain/hyperty-instance&apos; }, id: 1, type: &apos;subscribe&apos;, from: &apos;runtime://localhost/7600/sm&apos;, to: &apos;comm://domain/data-object-url/subscription&apos; };
+
+let allowedSubscribeMessage = { body: { auth: true, identity: { userProfile: { username: &apos;user@domain&apos; } }, subscriber: &apos;hyperty://domain/hyperty-instance&apos; }, id: 1, type: &apos;subscribe&apos;, from: &apos;runtime://localhost/7600/sm&apos;, to: &apos;comm://domain/data-object-url/subscription&apos; };
+
+let badSubscribeMessage = { body: { identity: { userProfile: { username: &apos;user@domain&apos; } }, subscriber: &apos;hyperty://domain/not-preauthorised-hyperty-instance&apos; }, id: 1, type: &apos;subscribe&apos;, from: &apos;runtime://localhost/7600/sm&apos;, to: &apos;comm://domain/data-object-url/subscription&apos; };
+
+/********** TESTS **********/
+let runtimeCapabilities = {
+  isAvailable: () =&gt; {
+    return new Promise((resolve) =&gt; {
+      resolve(false);
+    });
+  }
+};
+
+let runtimeCtx = new RuntimeCoreCtx();
+
+describe(&apos;Policies management&apos;, () =&gt; {
+  describe(&apos;conditions management&apos;, () =&gt; {
+    it(&apos;creates a simple condition&apos;, () =&gt; {
+      expect(simpleCondition.attribute).to.be.eql(&apos;source&apos;);
+      expect(simpleCondition.operator).to.be.eql(&apos;equals&apos;);
+      expect(simpleCondition.params).to.be.eql(&apos;user1@domain1&apos;);
+    });
+    it(&apos;returns condition is applicable&apos;, () =&gt; {
+      expect(simpleCondition.isApplicable(runtimeCtx, messageFromUser1)).to.be.eql(true);
+    });
+    it(&apos;returns condition is not applicable&apos;, () =&gt; {
+      expect(simpleCondition.isApplicable(runtimeCtx, messageFromUser2)).to.be.eql(false);
+    });
+
+    it(&apos;creates an advanced condition - &quot;and&quot;&apos;, () =&gt; {
+      expect(andCondition.condition).to.be.eql([&apos;and&apos;, new Condition(&apos;source&apos;, &apos;equals&apos;, &apos;user1@domain1&apos;), new Condition(&apos;domain&apos;, &apos;equals&apos;, &apos;domain1&apos;)]);
+      expect(andCondition.condition[0]).to.be.eql(&apos;and&apos;);
+      expect(andCondition.condition[1]).to.be.eql(new Condition(&apos;source&apos;, &apos;equals&apos;, &apos;user1@domain1&apos;));
+      expect(andCondition.condition[2]).to.be.eql(new Condition(&apos;domain&apos;, &apos;equals&apos;, &apos;domain1&apos;));
+    });
+
+    it(&apos;correctly returns &quot;and&quot; condition is applicable&apos;, () =&gt; {
+      expect(andCondition.isApplicable(runtimeCtx, messageFromUser1)).to.be.eql(true);
+    });
+
+    it(&apos;correctly returns &quot;and&quot; condition is not applicable&apos;, () =&gt; {
+      expect(andCondition.isApplicable(runtimeCtx, messageFromUser2)).to.be.eql(false);
+    });
+
+    it(&apos;creates an advanced condition - &quot;or&quot;&apos;, () =&gt; {
+      expect(orCondition.condition).to.be.eql([&apos;or&apos;, new Condition(&apos;source&apos;, &apos;equals&apos;, &apos;user1@domain1&apos;), new Condition(&apos;domain&apos;, &apos;equals&apos;, &apos;domain1&apos;)]);
+    });
+
+    it(&apos;correctly returns &quot;or&quot; condition is applicable&apos;, () =&gt; {
+      expect(orCondition.isApplicable(runtimeCtx, messageFromUser1)).to.be.eql(true);
+    });
+
+    it(&apos;correctly returns &quot;or&quot; condition is not applicable&apos;, () =&gt; {
+      expect(orCondition.isApplicable(runtimeCtx, messageFromUser2)).to.be.eql(false);
+    });
+
+    it(&apos;creates an advanced condition - &quot;not&quot;&apos;, () =&gt; {
+      expect(notCondition.condition).to.be.eql([&apos;not&apos;, new Condition(&apos;source&apos;, &apos;equals&apos;, &apos;user2@domain2&apos;)]);
+    });
+
+    it(&apos;correctly returns &quot;not&quot; condition is applicable&apos;, () =&gt; {
+      expect(notCondition.isApplicable(runtimeCtx, messageFromUser1)).to.be.eql(true);
+    });
+
+    it(&apos;correctly returns &quot;not&quot; condition is not applicable&apos;, () =&gt; {
+      expect(notCondition.isApplicable(runtimeCtx, messageFromUser2)).to.be.eql(false);
+    });
+
+    it(&apos;correctly returns &quot;and not&quot; condition is not applicable&apos;, () =&gt; {
+      expect(andNotCondition.isApplicable(runtimeCtx, messageFromUser1)).to.be.eql(false);
+    });
+
+    it(&apos;correctly returns &quot;or not&quot; condition is applicable&apos;, () =&gt; {
+      expect(orNotCondition.isApplicable(runtimeCtx, messageFromUser1)).to.be.eql(true);
+    });
+  });
+
+  describe(&apos;rules management&apos;, () =&gt; {
+    it(&apos;creates a simple rule&apos;, () =&gt; {
+      expect(simpleRule.decision).to.be.eql(false);
+      expect(simpleRule.condition).to.be.eql(simpleCondition);
+      expect(simpleRule.scope).to.be.eql(&apos;global&apos;);
+      expect(simpleRule.target).to.be.eql(&apos;global&apos;);
+    });
+    it(&apos;evaluates a simple rule to false&apos;, () =&gt; {
+      expect(simpleRule.evaluate(runtimeCtx, messageFromUser1)).to.be.eql(false);
+    });
+    it(&apos;evaluates a simple rule to &quot;Not Applicable&quot;&apos;, () =&gt; {
+      expect(simpleRule.evaluate(runtimeCtx, messageFromUser2)).to.be.eql(&apos;Not Applicable&apos;);
+    });
+  });
+
+  describe(&apos;policies management&apos;, () =&gt; {
+    it(&apos;creates a service provider policy&apos;, () =&gt; {
+      expect(sourcePolicy.key).to.be.eql(&apos;HypertyChat&apos;);
+      expect(sourcePolicy.combiningAlgorithm).to.be.eql(new AllowOverrides());
+      expect(sourcePolicy.rules).to.be.eql([simpleRule]);
+    });
+    it(&apos;evaluates a service provider policy to false&apos;, () =&gt; {
+      expect(sourcePolicy.evaluateRules(runtimeCtx, messageFromUser1)).to.be.eql(false);
+    });
+    it(&apos;evaluates a service provider policy to &quot;Not Applicable&quot;&apos;, () =&gt; {
+      expect(sourcePolicy.evaluateRules(runtimeCtx, messageFromUser2)).to.be.eql(&apos;Not Applicable&apos;);
+    });
+  });
+});
+
+describe(&apos;Policy Engine with Runtime Core context&apos;, () =&gt; {
+  let runtimeRegistry = {
+    isInterworkingProtoStub: () =&gt; {
+      return false;
+    },
+    isLocal: () =&gt; {
+      return true;
+    },
+    getPreAuthSubscribers: () =&gt; {
+      return [&apos;hyperty://domain/hyperty-instance&apos;];
+    },
+    getHypertyName: (hypertyURL) =&gt; {
+      if (hypertyURL === &apos;hyperty://domain/hyperty-123&apos;) {
+        return &apos;HypertyChat&apos;;
+      }
+      if (hypertyURL === &apos;hyperty://domain/hyperty-789&apos;) {
+        return &apos;Connector&apos;;
+      }
+    },
+    getHypertyOwner: () =&gt; {
+      return &apos;user://work/user2&apos;;
+    },
+    getReporterURLSynchonous: () =&gt; {
+      return &apos;hyperty://domain/hyperty-url&apos;;
+    },
+    getUserEmailFromURL: () =&gt; {
+      return &apos;user2@work&apos;;
+    },
+    isDataObjectURL: (dataObjectURL) =&gt; {
+      let splitURL = dataObjectURL.split(&apos;://&apos;);
+      return splitURL[0] === &apos;comm&apos;;
+    },
+    registerSubscribedDataObject: () =&gt; {},
+    registerSubscriber: () =&gt; {},
+    runtimeURL: &apos;runtime://localhost/7601&apos;
+  };
+
+  let identityModule = {
+    decryptMessage: (message) =&gt; {
+      return new Promise((resolve) =&gt; {
+        resolve(message);
+      });
+    },
+    doMutualAuthentication: (message) =&gt; {
+      return new Promise((resolve) =&gt; {
+        resolve(message);
+      });
+    },
+    encryptMessage: (message) =&gt; {
+      return new Promise((resolve) =&gt; {
+        resolve(message);
+      });
+    },
+    getIdentity: () =&gt; {
+      return new Promise((resolve) =&gt; {
+        resolve({ userProfile: {username: &apos;user@domain&apos; } });
+      });
+    },
+    getToken: () =&gt; {
+      return new Promise((resolve) =&gt; {
+        resolve({ userProfile: {username: &apos;user@domain&apos; } });
+      });
+    },
+    _getHypertyFromDataObject: (dataObjectURL) =&gt; {
+      return new Promise((resolve) =&gt; {
+        if (dataObjectURL === &apos;comm://domain/data-object-url&apos;) {
+          resolve(&apos;hyperty://domain/hyperty-url&apos;);
+        }
+      });
+    }
+  };
+  let storageManager = runtimeFactory.storageManager();
+  let policyEngine = new PEP(new RuntimeCoreCtx(identityModule, runtimeRegistry, storageManager, runtimeCapabilities));
+
+  describe(&apos;initial filtering&apos;, () =&gt; {
+    it(&apos;message that loads an hyperty should not be validated by policies&apos;, () =&gt; {
+      let loadMessage = { id: 2, from: &apos;hyperty-runtime://sandbox/external&apos;, to: &apos;hyperty-runtime://sandbox/internal&apos;, type: &apos;create&apos; };
+      expect(policyEngine._isToVerify(loadMessage)).to.be.eql(false);
+    });
+
+    /*it(&apos;message of the &quot;update&quot; type must have the data object\&apos;s reporter as source&apos;, (done) =&gt; {
+      let updateMessage = { body: { source: &apos;hyperty://domain/hyperty-url&apos;, identity: &apos;identityToken&apos; }, from: &apos;comm://domain/data-object-url&apos;, id: 3, to: &apos;comm://domain/data-object-url/changes&apos;, type: &apos;update&apos; };
+      expect(policyEngine.authorise(updateMessage).then((message) =&gt; {
+        return message;
+      }), (error) =&gt; {
+        return error;
+      }).to.be.fulfilled.and.eventually.eql(updateMessage).and.notify(done);
+
+      let badUpdateMessage = { body: { source: &apos;hyperty://domain/hyperty-url2&apos;, identity: &apos;identityToken&apos; }, from: &apos;comm://domain/data-object-url&apos;, id: 3, to: &apos;comm://domain/data-object-url/changes&apos;, type: &apos;update&apos; };
+      expect(policyEngine.authorise(badUpdateMessage).then((message) =&gt; {
+        return message;
+      }), (error) =&gt; {
+        return error;
+      }).to.be.rejected.and.notify(done);
+    });*/
+  });
+
+  describe(&apos;identity obtention&apos;, () =&gt; {
+    it(&apos;should add an identity in the message body&apos;, (done) =&gt; {
+      expect(policyEngine.authorise(noIdMessage).then((message) =&gt; {
+        return message;
+      }), (error) =&gt; {
+        return error;
+      }).to.be.fulfilled.and.eventually.eql(message).and.notify(done);
+    });
+
+    it(&apos;should maintain the identity in the message body&apos;, (done) =&gt; {
+      expect(policyEngine.authorise(message).then((message) =&gt; {
+        return message;
+      }), (error) =&gt; {
+        return error;
+      }).to.be.fulfilled.and.eventually.eql(message).and.notify(done);
+    });
+  });
+
+  describe(&apos;policies management&apos;, () =&gt; {
+    policyEngine.removePolicy(&apos;*&apos;);
+
+    it(&apos;adds a service provider policy to the engine&apos;, () =&gt; {
+      policyEngine.context.activeUserPolicy = undefined;
+      policyEngine.addPolicy(&apos;SERVICE_PROVIDER&apos;, &apos;HypertyChat&apos;, sourcePolicy);
+      console.log(&apos;policyEngine.context.serviceProviderPolicy&apos;);
+      console.log(policyEngine.context.serviceProviderPolicy);
+      expect(policyEngine.context.serviceProviderPolicy).to.be.eql({HypertyChat: new Policy(&apos;HypertyChat&apos;, [simpleRule], [])});
+      expect(policyEngine.context.serviceProviderPolicy.HypertyChat).to.be.eql(new Policy(&apos;HypertyChat&apos;, [simpleRule], []));
+      expect(policyEngine.context.serviceProviderPolicy.HypertyChat.actions).to.be.eql([]);
+      expect(policyEngine.context.serviceProviderPolicy.HypertyChat.rules).to.be.eql([simpleRule]);
+    });
+
+    it(&apos;adds a user policy to the engine&apos;, () =&gt; {
+      policyEngine.addPolicy(&apos;USER&apos;, &apos;My policy&apos;, new Policy(&apos;My policy&apos;, [dateRule], []));
+      expect(policyEngine.context.userPolicies).to.be.eql({&apos;My policy&apos;: new Policy(&apos;My policy&apos;, [dateRule], [])});
+      expect(policyEngine.context.userPolicies[&apos;My policy&apos;]).to.be.eql(new Policy(&apos;My policy&apos;, [dateRule], []));
+      expect(policyEngine.context.userPolicies[&apos;My policy&apos;].actions).to.be.eql([]);
+      expect(policyEngine.context.userPolicies[&apos;My policy&apos;].rules).to.be.eql([dateRule]);
+    });
+
+    it(&apos;adds a second user policy to the engine&apos;, () =&gt; {
+      policyEngine.addPolicy(&apos;USER&apos;, &apos;My second policy&apos;, new Policy(&apos;My second policy&apos;, [simpleRule], []));
+      expect(policyEngine.context.userPolicies).to.be.eql({&apos;My policy&apos;: new Policy(&apos;My policy&apos;, [dateRule], []), &apos;My second policy&apos;: new Policy(&apos;My second policy&apos;, [simpleRule], [])});
+      expect(policyEngine.context.serviceProviderPolicy).to.be.eql({HypertyChat: new Policy(&apos;HypertyChat&apos;, [simpleRule], [])});
+      expect(policyEngine.context.activeUserPolicy).to.be.eql(undefined);
+    });
+
+    it(&apos;removes an existing user policy&apos;, () =&gt; {
+      policyEngine.removePolicy(&apos;USER&apos;, &apos;My policy&apos;);
+      expect(policyEngine.context.serviceProviderPolicy).to.be.eql({HypertyChat: new Policy(&apos;HypertyChat&apos;, [simpleRule], [])});
+      expect(policyEngine.context.userPolicies).to.be.eql({&apos;My second policy&apos;: new Policy(&apos;My second policy&apos;, [simpleRule], [])});
+      expect(policyEngine.context.activeUserPolicy).to.be.eql(undefined);
+    });
+
+    it(&apos;tries to remove a policy that does not exist&apos;, () =&gt; {
+      policyEngine.removePolicy(&apos;USER&apos;, &apos;Vacations&apos;);
+      expect(policyEngine.context.serviceProviderPolicy).to.be.eql({HypertyChat: new Policy(&apos;HypertyChat&apos;, [simpleRule], [])});
+      expect(policyEngine.context.userPolicies).to.be.eql({&apos;My second policy&apos;: new Policy(&apos;My second policy&apos;, [simpleRule], [])});
+      expect(policyEngine.context.activeUserPolicy).to.be.eql(undefined);
+    });
+
+    it(&apos;removes all policies&apos;, () =&gt; {
+      policyEngine.removePolicy(&apos;*&apos;);
+      expect(policyEngine.context.serviceProviderPolicy).to.be.eql({});
+      expect(policyEngine.context.userPolicies).to.be.eql({});
+      expect(policyEngine.context.activeUserPolicy).to.be.eql(undefined);
+    });
+
+    it(&apos;does not apply rules as it is not its target&apos;, (done) =&gt; {
+      policyEngine.addPolicy(&apos;USER&apos;, &apos;My policy&apos;, new Policy(&apos;My policy&apos;, [sourceRuleForConn], []));
+      policyEngine.context.activeUserPolicy = &apos;My policy&apos;;
+      expect(policyEngine.authorise(messageFromChat).then((message) =&gt; {
+        return message;
+      }), (error) =&gt; {
+        return error;
+      }).to.be.fulfilled.and.eventually.eql(messageFromChat).and.notify(done);
+
+      policyEngine.removePolicy(&apos;*&apos;);
+      policyEngine.addPolicy(&apos;USER&apos;, &apos;My policy&apos;, new Policy(&apos;My policy&apos;, [sourceRuleForUser1], []));
+      policyEngine.context.activeUserPolicy = &apos;My policy&apos;;
+      expect(policyEngine.authorise(messageFromUser2).then((message) =&gt; {
+        return message;
+      }), (error) =&gt; {
+        return error;
+      }).to.be.fulfilled.and.eventually.eql(messageFromChat).and.notify(done);
+    });
+
+    it(&apos;applies a rule as it is its target&apos;, (done) =&gt; {
+      policyEngine.addPolicy(&apos;USER&apos;, &apos;My policy&apos;, new Policy(&apos;My policy&apos;, [sourceRuleForConn], []));
+      policyEngine.context.activeUserPolicy = &apos;My policy&apos;;
+      expect(policyEngine.authorise(messageFromConn).then((message) =&gt; {
+        return message;
+      }), (error) =&gt; {
+        return error;
+      }).to.be.rejected.and.notify(done);
+    });
+  });
+
+  describe(&apos;functionality: scheme&apos;, () =&gt; {
+    it(&apos;rejects the message as it is from a blocked scheme&apos;, (done) =&gt; {
+      policyEngine.removePolicy(&apos;*&apos;);
+      policyEngine.addPolicy(&apos;USER&apos;, &apos;My policy&apos;, new Policy(&apos;My policy&apos;, [schemeRule], []));
+      policyEngine.context.activeUserPolicy = &apos;My policy&apos;;
+      expect(policyEngine.authorise(messageFromBlocked).then((message) =&gt; {
+        return message;
+      }), (error) =&gt; {
+        return error;
+      }).to.be.rejected.and.notify(done);
+    });
+
+    it(&apos;allows the message as it comes from a scheme that is not blocked&apos;, (done) =&gt; {
+      expect(policyEngine.authorise(message).then((message) =&gt; {
+        return message;
+      }), (error) =&gt; {
+        return error;
+      }).to.be.fulfilled.and.eventually.eql(message).and.notify(done);
+    });
+  });
+
+  describe(&apos;functionality: source&apos;, () =&gt; {
+    let sourceRule2 = new Rule(false, new Condition(&apos;source&apos;, &apos;in&apos;, [&apos;user@blockedDomain&apos;]));
+    it(&apos;rejects the message as it comes from a blocked source&apos;, (done) =&gt; {
+      policyEngine.removePolicy(&apos;*&apos;);
+      policyEngine.addPolicy(&apos;USER&apos;, &apos;My policy&apos;, new Policy(&apos;My policy&apos;, [sourceRule2], []));
+      policyEngine.context.activeUserPolicy = &apos;My policy&apos;;
+      expect(policyEngine.authorise(messageFromBlocked).then((message) =&gt; {
+        return message;
+      }), (error) =&gt; {
+        return error;
+      }).to.be.rejected.and.notify(done);
+    });
+
+    it(&apos;rejects the message as it comes from a blocked source&apos;, (done) =&gt; {
+      policyEngine.removePolicy(&apos;*&apos;);
+      policyEngine.addPolicy(&apos;USER&apos;, &apos;My policy&apos;, new Policy(&apos;My policy&apos;, [sourceRule], []));
+      policyEngine.context.activeUserPolicy = &apos;My policy&apos;;
+      expect(policyEngine.authorise(messageFromBlocked).then((message) =&gt; {
+        return message;
+      }), (error) =&gt; {
+        return error;
+      }).to.be.rejected.and.notify(done);
+    });
+
+    it(&apos;allows the message as it comes from a source that is not blocked&apos;, (done) =&gt; {
+      expect(policyEngine.authorise(message).then((message) =&gt; {
+        return message;
+      }), (error) =&gt; {
+        return error;
+      }).to.be.fulfilled.and.eventually.eql(message).and.notify(done);
+    });
+  });
+
+  describe(&apos;functionality: domain&apos;, () =&gt; {
+    it(&apos;rejects the message as it comes from a blocked domain&apos;, (done) =&gt; {
+      policyEngine.removePolicy(&apos;*&apos;);
+      policyEngine.addPolicy(&apos;USER&apos;, &apos;My policy&apos;, new Policy(&apos;My policy&apos;, [domainRule], []));
+      policyEngine.context.activeUserPolicy = &apos;My policy&apos;;
+      expect(policyEngine.authorise(messageFromBlocked).then((message) =&gt; {
+        return message;
+      }), (error) =&gt; {
+        return error;
+      }).to.be.rejected.and.notify(done);
+    });
+
+    it(&apos;allows the message as it comes from a domain that is not blocked&apos;, (done) =&gt; {
+      expect(policyEngine.authorise(message).then((message) =&gt; {
+        return message;
+      }), (error) =&gt; {
+        return error;
+      }).to.be.fulfilled.and.eventually.eql(message).and.notify(done);
+    });
+  });
+
+  describe(&apos;data objects management&apos;, () =&gt; {
+    it(&apos;rejects a subscription attempt, as the policy rejects all&apos;, (done) =&gt; {
+      policyEngine.removePolicy(&apos;*&apos;);
+      policyEngine.addPolicy(&apos;USER&apos;, &apos;My policy&apos;, new Policy(&apos;My policy&apos;, [blockAnySubscriptionRule], []));
+      policyEngine.context.activeUserPolicy = &apos;My policy&apos;;
+      expect(policyEngine.authorise(subscribeMessage).then((message) =&gt; {
+        return message;
+      }), (error) =&gt; {
+        return error;
+      }).to.be.rejected.and.notify(done);
+    });
+
+    it(&apos;accepts a subscription attempt, as the policy accepts all&apos;, (done) =&gt; {
+      policyEngine.removePolicy(&apos;*&apos;);
+      policyEngine.addPolicy(&apos;USER&apos;, &apos;My policy&apos;, new Policy(&apos;My policy&apos;, [acceptAnySubscriptionRule], []));
+      policyEngine.context.activeUserPolicy = &apos;My policy&apos;;
+      expect(policyEngine.authorise(subscribeMessage).then((message) =&gt; {
+        return message;
+      }), (error) =&gt; {
+        return error;
+      }).to.be.fulfilled.and.eventually.eql(allowedSubscribeMessage).and.notify(done);
+    });
+
+    it(&apos;accepts a subscription attempt, as the policy accepts preauthorised subscribers and is preauthorised&apos;, (done) =&gt; {
+      policyEngine.removePolicy(&apos;*&apos;);
+      policyEngine.addPolicy(&apos;USER&apos;, &apos;My policy&apos;, new Policy(&apos;My policy&apos;, [acceptPreAuthSubscriptionRule], []));
+      policyEngine.context.activeUserPolicy = &apos;My policy&apos;;
+      expect(policyEngine.authorise(subscribeMessage).then((message) =&gt; {
+        return message;
+      }), (error) =&gt; {
+        return error;
+      }).to.be.fulfilled.and.eventually.eql(allowedSubscribeMessage).and.notify(done);
+    });
+
+    it(&apos;rejects a subscription attempt, as the policy rejects non-preauthorised subscriber and is not preauthorised&apos;, (done) =&gt; {
+      policyEngine.removePolicy(&apos;*&apos;);
+      policyEngine.addPolicy(&apos;USER&apos;, &apos;My policy&apos;, new Policy(&apos;My policy&apos;, [blockPreAuthSubscriptionRule], []));
+      policyEngine.context.activeUserPolicy = &apos;My policy&apos;;
+      expect(policyEngine.authorise(badSubscribeMessage).then((message) =&gt; {
+        return message;
+      }), (error) =&gt; {
+        return error;
+      }).to.be.rejected.and.notify(done);
+    });
+  });
+
+  describe(&apos;groups management&apos;, () =&gt; {
+    let groups = policyEngine.context.groups;
+    for (let i in groups) {
+      policyEngine.context.deleteGroup(i);
+    }
+
+    it(&apos;creates a group&apos;, () =&gt; {
+      policyEngine.context.createGroup(&apos;groupA&apos;);
+      expect(policyEngine.context.getGroupsNames()).to.be.eql([&apos;groupA&apos;]);
+    });
+
+    it(&apos;creates a second group&apos;, () =&gt; {
+      policyEngine.context.createGroup(&apos;groupB&apos;);
+      expect(policyEngine.context.getGroupsNames()).to.be.eql([&apos;groupA&apos;, &apos;groupB&apos;]);
+    });
+
+    it(&apos;adds an email to a group&apos;, () =&gt; {
+      policyEngine.context.addToGroup(&apos;groupA&apos;, &apos;user1@domain&apos;);
+      expect(policyEngine.context.getGroup(&apos;groupA&apos;)).to.be.eql([&apos;user1@domain&apos;]);
+    });
+
+    it(&apos;adds a second email to a group&apos;, () =&gt; {
+      policyEngine.context.addToGroup(&apos;groupA&apos;, &apos;user2@domain&apos;);
+      expect(policyEngine.context.getGroup(&apos;groupA&apos;)).to.be.eql([&apos;user1@domain&apos;, &apos;user2@domain&apos;]);
+    });
+
+    it(&apos;removes a user from a group&apos;, () =&gt; {
+      policyEngine.context.removeFromGroup(&apos;groupA&apos;, &apos;user1@domain&apos;);
+      expect(policyEngine.context.getGroup(&apos;groupA&apos;)).to.be.eql([&apos;user2@domain&apos;]);
+    });
+
+    it(&apos;deletes a group&apos;, () =&gt; {
+      policyEngine.context.deleteGroup(&apos;groupA&apos;);
+      expect(policyEngine.context.getGroup(&apos;groupA&apos;)).to.be.eql([]);
+      expect(policyEngine.context.getGroupsNames()).to.be.eql([&apos;groupB&apos;]);
+    });
+  });
+  policyEngine.removePolicy(&apos;*&apos;);
+
+});
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.5.2)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

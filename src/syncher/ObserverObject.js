@@ -10,14 +10,28 @@ class ObserverObject {
     _this._url = url;
     _this._childrens = childrens;
 
+    _this._storageManager = parent._storageManager;
+
     _this._bus = parent._bus;
+
     _this._subscriptions = {};
+    _this._storageSubscriptions = {};
+  }
+
+  _newSubscription(hyperty) {
+    let _this = this;
+
+    let subscription = _this._subscriptions[hyperty];
+    console.log('[Observer Object - new subscription] - ',  _this._subscriptions, hyperty, _this._subscriptions.hasOwnProperty(hyperty));
+    if (!subscription) {
+      _this._subscriptions[hyperty] = new Subscription(_this._bus, hyperty, _this._url, _this._childrens, false);
+    }
   }
 
   addSubscription(hyperty) {
     let _this = this;
 
-    _this._subscriptions[hyperty] = new Subscription(_this._bus, hyperty, _this._url, _this._childrens, false);
+    _this._newSubscription(hyperty);
   }
 
   removeSubscription(hyperty) {

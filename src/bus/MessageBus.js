@@ -60,6 +60,7 @@ class MessageBus extends Bus {
    * @return {number}                  the Message id
    */
   postMessage(inMsg, responseCallback) {
+    console.log('onPOSTMessage: ', inMsg);
     let _this = this;
 
     _this._genId(inMsg);

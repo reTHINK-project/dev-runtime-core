@@ -11,8 +11,9 @@ class ReporterObject {
     _this._url = url;
 
     _this._bus = parent._bus;
+    _this._storageManager = parent._storageManager;
 
-    _this._domain = divideURL(owner).domain;
+    _this._domain = divideURL(url).domain;
     _this._objSubscriptorURL = _this._url + '/subscription';
 
     _this._subscriptions = {};
@@ -40,6 +41,9 @@ class ReporterObject {
     let changeURL = _this._url + '/changes';
     _this._changeListener = _this._bus.addListener(changeURL, (msg) => {
       //TODO: what todo here? Save changes?
+      if (msg.body.attribute) {
+        _this._parent._storeDataObjects.updateData(_this._url, 'data', msg.body.attribute, msg.body.value, true);
+      }
       console.log('SyncherManager-' + changeURL + '-RCV: ', msg);
     });
   }
@@ -62,6 +66,18 @@ class ReporterObject {
     //remove all subscriptions
     Object.keys(_this._subscriptions).forEach((key) => {
       _this._subscriptions[key]._releaseListeners();
+    });
+  }
+
+  resumeSubscriptions(subscriptions) {
+    let _this = this;
+
+    Object.keys(subscriptions).forEach((key) => {
+      let hypertyURL = subscriptions[key];
+
+      if (!_this._subscriptions[hypertyURL]) {
+        _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, _this._childrens, true);
+      }
     });
   }
 
@@ -127,7 +143,11 @@ class ReporterObject {
       }
 
       let childBaseURL = _this._url + '/children/';
-      _this._childrens.push(childrens);
+      console.log('[ReporterObject - addChildrens] - childrens: ', childrens, childBaseURL);
+
+      childrens.forEach((child) => {
+        _this._childrens.push(child);
+      });
 
       /*
       _this._childrens.forEach((child) => {
@@ -139,6 +159,8 @@ class ReporterObject {
 
       let subscriptions = [];
       childrens.forEach((child) => subscriptions.push(childBaseURL + child));
+
+      //_this._storageSubscriptions[_this._objSubscriptorURL] = {url: _this._url, owner: _this._owner, childrens: _this._childrens};
 
       //FLOW-OUT: message sent to the msg-node SubscriptionManager component
       let nodeSubscribeMsg = {
@@ -205,13 +227,16 @@ class ReporterObject {
 
     //validate if subscription already exists?
     if (_this._subscriptions[hypertyURL]) {
-      let errorMsg = {
-        id: msg.id, type: 'response', from: msg.to, to: hypertyURL,
-        body: { code: 500, desc: 'Subscription for (' + _this._url + ' : ' +  hypertyURL + ') already exists!' }
-      };
+      // let errorMsg = {
+      //   id: msg.id, type: 'response', from: msg.to, to: hypertyURL,
+      //   body: { code: 500, desc: 'Subscription for (' + _this._url + ' : ' +  hypertyURL + ') already exists!' }
+      // };
+      //
+      // _this._bus.postMessage(errorMsg);
+      // return;
 
-      _this._bus.postMessage(errorMsg);
-      return;
+      // new version because of reusage
+      _this._subscriptions[hypertyURL]._releaseListeners();
     }
 
     //ask to subscribe to Syncher? (depends on the operation mode)
@@ -225,11 +250,26 @@ class ReporterObject {
         body: { type: msg.type, from: hypertyURL, to: _this._url, identity: msg.body.identity }
       };
 
+      //TODO: For Further Study
+      if (msg.body.hasOwnProperty('mutualAuthentication')) forwardMsg.body.mutualAuthentication = msg.body.mutualAuthentication;
+
       _this._bus.postMessage(forwardMsg, (reply) => {
         console.log('forward-reply: ', reply);
         if (reply.body.code === 200) {
-          _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, _this._childrens, true);
+          if (!_this._subscriptions[hypertyURL]) {
+            console.log('[Reporter Object] - _onRemoteSubscribe:', _this._childrens);
+            _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, _this._childrens, true);
+          }
         }
+
+        // Store for each reporter hyperty the dataObject
+        let userURL;
+        if (msg.body.identity && msg.body.identity.userProfile.userURL) {
+          userURL = msg.body.identity.userProfile.userURL;
+          _this._parent._storeDataObjects.update(_this._url, 'subscriberUsers', userURL);
+        }
+
+        _this._parent._storeDataObjects.update(_this._url, 'subscriptions', hypertyURL);
 
         //FLOW-OUT: subscription response sent (forward from internal Hyperty)
         _this._bus.postMessage({

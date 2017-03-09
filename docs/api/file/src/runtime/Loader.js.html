@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">src/runtime/Loader.js | Service Framework API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  <a href="test.html" data-ice="testLink">Test</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">allocation</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/allocation/AddressAllocation.js~AddressAllocation.html">AddressAllocation</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html">Bus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html">MiniBus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Pipeline.js~Pipeline.html">Pipeline</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">graphconnector</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/BloomFilter.js~BloomFilter.html">BloomFilter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GlobalRegistryRecord.js~GlobalRegistryRecord.html">GlobalRegistryRecord</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html">GraphConnector</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html">GraphConnectorContactData</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">identity</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/Crypto.js~Crypto.html">Crypto</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/GuiFake.js~GuiFake.html">GuiFake</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/Identity.js~Identity.html">Identity</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/IdentityModule.js~IdentityModule.html">IdentityModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/OpenIdLib.js~OpenIdLib.html">OpenIdLib</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/ActionsService.js~ActionsService.html">ActionsService</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/CombiningAlgorithm.js~CombiningAlgorithm.html">CombiningAlgorithm</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Operators.js~Operators.html">Operators</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/PDP.js~PDP.html">PDP</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/PEP.js~PEP.html">PEP</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Policy.js~Policy.html">Policy</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/ReThinkCtx.js~ReThinkCtx.html">ReThinkCtx</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Rule.js~Rule.html">Rule</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/combiningAlgorithms</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/AllowOverrides.js~AllowOverrides.html">AllowOverrides</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/BlockOverrides.js~BlockOverrides.html">BlockOverrides</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/FirstApplicable.js~FirstApplicable.html">FirstApplicable</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/conditions</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/AdvancedCondition.js~AdvancedCondition.html">AdvancedCondition</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/Condition.js~Condition.html">Condition</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/SubscriptionCondition.js~SubscriptionCondition.html">SubscriptionCondition</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/context</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html">RuntimeCoreCtx</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">protostub</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/protostub/IdpProxyStub.js~IdpProxyStub.html">IdpProxyStub</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-activate">activate</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">registry</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/Discovery.js~Discovery.html">Discovery</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/DiscoveryServiceFramework.js~DiscoveryServiceFramework.html">DiscoveryServiceFramework</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/HypertyInstance.js~HypertyInstance.html">HypertyInstance</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html">Registry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/RegistryDataModel.js~RegistryDataModel.html">RegistryDataModel</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">runtime</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/Descriptors.js~Descriptors.html">Descriptors</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/Loader.js~Loader.html">Loader</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/RuntimeUA.js~RuntimeUA.html">RuntimeUA</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-runtimeConfiguration">runtimeConfiguration</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-runtimeUtils">runtimeUtils</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">sandbox</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/sandbox/Sandbox.js~Sandbox.html">Sandbox</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/sandbox/SandboxRegistry.js~SandboxRegistry.html">SandboxRegistry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-SandboxType">SandboxType</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">syncher</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/ObserverObject.js~ObserverObject.html">ObserverObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/ReporterObject.js~ReporterObject.html">ReporterObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/StoreDataObjects.js~StoreDataObjects.html">StoreDataObjects</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/Subscription.js~Subscription.html">Subscription</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/SyncherManager.js~SyncherManager.html">SyncherManager</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">utils</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/utils/EventEmitter.js~EventEmitter.html">EventEmitter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-schemaValidation">schemaValidation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-buildURL">buildURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-convertToUserURL">convertToUserURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-deepClone">deepClone</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-divideEmail">divideEmail</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-divideURL">divideURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-emptyObject">emptyObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-generateGUID">generateGUID</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getConfigurationResources">getConfigurationResources</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserEmailFromURL">getUserEmailFromURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserIdentityDomain">getUserIdentityDomain</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserURLFromEmail">getUserURLFromEmail</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isBackendServiceURL">isBackendServiceURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isDataObjectURL">isDataObjectURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isHypertyURL">isHypertyURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isLegacy">isLegacy</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isURL">isURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isUserURL">isUserURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-removePathFromURL">removePathFromURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-tv4">tv4</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-divideURL">divideURL</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/runtime/Loader.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import {divideURL, emptyObject} from &apos;../utils/utils&apos;;
+import AddressAllocation from &apos;../allocation/AddressAllocation&apos;;
+
+class Loader {
+
+  constructor(runtimeURL, runtimeConfiguration, runtimeDescriptorsInstance) {
+    if (!runtimeConfiguration) throw   Error(&apos;[Runtime.Loader] The descriptor need to know the runtime configuration&apos;);
+    if (!runtimeDescriptorsInstance) throw   Error(&apos;[Runtime.Loader] The descriptor need to know the runtime Descriptor instance&apos;);
+
+    this.runtimeConfiguration = runtimeConfiguration;
+    this.descriptors = runtimeDescriptorsInstance;
+  }
+
+  /**
+   * Set runtime url
+   * @param  {string} value runtimeURL
+   */
+  set runtimeURL(value) {
+    this._runtimeURL = value;
+  }
+
+  /**
+   * Get runtime url
+   * @return {string} value runtimeURL
+   */
+  get runtimeURL() {
+    return this._runtimeURL;
+  }
+
+  /**
+   * Set Registry component
+   * @param  {Registry} value Registry Component
+   */
+  set registry(value) {
+    this._registry = value;
+
+    // Install AddressAllocation
+    let addressAllocation = AddressAllocation.instance;
+    this._addressAllocation = addressAllocation;
+
+    console.log(&apos;[Loader - AddressAllocation] - &apos;, addressAllocation);
+  }
+
+  /**
+   * Get Registry component
+   * @return {Registry} Registry component
+   */
+  get registry() {
+    return this._registry;
+  }
+
+  /**
+   * Set Message Bus component
+   * @param  {MessageBus} value Message bus component
+   */
+  set messageBus(value) {
+    this._messagesBus = value;
+  }
+
+  /**
+   * Get Message Bus component
+   * @return {MessageBus} Message Bus component
+   */
+  get messageBus() {
+    return this._messagesBus;
+  }
+
+  /**
+   * Set Runtime Factory component
+   * @param  {runtimeFactory} value Factory includes the specific implementations for each environment
+   */
+  set runtimeFactory(value) {
+    this._runtimeFactory = value;
+  }
+
+  /**
+   * Get Runtime Factory component
+   * @return {runtimeFactory} Runtime Factory component
+   */
+  get runtimeFactory() {
+    return this._runtimeFactory;
+  }
+
+
+  /**
+   * Deploy Hyperty from Catalogue URL
+   *
+   * @see https://github.com/reTHINK-project/specs/tree/master/datamodel/core/address
+   *
+   * @param {URL.HypertyCatalogueURL} hypertyCatalogueURL - The Catalogue URL used to identify descriptors in the Catalogue.
+   * @param {boolean|URL.HypertyURL} [reuseURL=false] reuseURL - reuseURL is used to reuse the hypertyURL previously registred, by default the reuse is disabled;
+   * @param {URL} appURL - the app url address; // TODO: improve this description;
+   * @returns {Promise&lt;Boolean, Error&gt;} this is Promise and returns true if all components are loaded with success or an error if someone fails.
+   *
+   * @memberOf Loader
+   */
+  loadHyperty(hypertyCatalogueURL, reuseURL = false, appURL) {
+
+    if (!this._readyToUse()) return false;
+    if (!hypertyCatalogueURL) throw new   Error(&apos;[Runtime.Loader] Hyperty descriptor url parameter is needed&apos;);
+
+    return new Promise((resolve, reject) =&gt; {
+
+      let _hypertyURL;
+      let _hypertySandbox;
+      let _hypertyDescriptor;
+      let _hypertySourcePackage;
+      let haveError = false;
+
+      let errorReason = (reason) =&gt; {
+        console.  Error(&apos;[Runtime.Loader] Something failed on the deploy hyperty: &apos;, reason);
+        reject(reason);
+      };
+
+      let handleError = (reason) =&gt; {
+        haveError = true;
+        reject(reason);
+      };
+
+      // Get Hyperty descriptor
+      // TODO: the request Module should be changed,
+      // because at this moment it is incompatible with nodejs;
+      // Probably we need to pass a factory like we do for sandboxes;
+      console.info(&apos;[Runtime.Loader] ------------------ Hyperty ------------------------&apos;);
+      console.info(&apos;[Runtime.Loader] Get hyperty descriptor for :&apos;, hypertyCatalogueURL);
+      return this.descriptors.getHypertyDescriptor(hypertyCatalogueURL)
+      .then((hypertyDescriptor) =&gt; {
+        // at this point, we have completed &quot;step 2 and 3&quot; as shown in https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md
+        console.info(&apos;[Runtime.Loader] 1: return hyperty descriptor&apos;);
+
+        // hyperty contains the full path of the catalogue URL, e.g.
+        // catalogue.rethink.eu/.well-known/..........
+        _hypertyDescriptor = hypertyDescriptor;
+
+        let sourcePackageURL = hypertyDescriptor.sourcePackageURL;
+
+        if (sourcePackageURL === &apos;/sourcePackage&apos;) {
+          return hypertyDescriptor.sourcePackage;
+        }
+
+        // Get the hyperty source code
+        return this.runtimeCatalogue.getSourcePackageFromURL(sourcePackageURL);
+      }, handleError)
+      .then((sourcePackage) =&gt; {
+        if (haveError) return false;
+
+        console.info(&apos;[Runtime.Loader] 2: return hyperty source code&apos;);
+
+        // at this point, we have completed &quot;step 4 and 5&quot; as shown in https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md
+
+        _hypertySourcePackage = sourcePackage;
+
+        //
+        // steps 6 -- 9 are skipped.
+        // TODO: on release of core 0.2;
+        // TODO: Promise to check the policy engine
+
+        // mock-up code;
+        // temporary code, only
+        let policy = true;
+
+        return policy;
+      }, handleError)
+      .then((policyResult) =&gt; {
+        if (haveError) return false;
+        console.info(&apos;[Runtime.Loader] 3: return policy engine result&apos; + policyResult);
+
+        // we have completed step 6 to 9 of https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
+        //
+        // Steps 6 -- 9
+        // As a result of the sipped steps, we know at this point if we execute
+        // inSameSandbox or not.
+        //
+
+        // For testing, just assume we execute in same Sandbox.
+        let inSameSandbox = true;
+        let sandbox;
+
+        if (inSameSandbox) {
+
+          // this don&apos;t need be a Promise;
+          sandbox = this.registry.getAppSandbox();
+
+          // we have completed step 11 here.
+        } else {
+
+          let domain = divideURL(hypertyCatalogueURL).domain;
+
+          // getSandbox, this will return a promise;
+          sandbox = this.registry.getSandbox(domain);
+        }
+
+        // this will return the sandbox or one promise to getSandbox;
+        return sandbox;
+      }, handleError)
+      .then((sandbox) =&gt; {
+        if (haveError) return false;
+        console.info(&apos;[Runtime.Loader] 4: return the sandbox&apos;, sandbox);
+
+        // Return the sandbox indepentely if it running in the same sandbox or not
+        // we have completed step 14 here.
+        return sandbox;
+      }, (reason) =&gt; {
+        if (haveError) return false;
+        console.  Error(&apos;[Runtime.Loader] 4.1: Try to register a new sandbox&apos;);
+
+        // check if the sandbox is registed for this hyperty descriptor url;
+        // Make Steps xxx --- xxx
+        // Instantiate the Sandbox
+
+        let hypertyCapabilities = {};
+        if (_hypertyDescriptor &amp;&amp; _hypertyDescriptor.hasOwnProperty(&apos;capabilities&apos;)) {
+          hypertyCapabilities = _hypertyDescriptor.stubCapabilities;
+        }
+
+        return this._runtimeFactory.createSandbox(hypertyCapabilities).then((sandbox) =&gt; {
+
+          sandbox.addListener(&apos;*&apos;, (msg) =&gt; {
+            this.messageBus.postMessage(msg);
+          });
+
+          return sandbox;
+        });
+      }, handleError)
+      .then((sandbox) =&gt; {
+        if (haveError) return false;
+        console.info(&apos;[Runtime.Loader] 5: return sandbox and register&apos;);
+
+        _hypertySandbox = sandbox;
+
+        let numberOfAddresses = 1;
+        return this._addressAllocation.create(this._registry._domain, numberOfAddresses, _hypertyDescriptor, &apos;hyperty&apos;, reuseURL);
+      }, handleError)
+      .then((addresses) =&gt; {
+        if (haveError) return false;
+        console.info(&apos;[Runtime.Loader] 6: return the addresses for the hyperty&apos;, addresses);
+
+        // Register hyperty
+        return this.registry.registerHyperty(_hypertySandbox, hypertyCatalogueURL, _hypertyDescriptor, addresses);
+      }, handleError)
+      .then((hypertyURL) =&gt; {
+        if (haveError) return false;
+        console.info(&apos;[Runtime.Loader] 7: Hyperty url, after register hyperty&apos;, hypertyURL);
+
+        // we have completed step 16 of https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
+        _hypertyURL = hypertyURL;
+
+        // Extend original hyperty configuration;
+        let configuration = {};
+        if (!emptyObject(_hypertyDescriptor.configuration)) {
+          try {
+            configuration = Object.assign({}, JSON.parse(_hypertyDescriptor.configuration));
+          } catch (e) {
+            configuration = _hypertyDescriptor.configuration;
+          }
+        }
+        configuration.runtimeURL = this._runtimeURL;
+
+        // We will deploy the component - step 17 of https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
+
+        try {
+          return _hypertySandbox.deployComponent(_hypertySourcePackage.sourceCode, _hypertyURL, configuration);
+        } catch (e) {
+          console.  Error(&apos;[Runtime.Loader] Error on deploy component:&apos;, e);
+          reject(e);
+        }
+      }, handleError)
+      .then((deployComponentStatus) =&gt; {
+        if (haveError) return false;
+        console.info(&apos;[Runtime.Loader] 8: Deploy component status for hyperty: &apos;, deployComponentStatus);
+
+        // we have completed step 19 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
+
+        // Add the message bus listener to the appSandbox or hypertSandbox;
+        this.messageBus.addListener(_hypertyURL, (msg) =&gt; {
+          _hypertySandbox.postMessage(msg);
+        });
+
+        // we have completed step 20 of https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
+        let hyperty = {
+          runtimeHypertyURL: _hypertyURL,
+          status: deployComponentStatus
+        };
+
+        resolve(hyperty);
+
+        // we have completed step 21 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
+        console.info(&apos;[Runtime.Loader] ------------------ END ------------------------&apos;);
+      }, handleError)
+      .catch(errorReason);
+    });
+  }
+
+  /**
+  * Deploy Stub from Catalogue URL or domain url
+  * @param  {URL.URL}     domain          domain
+  * @param  {Object}      p2pConfig       configuration of p2p
+  */
+  loadStub(protostubURL, p2pConfig) {
+
+    if (!this._readyToUse()) return false;
+    if (!protostubURL) throw new   Error(&apos;[Runtime.Loader.loadStub]ProtoStub descriptor url parameter is needed&apos;);
+
+    return new Promise((resolve, reject) =&gt; {
+
+      // to analyse if domain for p2pHandlers should be something else and not the default domain itself
+
+      let domain = divideURL(protostubURL).domain;
+
+      if (!domain) {
+        domain = protostubURL;
+      }
+
+      let _stubSandbox;
+      let _stubDescriptor;
+      let _runtimeProtoStubURL;
+      let _stubSourcePackage;
+      let haveError = false;
+      let stubId;
+
+      let errorReason = (reason) =&gt; {
+        console.  Error(&apos;[Runtime.Loader.loadStub]Something failed on the deploy of protocolstub: &apos;, reason);
+        reject(reason);
+      };
+
+      let handleError = (reason) =&gt; {
+        haveError = true;
+        reject(reason);
+      };
+
+      // Discover Protocol Stub
+      let discoverStub;
+      let isP2PHandler = false;
+      let isP2PRequester = false;
+      let stubCapabilities = {};
+
+      console.info(&apos;[Runtime.Loader.loadStub] starting loading for &apos;, protostubURL, &apos; with p2pconfig &apos;, p2pConfig);
+      console.info(&apos;[Runtime.Loader.loadStub]Discover or Create a new ProtoStub for domain: &apos;, domain);
+
+      // step 2 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+      try {
+        if (p2pConfig) {
+
+          if (p2pConfig.hasOwnProperty(&apos;isHandlerStub&apos;) &amp;&amp; p2pConfig.isHandlerStub) {
+            // step 6 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+            isP2PHandler = true;
+            stubId = this.runtimeURL;
+            discoverStub = this.registry.discoverP2PStub();
+          } else {
+            isP2PRequester = true;
+            let p2pHandlerRuntimeURL = p2pConfig.remoteRuntimeURL;
+            stubId = p2pHandlerRuntimeURL;
+
+            // step 4 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+
+            // step 5 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+            discoverStub = this.registry.discoverP2PStub(p2pHandlerRuntimeURL);
+          }
+
+        } else {
+          // step 3 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          stubId = domain;
+          discoverStub = this.registry.discoverProtostub(domain);
+        }
+
+        // Is registed?
+        console.info(&apos;[Runtime.Loader.loadStub]1. Proto Stub Discovered for &apos;, protostubURL, &apos;: &apos;, discoverStub);
+
+        // step 23 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+        resolve(discoverStub);
+        console.info(&apos; [Runtime.Loader]------------------- END ---------------------------\n&apos;);
+
+      } catch (reason) {
+
+        // is not registed?
+        console.info(&apos;[Runtime.Loader.loadStub]1. Proto Stub not found &apos; + reason);
+
+        // step 8 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+        this.descriptors.getStubDescriptor(protostubURL)
+        .then((stubDescriptor) =&gt; {
+
+          if (haveError) return false;
+          console.info(&apos;[Runtime.Loader.loadStub]2. return the ProtoStub descriptor&apos;);
+
+          // step 9 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          _stubDescriptor = stubDescriptor;
+
+          let sourcePackageURL = stubDescriptor.sourcePackageURL;
+
+          if (sourcePackageURL === &apos;/sourcePackage&apos;) {
+            return stubDescriptor.sourcePackage;
+          }
+
+          // step 10 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          return this.runtimeCatalogue.getSourcePackageFromURL(sourcePackageURL);
+        }, handleError)
+        .catch(errorReason)
+        .then((stubSourcePackage) =&gt; {
+          if (haveError) return false;
+
+          // According to debug, it seems RuntimeCatalogue does not support yet constraints. It appears empty!!!!
+
+          if (_stubDescriptor &amp;&amp; _stubDescriptor.constraints) {
+            stubCapabilities = _stubDescriptor.constraints;
+          }
+
+          // step 11 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          console.info(&apos;[Runtime.Loader.loadStub]3. return the ProtoStub Source Code&apos;);
+          _stubSourcePackage = stubSourcePackage;
+
+          // this will return the sandbox or one promise to getSandbox;
+          // step 12 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          return this.registry.getSandbox(domain, stubCapabilities);
+        })
+        .then((stubSandbox) =&gt; {
+          if (haveError) return false;
+
+          // step 15 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          console.info(&apos;[Runtime.Loader.loadStub]4. if the sandbox is registered then return the sandbox &apos;, stubSandbox);
+
+          _stubSandbox = stubSandbox;
+          return stubSandbox;
+        })
+        .catch((reason) =&gt; {
+          if (haveError) return false;
+
+          // step 13 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          console.info(&apos;[Runtime.Loader.loadStub]5. Sandbox was not found, creating a new one &apos;, reason);
+
+          // check if the sandbox is registed for this stub descriptor url;
+
+
+          // step 14 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          return this._runtimeFactory.createSandbox(stubCapabilities).then((sandbox) =&gt; {
+
+            sandbox.addListener(&apos;*&apos;, (msg) =&gt; {
+              this.messageBus.postMessage(msg);
+            });
+
+            return sandbox;
+          });
+
+        })
+        .then((sandbox) =&gt; {
+          if (haveError) return false;
+
+          // step 16 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          console.info(&apos;[Runtime.Loader.loadStub]6. return the sandbox instance and register&apos;, sandbox, &apos;to domain &apos;, domain);
+
+          _stubSandbox = sandbox;
+
+          // we need register stub on registry - step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          return this.registry.registerStub(_stubSandbox, stubId, p2pConfig, protostubURL, _stubDescriptor);
+        }, handleError)
+        .then((runtimeProtoStub) =&gt; {
+          if (haveError) return false;
+
+          // step 23 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          console.info(&apos;[Runtime.Loader.loadStub] 7. return the runtime protostub url: &apos;, runtimeProtoStub);
+
+          _runtimeProtoStubURL = runtimeProtoStub.url;
+
+          // Extend original hyperty configuration;
+          let configuration = {};
+          if (!emptyObject(_stubDescriptor.configuration)) {
+            try {
+              configuration = Object.assign({}, JSON.parse(_stubDescriptor.configuration));
+            } catch (e) {
+              configuration = _stubDescriptor.configuration;
+            }
+          }
+
+          if (p2pConfig) {
+            try {
+              configuration = Object.assign(configuration, JSON.parse(p2pConfig));
+            } catch (e) {
+              configuration = Object.assign(configuration, p2pConfig);
+            }
+          }
+
+          // required for protostub session
+
+          configuration.runtimeURL = this._runtimeURL;
+
+          // step 24 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          try {
+            return _stubSandbox.deployComponent(_stubSourcePackage.sourceCode, _runtimeProtoStubURL, configuration);
+          } catch (e) {
+            console.    Error(&apos;[Runtime.Loader.loadStub] Error on deploy component:&apos;, e);
+            reject(e);
+          }
+        }, handleError)
+        .then((deployComponentStatus) =&gt; {
+          if (haveError) return false;
+
+          // step 26 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          console.info(&apos;[Runtime.Loader.loadStub] 8: return deploy component for sandbox status: &apos;, deployComponentStatus);
+
+          // step 27 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          // Add the message bus listener
+          this.messageBus.addListener(_runtimeProtoStubURL, (msg) =&gt; {
+            _stubSandbox.postMessage(msg);
+          });
+
+          // step 28 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          let stub;
+          if (p2pConfig) {
+            console.log(&apos;[Runtime.Loader.loadStub] p2pConfig: &apos;, p2pConfig);
+
+            if (p2pConfig.hasOwnProperty(&apos;isHandlerStub&apos;)) stub = this.registry.p2pHandlerStub[this._runtimeURL];
+            if (p2pConfig.hasOwnProperty(&apos;p2pRequesterStub&apos;)) stub = this.registry.p2pRequesterStub[p2pConfig.remoteRuntimeURL];
+          } else {
+            stub = this.registry.protostubsList[domain];
+          }
+
+          console.log(&apos;[Runtime.Loader.loadStub] Stub: &apos;, stub);
+          resolve(stub);
+          console.info(&apos;[Runtime.Loader.loadStub]------------------- END ---------------------------\n&apos;);
+        }, handleError)
+        .catch(errorReason);
+
+      }
+
+    });
+
+  }
+
+  /**
+  * Deploy idpProxy from Catalogue URL or domain url
+  * @param  {URL.URL}     domain          domain
+  */
+
+  loadIdpProxy(idpProxyURL) {
+
+    if (!this._readyToUse()) return false;
+    if (!idpProxyURL) throw new   Error(&apos;[Runtime.Loader] IdpProxy descriptor url parameter is needed&apos;);
+
+    return new Promise((resolve, reject) =&gt; {
+
+      let domain = divideURL(idpProxyURL).domain;
+
+      if (!domain) {
+        domain = idpProxyURL;
+      }
+
+      let _proxySandbox;
+      let _proxyDescriptor;
+      let _runtimeIdpProxyURL;
+      let _proxySourcePackage;
+      let haveError = false;
+
+      let errorReason = (reason) =&gt; {
+        console.  Error(&apos;[Runtime.Loader] Something failed on the deploy of IdpProxy: &apos;, reason);
+        reject(reason);
+      };
+
+      let handleError = (reason) =&gt; {
+        haveError = true;
+        reject(reason);
+      };
+
+      // Discover IDPProxy
+      console.info(&apos;[Runtime.Loader] ------------------- IDP Proxy Deploy ---------------------------\n&apos;);
+      console.info(&apos;[Runtime.Loader] Discover or Create a new IdpProxy for domain/URL: &apos;, domain);
+
+      try {
+        let runtimeIdpProxyURL = this.registry.discoverIdpProxy(domain);
+
+        // Is registed?
+        console.info(&apos;[Runtime.Loader] 1. IDPProxy Discovered: &apos;, runtimeIdpProxyURL);
+
+        // we have completed step 2 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+
+        let idpProxy = this.registry.idpProxyList[domain];
+        console.log(&apos;Deployed: &apos;, idpProxy);
+
+        resolve(idpProxy);
+        console.info(&apos;[Runtime.Loader] ------------------- END ---------------------------\n&apos;);
+      } catch (reason) {
+
+        // is not registed?
+        console.info(&apos;[Runtime.Loader] 1. IdpProxy not found:&apos;, reason);
+
+        // we have completed step 3 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+
+        // we need to get ProtoStub descriptor step 4 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+        this.descriptors.getIdpProxyDescriptor(idpProxyURL)
+        .then((proxyDescriptor) =&gt; {
+
+          console.info(&apos;[Runtime.Loader] 2. Return the IDPProxy descriptor&apos;);
+
+          // we have completed step 5 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          _proxyDescriptor = proxyDescriptor;
+
+          let sourcePackageURL = proxyDescriptor.sourcePackageURL;
+
+          if (sourcePackageURL === &apos;/sourcePackage&apos;) {
+            return proxyDescriptor.sourcePackage;
+          }
+
+          // we need to get ProtoStub Source code from descriptor - step 6 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          return this.runtimeCatalogue.getSourcePackageFromURL(sourcePackageURL);
+        }, handleError)
+        .then((sourcePackage) =&gt; {
+          if (haveError) return false;
+          console.info(&apos;[Runtime.Loader] 3. return the IDPProxy source package&apos;);
+
+          // we have completed step 7 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+
+          _proxySourcePackage = sourcePackage;
+
+          // TODO: Check on PEP (policy Engine) if we need the sandbox and check if the Sandbox Factory have the context sandbox;
+          let policy = true;
+          return policy;
+        }, handleError)
+        .then((policy) =&gt; {
+          if (haveError) return false;
+
+          // this will return the sandbox or one promise to getSandbox;
+          return this.registry.getSandbox(domain);
+        })
+        .then((proxySandbox) =&gt; {
+          if (haveError) return false;
+          console.info(&apos;[Runtime.Loader] 4. if the sandbox is registered then return the sandbox&apos;, proxySandbox);
+
+          _proxySandbox = proxySandbox;
+          return proxySandbox;
+        })
+        .catch((reason) =&gt; {
+          if (haveError) return false;
+          console.info(&apos;[Runtime.Loader] 5. Sandbox was not found, creating a new one&apos;, reason);
+
+          let proxyCapabilities = {};
+          if (_proxyDescriptor &amp;&amp; _proxyDescriptor.hasOwnProperty(&apos;capabilities&apos;)) {
+            _proxyDescriptor = _proxyDescriptor.stubCapabilities;
+          }
+
+          return this._runtimeFactory.createSandbox(proxyCapabilities).then((sandbox) =&gt; {
+
+            sandbox.addListener(&apos;*&apos;, (msg) =&gt; {
+              this.messageBus.postMessage(msg);
+            });
+
+            return sandbox;
+          });
+        })
+        .then((sandbox) =&gt; {
+          if (haveError) return false;
+          console.info(&apos;[Runtime.Loader] 6. return the sandbox instance and register&apos;, sandbox, &apos;to domain &apos;, domain);
+
+          _proxySandbox = sandbox;
+
+          // we need register stub on registry - step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+          return this.registry.registerIdpProxy(sandbox, domain);
+        }, handleError)
+        .then((runtimeIdpProxyURL) =&gt; {
+          if (haveError) return false;
+          console.info(&apos;[Runtime.Loader] 7. Return the runtime Idp Proxy URL: &apos;, runtimeIdpProxyURL);
+
+          // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+
+          _runtimeIdpProxyURL = runtimeIdpProxyURL;
+
+          // Extend original hyperty configuration;
+          let configuration = {};
+          if (!emptyObject(_proxyDescriptor.configuration)) {
+            try {
+              configuration = Object.assign({}, JSON.parse(_proxyDescriptor.configuration));
+            } catch (e) {
+              configuration = _proxyDescriptor.configuration;
+            }
+          }
+          configuration.runtimeURL = this._runtimeURL;
+
+          // Deploy Component step xxx
+          try {
+            return _proxySandbox.deployComponent(_proxySourcePackage.sourceCode, runtimeIdpProxyURL, configuration);
+          } catch (e) {
+            console.  Error(&apos;[Runtime.Loader] Error on deploy component:&apos;, e);
+            reject(e);
+          }
+        }, handleError)
+        .then((deployComponentStatus) =&gt; {
+          if (haveError) return false;
+          console.info(&apos;[Runtime.Loader] 8: return deploy component for sandbox status: &apos;, deployComponentStatus);
+
+          // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+
+          // Add the message bus listener
+          this.messageBus.addListener(_runtimeIdpProxyURL, (msg) =&gt; {
+            _proxySandbox.postMessage(msg);
+          });
+
+          // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+
+          // Load Stub function resolved with success;
+          // let idpProxy = {
+          //   runtimeIdpProxyURL: _runtimeIdpProxyURL,
+          //   status: deployComponentStatus
+          // };
+
+          this.registry.idpProxyList[domain].status = &apos;deployed&apos;;
+          let idpProxy = this.registry.idpProxyList[domain];
+
+          console.log(&apos;Deployed: &apos;, idpProxy);
+
+          resolve(idpProxy);
+          console.info(&apos;[Runtime.Loader] ------------------- END ---------------------------\n&apos;);
+
+        }, handleError)
+        .catch(errorReason);
+      }
+
+    });
+  }
+
+  // Check if the loader is ready to load all components
+  _readyToUse() {
+
+    let status = false;
+
+    if (!this._runtimeURL) throw new   Error(&apos;[Runtime.Loader] The loader need the runtime url address&apos;);
+    if (!this._messagesBus) throw new   Error(&apos;[Runtime.Loader] The loader need the messageBus component&apos;);
+    if (!this._registry) throw new   Error(&apos;[Runtime.Loader] The loader need the registry component&apos;);
+    if (!this._runtimeFactory) throw new   Error(&apos;[Runtime.Loader] The loader need the runtime factory component&apos;);
+
+    status = true;
+    return status;
+  }
+
+}
+
+export default Loader;
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.5.2)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

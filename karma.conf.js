@@ -6,7 +6,8 @@ module.exports = function(config) {
       './test/*.spec.js'
     ],
     exclude: [
-      'test/GraphConnector.spec.js'
+      './test/GraphConnector.spec.js',
+      './test/PolicyEngine.spec.js'
     ],
     preprocessors: {
       './test/*.spec.js': ['webpack']
@@ -19,13 +20,18 @@ module.exports = function(config) {
     client: {
       mocha: {
         reporter: 'html'
-      }
+      },
+      captureConsole: true
     },
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
     autoWatch: true,
+
+    // start these browsers
+    // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
     browsers: ['ChromeTravis'],
+
     customLaunchers: {
       ChromeTravis: {
         base: 'Chrome',

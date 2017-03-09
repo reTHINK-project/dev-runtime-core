@@ -69,15 +69,16 @@ module.exports = {
     minibus: './src/minibus.js'
   },
   output: {
-    path: path.join(__dirname, "dist"),
-		filename: "[name].js",
-		library: "[name]",
-    libraryTarget: "umd",
+    path: path.join(__dirname, 'dist'),
+    filename: '[name].js',
+    library: '[name]',
+    libraryTarget: 'umd',
     umdNamedDefine: true
   },
   devtool: process.env.MODE === 'dev' ? 'inline-eval-cheap-source-map' : false,
   module: {
     rules: [
+
       /*{
         test: /\.js$/,
         exclude: /node_modules/,
@@ -95,6 +96,7 @@ module.exports = {
       }
     ]
   },
+
   //resolve: { extensions: ['.js'] },
   plugins: getModeConfig()
 };

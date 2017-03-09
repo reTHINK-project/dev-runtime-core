@@ -166,6 +166,12 @@ describe('Policies management', () => {
 
 describe('Policy Engine with Runtime Core context', () => {
   let runtimeRegistry = {
+    isInterworkingProtoStub: () => {
+      return false;
+    },
+    isLocal: () => {
+      return true;
+    },
     getPreAuthSubscribers: () => {
       return ['hyperty://domain/hyperty-instance'];
     },
@@ -211,7 +217,12 @@ describe('Policy Engine with Runtime Core context', () => {
         resolve(message);
       });
     },
-    getIdentityOfHyperty: () => {
+    getIdentity: () => {
+      return new Promise((resolve) => {
+        resolve({ userProfile: {username: 'user@domain' } });
+      });
+    },
+    getToken: () => {
       return new Promise((resolve) => {
         resolve({ userProfile: {username: 'user@domain' } });
       });
@@ -224,8 +235,8 @@ describe('Policy Engine with Runtime Core context', () => {
       });
     }
   };
-  let persistenceManager = runtimeFactory.persistenceManager();
-  let policyEngine = new PEP(new RuntimeCoreCtx(identityModule, runtimeRegistry, persistenceManager, runtimeCapabilities));
+  let storageManager = runtimeFactory.storageManager();
+  let policyEngine = new PEP(new RuntimeCoreCtx(identityModule, runtimeRegistry, storageManager, runtimeCapabilities));
 
   describe('initial filtering', () => {
     it('message that loads an hyperty should not be validated by policies', () => {
