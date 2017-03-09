@@ -77,6 +77,22 @@ class IdentityModule {
 
   }
 
+  callIdentityModuleFunc(methodName, parameters) {
+    let _this = this;
+    let message;
+
+    return new Promise((resolve, reject) => {
+      message = { type: 'execute', to: _this._guiURL, from: _this._idmURL,
+        body: { resource: 'identity', method: methodName, params: parameters }, };
+      _this._messageBus.postMessage(message, (res) => {
+        let result = res.body.value;
+
+        //console.log('TIAGO: return from callIdentityModuleFunc ', result);
+        resolve(result);
+      });
+    });
+  }
+
   /**
   * return the messageBus in this Registry
   * @param {MessageBus}           messageBus
@@ -103,8 +119,6 @@ class IdentityModule {
     _this._messageBus.addListener(_this._idmURL, (msg) => {
       let funcName = msg.body.method;
 
-      //console.log('TIAGO: executing ', funcName);
-
       let returnedValue;
       if (funcName === 'deployGUI') {
         returnedValue = _this.deployGUI();
@@ -128,14 +142,6 @@ class IdentityModule {
         let usernameHint = msg.body.params.usernameHint;
         let ipDomain = msg.body.params.ipDomain;
         _this.sendGenerateMessage(contents, origin, usernameHint, ipDomain).then((returnedValue) => {
-          let value = {type: 'execute', value: returnedValue, code: 200};
-          let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
-          _this._messageBus.postMessage(replyMsg);
-        });
-        return;
-      } else if (funcName === 'openPopup') {
-        let urlreceived = msg.body.params.urlreceived;
-        _this.openPopup(urlreceived).then((returnedValue) => {
           let value = {type: 'execute', value: returnedValue, code: 200};
           let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
           _this._messageBus.postMessage(replyMsg);
@@ -400,45 +406,6 @@ class IdentityModule {
           reject('error on requesting an identity to the GUI');
         }
       });
-    });
-  }
-
-  openPopup(urlreceived) {
-
-    return new Promise((resolve, reject) => {
-
-      let win = window.open(urlreceived, 'openIDrequest', 'width=800, height=600');
-      if (window.cordova) {
-        win.addEventListener('loadstart', function(e) {
-          let url = e.url;
-          let code = /\&code=(.+)$/.exec(url);
-          let error = /\&error=(.+)$/.exec(url);
-
-          if (code || error) {
-            win.close();
-            resolve(url);
-          }
-        });
-      } else {
-        let pollTimer = setInterval(function() {
-          try {
-            if (win.closed) {
-              reject('Some error occured when trying to get identity.');
-              clearInterval(pollTimer);
-            }
-
-            if (win.document.URL.indexOf('id_token') !== -1 || win.document.URL.indexOf(location.origin) !== -1) {
-              window.clearInterval(pollTimer);
-              let url =   win.document.URL;
-
-              win.close();
-              resolve(url);
-            }
-          } catch (e) {
-            //console.log(e);
-          }
-        }, 500);
-      }
     });
   }
 
