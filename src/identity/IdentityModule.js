@@ -185,13 +185,25 @@ class IdentityModule {
         console.log('[Identity.IdentityModule.getTokenAux] Token', identity);
         let time_now = _this._seconds_since_epoch();
         let complete_id = _this.getIdentity(identity.userProfile.userURL);
-        console.log('[Identity.IdentityModule.getTokenAux] Token expires in', complete_id.info.expires);
+        let expiration_date = undefined;
+
+        if (!complete_id.info.expires) {
+          if (!complete_id.info.tokenIDJSON.exp) {
+            throw 'The ID Token does not have an expiration time';
+          } else {
+            expiration_date = complete_id.info.tokenIDJSON.exp;
+          }
+        } else {
+          expiration_date = complete_id.info.expires;
+        }
+
+        console.log('[Identity.IdentityModule.getTokenAux] Token expires in', expiration_date);
         console.log('[Identity.IdentityModule.getTokenAux] time now:', time_now);
 
         // TODO: this should not be verified in this way
         // we should contact the IDP to verify this instead of using the local clock
         // but this works for now...
-        if (time_now >= complete_id.info.expires) {
+        if (time_now >= expiration_date) {
           // delete current identity
           _this.deleteIdentity(complete_id.identity);
 
@@ -225,8 +237,9 @@ class IdentityModule {
           console.log('[Identity.IdentityModule.getToken] isLEGACY: ', result);
           if (result) {
 
+            // TODO: check if in the future other legacy hyperties have expiration times
+            // if so the check should be made here (or in the getAccessToken function)
             let token = _this.getAccessToken(toUrl);
-            //console.log('TIAGO legacy token 1', token);
             if (token)
               return resolve(token);
 
@@ -236,7 +249,6 @@ class IdentityModule {
             _this.callGenerateMethods(domain).then((value) => {
               console.log('[Identity.IdentityModule.getToken] CallGeneratemethods', value);
               let token = _this.getAccessToken(toUrl);
-              //console.log('TIAGO legacy token 2', token);
               if (token)
                 return resolve(token);
               else {
