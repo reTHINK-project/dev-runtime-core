@@ -140,8 +140,31 @@ class PEP {
   }
 
   _isIncomingMessage(message) {
+    let from;
 
-    return !this.context.isLocal(message.from);
+    if (message.type === 'forward') {
+      console.info('[PEP - isIncomingMessage] - message.type: ', message.type);
+      from = message.body.from;
+    } else if (message.body.hasOwnProperty('source') && message.body.source) {
+      console.info('[PEP - isIncomingMessage] - message.body.source: ', message.body.source);
+      from = message.body.source;
+    } else if (message.body.hasOwnProperty('subscriber') && message.body.subscriber) {
+      //TODO: this subscriber validation should not exist, because is outdated
+      //TODO: the syncher and syncher manager not following the correct spec;
+      console.info('[PEP - isIncomingMessage] - message.body.subscriber: ', message.body.subscriber);
+      from = message.body.subscriber;
+    }  else if (message.body.hasOwnProperty('reporter') && message.body.reporter) {
+      //TODO: this subscriber validation should not exist, because is outdated
+      //TODO: the syncher and syncher manager not following the correct spec;
+      console.info('[PEP - isIncomingMessage] - message.body.reporter: ', message.body.reporter);
+      from = message.body.reporter;
+    } else {
+      console.info('[PEP - isIncomingMessage] - message.from ', message.from);
+      from = message.from;
+    }
+
+    console.info('[PEP - isIncomingMessage] - check if isLocal: ', from);
+    return !this.context.isLocal(from);
   }
 
   /**

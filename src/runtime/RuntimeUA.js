@@ -81,6 +81,7 @@ class RuntimeUA {
     }
 
     runtimeUtils.runtimeDescriptor = runtimeDescriptor;
+    this.runtimeUtils = runtimeUtils;
 
     if (typeof runtimeFactory.createRuntimeCatalogue === 'function') {
       this.persistenceManager = runtimeFactory.createRuntimeCatalogue();
@@ -133,6 +134,7 @@ class RuntimeUA {
           }
 
           this.capabilities = results[1];
+          Object.assign(runtimeUtils.runtimeCapabilities.constraints, results[1]);
 
           return this._loadComponents();
         }).then((status) => {
