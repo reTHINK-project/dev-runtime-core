@@ -1,3 +1,6 @@
 export let runtimeUtils = {
-  runtimeDescriptor: {}
+  runtimeDescriptor: {},
+  runtimeCapabilities: {
+    constraints: {}
+  }
 };

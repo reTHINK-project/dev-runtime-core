@@ -160,6 +160,7 @@ class StoreDataObjects {
         let hasSubscription = this._hasSubscription(storedDataObjects[type], msg.from);
         let isOwner = this._searchOwner(storedDataObjects[type], msg.from);
 
+        console.log('[StoredDataObjects - getResourcesByCriteria]:', msg, hasSubscription, isOwner);
         if (msg.hasOwnProperty('from') && hasSubscription || isOwner) {
           let resource = this._getResourcesBySubscription(storedDataObjects[type], msg.from);
 
