@@ -180,23 +180,25 @@ class IdentityModule {
     let _this = this;
     return new Promise((resolve, reject) => {
       _this.getIdToken(hypertyURL).then(function(identity) {
-        console.log('[Identity.IdentityModule.getTokenAux] Token', identity);
+        console.log('[Identity.IdentityModule.getValidToken] Token', identity);
         let time_now = _this._seconds_since_epoch();
         let complete_id = _this.getIdentity(identity.userProfile.userURL);
         let expiration_date = undefined;
 
-        if (!complete_id.info.expires) {
-          if (!complete_id.info.tokenIDJSON.exp) {
-            throw 'The ID Token does not have an expiration time';
-          } else {
+        if (complete_id.hasOwnProperty('info')) {
+          if (complete_id.info.hasOwnProperty('expirates')) {
+            expiration_date = complete_id.info.expires;
+          } else if (complete_id.info.hasOwnProperty('tokenIDJSON')) {
             expiration_date = complete_id.info.tokenIDJSON.exp;
+          } else {
+            throw 'The ID Token does not have an expiration time';
           }
         } else {
-          expiration_date = complete_id.info.expires;
+          throw 'The ID Token does not have an expiration time';
         }
 
-        console.log('[Identity.IdentityModule.getTokenAux] Token expires in', expiration_date);
-        console.log('[Identity.IdentityModule.getTokenAux] time now:', time_now);
+        console.log('[Identity.IdentityModule.getValidToken] Token expires in', expiration_date);
+        console.log('[Identity.IdentityModule.getValidToken] time now:', time_now);
 
         // TODO: this should not be verified in this way
         // we should contact the IDP to verify this instead of using the local clock
@@ -335,9 +337,27 @@ class IdentityModule {
 
     let domainToCheck = divideURL(url).domain;
     let identityToReturn;
+    let expiration_date = undefined;
+    let time_now = _this._seconds_since_epoch();
     for (let index in _this.identities) {
       let identity = _this.identities[index];
       if (identity.hasOwnProperty('interworking') && identity.interworking.domain === domainToCheck) {
+        // check if there is expiration time
+        if (identity.hasOwnProperty('info') && identity.info.hasOwnProperty('expirates')) {
+          expiration_date = identity.info.expires;
+          console.log('[Identity.IdentityModule.getAccessToken] Token expires in', expiration_date);
+          console.log('[Identity.IdentityModule.getAccessToken] time now:', time_now);
+
+          // TODO: this should not be verified in this way
+          // we should contact the IDP to verify this instead of using the local clock
+          // but this works for now...
+          if (time_now >= expiration_date) {
+            // delete current identity
+            _this.deleteIdentity(identity.identity);
+            return null; // the getToken function then generates a new token
+          }
+        } // else this access token has no expiration time
+
         if (identity.hasOwnProperty('messageInfo') && identity.messageInfo.hasOwnProperty('userProfile') && identity.messageInfo.userProfile) {
           identityToReturn = { userProfile: identity.messageInfo.userProfile, access_token: identity.interworking.access_token };
           if (identity.hasOwnProperty('infoToken') && identity.infoToken.hasOwnProperty('id')) {
