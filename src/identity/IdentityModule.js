@@ -808,7 +808,9 @@ class IdentityModule {
 
         if (result.loginUrl) {
 
-          _this.openPopup(result.loginUrl).then((value) => {
+          //_this.openPopup(result.loginUrl).then((value) => {
+          _this.callIdentityModuleFunc('openPopup', {urlreceived: result.loginUrl}).then((value) => {
+            console.log('TIAGO openPopup value', value);
             resolve(value);
           }, (err) => {
             reject(err);
