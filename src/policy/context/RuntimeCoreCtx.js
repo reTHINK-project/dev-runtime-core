@@ -73,7 +73,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
           resolve(message);
         }
       } else {
-        console.log('ON prepareForEvaluation', message);
+        console.log('[Policy.RuntimeCoreCtx prepareForEvaluation]', message);
         if (_this._isToSetID(message)) {
           _this._getIdentity(message).then(identity => {
             message.body.identity = identity;
@@ -271,14 +271,19 @@ class RuntimeCoreCtx extends ReThinkCtx {
   }
 
   _getIdentity(message) {
+
+    let from = message.from;
     console.log('[Policy.RuntimeCoreCtx.getIdentity] ', message);
     let sourceURL = undefined;
     if (message.body.source !== undefined) {
-      sourceURL = message.body.source;
-    } else {
-      sourceURL = message.from;
+      from = message.body.source;
     }
-    return this.idModule.getToken(sourceURL, message.to);
+
+    if (message.type === 'forward') {
+      from = message.body.from;
+    }
+
+    return this.idModule.getToken(from, message.to);
   }
 
   /**
