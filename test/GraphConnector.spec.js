@@ -16,37 +16,39 @@ import Registry from '../src/registry/Registry';
 import MessageBus from '../src/bus/MessageBus';
 import { runtimeFactory } from './resources/runtimeFactory';
 
-// variables
+
+let registry;
+let msgbus;
 let runtimeURL = 'hyperty-runtime://ua.pt/123';
 let appSandbox = runtimeFactory.createAppSandbox();
 let storageManager = runtimeFactory.storageManager();
-
-
-
+let runtimeCatalogue = runtimeFactory.createRuntimeCatalogue();
+let runtimeCapabilities = runtimeFactory.runtimeCapabilities(storageManager);
 
 describe('Graph Connector', function() {
-    // this will set this like a global variables
-    let identityModule;
-    let registry;
 
     // this will be executed before all the tests, and you can garantee this will be setted
     before(function () {
-        identityModule = {
+
+        let identityModule = {
             getIdentities: () => {
                 let identities = [];
                 let identityBundle = {identity: 'user://gmail.com/openidtest10', token: 'idToken'};
                 identities.push(identityBundle);
                 return identities;
             }
-        }
+        };
 
         // instanciate the registry;
-        registry = new Registry(runtimeURL, appSandbox, identityModule);
+
+        registry = new Registry(runtimeURL, appSandbox, identityModule, runtimeCatalogue, runtimeCapabilities, storageManager);
+        msgbus = new MessageBus(registry);
+        registry.messageBus = msgbus;
+    });
 
         describe('construction', function() {
             it('create new GraphConnector instance with zero contacts', function() {
-                let msgbus = new MessageBus(registry);
-                registry.messageBus = msgbus;
+
                 let graphConnector = new GraphConnector(runtimeURL, msgbus, storageManager);
                 expect(graphConnector.contacts.length).to.equal(0);
             });
@@ -55,8 +57,7 @@ describe('Graph Connector', function() {
 
         describe('create mock address book', function() {
 
-            let msgbus = new MessageBus(registry);
-            registry.messageBus = msgbus;
+
             let graphConnector = new GraphConnector(runtimeURL, msgbus, storageManager);
             let guid;
             let firstName;
@@ -428,10 +429,9 @@ describe('Graph Connector', function() {
 
 
         describe('GUID', function() {
-            let msgbus = new MessageBus(registry);
-            registry.messageBus = msgbus;
-            let graphConnector1 = new GraphConnector(runtimeURL, msgbus);
-            let graphConnector2 = new GraphConnector(runtimeURL, msgbus);
+
+            let graphConnector1 = new GraphConnector(runtimeURL, msgbus,storageManager);
+            let graphConnector2 = new GraphConnector(runtimeURL, msgbus,storageManager);
 
             it('GUID generation', function() {
 
@@ -489,10 +489,9 @@ describe('Graph Connector', function() {
         });
 
         describe('Global Registry Connection - send', function() {
-            let msgbus = new MessageBus(registry);
-            registry.messageBus = msgbus;
-            let graphConnector1 = new GraphConnector(runtimeURL, msgbus);
-            let graphConnector2 = new GraphConnector(runtimeURL, msgbus);
+
+            let graphConnector1 = new GraphConnector(runtimeURL, msgbus,storageManager);
+            let graphConnector2 = new GraphConnector(runtimeURL, msgbus,storageManager);
 
             it('send Global Registry Record', function(done) {
 
@@ -526,10 +525,9 @@ describe('Graph Connector', function() {
         });
 
         describe('Global Registry Connection - use GUID', function() {
-            let msgbus = new MessageBus(registry);
-            registry.messageBus = msgbus;
-            let graphConnector1 = new GraphConnector(runtimeURL, msgbus);
-            let graphConnector2 = new GraphConnector(runtimeURL, msgbus);
+
+            let graphConnector1 = new GraphConnector(runtimeURL, msgbus,storageManager);
+            let graphConnector2 = new GraphConnector(runtimeURL, msgbus,storageManager);
 
             it('re-use GUID and retrieve data from Global Registry', function(done) {
 
@@ -565,10 +563,9 @@ describe('Graph Connector', function() {
         });
 
         describe('Querying Global Registry', function() {
-            let msgbus = new MessageBus(registry);
-            registry.messageBus = msgbus;
-            let graphConnector1 = new GraphConnector(runtimeURL, msgbus);
-            let graphConnector2 = new GraphConnector(runtimeURL, msgbus);
+
+            let graphConnector1 = new GraphConnector(runtimeURL, msgbus,storageManager);
+            let graphConnector2 = new GraphConnector(runtimeURL, msgbus,storageManager);
 
             it('query Global Registry', function(done) {
 
@@ -619,8 +616,6 @@ describe('Graph Connector', function() {
 
             return text;
         }
-
-    });
 
 });
 
