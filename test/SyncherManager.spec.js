@@ -242,24 +242,35 @@ describe('SyncherManager', function() {
 
     new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator);
 
+    let a;
+
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
-    sync2.resumeObservers({}).then((doo) => {
+    sync2.resumeObservers({}).then((doos) => {
 
-      console.log('on-subscribe-resume-reply', doo, doo.data);
+      console.log('on-subscribe-resume-reply', doos);
 
-      doo.onChange('*', (changeEvent) => {
-        console.log('on-change: ', JSON.stringify(changeEvent), doo.data);
-        expect(changeEvent).to.contain.all.keys({ cType: 'add', oType: 'object', field: 'test', data: ['a', 'b', 'c'] });
-        expect(doo.data).to.contain.all.keys({ communication: { name: 'chat-x' }, x: 10, y: 10, test: ['a', 'b', 'c'] });
+      Object.values(doos).forEach((doo) => {
+        console.log('on-subscribe-resume-reply DataObjectObserver: ', doo);
 
-        done();
-      });
+        expect(doo.data).to.contain.all.keys({ communication: { name: 'chat-x' }, x: 10, y: 10});
+
+        doo.onChange('*', (changeEvent) => {
+          console.log('on-subscribe-resume on-change: ', JSON.stringify(changeEvent), doo.data);
+          expect(changeEvent).to.contain.all.keys({ cType: 'add', oType: 'object', field: 'test', data: ['a', 'b', 'c'] });
+          done();
+        });
+      })
+
+      setTimeout(() => {
+        a.data.test = ['a', 'b', 'c'];
+      }, 200);
 
     });
 
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
     sync1.create(schemaURL, [], initialData).then((dor) => {
       console.log('on-create-resume-reply', dor);
+      a = dor;
       dor.inviteObservers([hyperURL2]);
 
       dor.onRead((readEvent) => {
@@ -272,11 +283,6 @@ describe('SyncherManager', function() {
         //we may have some problems in the time sequence here.
         //change-msg can reach the observer first
         subscribeEvent.accept();
-
-        setTimeout(() => {
-          dor.data.test = ['a', 'b', 'c'];
-        });
-
       });
     });
 
@@ -297,11 +303,16 @@ describe('SyncherManager', function() {
     new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator);
 
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
+    sync1.resumeReporters({}).then((dors) => {
 
-    sync1.resumeReporters({}).then((dor) => {
-      dor.data.newTest = ['a', 'b', 'c'];
-      expect(dor.data).to.contain.all.keys({ communication: { name: 'chat-x' }, x: 10, y: 10, test: ['a', 'b', 'c'], newTest: ['a', 'b', 'c'] });
-      done();
+      Object.values(dors).forEach((dor) => {
+
+        dor.data.newTest = ['a', 'b', 'c'];
+        expect(dor.data).to.contain.all.keys({ communication: { name: 'chat-x' }, x: 10, y: 10, test: ['a', 'b', 'c'], newTest: ['a', 'b', 'c'] });
+        done();
+
+      });
+
     });
 
     // sync1.create(schemaURL, [], initialData).then((dor) => {
