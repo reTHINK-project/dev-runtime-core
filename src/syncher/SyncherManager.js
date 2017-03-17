@@ -29,8 +29,6 @@ import ObserverObject from './ObserverObject';
 
 import {MessageFactory} from 'service-framework/dist/MessageFactory';
 
-import StoreDataObjects from './StoreDataObjects';
-
 /**
  * @author micaelpedrosa@gmail.com
  * Core Syncronization system.
@@ -46,7 +44,7 @@ class SyncherManager {
   _observers: { ObjectURL: ObserverObject }
   */
 
-  constructor(runtimeURL, bus, registry, catalog, storageManager, allocator) {
+  constructor(runtimeURL, bus, registry, catalog, storageManager, allocator, storeDataObjects) {
     if (!runtimeURL) throw new Error('[Syncher Manager] - needs the runtimeURL parameter');
     if (!bus) throw new Error('[Syncher Manager] - needs the MessageBus instance');
     if (!registry) throw new Error('[Syncher Manager] - needs the Registry instance');
@@ -68,7 +66,7 @@ class SyncherManager {
     _this._reporters = {};
     _this._observers = {};
 
-    _this._storeDataObjects = new StoreDataObjects(storageManager);
+    _this._dataObjectsStorage = storeDataObjects;
 
     //TODO: this should not be hardcoded!
     _this._domain = divideURL(runtimeURL).domain;
@@ -110,7 +108,7 @@ class SyncherManager {
 
       // If from the hyperty side, call the resumeReporter we will have resume = true'
       // so we will create an resumed object and will try to resume the object previously saved;
-      this._storeDataObjects.getResourcesByCriteria(msg, true).then((result) => {
+      this._dataObjectsStorage.getResourcesByCriteria(msg, true).then((result) => {
 
         console.info('[SyncherManager - Create Resumed] - ResourcesByCriteria | Message: ', msg, ' result: ', result);
 
@@ -221,14 +219,17 @@ class SyncherManager {
 
           console.log('[SyncherManager - new Create] - ', msg);
 
-          if (msg.body.hasOwnProperty('store') && msg.body.store) {
-            // Store for each reporter hyperty the dataObject
-            let userURL;
-            if (msg.body.hasOwnProperty('identity') && msg.body.identity.userProfile.userURL) {
-              userURL = msg.body.identity.userProfile.userURL;
-            }
+          // Store for each reporter hyperty the dataObject
+          let userURL;
+          if (msg.body.hasOwnProperty('identity') && msg.body.identity.userProfile.userURL) {
+            userURL = msg.body.identity.userProfile.userURL;
+          }
 
-            _this._storeDataObjects.set(objURL, true, msg.body.schema, 'on', msg.body.value, owner, null, childrens, userURL);
+          // Store the dataObject information
+          _this._dataObjectsStorage.set(objURL, true, msg.body.schema, 'on', owner, null, null, childrens, userURL);
+
+          if (msg.body.hasOwnProperty('store') && msg.body.store) {
+            _this._dataObjectsStorage.saveData(true, objURL, null, msg.body.value);
           }
 
           reporter.forwardSubscribe([objURL, subscriptionURL]).then(() => {
@@ -309,9 +310,6 @@ class SyncherManager {
         }
 
         _this._reporters[resource] = reporter;
-
-        reporter.schema = schema;
-
         reporter.resumeSubscriptions(storedObject.subscriptions);
 
         reporter.addChildrens(childrens).then(() => {
@@ -364,7 +362,7 @@ class SyncherManager {
       //TODO: is there any policy verification before delete?
       object.delete();
 
-      this._storeDataObjects.deleteResource(objURL);
+      this._dataObjectsStorage.deleteResource(objURL);
 
       //TODO: unregister object?
       _this._bus.postMessage({
@@ -377,7 +375,7 @@ class SyncherManager {
   //FLOW-IN: message received from local Syncher -> subscribe
   _onLocalSubscribe(msg) {
 
-    this._storeDataObjects.getResourcesByCriteria(msg, false).then((result) => {
+    this._dataObjectsStorage.getResourcesByCriteria(msg, false).then((result) => {
 
       console.log('[SyncherManager - Subscribe] - filter result', result);
 
@@ -487,14 +485,16 @@ class SyncherManager {
                 _this._observers[objURL] = observer;
               }
 
-              if (msg.body.hasOwnProperty('store') && msg.body.store) {
-                // Store for each reporter hyperty the dataObject
-                let userURL;
-                if (msg.body.hasOwnProperty('identity') && msg.body.identity.userProfile.userURL) {
-                  userURL = msg.body.identity.userProfile.userURL;
-                }
+              // Store for each reporter hyperty the dataObject
+              let userURL;
+              if (msg.body.hasOwnProperty('identity') && msg.body.identity.userProfile.userURL) {
+                userURL = msg.body.identity.userProfile.userURL;
+              }
 
-                _this._storeDataObjects.set(objURL, false, msg.body.schema, 'on', {}, hypertyURL, null, childrens, userURL);
+              _this._dataObjectsStorage.set(objURL, false, msg.body.schema, 'on', reply.body.owner, hypertyURL, null, childrens, userURL);
+
+              if (msg.body.hasOwnProperty('store') && msg.body.store) {
+                _this._dataObjectsStorage.saveData(false, objURL, null, reply.body.value);
               }
 
               //register new hyperty subscription
@@ -623,7 +623,7 @@ class SyncherManager {
         body: { code: 200 }
       });
 
-      this._storeDataObjects.delete(objURL, 'subscriptions', hypertyURL, true);
+      this._dataObjectsStorage.delete(true, objURL, 'subscriptions', hypertyURL);
 
       //TODO: remove Object if no more subscription?
       //delete _this._observers[objURL];
