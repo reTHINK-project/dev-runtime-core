@@ -98,6 +98,9 @@ class SyncherManager {
   //FLOW-IN: message received from Syncher -> create
   _onCreate(msg) {
 
+    let from = msg.from;
+    let to = msg.to;
+
     if (!msg.body.hasOwnProperty('resume') || (msg.body.hasOwnProperty('resume') && !msg.body.resume)) {
 
       // If from the hyperty side, don't call the resumeReporter we will have resume = false'
@@ -118,6 +121,7 @@ class SyncherManager {
 
           Object.keys(result).forEach((objURL) => {
             listOfReporters.push(this._resumeCreate(msg, result[objURL]));
+            this._authorise(msg, objURL);
           });
 
           Promise.all(listOfReporters).then((resumedReporters) => {
@@ -128,11 +132,19 @@ class SyncherManager {
               return reporter !== false;
             });
 
+            console.log('MSG:', msg, to, from);
+
             //FLOW-OUT: message response to Syncher -> create
             this._bus.postMessage({
-              id: msg.id, type: 'response', from: msg.to, to: msg.from,
+              id: msg.id, type: 'response', from: to, to: from,
               body: { code: 200, value: successfullyResumed }
             });
+
+            // //FLOW-OUT: message response to Syncher -> create
+            // this._bus.postMessage({
+            //   id: msg.id, type: 'response', from: msg.to, to: owner,
+            //   body: { code: 200, resource: resource, childrenResources: childrens, schema: schema, value: storedObject.data }
+            // });
 
           });
 
@@ -280,8 +292,8 @@ class SyncherManager {
 
       console.log('[SyncherManager] - resume create', msg, storedObject);
 
-      let authMsg = msg;
-      authMsg.body.authorise = storedObject.subscriptions;
+      // let authMsg = msg;
+      // authMsg.body.authorise = storedObject.subscriptions;
 
       // // TODO: Check why the _authorise is called;
       // if (resource) {
@@ -309,25 +321,37 @@ class SyncherManager {
           reporter = this._reporters[resource];
         }
 
-        _this._reporters[resource] = reporter;
-        reporter.resumeSubscriptions(storedObject.subscriptions);
+        let subscriptionURL = resource + '/subscription';
 
-        reporter.addChildrens(childrens).then(() => {
+        reporter.forwardSubscribe([resource, subscriptionURL]).then(() => {
+          reporter.addChildrens(childrens).then(() => {
 
-          _this._reporters[resource] = reporter;
+            reporter.resumeSubscriptions(storedObject.subscriptions);
 
-          //send create to all observers, responses will be deliver to the Hyperty owner?
-          //schedule for next cycle needed, because the Reporter should be available.
-          setTimeout(() => {
-            //will invite other hyperties
-            _this._authorise(msg, resource);
+            _this._reporters[resource] = reporter;
+
+            // //FLOW-OUT: message response to Syncher -> create
+            // _this._bus.postMessage({
+            //   id: msg.id, type: 'response', from: msg.to, to: owner,
+            //   body: { code: 200, resource: resource, childrenResources: childrens, schema: schema, value: storedObject.data }
+            // });
+
+            //send create to all observers, responses will be deliver to the Hyperty owner?
+            //schedule for next cycle needed, because the Reporter should be available.
+            // setTimeout(() => {
+            //   //will invite other hyperties
+            //   _this._authorise(msg, resource);
+            // });
+
+            resolve(storedObject);
+
+          }).catch((reason) => {
+            console.error('[SyncherManager - resume create] - fail on addChildrens: ', reason);
+            resolve(false);
           });
-
-          resolve(storedObject);
         }).catch((reason) => {
-          console.error('[SyncherManager - resume create] - fail on addChildrens: ', reason);
-          resolve(false);
-        });
+          console.error('[SyncherManager - resume create] -  fail on forwardSubscribe: ', reason);
+        })
 
       }).catch((reason) => {
         console.error('[SyncherManager - resume create] - fail on getDataSchemaDescriptor: ', reason);
@@ -341,6 +365,8 @@ class SyncherManager {
   _authorise(msg, objURL) {
     let _this = this;
     let objSubscriptorURL = objURL + '/subscription';
+
+    console.log('[SyncherManager -  authorise] - ', msg, objURL);
 
     msg.body.authorise.forEach((hypertyURL) => {
       //FLOW-OUT: send invites to list of remote Syncher -> _onRemoteCreate -> onNotification
