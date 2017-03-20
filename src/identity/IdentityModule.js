@@ -37,7 +37,7 @@ class IdentityModule {
   /**
   * This is the constructor to initialise the Identity Module it does not require any input.
   */
-  constructor(runtimeURL, runtimeCapabilities, storageManager) {
+  constructor(runtimeURL, runtimeCapabilities, storageManager, dataObjectsStorage) {
     let _this = this;
 
     if (!runtimeURL) throw new Error('runtimeURL is missing.');
@@ -45,6 +45,7 @@ class IdentityModule {
 
     _this._runtimeURL = runtimeURL;
     _this.storageManager = storageManager;
+    _this.dataObjectsStorage = dataObjectsStorage;
     _this._idmURL = _this._runtimeURL + '/idm';
     _this._guiURL = _this._runtimeURL + '/identity-gui';
     _this.runtimeCapabilities = runtimeCapabilities;
@@ -865,54 +866,58 @@ class IdentityModule {
         _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
           let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
 
-          //if no key exists, create a new one if is the reporter of dataObject
-          if (!dataObjectKey) {
-            let isHypertyReporter = _this.registry.getReporterURLSynchonous(dataObjectURL);
+          _this.dataObjectsStorage.getDataObject(dataObjectURL).then((isHypertyReporter) => {
+            //if no key exists, create a new one if is the reporter of dataObject
+            if (!dataObjectKey) {
+              //let isHypertyReporter = _this.registry.getReporterURLSynchonous(dataObjectURL);
+              console.log('TIAGO isHypertyReporter', isHypertyReporter);
+              console.log('TIAGO isHypertyReporter.owner', isHypertyReporter.owner);
+              console.log('TIAGO message.from', message.from);
 
-            // if the hyperty is the reporter of the dataObject then generates a session key
-            if (isHypertyReporter && isHypertyReporter === message.from) {
+              // if the hyperty is the reporter of the dataObject then generates a session key
+              if (isHypertyReporter.owner && isHypertyReporter.owner === message.from) {
 
-              let sessionKey = _this.crypto.generateRandom();
-              _this.dataObjectSessionKeys[dataObjectURL] = {sessionKey: sessionKey, isToEncrypt: true};
+                let sessionKey = _this.crypto.generateRandom();
+                _this.dataObjectSessionKeys[dataObjectURL] = {sessionKey: sessionKey, isToEncrypt: true};
 
-              // TIAGO - persistence issue #147
-              _this.storageManager.set('dataObjectSessionKeys', 0, _this.dataObjectSessionKeys);
+                // TIAGO - persistence issue #147
+                _this.storageManager.set('dataObjectSessionKeys', 0, _this.dataObjectSessionKeys);
 
-              dataObjectKey = _this.dataObjectSessionKeys[dataObjectURL];
+                dataObjectKey = _this.dataObjectSessionKeys[dataObjectURL];
+              }
             }
-          }
 
-          //check if there is already a session key for the chat room
-          if (dataObjectKey) {
+            //check if there is already a session key for the chat room
+            if (dataObjectKey) {
 
-            // and if is to apply encryption, encrypt the messages
-            if (dataObjectKey.isToEncrypt) {
-              let iv = _this.crypto.generateIV();
+              // and if is to apply encryption, encrypt the messages
+              if (dataObjectKey.isToEncrypt) {
+                let iv = _this.crypto.generateIV();
 
-              _this.crypto.encryptAES(dataObjectKey.sessionKey, _this.crypto.encode(JSON.stringify(message.body.value)), iv).then(encryptedValue => {
+                _this.crypto.encryptAES(dataObjectKey.sessionKey, _this.crypto.encode(JSON.stringify(message.body.value)), iv).then(encryptedValue => {
 
-                let filteredMessage = _this._filterMessageToHash(message, message.body.value + iv, dataObjectKey.sessionKey);
+                  let filteredMessage = _this._filterMessageToHash(message, message.body.value + iv, dataObjectKey.sessionKey);
 
-                _this.crypto.hashHMAC(dataObjectKey.sessionKey, filteredMessage).then(hash => {
-                  //console.log('hash ', hash);
+                  _this.crypto.hashHMAC(dataObjectKey.sessionKey, filteredMessage).then(hash => {
+                    //console.log('hash ', hash);
 
-                  let newValue = {value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv), hash: _this.crypto.encode(hash)};
+                    let newValue = {value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv), hash: _this.crypto.encode(hash)};
 
-                  message.body.value = JSON.stringify(newValue);
-                  resolve(message);
+                    message.body.value = JSON.stringify(newValue);
+                    resolve(message);
+                  });
                 });
-              });
 
-            // if not, just send the message
+              // if not, just send the message
+              } else {
+                resolve(message);
+              }
+
+              // start the generation of a new session Key
             } else {
-              resolve(message);
+              reject('failed to decrypt message');
             }
-
-            // start the generation of a new session Key
-          } else {
-            reject('failed to decrypt message');
-          }
-
+          });
         });
       }
     });
@@ -1006,6 +1011,7 @@ class IdentityModule {
         // TIAGO - persistence issue #147
         _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
           let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
+          console.log('TIAGO dataObjectKey', dataObjectKey);
 
           if (dataObjectKey) {
 
