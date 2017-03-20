@@ -267,7 +267,7 @@ describe('SyncherManager', function() {
 
       setTimeout(() => {
         a.data.test = ['a', 'b', 'c'];
-      }, 200);
+      });
 
     });
 

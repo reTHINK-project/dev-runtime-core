@@ -121,7 +121,6 @@ class SyncherManager {
 
           Object.keys(result).forEach((objURL) => {
             listOfReporters.push(this._resumeCreate(msg, result[objURL]));
-            this._authorise(msg, objURL);
           });
 
           Promise.all(listOfReporters).then((resumedReporters) => {
@@ -132,19 +131,11 @@ class SyncherManager {
               return reporter !== false;
             });
 
-            console.log('MSG:', msg, to, from);
-
             //FLOW-OUT: message response to Syncher -> create
             this._bus.postMessage({
               id: msg.id, type: 'response', from: to, to: from,
               body: { code: 200, value: successfullyResumed }
             });
-
-            // //FLOW-OUT: message response to Syncher -> create
-            // this._bus.postMessage({
-            //   id: msg.id, type: 'response', from: msg.to, to: owner,
-            //   body: { code: 200, resource: resource, childrenResources: childrens, schema: schema, value: storedObject.data }
-            // });
 
           });
 
@@ -292,15 +283,6 @@ class SyncherManager {
 
       console.log('[SyncherManager] - resume create', msg, storedObject);
 
-      // let authMsg = msg;
-      // authMsg.body.authorise = storedObject.subscriptions;
-
-      // // TODO: Check why the _authorise is called;
-      // if (resource) {
-      //   _this._authorise(authMsg, resource);
-      //   return;
-      // }
-
       //get schema from catalogue and parse -> (scheme, children)
       _this._catalog.getDataSchemaDescriptor(schema).then((descriptor) => {
 
@@ -321,37 +303,18 @@ class SyncherManager {
           reporter = this._reporters[resource];
         }
 
-        let subscriptionURL = resource + '/subscription';
+        reporter.resumeSubscriptions(storedObject.subscriptions);
 
-        reporter.forwardSubscribe([resource, subscriptionURL]).then(() => {
-          reporter.addChildrens(childrens).then(() => {
+        reporter.addChildrens(childrens).then(() => {
 
-            reporter.resumeSubscriptions(storedObject.subscriptions);
+          _this._reporters[resource] = reporter;
 
-            _this._reporters[resource] = reporter;
+          resolve(storedObject);
 
-            // //FLOW-OUT: message response to Syncher -> create
-            // _this._bus.postMessage({
-            //   id: msg.id, type: 'response', from: msg.to, to: owner,
-            //   body: { code: 200, resource: resource, childrenResources: childrens, schema: schema, value: storedObject.data }
-            // });
-
-            //send create to all observers, responses will be deliver to the Hyperty owner?
-            //schedule for next cycle needed, because the Reporter should be available.
-            // setTimeout(() => {
-            //   //will invite other hyperties
-            //   _this._authorise(msg, resource);
-            // });
-
-            resolve(storedObject);
-
-          }).catch((reason) => {
-            console.error('[SyncherManager - resume create] - fail on addChildrens: ', reason);
-            resolve(false);
-          });
         }).catch((reason) => {
-          console.error('[SyncherManager - resume create] -  fail on forwardSubscribe: ', reason);
-        })
+          console.error('[SyncherManager - resume create] - fail on addChildrens: ', reason);
+          resolve(false);
+        });
 
       }).catch((reason) => {
         console.error('[SyncherManager - resume create] - fail on getDataSchemaDescriptor: ', reason);
@@ -403,7 +366,7 @@ class SyncherManager {
 
     this._dataObjectsStorage.getResourcesByCriteria(msg, false).then((result) => {
 
-      console.log('[SyncherManager - Subscribe] - filter result', result);
+      console.info('[SyncherManager - Subscribe] - ResourcesByCriteria | Message: ', msg, ' result: ', result);
 
       if (result && Object.keys(result).length > 0) {
 
@@ -419,8 +382,8 @@ class SyncherManager {
           console.log('[SyncherManager - Observers Resumed]', resumedObservers);
 
           // TODO: shoud send the information if some object was fail;
-          let successfullyResumed = Object.values(resumedObservers).filter((reporter) => {
-            return reporter !== false;
+          let successfullyResumed = Object.values(resumedObservers).filter((observer) => {
+            return observer !== false;
           });
 
           //FLOW-OUT: message response to Syncher -> create
