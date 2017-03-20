@@ -290,6 +290,8 @@ class SyncherManager {
         let scheme = properties.scheme ? properties.scheme.constant : 'resource';
         let childrens = properties.children ? properties.children.constant : [];
 
+        console.log('[SyncherManager] - getDataSchemaDescriptor: ', descriptor, childrens, storedObject.childrenResources)
+
         // Do schema validation
         // TODO: check if is need to handle with the result of validation
         schemaValidation(scheme, descriptor, initialData);
@@ -303,9 +305,9 @@ class SyncherManager {
           reporter = this._reporters[resource];
         }
 
-        reporter.resumeSubscriptions(storedObject.subscriptions);
-
         reporter.addChildrens(childrens).then(() => {
+
+          reporter.resumeSubscriptions(storedObject.subscriptions);
 
           _this._reporters[resource] = reporter;
 
