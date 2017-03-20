@@ -20,14 +20,22 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 **/
-import AddressAllocation from './AddressAllocation';
-import ObjectAllocation from '../syncher/ObjectAllocation';
+
+import { runtimeUtils } from '../runtime/runtimeUtils';
+
+import AddressAllocation from '../allocation/AddressAllocation';
 import HypertyInstance from './HypertyInstance';
 
 import {MessageFactory} from 'service-framework/dist/MessageFactory';
-import {divideURL} from '../utils/utils.js';
+import {divideURL, isHypertyURL, isURL, isUserURL, generateGUID, getUserIdentityDomain, isBackendServiceURL} from '../utils/utils.js';
 
-const STATUS = { DEPLOYED: 'deployed', PROGRESS: 'in-progress' };
+import Discovery from './Discovery';
+import 'proxy-observe';
+import { WatchingYou } from 'service-framework/dist/Utils';
+
+// import DiscoveryServiceFramework from './DiscoveryServiceFramework';
+
+const STATUS = { CREATED: 'created', LIVE: 'live', DEPLOYED: 'deployed', PROGRESS: 'in-progress', DISCONNECTED: 'disconnected', DEAD: 'dead' };
 
 /*import IdentityManager from './IdentityManager';
 import Discovery from './Discovery';*/
@@ -44,8 +52,9 @@ class Registry {
   * @param  {AppSandbox}          appSandbox            appSandbox
   * @param  {runtimeCatalogue}    runtimeCatalogue      runtimeCatalogue
   * @param  {DomainURL}           remoteRegistry        remoteRegistry
+  * @param  {storageManager}      storageManager
   */
-  constructor(runtimeURL, appSandbox, identityModule, runtimeCatalogue, runtimeCapabilities, remoteRegistry) {
+  constructor(runtimeURL, appSandbox, identityModule, runtimeCatalogue, runtimeCapabilities, storageManager, remoteRegistry) {
 
     // how some functions receive the parameters for example:
     // new Registry('hyperty-runtime://sp1/123', appSandbox, idModule, remoteRegistry);
@@ -54,6 +63,8 @@ class Registry {
     // registry.resolve('hyperty-runtime://sp1/123');
 
     if (!runtimeURL) throw new Error('runtimeURL is missing.');
+    if (!storageManager) throw new Error('storageManager is missing.');
+
     /*if (!remoteRegistry) throw new Error('remoteRegistry is missing');*/
 
     let _this = this;
@@ -64,8 +75,9 @@ class Registry {
     _this.runtimeCatalogue = runtimeCatalogue;
     _this.remoteRegistry = remoteRegistry;
     _this.idModule = identityModule;
+    _this.storageManager = storageManager;
     _this.runtimeCapabilities = runtimeCapabilities;
-    _this.identifier = Math.floor((Math.random() * 10000) + 1);
+    _this.identifier = generateGUID();
 
     // the expires in 3600, represents 1 hour
     //the expires is in seconds, unit of measure received by the domain registry
@@ -73,17 +85,29 @@ class Registry {
 
     _this.hypertiesListToRemove = {};
     _this.hypertiesList = [];
+    _this.remoteHypertyList = [];
+    _this.remoteDataObjectList = [];
+    _this.idpLegacyProxyList = {};
+
+    _this.watchingYou = new WatchingYou();
+    _this.p2pHandlerStub = {};
+    _this.p2pRequesterStub = _this.watchingYou.watch('p2pRequesterStub', {}, true);
+    _this.p2pConnectionList = _this.watchingYou.watch('p2pConnectionList', {}, true);
+    _this.p2pHandlerAssociation = {};
+
     _this.protostubsList = {};
     _this.idpProxyList = {};
     _this.dataObjectList = {};
     _this.subscribedDataObjectList = {};
     _this.sandboxesList = {sandbox: {}, appSandbox: {} };
     _this.pepList = {};
+    _this.registries = {};
 
     _this._domain = divideURL(_this.registryURL).domain;
     _this.sandboxesList.appSandbox[runtimeURL] = appSandbox;
     let msgFactory = new MessageFactory('false', '{}');
     _this.messageFactory = msgFactory;
+
   }
 
   set loader(loader) {
@@ -115,12 +139,113 @@ class Registry {
 
     _this._messageBus.addListener(_this.registryURL, function(msg) {
 
-      let userUrl = _this._getIdentityAssociated(msg.body.resource, msg.body.criteria);
+      console.log('[Registry listener] ', msg);
 
-      let reply = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: {resource: userUrl}};
-      reply.body.code = (userUrl) ? 200 : 404;
+      let isHyperty = isHypertyURL(msg.from);
+      let isDiscovery = msg.from.substring(msg.from.length - 10, msg.from.length) === '/discovery';
 
-      _this._messageBus.postMessage(reply);
+      let hasCriteria = msg.body.hasOwnProperty('criteria');
+      let isURLResource;
+      let isUserResource;
+      let isHypertyResource;
+
+      if (msg.body.hasOwnProperty('resource') && msg.body.resource !== '.') {
+        isURLResource = isURL(msg.body.resource);
+        isUserResource = isUserURL(msg.body.resource);
+        isHypertyResource = isHypertyURL(msg.body.resource);
+      }
+      let isDelete = msg.type === 'delete';
+      let hasName;
+      let hasUser;
+
+      if (msg.body.hasOwnProperty('value')) {
+        hasName = msg.body.value.hasOwnProperty('name');
+        hasUser = msg.body.value.hasOwnProperty('user');
+      }
+
+      if (isHyperty && isDiscovery) {
+        console.log('[Registry] hypertyDiscovery');
+        if (isDelete && hasName) {
+          console.log('[Registry] deleteDataObject');
+        } else if (isDelete && hasUser) {
+          console.log('[Registry] deleteHyperty');
+        } else if (hasCriteria && isUserResource) {
+          console.log('discoverHyperty');
+          for (let i in _this.remoteHypertyList) {
+            let hyperty = _this.remoteHypertyList[i];
+            if (JSON.stringify(hyperty.resources) === JSON.stringify(msg.body.criteria.resources) &&
+              JSON.stringify(hyperty.dataSchemes) === JSON.stringify(msg.body.criteria.dataSchemes) &&
+              hyperty.user.userURL === msg.body.resource) {
+              let url = hyperty.url;
+              let valueJson = {};
+              valueJson[url] = hyperty.info;
+              let message = {
+                type: 'response',
+                to: msg.from,
+                from: msg.to,
+                body: {
+                  value: valueJson
+                }
+              };
+              return _this._messageBus.postMessage(message);
+            }
+          }
+
+          _this.discovery.discoverHyperty(msg.body.resource, msg.body.criteria.dataSchemes, msg.body.criteria.resources).then((value) => {
+            let mostRecentHyperty;
+            Object.keys(value).forEach(function(a) {
+              let hyperty = new HypertyInstance(undefined, undefined, value[a].descriptor, undefined, a, { userURL: value[a].userID },
+                'guid', _this.runtimeURL, 'ctx', value[a].p2pHandler, value[a].p2pRequester, value[a].dataSchemes, value[a].resources,
+                value[a].startingTime, value[a].lastModified);
+              hyperty.info = value;
+              if (!mostRecentHyperty) {
+                mostRecentHyperty = hyperty;
+              } else {
+                let hypertyDate = new Date(hyperty.lastModified);
+                let mostRecentHypertyDate = new Date(mostRecentHyperty.lastModified);
+
+                if (hypertyDate > mostRecentHypertyDate) {
+                  mostRecentHyperty = hyperty;
+                  console.log('update date');
+                }
+              }
+            });
+
+            if (mostRecentHyperty) {
+              console.log('push');
+              _this.remoteHypertyList.push(mostRecentHyperty);
+            }
+          });
+
+        } else if (hasCriteria && !isURLResource) {
+          console.log('[Registry] discoverDataObject');
+        } else if (isHypertyResource) {
+          console.log('[Registry] discoverDataObjectPerReporter');
+        } else if (isUserResource) {
+          console.log('[Registry] discoverHypertyPerUser');
+        } else if (isURLResource) {
+          console.log('[Registry] discoverDataObjectPerURL');
+        } else if (!isURLResource) {
+          console.log('[Registry] discoverDataObjectPerName');
+        }
+
+      } else {
+
+        //hack to skip responses to responses
+
+        if (msg.type === 'response') {
+          console.error('[Register listener] skipping ', msg);
+          return;
+        }
+
+        // msg sent by identity manager library
+        let userUrl = _this._getIdentityAssociated(msg.body.resource, msg.body.criteria);
+
+        let reply = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: {resource: userUrl}};
+        reply.body.code = (userUrl) ? 200 : 404;
+
+        _this._messageBus.postMessage(reply);
+      }
     });
 
     // also set up messageBus in the IdentityModule component
@@ -128,18 +253,17 @@ class Registry {
     _this.idModule.messageBus = messageBus;
 
     // Install AddressAllocation
-    let addressAllocation = new AddressAllocation(_this.registryURL, messageBus);
+    let addressAllocation = AddressAllocation.instance;
     _this.addressAllocation = addressAllocation;
+    console.log('[Registry - AddressAllocation] - ', addressAllocation);
 
-    //Install ObjectAllocation
-    let objectAllocation = new ObjectAllocation(_this.registryURL + '/object-allocation', messageBus);
-    _this.objectAllocation = objectAllocation;
-
-    /*let discovery = new Discovery(_this.registryURL, messageBus);
+    let discovery = new Discovery(_this.runtimeURL, messageBus);
     _this.discovery = discovery;
 
-    let identityManager = new IdentityManager('hyperty://localhost/833a6e52-515b-498b-a57b-e3daeece48d2', _this.runtimeURL, messageBus);
-    _this.identityManager = identityManager;*/
+    // TODO what is this? this should be removed;
+    /*let discoveryServiceFramework = new DiscoveryServiceFramework('hyperty://localhost/123', _this.runtimeURL, messageBus);
+    _this.discoveryServiceFramework = discoveryServiceFramework;*/
+
   }
 
   /**
@@ -168,13 +292,13 @@ class Registry {
       type: 'read', from: _this.registryURL, to: 'domain://registry.' + activeDomain + '/', body: { resource: identityURL}
     };
 
-    console.log('Message: ', message, activeDomain, identityURL);
+    console.log('[Registry] Message: ', message, activeDomain, identityURL);
 
-    //console.log('message READ', message);
+    //console.log('[Registry] message READ', message);
     return new Promise(function(resolve, reject) {
 
       _this._messageBus.postMessage(message, (reply) => {
-        console.log('message reply', reply);
+        console.log('[Registry] message reply', reply);
 
         let hyperty;
         let mostRecent;
@@ -196,7 +320,7 @@ class Registry {
           }
         }
 
-        console.log('Last Hyperty: ', lastHyperty, mostRecent);
+        console.log('[Registry] Last Hyperty: ', lastHyperty, mostRecent);
 
         let hypertyURL = lastHyperty;
 
@@ -210,7 +334,7 @@ class Registry {
           hypertyURL: hypertyURL
         };
 
-        console.log('===> hypertyDiscovery messageBundle: ', idPackage);
+        console.log('[Registry] ===> hypertyDiscovery messageBundle: ', idPackage);
         resolve(idPackage);
       });
     });
@@ -340,9 +464,10 @@ class Registry {
   getReporterURL(dataObjectURL) {
     let _this = this;
 
-    let dataObject = _this.dataObjectList[dataObjectURL];
-
     return new Promise(function(resolve, reject) {
+
+      let dataObject = _this.dataObjectList[dataObjectURL];
+
       if (dataObject) {
         resolve(dataObject.reporter);
       } else {
@@ -411,7 +536,7 @@ class Registry {
 
     let unregisterResults = [];
 
-    return new Promise(function(resolve,reject) {
+    return new Promise(function(resolve, reject) {
 
       for (let index in _this.hypertiesList) {
         let hyperty = _this.hypertiesList[index];
@@ -422,7 +547,7 @@ class Registry {
       Promise.all(unregisterResults).then(() => {
 
         resolve('successfully unregistered all hyperties');
-      }, error => { reject(error);});
+      }, error => { reject(error); });
     });
   }
 
@@ -437,11 +562,11 @@ class Registry {
     let _this = this;
 
     let message = { type: 'delete', from: _this.registryURL,
-                    to: 'domain://registry.' + _this._domain + '/',
-                    body: { value: {user: user, url: hypertyInstance }}};
+      to: 'domain://registry.' + _this._domain + '/',
+      body: { value: {user: user, url: hypertyInstance }}};
 
     _this._messageBus.postMessage(message, (reply) => {
-      console.log('unregister hyperty Reply', reply);
+      console.log('[Registry] unregister hyperty Reply', reply);
     });
   }
 
@@ -453,11 +578,11 @@ class Registry {
     let _this = this;
 
     let message = { type: 'delete', from: _this.registryURL,
-                    to: 'domain://registry.' + _this._domain + '/',
-                    body: { value: {name: name}}};
+      to: 'domain://registry.' + _this._domain + '/',
+      body: { value: {name: name}}};
 
     _this._messageBus.postMessage(message, (reply) => {
-      console.log('unregister dataObject Reply', reply);
+      console.log('[Registry] unregister dataObject Reply', reply);
     });
   }
 
@@ -468,11 +593,11 @@ class Registry {
     let _this = this;
 
     let message = { type: 'UPDATE', from: _this.registryURL,
-                    to: 'domain://registry.' + _this._domain + '/',
-                    body: { resource: resource, value: value}};
+      to: 'domain://registry.' + _this._domain + '/',
+      body: { resource: resource, value: value}};
 
     _this._messageBus.post.postMessage(message, (reply) => {
-      console.log('Updated hyperty reply', reply);
+      console.log('[Registry] Updated hyperty reply', reply);
     });
   }
 
@@ -516,7 +641,7 @@ class Registry {
   * @param  {Array}     resources                     dataObject resources
   * @param  {Array}     authorise                     list of pre authorised authorised IDs
   */
-  registerDataObject(identifier, dataObjectschema, dataObjectUrl, dataObjectReporter, resources, authorise) {
+  registerDataObject(identifier, dataObjectschema, dataObjectUrl, dataObjectReporter, resources, addressURL, authorise) {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
@@ -525,29 +650,387 @@ class Registry {
       let filteredDataScheme = dataObjectUrl.split(':');
       dataScheme.push(filteredDataScheme[0]);
 
-      //message to register the new hyperty, within the domain registry
-      let messageValue = {name: identifier, resources: resources, dataSchemes: dataScheme, schema: dataObjectschema, url: dataObjectUrl, expires: _this.expiresTime, reporter: dataObjectReporter, preAuth: authorise, subscribers: []};
+      _this.storageManager.get('registry:DataObjectURLs').then((urlsList) => {
 
-      _this.dataObjectList[dataObjectUrl] = messageValue;
-
-      /*let message = _this.messageFactory.createCreateMessageRequest(
-        _this.registryURL,
-        'domain://registry.' + _this.registryDomain + '/',
-        messageValue,
-        'policy'
-      );*/
-
-      let message = {type:'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: messageValue, policy: 'policy'}};
-
-      _this._messageBus.postMessage(message, (reply) => {
-        console.log('===> registerDataObject Reply: ', reply);
-        if (reply.body.code === 200) {
-          resolve('ok');
-        } else {
-          reject('error on register DataObject');
+        if (!urlsList) {
+          urlsList = {};
         }
+
+        //update the list with the new elements
+        urlsList[identifier + dataObjectschema + resources + dataObjectReporter] = addressURL.address;
+
+        let p2pHandler;
+        let p2pRequester;
+
+        if (Object.keys(_this.p2pHandlerStub).length !== 0) {
+          p2pHandler = _this.p2pHandlerStub[_this.runtimeURL].url;
+          p2pRequester = runtimeUtils.runtimeDescriptor.p2pRequesterStub;
+        }
+
+        let runtime = _this.runtimeURL;
+        let status = 'live';
+
+        //message to register the new data object, within the domain registry
+        let messageValue = {
+          name: identifier,
+          resources: resources,
+          dataSchemes: dataScheme,
+          schema: dataObjectschema,
+          url: dataObjectUrl,
+          expires: _this.expiresTime,
+          reporter: dataObjectReporter,
+          preAuth: authorise,
+          subscribers: [],
+          runtime: runtime,
+          status: status
+        };
+
+        if (p2pHandler) {
+          messageValue.p2pHandler = p2pHandler;
+          messageValue.p2pRequester = p2pRequester;
+        }
+
+        if (_this.isInterworkingProtoStub(dataObjectReporter)) {
+          messageValue.interworking = true;
+        }
+
+        let message;
+
+        if (addressURL.newAddress) {
+
+          console.log('[Registry] registering new data object URL', dataObjectUrl);
+
+          message = {type: 'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: messageValue, policy: 'policy'}};
+
+        } else {
+
+          console.log('[Registry] registering previously registered data object URL', dataObjectUrl);
+
+          /*messageValue = {name: identifier, resources: resources, dataSchemes: dataScheme, schema: dataObjectschema, url: dataObjectUrl, expires: _this.expiresTime, reporter: dataObjectReporter, preAuth: authorise, subscribers: []};
+
+          message = {type:'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: messageValue, policy: 'policy'}};*/
+
+          message = {
+            type: 'update',
+            to: 'domain://registry.' + _this.registryDomain + '/',
+            from: _this.registryURL,
+            body: {resource: dataObjectUrl, value: {status: 'live'} }
+          };
+
+        }
+
+        _this.dataObjectList[dataObjectUrl] = messageValue;
+
+        // step to obtain the list of all URL registered to updated with the new one.
+        _this.storageManager.set('registry:DataObjectURLs', 0, urlsList).then(() => {
+
+          /*let message = _this.messageFactory.createCreateMessageRequest(
+            _this.registryURL,
+            'domain://registry.' + _this.registryDomain + '/',
+            messageValue,
+            'policy'
+          );*/
+
+          _this._messageBus.postMessage(message, (reply) => {
+            console.log('[Registry] ===> registerDataObject Reply: ', reply);
+            if (reply.body.code === 200) {
+              resolve('ok');
+            } else {
+              reject('error on register DataObject');
+            }
+          });
+        });
+      });
+    });
+  }
+
+  _getResourcesAndSchemes(descriptor) {
+    let _this = this;
+
+    return new Promise((resolve)=> {
+
+      let resources;
+
+      // check if the hyperty resources is a vector or a string
+      // TODO delete later when catalogue is fixed
+      if (typeof (descriptor.hypertyType) === 'string') {
+        resources = [];
+        resources.push(descriptor.hypertyType);
+      } else {
+        resources = descriptor.hypertyType;
+      }
+
+      let descriptorDataSchema = descriptor.dataObjects;
+      let dataSchemasArray = [];
+
+      //this will create a array with a Promise in each position
+      for (let index in descriptorDataSchema) {
+        dataSchemasArray.push(_this.runtimeCatalogue.getDataSchemaDescriptor(descriptorDataSchema[index]));
+      }
+
+      // as soon as the previous array is completed, this will wait for the resolve of all promises in the array
+      Promise.all(dataSchemasArray).then(function(dataSchemas) {
+
+        let filteredDataSchemas = [];
+        for (let index in dataSchemas) {
+          let dataSchema = dataSchemas[index];
+          filteredDataSchemas.push(dataSchema.sourcePackage.sourceCode.properties.scheme.constant);
+        }
+
+        console.log('[Registry] Hyperty Schemas', filteredDataSchemas);
+        console.log('[Registry] Hyperty resources', resources);
+
+        resolve({resources: resources, dataSchema: filteredDataSchemas});
+      });
+    });
+  }
+
+  /**
+  * method that returns previously registered Hyperty or DataObjects URLS, for given characteristics
+  * @param  {JSON}        info           object or hyperty charateristics info
+  * @return {addressURL}  addressURL     return the URL if there is any previousy registered URL, return undefined otherwise
+  */
+  checkRegisteredURLs(info, reuseURL) {
+    let _this = this;
+
+    return new Promise((resolve) => {
+
+      let objectType = (info.reporter) ? 'registry:DataObjectURLs' : 'registry:HypertyURLs';
+
+      if (typeof(reuseURL) === 'string') {
+        objectType = reuseURL && divideURL(reuseURL).type !== 'hyperty' ? 'registry:DataObjectURLs' : 'registry:HypertyURLs';
+      }
+
+      _this.storageManager.get(objectType).then((urlsList) => {
+
+        if (!urlsList) {
+          urlsList = {};
+        }
+
+        if (typeof(reuseURL) === 'string') {
+          console.info('[Registry - checkRegisteredURLs] - look for ' + reuseURL + ' on ', urlsList);
+
+          let searchResult = Object.keys(urlsList).map((key) => {
+            let indexOf = urlsList[key].indexOf(reuseURL);
+            return urlsList[key][indexOf];
+          });
+
+          console.info('[Registry - checkRegisteredURLs] - found ' + searchResult.length + ' results on ', searchResult);
+          if (searchResult.length === 1) {
+            return resolve(searchResult);
+          } else {
+            return resolve(undefined);
+          }
+        }
+
+        if (objectType === 'registry:HypertyURLs') {
+          _this._getResourcesAndSchemes(info).then((value) => {
+            if (urlsList[value.resources + value.dataSchema]) {
+              console.log('[Registry] reusage of hyperty URL');
+              return resolve(urlsList[value.resources + value.dataSchema]);
+            } else {
+              console.log('[Registry] no hyperty URL was previously registered ');
+              return resolve(undefined);
+            }
+          });
+        } else {
+
+          let characteristics = info.name + info.schema + info.resources + info.reporter;
+
+          if (urlsList[characteristics]) {
+            console.log('[Registry] reusage of dataObject URL');
+            return resolve(urlsList[characteristics]);
+          } else {
+            console.log('[Registry] no dataObject URL was previously registered');
+            return resolve(undefined);
+          }
+        }
+
       });
 
+    });
+  }
+
+  /**
+  * Verifies if remote Entity can be reached with a P2P Connection.
+  * @param  {URL.URL}        info           object URL
+  * @return {HypertyDataObjectInstance}  addressURL     return the Data Object instance registered URL, return undefined otherwise
+  */
+
+  checkP2P(url) {
+
+    if (url.includes('runtime://') && url.includes('/sm')) {
+
+      url = url = url.substring(0, url.indexOf('/sm'));
+      return this.checkP2PRuntime(url);
+    }
+
+    if (url.includes('hyperty://')) {
+      return this.checkP2PHyperty(url);
+    } else {
+
+        // remove data object suffixes
+      if (url.includes('/subscription')) {
+        url = url.substring(0, url.indexOf('/subscription'));
+      }
+
+      if (url.includes('/changes')) {
+        url = url.substring(0, url.indexOf('/changes'));
+      }
+
+      if (url.includes('/children/')) {
+        url = url.substring(0, url.indexOf('/children/'));
+      }
+
+      return this.checkP2PDataObject(url);
+    }
+  }
+
+  /**
+  * Verifies if remote Runtime can be reached with a P2P Connection.
+  * @param  {URL.URL}        runtimeURL           Runtime URL
+  * @return {Object}  p2pConnection    return the P2PConnection instance registered URL, return undefined otherwise
+  */
+
+  checkP2PRuntime(runtimeURL) {
+    let _this = this;
+
+    // look on locally stored p2p connections
+    return new Promise((resolve, reject) => {
+      if (_this.p2pConnectionList[runtimeURL]) {
+        let registeredRuntime = _this.p2pConnectionList[runtimeURL];
+        registeredRuntime.runtime = runtimeURL;
+        resolve(registeredRuntime);
+      } else {
+        reject('[Registry checkP2PRuntime] No P2P Connection for runtime ', runtimeURL);
+      }
+    });
+
+  }
+
+  /**
+  * Verifies if remote Data Object can be reached with a P2P Connection.
+  * @param  {URL.URL}        DataObjectURL           object URL
+  * @return {HypertyDataObjectInstance}  addressURL     return the Data Object instance registered URL, return undefined otherwise
+  */
+
+  checkP2PDataObject(dataObjectURL) {
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+
+      // look on locally stored hyperties
+
+      let dataobject = _this.remoteDataObjectList.filter((i) => {
+        return (_this.remoteDataObjectList[i].url === dataObjectURL);
+      });
+
+      if (dataobject.length !== 0 && dataobject[0].p2pRequester) {
+        resolve(dataobject[0]);
+      } else if (dataobject.length !== 0) {
+        reject('[Registry checkP2PDataObject] Data Object found does not support P2P', dataobject[0]);
+      } else {
+
+      // look on Domain Registry
+
+        let message = {
+          type: 'read',
+          from: _this.registryURL,
+          to: 'domain://registry.' + _this._domain + '/',
+          body: {
+            resource: dataObjectURL
+          }
+        };
+
+        _this._messageBus.postMessage(message, (reply) => {
+          console.log('discover data object per url reply', reply);
+          if ('value' in reply.body) {
+
+            //todo: store retrieved hyperty
+            let resolvedDataObject = reply.body.value;
+
+            _this.remoteDataObjectList.push(resolvedDataObject);
+
+            if (resolvedDataObject.p2pRequester) {
+              resolve(resolvedDataObject);
+            } else {
+              reject('[Registry checkP2PDataObject] Data Object found does not support P2P', reply.body.value);
+            }
+
+          } else {
+            reject('[Registry checkP2PDataObject] not found', reply.body.code);
+          }
+        });
+      }
+    });
+  }
+
+  /**
+  * Verifies if remote Hyperty can be reached with a P2P Connection.
+  * @param  {JSON}        info           object or hyperty charateristics info
+  * @return {addressURL}  addressURL     return the URL if there is any previousy registered URL, return undefined otherwise
+  */
+
+  checkP2PHyperty(hypertyURL) {
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+      let hyperty;
+
+
+      // look on locally stored hyperties
+
+      for (let i in _this.remoteHypertyList) {
+        hyperty = _this.remoteHypertyList[i];
+
+        console.log('[Registry - checkP2PHyperty] - for each Hyperty: ', hyperty);
+
+        // todo: change to "hyperty.url" to be aligned with hyperty instance data model spec
+
+        if (hyperty.hypertyID === hypertyURL) {
+
+          if (hyperty.hasOwnProperty('p2pHandler')) {
+            resolve(hyperty);
+          } else {
+            reject('[Registry checkP2PHyperty] Hyperty found does not support P2P', hyperty);
+          }
+        }
+      }
+
+      // look on Domain Registry
+
+      if (!hyperty) {
+        console.log('[Registry - checkP2PHyperty] - search in Domain Registry: ', hyperty);
+
+        let message = {
+          type: 'read',
+          from: _this.registryURL,
+          to: 'domain://registry.' + _this._domain + '/',
+          body: {
+            resource: hypertyURL
+          }
+        };
+
+        _this._messageBus.postMessage(message, (reply) => {
+          console.log('[Registry - checkP2PHyperty] Domain Registry reply', reply);
+          if ('value' in reply.body) {
+
+            //todo: store retrieved hyperty
+            let resolvedHyperty = reply.body.value;
+
+            _this.remoteHypertyList.push(resolvedHyperty);
+
+            if (resolvedHyperty.hasOwnProperty('p2pHandler')) {
+              resolve(resolvedHyperty);
+            } else {
+              reject('[Registry checkP2PHyperty] Hyperty found does not support P2P', reply.body.value);
+            }
+
+          } else {
+            reject('[Registry checkP2PHyperty] Hyperty with P2PHandler not found', reply.body.code);
+          }
+        });
+      }
     });
   }
 
@@ -557,8 +1040,10 @@ class Registry {
   * @param  {HypertyCatalogueURL} HypertyCatalogueURL   descriptor
   * @return {HypertyURL}          HypertyURL
   */
-  registerHyperty(sandbox, descriptorURL, descriptor) {
+  registerHyperty(sandbox, descriptorURL, descriptor, addressURL) {
     let _this = this;
+
+    let hypertyCapabilities;
 
     return new Promise(function(resolve, reject) {
 
@@ -571,93 +1056,111 @@ class Registry {
       }
 
       _this.idModule.getIdentityAssertion().then(function(result) {
-        console.log('TIAGO registry', result);
+
         let userProfile = result.userProfile;
-        let identityURL = userProfile.userURL;
+
+        // hack while domain registry does not support discovery per email
+        let email = userProfile.userURL.split('://')[1].split('/')[1];
+        let emailURL = 'user://' + email.split('@')[1] + '/' + email.split('@')[0];
 
         if (_this._messageBus === undefined) {
           reject('MessageBus not found on registerStub');
         } else {
-          //call check if the protostub exist
-          _this.resolve('hyperty-runtime://' + domainUrl).then(function() {
+          //call check if the protostub exist: to be removed
+          /*  _this.resolve(domainUrl).then(function(a) {
+            console.log('[Registry registerHyperty] stub to domain registry- ', a);*/
 
-            _this.registryDomain = domainUrl;
+          _this.storageManager.get('registry:HypertyURLs').then((urlsList) => {
 
-            // TODO: should be implemented with addresses poll
-            // In this case we will request and return only one
-            // address
-            let numberOfAddresses = 1;
-            _this.addressAllocation.create(domainUrl, numberOfAddresses).then(function(adderessList) {
+            console.log('[Registry registerHyperty] storageManager] - ', urlsList);
 
-              adderessList.forEach(function(address) {
+            _this._getResourcesAndSchemes(descriptor).then((value) => {
 
-                _this._messageBus.addListener(address + '/status', (msg) => {
-                  console.log('Message addListener for : ', address + '/status -> '  + msg);
-                });
+              hypertyCapabilities = value;
 
-              });
-
-              //check whether the received sanbox e ApplicationSandbox or a normal sandbox
-              if (sandbox.type === 'app') {
-                _this.sandboxesList.appSandbox[adderessList[0]] = sandbox;
-              } else if (sandbox.type === 'normal') {
-                _this.sandboxesList.sandbox[adderessList[0]] = sandbox;
-              } else {
-                reject('Wrong SandboxType');
+              if (!urlsList) {
+                urlsList = {};
               }
 
-              let resources;
+              urlsList[hypertyCapabilities.resources + hypertyCapabilities.dataSchema] = addressURL.address;
+              _this.storageManager.set('registry:HypertyURLs', 0, urlsList).then(() => {
 
-              // check if the hyperty resources is a vector or a string
-              // TODO delete later when catalogue is fixed
-              if (typeof (descriptor.hypertyType) === 'string') {
-                resources = [];
-                resources.push(descriptor.hypertyType);
-              } else {
-                resources = descriptor.hypertyType;
-              }
+                _this.registryDomain = domainUrl;
 
-              let descriptorDataSchema = descriptor.dataObjects;
-              let dataSchemasArray = [];
-
-              //this will create a array with a Promise in each position
-              for (let index in descriptorDataSchema) {
-                dataSchemasArray.push(_this.runtimeCatalogue.getDataSchemaDescriptor(descriptorDataSchema[index]));
-              }
-
-              // as soon as the previous array is completed, this will wait for the resolve of all promises in the array
-              Promise.all(dataSchemasArray).then(function(dataSchemas) {
-
-                let filteredDataSchemas = [];
-                for (let index in dataSchemas) {
-                  let dataSchema = dataSchemas[index];
-                  filteredDataSchemas.push(dataSchema.sourcePackage.sourceCode.properties.scheme.constant);
+                //check whether the received sanbox e ApplicationSandbox or a normal sandbox
+                if (sandbox.type === 'app') {
+                  _this.sandboxesList.appSandbox[addressURL.address[0]] = sandbox;
+                } else if (sandbox.type === 'normal') {
+                  _this.sandboxesList.sandbox[addressURL.address[0]] = sandbox;
+                } else {
+                  reject('Wrong SandboxType');
                 }
 
-                let hyperty = new HypertyInstance(_this.identifier, _this.registryURL,
-                descriptorURL, descriptor, adderessList[0], userProfile);
+                let p2pHandler;
+                let p2pRequester;
 
-                hyperty._resources = resources;
-                hyperty._dataSchemes = filteredDataSchemas;
+                if (Object.keys(_this.p2pHandlerStub).length !== 0) {
+                  p2pHandler = _this.p2pHandlerStub[_this.runtimeURL].url;
+                  p2pRequester = runtimeUtils.runtimeDescriptor.p2pRequesterStub;
+                }
+
+                let runtime = _this.runtimeURL;
+                let status = 'live';
+
+                let hyperty = new HypertyInstance(_this.identifier, _this.registryURL,
+                descriptorURL, descriptor, addressURL.address[0], userProfile, 'guid', _this.runtimeURL, 'ctx', p2pHandler, p2pRequester, hypertyCapabilities.dataSchema, hypertyCapabilities.resources);
+
                 _this.hypertiesList.push(hyperty);
 
                 //message to register the new hyperty, within the domain registry
-                let messageValue = {user: identityURL,  descriptor: descriptorURL, url: adderessList[0], expires: _this.expiresTime, resources: resources, dataSchemes: filteredDataSchemas};
+                let messageValue;
+                let message;
 
-                /*let message = _this.messageFactory.createCreateMessageRequest(
-                  _this.registryURL,
-                  'domain://registry.' + _this.registryDomain + '/',
-                  messageValue,
-                  'policy'
-                );*/
+                if (addressURL.newAddress) {
+                  console.log('[Registry registerHyperty] registering new Hyperty URL', addressURL.address[0]);
 
-                let message = {type:'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: messageValue, policy: 'policy'}};
+                  messageValue = {
+                    user: emailURL,
+                    descriptor: descriptorURL,
+                    url: addressURL.address[0],
+                    expires: _this.expiresTime,
+                    resources: hypertyCapabilities.resources,
+                    dataSchemes: hypertyCapabilities.dataSchema,
+                    runtime: runtime,
+                    status: status
+                  };
+
+                  if (p2pHandler) {
+                    messageValue.p2pHandler = p2pHandler;
+                    messageValue.p2pRequester = p2pRequester;
+                  }
+
+                  console.log('[Registry registerHyperty] registering new Hyperty at domain registry ', messageValue);
+
+                  message = {type: 'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: messageValue, policy: 'policy'}};
+
+                } else {
+                  console.log('[Registry registerHyperty] registering previously registered Hyperty URL', addressURL.address[0]);
+
+                  message = {
+                    type: 'update',
+                    to: 'domain://registry.' + _this.registryDomain + '/',
+                    from: _this.registryURL,
+                    body: {resource: addressURL.address[0], value: { status: 'live', user: emailURL }}
+                  };
+
+                  if (p2pHandler) {
+                    message.body.value.p2pHandler = p2pHandler;
+                  }
+                }
+
+                console.log('[Registry registerHyperty] updating Hyperty registration at domain registry  - ', message);
 
                 _this._messageBus.postMessage(message, (reply) => {
-                  console.log('===> RegisterHyperty Reply: ', reply);
+                  console.log('[Registry registerHyperty] Hyperty registration update response: ', reply);
 
                   if (reply.body.code === 200) {
-                    resolve(adderessList[0]);
+                    resolve(addressURL.address[0]);
                   } else {
                     reject('Failed to register an Hyperty');
                   }
@@ -673,29 +1176,29 @@ class Registry {
                     messageValue,
                     'policy'
                   );*/
-                  let message = {type:'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: messageValue, policy: 'policy'}};
+
+                  let message = {
+                    type: 'update',
+                    from: _this.registryURL,
+                    to: 'domain://registry.' + _this.registryDomain + '/',
+                    body: { resource: addressURL.address[0], value: {status: 'live'} }};
 
                   _this._messageBus.postMessage(message, (reply) => {
-                    console.log('===> KeepAlive Reply: ', reply);
+                    console.log('[Registry registerHyperty] KeepAlive Reply: ', reply);
                   });
-                },(((_this.expiresTime / 1.1) / 2) * 1000));
+                }, (((_this.expiresTime / 1.1) / 2) * 1000));
 
-                console.log('Hyperty Schemas', filteredDataSchemas);
-                console.log('Hyperty resources', resources);
-
+              }).catch(function(reason) {
+                console.log('[Registry registerHyperty] Error: ', reason);
+                reject(reason);
               });
-
-            }).catch(function(reason) {
-              console.log('Address Reason: ', reason);
-              reject(reason);
             });
           });
         }
       }, function(err) {
-        reject('Failed to obtain an identity');
+        reject('[Registry registerHyperty] Failed to obtain an identity', err);
       });
     });
-
   }
 
   /**
@@ -705,7 +1208,7 @@ class Registry {
   unregisterHyperty(url) {
     let _this = this;
 
-    return new Promise(function(resolve,reject) {
+    return new Promise(function(resolve, reject) {
 
       let found = false;
       let index = 0;
@@ -739,34 +1242,74 @@ class Registry {
     if (!url) throw new Error('Parameter url needed');
     let _this = this;
 
-    return new Promise(function(resolve,reject) {
+    let dividedURL = divideURL(url);
+    let domainURL = dividedURL.domain;
 
-      let dividedURL = divideURL(url);
-      let domainURL = dividedURL.domain;
+    if (_this.protostubsList.hasOwnProperty(domainURL) && _this.protostubsList[domainURL].status === STATUS.LIVE) {
+      return (_this.protostubsList[domainURL]);
+    } else {
 
-      if (_this.protostubsList.hasOwnProperty(domainURL) && _this.protostubsList[domainURL].status === STATUS.DEPLOYED) {
-        resolve(_this.protostubsList[domainURL]);
+      _this.protostubsList[domainURL] = {
+        status: STATUS.CREATED
+      };
+
+      throw new Error('[Registry - discoverProtoStub ] Message Node Protostub Not Found. Creating one');
+
+    }
+
+  }
+
+  /**
+  * To discover protocol stubs available in the runtime for a certain remote runtime URL. If available, it returns the runtime url for the protocol stub that connects to the requested domain.
+  * Required by the runtime BUS to route messages to remote servers or peers (do we need something similar for Hyperties?).
+  * @param  {RuntimeURL}           RuntimeURL            url
+  * @return {p2pRequester}           RuntimeURL
+  */
+  discoverP2PStub(runtimeURL) {
+    let _this = this;
+
+    if (runtimeURL) {
+
+      if (_this.p2pRequesterStub.hasOwnProperty(runtimeURL) && _this.p2pRequesterStub[runtimeURL].status === STATUS.LIVE) {
+        return (_this.p2pRequesterStub[runtimeURL]);
       } else {
-        _this.protostubsList[domainURL] = {
-          status: STATUS.PROGRESS
+        _this.p2pRequesterStub[runtimeURL] = {
+          status: STATUS.CREATED
         };
 
-        reject('requestUpdate couldn\'t get the ProtostubURL');
+        throw new Error('[Registry - discoverP2PStub ] P2P Requester Stub Not Found. Creating one');
+
       }
-    });
+    } else {
+
+      if (_this.p2pHandlerStub.hasOwnProperty(_this.runtimeURL)) {
+        return (_this.p2pHandlerStub[_this.runtimeURL]);
+      } else {
+        _this.p2pHandlerStub[_this.runtimeURL] = {
+          status: STATUS.CREATED
+        };
+
+        throw new Error('[Registry - discoverP2PStub ] P2P Handler Stub Not Found.');
+      }
+
+    }
 
   }
 
   /**
    * To register a new Protocol Stub in the runtime including as input parameters the function to postMessage, the DomainURL that is connected with the stub, which returns the RuntimeURL allocated to the new ProtocolStub.
-   * @param {Sandbox}        Sandbox
-   * @param  {DomainURL}     DomainURL service provider domain
+   * @param  {Sandbox}       Sandbox
+   * @param  {stubID}        Domain or hyperty runtime to register the stub
+   * @param  {descriptorURL}     Catalogue URL of the Protostub descriptor
+   * @param  {descriptor}     Protostub descriptor
    * @return {RuntimeProtoStubURL}
    */
-  registerStub(sandbox, domainURL) {
+  registerStub(sandbox, stubID, p2pConfig, descriptorURL, descriptor) {
     let _this = this;
 
-    return new Promise(function(resolve,reject) {
+    let _stubDescriptor = descriptor;
+
+    return new Promise(function(resolve, reject) {
 
       let runtimeProtoStubURL;
 
@@ -775,35 +1318,163 @@ class Registry {
         reject('MessageBus not found on registerStub');
       }
 
-      //TODO implement a unique number for the protostubURL
-      if (!domainURL.indexOf('msg-node.')) {
-        domainURL = domainURL.substring(domainURL.indexOf('.') + 1);
+      console.info('[Registry - registerStub] - stubID ', stubID);
+
+  /*    if (!stubID.indexOf('msg-node.')) {
+        stubID = stubID.substring(stubID.indexOf('.') + 1);
+      }*/
+
+      let P2PRequesterStub;
+
+      if (p2pConfig) {
+
+        if (p2pConfig.hasOwnProperty('isHandlerStub') && p2pConfig.isHandlerStub) {
+          runtimeProtoStubURL = 'runtime://' + divideURL(stubID).domain + '/p2phandler/' + generateGUID();
+          console.info('[Registry - registerStub - isP2PHandler] - ', runtimeProtoStubURL);
+
+          _this.p2pHandlerStub[stubID] = {
+            url: runtimeProtoStubURL,
+            status: STATUS.CREATED
+          };
+
+          _this.p2pHandlerAssociation[_this.runtimeURL] = [];
+
+          _this.sandboxesList.sandbox[stubID] = sandbox;
+          resolve(_this.p2pHandlerStub[stubID]);
+        } else {
+          P2PRequesterStub = p2pConfig.p2pRequesterStub;
+          runtimeProtoStubURL = 'runtime://' + divideURL(p2pConfig.remoteRuntimeURL).domain + '/p2prequester/' + generateGUID();
+          console.info('[Registry - registerStub - P2PRequesterStub] - ', P2PRequesterStub, ' - ', runtimeProtoStubURL);
+
+          // to be clarified what is this p2pHandlerAssociation
+
+          _this.p2pHandlerAssociation[_this.runtimeURL].push(runtimeProtoStubURL);
+          _this.p2pRequesterStub[stubID] = {
+            url: runtimeProtoStubURL,
+            status: STATUS.CREATED
+          };
+
+          _this.sandboxesList.sandbox[stubID] = sandbox;
+
+          //Setup P2P Requester path into MN
+
+          let msg = {
+            type: 'subscribe',
+            from: _this.registryURL,
+            to: 'domain://msg-node.' + _this._domain + '/sm',
+            body: {
+              subscribe: [runtimeProtoStubURL],
+              source: _this.registryURL
+            }
+          };
+
+          _this._messageBus.postMessage(msg, (reply) => {
+            console.log('[Registry - register Stub] p2pRequester path setup: ', reply);
+          });
+
+          resolve(_this.p2pRequesterStub[stubID]);
+        }
+      } else {
+        runtimeProtoStubURL = 'runtime://' + stubID + '/protostub/' + generateGUID();
+
+        console.info('[Registry - registerStub - Normal Stub] - ', stubID);
+
+        // TODO: Optimize this
+        _this.protostubsList[stubID] = {
+          url: runtimeProtoStubURL,
+          status: STATUS.CREATED
+        };
+
+        if (descriptorURL) {
+          _this.protostubsList[stubID].descriptorURL = descriptorURL;
+        }
+
+        if (_stubDescriptor && (_stubDescriptor.interworking)) {
+          _this.protostubsList[stubID].interworking = _stubDescriptor.interworking;
+        }
+
+        _this.sandboxesList.sandbox[runtimeProtoStubURL] = sandbox;
+
+        resolve(_this.protostubsList[stubID]);
       }
 
-      runtimeProtoStubURL = 'msg-node.' + domainURL + '/protostub/' + Math.floor((Math.random() * 10000) + 1);
-
-      // TODO: Optimize this
-      // Proxy;
-      _this.protostubsList[domainURL] = {
-        url: runtimeProtoStubURL,
-        status: STATUS.DEPLOYED
-      };
-
-      // _this.protostubsList[domainURL] = runtimeProtoStubURL;
-      _this.sandboxesList.sandbox[runtimeProtoStubURL] = sandbox;
-
-      // sandbox.addListener('*', function(msg) {
-      //   _this._messageBus.postMessage(msg);
-      // });
-
-      resolve(runtimeProtoStubURL);
+      // resolve(runtimeProtoStubURL);
 
       _this._messageBus.addListener(runtimeProtoStubURL + '/status', (msg) => {
-        if (msg.resource === msg.to + '/status') {
-          console.log('RuntimeProtostubURL/status message: ', msg.body.value);
-        }
+        _this._onProtostubStatusEvent(msg);
       });
+
     });
+
+  }
+
+  /**
+  * To Process status events fired by protostubs
+  * @param  {Message}   message     Event Message
+  */
+
+  _onProtostubStatusEvent(msg) {
+
+    let _this = this;
+
+    console.log('[Registry onProtostubStatusEvent]: ', msg);
+
+    let runtimeProtoStubURL = msg.from;
+
+    if (!msg.to.includes('/status')) {
+      console.error('[Registry onProtostubStatusEvent] Not Status Event: ', msg);
+      return;
+    }
+
+    // process status events from message node protostubs
+
+    if (runtimeProtoStubURL.includes('/protostub/')) {
+
+    // TODO: uncomment below when protostubs are updated with new status value "live"
+    /*  let filtered = Object.keys(_this.protostubsList).filter((key) => {
+          return _this.protostubsList[key].url === runtimeProtoStubURL;
+        }).map((key) => {
+          _this.protostubsList[key].status = msg.body.value;
+        });*/
+    } else { // process status events from p2p connections
+
+      if (msg.body.resource) {
+        let remoteRuntimeURL = msg.body.resource;
+
+        if (_this.p2pConnectionList[remoteRuntimeURL]) {
+          _this.p2pConnectionList[remoteRuntimeURL].status =  msg.body.value;
+          _this.p2pConnectionList[remoteRuntimeURL].url =  runtimeProtoStubURL;
+        } else {
+
+          let  p2pConnection = {
+            status: msg.body.value,
+            url: runtimeProtoStubURL
+          };
+
+          _this.p2pConnectionList[remoteRuntimeURL] =  p2pConnection;
+        }
+
+        console.log('[Registry - onProtostubStatusEvent] - P2PConnection status: ', _this.p2pConnectionList[remoteRuntimeURL]);
+
+        // Update P2P Requester protostub if it is coming from there
+        if (runtimeProtoStubURL.includes('/p2prequester/')) {
+          _this.p2pRequesterStub[remoteRuntimeURL].status = msg.body.value;
+          console.log('[Registry - onProtostubStatusEvent] - P2P Requester status: ', _this.p2pRequesterStub[remoteRuntimeURL]);
+        }
+
+      } else {
+        if (runtimeProtoStubURL.includes('/p2prequester/')) {
+            // It is an event from P2P Requester without mandatory "resource" field
+          console.error('[Registry onProtostubStatusEvent] resource missing: ', msg);
+          return;
+        } else {
+            // It is an event from P2P Handler
+          _this.p2pHandlerStub[_this.runtimeURL].status = msg.body.value;
+          console.log('[Registry - onProtostubStatusEvent] - P2PHandler Stub status: ', _this.p2pHandlerStub[_this.runtimeURL]);
+        }
+      }
+
+    }
 
   }
 
@@ -834,7 +1505,7 @@ class Registry {
   registerIdpProxy(sandbox, domainURL) {
     let _this = this;
 
-    return new Promise(function(resolve,reject) {
+    return new Promise(function(resolve, reject) {
 
       let idpProxyStubURL;
 
@@ -843,7 +1514,7 @@ class Registry {
         reject('MessageBus not found on registerStub');
       }
 
-      idpProxyStubURL = 'domain-idp://' + domainURL + '/stub/' + Math.floor((Math.random() * 10000) + 1);
+      idpProxyStubURL = 'domain-idp://' + domainURL + '/stub/' + generateGUID();
 
       // TODO: Optimize this
       _this.idpProxyList[domainURL] = {
@@ -861,7 +1532,7 @@ class Registry {
 
       _this._messageBus.addListener(idpProxyStubURL + '/status', (msg) => {
         if (msg.resource === msg.to + '/status') {
-          console.log('idpProxyStubURL/status message: ', msg.body.value);
+          console.log('[Registry] idpProxyStubURL/status message: ', msg.body.value);
         }
       });
     });
@@ -876,21 +1547,20 @@ class Registry {
     if (!url) throw new Error('Parameter url needed');
     let _this = this;
 
-    return new Promise(function(resolve, reject) {
+    let dividedURL = divideURL(url);
+    let domainURL = dividedURL.domain;
 
-      let dividedURL = divideURL(url);
-      let domainURL = dividedURL.domain;
+    if (_this.idpProxyList.hasOwnProperty(domainURL) && _this.idpProxyList[domainURL].status === STATUS.LIVE) {
+      return (_this.idpProxyList[domainURL]);
+    } else {
 
-      if (_this.idpProxyList.hasOwnProperty(domainURL) && _this.idpProxyList[domainURL].status === STATUS.DEPLOYED) {
-        resolve(_this.idpProxyList[domainURL]);
-      } else {
-        // TODO: Optimize this
-        _this.idpProxyList[domainURL] = {
-          status: STATUS.PROGRESS
-        };
-        reject('requestUpdate couldn\'t get the idpProxyURL');
-      }
-    });
+      _this.idpProxyList[domainURL] = {
+        status: STATUS.PROGRESS
+      };
+
+      throw new Error('[Registry - discoverIdpProxy ] Idp Proxy Not Found. Creating one');
+
+    }
 
   }
 
@@ -903,7 +1573,7 @@ class Registry {
   registerPEP(postMessage, hyperty) {
     let _this = this;
 
-    return new Promise(function(resolve,reject) {
+    return new Promise(function(resolve) {
       //TODO check what parameter in the postMessage the pep is.
       _this.pepList[hyperty] = postMessage;
       resolve('PEP registered with success');
@@ -918,7 +1588,7 @@ class Registry {
   unregisterPEP(HypertyRuntimeURL) {
     let _this = this;
 
-    return new Promise(function(resolve,reject) {
+    return new Promise(function(resolve, reject) {
 
       let result = _this.pepList[HypertyRuntimeURL];
 
@@ -932,25 +1602,16 @@ class Registry {
   }
 
   /**
-  * To receive status events from components registered in the Registry.
-  * @param  {Message.Message}     Message.Message       event
-  */
-  onEvent(event) {
-    // TODO body...
-    console.log('onEvent');
-  }
-
-  /**
-  * To discover sandboxes available in the runtime for a certain domain. Required by the runtime UA to avoid more than one sandbox for the same domain.
+  * To discover sandboxes available in the runtime for a certain domain and a certain set of capabilities. Required by the runtime UA to avoid more than one sandbox for the same domain.
   * @param  {DomainURL} DomainURL url
   * @return {RuntimeSandbox}           RuntimeSandbox
   */
-  getSandbox(url) {
+  getSandbox(url, constraints) {
     if (!url) throw new Error('Parameter url needed');
-    console.log('getSandbox: ', url);
+    console.log('[Registry getSandbox] getSandbox for: ', url, ' and capabilities: ', constraints);
 
     let _this = this;
-    return new Promise(function(resolve,reject) {
+    return new Promise(function(resolve, reject) {
 
       let request;
 
@@ -963,11 +1624,18 @@ class Registry {
 
         if (!request) {
 
-          let domain = divideURL(url).domain;
+          let domain;
+
+          if (url.includes('://')) {
+            domain = divideURL(url).domain;
+          } else {
+            domain = url;
+          }
 
           // search in the sandboxes list for a entry containing the domain given
           for (let sandbox in _this.sandboxesList.sandbox) {
-            if (sandbox.includes(domain)) {
+            //todo: uncomment sandbox constraints match condition with runtime sharing
+            if (sandbox.includes(domain) /*&& _this.sandboxesList.sandbox[sandbox].matches(constraints)*/) {
               request = _this.sandboxesList.sandbox[sandbox];
               break;
             }
@@ -984,13 +1652,8 @@ class Registry {
     });
   }
 
-  /**
-  * To verify if source is valid and to resolve target runtime url address if needed (eg protostub runtime url in case the message is to be dispatched to a remote endpoint).
-  * @param  {URL.URL}  url       url
-  * @return {Promise<URL.URL>}                 Promise <URL.URL>
-  */
-  resolve(url) {
-    console.log('resolve ' + url);
+  resolveNormalStub(url) {
+    console.log('resolveNormalStub ' + url);
     let _this = this;
 
     return new Promise((resolve, reject) => {
@@ -1001,60 +1664,313 @@ class Registry {
       let domainUrl = dividedURL.domain;
       let type = dividedURL.type;
 
+      if (url.includes(_this.runtimeURL)) {
+        console.error('[Registry - resolve] URL to be resolved should have listeners ', url);
+        reject('[Registry - resolve] URL to be resolved should have listeners ', url);
+      }
+
       // resolve the domain protostub in case of a message to global registry
       if (url.includes('global://registry')) {
         domainUrl = _this._domain;
-      }
-
-      if (!domainUrl.indexOf('msg-node.') || !domainUrl.indexOf('registry.')) {
-        domainUrl = domainUrl.substring(domainUrl.indexOf('.') + 1);
-      }
-
-      let registredComponent;
-      if (type === 'domain-idp') {
-        registredComponent  = _this.idpProxyList.hasOwnProperty(domainUrl) ? _this.idpProxyList[domainUrl] : false;
       } else {
-        registredComponent  = _this.protostubsList.hasOwnProperty(domainUrl) ? _this.protostubsList[domainUrl] : false;
+        if (!domainUrl.indexOf('msg-node.') || !domainUrl.indexOf('registry.')) {
+          domainUrl = domainUrl.substring(domainUrl.indexOf('.') + 1);
+        }
       }
 
-      if (registredComponent && registredComponent.hasOwnProperty('status') && registredComponent.status === STATUS.DEPLOYED) {
-        console.info('Resolved: ', registredComponent.url);
-        resolve(registredComponent.url);
-      } else {
-        if (type === 'domain-idp') {
-          // _this.trigger('runtime:loadIdpProxy', domainUrl);
+      _this.isLegacy(url).then((isLegacy) => {
 
-          console.log('TIAGO: domainUrl', domainUrl);
-
-          _this._loader.loadIdpProxy(domainUrl).then((result) => {
-            registredComponent  = _this.idpProxyList[domainUrl];
-            console.info('Resolved IDPProxy: ', registredComponent, result);
-            _this.idpProxyList[domainUrl].status = STATUS.DEPLOYED;
-            resolve(registredComponent.url);
-          }).catch((reason) => {
-            console.error('Error resolving IDPProxy: ', reason);
-            reject(reason);
-          });
-
-        } else {
-          // _this.trigger('runtime:loadStub', domainUrl);
-
-          _this._loader.loadStub(domainUrl).then((result) => {
-            registredComponent  = _this.protostubsList[domainUrl];
-            console.info('Resolved Protostub: ', registredComponent, result);
-            _this.protostubsList[domainUrl].status = STATUS.DEPLOYED;
-            resolve(registredComponent.url);
-          }).catch((reason) => {
-            console.error('Error resolving Protostub: ', reason);
-            reject(reason);
-          });
+        // if legacy it should resolve for <protocol>.<domain>
+        if (isLegacy && type !== 'domain-idp') {
+          domainUrl = type + '.' + getUserIdentityDomain(url);
         }
 
+        console.info('[Registry.resolve] domainUrl:', domainUrl);
+
+        let registredComponent;
+
+        if (type === 'domain-idp') {
+          registredComponent  = _this.idpProxyList.hasOwnProperty(domainUrl) ? _this.idpProxyList[domainUrl] : false;
+        } else {
+          registredComponent  = _this.protostubsList.hasOwnProperty(domainUrl) ? _this.protostubsList[domainUrl] : false;
+        }
+
+        // TODO since the protostubs have other states this should be revised, because the status could change from DEPLOYED to LIVE
+        // TODO and this validation will trigger a new load of IDPProxy or Protostub;
+        if (registredComponent && registredComponent.hasOwnProperty('status') && (registredComponent.status === STATUS.DEPLOYED || registredComponent.status === STATUS.LIVE)) {
+          console.info('[Registry.resolve] Resolved: ', registredComponent.url, registredComponent.status);
+          resolve(registredComponent.url);
+        } else {
+          if (type === 'domain-idp') {
+
+            // this process will load the idp proxy, because is not yet registered;
+            console.info('[Registry.resolve] trigger new IDPProxy: ', domainUrl);
+            _this.loader.loadIdpProxy(domainUrl).then(() => {
+
+              registredComponent  = _this.idpProxyList[domainUrl];
+              _this.idpProxyList[domainUrl].status = STATUS.DEPLOYED;
+              console.info('[Registry.resolve] Resolved: ', registredComponent.url, registredComponent.status);
+              resolve(registredComponent.url);
+
+            }).catch((reason) => {
+              console.error('[Registry.resolve] Error resolving Load IDPProxy: ', reason);
+              reject(reason);
+            });
+
+          } else {
+
+            // this process will load the Protocols stub, because is not yet registered;
+            console.info('[Registry.resolve] trigger new ProtocolStub: ', domainUrl);
+            _this.loader.loadStub(domainUrl).then(() => {
+
+              registredComponent  = _this.protostubsList[domainUrl];
+              console.info('[Registry.resolve] Resolved: ', registredComponent.url, registredComponent.status);
+              _this.protostubsList[domainUrl].status = STATUS.DEPLOYED;
+
+              resolve(registredComponent.url);
+            }).catch((reason) => {
+              console.error('[Registry.resolve] Error resolving Load ProtocolStub: ', reason);
+              reject(reason);
+            });
+
+          }
+
+        }
+
+      }).catch((reason) => {
+        console.error('[Registry.resolve] Error resolving islegacy: ', reason);
+        reject(reason);
+      });
+
+    });
+
+  }
+
+  /**
+  * To verify if source is valid and to resolve target runtime url address if needed (eg protostub runtime url in case the message is to be dispatched to a remote endpoint).
+  * @param  {URL.URL}  url       url
+  * @return {Promise<URL.URL>}                 Promise <URL.URL>
+  */
+  resolve(url) {
+    console.log('[Registry - Resolve] -  ' + url);
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+
+      // Skip p2p procedure when not supported by the Runtime or for backend services
+
+      if (!_this.p2pHandlerStub[_this.runtimeURL] || isBackendServiceURL(url) || url.includes(_this.runtimeURL) || url.includes('/p2phandler/') || url.includes('/p2prequester/')) {
+
+        _this.resolveNormalStub(url).then((returnURL) => {
+          resolve(returnURL);
+        });
+
+      } else {
+        _this.checkP2P(url).then((registeredP2P) => {
+
+          console.log('[Registry - resolve] found registered P2P: ', registeredP2P);
+
+          let p2pConnection = _this.p2pConnectionList[registeredP2P.runtime];
+
+          if (!p2pConnection) {
+            p2pConnection = {};
+          }
+
+          if (p2pConnection.status === STATUS.LIVE) {
+            resolve(p2pConnection.url);
+          } else {
+
+            if (p2pConnection.status === STATUS.CREATED || p2pConnection.status === STATUS.PROGRESS) {
+              _this.resolveNormalStub(url).then((returnURL) => {
+                resolve(returnURL);
+              });
+            } else {
+              /*
+              p2pConnection.status = STATUS.CREATED;
+              _this.p2pConnectionList[registeredP2P.runtimeURL] = p2pConnection;
+              */
+
+              console.log('[Registry - resolve] loadStub with p2pRequester: ', registeredP2P);
+
+              let remoteRuntime = registeredP2P.runtime;
+
+              let p2pConfig = { remoteRuntimeURL: remoteRuntime, p2pHandler: registeredP2P.p2pHandler, p2pRequesterStub: true };
+
+              //  stub load
+              _this.loader.loadStub(registeredP2P.p2pRequester, p2pConfig).then(() => {
+
+                console.log('[Registry - resolve] p2pRequester deployed: ', _this.p2pRequesterStub[remoteRuntime]);
+
+                _this.watchingYou.observe('p2pRequesterStub', (change) => {
+
+                  console.log('[Registry - resolve] p2pRequesterStubs changed ' + _this.p2pRequesterStub);
+
+                  if (change.keypath.split('.')[0] === remoteRuntime && change.name === 'status' && change.newValue === STATUS.LIVE) {
+                    console.log('[Registry - resolve] p2pRequester is live ' + _this.p2pRequesterStub[remoteRuntime]);
+                    resolve(_this.p2pRequesterStub[remoteRuntime].url);
+                  }
+                });
+
+              }).catch((error) => {
+                reject(error);
+              });
+            }
+          }
+        }, (reason) => {
+          console.info('[Registry - Resolve] - Reason: ', reason);
+
+          _this.resolveNormalStub(url).then((returnURL) => {
+            resolve(returnURL);
+          });
+        });
       }
 
     });
   }
 
+
+  /**
+  * To verify if url is for a legacy service.
+  * @param  {URL.URL}  url      url
+  * @return {boolean}
+  */
+  isLegacy(url) {
+
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+
+      if (url === _this._domain) {
+        return resolve(false);
+      }
+
+      console.log('[Registry] [Registry.Registry.isLegacy] ', url);
+
+      // TODO: to be defined in the runtime configuration
+      let nonLegacy = ['hyperty-runtime', 'domain', 'global', 'hyperty'];
+
+      let urlDivided = divideURL(url);
+
+      if (nonLegacy.indexOf(urlDivided.type) !== -1 || urlDivided.domain === _this._domain) {
+        return resolve(false);
+      }
+
+      // process User URLs
+      if (url.split('@').length > 1) {
+        let domain = urlDivided.domain;
+
+        console.log('[Registry] [Registry.Registry.isLegacy] domain: ', domain);
+        if (_this.idpLegacyProxyList.hasOwnProperty(domain)) {
+
+          let result = _this.idpLegacyProxyList[domain];
+
+          if (result.interworking) {
+            return resolve(result.interworking);
+          } else {
+            return resolve(false);
+          }
+        }
+
+        _this._loader.descriptors.getIdpProxyDescriptor(domain).then((result) => {
+
+          console.log('[Registry] [Registry.Registry.isLegacy] Legacy stub descriptor: ', result);
+          _this.idpLegacyProxyList[domain] = result;
+
+          if (result.interworking) {
+            resolve(result.interworking);
+          } else {
+            resolve(false);
+          }
+
+        }).catch((reason) => {
+          console.warn('problem loading idp proxy descriptor for domain:', domain, ' because ', reason);
+          reject(reason);
+        });
+      } else { // process protostub URLs
+        resolve(_this.isInterworkingProtoStub(url));
+      }
+    });
+  }
+
+  /**
+  * To verify if URL is locally registered or not.
+  * @param  {URL.URL}  url      url
+  * @return {boolean}
+  */
+
+  isLocal(url) {
+
+    let runtimeScheme = ['hyperty-runtime', 'runtime'];
+    let hypertyScheme = ['hyperty'];
+    let urlScheme = url.split('://')[0];
+
+    // Process Runtime Core URLs.
+    // Messages originated from protostubs should also not include the runtimeURL in its URL.
+
+    if (runtimeScheme.indexOf(urlScheme) !== -1) {
+      return url.includes(this.runtimeURL);
+    }
+
+    // Process Hyperty URLs
+    // Todo: hypertiesList should be an object not an array
+
+    if (hypertyScheme.indexOf(urlScheme) !== -1) {
+
+      for (let index in this.hypertiesList) {
+        let hyperty = this.hypertiesList[index];
+        if (hyperty.hypertyURL === url) {
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    // Process Data Object URLs
+
+    if (url.includes('/subscription')) {
+      url = url.substring(0, url.indexOf('/subscription'));
+    }
+
+    let dataObject = this.dataObjectList[url];
+
+    if (dataObject) {
+      if (dataObject.interworking) {
+        return !dataObject.interworking;
+      }
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+  * To verify if protostub is to interwork with a legacy domain.
+  * @param  {URL.URL}  runtimeProtostubURL      The runtime URL of the Protostub
+  * @return {boolean}
+  */
+
+  isInterworkingProtoStub(runtimeProtostubURL) {
+
+    let _this = this;
+
+    if (!(runtimeProtostubURL.includes('/protostub/'))) {
+      return false;
+    }
+
+    let filtered = Object.keys(_this.protostubsList).filter((key) => {
+      return _this.protostubsList[key].url === runtimeProtostubURL;
+    }).map((key) => {
+
+      if (_this.protostubsList[key].hasOwnProperty('interworking')) {
+        return _this.protostubsList[key].interworking;
+      } else {
+        return false;
+      }
+    })[0];
+
+    return filtered;
+  }
 }
 
 export default Registry;

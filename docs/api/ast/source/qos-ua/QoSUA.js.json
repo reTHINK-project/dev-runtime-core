@@ -1,455 +1,901 @@
 {
-  "type": "Program",
-  "body": [
-    {
-      "type": "ClassDeclaration",
-      "id": {
-        "type": "Identifier",
-        "name": "QoSUA",
-        "range": [
-          45,
-          50
-        ],
+  "type": "File",
+  "start": 0,
+  "end": 1165,
+  "loc": {
+    "start": {
+      "line": 1,
+      "column": 0
+    },
+    "end": {
+      "line": 43,
+      "column": 0
+    }
+  },
+  "program": {
+    "type": "Program",
+    "start": 0,
+    "end": 1165,
+    "loc": {
+      "start": {
+        "line": 1,
+        "column": 0
+      },
+      "end": {
+        "line": 43,
+        "column": 0
+      }
+    },
+    "sourceType": "module",
+    "body": [
+      {
+        "type": "ClassDeclaration",
+        "start": 914,
+        "end": 1164,
         "loc": {
           "start": {
-            "line": 4,
-            "column": 6
+            "line": 26,
+            "column": 0
           },
           "end": {
-            "line": 4,
-            "column": 11
+            "line": 42,
+            "column": 1
           }
-        }
-      },
-      "superClass": null,
-      "body": {
-        "type": "ClassBody",
-        "body": [
-          {
-            "type": "MethodDefinition",
-            "key": {
-              "type": "Identifier",
-              "name": "getCurrentConnectivityStatistics",
-              "range": [
-                111,
-                143
-              ],
+        },
+        "id": {
+          "type": "Identifier",
+          "start": 920,
+          "end": 925,
+          "loc": {
+            "start": {
+              "line": 26,
+              "column": 6
+            },
+            "end": {
+              "line": 26,
+              "column": 11
+            },
+            "identifierName": "QoSUA"
+          },
+          "name": "QoSUA",
+          "leadingComments": null
+        },
+        "superClass": null,
+        "body": {
+          "type": "ClassBody",
+          "start": 926,
+          "end": 1164,
+          "loc": {
+            "start": {
+              "line": 26,
+              "column": 12
+            },
+            "end": {
+              "line": 42,
+              "column": 1
+            }
+          },
+          "body": [
+            {
+              "type": "ClassMethod",
+              "start": 981,
+              "end": 1037,
               "loc": {
                 "start": {
-                  "line": 9,
+                  "line": 31,
                   "column": 2
                 },
                 "end": {
-                  "line": 9,
-                  "column": 34
+                  "line": 33,
+                  "column": 3
                 }
-              }
-            },
-            "value": {
-              "type": "FunctionExpression",
+              },
+              "computed": false,
+              "key": {
+                "type": "Identifier",
+                "start": 981,
+                "end": 1013,
+                "loc": {
+                  "start": {
+                    "line": 31,
+                    "column": 2
+                  },
+                  "end": {
+                    "line": 31,
+                    "column": 34
+                  },
+                  "identifierName": "getCurrentConnectivityStatistics"
+                },
+                "name": "getCurrentConnectivityStatistics",
+                "leadingComments": null
+              },
+              "static": false,
+              "kind": "method",
               "id": null,
+              "generator": false,
+              "expression": false,
+              "async": false,
               "params": [],
               "body": {
                 "type": "BlockStatement",
-                "body": [],
-                "range": [
-                  147,
-                  169
-                ],
+                "start": 1017,
+                "end": 1037,
                 "loc": {
                   "start": {
-                    "line": 9,
+                    "line": 31,
                     "column": 38
                   },
                   "end": {
-                    "line": 11,
+                    "line": 33,
                     "column": 3
                   }
                 },
+                "body": [],
+                "directives": [],
+                "leadingComments": null,
                 "trailingComments": [
                   {
-                    "type": "Line",
+                    "type": "CommentLine",
                     "value": " Body...",
-                    "range": [
-                      154,
-                      164
-                    ],
+                    "start": 1023,
+                    "end": 1033,
                     "loc": {
                       "start": {
-                        "line": 10,
+                        "line": 32,
                         "column": 4
                       },
                       "end": {
-                        "line": 10,
+                        "line": 32,
                         "column": 14
                       }
                     }
                   },
                   {
-                    "type": "Block",
-                    "value": "*\r\n   * Sends Connectivity Statistics data to QoS Broker\r\n   ",
-                    "range": [
-                      175,
-                      240
-                    ],
+                    "type": "CommentBlock",
+                    "value": "*\n   * Sends Connectivity Statistics data to QoS Broker\n   ",
+                    "start": 1041,
+                    "end": 1104,
                     "loc": {
                       "start": {
-                        "line": 13,
+                        "line": 35,
                         "column": 2
                       },
                       "end": {
-                        "line": 15,
+                        "line": 37,
                         "column": 5
                       }
                     }
                   }
                 ]
               },
-              "generator": false,
-              "expression": false,
-              "range": [
-                143,
-                169
-              ],
-              "loc": {
-                "start": {
-                  "line": 9,
-                  "column": 34
-                },
-                "end": {
-                  "line": 11,
-                  "column": 3
-                }
-              }
-            },
-            "kind": "method",
-            "computed": false,
-            "range": [
-              111,
-              169
-            ],
-            "loc": {
-              "start": {
-                "line": 9,
-                "column": 2
-              },
-              "end": {
-                "line": 11,
-                "column": 3
-              }
-            },
-            "leadingComments": [
-              {
-                "type": "Block",
-                "value": "*\r\n   * Get Connectivity Statistics data\r\n   ",
-                "range": [
-                  58,
-                  107
-                ],
-                "loc": {
-                  "start": {
-                    "line": 6,
-                    "column": 2
-                  },
-                  "end": {
-                    "line": 8,
-                    "column": 5
+              "leadingComments": [
+                {
+                  "type": "CommentBlock",
+                  "value": "*\n   * Get Connectivity Statistics data\n   ",
+                  "start": 931,
+                  "end": 978,
+                  "loc": {
+                    "start": {
+                      "line": 28,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 30,
+                      "column": 5
+                    }
                   }
                 }
-              }
-            ],
-            "static": false
-          },
-          {
-            "type": "MethodDefinition",
-            "key": {
-              "type": "Identifier",
-              "name": "sendConnectivityStatisticsToBroker",
-              "range": [
-                244,
-                278
-              ],
+              ]
+            },
+            {
+              "type": "ClassMethod",
+              "start": 1107,
+              "end": 1161,
               "loc": {
                 "start": {
-                  "line": 16,
+                  "line": 38,
                   "column": 2
                 },
                 "end": {
-                  "line": 16,
-                  "column": 36
+                  "line": 40,
+                  "column": 3
                 }
-              }
-            },
-            "value": {
-              "type": "FunctionExpression",
+              },
+              "computed": false,
+              "key": {
+                "type": "Identifier",
+                "start": 1107,
+                "end": 1141,
+                "loc": {
+                  "start": {
+                    "line": 38,
+                    "column": 2
+                  },
+                  "end": {
+                    "line": 38,
+                    "column": 36
+                  },
+                  "identifierName": "sendConnectivityStatisticsToBroker"
+                },
+                "name": "sendConnectivityStatisticsToBroker",
+                "leadingComments": null
+              },
+              "static": false,
+              "kind": "method",
               "id": null,
+              "generator": false,
+              "expression": false,
+              "async": false,
               "params": [],
               "body": {
                 "type": "BlockStatement",
-                "body": [],
-                "range": [
-                  281,
-                  300
-                ],
+                "start": 1144,
+                "end": 1161,
                 "loc": {
                   "start": {
-                    "line": 16,
+                    "line": 38,
                     "column": 39
                   },
                   "end": {
-                    "line": 18,
+                    "line": 40,
                     "column": 3
                   }
                 },
-                "trailingComments": [
+                "body": [],
+                "directives": [],
+                "leadingComments": null,
+                "innerComments": [
                   {
-                    "type": "Line",
+                    "type": "CommentLine",
                     "value": " Body",
-                    "range": [
-                      288,
-                      295
-                    ],
+                    "start": 1150,
+                    "end": 1157,
                     "loc": {
                       "start": {
-                        "line": 17,
+                        "line": 39,
                         "column": 4
                       },
                       "end": {
-                        "line": 17,
+                        "line": 39,
                         "column": 11
                       }
                     }
                   }
                 ]
               },
-              "generator": false,
-              "expression": false,
-              "range": [
-                278,
-                300
-              ],
-              "loc": {
-                "start": {
-                  "line": 16,
-                  "column": 36
-                },
-                "end": {
-                  "line": 18,
-                  "column": 3
+              "leadingComments": [
+                {
+                  "type": "CommentBlock",
+                  "value": "*\n   * Sends Connectivity Statistics data to QoS Broker\n   ",
+                  "start": 1041,
+                  "end": 1104,
+                  "loc": {
+                    "start": {
+                      "line": 35,
+                      "column": 2
+                    },
+                    "end": {
+                      "line": 37,
+                      "column": 5
+                    }
+                  }
                 }
-              }
-            },
-            "kind": "method",
-            "computed": false,
-            "range": [
-              244,
-              300
-            ],
+              ]
+            }
+          ]
+        },
+        "leadingComments": [
+          {
+            "type": "CommentBlock",
+            "value": "*\n* Copyright 2016 PT Inovação e Sistemas SA\n* Copyright 2016 INESC-ID\n* Copyright 2016 QUOBIS NETWORKS SL\n* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V\n* Copyright 2016 ORANGE SA\n* Copyright 2016 Deutsche Telekom AG\n* Copyright 2016 Apizee\n* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN\n*\n* Licensed under the Apache License, Version 2.0 (the \"License\");\n* you may not use this file except in compliance with the License.\n* You may obtain a copy of the License at\n*\n*   http://www.apache.org/licenses/LICENSE-2.0\n*\n* Unless required by applicable law or agreed to in writing, software\n* distributed under the License is distributed on an \"AS IS\" BASIS,\n* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n* See the License for the specific language governing permissions and\n* limitations under the License.\n*",
+            "start": 0,
+            "end": 877,
             "loc": {
               "start": {
-                "line": 16,
-                "column": 2
+                "line": 1,
+                "column": 0
               },
               "end": {
-                "line": 18,
+                "line": 22,
                 "column": 3
               }
-            },
-            "leadingComments": [
-              {
-                "type": "Line",
-                "value": " Body...",
-                "range": [
-                  154,
-                  164
-                ],
-                "loc": {
-                  "start": {
-                    "line": 10,
-                    "column": 4
-                  },
-                  "end": {
-                    "line": 10,
-                    "column": 14
-                  }
-                }
-              },
-              {
-                "type": "Block",
-                "value": "*\r\n   * Sends Connectivity Statistics data to QoS Broker\r\n   ",
-                "range": [
-                  175,
-                  240
-                ],
-                "loc": {
-                  "start": {
-                    "line": 13,
-                    "column": 2
-                  },
-                  "end": {
-                    "line": 15,
-                    "column": 5
-                  }
-                }
-              }
-            ],
-            "static": false
-          }
-        ],
-        "range": [
-          51,
-          305
-        ],
-        "loc": {
-          "start": {
-            "line": 4,
-            "column": 12
+            }
           },
-          "end": {
-            "line": 20,
-            "column": 1
-          }
-        }
-      },
-      "range": [
-        39,
-        305
-      ],
-      "loc": {
-        "start": {
-          "line": 4,
-          "column": 0
-        },
-        "end": {
-          "line": 20,
-          "column": 1
-        }
-      },
-      "leadingComments": [
-        {
-          "type": "Block",
-          "value": "*\r\n * QoS User Agent Interface\r\n ",
-          "range": [
-            0,
-            37
-          ],
-          "loc": {
-            "start": {
-              "line": 1,
-              "column": 0
-            },
-            "end": {
-              "line": 3,
-              "column": 3
+          {
+            "type": "CommentBlock",
+            "value": "*\n * QoS User Agent Interface\n ",
+            "start": 878,
+            "end": 913,
+            "loc": {
+              "start": {
+                "line": 23,
+                "column": 0
+              },
+              "end": {
+                "line": 25,
+                "column": 3
+              }
             }
           }
-        }
-      ]
-    }
-  ],
-  "sourceType": "module",
-  "range": [
-    39,
-    305
-  ],
-  "loc": {
-    "start": {
-      "line": 4,
-      "column": 0
-    },
-    "end": {
-      "line": 20,
-      "column": 1
-    }
+        ]
+      }
+    ],
+    "directives": []
   },
   "comments": [
     {
-      "type": "Block",
-      "value": "*\r\n * QoS User Agent Interface\r\n ",
-      "range": [
-        0,
-        37
-      ],
+      "type": "CommentBlock",
+      "value": "*\n* Copyright 2016 PT Inovação e Sistemas SA\n* Copyright 2016 INESC-ID\n* Copyright 2016 QUOBIS NETWORKS SL\n* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V\n* Copyright 2016 ORANGE SA\n* Copyright 2016 Deutsche Telekom AG\n* Copyright 2016 Apizee\n* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN\n*\n* Licensed under the Apache License, Version 2.0 (the \"License\");\n* you may not use this file except in compliance with the License.\n* You may obtain a copy of the License at\n*\n*   http://www.apache.org/licenses/LICENSE-2.0\n*\n* Unless required by applicable law or agreed to in writing, software\n* distributed under the License is distributed on an \"AS IS\" BASIS,\n* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n* See the License for the specific language governing permissions and\n* limitations under the License.\n*",
+      "start": 0,
+      "end": 877,
       "loc": {
         "start": {
           "line": 1,
           "column": 0
         },
         "end": {
-          "line": 3,
+          "line": 22,
           "column": 3
         }
       }
     },
     {
-      "type": "Block",
-      "value": "*\r\n   * Get Connectivity Statistics data\r\n   ",
-      "range": [
-        58,
-        107
-      ],
+      "type": "CommentBlock",
+      "value": "*\n * QoS User Agent Interface\n ",
+      "start": 878,
+      "end": 913,
       "loc": {
         "start": {
-          "line": 6,
+          "line": 23,
+          "column": 0
+        },
+        "end": {
+          "line": 25,
+          "column": 3
+        }
+      }
+    },
+    {
+      "type": "CommentBlock",
+      "value": "*\n   * Get Connectivity Statistics data\n   ",
+      "start": 931,
+      "end": 978,
+      "loc": {
+        "start": {
+          "line": 28,
           "column": 2
         },
         "end": {
-          "line": 8,
+          "line": 30,
           "column": 5
         }
       }
     },
     {
-      "type": "Line",
+      "type": "CommentLine",
       "value": " Body...",
-      "range": [
-        154,
-        164
-      ],
+      "start": 1023,
+      "end": 1033,
       "loc": {
         "start": {
-          "line": 10,
+          "line": 32,
           "column": 4
         },
         "end": {
-          "line": 10,
+          "line": 32,
           "column": 14
         }
       }
     },
     {
-      "type": "Block",
-      "value": "*\r\n   * Sends Connectivity Statistics data to QoS Broker\r\n   ",
-      "range": [
-        175,
-        240
-      ],
+      "type": "CommentBlock",
+      "value": "*\n   * Sends Connectivity Statistics data to QoS Broker\n   ",
+      "start": 1041,
+      "end": 1104,
       "loc": {
         "start": {
-          "line": 13,
+          "line": 35,
           "column": 2
         },
         "end": {
-          "line": 15,
+          "line": 37,
           "column": 5
         }
       }
     },
     {
-      "type": "Line",
+      "type": "CommentLine",
       "value": " Body",
-      "range": [
-        288,
-        295
-      ],
+      "start": 1150,
+      "end": 1157,
       "loc": {
         "start": {
-          "line": 17,
+          "line": 39,
           "column": 4
         },
         "end": {
-          "line": 17,
+          "line": 39,
           "column": 11
+        }
+      }
+    }
+  ],
+  "tokens": [
+    {
+      "type": "CommentBlock",
+      "value": "*\n* Copyright 2016 PT Inovação e Sistemas SA\n* Copyright 2016 INESC-ID\n* Copyright 2016 QUOBIS NETWORKS SL\n* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V\n* Copyright 2016 ORANGE SA\n* Copyright 2016 Deutsche Telekom AG\n* Copyright 2016 Apizee\n* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN\n*\n* Licensed under the Apache License, Version 2.0 (the \"License\");\n* you may not use this file except in compliance with the License.\n* You may obtain a copy of the License at\n*\n*   http://www.apache.org/licenses/LICENSE-2.0\n*\n* Unless required by applicable law or agreed to in writing, software\n* distributed under the License is distributed on an \"AS IS\" BASIS,\n* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n* See the License for the specific language governing permissions and\n* limitations under the License.\n*",
+      "start": 0,
+      "end": 877,
+      "loc": {
+        "start": {
+          "line": 1,
+          "column": 0
+        },
+        "end": {
+          "line": 22,
+          "column": 3
+        }
+      }
+    },
+    {
+      "type": "CommentBlock",
+      "value": "*\n * QoS User Agent Interface\n ",
+      "start": 878,
+      "end": 913,
+      "loc": {
+        "start": {
+          "line": 23,
+          "column": 0
+        },
+        "end": {
+          "line": 25,
+          "column": 3
+        }
+      }
+    },
+    {
+      "type": {
+        "label": "class",
+        "keyword": "class",
+        "beforeExpr": false,
+        "startsExpr": false,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null,
+        "updateContext": null
+      },
+      "value": "class",
+      "start": 914,
+      "end": 919,
+      "loc": {
+        "start": {
+          "line": 26,
+          "column": 0
+        },
+        "end": {
+          "line": 26,
+          "column": 5
+        }
+      }
+    },
+    {
+      "type": {
+        "label": "name",
+        "beforeExpr": false,
+        "startsExpr": true,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null
+      },
+      "value": "QoSUA",
+      "start": 920,
+      "end": 925,
+      "loc": {
+        "start": {
+          "line": 26,
+          "column": 6
+        },
+        "end": {
+          "line": 26,
+          "column": 11
+        }
+      }
+    },
+    {
+      "type": {
+        "label": "{",
+        "beforeExpr": true,
+        "startsExpr": true,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null
+      },
+      "start": 926,
+      "end": 927,
+      "loc": {
+        "start": {
+          "line": 26,
+          "column": 12
+        },
+        "end": {
+          "line": 26,
+          "column": 13
+        }
+      }
+    },
+    {
+      "type": "CommentBlock",
+      "value": "*\n   * Get Connectivity Statistics data\n   ",
+      "start": 931,
+      "end": 978,
+      "loc": {
+        "start": {
+          "line": 28,
+          "column": 2
+        },
+        "end": {
+          "line": 30,
+          "column": 5
+        }
+      }
+    },
+    {
+      "type": {
+        "label": "name",
+        "beforeExpr": false,
+        "startsExpr": true,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null
+      },
+      "value": "getCurrentConnectivityStatistics",
+      "start": 981,
+      "end": 1013,
+      "loc": {
+        "start": {
+          "line": 31,
+          "column": 2
+        },
+        "end": {
+          "line": 31,
+          "column": 34
+        }
+      }
+    },
+    {
+      "type": {
+        "label": "(",
+        "beforeExpr": true,
+        "startsExpr": true,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null
+      },
+      "start": 1013,
+      "end": 1014,
+      "loc": {
+        "start": {
+          "line": 31,
+          "column": 34
+        },
+        "end": {
+          "line": 31,
+          "column": 35
+        }
+      }
+    },
+    {
+      "type": {
+        "label": ")",
+        "beforeExpr": false,
+        "startsExpr": false,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null
+      },
+      "start": 1014,
+      "end": 1015,
+      "loc": {
+        "start": {
+          "line": 31,
+          "column": 35
+        },
+        "end": {
+          "line": 31,
+          "column": 36
+        }
+      }
+    },
+    {
+      "type": {
+        "label": "{",
+        "beforeExpr": true,
+        "startsExpr": true,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null
+      },
+      "start": 1017,
+      "end": 1018,
+      "loc": {
+        "start": {
+          "line": 31,
+          "column": 38
+        },
+        "end": {
+          "line": 31,
+          "column": 39
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": " Body...",
+      "start": 1023,
+      "end": 1033,
+      "loc": {
+        "start": {
+          "line": 32,
+          "column": 4
+        },
+        "end": {
+          "line": 32,
+          "column": 14
+        }
+      }
+    },
+    {
+      "type": {
+        "label": "}",
+        "beforeExpr": false,
+        "startsExpr": false,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null
+      },
+      "start": 1036,
+      "end": 1037,
+      "loc": {
+        "start": {
+          "line": 33,
+          "column": 2
+        },
+        "end": {
+          "line": 33,
+          "column": 3
+        }
+      }
+    },
+    {
+      "type": "CommentBlock",
+      "value": "*\n   * Sends Connectivity Statistics data to QoS Broker\n   ",
+      "start": 1041,
+      "end": 1104,
+      "loc": {
+        "start": {
+          "line": 35,
+          "column": 2
+        },
+        "end": {
+          "line": 37,
+          "column": 5
+        }
+      }
+    },
+    {
+      "type": {
+        "label": "name",
+        "beforeExpr": false,
+        "startsExpr": true,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null
+      },
+      "value": "sendConnectivityStatisticsToBroker",
+      "start": 1107,
+      "end": 1141,
+      "loc": {
+        "start": {
+          "line": 38,
+          "column": 2
+        },
+        "end": {
+          "line": 38,
+          "column": 36
+        }
+      }
+    },
+    {
+      "type": {
+        "label": "(",
+        "beforeExpr": true,
+        "startsExpr": true,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null
+      },
+      "start": 1141,
+      "end": 1142,
+      "loc": {
+        "start": {
+          "line": 38,
+          "column": 36
+        },
+        "end": {
+          "line": 38,
+          "column": 37
+        }
+      }
+    },
+    {
+      "type": {
+        "label": ")",
+        "beforeExpr": false,
+        "startsExpr": false,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null
+      },
+      "start": 1142,
+      "end": 1143,
+      "loc": {
+        "start": {
+          "line": 38,
+          "column": 37
+        },
+        "end": {
+          "line": 38,
+          "column": 38
+        }
+      }
+    },
+    {
+      "type": {
+        "label": "{",
+        "beforeExpr": true,
+        "startsExpr": true,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null
+      },
+      "start": 1144,
+      "end": 1145,
+      "loc": {
+        "start": {
+          "line": 38,
+          "column": 39
+        },
+        "end": {
+          "line": 38,
+          "column": 40
+        }
+      }
+    },
+    {
+      "type": "CommentLine",
+      "value": " Body",
+      "start": 1150,
+      "end": 1157,
+      "loc": {
+        "start": {
+          "line": 39,
+          "column": 4
+        },
+        "end": {
+          "line": 39,
+          "column": 11
+        }
+      }
+    },
+    {
+      "type": {
+        "label": "}",
+        "beforeExpr": false,
+        "startsExpr": false,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null
+      },
+      "start": 1160,
+      "end": 1161,
+      "loc": {
+        "start": {
+          "line": 40,
+          "column": 2
+        },
+        "end": {
+          "line": 40,
+          "column": 3
+        }
+      }
+    },
+    {
+      "type": {
+        "label": "}",
+        "beforeExpr": false,
+        "startsExpr": false,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null
+      },
+      "start": 1163,
+      "end": 1164,
+      "loc": {
+        "start": {
+          "line": 42,
+          "column": 0
+        },
+        "end": {
+          "line": 42,
+          "column": 1
+        }
+      }
+    },
+    {
+      "type": {
+        "label": "eof",
+        "beforeExpr": false,
+        "startsExpr": false,
+        "rightAssociative": false,
+        "isLoop": false,
+        "isAssign": false,
+        "prefix": false,
+        "postfix": false,
+        "binop": null,
+        "updateContext": null
+      },
+      "start": 1165,
+      "end": 1165,
+      "loc": {
+        "start": {
+          "line": 43,
+          "column": 0
+        },
+        "end": {
+          "line": 43,
+          "column": 0
         }
       }
     }

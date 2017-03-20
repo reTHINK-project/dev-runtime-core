@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../">
+  <title data-ice="title">test/SyncherManager.spec.js | Service Framework API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  <a href="test.html" data-ice="testLink">Test</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">allocation</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/allocation/AddressAllocation.js~AddressAllocation.html">AddressAllocation</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html">Bus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html">MiniBus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Pipeline.js~Pipeline.html">Pipeline</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">graphconnector</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/BloomFilter.js~BloomFilter.html">BloomFilter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GlobalRegistryRecord.js~GlobalRegistryRecord.html">GlobalRegistryRecord</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html">GraphConnector</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html">GraphConnectorContactData</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">identity</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/Crypto.js~Crypto.html">Crypto</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/GuiFake.js~GuiFake.html">GuiFake</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/Identity.js~Identity.html">Identity</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/IdentityModule.js~IdentityModule.html">IdentityModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/OpenIdLib.js~OpenIdLib.html">OpenIdLib</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/ActionsService.js~ActionsService.html">ActionsService</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/CombiningAlgorithm.js~CombiningAlgorithm.html">CombiningAlgorithm</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Operators.js~Operators.html">Operators</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/PDP.js~PDP.html">PDP</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/PEP.js~PEP.html">PEP</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Policy.js~Policy.html">Policy</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/ReThinkCtx.js~ReThinkCtx.html">ReThinkCtx</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Rule.js~Rule.html">Rule</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/combiningAlgorithms</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/AllowOverrides.js~AllowOverrides.html">AllowOverrides</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/BlockOverrides.js~BlockOverrides.html">BlockOverrides</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/FirstApplicable.js~FirstApplicable.html">FirstApplicable</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/conditions</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/AdvancedCondition.js~AdvancedCondition.html">AdvancedCondition</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/Condition.js~Condition.html">Condition</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/SubscriptionCondition.js~SubscriptionCondition.html">SubscriptionCondition</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/context</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html">RuntimeCoreCtx</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">protostub</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/protostub/IdpProxyStub.js~IdpProxyStub.html">IdpProxyStub</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-activate">activate</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">registry</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/Discovery.js~Discovery.html">Discovery</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/DiscoveryServiceFramework.js~DiscoveryServiceFramework.html">DiscoveryServiceFramework</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/HypertyInstance.js~HypertyInstance.html">HypertyInstance</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html">Registry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/RegistryDataModel.js~RegistryDataModel.html">RegistryDataModel</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">runtime</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/Descriptors.js~Descriptors.html">Descriptors</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/Loader.js~Loader.html">Loader</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/RuntimeUA.js~RuntimeUA.html">RuntimeUA</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-runtimeConfiguration">runtimeConfiguration</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-runtimeUtils">runtimeUtils</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">sandbox</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/sandbox/Sandbox.js~Sandbox.html">Sandbox</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/sandbox/SandboxRegistry.js~SandboxRegistry.html">SandboxRegistry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-SandboxType">SandboxType</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">syncher</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/ObserverObject.js~ObserverObject.html">ObserverObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/ReporterObject.js~ReporterObject.html">ReporterObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/StoreDataObjects.js~StoreDataObjects.html">StoreDataObjects</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/Subscription.js~Subscription.html">Subscription</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/SyncherManager.js~SyncherManager.html">SyncherManager</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">utils</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/utils/EventEmitter.js~EventEmitter.html">EventEmitter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-schemaValidation">schemaValidation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-buildURL">buildURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-convertToUserURL">convertToUserURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-deepClone">deepClone</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-divideEmail">divideEmail</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-divideURL">divideURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-emptyObject">emptyObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-generateGUID">generateGUID</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getConfigurationResources">getConfigurationResources</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserEmailFromURL">getUserEmailFromURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserIdentityDomain">getUserIdentityDomain</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserURLFromEmail">getUserURLFromEmail</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isBackendServiceURL">isBackendServiceURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isDataObjectURL">isDataObjectURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isHypertyURL">isHypertyURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isLegacy">isLegacy</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isURL">isURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isUserURL">isUserURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-removePathFromURL">removePathFromURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-tv4">tv4</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-divideURL">divideURL</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">test/SyncherManager.spec.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import { runtimeFactory } from &apos;./resources/runtimeFactory&apos;;
+import {Syncher, DataObjectReporter, DataObjectObserver} from &apos;service-framework/dist/Syncher&apos;;
+import SyncherManager from &apos;../src/syncher/SyncherManager&apos;;
+import MessageBus from &apos;../src/bus/MessageBus&apos;;
+
+import PEP from &apos;../src/policy/PEP&apos;;
+import RuntimeCoreCtx from &apos;../src/policy/context/RuntimeCoreCtx&apos;;
+
+import chai from &apos;chai&apos;;
+import chaiAsPromised from &apos;chai-as-promised&apos;;
+
+chai.config.truncateThreshold = 0;
+
+let expect = chai.expect;
+chai.use(chaiAsPromised);
+
+describe(&apos;SyncherManager&apos;, function() {
+  let storageManager = runtimeFactory.storageManager();
+
+  let schemaURL = &apos;schema://fake-schema-url&apos;;
+  let runtimeURL = &apos;hyperty-runtime://fake-runtime&apos;;
+
+  let objURL = &apos;resource://obj1&apos;;
+  let objURLChanges = objURL + &apos;/changes&apos;;
+
+  let hyperURL1 = &apos;hyperty://h1.domain/h1&apos;;
+  let hyperURL2 = &apos;hyperty://h2.domain/h2&apos;;
+
+  let initialData = {
+    communication: { name: &apos;chat-x&apos; },
+    x: 10, y: 10
+  };
+
+  let msgNodeResponseFunc = (bus, msg) =&gt; {
+    if (msg.type === &apos;subscribe&apos;) {
+      if (msg.id === 2) {
+        //reporter subscribe
+        expect(msg).to.contain.all.keys({
+          id: 2, type: &apos;subscribe&apos;, from: &apos;hyperty-runtime://fake-runtime/sm&apos;, to: &apos;domain://msg-node.h1.domain/sm&apos;,
+          body: { subscribe: [objURL + &apos;/children/children1&apos;, objURL + &apos;/children/children2&apos;], source: hyperURL1 }
+        });
+      } else {
+        //observer subscribe
+        expect(msg).to.contain.all.keys({
+          id: 5, type: &apos;subscribe&apos;, from: &apos;hyperty-runtime://fake-runtime/sm&apos;, to: &apos;domain://msg-node.obj1/sm&apos;,
+          body: { subscribe: [objURL + &apos;/changes&apos;, objURL + &apos;/children/children1&apos;, objURL + &apos;/children/children2&apos;], source: hyperURL2 }
+        });
+      }
+
+      //simulate msg-node response
+      bus.postMessage({
+        id: msg.id, type: &apos;response&apos;, from: msg.to, to: msg.from,
+        body: { code: 200 }
+      });
+    }
+  };
+
+  //fake object allocator -&gt; always return the same URL
+  let allocator = {
+    create: () =&gt; {
+      return new Promise((resolve) =&gt; {
+        resolve({address: [objURL]});
+      });
+    }
+  };
+
+  let registry = {
+    registerDataObject: (identifier, dataObjectschema, dataObjectUrl, dataObjectReporter) =&gt; {
+      console.log(&apos;REGISTRY-OBJECT: &apos;, identifier, dataObjectschema, dataObjectUrl, dataObjectReporter);
+      return new Promise((resolve) =&gt; {
+        resolve(&apos;ok&apos;);
+      });
+    },
+
+    isInterworkingProtoStub: (url) =&gt; {
+      console.log(&apos;isInterworkingProtoStub: &apos;, url);
+      return false;
+    }
+  };
+
+  let runtimeRegistry = {
+    getPreAuthSubscribers: () =&gt; {
+      return [&apos;hyperty://domain/hyperty-instance&apos;];
+    },
+    getHypertyName: () =&gt; {
+      return &apos;HypertyChat&apos;;
+    },
+    isDataObjectURL: (dataObjectURL) =&gt; {
+      let splitURL = dataObjectURL.split(&apos;://&apos;);
+      return splitURL[0] === &apos;comm&apos;;
+    },
+    registerSubscribedDataObject: () =&gt; {},
+    registerSubscriber: () =&gt; {},
+    isInterworkingProtoStub: (url) =&gt; {
+      console.log(&apos;isInterworkingProtoStub: &apos;, url);
+      return false;
+    },
+    isLocal: (url) =&gt; {
+      console.log(&apos;isLocal: &apos;, url);
+      return false;
+    },
+    runtimeURL: &apos;runtime://localhost/7601&apos;
+  };
+
+  let identityModule = {
+    decryptMessage: (message) =&gt; {
+      return new Promise((resolve) =&gt; {
+        resolve(message);
+      });
+    },
+    encryptMessage: (message) =&gt; {
+      return new Promise((resolve) =&gt; {
+        resolve(message);
+      });
+    },
+    getToken: () =&gt; {
+      return new Promise((resolve) =&gt; {
+        resolve({ userProfile: {username: &apos;user@domain&apos; } });
+      });
+    }
+  };
+
+  let catalog = {
+    getDataSchemaDescriptor: (schema) =&gt; {
+      console.log(&apos;REQUEST-SCHEMA: &apos;, schema);
+      return new Promise((resolve, reject) =&gt; {
+        if (schema) {
+          resolve({ sourcePackage: { sourceCode: {
+            properties: {
+              scheme: { constant: &apos;resource&apos; },
+              children: { constant: [&apos;children1&apos;, &apos;children2&apos;] }
+            }
+          }}});
+        } else {
+          reject(&apos;No schema provided&apos;);
+        }
+      });
+    }
+  };
+
+  let policyEngine = new PEP(new RuntimeCoreCtx(identityModule, runtimeRegistry, storageManager, runtimeFactory.runtimeCapabilities()));
+
+  let handlers = [
+
+    // Policy message authorise
+    function(ctx) {
+      policyEngine.authorise(ctx.msg).then(function(changedMgs) {
+        ctx.msg = changedMgs;
+        ctx.next();
+      }).catch(function(reason) {
+        console.error(reason);
+        ctx.fail(reason);
+      });
+    }
+  ];
+
+  it(&apos;reporter read&apos;, function(done) {
+    let bus = new MessageBus();
+    bus._onPostMessage = (msg) =&gt; {
+      console.log(&apos;_onPostMessage: &apos;, msg);
+      msgNodeResponseFunc(bus, msg);
+    };
+
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator);
+
+    let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
+    let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
+    sync1.create(schemaURL, [], initialData).then((dor) =&gt; {
+      console.log(&apos;on-create-reply&apos;, dor.onRead);
+      dor.onRead((event) =&gt; {
+        console.log(&apos;on-read&apos;);
+        event.accept();
+      });
+
+      sync2.read(dor.url).then((data) =&gt; {
+        console.log(&apos;on-read-reply&apos;, data);
+        expect(data).to.contain.all.keys({ communication: { name: &apos;chat-x&apos; }, x: 10, y: 10 });
+        done();
+      });
+    });
+  });
+
+  it(&apos;reporter observer integration&apos;, function(done) {
+    let bus = new MessageBus();
+    bus._onPostMessage = (msg) =&gt; {
+      console.log(&apos;_onPostMessage: &apos;, msg);
+      msgNodeResponseFunc(bus, msg);
+    };
+
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator);
+
+    let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
+    sync2.onNotification((notifyEvent) =&gt; {
+      console.log(&apos;on-create-notify: &apos;, notifyEvent);
+
+      notifyEvent.ack();
+
+      sync2.subscribe(schemaURL, notifyEvent.url, true, false).then((doo) =&gt; {
+        console.log(&apos;on-subscribe-reply&apos;, doo, doo.data);
+
+        doo.onChange(&apos;*&apos;, (changeEvent) =&gt; {
+          console.log(&apos;on-change: &apos;, JSON.stringify(changeEvent));
+          expect(changeEvent).to.contain.all.keys({ cType: &apos;add&apos;, oType: &apos;object&apos;, field: &apos;test&apos;, data: [&apos;a&apos;, &apos;b&apos;, &apos;c&apos;] });
+          expect(doo.data).to.contain.all.keys({ communication: { name: &apos;chat-x&apos; }, x: 10, y: 10, test: [&apos;a&apos;, &apos;b&apos;, &apos;c&apos;] });
+          done();
+        });
+      });
+    });
+
+    let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
+    sync1.create(schemaURL, [], initialData, true, false).then((dor) =&gt; {
+      console.log(&apos;on-create-reply&apos;, dor);
+      dor.inviteObservers([hyperURL2]);
+
+      dor.onSubscription((subscribeEvent) =&gt; {
+        console.log(&apos;on-subscribe: &apos;, subscribeEvent);
+
+        //we may have some problems in the time sequence here.
+        //change-msg can reach the observer first
+        subscribeEvent.accept();
+
+        // TODO: We had the settimeout because when the proxyobserve trigger will trigger with this version of object..
+        // this hack should make it trigger in next cycle;
+        setTimeout(() =&gt; {
+          dor.data.test = [&apos;a&apos;, &apos;b&apos;, &apos;c&apos;];
+        });
+      });
+    });
+  });
+
+  it(&apos;should resume observers&apos;, function(done) {
+
+    let bus = new MessageBus();
+    bus._onMessage((a) =&gt; {
+      console.log(a);
+    });
+
+    bus._onPostMessage = (msg) =&gt; {
+      console.log(&apos;_onPostMessage: &apos;, msg);
+      msgNodeResponseFunc(bus, msg);
+    };
+
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator);
+
+    let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
+    sync2.resumeObservers({}).then((doo) =&gt; {
+
+      console.log(&apos;on-subscribe-resume-reply&apos;, doo, doo.data);
+
+      doo.onChange(&apos;*&apos;, (changeEvent) =&gt; {
+        console.log(&apos;on-change: &apos;, JSON.stringify(changeEvent), doo.data);
+        expect(changeEvent).to.contain.all.keys({ cType: &apos;add&apos;, oType: &apos;object&apos;, field: &apos;test&apos;, data: [&apos;a&apos;, &apos;b&apos;, &apos;c&apos;] });
+        expect(doo.data).to.contain.all.keys({ communication: { name: &apos;chat-x&apos; }, x: 10, y: 10, test: [&apos;a&apos;, &apos;b&apos;, &apos;c&apos;] });
+
+        done();
+      });
+
+    });
+
+    let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
+    sync1.create(schemaURL, [], initialData).then((dor) =&gt; {
+      console.log(&apos;on-create-resume-reply&apos;, dor);
+      dor.inviteObservers([hyperURL2]);
+
+      dor.onRead((readEvent) =&gt; {
+        readEvent.accept();
+      });
+
+      dor.onSubscription((subscribeEvent) =&gt; {
+        console.log(&apos;on-resume-subscribe: &apos;, subscribeEvent);
+
+        //we may have some problems in the time sequence here.
+        //change-msg can reach the observer first
+        subscribeEvent.accept();
+
+        setTimeout(() =&gt; {
+          dor.data.test = [&apos;a&apos;, &apos;b&apos;, &apos;c&apos;];
+        });
+
+      });
+    });
+
+  });
+
+  it(&apos;should resume reporters&apos;, function(done) {
+
+    let bus = new MessageBus();
+    bus._onMessage((a) =&gt; {
+      console.log(&apos;AQUI:&apos;, a);
+    });
+
+    bus._onPostMessage = (msg) =&gt; {
+      console.log(&apos;_onPostMessage: &apos;, msg);
+      msgNodeResponseFunc(bus, msg);
+    };
+
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator);
+
+    let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
+
+    sync1.resumeReporters({}).then((dor) =&gt; {
+      dor.data.newTest = [&apos;a&apos;, &apos;b&apos;, &apos;c&apos;];
+      expect(dor.data).to.contain.all.keys({ communication: { name: &apos;chat-x&apos; }, x: 10, y: 10, test: [&apos;a&apos;, &apos;b&apos;, &apos;c&apos;], newTest: [&apos;a&apos;, &apos;b&apos;, &apos;c&apos;] });
+      done();
+    });
+
+    // sync1.create(schemaURL, [], initialData).then((dor) =&gt; {
+    //   console.log(&apos;on-create-resume-reply&apos;, dor);
+    //   dor.inviteObservers([hyperURL2]);
+    //
+    //   dor.onRead((readEvent) =&gt; {
+    //     readEvent.accept();
+    //   });
+    //
+    //   dor.onSubscription((subscribeEvent) =&gt; {
+    //     console.log(&apos;on-resume-subscribe: &apos;, subscribeEvent);
+    //
+    //     //we may have some problems in the time sequence here.
+    //     //change-msg can reach the observer first
+    //     subscribeEvent.accept();
+    //     dor.data.test = [&apos;a&apos;, &apos;b&apos;, &apos;c&apos;];
+    //   });
+    // });
+
+  });
+
+  // TODO we should update the ProxyObject on service-framework to make test pass
+  // TODO or we should update the tests messages, because the order;
+  it.skip(&apos;verify produced sync messages&apos;, function(done) {
+    this.timeout(10000);
+
+    let seq = 0;
+    let data;
+
+    let bus = {
+      postMessage: (msg, replyCallback) =&gt; {
+        seq++;
+        console.log(&apos;3-postMessage: (seq === &apos; + seq + &apos;)&apos;, JSON.stringify(msg));
+
+        if (seq === 1) {
+          expect(msg).to.deep.equal({
+            type: &apos;update&apos;, from: objURL, to: objURLChanges,
+            body: { version: 1, source: hyperURL1, attribute: &apos;1&apos;,
+              value: {
+                name: &apos;Micael&apos;,
+                birthdate: &apos;28-02-1981&apos;,
+                email: &apos;micael-xxx@gmail.com&apos;,
+                phone: 911000000
+              }
+            }
+          });
+        }
+
+        if (seq === 2) {
+          expect(msg).to.deep.equal({
+            type: &apos;update&apos;, from: objURL, to: objURLChanges,
+            body: { version: 2, source: hyperURL1, attribute: &apos;1.obj1&apos;,
+              value: {
+                name: &apos;xpto&apos;
+              }
+            }
+          });
+        }
+
+        if (seq === 3) {
+          expect(msg).to.deep.equal({
+            type: &apos;update&apos;, from: objURL, to: objURLChanges,
+            body: { version: 3, source: hyperURL1, attribute: &apos;2&apos;,
+              value: {
+                name: &apos;Luis Duarte&apos;,
+                birthdate: &apos;02-12-1991&apos;,
+                email: &apos;luis-xxx@gmail.com&apos;,
+                phone: 910000000
+              }
+            }
+          });
+
+          //apply changes...
+          data[&apos;1&apos;].name = &apos;Micael Pedrosa&apos;;
+          data[&apos;1&apos;].birthdate = new Date(1982, 1, 28).toUTCString();
+          data[&apos;1&apos;].obj1.name = &apos;XPTO&apos;;
+        }
+
+/*        if (seq === 3) {
+          expect(msg).to.deep.equal({
+            type: &apos;update&apos;, from: objURL, to: objURLChanges,
+            body: { version: 3, source: hyperURL1, attribute: &apos;2&apos; }
+          });
+        }*/
+
+        if (seq === 4) {
+          expect(msg).to.deep.equal({
+            type: &apos;update&apos;, from: objURL, to: objURLChanges,
+            body: { version: 4, source: hyperURL1, attribute: &apos;1.name&apos;, value: &apos;Micael Pedrosa&apos; }
+          });
+
+        }
+
+        if (seq === 5) {
+          expect(msg).to.deep.equal({
+            type: &apos;update&apos;, from: objURL, to: objURLChanges,
+            body: { version: 5, source: hyperURL1, attribute: &apos;1.birthdate&apos;, value: new Date(1982, 1, 28).toUTCString() }
+          });
+
+        }
+
+        if (seq === 6) {
+          expect(msg).to.deep.equal({
+            type: &apos;update&apos;, from: objURL, to: objURLChanges,
+            body: { version: 6, source: hyperURL1, attribute: &apos;1.obj1.name&apos;, value: &apos;XPTO&apos; }
+          });
+
+          //apply changes...
+          data[&apos;1&apos;].arr = [1, 0, { x: 10, y: 20 }];
+        }
+
+        if (seq === 7) {
+          expect(msg).to.deep.equal({
+            type: &apos;update&apos;, from: objURL, to: objURLChanges,
+            body: { version: 7, source: hyperURL1, attribute: &apos;1.arr&apos;, value: [1, 0, {x: 10, y: 20}] }
+          });
+
+          //apply changes...
+          data[&apos;1&apos;].arr[1] = 2;
+        }
+
+        if (seq === 8) {
+          console.log(&apos;data&apos;, data);
+
+          expect(msg).to.deep.equal({
+            type: &apos;update&apos;, from: objURL, to: objURLChanges,
+            body: { version: 8, source: hyperURL1, attributeType: &apos;array&apos;, attribute: &apos;1.arr.1&apos;, value: 2 }
+          });
+
+          //apply changes...
+          setTimeout(() =&gt; {
+            data[&apos;1&apos;].arr.push(3);
+            data[&apos;1&apos;].arr.push({ x: 1, y: 2 });
+          });
+
+          done();
+        }
+
+        if (seq === 9) {
+          expect(msg).to.deep.equal({
+            type: &apos;update&apos;, from: objURL, to: objURLChanges,
+            body: { version: 9, source: hyperURL1, attributeType: &apos;array&apos;, operation: &apos;add&apos;, attribute: &apos;1.arr.3&apos;, value: 3 }
+          });
+        }
+
+        if (seq === 10) {
+          expect(msg).to.deep.equal({
+            type: &apos;update&apos;, from: objURL, to: objURLChanges,
+            body: { version: 10, source: hyperURL1, attributeType: &apos;array&apos;, attribute: &apos;1.arr.length&apos;, value: 4 }
+          });
+        }
+
+        if (seq === 11) {
+
+          expect(msg).to.deep.equal({
+            type: &apos;update&apos;, from: objURL, to: objURLChanges,
+            body: { version: 10, source: hyperURL1, attributeType: &apos;array&apos;, operation: &apos;add&apos;, attribute: &apos;1.arr.4&apos;, value: {x: 1, y: 2} }
+          });
+
+          //apply changes...
+          data[&apos;1&apos;].arr.splice(1, 2, 10, 11, 12);
+          data[&apos;1&apos;].arr[5].x = 10;
+        }
+
+        if (seq === 12) {
+          expect(msg).to.deep.equal({
+            type: &apos;update&apos;, from: objURL, to: objURLChanges,
+            body: { version: 12, source: hyperURL1, attributeType: &apos;array&apos;, operation: &apos;remove&apos;, attribute: &apos;1.arr.1&apos;, value: 2 }
+          });
+        }
+
+        if (seq === 13) {
+          expect(msg).to.deep.equal({
+            type: &apos;update&apos;, from: objURL, to: objURLChanges,
+            body: { version: 12, source: hyperURL1, attributeType: &apos;array&apos;, operation: &apos;add&apos;, attribute: &apos;1.arr.1&apos;, value: [10, 11, 12] }
+          });
+        }
+
+        if (seq === 14) {
+          expect(msg).to.deep.equal({
+            type: &apos;update&apos;, from: objURL, to: objURLChanges,
+            body: { version: 13, source: hyperURL1, attribute: &apos;1.arr.5.x&apos;, value: 10 }
+          });
+
+          //apply changes...
+          data[&apos;1&apos;].arr.pop();
+        }
+
+        if (seq === 14) {
+          expect(msg).to.deep.equal({
+            type: &apos;update&apos;, from: objURL, to: objURLChanges,
+            body: { version: 14, source: hyperURL1, attributeType: &apos;array&apos;, operation: &apos;remove&apos;, attribute: &apos;1.arr.5&apos;, value: 1 }
+          });
+
+          done();
+        }
+      },
+
+      addListener: (url, callback) =&gt; {
+        console.log(&apos;3-addListener&apos;, url);
+      }
+    };
+
+    //BEGIN: skip message system (already tested in previous units) and manually create a reporter and subscription, this should not be done in real code.
+    let sync = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
+    let reporter = new DataObjectReporter(sync, objURL, schemaURL, &apos;on&apos;, {}, []);
+    reporter.subscriptions[hyperURL2] = { status: &apos;on&apos; };
+    sync.reporters[objURL] = reporter;
+
+    //END
+    data = reporter.data;
+
+    //apply changes...
+    data[&apos;1&apos;] = { name: &apos;Micael&apos;, birthdate: &apos;28-02-1981&apos;, email: &apos;micael-xxx@gmail.com&apos;, phone: 911000000};
+    data[&apos;1&apos;].obj1 = { name: &apos;xpto&apos; };
+    data[&apos;2&apos;] = { name: &apos;Luis Duarte&apos;, birthdate: &apos;02-12-1991&apos;, email: &apos;luis-xxx@gmail.com&apos;, phone: 910000000 };
+  });
+
+  // TODO we should update the ProxyObject on service-framework to make test pass
+  // TODO or we should update the tests messages, because the order;
+  it.skip(&apos;verify consumed sync messages&apos;, function(done) {
+    this.timeout(10000);
+
+    let post;
+    let bus = {
+      addListener: (url, callback) =&gt; {
+        console.log(&apos;4-addListener&apos;, url);
+
+        if (url === objURLChanges) {
+          post = callback;
+        }
+      }
+    };
+
+    //BEGIN: skip message system (already tested in previous units) and manually create an observer, this should not be done in real code.
+    let seq = 0;
+    let data;
+    let compacted = false;
+
+    let sync = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
+    let observer = new DataObjectObserver(sync, objURL, schemaURL, &apos;on&apos;, { data: {}, childrens: {} }, [], 0);
+    sync.observers[objURL] = observer;
+
+    observer.onChange(&apos;*&apos;, (event) =&gt; {
+      seq++;
+      console.log(&apos;4-onChange: (seq === &apos; + seq + &apos;)&apos;, JSON.stringify(event));
+
+      if (seq === 1) {
+        expect(event).to.contain.all.keys({ cType: &apos;add&apos;, oType: &apos;object&apos;, field: &apos;1&apos;, data: { name: &apos;Micael&apos;, birthdate: &apos;28-01-1981&apos;, email: &apos;micael-xxx@gmail.com&apos;, phone: 911000000, obj1: { name: &apos;xpto&apos; } } });
+      }
+
+      if (seq === 2) {
+        expect(event).to.contain.all.keys({ cType: &apos;add&apos;, oType: &apos;object&apos;, field: &apos;2&apos;, data: { name: &apos;Luis Duarte&apos;, birthdate: &apos;02-12-1991&apos;, email: &apos;luis-xxx@gmail.com&apos;, phone: 910000000, obj1: { name: &apos;xpto&apos; } } });
+
+        //verify changes...
+        expect(data).to.contain.all.keys({
+          1: { name: &apos;Micael&apos;, birthdate: &apos;28-01-1981&apos;, email: &apos;micael-xxx@gmail.com&apos;, phone: 911000000, obj1: { name: &apos;xpto&apos; } },
+          2: { name: &apos;Luis Duarte&apos;, birthdate: &apos;02-12-1991&apos;, email: &apos;luis-xxx@gmail.com&apos;, phone: 910000000, obj1: { name: &apos;xpto&apos; } }
+        });
+
+        post({
+          type: &apos;update&apos;, from: objURL, to: objURLChanges,
+          body: { version: 3, attribute: &apos;2&apos; }
+        });
+
+        post({
+          type: &apos;update&apos;, from: objURL, to: objURLChanges,
+          body: { version: 4, attribute: &apos;1.name&apos;, value: &apos;Micael Pedrosa&apos; }
+        });
+
+        post({
+          type: &apos;update&apos;, from: objURL, to: objURLChanges,
+          body: { version: 5, attribute: &apos;1.birthdate&apos;, value: &apos;28-02-1981&apos; }
+        });
+
+        post({
+          type: &apos;update&apos;, from: objURL, to: objURLChanges,
+          body: { version: 6, attribute: &apos;1.obj1.name&apos;, value: &apos;XPTO&apos; }
+        });
+      }
+
+      if (seq === 3) {
+        expect(event).to.contain.all.keys({ cType: &apos;remove&apos;, oType: &apos;object&apos;, field: &apos;2&apos; });
+      }
+
+      if (seq === 4) {
+        expect(event).to.contain.all.keys({ cType: &apos;update&apos;, oType: &apos;object&apos;, field: &apos;1.name&apos;, data: &apos;Micael Pedrosa&apos; });
+      }
+
+      if (seq === 5) {
+        expect(event).to.contain.all.keys({ cType: &apos;update&apos;, oType: &apos;object&apos;, field: &apos;1.birthdate&apos;, data: &apos;28-02-1981&apos; });
+      }
+
+      if (seq === 6) {
+        expect(event).to.contain.all.keys({ cType: &apos;update&apos;, oType: &apos;object&apos;, field: &apos;1.obj1.name&apos;, data: &apos;XPTO&apos; });
+
+        //verify changes...
+        expect(data).to.contain.all.keys({
+          1: { name: &apos;Micael Pedrosa&apos;, birthdate: &apos;28-02-1981&apos;, email: &apos;micael-xxx@gmail.com&apos;, phone: 911000000, obj1: { name: &apos;XPTO&apos; } }
+        });
+
+        post({
+          type: &apos;update&apos;, from: objURL, to: objURLChanges,
+          body: { version: 7, attribute: &apos;1.arr&apos;, value: [1, 0, { x: 10, y: 20 }] }
+        });
+      }
+
+      if (seq === 7) {
+        expect(event).to.contain.all.keys({ cType: &apos;add&apos;, oType: &apos;object&apos;, field: &apos;1.arr&apos;, data: [1, 0, { x: 10, y: 20 }] });
+
+        //verify changes...
+        expect(data).to.contain.all.keys({
+          1: { name: &apos;Micael Pedrosa&apos;, birthdate: &apos;28-02-1981&apos;, email: &apos;micael-xxx@gmail.com&apos;, phone: 911000000, obj1: {name: &apos;XPTO&apos;}, arr: [1, 0, { x: 10, y: 20 }] }
+        });
+
+        post({
+          type: &apos;update&apos;, from: objURL, to: objURLChanges,
+          body: { version: 8, attributeType: &apos;array&apos;, attribute: &apos;1.arr.1&apos;, value: 2 }
+        });
+      }
+
+      if (seq === 8) {
+        expect(event).to.contain.all.keys({ cType: &apos;update&apos;, oType: &apos;array&apos;, field: &apos;1.arr.1&apos;, data: 2 });
+
+        //verify changes...
+        expect(data).to.contain.all.keys({
+          1: { name: &apos;Micael Pedrosa&apos;, birthdate: &apos;28-02-1981&apos;, email: &apos;micael-xxx@gmail.com&apos;, phone: 911000000, obj1: {name: &apos;XPTO&apos;}, arr: [1, 2, { x: 10, y: 20 }] }
+        });
+
+        post({
+          type: &apos;update&apos;, from: objURL, to: objURLChanges,
+          body: { version: 9, attributeType: &apos;array&apos;, operation: &apos;add&apos;, attribute: &apos;1.arr.3&apos;, value: [3] }
+        });
+
+        post({
+          type: &apos;update&apos;, from: objURL, to: objURLChanges,
+          body: { version: 10, attributeType: &apos;array&apos;, operation: &apos;add&apos;, attribute: &apos;1.arr.4&apos;, value: [{ x: 1, y: 2 }] }
+        });
+      }
+
+      if (seq === 9) {
+        if (event.data.length === 1) {
+          expect(event).to.contain.all.keys({ cType: &apos;add&apos;, oType: &apos;array&apos;, field: &apos;1.arr.3&apos;, data: [3] });
+        } else {
+          //it&apos;s OK to compact 2 messages...
+          expect(event).to.contain.all.keys({ cType: &apos;add&apos;, oType: &apos;array&apos;, field: &apos;1.arr.3&apos;, data: [3, { x: 1, y: 2 }]});
+          compacted = true;
+        }
+      }
+
+      if (seq === 10) {
+        if (!compacted) {
+          expect(event).to.contain.all.keys({ cType: &apos;add&apos;, oType: &apos;array&apos;, field: &apos;1.arr.4&apos;, data: [{ x: 1, y: 2 }] });
+        }
+
+        compacted = false;
+
+        //verify changes...
+        expect(data).to.contain.all.keys({
+          1: { name: &apos;Micael Pedrosa&apos;, birthdate: &apos;28-02-1981&apos;, email: &apos;micael-xxx@gmail.com&apos;, phone: 911000000, obj1: { name: &apos;XPTO&apos; }, arr: [1, 2, { x: 10, y: 20 }, 3, { x: 1, y: 2 }]}
+        });
+
+        done();
+
+        /*
+        post({
+          type: &apos;update&apos;, from: objURL, to: objURLChanges,
+          body: { version: 11, attributeType: &apos;array&apos;, operation: &apos;remove&apos;, attribute: &apos;1.arr.1&apos;, value: 2 }
+        });
+
+        post({
+          type: &apos;update&apos;, from: objURL, to: objURLChanges,
+          body: { version: 12, attributeType: &apos;array&apos;, operation: &apos;add&apos;, attribute: &apos;1.arr.1&apos;, value: [10, 11, 12] }
+        });
+
+        post({
+          type: &apos;update&apos;, from: objURL, to: objURLChanges,
+          body: { version: 13, attribute: &apos;1.arr.5.x&apos;, value: 10 }
+        });
+        */
+      }
+
+      /*
+      if (seq === 11) {
+        expect(event).to.contain.all.keys({ cType: &apos;remove&apos;, oType: &apos;array&apos;, field: &apos;1.arr.1&apos;, data: 2 });
+      }
+
+      if (seq === 12) {
+        expect(event).to.contain.all.keys({ cType: &apos;add&apos;, oType: &apos;array&apos;, field: &apos;1.arr.1&apos;, data: [10, 11, 12] });
+      }
+
+      if (seq === 13) {
+        expect(event).to.contain.all.keys({ cType: &apos;update&apos;, oType: &apos;object&apos;, field: &apos;1.arr.5.x&apos;, data: 10 });
+
+        //verify changes...
+        expect(data).to.contain.all.keys({
+          1: { name: &apos;Micael Pedrosa&apos;, birthdate: &apos;28-02-1981&apos;, email: &apos;micael-xxx@gmail.com&apos;, phone: 911000000, obj1: { name: &apos;XPTO&apos; }, arr: [1, 10, 11, 12, 3, { x: 10, y: 2 }] }
+        });
+
+        post({
+          type: &apos;update&apos;, from: objURL, to: objURLChanges,
+          body: { version: 14, attributeType: &apos;array&apos;, operation: &apos;remove&apos;, attribute: &apos;1.arr.5&apos;, value: 1 }
+        });
+      }
+
+      if (seq === 14) {
+        expect(event).to.contain.all.keys({ cType: &apos;remove&apos;, oType: &apos;array&apos;, field: &apos;1.arr.5&apos;, data: 1 });
+
+        //verify changes...
+        expect(data).to.contain.all.keys({
+          1: { name: &apos;Micael Pedrosa&apos;, birthdate: &apos;28-02-1981&apos;, email: &apos;micael-xxx@gmail.com&apos;, phone: 911000000, obj1: { name: &apos;XPTO&apos; }, arr: [1, 10, 11, 12, 3] }
+        });
+
+        done();
+      }
+      */
+    });
+
+    //END
+    data = observer.data;
+
+    post({
+      type: &apos;update&apos;, from: objURL, to: objURLChanges,
+      body: { version: 1, attribute: &apos;1&apos;,
+        value: {
+          name: &apos;Micael&apos;,
+          birthdate: &apos;28-01-1981&apos;,
+          email: &apos;micael-xxx@gmail.com&apos;,
+          phone: 911000000,
+          obj1: { name: &apos;xpto&apos;}
+        }
+      }
+    });
+
+    post({
+      type: &apos;update&apos;, from: objURL, to: objURLChanges,
+      body: { version: 2, attribute: &apos;2&apos;,
+        value: {
+          name: &apos;Luis Duarte&apos;,
+          birthdate: &apos;02-12-1991&apos;,
+          email: &apos;luis-xxx@gmail.com&apos;,
+          phone: 910000000,
+          obj1: { name: &apos;xpto&apos; }
+        }
+      }
+    });
+  });
+
+  it(&apos;reporter addChild&apos;, function(done) {
+    let bus = new MessageBus();
+    bus._onPostMessage = (msg) =&gt; {
+      console.log(&apos;5-_onPostMessage: &apos;, msg);
+      msgNodeResponseFunc(bus, msg);
+    };
+
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator);
+
+    let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
+    sync1.create(schemaURL, [], initialData).then((dor) =&gt; {
+      console.log(&apos;on-create-reply&apos;);
+      dor.addChild(&apos;children1&apos;, {message: &apos;my message&apos;}).then((doc) =&gt; {
+        console.log(&apos;on-addChild-reply&apos;, doc);
+        done();
+      });
+    });
+  });
+
+  it(&apos;observer addChild&apos;, function(done) {
+    let bus = new MessageBus();
+    bus._onPostMessage = (msg) =&gt; {
+      console.log(&apos;6-_onPostMessage: &apos;, msg);
+      msgNodeResponseFunc(bus, msg);
+    };
+
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator);
+
+    let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
+    sync2.onNotification((notifyEvent) =&gt; {
+      console.log(&apos;on-create-notify: &apos;, notifyEvent);
+      notifyEvent.ack();
+
+      sync2.subscribe(schemaURL, notifyEvent.url).then((doo) =&gt; {
+        console.log(&apos;on-subscribe-reply&apos;);
+        doo.addChild(&apos;children1&apos;, { message: &apos;Hello World!&apos; }).then((doc) =&gt; {
+          console.log(&apos;on-local-addChild&apos;);
+          doc.onResponse((event) =&gt; {
+            console.log(&apos;on-remote-addChild-reply&apos;, event);
+            expect(event).to.contain.all.keys({ type: &apos;response&apos;, url: hyperURL1, code: 200 });
+            done();
+          });
+        });
+      });
+    });
+
+    let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
+    sync1.create(schemaURL, [hyperURL2], initialData).then((dor) =&gt; {
+      console.log(&apos;on-create-reply&apos;);
+      dor.onSubscription((subscribeEvent) =&gt; {
+        dor.onAddChild((event) =&gt; {
+          console.log(&apos;on-remote-addChild&apos;, event);
+          expect(event).to.contain.all.keys({ type: &apos;create&apos;, from: hyperURL2, url: &apos;resource://obj1/children/children1&apos;, childId: hyperURL2 + &apos;#1&apos;, value: { message: &apos;Hello World!&apos; } });
+        });
+
+        console.log(&apos;on-subscribe: &apos;, subscribeEvent);
+        subscribeEvent.accept();
+      });
+    });
+  });
+
+  it(&apos;children deltas generate and process&apos;, function(done) {
+    let bus = new MessageBus();
+    bus.pipeline.handlers = handlers;
+
+    bus._onPostMessage = (msg) =&gt; {
+      console.log(&apos;7-_onPostMessage: &apos;, msg);
+      msgNodeResponseFunc(bus, msg);
+    };
+
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator);
+
+    let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
+    sync2.onNotification((notifyEvent) =&gt; {
+      notifyEvent.ack();
+
+      sync2.subscribe(schemaURL, notifyEvent.url).then((doo) =&gt; {
+        doo.addChild(&apos;children1&apos;, { message: &apos;Hello Micael!&apos; }).then((doc) =&gt; {
+          doc.data.message = &apos;Hello Luis!&apos;;
+        });
+      });
+    });
+
+    let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
+    sync1.create(schemaURL, [hyperURL2], initialData).then((dor) =&gt; {
+      dor.onSubscription((subscribeEvent) =&gt; {
+        dor.onAddChild((event) =&gt; {
+          let children1 = dor.childrens[event.childId];
+          children1.onChange((changeEvent) =&gt; {
+            console.log(&apos;onChange: &apos;, changeEvent);
+            expect(changeEvent).to.contain.all.keys({ cType: &apos;update&apos;, oType: &apos;object&apos;, field: &apos;message&apos;, data: &apos;Hello Luis!&apos; });
+            expect(children1.data).to.contain.all.keys({ message: &apos;Hello Luis!&apos; });
+            done();
+          });
+        });
+
+        subscribeEvent.accept();
+      });
+    });
+  });
+
+  it(&apos;create and delete&apos;, function(done) {
+    let deleted = false;
+
+    let bus = new MessageBus();
+    bus.pipeline.handlers = handlers;
+
+    bus._onPostMessage = (msg) =&gt; {
+      console.log(&apos;8-_onPostMessage: &apos;, msg);
+      if (msg.type === &apos;subscribe&apos;) {
+        bus.postMessage({
+          id: msg.id, type: &apos;response&apos;, from: msg.to, to: msg.from,
+          body: { code: 200 }
+        });
+      } else if (msg.type === &apos;delete&apos;) {
+        //expect delete message to msg-node
+        if (msg.from === runtimeURL + &apos;/sm&apos;) {
+          expect(msg.to).to.eql(&apos;domain://msg-node.h1.domain/object-address-allocation&apos;);
+          expect(msg.body.resource).to.eql(objURL);
+        }
+
+        if (msg.from === objURL + &apos;/subscription&apos;) {
+          deleted = true;
+        }
+      }
+    };
+
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator);
+
+    let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
+    sync2.onNotification((notifyEvent) =&gt; {
+      console.log(&apos;onNotification: &apos;, notifyEvent);
+      if (notifyEvent.type === &apos;create&apos;) {
+        notifyEvent.ack(100);
+        sync2.subscribe(schemaURL, notifyEvent.url).then((doo) =&gt; {
+          console.log(&apos;subscribe: &apos;, doo.url);
+        });
+      } else if (notifyEvent.type === &apos;delete&apos;) {
+        notifyEvent.ack(100);
+        expect(deleted).to.eql(true);
+        done();
+      }
+    });
+
+    let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
+    sync1.create(schemaURL, [hyperURL2], initialData).then((dor) =&gt; {
+      console.log(&apos;create: &apos;, dor.url);
+      dor.onSubscription((subscribeEvent) =&gt; {
+        console.log(&apos;onSubscription: &apos;, subscribeEvent);
+        subscribeEvent.accept();
+
+        setTimeout(() =&gt; {
+          expect(sync1.reporters[dor.url]).to.eql(dor);
+          dor.delete();
+          delete sync1.reporters[dor.url];
+          expect(sync1.reporters[dor.url]).to.be.empty;
+          console.log(&apos;reporter-deleted&apos;);
+        }, 100);
+
+      });
+    });
+  });
+
+  it(&apos;subscribe and unsubscribe&apos;, function(done) {
+    let bus = new MessageBus();
+    bus.pipeline.handlers = handlers;
+
+    bus._onPostMessage = (msg) =&gt; {
+      console.log(&apos;8-_onPostMessage: &apos;, msg);
+      if (msg.type === &apos;subscribe&apos;) {
+        bus.postMessage({
+          id: msg.id, type: &apos;response&apos;, from: msg.to, to: msg.from,
+          body: { code: 200 }
+        });
+      } else if (msg.type === &apos;unsubscribe&apos;) {
+        //expect delete message to msg-node
+        expect(msg.from).to.eql(runtimeURL + &apos;/sm&apos;);
+        expect(msg.to).to.eql(&apos;domain://msg-node.h2.domain/sm&apos;);
+        expect(msg.body.resource).to.eql(objURL);
+        done();
+      }
+    };
+
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator);
+
+    let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
+    sync2.onNotification((notifyEvent) =&gt; {
+      console.log(&apos;onNotification: &apos;, notifyEvent);
+      sync2.subscribe(schemaURL, notifyEvent.url).then((doo) =&gt; {
+        console.log(&apos;subscribe: &apos;, doo.url);
+        doo.unsubscribe();
+      });
+    });
+
+    let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
+    sync1.create(schemaURL, [hyperURL2], initialData).then((dor) =&gt; {
+      console.log(&apos;create: &apos;, dor.url);
+      dor.onSubscription((subscribeEvent) =&gt; {
+        console.log(&apos;onSubscription: &apos;, subscribeEvent);
+        subscribeEvent.accept();
+      });
+    });
+  });
+
+  describe(&apos;should use the storageManager&apos;, function() {
+
+    let hyperties = {};
+
+    // let sync1DataObjectReporter;
+    // let sync2DataObjectObserver;
+    // let sync3DataObjectObserver;
+
+    it(&apos;should save the url on storageManager&apos;, function(done) {
+
+      let bus = new MessageBus();
+      bus.pipeline.handlers = handlers;
+
+      bus._onPostMessage = function(msg)  {
+        console.log(&apos;8-_onPostMessage: &apos;, msg);
+        if (msg.type === &apos;subscribe&apos;) {
+          bus.postMessage({
+            id: msg.id, type: &apos;response&apos;, from: msg.to, to: msg.from,
+            body: { code: 200 }
+          });
+        }
+      };
+
+      function guid() {
+        function s4() {
+          return Math.floor((1 + Math.random()) * 0x10000)
+            .toString(16)
+            .substring(1);
+        }
+        return s4() + s4() + &apos;-&apos; + s4() + &apos;-&apos; + s4() + &apos;-&apos; +
+          s4() + &apos;-&apos; + s4() + s4() + s4();
+      }
+
+      let objURL = &apos;resource://domain/&apos; + guid();
+
+      //fake object allocator -&gt; always return the same URL
+      let allocator = {
+        create: () =&gt; {
+          return new Promise((resolve) =&gt; {
+            hyperties.object = objURL;
+            resolve({address: [objURL]});
+          });
+        }
+      };
+
+      new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator);
+
+      let hypertyURL3 = &apos;hyperty://h1.domain/&apos; + guid();
+      hyperties.h3 = hypertyURL3;
+      let sync3 = new Syncher(hypertyURL3, bus, { runtimeURL: runtimeURL });
+      sync3.onNotification((notifyEvent) =&gt; {
+        sync3.subscribe(schemaURL, notifyEvent.url).then((doo) =&gt; {
+          //sync3DataObjectObserver = doo;
+          console.log(&apos;sync3 subscribe: &apos;, doo.url);
+          done();
+        });
+      });
+
+      let hypertyURL2 = &apos;hyperty://h1.domain/&apos; + guid();
+      hyperties.h2 = hypertyURL2;
+      let sync2 = new Syncher(hypertyURL2, bus, { runtimeURL: runtimeURL });
+      sync2.onNotification((notifyEvent) =&gt; {
+        sync2.subscribe(schemaURL, notifyEvent.url).then((doo) =&gt; {
+          //sync2DataObjectObserver = doo;
+          console.log(&apos;sync2 subscribe:&apos;, doo.url);
+        });
+      });
+
+      let hypertyURL1 = &apos;hyperty://h1.domain/&apos; + guid();
+      hyperties.h1 = hypertyURL1;
+      let sync1 = new Syncher(hypertyURL1, bus, { runtimeURL: runtimeURL });
+      sync1.create(schemaURL, [hypertyURL2, hypertyURL3], initialData, true, false).then((dor) =&gt; {
+        // sync1DataObjectReporter = dor;
+        dor.onSubscription((subscribeEvent) =&gt; {
+          subscribeEvent.accept();
+        });
+      });
+    });
+
+    it(&apos;should resume the url stored on storageManager&apos;, (done) =&gt; {
+
+      let bus = new MessageBus();
+      bus.pipeline.handlers = handlers;
+      bus._onPostMessage = (msg) =&gt; {
+        console.log(&apos;10-_onPostMessage: &apos;, msg);
+
+        if (msg.type === &apos;subscribe&apos;) {
+          bus.postMessage({
+            id: msg.id, type: &apos;response&apos;, from: msg.to, to: msg.from,
+            body: { code: 200 }
+          });
+        }
+
+        // TODO: remove the msg.body.version verification
+        // TODO: this could be related with the syncher synchronization mechanism
+        if (msg.type === &apos;update&apos; &amp;&amp; msg.body.version === 2) {
+          expect(msg.from).to.eql(hyperties.object);
+          expect(msg.to).to.eql(hyperties.object + &apos;/changes&apos;);
+
+          done();
+        }
+
+      };
+
+      //fake object allocator -&gt; always return the same URL
+      let allocator = {
+        create: function() {
+          return new Promise(function(resolve) {
+            resolve({address: [hyperties.object]});
+          });
+        }
+      };
+
+      new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator);
+
+      let sync3 = new Syncher(hyperties.h3, bus, { runtimeURL: runtimeURL });
+      sync3.onNotification((notifyEvent) =&gt; {
+        sync3.subscribe(schemaURL, notifyEvent.url).then((doo) =&gt; {
+          doo.onChange(&apos;*&apos;, function(changes) {
+            console.log(&apos;Sync 3: &apos;, changes);
+          });
+          console.log(&apos;sync3 subscribe: &apos;, doo.url);
+        });
+      });
+
+      let sync2 = new Syncher(hyperties.h2, bus, { runtimeURL: runtimeURL });
+      sync2.onNotification((notifyEvent) =&gt; {
+        sync2.subscribe(schemaURL, notifyEvent.url).then((doo) =&gt; {
+          doo.onChange(&apos;*&apos;, function(changes) {
+            console.log(&apos;Sync 2: &apos;, changes);
+          });
+          console.log(&apos;sync2 subscribe:&apos;, doo.url);
+        });
+      });
+
+      let sync1 = new Syncher(hyperties.h1, bus, { runtimeURL: runtimeURL });
+      sync1.create(schemaURL, [hyperties.h2, hyperties.h3], initialData).then((dor) =&gt; {
+
+        dor.onSubscription((subscribeEvent) =&gt; {
+          subscribeEvent.accept();
+
+          dor.data.x = 20;
+        });
+      });
+
+    });
+
+  });
+
+});
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.5.2)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

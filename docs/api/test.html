@@ -1,0 +1,1663 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="">
+  <title data-ice="title">Test | Service Framework API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  <a href="test.html" data-ice="testLink">Test</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">allocation</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/allocation/AddressAllocation.js~AddressAllocation.html">AddressAllocation</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html">Bus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html">MiniBus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Pipeline.js~Pipeline.html">Pipeline</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">graphconnector</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/BloomFilter.js~BloomFilter.html">BloomFilter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GlobalRegistryRecord.js~GlobalRegistryRecord.html">GlobalRegistryRecord</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html">GraphConnector</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html">GraphConnectorContactData</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">identity</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/Crypto.js~Crypto.html">Crypto</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/GuiFake.js~GuiFake.html">GuiFake</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/Identity.js~Identity.html">Identity</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/IdentityModule.js~IdentityModule.html">IdentityModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/OpenIdLib.js~OpenIdLib.html">OpenIdLib</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/ActionsService.js~ActionsService.html">ActionsService</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/CombiningAlgorithm.js~CombiningAlgorithm.html">CombiningAlgorithm</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Operators.js~Operators.html">Operators</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/PDP.js~PDP.html">PDP</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/PEP.js~PEP.html">PEP</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Policy.js~Policy.html">Policy</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/ReThinkCtx.js~ReThinkCtx.html">ReThinkCtx</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Rule.js~Rule.html">Rule</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/combiningAlgorithms</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/AllowOverrides.js~AllowOverrides.html">AllowOverrides</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/BlockOverrides.js~BlockOverrides.html">BlockOverrides</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/FirstApplicable.js~FirstApplicable.html">FirstApplicable</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/conditions</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/AdvancedCondition.js~AdvancedCondition.html">AdvancedCondition</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/Condition.js~Condition.html">Condition</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/SubscriptionCondition.js~SubscriptionCondition.html">SubscriptionCondition</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/context</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html">RuntimeCoreCtx</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">protostub</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/protostub/IdpProxyStub.js~IdpProxyStub.html">IdpProxyStub</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-activate">activate</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">registry</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/Discovery.js~Discovery.html">Discovery</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/DiscoveryServiceFramework.js~DiscoveryServiceFramework.html">DiscoveryServiceFramework</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/HypertyInstance.js~HypertyInstance.html">HypertyInstance</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html">Registry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/RegistryDataModel.js~RegistryDataModel.html">RegistryDataModel</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">runtime</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/Descriptors.js~Descriptors.html">Descriptors</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/Loader.js~Loader.html">Loader</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/RuntimeUA.js~RuntimeUA.html">RuntimeUA</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-runtimeConfiguration">runtimeConfiguration</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-runtimeUtils">runtimeUtils</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">sandbox</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/sandbox/Sandbox.js~Sandbox.html">Sandbox</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/sandbox/SandboxRegistry.js~SandboxRegistry.html">SandboxRegistry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-SandboxType">SandboxType</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">syncher</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/ObserverObject.js~ObserverObject.html">ObserverObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/ReporterObject.js~ReporterObject.html">ReporterObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/StoreDataObjects.js~StoreDataObjects.html">StoreDataObjects</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/Subscription.js~Subscription.html">Subscription</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/SyncherManager.js~SyncherManager.html">SyncherManager</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">utils</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/utils/EventEmitter.js~EventEmitter.html">EventEmitter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-schemaValidation">schemaValidation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-buildURL">buildURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-convertToUserURL">convertToUserURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-deepClone">deepClone</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-divideEmail">divideEmail</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-divideURL">divideURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-emptyObject">emptyObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-generateGUID">generateGUID</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getConfigurationResources">getConfigurationResources</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserEmailFromURL">getUserEmailFromURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserIdentityDomain">getUserIdentityDomain</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserURLFromEmail">getUserURLFromEmail</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isBackendServiceURL">isBackendServiceURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isDataObjectURL">isDataObjectURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isHypertyURL">isHypertyURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isLegacy">isLegacy</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isURL">isURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isUserURL">isUserURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-removePathFromURL">removePathFromURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-tv4">tv4</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-divideURL">divideURL</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1>Test</h1>
+<table class="test-summary">
+  <thead>
+    <tr>
+      <td class="test-description">Description</td>
+      <td class="test-target">Identifier</td>
+      <td class="test-count">Count</td>
+    </tr>
+  </thead>
+
+  <tbody data-ice="tests">
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="0">
+  <td data-ice="testDescription" style="padding-left: 10px"><span class="toggle closed"></span><span><a href="test-file/test/AddressAllocation.spec.js.html#lineNumber15"><p>AddressAllocation</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">4</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/AddressAllocation.spec.js.html#lineNumber64"><p>should create a new hyperty address</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/AddressAllocation.spec.js.html#lineNumber79"><p>should create a new data Object address</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/AddressAllocation.spec.js.html#lineNumber95"><p>should reuse an hyperty url address based on reuse option</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/AddressAllocation.spec.js.html#lineNumber112"><p>should reuse an hyperty url address based on an given url</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="0">
+  <td data-ice="testDescription" style="padding-left: 10px"><span class="toggle closed"></span><span><a href="test-file/test/Descriptors.spec.js.html#lineNumber17"><p>Should get configuration and parse to Descriptors</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">4</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/Descriptors.spec.js.html#lineNumber60"><p>constructor should receive 3 arguments</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/Descriptors.spec.js.html#lineNumber77"><p>should get hyperty</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/Descriptors.spec.js.html#lineNumber87"><p>should get protocolstub</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/Descriptors.spec.js.html#lineNumber97"><p>should get protocolstub</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="0">
+  <td data-ice="testDescription" style="padding-left: 10px"><span class="toggle closed"></span><span><a href="test-file/test/GraphConnector.spec.js.html#lineNumber39"><p>Graph Connector</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">15</td>
+</tr>
+
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/GraphConnector.spec.js.html#lineNumber41"><p>construction</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">1</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/GraphConnector.spec.js.html#lineNumber42"><p>create new GraphConnector instance with zero contacts</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/GraphConnector.spec.js.html#lineNumber50"><p>create mock address book</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">9</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/GraphConnector.spec.js.html#lineNumber73"><p>create new GraphConnector with random contacts</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/GraphConnector.spec.js.html#lineNumber77"><p>remove some contacts from GraphConnector</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/GraphConnector.spec.js.html#lineNumber84"><p>get contact by first name</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/GraphConnector.spec.js.html#lineNumber90"><p>get contact by last name</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/GraphConnector.spec.js.html#lineNumber96"><p>check GUID when in direct contacts</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/GraphConnector.spec.js.html#lineNumber108"><p>test direct contacts bloom filter</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/GraphConnector.spec.js.html#lineNumber125"><p>test privacy setting for contacts</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/GraphConnector.spec.js.html#lineNumber138"><p>check GUID when in friend-of-friend connection</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/GraphConnector.spec.js.html#lineNumber164"><p>bloom filter tests</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/GraphConnector.spec.js.html#lineNumber214"><p>GUID</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">2</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/GraphConnector.spec.js.html#lineNumber220"><p>GUID generation</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/GraphConnector.spec.js.html#lineNumber231"><p>GUID re-generation</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/GraphConnector.spec.js.html#lineNumber271"><p>Global Registry Connection - send</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">1</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/GraphConnector.spec.js.html#lineNumber277"><p>send Global Registry Record</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/GraphConnector.spec.js.html#lineNumber304"><p>Global Registry Connection - use GUID</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">1</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/GraphConnector.spec.js.html#lineNumber310"><p>re-use GUID and retrieve data from Global Registry</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/GraphConnector.spec.js.html#lineNumber339"><p>Querying Global Registry</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">1</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/GraphConnector.spec.js.html#lineNumber345"><p>query Global Registry</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="0">
+  <td data-ice="testDescription" style="padding-left: 10px"><span class="toggle closed"></span><span><a href="test-file/test/IdentityModule.spec.js.html#lineNumber37"><p>IdentityModule</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">2</td>
+</tr>
+
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/IdentityModule.spec.js.html#lineNumber39"><p>constructor()</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">1</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/IdentityModule.spec.js.html#lineNumber41"><p>successfully instantiated</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/IdentityModule.spec.js.html#lineNumber46"><p>getIdentitiesToChoose()</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">1</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/IdentityModule.spec.js.html#lineNumber57"><p>should return a list of IdPs and a list of identities previously registered</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="0">
+  <td data-ice="testDescription" style="padding-left: 10px"><span class="toggle closed"></span><span><a href="test-file/test/MessageBus.spec.js.html#lineNumber6"><p>MessageBus</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">4</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/MessageBus.spec.js.html#lineNumber7"><p>sending message</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/MessageBus.spec.js.html#lineNumber39"><p>pipeline msg change</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/MessageBus.spec.js.html#lineNumber56"><p>sending using external system</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/MessageBus.spec.js.html#lineNumber89"><p>publish unique messages</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="0">
+  <td data-ice="testDescription" style="padding-left: 10px"><span class="toggle closed"></span><span><a href="test-file/test/MiniBus.spec.js.html#lineNumber6"><p>MiniBus</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">3</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/MiniBus.spec.js.html#lineNumber7"><p>simple sending message</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/MiniBus.spec.js.html#lineNumber24"><p>send with external response</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/MiniBus.spec.js.html#lineNumber62"><p>send and publish</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="0">
+  <td data-ice="testDescription" style="padding-left: 10px"><span class="toggle closed"></span><span><a href="test-file/test/PersistenceManager.spec.js.html#lineNumber8"><p>PersistenceManager</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">4</td>
+</tr>
+
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/PersistenceManager.spec.js.html#lineNumber11"><p>set</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">1</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PersistenceManager.spec.js.html#lineNumber12"><p>should set the value for a given key-version tuple</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/PersistenceManager.spec.js.html#lineNumber19"><p>get</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">1</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PersistenceManager.spec.js.html#lineNumber20"><p>should get the value for a given key</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/PersistenceManager.spec.js.html#lineNumber27"><p>getVersion</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">1</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PersistenceManager.spec.js.html#lineNumber28"><p>should get the value version for a given key</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/PersistenceManager.spec.js.html#lineNumber35"><p>delete</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">1</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PersistenceManager.spec.js.html#lineNumber36"><p>should remove a value from PersistenceManager for a given key</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="0">
+  <td data-ice="testDescription" style="padding-left: 10px"><span class="toggle closed"></span><span><a href="test-file/test/Pipeline.spec.js.html#lineNumber6"><p>Pipeline</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">3</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/Pipeline.spec.js.html#lineNumber7"><p>fail detected</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/Pipeline.spec.js.html#lineNumber37"><p>deliver detected</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/Pipeline.spec.js.html#lineNumber66"><p>sequence processor</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="0">
+  <td data-ice="testDescription" style="padding-left: 10px"><span class="toggle closed"></span><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber75"><p>Policies management</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">20</td>
+</tr>
+
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber76"><p>conditions management</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">14</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber77"><p>creates a simple condition</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber82"><p>returns condition is applicable</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber85"><p>returns condition is not applicable</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber89"><p>creates an advanced condition - &quot;and&quot;</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber96"><p>correctly returns &quot;and&quot; condition is applicable</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber100"><p>correctly returns &quot;and&quot; condition is not applicable</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber104"><p>creates an advanced condition - &quot;or&quot;</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber108"><p>correctly returns &quot;or&quot; condition is applicable</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber112"><p>correctly returns &quot;or&quot; condition is not applicable</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber116"><p>creates an advanced condition - &quot;not&quot;</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber120"><p>correctly returns &quot;not&quot; condition is applicable</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber124"><p>correctly returns &quot;not&quot; condition is not applicable</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber128"><p>correctly returns &quot;and not&quot; condition is not applicable</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber132"><p>correctly returns &quot;or not&quot; condition is applicable</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber137"><p>rules management</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">3</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber138"><p>creates a simple rule</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber144"><p>evaluates a simple rule to false</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber147"><p>evaluates a simple rule to &quot;Not Applicable&quot;</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber152"><p>policies management</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">3</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber153"><p>creates a service provider policy</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber158"><p>evaluates a service provider policy to false</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber161"><p>evaluates a service provider policy to &quot;Not Applicable&quot;</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="0">
+  <td data-ice="testDescription" style="padding-left: 10px"><span class="toggle closed"></span><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber167"><p>Policy Engine with Runtime Core context</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">28</td>
+</tr>
+
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber241"><p>initial filtering</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">1</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber242"><p>message that loads an hyperty should not be validated by policies</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber264"><p>identity obtention</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">2</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber265"><p>should add an identity in the message body</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber273"><p>should maintain the identity in the message body</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber282"><p>policies management</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">8</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber285"><p>adds a service provider policy to the engine</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber296"><p>adds a user policy to the engine</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber304"><p>adds a second user policy to the engine</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber311"><p>removes an existing user policy</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber318"><p>tries to remove a policy that does not exist</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber325"><p>removes all policies</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber332"><p>does not apply rules as it is not its target</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber351"><p>applies a rule as it is its target</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber362"><p>functionality: scheme</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">2</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber363"><p>rejects the message as it is from a blocked scheme</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber374"><p>allows the message as it comes from a scheme that is not blocked</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber383"><p>functionality: source</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">3</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber385"><p>rejects the message as it comes from a blocked source</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber396"><p>rejects the message as it comes from a blocked source</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber407"><p>allows the message as it comes from a source that is not blocked</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber416"><p>functionality: domain</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">2</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber417"><p>rejects the message as it comes from a blocked domain</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber428"><p>allows the message as it comes from a domain that is not blocked</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber437"><p>data objects management</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">4</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber438"><p>rejects a subscription attempt, as the policy rejects all</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber449"><p>accepts a subscription attempt, as the policy accepts all</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber460"><p>accepts a subscription attempt, as the policy accepts preauthorised subscribers and is preauthorised</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber471"><p>rejects a subscription attempt, as the policy rejects non-preauthorised subscriber and is not preauthorised</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber483"><p>groups management</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">6</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber489"><p>creates a group</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber494"><p>creates a second group</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber499"><p>adds an email to a group</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber504"><p>adds a second email to a group</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber509"><p>removes a user from a group</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/PolicyEngine.spec.js.html#lineNumber514"><p>deletes a group</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="0">
+  <td data-ice="testDescription" style="padding-left: 10px"><span class="toggle closed"></span><span><a href="test-file/test/Registry.spec.js.html#lineNumber37"><p>Registry</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">31</td>
+</tr>
+
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/Registry.spec.js.html#lineNumber171"><p>constructor()</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">1</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/Registry.spec.js.html#lineNumber173"><p>depends of the MessageBus</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/Registry.spec.js.html#lineNumber178"><p>getAppSandbox()</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">1</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/Registry.spec.js.html#lineNumber179"><p>return AppSandbox()</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/Registry.spec.js.html#lineNumber185"><p>registerStub(sandBox, domainURL)</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">4</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/Registry.spec.js.html#lineNumber189"><p>should register a stub</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/Registry.spec.js.html#lineNumber198"><p>should register a P2P Handler Stub</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/Registry.spec.js.html#lineNumber209"><p>should register a P2P Requester Stub</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/Registry.spec.js.html#lineNumber224"><p>should discover P2PHandlerStub</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/Registry.spec.js.html#lineNumber232"><p>discoverProtostub(url)</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">1</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/Registry.spec.js.html#lineNumber234"><p>should discover a ProtocolStub</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/Registry.spec.js.html#lineNumber252"><p>registerPEP(postMessage, hyperty)</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">1</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/Registry.spec.js.html#lineNumber254"><p>should register PEP</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/Registry.spec.js.html#lineNumber265"><p>unregisterPEP(HypertyRuntimeURL)</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">1</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/Registry.spec.js.html#lineNumber267"><p>should unregister PEP</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/Registry.spec.js.html#lineNumber277"><p>registerHyperty(sandbox, descriptorURL, descriptor)</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">1</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/Registry.spec.js.html#lineNumber279"><p>should register an Hyperty</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/Registry.spec.js.html#lineNumber293"><p>getSandbox(url)</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">5</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/Registry.spec.js.html#lineNumber295"><p>should get a sandbox from a domain</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/Registry.spec.js.html#lineNumber304"><p>should get a sandbox from a specific hypertyIstance</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/Registry.spec.js.html#lineNumber312"><p>should get a sandbox from a specific protostubURL</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/Registry.spec.js.html#lineNumber327"><p>should register a anotherdomain protoStub URL</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/Registry.spec.js.html#lineNumber336"><p>should get a sandbox from another domain</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/Registry.spec.js.html#lineNumber348"><p>resolve(url)</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">1</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/Registry.spec.js.html#lineNumber350"><p>should return a protostub url</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/Registry.spec.js.html#lineNumber360"><p>unregisterStub(url)</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">1</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/Registry.spec.js.html#lineNumber362"><p>should unregister a ProtocolStub</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/Registry.spec.js.html#lineNumber372"><p>getHypertyOwner(hypertyURL)</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">1</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/Registry.spec.js.html#lineNumber373"><p>should return the user associated to the hyperty URL</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/Registry.spec.js.html#lineNumber379"><p>getHypertyName(hypertyURL)</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">1</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/Registry.spec.js.html#lineNumber380"><p>should return the hyperty Name from a given hypertyURL</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/Registry.spec.js.html#lineNumber387"><p>registerDataObject(identifier, dataObjectschema, dataObjectUrl, dataObjectReporter, authorise)</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">1</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/Registry.spec.js.html#lineNumber388"><p>should register a new Data Object in the runtime registry</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/Registry.spec.js.html#lineNumber402"><p>checkRegisteredURLs(info)</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">5</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/Registry.spec.js.html#lineNumber404"><p>should return a previously registered Hyperty URL</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/Registry.spec.js.html#lineNumber418"><p>should return a undefined value if the Hyperty is not previously registered</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/Registry.spec.js.html#lineNumber430"><p>should return a previously registered Data Object URL</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/Registry.spec.js.html#lineNumber445"><p>should return a undefined value if the dataObjectURL is not previously registered</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/Registry.spec.js.html#lineNumber457"><p>should return an hyperty url based on given address</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/Registry.spec.js.html#lineNumber476"><p>getReporterURL(dataObjectURL)</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">2</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/Registry.spec.js.html#lineNumber478"><p>should return the reporterURL associated with the dataobject URL</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/Registry.spec.js.html#lineNumber486"><p>should not found the reporter the reporterURL associated with the dataobject URL</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/Registry.spec.js.html#lineNumber496"><p>getPreAuthSubscribers(dataObjectURL)</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">1</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/Registry.spec.js.html#lineNumber497"><p>should return the list of pre authorised users</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/Registry.spec.js.html#lineNumber507"><p>getDataObjectSubscribers(dataObjectURL)</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">1</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/Registry.spec.js.html#lineNumber508"><p>should return the list of pre authorised users</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/Registry.spec.js.html#lineNumber518"><p>unregisterHyperty(url)</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">1</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/Registry.spec.js.html#lineNumber519"><p>should unregister an Hyperty</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/Registry.spec.js.html#lineNumber528"><p>isLegacy(url)</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">1</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/Registry.spec.js.html#lineNumber530"><p>should return a protostub</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="0">
+  <td data-ice="testDescription" style="padding-left: 10px"><span class="toggle closed"></span><span><a href="test-file/test/RuntimeUA.spec.js.html#lineNumber31"><p>RuntimeUA</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">17</td>
+</tr>
+
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/RuntimeUA.spec.js.html#lineNumber93"><p>constructor()</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">6</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/RuntimeUA.spec.js.html#lineNumber95"><p>expects the runtime was ready</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/RuntimeUA.spec.js.html#lineNumber159"><p>depends of the Registry</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/RuntimeUA.spec.js.html#lineNumber163"><p>depends of the Identity Module</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/RuntimeUA.spec.js.html#lineNumber167"><p>depends of the Policy Engine</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/RuntimeUA.spec.js.html#lineNumber171"><p>depends of the MessageBus</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/RuntimeUA.spec.js.html#lineNumber175"><p>should throw when given no arguments</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/RuntimeUA.spec.js.html#lineNumber189"><p>loadHyperty(hypertyDescriptorURL)</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">5</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/RuntimeUA.spec.js.html#lineNumber191"><p>should throw when given no arguments</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/RuntimeUA.spec.js.html#lineNumber200"><p>should be a Promise</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/RuntimeUA.spec.js.html#lineNumber212"><p>should be deployed</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/RuntimeUA.spec.js.html#lineNumber224"><p>should load an hyperty based on given true value for the reuse</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/RuntimeUA.spec.js.html#lineNumber236"><p>should load an hyperty based on given reuse URL address</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/RuntimeUA.spec.js.html#lineNumber254"><p>loadStub(sp-domain)</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">3</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/RuntimeUA.spec.js.html#lineNumber256"><p>should throw when given no arguments</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/RuntimeUA.spec.js.html#lineNumber263"><p>should be a Promise</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/RuntimeUA.spec.js.html#lineNumber272"><p>should be deployed</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/RuntimeUA.spec.js.html#lineNumber286"><p>loadIdpProxy(google.com)</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">3</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/RuntimeUA.spec.js.html#lineNumber288"><p>should throw when given no arguments</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/RuntimeUA.spec.js.html#lineNumber295"><p>should be a Promise</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/RuntimeUA.spec.js.html#lineNumber304"><p>should be deployed</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="0">
+  <td data-ice="testDescription" style="padding-left: 10px"><span class="toggle closed"></span><span><a href="test-file/test/Sandbox.spec.js.html#lineNumber10"><p>Sandbox</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">2</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/Sandbox.spec.js.html#lineNumber14"><p>deploy and undeploy</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/Sandbox.spec.js.html#lineNumber76"><p>deploy url duplication rejected</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="0">
+  <td data-ice="testDescription" style="padding-left: 10px"><span class="toggle closed"></span><span><a href="test-file/test/StoreDataObjects.spec.js.html#lineNumber14"><p>StoreDataObjects</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">11</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/StoreDataObjects.spec.js.html#lineNumber33"><p>should set dataObject information to be saved on storage</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/StoreDataObjects.spec.js.html#lineNumber53"><p>should set a bundle of information to be saved on storage like reporter</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/StoreDataObjects.spec.js.html#lineNumber84"><p>should set a bundle of information to be saved on storage like observers</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/StoreDataObjects.spec.js.html#lineNumber113"><p>should update a resource with new Subscription</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/StoreDataObjects.spec.js.html#lineNumber128"><p>should update a resource with new Subscriber Users</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/StoreDataObjects.spec.js.html#lineNumber150"><p>should get specific dataObject by hypertyURL</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/StoreDataObjects.spec.js.html#lineNumber165"><p>should get specific dataObject by identity</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/StoreDataObjects.spec.js.html#lineNumber184"><p>should get specific dataObject by schema</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/StoreDataObjects.spec.js.html#lineNumber203"><p>should get specific dataObject by some data</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/StoreDataObjects.spec.js.html#lineNumber224"><p>should delete a specific value from specific resource</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/StoreDataObjects.spec.js.html#lineNumber230"><p>should delete a resource</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="0">
+  <td data-ice="testDescription" style="padding-left: 10px"><span class="toggle closed"></span><span><a href="test-file/test/SyncherManager.spec.js.html#lineNumber17"><p>SyncherManager</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">11</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/SyncherManager.spec.js.html#lineNumber157"><p>reporter read</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/SyncherManager.spec.js.html#lineNumber183"><p>reporter observer integration</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/SyncherManager.spec.js.html#lineNumber231"><p>should resume observers</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/SyncherManager.spec.js.html#lineNumber285"><p>should resume reporters</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/SyncherManager.spec.js.html#lineNumber754"><p>reporter addChild</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/SyncherManager.spec.js.html#lineNumber773"><p>observer addChild</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/SyncherManager.spec.js.html#lineNumber815"><p>children deltas generate and process</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/SyncherManager.spec.js.html#lineNumber855"><p>create and delete</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/SyncherManager.spec.js.html#lineNumber917"><p>subscribe and unsubscribe</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span class="toggle closed"></span><span><a href="test-file/test/SyncherManager.spec.js.html#lineNumber958"><p>should use the storageManager</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">2</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/SyncherManager.spec.js.html#lineNumber966"><p>should save the url on storageManager</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+<tr data-ice="testIt" style="display: none;" data-test-depth="2">
+  <td data-ice="testDescription" style="padding-left: 30px"><span><a href="test-file/test/SyncherManager.spec.js.html#lineNumber1037"><p>should resume the url stored on storageManager</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+
+<tr class="test-describe" data-ice="testDescribe" style="display: none;" data-test-depth="0">
+  <td data-ice="testDescription" style="padding-left: 10px"><span class="toggle closed"></span><span><a href="test-file/test/utils.spec.js.html#lineNumber17"><p>Utils Module</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td data-ice="testCount">1</td>
+</tr>
+
+<tr data-ice="testIt" style="display: none;" data-test-depth="1">
+  <td data-ice="testDescription" style="padding-left: 20px"><span><a href="test-file/test/utils.spec.js.html#lineNumber19"><p>should divide an url in 3 parts (type, domain, identity)</p>
+</a></span></td>
+  <td data-ice="testTarget" class="test-target">-</td>
+  <td></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.5.2)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

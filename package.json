@@ -10,8 +10,8 @@
     "test": "karma start",
     "test:lint": "eslint --config .eslintrc.yml ./src/",
     "build:doc": "./node_modules/.bin/esdoc -c esdoc.json",
-    "build:dev": "MODE=dev webpack",
-    "build:prod": "MODE=prod webpack"
+    "build:dev": "cross-env MODE=dev webpack",
+    "build:prod": "cross-env MODE=prod webpack"
   },
   "repository": {
     "type": "git",
@@ -28,7 +28,7 @@
       "email": "vitor-t-silva@telecom.pt"
     }
   ],
-  "license": "APSL-2.0",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/reTHINK-project/dev-runtime-core/issues"
   },
@@ -51,6 +51,8 @@
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
     "chai-json-schema": "^1.4.0",
+    "cross-env": "^3.1.4",
+    "dexie": "^1.5.1",
     "esdoc": "^0.5.2",
     "eslint": "^3.12.2",
     "eslint-loader": "^1.6.1",
@@ -70,6 +72,7 @@
     "sinon-chai": "^2.8.0",
     "sjcl": "^1.0.3",
     "tv4": "^1.2.7",
+    "proxy-observe": "^0.0.21",
     "webpack": "^2.2.0-rc.7"
   }
 }

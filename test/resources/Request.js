@@ -33,6 +33,8 @@ class Request {
     return new Promise(function(resolve, reject) {
       let protocolmap = {
         'hyperty-catalogue://': 'http://',
+        'https://': 'https://',
+        'http://': 'https://',
         '../': '../'
       };
 

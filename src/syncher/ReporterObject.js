@@ -11,8 +11,9 @@ class ReporterObject {
     _this._url = url;
 
     _this._bus = parent._bus;
+    _this._storageManager = parent._storageManager;
 
-    _this._domain = divideURL(owner).domain;
+    _this._domain = divideURL(url).domain;
     _this._objSubscriptorURL = _this._url + '/subscription';
 
     _this._subscriptions = {};
@@ -29,7 +30,7 @@ class ReporterObject {
 
     //add subscription listener...
     _this._subscriptionListener = _this._bus.addListener(_this._objSubscriptorURL, (msg) => {
-      console.log(_this._objSubscriptorURL + '-RCV: ', msg);
+      console.log('[SyncherManager.ReporterObject received ]', msg);
       switch (msg.type) {
         case 'subscribe': _this._onRemoteSubscribe(msg); break;
         case 'unsubscribe': _this._onRemoteUnSubscribe(msg); break;
@@ -40,7 +41,10 @@ class ReporterObject {
     let changeURL = _this._url + '/changes';
     _this._changeListener = _this._bus.addListener(changeURL, (msg) => {
       //TODO: what todo here? Save changes?
-      console.log('SyncherManager-' + changeURL + '-RCV: ', msg);
+      if (msg.body.attribute) {
+        _this._parent._dataObjectsStorage.saveData(true, _this._url, msg.body.attribute, msg.body.value);
+      }
+      console.log('[SyncherManager.ReporterObject ] SyncherManager-' + changeURL + '-RCV: ', msg);
     });
   }
 
@@ -65,6 +69,18 @@ class ReporterObject {
     });
   }
 
+  resumeSubscriptions(subscriptions) {
+    let _this = this;
+
+    Object.keys(subscriptions).forEach((key) => {
+      let hypertyURL = subscriptions[key];
+
+      if (!_this._subscriptions[hypertyURL]) {
+        _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, _this._childrens, true);
+      }
+    });
+  }
+
   /**
    * Register a listener in the msg-node and in the local MessageBus, so that messages on this address are forwarded to the reporter object
    * @param  {string} address - URL to register the listeners
@@ -81,7 +97,7 @@ class ReporterObject {
 
     return new Promise((resolve, reject) => {
       _this._bus.postMessage(nodeSubscribeMsg, (reply) => {
-        console.log('forward-subscribe-response(reporter): ', reply);
+        console.log('[SyncherManager.ReporterObject ]forward-subscribe-response(reporter): ', reply);
         if (reply.body.code === 200) {
           let newForward = _this._bus.addForward(_this._url, _this._owner);
           _this._forwards[addresses[0]] = newForward;
@@ -127,7 +143,11 @@ class ReporterObject {
       }
 
       let childBaseURL = _this._url + '/children/';
-      _this._childrens.push(childrens);
+      console.log('[SyncherManager.ReporterObject - addChildrens] - childrens: ', childrens, childBaseURL);
+
+      childrens.forEach((child) => {
+        _this._childrens.push(child);
+      });
 
       /*
       _this._childrens.forEach((child) => {
@@ -140,6 +160,8 @@ class ReporterObject {
       let subscriptions = [];
       childrens.forEach((child) => subscriptions.push(childBaseURL + child));
 
+      //_this._storageSubscriptions[_this._objSubscriptorURL] = {url: _this._url, owner: _this._owner, childrens: _this._childrens};
+
       //FLOW-OUT: message sent to the msg-node SubscriptionManager component
       let nodeSubscribeMsg = {
         type: 'subscribe', from: _this._parent._url, to: 'domain://msg-node.' + _this._domain + '/sm',
@@ -147,14 +169,14 @@ class ReporterObject {
       };
 
       _this._bus.postMessage(nodeSubscribeMsg, (reply) => {
-        console.log('node-subscribe-response(reporter): ', reply);
+        console.log('[SyncherManager.ReporterObject ]node-subscribe-response(reporter):', reply);
         if (reply.body.code === 200) {
 
           //add children listeners on local ...
           subscriptions.forEach((childURL) => {
             let childListener = _this._bus.addListener(childURL, (msg) => {
               //TODO: what todo here? Save childrens?
-              console.log('SyncherManager-' + childURL + '-RCV: ', msg);
+              console.log('[SyncherManager.ReporterObject received]', msg);
             });
             _this._childrenListeners.push(childListener);
 
@@ -205,13 +227,16 @@ class ReporterObject {
 
     //validate if subscription already exists?
     if (_this._subscriptions[hypertyURL]) {
-      let errorMsg = {
-        id: msg.id, type: 'response', from: msg.to, to: hypertyURL,
-        body: { code: 500, desc: 'Subscription for (' + _this._url + ' : ' +  hypertyURL + ') already exists!' }
-      };
+      // let errorMsg = {
+      //   id: msg.id, type: 'response', from: msg.to, to: hypertyURL,
+      //   body: { code: 500, desc: 'Subscription for (' + _this._url + ' : ' +  hypertyURL + ') already exists!' }
+      // };
+      //
+      // _this._bus.postMessage(errorMsg);
+      // return;
 
-      _this._bus.postMessage(errorMsg);
-      return;
+      // new version because of reusage
+      _this._subscriptions[hypertyURL]._releaseListeners();
     }
 
     //ask to subscribe to Syncher? (depends on the operation mode)
@@ -225,11 +250,28 @@ class ReporterObject {
         body: { type: msg.type, from: hypertyURL, to: _this._url, identity: msg.body.identity }
       };
 
+      //TODO: For Further Study
+      if (msg.body.hasOwnProperty('mutualAuthentication')) forwardMsg.body.mutualAuthentication = msg.body.mutualAuthentication;
+
       _this._bus.postMessage(forwardMsg, (reply) => {
-        console.log('forward-reply: ', reply);
+        console.log('[SyncherManager.ReporterObject ]forward-reply: ', reply);
         if (reply.body.code === 200) {
-          _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, _this._childrens, true);
+          if (!_this._subscriptions[hypertyURL]) {
+            console.log('[SyncherManager.ReporterObject] - _onRemoteSubscribe:', _this._childrens);
+            _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, _this._childrens, true);
+          }
         }
+
+        // Store for each reporter hyperty the dataObject
+        let userURL;
+        if (msg.body.identity && msg.body.identity.userProfile.userURL) {
+          userURL = msg.body.identity.userProfile.userURL;
+          _this._parent._dataObjectsStorage.update(true, _this._url, 'subscriberUsers', userURL);
+        }
+
+        _this._parent._dataObjectsStorage.update(true, _this._url, 'subscriptions', hypertyURL);
+
+        reply.body.owner = _this._owner;
 
         //FLOW-OUT: subscription response sent (forward from internal Hyperty)
         _this._bus.postMessage({
