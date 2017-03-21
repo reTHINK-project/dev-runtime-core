@@ -137,12 +137,12 @@ class RuntimeCoreCtx extends ReThinkCtx {
             let isFromRemoteSM = _this.isFromRemoteSM(message.from);
             if (isSubscription & isFromRemoteSM) {
 
-              // TODO: should activate this to use the mutualAuthentication
+              // TODO: should do mutualAuthentication and this should be removed
               resolve(message);
 
               // TODO: should verify why the mutualAuthentication is not working
               // TODO: this should uncommented
-             /* _this.doMutualAuthentication(message).then(() => {
+              /*_this.doMutualAuthentication(message).then(() => {
                 resolve(message);
               }, (error) => {
                 reject(error);

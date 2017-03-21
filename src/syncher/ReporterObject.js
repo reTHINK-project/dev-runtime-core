@@ -75,10 +75,13 @@ class ReporterObject {
     Object.keys(subscriptions).forEach((key) => {
       let hypertyURL = subscriptions[key];
 
+      console.log('[SyncherManager.ReporterObject] - resume subscriptions', _this, hypertyURL, _this._childrens);
+
       if (!_this._subscriptions[hypertyURL]) {
         _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, _this._childrens, true);
       }
     });
+
   }
 
   /**
