@@ -15,7 +15,7 @@ import jsrsasign from 'jsrsasign';
 import Registry from '../src/registry/Registry';
 import MessageBus from '../src/bus/MessageBus';
 import { runtimeFactory } from './resources/runtimeFactory';
-
+import AddressAllocation from '../src/allocation/AddressAllocation';
 
 let registry;
 let msgbus;
@@ -24,6 +24,7 @@ let appSandbox = runtimeFactory.createAppSandbox();
 let storageManager = runtimeFactory.storageManager();
 let runtimeCatalogue = runtimeFactory.createRuntimeCatalogue();
 let runtimeCapabilities = runtimeFactory.runtimeCapabilities(storageManager);
+let graphConnector;
 
 describe('Graph Connector', function() {
 
@@ -40,16 +41,19 @@ describe('Graph Connector', function() {
         };
 
         // instanciate the registry;
-
         registry = new Registry(runtimeURL, appSandbox, identityModule, runtimeCatalogue, runtimeCapabilities, storageManager);
         msgbus = new MessageBus(registry);
+        new AddressAllocation(runtimeURL, msgbus, registry);
+
         registry.messageBus = msgbus;
+
+        graphConnector = new GraphConnector(runtimeURL, msgbus, storageManager);
+
     });
 
         describe('construction', function() {
             it('create new GraphConnector instance with zero contacts', function() {
 
-                let graphConnector = new GraphConnector(runtimeURL, msgbus, storageManager);
                 expect(graphConnector.contacts.length).to.equal(0);
             });
         });
@@ -57,66 +61,55 @@ describe('Graph Connector', function() {
 
         describe('create mock address book', function() {
 
-
-            let graphConnector = new GraphConnector(runtimeURL, msgbus, storageManager);
             let guid;
-            let firstName;
-            let lastName;
             let remGUIDArr = [];
-            for (let j = 0; j < 299; j++) {
-
-                // to mock GUIDs for now
-                guid = Math.floor(Math.random() * 9999999999999999999999999999999999) + 1000000000000000000000000000000000;
-
-                firstName = randomName();
-                lastName = randomName();
-                graphConnector.addContact(guid, firstName, lastName);
-                if (j % 10 === 0) {
-                    remGUIDArr.push(guid);
-                }
-            }
-            graphConnector.addContact('123', 'Alice', 'Wonderland');
-            var expected = new GraphConnectorContactData('123', 'Alice', 'Wonderland');
-            var expectedEdit = new GraphConnectorContactData('1234', 'Joey', 'Wunderlander');
-
-            //adding GUID for the owner for testing purposes
-            graphConnector.globalRegistryRecord.guid = '1234567890qwertz';
 
             it('create new GraphConnector with random contacts', function() {
-                expect(graphConnector.contacts.length).to.equal(300);
+
+
+                // mock reply from Global Registry
+                graphConnector.messageBus.addListener('global://registry/', (msg) => {
+                    let message = {
+                        id: msg.id, type: 'response', from: 'global://registry/', to: msg.from,
+                        body: {
+                            Message: 'request was performed successfully',
+                            Code: 400,
+                            Value: "test",
+                            errorCode: 0
+                        }
+                    };
+
+                    graphConnector.messageBus.postMessage(message, (reply) => {
+
+                        console.info('Reply GUID add-contacts: ', reply);
+                    });
+                });
+
+                graphConnector.addContact('123', 'Alice', 'Wonderland');
+                graphConnector.addContact('1234', 'Bob', 'Wonderland');
+                graphConnector.addContact('12345', 'Felix', 'Beierle');
+                graphConnector.addContact('123456', 'Senan', 'Sharhan');
+                expect(graphConnector.contacts.length).to.equal(4);
             });
 
             it('remove some contacts from GraphConnector', function() {
-                let status;
-                for (let j = 0; j < remGUIDArr.length; j++) {
-                    status = graphConnector.removeContact(remGUIDArr[j]);
-                    expect(status).to.equal(true);
-                }
-                status = graphConnector.removeContact('4321');
+
+                graphConnector.removeContact('1234');
+                let status = graphConnector.removeContact('4321');
                 expect(status).to.equal(false);
-                expect(graphConnector.contacts.length).to.equal(270);
+                expect(graphConnector.contacts.length).to.equal(3);
             });
 
-            it('check GUID when in direct contacts', function() {
 
-                // Format is: RelatedContacts<Direct<GraphConnectorContactData>,FoF<GraphConnectorContactData>>
-                let result = graphConnector.checkGUID('123');
-                let directContacts = result[0];
-                let fofs = result [1];
-                expect(result.length).to.equal(2);
-                expect(directContacts.length).to.equal(1);
-                expect(fofs.length).to.equal(0);
-                expect(directContacts[0]).to.eql(expected);
-            });
-
-            it('setting first and last name of the owner', function() {
-
+              it('setting first and last name of the owner', function() {
+                graphConnector.generateGUID();
                 let result = graphConnector.setOwnerName('Tom', 'Sawyer');
                 expect(result).to.equal(true);
                 result = graphConnector.setOwnerName('Tom');
                 expect(result).to.equal(true);
 
             });
+
 
             it('test direct contacts bloom filter', function() {
 
@@ -191,6 +184,8 @@ describe('Graph Connector', function() {
             });
 
             it('editing contact (GUID, lname, fname, privacyStatus)', function() {
+
+                var expectedEdit = new GraphConnectorContactData('1234', 'Joey', 'Wunderlander');
                 expectedEdit.privateContact = true;
                 graphConnector.addContact('4321', 'eoJ', 'Landwunder');
                 let res = graphConnector.editContact('4321', 'Joe', 'Wunderland', '4321', true);
@@ -216,6 +211,7 @@ describe('Graph Connector', function() {
             });
 
             it('Adding and removing groupname to owner', function() {
+                graphConnector.addContact('1234567890qwertz', 'test', 'test');
                 let res = graphConnector.addGroupName('1234567890qwertz', 'Winterfell');
                 expect(res).to.equal(true);
                 res = graphConnector.addGroupName('1234567890qwertz', 'Winterfell');
@@ -233,20 +229,19 @@ describe('Graph Connector', function() {
 
             it('getting all contacts with same groupName', function() {
                 graphConnector.addGroupName('123456', 'Summerfall');
-                graphConnector.addGroupName('1234', 'Summerfall');
                 graphConnector.addGroupName('1234567890qwertz', 'Summerfall');
                 let res = graphConnector.getGroup('Summerfall');
-                expect(res.length).to.equal(3);
+                expect(res.length).to.equal(2);
             });
 
             it('getting all the group names of the user', function() {
 
                 let result = graphConnector.getGroupNames();
                 expect(result.length).to.equal(2);
-                graphConnector.addGroupName('1234', 'SSummerfall');
+                graphConnector.addGroupName('123456', 'SSummerfall');
                 result = graphConnector.getGroupNames();
                 expect(result.length).to.equal(3);
-                graphConnector.removeGroupName('1234', 'SSummerfall');
+                graphConnector.removeGroupName('123456', 'SSummerfall');
 
             });
 
@@ -344,13 +339,6 @@ describe('Graph Connector', function() {
                 expect(owner.firstName).to.equal('TestingOwner');
             });
 
-            it('adding a new contact', function() {
-                let success = graphConnector.addContact('testingAdd123', 'TestingAdd', 'addcontact');
-                //let unsuccess = graphConnector.addContact('testingAdd123', 'TestingAddfail', 'addcontactfail');
-                expect(success).to.equal(true);
-                //expect(unsuccess).to.equal(false);
-            });
-
             it('adding userID to a contact', function() {
                 graphConnector.addContact('testingAddUSERID123', 'TestingUserID', 'adduserIDSuccess');
                 let success = graphConnector.setContactUserIDs('testingAddUSERID123', 'test://facebook.com/fluffy123', 'google.com');
@@ -425,19 +413,18 @@ describe('Graph Connector', function() {
 
             });
 
+
         });
 
 
         describe('GUID', function() {
 
-            let graphConnector1 = new GraphConnector(runtimeURL, msgbus,storageManager);
-            let graphConnector2 = new GraphConnector(runtimeURL, msgbus,storageManager);
 
             it('GUID generation', function() {
 
                 this.timeout(30000);
 
-                let mnemonic1 = graphConnector1.generateGUID();
+                let mnemonic1 = graphConnector.generateGUID();
                 let res = mnemonic1.split(' ');
 
                 expect(res.length).to.equal(16);
@@ -449,29 +436,32 @@ describe('Graph Connector', function() {
                 this.timeout(15000);
 
                 // create mnemonic and sign Global Regsitry record
-                let mnemonic1 = graphConnector1.generateGUID();
-                let jwt1 = graphConnector1.signGlobalRegistryRecord();
+                let mnemonic1 = graphConnector.generateGUID();
+                let jwt1 = graphConnector.signGlobalRegistryRecord();
+
 
                 // mock reply from Global Registry
-                graphConnector2.messageBus.addListener('global://registry/', (msg) => {
+                graphConnector.messageBus.removeAllListenersOf('global://registry/');
+                graphConnector.messageBus.addListener('global://registry/', (msg) => {
                     let message = {
                         id: msg.id, type: 'response', from: 'global://registry/', to: msg.from,
                         body: {
-                            message: 'request was performed successfully',
-                            responseCode: 200,
+                            Message: 'request was performed successfully',
+                            Code: 200,
                             Value: jwt1,
                             errorCode: 0
                         }
                     };
 
-                    graphConnector2.messageBus.postMessage(message, (reply) => {
-                        console.log('Reply GUID re-generation: ', reply);
+                    graphConnector.messageBus.postMessage(message, (reply) => {
+
+                        console.info('Reply GUID re-generation: ', reply);
                     });
                 });
 
-                expect(graphConnector2.useGUID(mnemonic1).then(function(response) {
+                expect(graphConnector.useGUID(mnemonic1).then(function(response) {
 
-                    let publicKey2 = graphConnector2.globalRegistryRecord.publicKey;
+                    let publicKey2 = graphConnector.globalRegistryRecord.publicKey;
                     let publicKeyObject2 = jsrsasign.KEYUTIL.getKey(publicKey2);
 
                     let unwrappedJWT = jsrsasign.KJUR.jws.JWS.parse(jwt1);
@@ -490,34 +480,33 @@ describe('Graph Connector', function() {
 
         describe('Global Registry Connection - send', function() {
 
-            let graphConnector1 = new GraphConnector(runtimeURL, msgbus,storageManager);
-            let graphConnector2 = new GraphConnector(runtimeURL, msgbus,storageManager);
 
             it('send Global Registry Record', function(done) {
 
                 this.timeout(15000);
 
                 // create mnemonic and sign Global Regsitry record
-                let mnemonic1 = graphConnector1.generateGUID();
-                let jwt1 = graphConnector1.signGlobalRegistryRecord();
+
+                let jwt1 = graphConnector.signGlobalRegistryRecord();
 
                 // mock reply from Global Registry 1
-                graphConnector1.messageBus.addListener('global://registry/', (msg) => {
+                graphConnector.messageBus.removeAllListenersOf('global://registry/');
+                graphConnector.messageBus.addListener('global://registry/', (msg) => {
                     let message = {
                         id: msg.id, type: 'response', from: 'global://registry/', to: msg.from,
                         body: {
-                            message: 'request was performed successfully',
-                            responseCode: 200,
+                            Message: 'request was performed successfully',
+                            Code: 200,
                             errorCode: 0
                         }
                     };
 
-                    graphConnector1.messageBus.postMessage(message, (reply) => {
-                        console.log('Reply GRC - send: ', reply);
+                    graphConnector.messageBus.postMessage(message, (reply) => {
+                        console.info('Reply GRC - send: ', reply);
                     });
                 });
 
-                expect(graphConnector1.sendGlobalRegistryRecord(jwt1).then(function(response) {
+                expect(graphConnector.sendGlobalRegistryRecord(jwt1).then(function(response) {
                     return response;
                 })).to.be.fulfilled.and.eventually.equal(200).and.notify(done);
 
@@ -526,96 +515,78 @@ describe('Graph Connector', function() {
 
         describe('Global Registry Connection - use GUID', function() {
 
-            let graphConnector1 = new GraphConnector(runtimeURL, msgbus,storageManager);
-            let graphConnector2 = new GraphConnector(runtimeURL, msgbus,storageManager);
 
             it('re-use GUID and retrieve data from Global Registry', function(done) {
 
                 this.timeout(15000);
 
                 // create mnemonic and sign Global Regsitry record
-                let mnemonic1 = graphConnector1.generateGUID();
-                let jwt1 = graphConnector1.signGlobalRegistryRecord();
-                let grr1 = graphConnector1.globalRegistryRecord;
+                let mnemonic1 = graphConnector.generateGUID();
+                let jwt1 = graphConnector.signGlobalRegistryRecord();
+                let grr1 = graphConnector.globalRegistryRecord;
 
                 // mock reply from Global Registry 2
-                graphConnector2.messageBus.addListener('global://registry/', (msg) => {
+                graphConnector.messageBus.removeAllListenersOf('global://registry/');
+                graphConnector.messageBus.addListener('global://registry/', (msg) => {
                     let message = {
                         id: msg.id, type: 'response', from: 'global://registry/', to: msg.from,
                         body: {
-                            message: 'request was performed successfully',
-                            responseCode: 200,
+                            Message: 'request was performed successfully',
+                            Code: 200,
                             Value: jwt1,
                             errorCode: 0
                         }
                     };
 
-                    graphConnector2.messageBus.postMessage(message, (reply) => {
+                    graphConnector.messageBus.postMessage(message, (reply) => {
                         console.log('Reply GRC - use GUID: ', reply);
                     });
                 });
 
-                expect(graphConnector2.useGUID(mnemonic1).then(function(response) {
-                    return graphConnector2.globalRegistryRecord;
+                expect(graphConnector.useGUID(mnemonic1).then(function(response) {
+                    return response;
                 })).to.be.fulfilled.and.eventually.eql(grr1).and.notify(done);
             });
 
         });
 
-        describe('Querying Global Registry', function() {
+     describe('Querying Global Registry', function() {
 
-            let graphConnector1 = new GraphConnector(runtimeURL, msgbus,storageManager);
-            let graphConnector2 = new GraphConnector(runtimeURL, msgbus,storageManager);
 
             it('query Global Registry', function(done) {
 
                 this.timeout(15000);
 
-                // create mnemonic and sign Global Regsitry record
-                let mnemonic1 = graphConnector1.generateGUID();
-                let jwt1 = graphConnector1.signGlobalRegistryRecord();
-                let guid1 = graphConnector1.globalRegistryRecord.guid;
-                let result = new GraphConnectorContactData();
+                let jwt = graphConnector.signGlobalRegistryRecord();
+                let guid1 = graphConnector.globalRegistryRecord.guid;
+
 
                 // mock reply from Global Registry
-                graphConnector2.messageBus.addListener('global://registry/', (msg) => {
+                graphConnector.messageBus.removeAllListenersOf('global://registry/');
+                graphConnector.messageBus.addListener('global://registry/', (msg) => {
                     let message = {
-                        id: 1, type: 'response', from: 'global://registry/', to: msg.from,
+                        id: msg.id, type: 'response', from: 'global://registry/', to: msg.from,
                         body: {
-                            message: 'request was performed successfully',
-                            responseCode: 200,
-                            Value: jwt1,
+                            Message: 'request was performed successfully',
+                            Code: 200,
+                            Value: jwt,
                             errorCode: 0
                         }
                     };
 
-                    graphConnector2.messageBus.postMessage(message, (reply) => {
-                        console.log('Reply QGR - query: ', reply);
+                    graphConnector.messageBus.postMessage(message, (reply) => {
+                        console.info('Reply QGR - query: ', reply);
                     });
                 });
 
-                expect(graphConnector2.queryGlobalRegistry(guid1).then(function(response) {
-                    return response.guid;
+
+                expect(graphConnector.queryGlobalRegistry(guid1).then(function(response) {
+                    return response._guid;
                 })).to.be.fulfilled.and.eventually.equal(guid1).and.notify(done);
 
             });
 
         });
-
-
-        function randomName() {
-            let text = '';
-            let firstLetter = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            let restLetters = 'abcdefghijklmnopqrstuvwxyz';
-
-            text += firstLetter.charAt(Math.floor(Math.random() * firstLetter.length));
-
-            for (let i = 0; i < 4; i++) {
-                text += restLetters.charAt(Math.floor(Math.random() * restLetters.length));
-            }
-
-            return text;
-        }
 
 });
 
