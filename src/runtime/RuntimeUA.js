@@ -37,8 +37,9 @@ import Descriptors from './Descriptors';
 import { runtimeConfiguration } from './runtimeConfiguration';
 import { runtimeUtils } from './runtimeUtils';
 
-// import GraphConnector from '../graphconnector/GraphConnector';
+import GraphConnector from '../graphconnector/GraphConnector';
 
+import DataObjectsStorage from '../store-objects/DataObjectsStorage';
 import SyncherManager from '../syncher/SyncherManager';
 import RuntimeCoreCtx from '../policy/context/RuntimeCoreCtx';
 
@@ -124,8 +125,9 @@ class RuntimeUA {
       try {
         let getCapabilities = this.runtimeCapabilities.getRuntimeCapabilities();
         let getRuntimeURL = this.storageManager.get('runtime:URL');
+        let getStoredDataObjects = this.storageManager.get('syncherManager:ObjectURLs');
 
-        Promise.all([getRuntimeURL, getCapabilities]).then((results) => {
+        Promise.all([getRuntimeURL, getCapabilities, getStoredDataObjects]).then((results) => {
 
           this.runtimeURL = results[0] ? results[0].runtimeURL : results[0];
           if (!this.runtimeURL) {
@@ -135,6 +137,8 @@ class RuntimeUA {
 
           this.capabilities = results[1];
           Object.assign(runtimeUtils.runtimeCapabilities.constraints, results[1]);
+
+          this._dataObjectsStorage = new DataObjectsStorage(this.storageManager, results[2] || {});
 
           return this._loadComponents();
         }).then((status) => {
@@ -268,6 +272,9 @@ class RuntimeUA {
           }
         ];
 
+        // Instantiate the Graph Connector
+        this.graphConnector = new GraphConnector(this.runtimeURL, this.messageBus, this.storageManager);
+
         // Add to App Sandbox the listener;
         appSandbox.addListener('*', (msg) => {
           this.messageBus.postMessage(msg);
@@ -287,7 +294,7 @@ class RuntimeUA {
         this.runtimeFactory.messageBus = this.messageBus;
 
         // Instanciate the SyncherManager;
-        this.syncherManager = new SyncherManager(this.runtimeURL, this.messageBus, this.registry, this.runtimeCatalogue, this.storageManager);
+        this.syncherManager = new SyncherManager(this.runtimeURL, this.messageBus, this.registry, this.runtimeCatalogue, this.storageManager, null, this._dataObjectsStorage);
 
         // Set into loader the needed components;
         this.loader.runtimeURL = this.runtimeURL;
@@ -296,8 +303,6 @@ class RuntimeUA {
         this.loader.runtimeCatalogue = this.runtimeCatalogue;
         this.loader.runtimeFactory = this.runtimeFactory;
 
-        // Instantiate the Graph Connector
-        // _this.graphConnector = new GraphConnector(_this.runtimeURL, _this.messageBus);
         resolve(true);
 
       } catch (e) {

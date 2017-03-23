@@ -109,7 +109,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
           resolve(message);
         }
       } else {
-        console.log('ON prepareForEvaluation', message);
+        console.log('[Policy.RuntimeCoreCtx prepareForEvaluation]', message);
         if (_this._isToSetID(message)) {
           _this._getIdentity(message).then(identity => {
             message.body.identity = identity;
@@ -308,11 +308,15 @@ class RuntimeCoreCtx extends ReThinkCtx {
   }
 
   _getIdentity(message) {
+
+    let from = message.from;
     console.log('[Policy.RuntimeCoreCtx.getIdentity] ', message);
 
     if (message.body.source !== undefined) {
-      return this.idModule.getToken(message.body.source, message.to);
-    } else {
+      from = message.body.source;
+    }
+
+    if (message.type === 'forward')      { from = message.body.from; }
 
 /*    if (message.type === 'update') {
       return this.idModule.getToken(message.body.source);
@@ -324,12 +328,8 @@ class RuntimeCoreCtx extends ReThinkCtx {
 
 //    if (divideURL(message.from).type === 'hyperty') {
 
-      return this.idModule.getToken(message.from, message.to);
-    }
+    return this.idModule.getToken(from, message.to);
 
-/*    else {
-      return this.idModule.getToken(this.getURL(message.from));
-    }*/
   }
 
   /**
