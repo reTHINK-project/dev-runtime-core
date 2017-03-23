@@ -25,7 +25,7 @@ import BloomFilter from './BloomFilter';
 import GlobalRegistryRecord from './GlobalRegistryRecord';
 import bitcoin from 'bitcoinjs-lib';
 import bip39 from 'bip39';
-import sjcl from 'sjcl';
+import sjcl from './sjcl'; // 1.0.6
 import jsrsasign from 'jsrsasign';
 import base64url from 'base64-url';
 import hex64 from 'hex64';
