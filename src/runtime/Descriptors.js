@@ -1,4 +1,5 @@
 import {divideURL, getConfigurationResources, buildURL} from '../utils/utils';
+import { runtimeUtils } from './runtimeUtils';
 
 class Descriptors {
 
@@ -10,10 +11,12 @@ class Descriptors {
     this.runtimeConfiguration = runtimeConfiguration;
     this.runtimeURL = runtimeURL;
     this.catalogue = catalogue;
+
+    this.constraints = runtimeUtils.runtimeCapabilities;
   }
 
   getHypertyDescriptor(hypertyURL) {
-    return this.catalogue.getHypertyDescriptor(hypertyURL);
+    return this.catalogue.getHypertyDescriptor(hypertyURL, true, this.constraints);
   }
 
   getStubDescriptor(stubURL) {
@@ -31,11 +34,13 @@ class Descriptors {
         let dividedURL = divideURL(stubURL);
         domain = dividedURL.domain;
         let path = dividedURL.identity;
-        if (path)
+
+        if (path) {
           protostub = path.substring(path.lastIndexOf('/') + 1);
-        else {
-            protostub = 'default';
-          }
+        } else {
+          protostub = 'default';
+        }
+
       } else {
         protostub = 'default';
         domain = stubURL;
@@ -64,7 +69,7 @@ class Descriptors {
       }
 
       console.log('Load ProtocolStub for domain, ' + domain + ' : ', protoStubURL);
-      return this.catalogue.getStubDescriptor(protoStubURL).then((result) => {
+      return this.catalogue.getStubDescriptor(protoStubURL, true, this.constraints).then((result) => {
 
         resolve(result);
 
@@ -79,7 +84,7 @@ class Descriptors {
         protoStubURL = resource.prefix + domain + resource.suffix + protostub;
 
         console.log('Fallback -> Load Protocolstub for domain, ' + domain + ' : ', protostub);
-        return this.catalogue.getStubDescriptor(protoStubURL);
+        return this.catalogue.getStubDescriptor(protoStubURL, true, this.constraints);
       }).then((result) => {
         resolve(result);
       }).catch((reason) => {
@@ -94,7 +99,6 @@ class Descriptors {
 
       let domain;
       let idpproxy;
-      let protoStubURL;
 
       let originDividedURL = divideURL(this.runtimeURL);
       let originDomain = originDividedURL.domain;
@@ -103,11 +107,12 @@ class Descriptors {
         let dividedURL = divideURL(idpProxyURL);
         domain = dividedURL.domain;
         let path = dividedURL.identity;
-        if (path)
+        if (path) {
           idpproxy = path.substring(path.lastIndexOf('/') + 1);
-        else {
-            idpproxy = 'default';
-          }
+        } else {
+          idpproxy = 'default';
+        }
+
       } else {
         idpproxy = 'default';
         domain = idpProxyURL;
@@ -118,7 +123,7 @@ class Descriptors {
 
       idpProxyURL = resource.prefix + domain + resource.suffix + idpproxy;
       console.log('Load Idp Proxy for domain, ' + domain + ' : ', idpProxyURL);
-      return this.catalogue.getIdpProxyDescriptor(idpProxyURL).then((result) => {
+      return this.catalogue.getIdpProxyDescriptor(idpProxyURL, true, this.constraints).then((result) => {
 
         resolve(result);
 
@@ -130,7 +135,7 @@ class Descriptors {
         idpProxyURL = buildURL(this.runtimeConfiguration, 'catalogueURLs', 'idpProxy', idpproxy);
 
         console.log('Load Idp Proxy for domain, ' + domain + ' : ', idpProxyURL);
-        return this.catalogue.getIdpProxyDescriptor(idpProxyURL);
+        return this.catalogue.getIdpProxyDescriptor(idpProxyURL, true, this.constraints);
       }).then((result) => {
         resolve(result);
       }).catch((reason) => {

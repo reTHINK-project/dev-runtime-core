@@ -54,7 +54,7 @@ class IdentityModule {
     //to store items with this format: {identity: identityURL, token: tokenID}
     _this.identities = [];
     _this.emailsList = [];
-    let newIdentity = new Identity('guid','HUMAN');
+    let newIdentity = new Identity('guid', 'HUMAN');
     _this.identity = newIdentity;
     _this.crypto = new Crypto();
 
@@ -178,15 +178,14 @@ class IdentityModule {
     let _this = this;
     return new Promise(function(resolve, reject) {
       console.log('[Identity.IdentityModule.getToken] from->', fromURL, '  to->', toUrl);
-      if (toUrl && toUrl.split('@').length > 1) {
+      if (toUrl) {
 //        console.log('toUrl', toUrl);
         _this.registry.isLegacy(toUrl).then(function(result) {
           console.log('[Identity.IdentityModule.getToken] isLEGACY: ', result);
           if (result) {
 
             let token = _this.getAccessToken(toUrl);
-            if (token)
-              return resolve(token);
+            if (token)              { return resolve(token); }
 
             console.log('[Identity.IdentityModule.getToken] NO Identity.. Login now');
             let domain = getUserIdentityDomain(toUrl);
@@ -194,9 +193,7 @@ class IdentityModule {
             _this.callGenerateMethods(domain).then((value) => {
               console.log('[Identity.IdentityModule.getToken] CallGeneratemethods', value);
               let token = _this.getAccessToken(toUrl);
-              if (token)
-                return resolve(token);
-              else {
+              if (token)                { return resolve(token); }              else {
                 return reject('No Access token found');
               }
             }, (err) => {
@@ -288,6 +285,11 @@ class IdentityModule {
     let length = urlSplit.length;*/
 
     let domainToCheck = divideURL(url).domain;
+
+    if (url.includes('protostub')) {
+      domainToCheck = domainToCheck.replace(domainToCheck.split('.')[0] + '.', '');
+    }
+
     let identityToReturn;
     for (let index in _this.identities) {
       let identity = _this.identities[index];
@@ -308,7 +310,7 @@ class IdentityModule {
   getIdentitiesToChoose() {
     let _this = this;
     let identities = _this.emailsList;
-    let idps = [{domain: 'google.com', type: 'idToken'},{domain: 'microsoft.com', type: 'idToken'}, {domain: 'orange.fr', type: 'idToken'}, {domain: 'slack.com', type: 'Legacy'}];
+    let idps = [{domain: 'google.com', type: 'idToken'}, {domain: 'microsoft.com', type: 'idToken'}, {domain: 'orange.fr', type: 'idToken'}, {domain: 'slack.com', type: 'Legacy'}];
 
     return {identities: identities, idps: idps};
   }
@@ -324,7 +326,7 @@ class IdentityModule {
     let users = [];
 
     //if request comes with the emailFormat option, then convert url to email format
-    let converter = (emailFormat) ? getUserEmailFromURL : (value) => {return value;};
+    let converter = (emailFormat) ? getUserEmailFromURL : (value) => { return value; };
 
     for (let index in _this.identities) {
       let identity = _this.identities[index];
@@ -403,7 +405,7 @@ class IdentityModule {
   requestIdentityToGUI(identities, idps) {
     let _this = this;
 
-    return new Promise(function(resolve,reject) {
+    return new Promise(function(resolve, reject) {
 
       //condition to check if the real GUI is deployed. If not, deploys a fake gui
       if (_this.guiDeployed === false) {
@@ -413,8 +415,8 @@ class IdentityModule {
         _this.guiDeployed = true;
       }
 
-      let message = {type:'create', to: _this._guiURL, from: _this._idmURL,
-                    body: {value: {identities: identities, idps: idps}}};
+      let message = {type: 'create', to: _this._guiURL, from: _this._idmURL,
+        body: {value: {identities: identities, idps: idps}}};
 
       let id = _this._messageBus.postMessage(message);
 
@@ -483,7 +485,7 @@ class IdentityModule {
   getIdentityAssertion(identifier, origin, usernameHint, idpDomain) {
     let _this = this;
 
-    return new Promise(function(resolve,reject) {
+    return new Promise(function(resolve, reject) {
 
       //CHECK whether is browser environment or nodejs
       //if it is browser, then create a fake identity
@@ -502,7 +504,7 @@ class IdentityModule {
           //  let chosenID = getUserURLFromEmail(value.value);
           // hack while the user url is not returned from requestIdentityToGUI;
 
-          let chosenID = 'user://' + _this.currentIdentity.idp + '/' + value.value;
+            let chosenID = 'user://' + _this.currentIdentity.idp + '/' + value.value;
 
             // returns the identity info from the chosen id
             for (let i in _this.identities) {
@@ -550,11 +552,11 @@ class IdentityModule {
 
           let identityBundle = {
             assertion: 'assertion',
-            idp:'nodejs',
+            idp: 'nodejs',
             identity: 'user://nodejs.com/nodejs-' + randomNumber,
             messageInfo: {
               assertion: 'assertion',
-              idp:'nodejs',
+              idp: 'nodejs',
               userProfile: userProfile
             },
             userProfile: userProfile
@@ -611,7 +613,7 @@ class IdentityModule {
     let message;
 
     return new Promise((resolve, reject) => {
-      message = {type:'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'generateAssertion', params: {contents: contents, origin: origin, usernameHint: usernameHint}}};
+      message = {type: 'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'generateAssertion', params: {contents: contents, origin: origin, usernameHint: usernameHint}}};
       _this._messageBus.postMessage(message, (res) => {
         let result = res.body.value;
 
@@ -722,7 +724,7 @@ class IdentityModule {
 
     console.log('generateAssertion');
 
-    return new Promise(function(resolve,reject) {
+    return new Promise(function(resolve, reject) {
 
       _this.sendGenerateMessage(contents, origin, usernameHint, idpDomain).then((result) => {
 
@@ -765,8 +767,8 @@ class IdentityModule {
 
     let domain = _this._resolveDomain(idpDomain);
 
-    let message = {type:'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'validateAssertion',
-            params: {assertion: assertion, origin: origin}}};
+    let message = {type: 'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'validateAssertion',
+      params: {assertion: assertion, origin: origin}}};
 
     return new Promise(function(resolve, reject) {
       _this._messageBus.postMessage(message, (result) => {
@@ -806,7 +808,7 @@ class IdentityModule {
       let isToHyperty = divideURL(message.to).type === 'hyperty';
 
       if (message.type === 'update') {
-        resolve(message);
+        return resolve(message);
       }
 
       if (isToLegacyIdentity) {
@@ -860,7 +862,7 @@ class IdentityModule {
 
         console.log('dataObject value to encrypt: ', message.body.value);
         console.log('IdentityModule - encrypt from hyperty to dataobject ', message);
-        
+
         // TIAGO - persistence issue #147
         _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
           let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
@@ -945,7 +947,7 @@ class IdentityModule {
       let isToHyperty = divideURL(message.to).type === 'hyperty';
 
       if (message.type === 'update') {
-        resolve(message);
+        return resolve(message);
       }
 
       //is is hyperty to hyperty communication
@@ -1005,7 +1007,7 @@ class IdentityModule {
 
         // TIAGO - persistence issue #147
         _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
-          let dataObjectKey = sessionKeys[dataObjectURL];
+          let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
 
           if (dataObjectKey) {
 
@@ -1055,23 +1057,24 @@ class IdentityModule {
   doMutualAuthentication(sender, receiver) {
     console.log('doMutualAuthentication: ', sender, receiver);
     let _this = this;
-    let dataObjectURL;
-
-    // check if the sender is a dataObject and if so stores that value
-    let reporterURL = _this.registry.getReporterURLSynchonous(sender);
-    if (reporterURL) {
-      dataObjectURL = sender;
-      sender = reporterURL;
-    }
-
-    let msg = {
-      to: receiver,
-      from: sender,
-      callback: undefined,
-      body: {handshakePhase: 'startHandShake', ignore: 'ignoreMessage'}
-    };
 
     return new Promise(function(resolve, reject) {
+
+      let dataObjectURL;
+
+      // check if the sender is a dataObject and if so stores that value
+      let reporterURL = _this.registry.getReporterURLSynchonous(sender);
+      if (reporterURL) {
+        dataObjectURL = sender;
+        sender = reporterURL;
+      }
+
+      let msg = {
+        to: receiver,
+        from: sender,
+        callback: undefined,
+        body: {handshakePhase: 'startHandShake', ignore: 'ignoreMessage'}
+      };
 
       if (!sender || !receiver) {
         return reject('sender or receiver missing on doMutualAuthentication');
@@ -1123,7 +1126,7 @@ class IdentityModule {
 
     //console.log('handshakeType');
 
-    return new Promise(function(resolve,reject) {
+    return new Promise(function(resolve, reject) {
 
       let handshakeType = message.body.handshakePhase;
       let iv;
@@ -1148,13 +1151,14 @@ class IdentityModule {
 
           // check if was the encrypt function or the mutual authentication that request the
           // start of the handShakePhase.
-          if (chatKeys.initialMessage) {resolve({message: startHandShakeMsg, chatKeys: chatKeys});
+          if (chatKeys.initialMessage) {
+            resolve({message: startHandShakeMsg, chatKeys: chatKeys});
           } else {
             _this.chatKeys[message.from + '<->' + message.to] = chatKeys;
             _this._messageBus.postMessage(startHandShakeMsg);
           }
 
-        break;
+          break;
         case 'senderHello':
 
           console.log('senderHello');
@@ -1174,7 +1178,7 @@ class IdentityModule {
           chatKeys.handshakeHistory.receiverHello = _this._filterMessageToHash(senderHelloMsg, undefined, chatKeys.hypertyFrom.messageInfo);
           resolve({message: senderHelloMsg, chatKeys: chatKeys});
 
-        break;
+          break;
         case 'receiverHello':
 
           console.log('receiverHello');
@@ -1272,7 +1276,7 @@ class IdentityModule {
 
           }, error => reject(error));
 
-        break;
+          break;
         case 'senderCertificate':
 
           console.log('senderCertificate');
@@ -1381,7 +1385,7 @@ class IdentityModule {
             resolve({message: receiverFinishedMessage, chatKeys: chatKeys});
           });
 
-        break;
+          break;
         case 'receiverFinishedMessage':
 
           console.log('receiverFinishedMessage');
@@ -1423,7 +1427,7 @@ class IdentityModule {
             });
           });
 
-        break;
+          break;
         case 'reporterSessionKey':
 
           console.log('reporterSessionKey');
@@ -1484,7 +1488,7 @@ class IdentityModule {
             resolve({message: receiverAcknowledgeMsg, chatKeys: chatKeys});
           });
 
-        break;
+          break;
         case 'receiverAcknowledge':
 
           console.log('receiverAcknowledge');
@@ -1509,7 +1513,7 @@ class IdentityModule {
             resolve('handShakeEnd');
           });
 
-        break;
+          break;
         default:
           reject(message);
       }
@@ -1630,7 +1634,7 @@ class IdentityModule {
     return {
       type: message.type,
       from: message.from,
-      to:   message.to,
+      to: message.to,
       body: {
         identity: identity || message.body.identity,
         value: decryptedValue || message.body.value,
@@ -1658,45 +1662,45 @@ class IdentityModule {
     let userInfo = _this.getIdentity(userURL);
 
     let newChatCrypto =
-    {
-      hypertyFrom:
       {
-        hyperty: from,
-        userID: userInfo.messageInfo.userProfile.username,
-        privateKey: userInfo.keyPair.private,
-        publicKey: userInfo.keyPair.public,
-        assertion: userInfo.assertion,
-        messageInfo: userInfo.messageInfo
-      },
-      hypertyTo:
-      {
-        hyperty: to,
-        userID: undefined,
-        publicKey: undefined,
-        assertion: undefined
-      },
-      keys:
-      {
-        hypertyToSessionKey: undefined,
-        hypertyFromSessionKey: undefined,
-        hypertyToHashKey: undefined,
-        hypertyFromHashKey: undefined,
-        toRandom: undefined,
-        fromRandom: undefined,
-        premasterKey: undefined,
-        masterKey: undefined
-      },
-      handshakeHistory: {
-        senderHello: undefined,
-        receiverHello: undefined,
-        senderCertificate: undefined,
-        receiverFinishedMessage: undefined
-      },
-      initialMessage: (message.body.ignore) ? undefined : message,
-      callback: message.callback,
-      authenticated: false,
-      dataObjectURL: message.dataObjectURL
-    };
+        hypertyFrom:
+        {
+          hyperty: from,
+          userID: userInfo.messageInfo.userProfile.username,
+          privateKey: userInfo.keyPair.private,
+          publicKey: userInfo.keyPair.public,
+          assertion: userInfo.assertion,
+          messageInfo: userInfo.messageInfo
+        },
+        hypertyTo:
+        {
+          hyperty: to,
+          userID: undefined,
+          publicKey: undefined,
+          assertion: undefined
+        },
+        keys:
+        {
+          hypertyToSessionKey: undefined,
+          hypertyFromSessionKey: undefined,
+          hypertyToHashKey: undefined,
+          hypertyFromHashKey: undefined,
+          toRandom: undefined,
+          fromRandom: undefined,
+          premasterKey: undefined,
+          masterKey: undefined
+        },
+        handshakeHistory: {
+          senderHello: undefined,
+          receiverHello: undefined,
+          senderCertificate: undefined,
+          receiverFinishedMessage: undefined
+        },
+        initialMessage: (message.body.ignore) ? undefined : message,
+        callback: message.callback,
+        authenticated: false,
+        dataObjectURL: message.dataObjectURL
+      };
 
     return newChatCrypto;
   }

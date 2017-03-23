@@ -1727,7 +1727,12 @@ class Registry {
 
               console.log('[Registry - resolveNormalStub] protostubsList changed ' + _this.protostubsList);
 
-              if (change.keypath.split('.')[0] === domainUrl && change.name === 'status' && change.newValue === STATUS.CREATED) {
+              let keypath = change.keypath;
+
+              if (keypath.includes('status'))
+                keypath = keypath.replace('.status', '');
+
+              if (keypath === domainUrl && change.name === 'status' && change.newValue === STATUS.CREATED) {
                 console.log('[Registry - resolve] protostub is live ' + _this.protostubsList[domainUrl]);
                 resolve(_this.protostubsList[domainUrl].url);
               }
@@ -1846,7 +1851,7 @@ class Registry {
 
 
   /**
-  * To verify if url is from a legacy domain.
+  * To verify if url is for a legacy service.
   * @param  {URL.URL}  url      url
   * @return {boolean}
   */
@@ -1863,7 +1868,7 @@ class Registry {
       console.log('[Registry] [Registry.Registry.isLegacy] ', url);
 
       // TODO: to be defined in the runtime configuration
-      let nonLegacy = ['runtime', 'hyperty-runtime', 'domain', 'global', 'hyperty'];
+      let nonLegacy = ['hyperty-runtime', 'domain', 'global', 'hyperty'];
 
       let urlDivided = divideURL(url);
 
@@ -1871,36 +1876,40 @@ class Registry {
         return resolve(false);
       }
 
-      let domain = urlDivided.domain;
+      // process User URLs
+      if (url.split('@').length > 1) {
+        let domain = urlDivided.domain;
 
-      console.log('[Registry] [Registry.Registry.isLegacy] domain: ', domain);
-      if (_this.idpLegacyProxyList.hasOwnProperty(domain)) {
+        console.log('[Registry] [Registry.Registry.isLegacy] domain: ', domain);
+        if (_this.idpLegacyProxyList.hasOwnProperty(domain)) {
 
-        let result = _this.idpLegacyProxyList[domain];
+          let result = _this.idpLegacyProxyList[domain];
 
-        if (result.interworking) {
-          return resolve(result.interworking);
-        } else {
-          return resolve(false);
+          if (result.interworking) {
+            return resolve(result.interworking);
+          } else {
+            return resolve(false);
+          }
         }
+
+        _this._loader.descriptors.getIdpProxyDescriptor(domain).then((result) => {
+
+          console.log('[Registry] [Registry.Registry.isLegacy] Legacy stub descriptor: ', result);
+          _this.idpLegacyProxyList[domain] = result;
+
+          if (result.interworking) {
+            resolve(result.interworking);
+          } else {
+            resolve(false);
+          }
+
+        }).catch((reason) => {
+          console.warn('problem loading idp proxy descriptor for domain:', domain, ' because ', reason);
+          reject(reason);
+        });
+      } else { // process protostub URLs
+        resolve(_this.isInterworkingProtoStub(url));
       }
-
-      _this._loader.descriptors.getIdpProxyDescriptor(domain).then((result) => {
-
-        console.log('[Registry] [Registry.Registry.isLegacy] Legacy stub descriptor: ', result);
-        _this.idpLegacyProxyList[domain] = result;
-
-        if (result.interworking) {
-          resolve(result.interworking);
-        } else {
-          resolve(false);
-        }
-
-      }).catch((reason) => {
-        console.warn('problem loading idp proxy descriptor for domain:', domain, ' because ', reason);
-        reject(reason);
-      });
-
     });
   }
 

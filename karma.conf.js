@@ -6,7 +6,6 @@ module.exports = function(config) {
       './test/*.spec.js'
     ],
     exclude: [
-      './test/GraphConnector.spec.js',
       './test/PolicyEngine.spec.js'
     ],
     preprocessors: {
