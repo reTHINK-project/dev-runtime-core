@@ -484,23 +484,24 @@ class Loader {
 
           // step 24 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
           try {
+            // step 26 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+            console.info('[Runtime.Loader.loadStub] 8: adding sandbox listener to protostubURL : ', _runtimeProtoStubURL);
+
+            // step 27 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+            // Add the message bus listener
+            this.messageBus.addListener(_runtimeProtoStubURL, (msg) => {
+              _stubSandbox.postMessage(msg);
+            });
+
             return _stubSandbox.deployComponent(_stubSourcePackage.sourceCode, _runtimeProtoStubURL, configuration);
           } catch (e) {
             console.    Error('[Runtime.Loader.loadStub] Error on deploy component:', e);
             reject(e);
           }
         }, handleError)
-        .then((deployComponentStatus) => {
+        .then(() => {
           if (haveError) return false;
 
-          // step 26 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-          console.info('[Runtime.Loader.loadStub] 8: return deploy component for sandbox status: ', deployComponentStatus);
-
-          // step 27 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-          // Add the message bus listener
-          this.messageBus.addListener(_runtimeProtoStubURL, (msg) => {
-            _stubSandbox.postMessage(msg);
-          });
 
           // step 28 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
           let stub;

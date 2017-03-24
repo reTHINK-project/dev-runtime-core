@@ -35,7 +35,7 @@ import { WatchingYou } from 'service-framework/dist/Utils';
 
 // import DiscoveryServiceFramework from './DiscoveryServiceFramework';
 
-const STATUS = { CREATED: 'created', LIVE: 'live', DEPLOYED: 'deployed', PROGRESS: 'in-progress', DISCONNECTED: 'disconnected', DEAD: 'dead' };
+const STATUS = { CREATED: 'created', LIVE: 'live', DEPLOYING: 'deploying', DEPLOYED: 'deployed', PROGRESS: 'in-progress', DISCONNECTED: 'disconnected', FAILED: 'deployment-failed', DEAD: 'dead' };
 
 /*import IdentityManager from './IdentityManager';
 import Discovery from './Discovery';*/
@@ -95,7 +95,7 @@ class Registry {
     _this.p2pConnectionList = _this.watchingYou.watch('p2pConnectionList', {}, true);
     _this.p2pHandlerAssociation = {};
 
-    _this.protostubsList = {};
+    _this.protostubsList = _this.watchingYou.watch('protostubsList', {}, true);
     _this.idpProxyList = {};
     _this.dataObjectList = {};
     _this.subscribedDataObjectList = {};
@@ -1382,7 +1382,7 @@ class Registry {
         // TODO: Optimize this
         _this.protostubsList[stubID] = {
           url: runtimeProtoStubURL,
-          status: STATUS.CREATED
+          status: STATUS.DEPLOYING
         };
 
         if (descriptorURL) {
@@ -1431,11 +1431,12 @@ class Registry {
     if (runtimeProtoStubURL.includes('/protostub/')) {
 
     // TODO: uncomment below when protostubs are updated with new status value "live"
-    /*  let filtered = Object.keys(_this.protostubsList).filter((key) => {
-          return _this.protostubsList[key].url === runtimeProtoStubURL;
-        }).map((key) => {
-          _this.protostubsList[key].status = msg.body.value;
-        });*/
+      Object.keys(_this.protostubsList).filter((key) => {
+        return _this.protostubsList[key].url === runtimeProtoStubURL;
+      }).map((key) => {
+        _this.protostubsList[key].status = msg.body.value;
+        console.log('[Registry - onProtostubStatusEvent] - Protostub status: ', _this.protostubsList[key]);
+      });
     } else { // process status events from p2p connections
 
       if (msg.body.resource) {
@@ -1697,10 +1698,11 @@ class Registry {
 
         // TODO since the protostubs have other states this should be revised, because the status could change from DEPLOYED to LIVE
         // TODO and this validation will trigger a new load of IDPProxy or Protostub;
-        if (registredComponent && registredComponent.hasOwnProperty('status') && (registredComponent.status === STATUS.DEPLOYED || registredComponent.status === STATUS.LIVE)) {
+        if (registredComponent && registredComponent.hasOwnProperty('status') && (registredComponent.status === STATUS.DEPLOYED || registredComponent.status === STATUS.CREATED || registredComponent.status === STATUS.LIVE)) {
           console.info('[Registry.resolve] Resolved: ', registredComponent.url, registredComponent.status);
           resolve(registredComponent.url);
         } else {
+          //todo: use switch-case to support other types of stubs
           if (type === 'domain-idp') {
 
             // this process will load the idp proxy, because is not yet registered;
@@ -1719,17 +1721,31 @@ class Registry {
 
           } else {
 
-            // this process will load the Protocols stub, because is not yet registered;
+            // The protoStub does not exist, let's prepare its deployment by watching its status
+
+            _this.watchingYou.observe('protostubsList', (change) => {
+
+              console.log('[Registry - resolveNormalStub] protostubsList changed ' + _this.protostubsList);
+
+              let keypath = change.keypath;
+
+              if (keypath.includes('status'))
+                keypath = keypath.replace('.status', '');
+
+              if (keypath === domainUrl && change.name === 'status' && change.newValue === STATUS.CREATED) {
+                console.log('[Registry - resolve] protostub is live ' + _this.protostubsList[domainUrl]);
+                resolve(_this.protostubsList[domainUrl].url);
+              }
+            });
+
+            // lets deploy the protostub
             console.info('[Registry.resolve] trigger new ProtocolStub: ', domainUrl);
             _this.loader.loadStub(domainUrl).then(() => {
 
-              registredComponent  = _this.protostubsList[domainUrl];
-              console.info('[Registry.resolve] Resolved: ', registredComponent.url, registredComponent.status);
-              _this.protostubsList[domainUrl].status = STATUS.DEPLOYED;
-
-              resolve(registredComponent.url);
+              console.log('[Registry - resolveNormalStub] Stub deployed: ', _this.protostubsList[domainUrl]);
             }).catch((reason) => {
               console.error('[Registry.resolve] Error resolving Load ProtocolStub: ', reason);
+              _this.protostubsList[domainUrl].status = 'deployment-failed';
               reject(reason);
             });
 
@@ -1790,26 +1806,31 @@ class Registry {
               _this.p2pConnectionList[registeredP2P.runtimeURL] = p2pConnection;
               */
 
+              // todo: Skip in case p2p option is false
+
               console.log('[Registry - resolve] loadStub with p2pRequester: ', registeredP2P);
 
               let remoteRuntime = registeredP2P.runtime;
 
               let p2pConfig = { remoteRuntimeURL: remoteRuntime, p2pHandler: registeredP2P.p2pHandler, p2pRequesterStub: true };
 
+              // lets prepare the p2pRequesterSTub deployment by setting an observer to its status changes
+
+              _this.watchingYou.observe('p2pRequesterStub', (change) => {
+
+                console.log('[Registry - resolve] p2pRequesterStubs changed ' + _this.p2pRequesterStub);
+
+                if (change.keypath.split('.')[0] === remoteRuntime && change.name === 'status' && change.newValue === STATUS.LIVE) {
+                  console.log('[Registry - resolve] p2pRequester is live ' + _this.p2pRequesterStub[remoteRuntime]);
+                  resolve(_this.p2pRequesterStub[remoteRuntime].url);
+                }
+              });
+
               //  stub load
               _this.loader.loadStub(registeredP2P.p2pRequester, p2pConfig).then(() => {
 
                 console.log('[Registry - resolve] p2pRequester deployed: ', _this.p2pRequesterStub[remoteRuntime]);
 
-                _this.watchingYou.observe('p2pRequesterStub', (change) => {
-
-                  console.log('[Registry - resolve] p2pRequesterStubs changed ' + _this.p2pRequesterStub);
-
-                  if (change.keypath.split('.')[0] === remoteRuntime && change.name === 'status' && change.newValue === STATUS.LIVE) {
-                    console.log('[Registry - resolve] p2pRequester is live ' + _this.p2pRequesterStub[remoteRuntime]);
-                    resolve(_this.p2pRequesterStub[remoteRuntime].url);
-                  }
-                });
 
               }).catch((error) => {
                 reject(error);
