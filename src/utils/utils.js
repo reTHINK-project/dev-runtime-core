@@ -321,3 +321,20 @@ export function assign(obj, keyPath, value) {
 
   obj[keyPath[lastKeyIndex]] = value;
 }
+
+export function splitObjectURL(dataObjectURL) {
+  console.info('[utils - splitObjectURL]: ', dataObjectURL);
+
+  let splitedURL = dataObjectURL.split('/');
+  let url = splitedURL[0] + '//' + splitedURL[2] + '/' + splitedURL[3];
+  let resource = splitedURL[5];
+
+  let result = {
+    url: url,
+    resource: resource
+  };
+
+  console.info('[utils - splitObjectURL]: ', result);
+
+  return result;
+}
