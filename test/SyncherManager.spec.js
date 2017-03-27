@@ -313,7 +313,7 @@ describe('SyncherManager', function() {
         console.log('on-create-resume-reply DataObjectReporter: ', dor);
 
         dor.data.newTest = ['a', 'b', 'c'];
-        expect(dor.data).to.contain.all.keys({ communication: { name: 'chat-x' }, x: 10, y: 10, test: ['a', 'b', 'c'], newTest: ['a', 'b', 'c'] });
+        expect(dor.data).to.contain.all.keys({ communication: { name: 'chat-x' }, reporter: hyperURL1, schema: schemaURL, x: 10, y: 10, test: ['a', 'b', 'c'], newTest: ['a', 'b', 'c'] });
         done();
 
       });
