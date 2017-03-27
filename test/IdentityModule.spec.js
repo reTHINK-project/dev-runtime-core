@@ -16,17 +16,42 @@ let runtimeURL = 'hyperty-runtime://csp.com/123';
 
 let msgbus = {
   postMessage: (msg, callback) => {
-    expect(msg).to.eql({
+    let createMsg = {
       type: 'create',
       from: 'hyperty-runtime://csp.com/123/idm',
       to: 'hyperty-runtime://csp.com/123/identity-gui',
       body: {value: {identities: [], idps: ['google.com', 'microsoft.com', 'orange.fr']}}
-    });
+    };
 
-    callback({
-      id: 1, type: 'response', from: 'hyperty-runtime://csp.com/123/identity-gui', to: 'hyperty-runtime://csp.com/123/idm',
-      body: {type: 'idp', value: 'google.com', code: 200}
-    });
+    let responseMsg = {
+      type: 'response',
+      from: 'hyperty-runtime://csp.com/123/idm',
+      to: 'hyperty-runtime://csp.com/123/identity-gui',
+      body: {value: {identities: [], idps: ['google.com', 'microsoft.com', 'orange.fr']}}
+    };
+
+    let executeMsg = {
+      type: 'execute',
+      from: 'hyperty-runtime://csp.com/123/idm',
+      to: 'hyperty-runtime://csp.com/123/identity-gui',
+      body: { resource: 'identity', method: 'openPopup', params: {urlreceived: 'url'}}
+    };
+
+    expect(msg.type).to.be.oneOf([createMsg.type, executeMsg.type, responseMsg.type]);
+
+    if (msg.type === createMsg.type) {
+
+      expect(msg).to.eql(createMsg);
+
+      callback({
+        id: 1, type: 'response', from: 'hyperty-runtime://csp.com/123/identity-gui', to: 'hyperty-runtime://csp.com/123/idm',
+        body: {type: 'idp', value: 'google.com', code: 200}
+      });
+    }
+  },
+
+  addListener: (url, callback) => {
+    expect(url).to.eql('hyperty-runtime://csp.com/123/idm');
   }
 };
 

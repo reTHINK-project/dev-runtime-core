@@ -286,6 +286,9 @@ class RuntimeUA {
         // Policy Engine
         this.policyEngine.messageBus = this.messageBus;
 
+        // Register messageBus on IDM
+        this.identityModule.messageBus = this.messageBus;
+        
         // Register registry on IdentityModule
         this.identityModule.registry = this.registry;
 

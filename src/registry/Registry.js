@@ -248,10 +248,6 @@ class Registry {
       }
     });
 
-    // also set up messageBus in the IdentityModule component
-    // TODO redefine a better way to add the messageBus in the IdModule
-    _this.idModule.messageBus = messageBus;
-
     // Install AddressAllocation
     let addressAllocation = AddressAllocation.instance;
     _this.addressAllocation = addressAllocation;
