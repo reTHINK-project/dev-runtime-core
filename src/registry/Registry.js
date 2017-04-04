@@ -1249,9 +1249,9 @@ class Registry {
       return (_this.protostubsList[domainURL]);
     } else {
 
-      _this.protostubsList[domainURL] = {
+    /*  _this.protostubsList[domainURL] = {
         status: STATUS.CREATED
-      };
+      };*/
 
       throw new Error('[Registry - discoverProtoStub ] Message Node Protostub Not Found. Creating one');
 
