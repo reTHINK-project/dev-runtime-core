@@ -1747,17 +1747,20 @@ class Registry {
               }
             });
 
-            // this process will load the idp proxy, because is not yet registered;
-            console.info('[Registry.resolveNormalStub] deploy new IDPProxy: ', domainUrl);
-            _this.loader.loadIdpProxy(domainUrl).then(() => {
+            if (!registredComponent) {
+              // this process will load the idp proxy, because is not yet registered;
+              console.info('[Registry.resolveNormalStub] deploy new IDPProxy: ', domainUrl);
+              _this.loader.loadIdpProxy(domainUrl).then(() => {
 
-              console.info('[Registry.resolveNormalStub] IdP Proxy deployed: ', _this.idpProxyList[domainUrl]);
+                console.info('[Registry.resolveNormalStub] IdP Proxy deployed: ', _this.idpProxyList[domainUrl]);
 
-            }).catch((reason) => {
-              console.error('[Registry.resolve] Error resolving Load IDPProxy: ', reason);
-              _this.idpProxyList[domainUrl].status = 'deployment-failed';
-              reject(reason);
-            });
+              }).catch((reason) => {
+                console.error('[Registry.resolve] Error resolving Load IDPProxy: ', reason);
+                _this.idpProxyList[domainUrl].status = 'deployment-failed';
+                reject(reason);
+              });
+            }
+
 
           } else {
 
@@ -1778,16 +1781,18 @@ class Registry {
               }
             });
 
-            // lets deploy the protostub
-            console.info('[Registry.resolve] trigger new ProtocolStub: ', domainUrl);
-            _this.loader.loadStub(domainUrl).then(() => {
+            if (!registredComponent) {
+              // lets deploy the protostub
+              console.info('[Registry.resolve] trigger new ProtocolStub: ', domainUrl);
+              _this.loader.loadStub(domainUrl).then(() => {
 
-              console.log('[Registry - resolveNormalStub] Stub deployed: ', _this.protostubsList[domainUrl]);
-            }).catch((reason) => {
-              console.error('[Registry.resolveNormalStub] Error resolving Load ProtocolStub: ', reason);
-              _this.protostubsList[domainUrl].status = 'deployment-failed';
-              reject(reason);
-            });
+                console.log('[Registry - resolveNormalStub] Stub deployed: ', _this.protostubsList[domainUrl]);
+              }).catch((reason) => {
+                console.error('[Registry.resolveNormalStub] Error resolving Load ProtocolStub: ', reason);
+                _this.protostubsList[domainUrl].status = 'deployment-failed';
+                reject(reason);
+              });
+            }
 
           }
 
