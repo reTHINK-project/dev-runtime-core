@@ -89,7 +89,10 @@ class ObserverObject {
             _this._parent._dataObjectsStorage.saveChildrens(false, url, attribute, value);
           }
 
-          _this._childrenListeners.push(childListener);
+          console.log('[SyncherManager.ObserverObject children Listeners]', _this._childrenListeners, childListener);
+          if (_this._childrenListeners.indexOf(childListener) === -1) {
+            _this._childrenListeners.push(childListener);
+          }
 
         });
 
