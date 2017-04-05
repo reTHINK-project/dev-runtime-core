@@ -559,13 +559,13 @@ class SyncherManager {
         });
 
         //FLOW-OUT: subscribe message to remote ReporterObject -> _onRemoteSubscribe
-        let objSubscribeMsg = {
+        /*let objSubscribeMsg = {
           type: 'subscribe', from: this._url, to: objURLSubscription,
           body: { subscriber: hypertyURL, identity: msg.body.identity }
         };
 
         //subscribe to reporter SM
-        this._bus.postMessage(objSubscribeMsg, (reply) => {
+        this._bus.postMessage(objSubscribeMsg, (reply) => {*/
 
           let observer = this._observers[objURL];
           if (!observer) {
@@ -581,10 +581,10 @@ class SyncherManager {
           // Object.assign(storedObject.data, reply.body.value.data);
           // Object.assign(storedObject.childrens, reply.body.value.childrens);
 
-          console.log('[subscribe] - resume subscription: ', msg, reply, storedObject, observer);
+          //console.log('[subscribe] - resume subscription: ', msg, reply, storedObject, observer);
           resolve(storedObject);
 
-        });
+        //});
 
       }).catch((reason) => {
         console.error('[SyncherManager - resume subscription] - fail on getDataSchemaDescriptor: ', reason);
