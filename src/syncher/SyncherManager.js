@@ -536,7 +536,8 @@ class SyncherManager {
       let schema = storedObject.schema;
 
       let hypertyURL = msg.from;
-      let objURLSubscription = objURL + '/subscription';
+
+      // let objURLSubscription = objURL + '/subscription';
 
       let childBaseURL = objURL + '/children/';
 
@@ -567,22 +568,22 @@ class SyncherManager {
         //subscribe to reporter SM
         this._bus.postMessage(objSubscribeMsg, (reply) => {*/
 
-          let observer = this._observers[objURL];
-          if (!observer) {
-            observer = new ObserverObject(this, objURL, childrens);
-            observer.isToSaveData = storedObject.isToSaveData;
-            this._observers[objURL] = observer;
-          }
+        let observer = this._observers[objURL];
+        if (!observer) {
+          observer = new ObserverObject(this, objURL, childrens);
+          observer.isToSaveData = storedObject.isToSaveData;
+          this._observers[objURL] = observer;
+        }
 
-          //register new hyperty subscription
-          observer.addSubscription(hypertyURL);
-          observer.addChildrens(childrens);
+        //register new hyperty subscription
+        observer.addSubscription(hypertyURL);
+        observer.addChildrens(childrens);
 
-          // Object.assign(storedObject.data, reply.body.value.data);
-          // Object.assign(storedObject.childrens, reply.body.value.childrens);
+        // Object.assign(storedObject.data, reply.body.value.data);
+        // Object.assign(storedObject.childrens, reply.body.value.childrens);
 
-          //console.log('[subscribe] - resume subscription: ', msg, reply, storedObject, observer);
-          resolve(storedObject);
+        //console.log('[subscribe] - resume subscription: ', msg, reply, storedObject, observer);
+        resolve(storedObject);
 
         //});
 
