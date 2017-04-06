@@ -233,6 +233,7 @@ class SyncherManager {
 
           if (msg.body.hasOwnProperty('store') && msg.body.store) {
             reporter.isToSaveData = true;
+            _this._dataObjectsStorage.update(true, objURL, 'isToSaveData', true);
             _this._dataObjectsStorage.saveData(true, objURL, null, msg.body.value);
           }
 
