@@ -341,7 +341,7 @@ export function splitObjectURL(dataObjectURL) {
 
 export function checkAttribute(path) {
 
-  let regex = /(([a-zA-Z]+):\/\/([0-9a-zA-Z][-\w]*[0-9a-zA-Z]\.)+[a-zA-Z]{2,9})(:\d{1,4})?([-\w\/#~:?+=&%@~]*)/gm;
+  let regex = /((([a-zA-Z]+):\/\/([0-9a-zA-Z][-\w]*[0-9a-zA-Z]\.)+[a-zA-Z]{2,9})\/[a-zA-Z0-9\.]+@[a-zA-Z0-9]+(\-)?[a-zA-Z0-9]+(\.)?[a-zA-Z0-9]{2,10}?\.[a-zA-Z]{2,10})(.+(?=.identity))?/gm;
 
   let list = [];
   let final = [];
@@ -367,16 +367,16 @@ export function checkAttribute(path) {
     let result;
     list.forEach((url) => {
 
-      result = path.replace(url, '-');
+      result = path.replace(url, '*-*');
       final = result.split('.').map((item) => {
 
-        if (item === '-') { return url; }
+        if (item === '*-*') { return url; }
 
         return item;
       });
     });
   }
 
-  console.log('[ServiceFramework.Utils.checkAttribute]', final);
+  console.log('[RuntimeCore.Utils.checkAttribute]', final);
   return final;
 }
