@@ -305,7 +305,7 @@ export function divideEmail(email) {
 export function assign(obj, keyPath, value) {
 
   if (!obj) obj = {};
-  if (typeof(keyPath) === 'string') keyPath = keyPath.split('.');
+  if (typeof(keyPath) === 'string') keyPath = checkAttribute(keyPath);
 
   let lastKeyIndex = keyPath.length - 1;
 
@@ -320,4 +320,63 @@ export function assign(obj, keyPath, value) {
   }
 
   obj[keyPath[lastKeyIndex]] = value;
+}
+
+export function splitObjectURL(dataObjectURL) {
+  console.info('[utils - splitObjectURL]: ', dataObjectURL);
+
+  let splitedURL = dataObjectURL.split('/');
+  let url = splitedURL[0] + '//' + splitedURL[2] + '/' + splitedURL[3];
+  let resource = splitedURL[5];
+
+  let result = {
+    url: url,
+    resource: resource
+  };
+
+  console.info('[utils - splitObjectURL]: ', result);
+
+  return result;
+}
+
+export function checkAttribute(path) {
+
+  let regex = /(([a-zA-Z]+):\/\/([0-9a-zA-Z][-\w]*[0-9a-zA-Z]\.)+[a-zA-Z]{2,9})(:\d{1,4})?([-\w\/#~:?+=&%@~]*)/gm;
+
+  let list = [];
+  let final = [];
+  let test = path.match(regex);
+
+  if (test == null) {
+    final = path.split('.');
+  } else {
+    let m;
+    while ((m = regex.exec(path)) !== null) {
+      // This is necessary to avoid infinite loops with zero-width matches
+      if (m.index === regex.lastIndex) {
+        regex.lastIndex++;
+      }
+
+      // The result can be accessed through the `m`-variable.
+      m.forEach((match, groupIndex) => {
+        if (groupIndex === 0) {
+          list.push(match);
+        }
+      });
+    }
+    let result;
+    list.forEach((url) => {
+
+      result = path.replace(url, '-');
+      final = result.split('.').map((item) => {
+
+        if (item === '-') { return url; }
+
+        return item;
+      });
+    });
+  }
+
+  console.log('[ServiceFramework.Utils.checkAttribute]', final);
+  return final;
 }

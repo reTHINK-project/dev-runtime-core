@@ -256,18 +256,17 @@ describe('SyncherManager', function() {
       Object.values(doos).forEach((doo) => {
         console.log('on-subscribe-resume-reply DataObjectObserver: ', doo);
 
-        expect(doo.data).to.contain.all.keys({ communication: { name: 'chat-x' }, x: 10, y: 10});
+        expect(doo.data).to.contain.all.keys({ communication: { name: 'chat-x' }, x: 10, y: 10, test: ['a', 'b', 'c']});
 
-        doo.onChange('*', (changeEvent) => {
-          console.log('on-subscribe-resume on-change: ', JSON.stringify(changeEvent), doo.data);
-          expect(changeEvent).to.contain.all.keys({ cType: 'add', oType: 'object', field: 'test', data: ['a', 'b', 'c'] });
-          done();
-        });
+        // doo.onChange('*', (changeEvent) => {
+        //   console.log('on-subscribe-resume on-change: ', JSON.stringify(changeEvent), doo.data);
+        //   expect(changeEvent).to.contain.all.keys({ cType: 'add', oType: 'object', field: 'test', data: ['a', 'b', 'c'] });
+        // });
+
+        done();
       });
 
-      setTimeout(() => {
-        a.data.test = ['a', 'b', 'c'];
-      });
+      a.data.test = ['a', 'b', 'c'];
 
     });
 
@@ -311,8 +310,10 @@ describe('SyncherManager', function() {
 
       Object.values(dors).forEach((dor) => {
 
+        console.log('on-create-resume-reply DataObjectReporter: ', dor);
+
         dor.data.newTest = ['a', 'b', 'c'];
-        expect(dor.data).to.contain.all.keys({ communication: { name: 'chat-x' }, x: 10, y: 10, test: ['a', 'b', 'c'], newTest: ['a', 'b', 'c'] });
+        expect(dor.data).to.contain.all.keys({ communication: { name: 'chat-x' }, reporter: hyperURL1, schema: schemaURL, x: 10, y: 10, test: ['a', 'b', 'c'], newTest: ['a', 'b', 'c'] });
         done();
 
       });
