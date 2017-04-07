@@ -224,17 +224,27 @@ class SyncherManager {
 
           // Store for each reporter hyperty the dataObject
           let userURL;
+          let interworking = false;
+
           if (msg.body.hasOwnProperty('identity') && msg.body.identity.userProfile.userURL) {
             userURL = msg.body.identity.userProfile.userURL;
+            if (!userURL.includes('user://')) {
+              interworking = true;
+            }
+          } else {
+            interworking = true;
           }
 
           // Store the dataObject information
-          _this._dataObjectsStorage.set(objURL, true, msg.body.schema, 'on', owner, null, childrens, userURL);
 
-          if (msg.body.hasOwnProperty('store') && msg.body.store) {
-            reporter.isToSaveData = true;
-            _this._dataObjectsStorage.update(true, objURL, 'isToSaveData', true);
-            _this._dataObjectsStorage.saveData(true, objURL, null, msg.body.value);
+          if (!interworking) {
+            _this._dataObjectsStorage.set(objURL, true, msg.body.schema, 'on', owner, null, childrens, userURL);
+
+            if (msg.body.hasOwnProperty('store') && msg.body.store) {
+              reporter.isToSaveData = true;
+              _this._dataObjectsStorage.update(true, objURL, 'isToSaveData', true);
+              _this._dataObjectsStorage.saveData(true, objURL, null, msg.body.value);
+            }
           }
 
           reporter.forwardSubscribe([objURL, subscriptionURL]).then(() => {
@@ -481,17 +491,26 @@ class SyncherManager {
                 _this._observers[objURL] = observer;
               }
 
+              let interworking = false;
+
               // Store for each reporter hyperty the dataObject
               let userURL;
               if (msg.body.hasOwnProperty('identity') && msg.body.identity.userProfile.userURL) {
                 userURL = msg.body.identity.userProfile.userURL;
+                if (!userURL.includes('user://')) {
+                  interworking = true;
+                }
+              } else {
+                interworking = true;
               }
 
-              _this._dataObjectsStorage.set(objURL, false, msg.body.schema, 'on', reply.body.owner, hypertyURL, childrens, userURL);
-              if (msg.body.hasOwnProperty('store') && msg.body.store) {
-                observer.isToSaveData = true;
-                _this._dataObjectsStorage.update(false, objURL, 'isToSaveData', true);
-                _this._dataObjectsStorage.saveData(false, objURL, null, reply.body.value.data);
+              if (!interworking) {
+                _this._dataObjectsStorage.set(objURL, false, msg.body.schema, 'on', reply.body.owner, hypertyURL, childrens, userURL);
+                if (msg.body.hasOwnProperty('store') && msg.body.store) {
+                  observer.isToSaveData = true;
+                  _this._dataObjectsStorage.update(false, objURL, 'isToSaveData', true);
+                  _this._dataObjectsStorage.saveData(false, objURL, null, reply.body.value.data);
+                }
               }
 
               // register new hyperty subscription
