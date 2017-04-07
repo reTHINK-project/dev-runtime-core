@@ -305,7 +305,7 @@ export function divideEmail(email) {
 export function assign(obj, keyPath, value) {
 
   if (!obj) obj = {};
-  if (typeof(keyPath) === 'string') keyPath = checkAttribute(keyPath);
+  if (typeof(keyPath) === 'string') keyPath = parseAttributes(keyPath);
 
   let lastKeyIndex = keyPath.length - 1;
 
@@ -379,4 +379,43 @@ export function checkAttribute(path) {
 
   console.log('[RuntimeCore.Utils.checkAttribute]', final);
   return final;
+}
+
+export function parseAttributes(path) {
+  let regex = /([0-9a-zA-Z][-\w]*):\/\//g;
+
+  let string3 = 'identity';
+
+  if (!path.includes('://')) {
+    return (path.split('.'));
+  } else {
+    let string1 = path.split(regex)[0];
+
+    let array1 = string1.split('.');
+
+    let string2 = path.replace(string1, '');
+
+    if (path.includes(string3)) {
+
+      let array2 = string2.split(string3 + '.');
+
+      console.log('array2 ' + array2);
+
+      string2 = array2[0].slice('.', -1);
+
+      array2 = array2[1].split('.');
+
+      array1.push(string2, string3);
+
+      array1 = array1.concat(array2);
+
+    } else {
+      array1.push(string2);
+
+    }
+
+    return (array1.filter(Boolean));
+
+  }
+
 }
