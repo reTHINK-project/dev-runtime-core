@@ -97,21 +97,21 @@ class CoreDiscovery {
     switch (atributes[1]) {
       case 'user':
         if(atributes[0] == 'hyperty')
-          return _this.discoverHyperties(msg.body.resource.split('user/')[1], dataSchemes, resources);
+          return _this.discoverHyperties(msg.body.resource.split('user/')[1], dataSchemes, resources, msg.body.criteria.domain);
         else
-          return _this.discoverDataObjects(msg.body.resource.split('user/')[1], dataSchemes, resources);
+          return _this.discoverDataObjects(msg.body.resource.split('user/')[1], dataSchemes, resources, msg.body.criteria.domain);
         break;
       case 'url':
         if(atributes[0] == 'hyperty')
-          return _this.discoverHypertyPerURL(msg.body.resource.split('url/')[1]);
+          return _this.discoverHypertyPerURL(msg.body.resource.split('url/')[1], msg.body.criteria.domain);
         else
-          return _this.discoverDataObjectPerURL(msg.body.resource.split('url/')[1]);
+          return _this.discoverDataObjectPerURL(msg.body.resource.split('url/')[1], msg.body.criteria.domain);
         break;
       case 'name':
-        return _this.discoverDataObjectsPerName(msg.body.resource.split('name/')[1], dataSchemes, resources);
+        return _this.discoverDataObjectsPerName(msg.body.resource.split('name/')[1], dataSchemes, resources, msg.body.criteria.domain);
         break;
       case 'reporter':
-        return _this.discoverDataObjectsPerReporter(msg.body.resource.split('reporter/')[1], dataSchemes, resources);
+        return _this.discoverDataObjectsPerReporter(msg.body.resource.split('reporter/')[1], dataSchemes, resources, msg.body.criteria.domain);
         break;
       case 'guid':
         if(atributes[0] == 'hyperty')
@@ -358,7 +358,7 @@ class CoreDiscovery {
 
       _this.messageBus.postMessage(msg, (reply) => {
 
-        if(reply.body.code === 500)
+        if(reply.body.code !== 200)
           return reject('No Hyperty was found');
 
         let hyperties = reply.body.value;
@@ -464,7 +464,7 @@ class CoreDiscovery {
 
       _this.messageBus.postMessage(msg, (reply) => {
 
-        if(reply.body.code === 500)
+        if(reply.body.code !== 200)
           return reject('No Hyperty was found');
 
         let hyperty = reply.body.value;
