@@ -34,6 +34,7 @@ class Subscription {
     }
 
     _this._childrenListeners = [];
+    console.log('[Subscription] - childID', childrens);
     childrens.forEach((child) => {
       let childId = childBaseURL + child;
 

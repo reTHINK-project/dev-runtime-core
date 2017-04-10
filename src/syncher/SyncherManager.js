@@ -98,6 +98,9 @@ class SyncherManager {
   //FLOW-IN: message received from Syncher -> create
   _onCreate(msg) {
 
+    let from = msg.from;
+    let to = msg.to;
+
     if (!msg.body.hasOwnProperty('resume') || (msg.body.hasOwnProperty('resume') && !msg.body.resume)) {
 
       // If from the hyperty side, don't call the resumeReporter we will have resume = false'
@@ -110,13 +113,30 @@ class SyncherManager {
       // so we will create an resumed object and will try to resume the object previously saved;
       this._dataObjectsStorage.getResourcesByCriteria(msg, true).then((result) => {
 
-        console.info('[SyncherManager - Create Resumed Object]', msg, result);
+        console.info('[SyncherManager - Create Resumed] - ResourcesByCriteria | Message: ', msg, ' result: ', result);
 
         if (result && Object.keys(result).length > 0) {
 
-          // TODO: should reuse the storaged information
+          let listOfReporters = [];
+
           Object.keys(result).forEach((objURL) => {
-            this._resumeCreate(msg, result[objURL]);
+            listOfReporters.push(this._resumeCreate(msg, result[objURL]));
+          });
+
+          Promise.all(listOfReporters).then((resumedReporters) => {
+            console.log('[SyncherManager - Create Resumed]', resumedReporters);
+
+            // TODO: shoud send the information if some object was fail;
+            let successfullyResumed = Object.values(resumedReporters).filter((reporter) => {
+              return reporter !== false;
+            });
+
+            //FLOW-OUT: message response to Syncher -> create
+            this._bus.postMessage({
+              id: msg.id, type: 'response', from: to, to: from,
+              body: { code: 200, value: successfullyResumed }
+            });
+
           });
 
         } else {
@@ -204,15 +224,27 @@ class SyncherManager {
 
           // Store for each reporter hyperty the dataObject
           let userURL;
+          let interworking = false;
+
           if (msg.body.hasOwnProperty('identity') && msg.body.identity.userProfile.userURL) {
             userURL = msg.body.identity.userProfile.userURL;
+            if (!userURL.includes('user://')) {
+              interworking = true;
+            }
+          } else {
+            interworking = true;
           }
 
           // Store the dataObject information
-          _this._dataObjectsStorage.set(objURL, true, msg.body.schema, 'on', owner, null, null, childrens, userURL);
 
-          if (msg.body.hasOwnProperty('store') && msg.body.store) {
-            _this._dataObjectsStorage.saveData(true, objURL, null, msg.body.value);
+          if (!interworking) {
+            _this._dataObjectsStorage.set(objURL, true, msg.body.schema, 'on', owner, null, childrens, userURL);
+
+            if (msg.body.hasOwnProperty('store') && msg.body.store) {
+              reporter.isToSaveData = true;
+              _this._dataObjectsStorage.update(true, objURL, 'isToSaveData', true);
+              _this._dataObjectsStorage.saveData(true, objURL, null, msg.body.value);
+            }
           }
 
           reporter.forwardSubscribe([objURL, subscriptionURL]).then(() => {
@@ -254,69 +286,67 @@ class SyncherManager {
 
     let _this = this;
 
-    let owner = msg.from;
-    let schema = storedObject.schema;
-    let resource = storedObject.resource;
-    let initialData = storedObject.data;
+    return new Promise((resolve) => {
 
-    console.log('[SyncherManager] - resumeCreate', msg);
+      let owner = msg.from;
+      let schema = storedObject.schema;
+      let resource = storedObject.resource;
+      let initialData = storedObject.data;
 
-    let authMsg = msg;
-    authMsg.body.authorise = storedObject.subscriptions;
+      console.log('[SyncherManager] - resume create', msg, storedObject);
 
-    // // TODO: Check why the _authorise is called;
-    // if (resource) {
-    //   _this._authorise(authMsg, resource);
-    //   return;
-    // }
+      //get schema from catalogue and parse -> (scheme, children)
+      _this._catalog.getDataSchemaDescriptor(schema).then((descriptor) => {
 
-    //get schema from catalogue and parse -> (scheme, children)
-    _this._catalog.getDataSchemaDescriptor(schema).then((descriptor) => {
+        let properties = descriptor.sourcePackage.sourceCode.properties;
+        let scheme = properties.scheme ? properties.scheme.constant : 'resource';
+        let childrens = properties.children ? properties.children.constant : [];
 
-      let properties = descriptor.sourcePackage.sourceCode.properties;
-      let scheme = properties.scheme ? properties.scheme.constant : 'resource';
-      let childrens = properties.children ? properties.children.constant : [];
+        console.log('[SyncherManager] - getDataSchemaDescriptor: ', descriptor, childrens, storedObject.childrenResources);
 
-      // Do schema validation
-      // TODO: check if is need to handle with the result of validation
-      schemaValidation(scheme, descriptor, initialData);
+        // Do schema validation
+        // TODO: check if is need to handle with the result of validation
+        schemaValidation(scheme, descriptor, initialData);
 
-      //all OK -> create reporter and register listeners
-      let reporter;
+        //all OK -> create reporter and register listeners
+        let reporter;
 
-      if (!this._reporters[resource]) {
-        reporter = new ReporterObject(_this, owner, resource);
-      } else {
-        reporter = this._reporters[resource];
-      }
+        if (!this._reporters[resource]) {
+          reporter = new ReporterObject(_this, owner, resource);
+        } else {
+          reporter = this._reporters[resource];
+        }
 
-      _this._reporters[resource] = reporter;
+        reporter.isToSaveData = storedObject.isToSaveData;
 
-      reporter.addChildrens(childrens).then(() => {
+        reporter.addChildrens(childrens).then(() => {
 
-        reporter.resumeSubscriptions(storedObject.subscriptions);
+          reporter.resumeSubscriptions(storedObject.subscriptions);
 
-        //FLOW-OUT: message response to Syncher -> create
-        _this._bus.postMessage({
-          id: msg.id, type: 'response', from: msg.to, to: owner,
-          body: { code: 200, resource: resource, childrenResources: childrens, schema: schema, value: storedObject.data }
+          _this._reporters[resource] = reporter;
+
+          console.info('[SyncherManager - resume create] - resolved resumed: ', storedObject);
+          resolve(storedObject);
+
+        }).catch((reason) => {
+          console.error('[SyncherManager - resume create] - fail on addChildrens: ', reason);
+          resolve(false);
         });
 
-        //send create to all observers, responses will be deliver to the Hyperty owner?
-        //schedule for next cycle needed, because the Reporter should be available.
-        setTimeout(() => {
-          //will invite other hyperties
-          _this._authorise(msg, resource);
-        });
-
+      }).catch((reason) => {
+        console.error('[SyncherManager - resume create] - fail on getDataSchemaDescriptor: ', reason);
+        resolve(false);
       });
 
     });
+
   }
 
   _authorise(msg, objURL) {
     let _this = this;
     let objSubscriptorURL = objURL + '/subscription';
+
+    console.log('[SyncherManager -  authorise] - ', msg, objURL);
 
     msg.body.authorise.forEach((hypertyURL) => {
       //FLOW-OUT: send invites to list of remote Syncher -> _onRemoteCreate -> onNotification
@@ -353,14 +383,32 @@ class SyncherManager {
 
     this._dataObjectsStorage.getResourcesByCriteria(msg, false).then((result) => {
 
-      console.log('[SyncherManager - Subscribe] - filter result', result);
+      console.info('[SyncherManager - Subscribe] - ResourcesByCriteria | Message: ', msg, ' result: ', result);
 
       if (result && Object.keys(result).length > 0) {
+
+        let listOfObservers = [];
 
         // TODO: should reuse the storaged information
         Object.keys(result).forEach((objURL) => {
           console.log('[SyncherManager - resume Subscribe] - reuse current object url: ', result[objURL]);
-          this._resumeSubscription(msg, result[objURL]);
+          listOfObservers.push(this._resumeSubscription(msg, result[objURL]));
+        });
+
+        Promise.all(listOfObservers).then((resumedObservers) => {
+          console.log('[SyncherManager - Observers Resumed]', resumedObservers);
+
+          // TODO: shoud send the information if some object was fail;
+          let successfullyResumed = Object.values(resumedObservers).filter((observer) => {
+            return observer !== false;
+          });
+
+          //FLOW-OUT: message response to Syncher -> create
+          this._bus.postMessage({
+            id: msg.id, type: 'response', from: msg.to, to: msg.from,
+            body: { code: 200, value: successfullyResumed }
+          });
+
         });
 
       } else if (msg.body.schema && msg.body.resource) {
@@ -443,20 +491,33 @@ class SyncherManager {
                 _this._observers[objURL] = observer;
               }
 
+              let interworking = false;
+
               // Store for each reporter hyperty the dataObject
               let userURL;
               if (msg.body.hasOwnProperty('identity') && msg.body.identity.userProfile.userURL) {
                 userURL = msg.body.identity.userProfile.userURL;
+                if (!userURL.includes('user://')) {
+                  interworking = true;
+                }
+              } else {
+                interworking = true;
               }
 
-              _this._dataObjectsStorage.set(objURL, false, msg.body.schema, 'on', reply.body.owner, hypertyURL, null, childrens, userURL);
-
-              if (msg.body.hasOwnProperty('store') && msg.body.store) {
-                _this._dataObjectsStorage.saveData(false, objURL, null, reply.body.value);
+              if (!interworking) {
+                _this._dataObjectsStorage.set(objURL, false, msg.body.schema, 'on', reply.body.owner, hypertyURL, childrens, userURL);
+                if (msg.body.hasOwnProperty('store') && msg.body.store) {
+                  observer.isToSaveData = true;
+                  _this._dataObjectsStorage.update(false, objURL, 'isToSaveData', true);
+                  _this._dataObjectsStorage.saveData(false, objURL, null, reply.body.value.data);
+                }
               }
 
-              //register new hyperty subscription
+              // register new hyperty subscription
               observer.addSubscription(hypertyURL);
+
+              // add childrens and listeners to save data if necessary
+              observer.addChildrens(childrens);
 
               //forward to hyperty:
               reply.id = msg.id;
@@ -488,68 +549,71 @@ class SyncherManager {
   }
 
   _resumeSubscription(msg, storedObject) {
-    let objURL = storedObject.resource;
-    let schema = storedObject.schema;
 
-    let hypertyURL = msg.from;
-    let objURLSubscription = objURL + '/subscription';
+    return new Promise((resolve) => {
 
-    let childBaseURL = objURL + '/children/';
+      let objURL = storedObject.resource;
+      let schema = storedObject.schema;
 
-    console.log('[SyncherManager ReuseSubscription] - objURL: ', objURL, ' - schema:', schema);
+      let hypertyURL = msg.from;
 
-    //get schema from catalogue and parse -> (children)
-    this._catalog.getDataSchemaDescriptor(schema).then((descriptor) => {
-      let properties = descriptor.sourcePackage.sourceCode.properties;
-      let childrens = properties.children ? properties.children.constant : [];
+      // let objURLSubscription = objURL + '/subscription';
 
-      //children addresses
-      let subscriptions = [];
-      subscriptions.push(objURL + '/changes');
-      childrens.forEach((child) => subscriptions.push(childBaseURL + child));
+      let childBaseURL = objURL + '/children/';
 
-      //FLOW-OUT: reply with provisional response
-      this._bus.postMessage({
-        id: msg.id, type: 'response', from: msg.to, to: hypertyURL,
-        body: { code: 100, childrenResources: childrens, schema: schema, resource: objURL }
-      });
+      console.log('[SyncherManager - ReuseSubscription] - objURL: ', objURL, ' - schema:', schema);
 
-      //FLOW-OUT: subscribe message to remote ReporterObject -> _onRemoteSubscribe
-      let objSubscribeMsg = {
-        type: 'subscribe', from: this._url, to: objURLSubscription,
-        body: { subscriber: hypertyURL, identity: msg.body.identity }
-      };
+      //get schema from catalogue and parse -> (children)
+      this._catalog.getDataSchemaDescriptor(schema).then((descriptor) => {
+        let properties = descriptor.sourcePackage.sourceCode.properties;
+        let childrens = properties.children ? properties.children.constant : [];
 
-      //subscribe to reporter SM
-      this._bus.postMessage(objSubscribeMsg, (reply) => {
+        //children addresses
+        let subscriptions = [];
+        subscriptions.push(objURL + '/changes');
+        childrens.forEach((child) => subscriptions.push(childBaseURL + child));
+
+        //FLOW-OUT: reply with provisional response
+        this._bus.postMessage({
+          id: msg.id, type: 'response', from: msg.to, to: hypertyURL,
+          body: { code: 100, childrenResources: childrens, schema: schema, resource: objURL }
+        });
+
+        //FLOW-OUT: subscribe message to remote ReporterObject -> _onRemoteSubscribe
+        /*let objSubscribeMsg = {
+          type: 'subscribe', from: this._url, to: objURLSubscription,
+          body: { subscriber: hypertyURL, identity: msg.body.identity }
+        };
+
+        //subscribe to reporter SM
+        this._bus.postMessage(objSubscribeMsg, (reply) => {*/
 
         let observer = this._observers[objURL];
         if (!observer) {
           observer = new ObserverObject(this, objURL, childrens);
+          observer.isToSaveData = storedObject.isToSaveData;
           this._observers[objURL] = observer;
         }
 
         //register new hyperty subscription
         observer.addSubscription(hypertyURL);
+        observer.addChildrens(childrens);
 
-        //forward to hyperty:
-        let response = {
-          id: msg.id, from: this._url, to: hypertyURL, type: 'response',
-          body: reply.body
-        };
+        // Object.assign(storedObject.data, reply.body.value.data);
+        // Object.assign(storedObject.childrens, reply.body.value.childrens);
 
-        response.body.schema = schema;
-        response.body.resource = objURL;
+        //console.log('[subscribe] - resume subscription: ', msg, reply, storedObject, observer);
+        resolve(storedObject);
 
-        response.body.value = storedObject.data || {};
+        //});
 
-        console.log('[subscribe] - resume subscription: ', msg, reply, response, observer);
-
-        this._bus.postMessage(response);
-
+      }).catch((reason) => {
+        console.error('[SyncherManager - resume subscription] - fail on getDataSchemaDescriptor: ', reason);
+        resolve(false);
       });
 
     });
+
   }
 
   //FLOW-IN: message received from local DataObjectObserver -> unsubscribe

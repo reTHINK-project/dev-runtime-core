@@ -1,8 +1,9 @@
 
-import {divideURL, getUserURLFromEmail, getUserEmailFromURL, isDataObjectURL, convertToUserURL, getUserIdentityDomain, isLegacy} from '../utils/utils.js';
+import {divideURL, getUserURLFromEmail, getUserEmailFromURL, isDataObjectURL, convertToUserURL, getUserIdentityDomain, isLegacy } from '../utils/utils.js';
 import Identity from './Identity';
 import Crypto from './Crypto';
 import GuiFake from './GuiFake';
+import { WatchingYou } from 'service-framework/dist/Utils';
 
 /**
 *
@@ -52,10 +53,13 @@ class IdentityModule {
 
     _this._domain = divideURL(_this._runtimeURL).domain;
 
+    _this.watchingYou = new WatchingYou();
+
     //to store items with this format: {identity: identityURL, token: tokenID}
     _this.identities = [];
+    _this.identitiesList =  _this.watchingYou.watch('identitiesList', {}, true);
     _this.emailsList = [];
-    let newIdentity = new Identity('guid','HUMAN');
+    let newIdentity = new Identity('guid', 'HUMAN');
     _this.identity = newIdentity;
     _this.crypto = new Crypto();
 
@@ -179,31 +183,55 @@ class IdentityModule {
     let _this = this;
     return new Promise(function(resolve, reject) {
       console.log('[Identity.IdentityModule.getToken] from->', fromURL, '  to->', toUrl);
-      if (toUrl && toUrl.split('@').length > 1) {
+
+      if (toUrl) {
 //        console.log('toUrl', toUrl);
         _this.registry.isLegacy(toUrl).then(function(result) {
           console.log('[Identity.IdentityModule.getToken] isLEGACY: ', result);
           if (result) {
 
             let token = _this.getAccessToken(toUrl);
-            if (token)
-              return resolve(token);
+            if (token)              { return resolve(token); }
 
-            console.log('[Identity.IdentityModule.getToken] NO Identity.. Login now');
             let domain = getUserIdentityDomain(toUrl);
-            console.log('[Identity.IdentityModule.getToken] domain->', domain);
-            _this.callGenerateMethods(domain).then((value) => {
-              console.log('[Identity.IdentityModule.getToken] CallGeneratemethods', value);
-              let token = _this.getAccessToken(toUrl);
-              if (token)
-                return resolve(token);
-              else {
-                return reject('No Access token found');
-              }
-            }, (err) => {
-              console.error('[Identity.IdentityModule.getToken] error CallGeneratemethods');
-              return reject(err);
-            });
+
+            // check if process to get token has already started
+            if (_this.identitiesList[domain] && _this.identitiesList[domain].status === 'in-progress') {
+              // The process to get the token has already started, let's wait by watching its status
+
+              _this.watchingYou.observe('identitiesList', (change) => {
+
+                console.log('[Identity.IdentityModule.getToken]  identitiesList changed ' + _this.identitiesList);
+
+                let keypath = change.keypath;
+
+                if (keypath.includes('status'))
+                  keypath = keypath.replace('.status', '');
+
+                if (keypath === domain && change.name === 'status' && change.newValue === 'created') {
+                  console.log('[Identity.IdentityModule.getToken] token is created ' + _this.identitiesList[domain]);
+                  return resolve(_this.getAccessToken(toUrl));
+                }
+              });
+            } else { //Token does not exist and the process to get has not started yet
+
+              _this.identitiesList[domain] = {
+                status: 'in-progress'
+              };
+
+              console.log('[Identity.IdentityModule.getToken] for-> ', domain);
+              _this.callGenerateMethods(domain).then((value) => {
+                console.log('[Identity.IdentityModule.getToken] CallGeneratemethods', value);
+                let token = _this.getAccessToken(toUrl);
+                if (token)                { return resolve(token); }              else {
+                  return reject('No Access token found');
+                }
+              }, (err) => {
+                console.error('[Identity.IdentityModule.getToken] error CallGeneratemethods');
+                return reject(err);
+              });
+            }
+
           } else {
 
             _this.getIdToken(fromURL).then(function(identity) {
@@ -289,6 +317,11 @@ class IdentityModule {
     let length = urlSplit.length;*/
 
     let domainToCheck = divideURL(url).domain;
+
+    if (url.includes('protostub')) {
+      domainToCheck = domainToCheck.replace(domainToCheck.split('.')[0] + '.', '');
+    }
+
     let identityToReturn;
     for (let index in _this.identities) {
       let identity = _this.identities[index];
@@ -309,7 +342,7 @@ class IdentityModule {
   getIdentitiesToChoose() {
     let _this = this;
     let identities = _this.emailsList;
-    let idps = [{domain: 'google.com', type: 'idToken'},{domain: 'microsoft.com', type: 'idToken'}, {domain: 'orange.fr', type: 'idToken'}, {domain: 'slack.com', type: 'Legacy'}];
+    let idps = [{domain: 'google.com', type: 'idToken'}, {domain: 'microsoft.com', type: 'idToken'}, {domain: 'orange.fr', type: 'idToken'}, {domain: 'slack.com', type: 'Legacy'}];
 
     return {identities: identities, idps: idps};
   }
@@ -325,7 +358,7 @@ class IdentityModule {
     let users = [];
 
     //if request comes with the emailFormat option, then convert url to email format
-    let converter = (emailFormat) ? getUserEmailFromURL : (value) => {return value;};
+    let converter = (emailFormat) ? getUserEmailFromURL : (value) => { return value; };
 
     for (let index in _this.identities) {
       let identity = _this.identities[index];
@@ -404,7 +437,7 @@ class IdentityModule {
   requestIdentityToGUI(identities, idps) {
     let _this = this;
 
-    return new Promise(function(resolve,reject) {
+    return new Promise(function(resolve, reject) {
 
       //condition to check if the real GUI is deployed. If not, deploys a fake gui
       if (_this.guiDeployed === false) {
@@ -414,8 +447,8 @@ class IdentityModule {
         _this.guiDeployed = true;
       }
 
-      let message = {type:'create', to: _this._guiURL, from: _this._idmURL,
-                    body: {value: {identities: identities, idps: idps}}};
+      let message = {type: 'create', to: _this._guiURL, from: _this._idmURL,
+        body: {value: {identities: identities, idps: idps}}};
 
       let id = _this._messageBus.postMessage(message);
 
@@ -484,7 +517,7 @@ class IdentityModule {
   getIdentityAssertion(identifier, origin, usernameHint, idpDomain) {
     let _this = this;
 
-    return new Promise(function(resolve,reject) {
+    return new Promise(function(resolve, reject) {
 
       //CHECK whether is browser environment or nodejs
       //if it is browser, then create a fake identity
@@ -503,7 +536,7 @@ class IdentityModule {
           //  let chosenID = getUserURLFromEmail(value.value);
           // hack while the user url is not returned from requestIdentityToGUI;
 
-          let chosenID = 'user://' + _this.currentIdentity.idp + '/' + value.value;
+            let chosenID = 'user://' + _this.currentIdentity.idp + '/' + value.value;
 
             // returns the identity info from the chosen id
             for (let i in _this.identities) {
@@ -551,11 +584,11 @@ class IdentityModule {
 
           let identityBundle = {
             assertion: 'assertion',
-            idp:'nodejs',
+            idp: 'nodejs',
             identity: 'user://nodejs.com/nodejs-' + randomNumber,
             messageInfo: {
               assertion: 'assertion',
-              idp:'nodejs',
+              idp: 'nodejs',
               userProfile: userProfile
             },
             userProfile: userProfile
@@ -612,7 +645,7 @@ class IdentityModule {
     let message;
 
     return new Promise((resolve, reject) => {
-      message = {type:'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'generateAssertion', params: {contents: contents, origin: origin, usernameHint: usernameHint}}};
+      message = {type: 'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'generateAssertion', params: {contents: contents, origin: origin, usernameHint: usernameHint}}};
       _this._messageBus.postMessage(message, (res) => {
         let result = res.body.value;
 
@@ -672,6 +705,8 @@ class IdentityModule {
       _this.currentIdentity = newIdentity;
 
       //verify if the id already exists. If already exists then do not add to the identities list;
+      //to be reviewed since the identity contains data like the asssrtion and ley pairs that may be different if generated twice
+
       let idAlreadyExists = false;
       let oldId;
       for (let identity in _this.identities) {
@@ -701,6 +736,8 @@ class IdentityModule {
         _this.emailsList.push(email);
         _this.identities.push(result);
         _this.storageManager.set('idModule:identities', 0, _this.identities).then(() => {
+          if (_this.identitiesList[idToken.idp.domain])
+            _this.identitiesList[idToken.idp.domain].status = 'created';
 
           resolve(newIdentity);
         });
@@ -723,7 +760,7 @@ class IdentityModule {
 
     console.log('generateAssertion');
 
-    return new Promise(function(resolve,reject) {
+    return new Promise(function(resolve, reject) {
 
       _this.sendGenerateMessage(contents, origin, usernameHint, idpDomain).then((result) => {
 
@@ -766,8 +803,8 @@ class IdentityModule {
 
     let domain = _this._resolveDomain(idpDomain);
 
-    let message = {type:'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'validateAssertion',
-            params: {assertion: assertion, origin: origin}}};
+    let message = {type: 'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'validateAssertion',
+      params: {assertion: assertion, origin: origin}}};
 
     return new Promise(function(resolve, reject) {
       _this._messageBus.postMessage(message, (result) => {
@@ -1130,7 +1167,7 @@ class IdentityModule {
 
     //console.log('handshakeType');
 
-    return new Promise(function(resolve,reject) {
+    return new Promise(function(resolve, reject) {
 
       let handshakeType = message.body.handshakePhase;
       let iv;
@@ -1155,13 +1192,14 @@ class IdentityModule {
 
           // check if was the encrypt function or the mutual authentication that request the
           // start of the handShakePhase.
-          if (chatKeys.initialMessage) {resolve({message: startHandShakeMsg, chatKeys: chatKeys});
+          if (chatKeys.initialMessage) {
+            resolve({message: startHandShakeMsg, chatKeys: chatKeys});
           } else {
             _this.chatKeys[message.from + '<->' + message.to] = chatKeys;
             _this._messageBus.postMessage(startHandShakeMsg);
           }
 
-        break;
+          break;
         case 'senderHello':
 
           console.log('senderHello');
@@ -1181,7 +1219,7 @@ class IdentityModule {
           chatKeys.handshakeHistory.receiverHello = _this._filterMessageToHash(senderHelloMsg, undefined, chatKeys.hypertyFrom.messageInfo);
           resolve({message: senderHelloMsg, chatKeys: chatKeys});
 
-        break;
+          break;
         case 'receiverHello':
 
           console.log('receiverHello');
@@ -1279,7 +1317,7 @@ class IdentityModule {
 
           }, error => reject(error));
 
-        break;
+          break;
         case 'senderCertificate':
 
           console.log('senderCertificate');
@@ -1388,7 +1426,7 @@ class IdentityModule {
             resolve({message: receiverFinishedMessage, chatKeys: chatKeys});
           });
 
-        break;
+          break;
         case 'receiverFinishedMessage':
 
           console.log('receiverFinishedMessage');
@@ -1430,7 +1468,7 @@ class IdentityModule {
             });
           });
 
-        break;
+          break;
         case 'reporterSessionKey':
 
           console.log('reporterSessionKey');
@@ -1491,7 +1529,7 @@ class IdentityModule {
             resolve({message: receiverAcknowledgeMsg, chatKeys: chatKeys});
           });
 
-        break;
+          break;
         case 'receiverAcknowledge':
 
           console.log('receiverAcknowledge');
@@ -1516,7 +1554,7 @@ class IdentityModule {
             resolve('handShakeEnd');
           });
 
-        break;
+          break;
         default:
           reject(message);
       }
@@ -1637,7 +1675,7 @@ class IdentityModule {
     return {
       type: message.type,
       from: message.from,
-      to:   message.to,
+      to: message.to,
       body: {
         identity: identity || message.body.identity,
         value: decryptedValue || message.body.value,
@@ -1665,45 +1703,45 @@ class IdentityModule {
     let userInfo = _this.getIdentity(userURL);
 
     let newChatCrypto =
-    {
-      hypertyFrom:
       {
-        hyperty: from,
-        userID: userInfo.messageInfo.userProfile.username,
-        privateKey: userInfo.keyPair.private,
-        publicKey: userInfo.keyPair.public,
-        assertion: userInfo.assertion,
-        messageInfo: userInfo.messageInfo
-      },
-      hypertyTo:
-      {
-        hyperty: to,
-        userID: undefined,
-        publicKey: undefined,
-        assertion: undefined
-      },
-      keys:
-      {
-        hypertyToSessionKey: undefined,
-        hypertyFromSessionKey: undefined,
-        hypertyToHashKey: undefined,
-        hypertyFromHashKey: undefined,
-        toRandom: undefined,
-        fromRandom: undefined,
-        premasterKey: undefined,
-        masterKey: undefined
-      },
-      handshakeHistory: {
-        senderHello: undefined,
-        receiverHello: undefined,
-        senderCertificate: undefined,
-        receiverFinishedMessage: undefined
-      },
-      initialMessage: (message.body.ignore) ? undefined : message,
-      callback: message.callback,
-      authenticated: false,
-      dataObjectURL: message.dataObjectURL
-    };
+        hypertyFrom:
+        {
+          hyperty: from,
+          userID: userInfo.messageInfo.userProfile.username,
+          privateKey: userInfo.keyPair.private,
+          publicKey: userInfo.keyPair.public,
+          assertion: userInfo.assertion,
+          messageInfo: userInfo.messageInfo
+        },
+        hypertyTo:
+        {
+          hyperty: to,
+          userID: undefined,
+          publicKey: undefined,
+          assertion: undefined
+        },
+        keys:
+        {
+          hypertyToSessionKey: undefined,
+          hypertyFromSessionKey: undefined,
+          hypertyToHashKey: undefined,
+          hypertyFromHashKey: undefined,
+          toRandom: undefined,
+          fromRandom: undefined,
+          premasterKey: undefined,
+          masterKey: undefined
+        },
+        handshakeHistory: {
+          senderHello: undefined,
+          receiverHello: undefined,
+          senderCertificate: undefined,
+          receiverFinishedMessage: undefined
+        },
+        initialMessage: (message.body.ignore) ? undefined : message,
+        callback: message.callback,
+        authenticated: false,
+        dataObjectURL: message.dataObjectURL
+      };
 
     return newChatCrypto;
   }

@@ -35,7 +35,7 @@ import { WatchingYou } from 'service-framework/dist/Utils';
 
 // import DiscoveryServiceFramework from './DiscoveryServiceFramework';
 
-const STATUS = { CREATED: 'created', LIVE: 'live', DEPLOYED: 'deployed', PROGRESS: 'in-progress', DISCONNECTED: 'disconnected', DEAD: 'dead' };
+const STATUS = { CREATED: 'created', LIVE: 'live', DEPLOYING: 'deploying', DEPLOYED: 'deployed', PROGRESS: 'in-progress', DISCONNECTED: 'disconnected', FAILED: 'deployment-failed', DEAD: 'dead' };
 
 /*import IdentityManager from './IdentityManager';
 import Discovery from './Discovery';*/
@@ -95,8 +95,8 @@ class Registry {
     _this.p2pConnectionList = _this.watchingYou.watch('p2pConnectionList', {}, true);
     _this.p2pHandlerAssociation = {};
 
-    _this.protostubsList = {};
-    _this.idpProxyList = {};
+    _this.protostubsList = _this.watchingYou.watch('protostubsList', {}, true);
+    _this.idpProxyList = _this.watchingYou.watch('idpProxyList', {}, true);
     _this.dataObjectList = {};
     _this.subscribedDataObjectList = {};
     _this.sandboxesList = {sandbox: {}, appSandbox: {} };
@@ -1249,9 +1249,9 @@ class Registry {
       return (_this.protostubsList[domainURL]);
     } else {
 
-      _this.protostubsList[domainURL] = {
+    /*  _this.protostubsList[domainURL] = {
         status: STATUS.CREATED
-      };
+      };*/
 
       throw new Error('[Registry - discoverProtoStub ] Message Node Protostub Not Found. Creating one');
 
@@ -1382,7 +1382,7 @@ class Registry {
         // TODO: Optimize this
         _this.protostubsList[stubID] = {
           url: runtimeProtoStubURL,
-          status: STATUS.CREATED
+          status: STATUS.DEPLOYING
         };
 
         if (descriptorURL) {
@@ -1431,11 +1431,12 @@ class Registry {
     if (runtimeProtoStubURL.includes('/protostub/')) {
 
     // TODO: uncomment below when protostubs are updated with new status value "live"
-    /*  let filtered = Object.keys(_this.protostubsList).filter((key) => {
-          return _this.protostubsList[key].url === runtimeProtoStubURL;
-        }).map((key) => {
-          _this.protostubsList[key].status = msg.body.value;
-        });*/
+      Object.keys(_this.protostubsList).filter((key) => {
+        return _this.protostubsList[key].url === runtimeProtoStubURL;
+      }).map((key) => {
+        _this.protostubsList[key].status = msg.body.value;
+        console.log('[Registry - onProtostubStatusEvent] - Protostub status: ', _this.protostubsList[key]);
+      });
     } else { // process status events from p2p connections
 
       if (msg.body.resource) {
@@ -1519,7 +1520,7 @@ class Registry {
       // TODO: Optimize this
       _this.idpProxyList[domainURL] = {
         url: idpProxyStubURL,
-        status: STATUS.PROGRESS
+        status: STATUS.DEPLOYING
       };
 
       _this.sandboxesList.sandbox[idpProxyStubURL] = sandbox;
@@ -1531,11 +1532,36 @@ class Registry {
       resolve(idpProxyStubURL);
 
       _this._messageBus.addListener(idpProxyStubURL + '/status', (msg) => {
-        if (msg.resource === msg.to + '/status') {
-          console.log('[Registry] idpProxyStubURL/status message: ', msg.body.value);
-        }
+        _this._onIdpProxyStatusEvent(msg);
       });
     });
+  }
+
+  /**
+  * To Process status events fired by Idp Proxies
+  * @param  {Message}   message     Event Message
+  */
+
+  _onIdpProxyStatusEvent(msg) {
+
+    let _this = this;
+
+    console.log('[Registry onIdpProxyStatusEvent]: ', msg);
+
+    let idpProxyURL = msg.from;
+
+    if (!msg.to.includes('/status')) {
+      console.error('[Registry onIdpProxyStatusEvent] Not Status Event: ', msg);
+      return;
+    }
+
+    Object.keys(_this.idpProxyList).filter((key) => {
+      return _this.idpProxyList[key].url === idpProxyURL;
+    }).map((key) => {
+      _this.idpProxyList[key].status = msg.body.value;
+      console.log('[Registry - onIdpProxyStatusEvent] - Idp Proxy status: ', _this.idpProxyList[key]);
+    });
+
   }
 
   /**
@@ -1697,41 +1723,76 @@ class Registry {
 
         // TODO since the protostubs have other states this should be revised, because the status could change from DEPLOYED to LIVE
         // TODO and this validation will trigger a new load of IDPProxy or Protostub;
-        if (registredComponent && registredComponent.hasOwnProperty('status') && (registredComponent.status === STATUS.DEPLOYED || registredComponent.status === STATUS.LIVE)) {
+        if (registredComponent && registredComponent.hasOwnProperty('status') && (registredComponent.status === STATUS.DEPLOYED || registredComponent.status === STATUS.CREATED || registredComponent.status === STATUS.LIVE)) {
           console.info('[Registry.resolve] Resolved: ', registredComponent.url, registredComponent.status);
           resolve(registredComponent.url);
         } else {
+          //todo: use switch-case to support other types of stubs
           if (type === 'domain-idp') {
 
-            // this process will load the idp proxy, because is not yet registered;
-            console.info('[Registry.resolve] trigger new IDPProxy: ', domainUrl);
-            _this.loader.loadIdpProxy(domainUrl).then(() => {
+            // The IdP Proxy does not exist, let's prepare its deployment by watching its status
 
-              registredComponent  = _this.idpProxyList[domainUrl];
-              _this.idpProxyList[domainUrl].status = STATUS.DEPLOYED;
-              console.info('[Registry.resolve] Resolved: ', registredComponent.url, registredComponent.status);
-              resolve(registredComponent.url);
+            _this.watchingYou.observe('idpProxyList', (change) => {
 
-            }).catch((reason) => {
-              console.error('[Registry.resolve] Error resolving Load IDPProxy: ', reason);
-              reject(reason);
+              console.log('[Registry - resolveNormalStub] idpProxyList changed ' + _this.idpProxyList);
+
+              let keypath = change.keypath;
+
+              if (keypath.includes('status'))
+                keypath = keypath.replace('.status', '');
+
+              if (keypath === domainUrl && change.name === 'status' && change.newValue === STATUS.CREATED) {
+                console.log('[Registry - resolveNormalStub] idpProxyList is live ' + _this.idpProxyList[domainUrl]);
+                resolve(_this.idpProxyList[domainUrl].url);
+              }
             });
+
+            if (!registredComponent) {
+              // this process will load the idp proxy, because is not yet registered;
+              console.info('[Registry.resolveNormalStub] deploy new IDPProxy: ', domainUrl);
+              _this.loader.loadIdpProxy(domainUrl).then(() => {
+
+                console.info('[Registry.resolveNormalStub] IdP Proxy deployed: ', _this.idpProxyList[domainUrl]);
+
+              }).catch((reason) => {
+                console.error('[Registry.resolve] Error resolving Load IDPProxy: ', reason);
+                _this.idpProxyList[domainUrl].status = 'deployment-failed';
+                reject(reason);
+              });
+            }
+
 
           } else {
 
-            // this process will load the Protocols stub, because is not yet registered;
-            console.info('[Registry.resolve] trigger new ProtocolStub: ', domainUrl);
-            _this.loader.loadStub(domainUrl).then(() => {
+            // The protoStub does not exist, let's prepare its deployment by watching its status
 
-              registredComponent  = _this.protostubsList[domainUrl];
-              console.info('[Registry.resolve] Resolved: ', registredComponent.url, registredComponent.status);
-              _this.protostubsList[domainUrl].status = STATUS.DEPLOYED;
+            _this.watchingYou.observe('protostubsList', (change) => {
 
-              resolve(registredComponent.url);
-            }).catch((reason) => {
-              console.error('[Registry.resolve] Error resolving Load ProtocolStub: ', reason);
-              reject(reason);
+              console.log('[Registry - resolveNormalStub] protostubsList changed ' + _this.protostubsList);
+
+              let keypath = change.keypath;
+
+              if (keypath.includes('status'))
+                keypath = keypath.replace('.status', '');
+
+              if (keypath === domainUrl && change.name === 'status' && change.newValue === STATUS.CREATED) {
+                console.log('[Registry - resolve] protostub is live ' + _this.protostubsList[domainUrl]);
+                resolve(_this.protostubsList[domainUrl].url);
+              }
             });
+
+            if (!registredComponent) {
+              // lets deploy the protostub
+              console.info('[Registry.resolve] trigger new ProtocolStub: ', domainUrl);
+              _this.loader.loadStub(domainUrl).then(() => {
+
+                console.log('[Registry - resolveNormalStub] Stub deployed: ', _this.protostubsList[domainUrl]);
+              }).catch((reason) => {
+                console.error('[Registry.resolveNormalStub] Error resolving Load ProtocolStub: ', reason);
+                _this.protostubsList[domainUrl].status = 'deployment-failed';
+                reject(reason);
+              });
+            }
 
           }
 
@@ -1790,26 +1851,31 @@ class Registry {
               _this.p2pConnectionList[registeredP2P.runtimeURL] = p2pConnection;
               */
 
+              // todo: Skip in case p2p option is false
+
               console.log('[Registry - resolve] loadStub with p2pRequester: ', registeredP2P);
 
               let remoteRuntime = registeredP2P.runtime;
 
               let p2pConfig = { remoteRuntimeURL: remoteRuntime, p2pHandler: registeredP2P.p2pHandler, p2pRequesterStub: true };
 
+              // lets prepare the p2pRequesterSTub deployment by setting an observer to its status changes
+
+              _this.watchingYou.observe('p2pRequesterStub', (change) => {
+
+                console.log('[Registry - resolve] p2pRequesterStubs changed ' + _this.p2pRequesterStub);
+
+                if (change.keypath.split('.')[0] === remoteRuntime && change.name === 'status' && change.newValue === STATUS.LIVE) {
+                  console.log('[Registry - resolve] p2pRequester is live ' + _this.p2pRequesterStub[remoteRuntime]);
+                  resolve(_this.p2pRequesterStub[remoteRuntime].url);
+                }
+              });
+
               //  stub load
               _this.loader.loadStub(registeredP2P.p2pRequester, p2pConfig).then(() => {
 
                 console.log('[Registry - resolve] p2pRequester deployed: ', _this.p2pRequesterStub[remoteRuntime]);
 
-                _this.watchingYou.observe('p2pRequesterStub', (change) => {
-
-                  console.log('[Registry - resolve] p2pRequesterStubs changed ' + _this.p2pRequesterStub);
-
-                  if (change.keypath.split('.')[0] === remoteRuntime && change.name === 'status' && change.newValue === STATUS.LIVE) {
-                    console.log('[Registry - resolve] p2pRequester is live ' + _this.p2pRequesterStub[remoteRuntime]);
-                    resolve(_this.p2pRequesterStub[remoteRuntime].url);
-                  }
-                });
 
               }).catch((error) => {
                 reject(error);
@@ -1830,7 +1896,7 @@ class Registry {
 
 
   /**
-  * To verify if url is from a legacy domain.
+  * To verify if url is for a legacy service.
   * @param  {URL.URL}  url      url
   * @return {boolean}
   */
@@ -1847,7 +1913,7 @@ class Registry {
       console.log('[Registry] [Registry.Registry.isLegacy] ', url);
 
       // TODO: to be defined in the runtime configuration
-      let nonLegacy = ['runtime', 'hyperty-runtime', 'domain', 'global', 'hyperty'];
+      let nonLegacy = ['hyperty-runtime', 'domain', 'global', 'hyperty'];
 
       let urlDivided = divideURL(url);
 
@@ -1855,36 +1921,40 @@ class Registry {
         return resolve(false);
       }
 
-      let domain = urlDivided.domain;
+      // process User URLs
+      if (url.split('@').length > 1) {
+        let domain = urlDivided.domain;
 
-      console.log('[Registry] [Registry.Registry.isLegacy] domain: ', domain);
-      if (_this.idpLegacyProxyList.hasOwnProperty(domain)) {
+        console.log('[Registry] [Registry.Registry.isLegacy] domain: ', domain);
+        if (_this.idpLegacyProxyList.hasOwnProperty(domain)) {
 
-        let result = _this.idpLegacyProxyList[domain];
+          let result = _this.idpLegacyProxyList[domain];
 
-        if (result.interworking) {
-          return resolve(result.interworking);
-        } else {
-          return resolve(false);
+          if (result.interworking) {
+            return resolve(result.interworking);
+          } else {
+            return resolve(false);
+          }
         }
+
+        _this._loader.descriptors.getIdpProxyDescriptor(domain).then((result) => {
+
+          console.log('[Registry] [Registry.Registry.isLegacy] Legacy stub descriptor: ', result);
+          _this.idpLegacyProxyList[domain] = result;
+
+          if (result.interworking) {
+            resolve(result.interworking);
+          } else {
+            resolve(false);
+          }
+
+        }).catch((reason) => {
+          console.warn('problem loading idp proxy descriptor for domain:', domain, ' because ', reason);
+          reject(reason);
+        });
+      } else { // process protostub URLs
+        resolve(_this.isInterworkingProtoStub(url));
       }
-
-      _this._loader.descriptors.getIdpProxyDescriptor(domain).then((result) => {
-
-        console.log('[Registry] [Registry.Registry.isLegacy] Legacy stub descriptor: ', result);
-        _this.idpLegacyProxyList[domain] = result;
-
-        if (result.interworking) {
-          resolve(result.interworking);
-        } else {
-          resolve(false);
-        }
-
-      }).catch((reason) => {
-        console.warn('problem loading idp proxy descriptor for domain:', domain, ' because ', reason);
-        reject(reason);
-      });
-
     });
   }
 
