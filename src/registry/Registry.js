@@ -1058,10 +1058,10 @@ class Registry {
       _this.idModule.getIdentityAssertion().then(function(result) {
 
         let userProfile = result.userProfile;
-
+        console.log('[Registry registerHyperty] userProfile', userProfile);
         // hack while domain registry does not support discovery per email
         let email = userProfile.userURL.split('://')[1].split('/')[1];
-        let emailURL = 'user://' + email.split('@')[1] + '/' + email.split('@')[0];
+        let emailURL = userProfile.userURL;
 
         if (_this._messageBus === undefined) {
           reject('MessageBus not found on registerStub');
