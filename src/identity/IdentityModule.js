@@ -652,8 +652,8 @@ class IdentityModule {
 
         _this.fakeNodePopUp().then((url) => {
           _this.sendGenerateMessage(publicKey, origin, url, idp).then((result) => {
-            console.log('TIAGO after idp proxy', result);
-            if (result) {
+            console.log('TIAGO after idp proxy:', result);
+            /*if (result) {
               _this.storeIdentity(result, keyPair).then((value) => {
                 resolve(value);
               }, (err) => {
@@ -662,7 +662,10 @@ class IdentityModule {
 
             } else {
               reject('error on obtaining identity information');
-            }
+            }*/
+          }).catch(function(err) {
+            console.log(err);
+            reject(err);
           });
 
         });
