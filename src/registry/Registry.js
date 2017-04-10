@@ -29,7 +29,8 @@ import HypertyInstance from './HypertyInstance';
 import {MessageFactory} from 'service-framework/dist/MessageFactory';
 import {divideURL, isHypertyURL, isURL, isUserURL, generateGUID, getUserIdentityDomain, isBackendServiceURL} from '../utils/utils.js';
 
-import Discovery from './Discovery';
+//import Discovery from './Discovery';
+import Discovery from '../discovery/CoreDiscovery';
 import 'proxy-observe';
 import { WatchingYou } from 'service-framework/dist/Utils';
 
@@ -164,6 +165,7 @@ class Registry {
       }
 
       if (isHyperty && isDiscovery) {
+        console.log('DISCOVERRRR');
         console.log('[Registry] hypertyDiscovery');
         if (isDelete && hasName) {
           console.log('[Registry] deleteDataObject');
@@ -1161,7 +1163,38 @@ class Registry {
 
                   if (reply.body.code === 200) {
                     resolve(addressURL.address[0]);
-                  } else {
+                  }else if (reply.body.code === 404) {
+                    console.log('[Registry registerHyperty] The update was not possible. Registering new Hyperty at domain registry');
+                    
+                    messageValue = {
+                      user: emailURL,
+                      descriptor: descriptorURL,
+                      url: addressURL.address[0],
+                      expires: _this.expiresTime,
+                      resources: hypertyCapabilities.resources,
+                      dataSchemes: hypertyCapabilities.dataSchema,
+                      runtime: runtime,
+                      status: status
+                    };
+
+                    if (p2pHandler) {
+                      messageValue.p2pHandler = p2pHandler;
+                      messageValue.p2pRequester = p2pRequester;
+                    }
+
+                    message = {type: 'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: messageValue, policy: 'policy'}};
+
+                    _this._messageBus.postMessage(message, (reply) =>{
+                      console.log('[Registry registerHyperty] Hyperty registration update response: ', reply);
+
+                      if (reply.body.code === 200)
+                        resolve(addressURL.address[0]);
+                      else
+                        reject('Failed to register an Hyperty');
+
+                    });
+
+                  }else {
                     reject('Failed to register an Hyperty');
                   }
                 });
