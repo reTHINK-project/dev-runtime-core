@@ -906,11 +906,6 @@ class IdentityModule {
           _this.dataObjectsStorage.getDataObject(dataObjectURL).then((isHypertyReporter) => {
             //if no key exists, create a new one if is the reporter of dataObject
             if (!dataObjectKey) {
-              //let isHypertyReporter = _this.registry.getReporterURLSynchonous(dataObjectURL);
-              console.log('TIAGO isHypertyReporter', isHypertyReporter);
-              console.log('TIAGO isHypertyReporter.owner', isHypertyReporter.owner);
-              console.log('TIAGO message.from', message.from);
-
               // if the hyperty is the reporter of the dataObject then generates a session key
               if (isHypertyReporter.owner && isHypertyReporter.owner === message.from) {
 
@@ -1048,7 +1043,7 @@ class IdentityModule {
         // TIAGO - persistence issue #147
         _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
           let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
-          console.log('TIAGO dataObjectKey', dataObjectKey);
+          console.log('dataObjectKey', dataObjectKey);
 
           if (dataObjectKey) {
 
@@ -1165,7 +1160,7 @@ class IdentityModule {
   _doHandShakePhase(message, chatKeys) {
     let _this = this;
 
-    //console.log('handshakeType');
+    console.log('handshake phase');
 
     return new Promise(function(resolve, reject) {
 
