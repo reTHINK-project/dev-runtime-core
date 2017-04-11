@@ -1,8 +1,9 @@
 
-import {divideURL, getUserURLFromEmail, getUserEmailFromURL, isDataObjectURL, convertToUserURL, getUserIdentityDomain, isLegacy} from '../utils/utils.js';
+import {divideURL, getUserURLFromEmail, getUserEmailFromURL, isDataObjectURL, convertToUserURL, getUserIdentityDomain, isLegacy } from '../utils/utils.js';
 import Identity from './Identity';
 import Crypto from './Crypto';
 import GuiFake from './GuiFake';
+import { WatchingYou } from 'service-framework/dist/Utils';
 
 /**
 *
@@ -51,8 +52,11 @@ class IdentityModule {
 
     _this._domain = divideURL(_this._runtimeURL).domain;
 
+    _this.watchingYou = new WatchingYou();
+
     //to store items with this format: {identity: identityURL, token: tokenID}
     _this.identities = [];
+    _this.identitiesList =  _this.watchingYou.watch('identitiesList', {}, true);
     _this.emailsList = [];
     let newIdentity = new Identity('guid', 'HUMAN');
     _this.identity = newIdentity;
@@ -248,6 +252,7 @@ class IdentityModule {
     let _this = this;
     return new Promise(function(resolve, reject) {
       console.log('[Identity.IdentityModule.getToken] from->', fromURL, '  to->', toUrl);
+
       if (toUrl) {
 //        console.log('toUrl', toUrl);
         _this.registry.isLegacy(toUrl).then(function(result) {
@@ -257,19 +262,45 @@ class IdentityModule {
             let token = _this.getAccessToken(toUrl);
             if (token)              { return resolve(token); }
 
-            console.log('[Identity.IdentityModule.getToken] NO Identity.. Login now');
             let domain = getUserIdentityDomain(toUrl);
-            console.log('[Identity.IdentityModule.getToken] domain->', domain);
-            _this.callGenerateMethods(domain).then((value) => {
-              console.log('[Identity.IdentityModule.getToken] CallGeneratemethods', value);
-              let token = _this.getAccessToken(toUrl);
-              if (token)                { return resolve(token); }              else {
-                return reject('No Access token found');
-              }
-            }, (err) => {
-              console.error('[Identity.IdentityModule.getToken] error CallGeneratemethods');
-              return reject(err);
-            });
+
+            // check if process to get token has already started
+            if (_this.identitiesList[domain] && _this.identitiesList[domain].status === 'in-progress') {
+              // The process to get the token has already started, let's wait by watching its status
+
+              _this.watchingYou.observe('identitiesList', (change) => {
+
+                console.log('[Identity.IdentityModule.getToken]  identitiesList changed ' + _this.identitiesList);
+
+                let keypath = change.keypath;
+
+                if (keypath.includes('status'))
+                  keypath = keypath.replace('.status', '');
+
+                if (keypath === domain && change.name === 'status' && change.newValue === 'created') {
+                  console.log('[Identity.IdentityModule.getToken] token is created ' + _this.identitiesList[domain]);
+                  return resolve(_this.getAccessToken(toUrl));
+                }
+              });
+            } else { //Token does not exist and the process to get has not started yet
+
+              _this.identitiesList[domain] = {
+                status: 'in-progress'
+              };
+
+              console.log('[Identity.IdentityModule.getToken] for-> ', domain);
+              _this.callGenerateMethods(domain).then((value) => {
+                console.log('[Identity.IdentityModule.getToken] CallGeneratemethods', value);
+                let token = _this.getAccessToken(toUrl);
+                if (token)                { return resolve(token); }              else {
+                  return reject('No Access token found');
+                }
+              }, (err) => {
+                console.error('[Identity.IdentityModule.getToken] error CallGeneratemethods');
+                return reject(err);
+              });
+            }
+
           } else {
 
             _this.getIdToken(fromURL).then(function(identity) {
@@ -705,6 +736,8 @@ class IdentityModule {
       _this.currentIdentity = newIdentity;
 
       //verify if the id already exists. If already exists then do not add to the identities list;
+      //to be reviewed since the identity contains data like the asssrtion and ley pairs that may be different if generated twice
+
       let idAlreadyExists = false;
       let oldId;
       for (let identity in _this.identities) {
@@ -734,6 +767,8 @@ class IdentityModule {
         _this.emailsList.push(email);
         _this.identities.push(result);
         _this.storageManager.set('idModule:identities', 0, _this.identities).then(() => {
+          if (_this.identitiesList[idToken.idp.domain])
+            _this.identitiesList[idToken.idp.domain].status = 'created';
 
           resolve(newIdentity);
         });

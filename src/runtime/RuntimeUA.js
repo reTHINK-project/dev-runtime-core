@@ -39,6 +39,8 @@ import { runtimeUtils } from './runtimeUtils';
 
 import GraphConnector from '../graphconnector/GraphConnector';
 
+import CoreDiscovery from '../discovery/CoreDiscovery';
+
 import DataObjectsStorage from '../store-objects/DataObjectsStorage';
 import SyncherManager from '../syncher/SyncherManager';
 import RuntimeCoreCtx from '../policy/context/RuntimeCoreCtx';
@@ -56,6 +58,7 @@ import RuntimeCoreCtx from '../policy/context/RuntimeCoreCtx';
  * @property {Registry} registry - Registry Module;
  * @property {MessageBus} messageBus - Message Bus is used like a router to redirect the messages from one component to other(s)
  * @property {GraphConnector} graphConnector - Graph Connector handling GUID and contacts
+ * @property {CoreDiscovery} discovery - Discovery for discovery hyperties/dataObjects
  */
 class RuntimeUA {
 
@@ -274,6 +277,16 @@ class RuntimeUA {
 
         // Instantiate the Graph Connector
         this.graphConnector = new GraphConnector(this.runtimeURL, this.messageBus, this.storageManager);
+
+        // Instantiate Discovery
+        this.coreDiscovery = new CoreDiscovery(this.runtimeURL, this.messageBus, this.graphConnector);
+
+        // Instantiate Discovery Lib for Testing
+        //_this.discovery = new Discovery(_this.runtimeURL, _this.messageBus);
+        // _this.loadStub("localhost");
+        // setTimeout(function(){
+        //_this.discovery.discoverHyperties("user://google.com/bernardo.marquesg@gmail.com", ["comasdm"], ["chat"]);
+        // }, 2000);
 
         // Add to App Sandbox the listener;
         appSandbox.addListener('*', (msg) => {
