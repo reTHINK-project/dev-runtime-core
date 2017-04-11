@@ -6,7 +6,8 @@ module.exports = function(config) {
       './test/*.spec.js'
     ],
     exclude: [
-      './test/PolicyEngine.spec.js'
+      './test/PolicyEngine.spec.js',
+      './test/SyncherManager.spec.js'
     ],
     preprocessors: {
       './test/*.spec.js': ['webpack']
