@@ -78,10 +78,8 @@ describe('SyncherManager', function() {
     isInterworkingProtoStub: (url) => {
       console.log('isInterworkingProtoStub: ', url);
       return false;
-    }
-  };
+    },
 
-  let runtimeRegistry = {
     getPreAuthSubscribers: () => {
       return ['hyperty://domain/hyperty-instance'];
     },
@@ -94,10 +92,6 @@ describe('SyncherManager', function() {
     },
     registerSubscribedDataObject: () => {},
     registerSubscriber: () => {},
-    isInterworkingProtoStub: (url) => {
-      console.log('isInterworkingProtoStub: ', url);
-      return false;
-    },
     isLocal: (url) => {
       console.log('isLocal: ', url);
       return false;
@@ -141,7 +135,8 @@ describe('SyncherManager', function() {
     }
   };
 
-  let policyEngine = new PEP(new RuntimeCoreCtx(identityModule, runtimeRegistry, storageManager, runtimeFactory.runtimeCapabilities()));
+  let runtimeCoreCtx = new RuntimeCoreCtx(runtimeURL, identityModule, registry, storageManager, runtimeFactory.runtimeCapabilities());
+  let policyEngine = new PEP(runtimeCoreCtx);
 
   let handlers = [
 
