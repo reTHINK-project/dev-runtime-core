@@ -3,7 +3,8 @@ module.exports = function(config) {
     basePath: '',
     frameworks: ['mocha', 'chai', 'sinon'],
     files: [
-      './test/*.spec.js'
+      './test/StorageManager.spec.js',
+      './test/SyncherManager.spec.js'
     ],
     exclude: [
       './test/PolicyEngine.spec.js'
@@ -43,6 +44,6 @@ module.exports = function(config) {
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
-    singleRun: true
+    singleRun: false
   });
 };

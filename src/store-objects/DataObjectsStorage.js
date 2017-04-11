@@ -75,6 +75,11 @@ class DataObjectsStorage {
     let storeDataObject = this._storeDataObject;
     let type = this._getTypeOfObject(isReporter);
 
+    if (!storeDataObject || !storeDataObject[type] || !storeDataObject[type][resource]) {
+      console.log('[StoreDataObjects - save data] - not saved');
+      return;
+    }
+
     console.log('[StoreDataObjects - saveData] - ', isReporter, type, resource, attribute, value);
 
     if (!storeDataObject[type][resource].hasOwnProperty('data')) {
@@ -95,6 +100,11 @@ class DataObjectsStorage {
   saveChildrens(isReporter, resource, attribute, value) {
     let storeDataObject = this._storeDataObject;
     let type = this._getTypeOfObject(isReporter);
+
+    if (!storeDataObject || !storeDataObject[type] || !storeDataObject[type][resource]) {
+      console.log('[StoreDataObjects - save childrens] - not saved');
+      return;
+    }
 
     if (!storeDataObject[type][resource].hasOwnProperty('childrens')) {
       storeDataObject[type][resource].childrens = {};
@@ -124,6 +134,11 @@ class DataObjectsStorage {
     let storeDataObject = this._storeDataObject;
     let type = this._getTypeOfObject(isReporter);
 
+    if (!storeDataObject || !storeDataObject[type] || !storeDataObject[type][resource]) {
+      console.log('[StoreDataObjects - update] - not saved');
+      return;
+    }
+
     console.log('[StoreDataObjects - update] - ', isReporter, type, resource, attribute, value);
 
     if (storeDataObject[type] && storeDataObject[type][resource] && resource && attribute && value) {
@@ -143,10 +158,8 @@ class DataObjectsStorage {
 
       this._storeDataObject = storeDataObject;
       this._storageManager.set('syncherManager:ObjectURLs', 1, storeDataObject);
-
+      return storeDataObject[type][resource];
     }
-
-    return storeDataObject[type][resource];
   }
 
   /**
@@ -160,8 +173,12 @@ class DataObjectsStorage {
   delete(isReporter, resource, attribute, value) {
 
     let storeDataObject = this._storeDataObject;
-
     let type = this._getTypeOfObject(isReporter);
+
+    if (!storeDataObject || !storeDataObject[type] || !storeDataObject[type][resource]) {
+      console.log('[StoreDataObjects - delete] - not saved');
+      return;
+    }
 
     if (storeDataObject[type] && storeDataObject[type][resource] && resource && attribute && value) {
 
@@ -173,9 +190,9 @@ class DataObjectsStorage {
 
       this._storeDataObject = storeDataObject;
       this._storageManager.set('syncherManager:ObjectURLs', 1, storeDataObject);
-    }
 
-    return storeDataObject[type][resource];
+      return storeDataObject[type][resource];
+    }
   }
 
   /**
