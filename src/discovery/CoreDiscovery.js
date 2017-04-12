@@ -47,6 +47,7 @@ class CoreDiscovery {
     _this.discoveryURL = runtimeURL + '/discovery/';
 
     _this.messageBus.addListener(_this.discoveryURL, (msg) => {
+        console.log("RuntimeCore.CoreDiscovery.constructor", msg );
 
         _this.discoveryManager(msg).then(result =>{
 
@@ -137,6 +138,7 @@ class CoreDiscovery {
   discoverHypertiesPerUserProfileData(userIdentifier, dataSchemes, resources) {
     let _this = this;
 
+    console.log("RuntimeCore.Discovery.discoverHypertiesPerUserProfileData on Function");
     return new Promise(function(resolve, reject) {
 
       //translate user identifier (e.g. email, name...) into the associated GUIDs
