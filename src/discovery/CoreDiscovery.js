@@ -38,16 +38,17 @@ class CoreDiscovery {
   * @param  {RuntimeURL}          runtimeURL            runtimeURL
   * @param  {graphConnector}    graphConnector
   */
-  constructor(runtimeURL, msgBus, graphConnector) {
+  constructor(runtimeURL, msgBus, graphConnector, runtimeFactory) {
+    if (!runtimeFactory) throw Error('The catalogue needs the runtimeFactory');
+
     let _this = this;
     _this.messageBus = msgBus;
     _this.graphConnector = graphConnector;
-
+    _this.httpRequest = runtimeFactory.createHttpRequest();
     _this.domain = divideURL(runtimeURL).domain;
     _this.discoveryURL = runtimeURL + '/discovery/';
 
     _this.messageBus.addListener(_this.discoveryURL, (msg) => {
-        console.log("RuntimeCore.CoreDiscovery.constructor", msg );
 
         _this.discoveryManager(msg).then(result =>{
 
@@ -138,7 +139,6 @@ class CoreDiscovery {
   discoverHypertiesPerUserProfileData(userIdentifier, dataSchemes, resources) {
     let _this = this;
 
-    console.log("RuntimeCore.Discovery.discoverHypertiesPerUserProfileData on Function");
     return new Promise(function(resolve, reject) {
 
       //translate user identifier (e.g. email, name...) into the associated GUIDs
@@ -670,28 +670,27 @@ class CoreDiscovery {
 
     return new Promise(function(resolve, reject) {
 
-      $.ajax({
-        dataType: 'text',
-        url: "https://rethink.tlabscloud.com/discovery/rest/discover/lookup?searchquery=" + userIdentifier,
-        type: 'GET',
-        success: function(json) {
-          console.log('discover GUID by user identifier', json);
-          let response = $.parseJSON(json);
-          let filteredGuid = response.results.filter(function(x) {
-            return x["rethinkID"] != undefined
-          });
+      let lookupURLDiscoveryService = "https://rethink.tlabscloud.com/discovery/rest/discover/lookup?searchquery=";
+      _this.httpRequest.get(lookupURLDiscoveryService + userIdentifier)
+      .then(function(json) {
+        console.log('discover GUID by user identifier', json);
 
-          if (filteredGuid.length === 0)
-            return reject('Unsuccessful discover GUID by user identifier');
+        let response = JSON.parse(json);
+        let filteredGuid = response.results.filter(function(x) {
+               return x["rethinkID"] != undefined
+        });
 
-          let guids = filteredGuid.map(function(x){ return x["rethinkID"]; });
+        if (filteredGuid.length === 0)
+          return reject('Unsuccessful discover GUID by user identifier');
 
-          resolve(guids)
-        },
-        error: function (err) {
-          console.log("Error Contacting The Discovery Service");
-          reject(err);
-        }
+        let guids = filteredGuid.map(function(x){ return x["rethinkID"]; });
+
+        return resolve(guids);
+
+      })
+      .catch(function(err) {
+        console.log("HTTP Request error: ", err);
+        return reject(err);
       });
     });
   }
