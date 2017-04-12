@@ -579,13 +579,13 @@ class IdentityModule {
             avatar: 'https://lh3.googleusercontent.com/-WaCrjVMMV-Q/AAAAAAAAAAI/AAAAAAAAAAs/8OlVqCpSB9c/photo.jpg',
             cn: 'test nodejs',
             username: nodejsUser + '@nodejs.com',
-            userURL: 'user://nodejs.com/' + nodejsUser
+            userURL: 'user://nodejs.com/' + nodejsUser + '@nodejs.com'
           };
 
           let identityBundle = {
             assertion: 'assertion',
             idp: 'nodejs',
-            identity: 'user://nodejs.com/' + nodejsUser,
+            identity: 'user://nodejs.com/' + nodejsUser + '@nodejs.com',
             messageInfo: {
               assertion: 'assertion',
               idp: 'nodejs',
