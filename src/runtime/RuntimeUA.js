@@ -279,7 +279,8 @@ class RuntimeUA {
         this.graphConnector = new GraphConnector(this.runtimeURL, this.messageBus, this.storageManager);
 
         // Instantiate Discovery
-        this.coreDiscovery = new CoreDiscovery(this.runtimeURL, this.messageBus, this.graphConnector);
+        console.log("runtimeFactory: ", this.runtimeFactory);
+        this.coreDiscovery = new CoreDiscovery(this.runtimeURL, this.messageBus, this.graphConnector, this.runtimeFactory);
 
         // Instantiate Discovery Lib for Testing
         //_this.discovery = new Discovery(_this.runtimeURL, _this.messageBus);
