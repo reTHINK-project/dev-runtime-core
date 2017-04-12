@@ -255,8 +255,11 @@ class RuntimeUA {
         // Prepare the address allocation instance;
         this.addressAllocation = new AddressAllocation(this.runtimeURL, this.messageBus, this.registry);
 
+        // before the merge
+        //this.policyEngine = new PEP(new RuntimeCoreCtx(this.identityModule, this.registry, this.storageManager, this.runtimeCapabilities));
+        
         // Instantiate the Policy Engine
-        this.policyEngine = new PEP(new RuntimeCoreCtx(this.identityModule, this.registry, this.storageManager, this.runtimeCapabilities));
+        this.policyEngine = new PEP(new RuntimeCoreCtx(this.runtimeURL, this.identityModule, this.registry, this.storageManager, this.runtimeCapabilities));
 
         this.messageBus.pipeline.handlers = [
 
@@ -294,6 +297,12 @@ class RuntimeUA {
         // Register messageBus on Registry
         this.registry.messageBus = this.messageBus;
 
+        // Policy Engine
+        this.policyEngine.messageBus = this.messageBus;
+
+        // Register messageBus on IDM
+        this.identityModule.messageBus = this.messageBus;
+        
         // Register registry on IdentityModule
         this.identityModule.registry = this.registry;
 

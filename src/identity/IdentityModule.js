@@ -85,6 +85,22 @@ class IdentityModule {
 
   }
 
+  callIdentityModuleFunc(methodName, parameters) {
+    let _this = this;
+    let message;
+
+    return new Promise((resolve, reject) => {
+      message = { type: 'execute', to: _this._guiURL, from: _this._idmURL,
+        body: { resource: 'identity', method: methodName, params: parameters }, };
+      _this._messageBus.postMessage(message, (res) => {
+        let result = res.body.value;
+
+        //console.log('TIAGO: return from callIdentityModuleFunc ', result);
+        resolve(result);
+      });
+    });
+  }
+
   /**
   * return the messageBus in this Registry
   * @param {MessageBus}           messageBus
@@ -101,7 +117,60 @@ class IdentityModule {
   set messageBus(messageBus) {
     let _this = this;
     _this._messageBus = messageBus;
+    _this.addGUIListeners();
+  }
 
+  addGUIListeners() {
+    let _this = this;
+
+    // TIAGO
+    _this._messageBus.addListener(_this._idmURL, (msg) => {
+      let funcName = msg.body.method;
+
+      let returnedValue;
+      if (funcName === 'deployGUI') {
+        returnedValue = _this.deployGUI();
+      } else if (funcName === 'getIdentitiesToChoose') {
+        returnedValue = _this.getIdentitiesToChoose();
+      } else if (funcName === 'unregisterIdentity') {
+        let email = msg.body.params.email;
+        returnedValue = _this.unregisterIdentity(email);
+      } else if (funcName === 'generateRSAKeyPair') {
+        // because generateRSAKeyPair is a promise
+        // we have to send the message only after getting the key pair
+        _this.crypto.generateRSAKeyPair().then((keyPair) => {
+          let value = {type: 'execute', value: keyPair, code: 200};
+          let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
+          _this._messageBus.postMessage(replyMsg);
+        });
+        return;
+      } else if (funcName === 'sendGenerateMessage') {
+        let contents = msg.body.params.contents;
+        let origin = msg.body.params.origin;
+        let usernameHint = msg.body.params.usernameHint;
+        let ipDomain = msg.body.params.ipDomain;
+        _this.sendGenerateMessage(contents, origin, usernameHint, ipDomain).then((returnedValue) => {
+          let value = {type: 'execute', value: returnedValue, code: 200};
+          let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
+          _this._messageBus.postMessage(replyMsg);
+        });
+        return;
+      } else if (funcName === 'storeIdentity') {
+        let result = msg.body.params.result;
+        let keyPair = msg.body.params.keyPair;
+        _this.storeIdentity(result, keyPair).then((returnedValue) => {
+          let value = {type: 'execute', value: returnedValue, code: 200};
+          let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
+          _this._messageBus.postMessage(replyMsg);
+        });
+        return;
+      }
+
+      // if the function requested is not a promise
+      let value = {type: 'execute', value: returnedValue, code: 200};
+      let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
+      _this._messageBus.postMessage(replyMsg);
+    });
   }
 
   /**
@@ -150,6 +219,7 @@ class IdentityModule {
 
     throw 'identity not found';
   }
+
 
   _loadIdentities() {
     let _this = this;
@@ -258,8 +328,6 @@ class IdentityModule {
   * @param  {String}  hypertyURL     the Hyperty address
   * @return {JSON}    token    Id token to be added to the message
   */
-
-
   getIdToken(hypertyURL) {
     let _this = this;
     return new Promise(function(resolve, reject) {
@@ -292,8 +360,11 @@ class IdentityModule {
             let identity = _this.identities[index];
             if (identity.identity === userURL) {
               // TODO check this getIdToken when we run on nodejs environment;
-              if (identity.hasOwnProperty('messageInfo')) return resolve(identity.messageInfo);
-              else return resolve(identity);
+              if (identity.hasOwnProperty('messageInfo')) {
+                return resolve(identity.messageInfo);
+              } else {
+                return resolve(identity);
+              }
             }
           }
         } else {
@@ -466,45 +537,6 @@ class IdentityModule {
           reject('error on requesting an identity to the GUI');
         }
       });
-    });
-  }
-
-  openPopup(urlreceived) {
-
-    return new Promise((resolve, reject) => {
-
-      let win = window.open(urlreceived, 'openIDrequest', 'width=800, height=600');
-      if (window.cordova) {
-        win.addEventListener('loadstart', function(e) {
-          let url = e.url;
-          let code = /\&code=(.+)$/.exec(url);
-          let error = /\&error=(.+)$/.exec(url);
-
-          if (code || error) {
-            win.close();
-            resolve(url);
-          }
-        });
-      } else {
-        let pollTimer = setInterval(function() {
-          try {
-            if (win.closed) {
-              reject('Some error occured when trying to get identity.');
-              clearInterval(pollTimer);
-            }
-
-            if (win.document.URL.indexOf('id_token') !== -1 || win.document.URL.indexOf(location.origin) !== -1) {
-              window.clearInterval(pollTimer);
-              let url =   win.document.URL;
-
-              win.close();
-              resolve(url);
-            }
-          } catch (e) {
-            //console.log(e);
-          }
-        }, 500);
-      }
     });
   }
 
@@ -766,7 +798,9 @@ class IdentityModule {
 
         if (result.loginUrl) {
 
-          _this.openPopup(result.loginUrl).then((value) => {
+          //_this.openPopup(result.loginUrl).then((value) => {
+          _this.callIdentityModuleFunc('openPopup', {urlreceived: result.loginUrl}).then((value) => {
+            console.log('TIAGO openPopup value', value);
             resolve(value);
           }, (err) => {
             reject(err);
@@ -937,6 +971,7 @@ class IdentityModule {
                   let newValue = {value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv), hash: _this.crypto.encode(hash)};
 
                   message.body.value = JSON.stringify(newValue);
+                  console.log('TIAGO outgoing:', message);
                   resolve(message);
                 });
               });
@@ -1065,6 +1100,7 @@ class IdentityModule {
                   //console.log('result of hash verification! ', result);
 
                   message.body.assertedIdentity = true;
+                  console.log('TIAGO incoming:', message);
                   resolve(message);
                 });
               });
@@ -1318,6 +1354,7 @@ class IdentityModule {
           console.log('senderCertificate');
           let receivedValue = JSON.parse(atob(message.body.value));
 
+          console.log('TIAGO identity', message.body);
           _this.validateAssertion(message.body.identity.assertion, undefined, message.body.identity.idp).then((value) => {
             let encryptedPMS = _this.crypto.decode(receivedValue.assymetricEncryption);
 
