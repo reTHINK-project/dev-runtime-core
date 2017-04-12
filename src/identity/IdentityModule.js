@@ -506,7 +506,6 @@ class IdentityModule {
   */
   requestIdentityToGUI(identities, idps) {
     let _this = this;
-
     return new Promise(function(resolve, reject) {
 
       //condition to check if the real GUI is deployed. If not, deploys a fake gui
@@ -798,9 +797,7 @@ class IdentityModule {
 
         if (result.loginUrl) {
 
-          //_this.openPopup(result.loginUrl).then((value) => {
           _this.callIdentityModuleFunc('openPopup', {urlreceived: result.loginUrl}).then((value) => {
-            console.log('TIAGO openPopup value', value);
             resolve(value);
           }, (err) => {
             reject(err);
@@ -971,7 +968,7 @@ class IdentityModule {
                   let newValue = {value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv), hash: _this.crypto.encode(hash)};
 
                   message.body.value = JSON.stringify(newValue);
-                  console.log('TIAGO outgoing:', message);
+                  //console.log('TIAGO outgoing:', message);
                   resolve(message);
                 });
               });
@@ -1100,7 +1097,7 @@ class IdentityModule {
                   //console.log('result of hash verification! ', result);
 
                   message.body.assertedIdentity = true;
-                  console.log('TIAGO incoming:', message);
+                  //console.log('TIAGO incoming:', message);
                   resolve(message);
                 });
               });
@@ -1354,7 +1351,7 @@ class IdentityModule {
           console.log('senderCertificate');
           let receivedValue = JSON.parse(atob(message.body.value));
 
-          console.log('TIAGO identity', message.body);
+          //console.log('TIAGO identity', message.body);
           _this.validateAssertion(message.body.identity.assertion, undefined, message.body.identity.idp).then((value) => {
             let encryptedPMS = _this.crypto.decode(receivedValue.assymetricEncryption);
 

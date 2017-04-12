@@ -14,6 +14,9 @@ class GuiFake {
 
     _this._messageBus.addListener(_this._url, msg => {
 
+      // if the method is openpopup then the guifake should not answer
+      if (msg.type === 'execute' && msg.body.method === 'openPopup') { return; }
+
       let identities = msg.body.value.identities;
       let idps = msg.body.value.idps;
 
