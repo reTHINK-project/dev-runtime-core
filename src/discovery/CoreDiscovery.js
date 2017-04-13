@@ -358,29 +358,28 @@ class CoreDiscovery {
     }
 
     return new Promise(function(resolve, reject) {
+      console.log("[CoreDiscovery.discoverHyperties] sending msg ", msg);
 
-      _this.registry.isLegacy(user).then((legacy) => {
-        if (!legacy) {
-          _this.messageBus.postMessage(msg, (reply) => {
+        _this.messageBus.postMessage(msg, (reply) => {
 
-            if (reply.body.code !== 200)
-              return reject('No Hyperty was found');
+          console.log("[CoreDiscovery.discoverHyperties] rcved reply ", reply);
 
+          if (reply.body.code === 200) {
             let hyperties = reply.body.value;
 
             let finalHyperties = [];
             for (var key in hyperties) finalHyperties.push(hyperties[key]);
 
             if (finalHyperties.length > 0) {
-              console.log("Hyperties Found: ", finalHyperties);
+              console.log("[CoreDiscovery.discoverHyperties] Hyperties Found: ", finalHyperties);
               resolve(finalHyperties);
-            } else {
-              return reject('No Hyperty was found');
             }
+          }
+
+          _this.registry.isLegacy(user).then((legacy) => {
+              if (legacy) resolve([{hypertyID: user }])
+              else return reject('No Hyperty was found');
           });
-        } else {
-          resolve([{hypertyID: user }])
-        }
       });
     });
   }
