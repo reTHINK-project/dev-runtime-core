@@ -373,13 +373,13 @@ class CoreDiscovery {
             if (finalHyperties.length > 0) {
               console.log("[CoreDiscovery.discoverHyperties] Hyperties Found: ", finalHyperties);
               resolve(finalHyperties);
-            }
-          }
+            } else return reject('No Hyperty was found');
+          } else return reject('No Hyperty was found');
 
-          _this.registry.isLegacy(user).then((legacy) => {
+          /*_this.registry.isLegacy(user).then((legacy) => {
               if (legacy) resolve([{hypertyID: user }])
               else return reject('No Hyperty was found');
-          });
+          });*/
       });
     });
   }
