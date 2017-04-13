@@ -257,7 +257,7 @@ class RuntimeUA {
 
         // before the merge
         //this.policyEngine = new PEP(new RuntimeCoreCtx(this.identityModule, this.registry, this.storageManager, this.runtimeCapabilities));
-        
+
         // Instantiate the Policy Engine
         this.policyEngine = new PEP(new RuntimeCoreCtx(this.runtimeURL, this.identityModule, this.registry, this.storageManager, this.runtimeCapabilities));
 
@@ -280,7 +280,7 @@ class RuntimeUA {
 
         // Instantiate Discovery
         console.log("runtimeFactory: ", this.runtimeFactory);
-        this.coreDiscovery = new CoreDiscovery(this.runtimeURL, this.messageBus, this.graphConnector, this.runtimeFactory);
+        this.coreDiscovery = new CoreDiscovery(this.runtimeURL, this.messageBus, this.graphConnector, this.runtimeFactory, this.registry);
 
         // Instantiate Discovery Lib for Testing
         //_this.discovery = new Discovery(_this.runtimeURL, _this.messageBus);
@@ -302,7 +302,7 @@ class RuntimeUA {
 
         // Register messageBus on IDM
         this.identityModule.messageBus = this.messageBus;
-        
+
         // Register registry on IdentityModule
         this.identityModule.registry = this.registry;
 
