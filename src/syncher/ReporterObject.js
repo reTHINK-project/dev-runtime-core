@@ -1,4 +1,4 @@
-import { divideURL } from '../utils/utils';
+import { divideURL, splitObjectURL } from '../utils/utils';
 import Subscription from './Subscription';
 
 class ReporterObject {
@@ -11,7 +11,6 @@ class ReporterObject {
     _this._url = url;
 
     _this._bus = parent._bus;
-    _this._storageManager = parent._storageManager;
 
     _this._domain = divideURL(url).domain;
     _this._objSubscriptorURL = _this._url + '/subscription';
@@ -21,6 +20,8 @@ class ReporterObject {
     _this._childrenListeners = [];
 
     _this._forwards = {};
+
+    _this._isToSaveData = false;
 
     _this._allocateListeners();
   }
@@ -40,12 +41,20 @@ class ReporterObject {
 
     let changeURL = _this._url + '/changes';
     _this._changeListener = _this._bus.addListener(changeURL, (msg) => {
-      //TODO: what todo here? Save changes?
-      if (msg.body.attribute) {
-        _this._parent._storeDataObjects.updateData(_this._url, 'data', msg.body.attribute, msg.body.value, true);
-      }
+
       console.log('[SyncherManager.ReporterObject ] SyncherManager-' + changeURL + '-RCV: ', msg);
+
+      //TODO: what todo here? Save changes?
+      if (this._isToSaveData && msg.body.attribute) {
+        console.log('[SyncherManager.ReporterObject ] SyncherManager - save data: ', msg);
+        _this._parent._dataObjectsStorage.update(true, _this._url, 'version', msg.body.version);
+        _this._parent._dataObjectsStorage.saveData(true, _this._url, msg.body.attribute, msg.body.value);
+      }
     });
+  }
+
+  set isToSaveData(value) {
+    this._isToSaveData = value;
   }
 
   _releaseListeners() {
@@ -75,10 +84,13 @@ class ReporterObject {
     Object.keys(subscriptions).forEach((key) => {
       let hypertyURL = subscriptions[key];
 
+      console.log('[SyncherManager.ReporterObject] - resume subscriptions', _this, hypertyURL, _this._childrens);
+
       if (!_this._subscriptions[hypertyURL]) {
         _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, _this._childrens, true);
       }
     });
+
   }
 
   /**
@@ -177,6 +189,26 @@ class ReporterObject {
             let childListener = _this._bus.addListener(childURL, (msg) => {
               //TODO: what todo here? Save childrens?
               console.log('[SyncherManager.ReporterObject received]', msg);
+
+              if (msg.type === 'create' && msg.to.includes('children') && this._isToSaveData) {
+                let splitedReporterURL = splitObjectURL(msg.to);
+                let url = splitedReporterURL.url;
+
+                let resource = splitedReporterURL.resource;
+                let value = {
+                  identity: msg.body.identity,
+                  value: msg.body.value
+                };
+                let objectURLResource = msg.body.resource;
+                let attribute = resource;
+
+                if (objectURLResource) attribute += '.' + objectURLResource;
+
+                console.log('[SyncherManager.ReporterObject - save childrens] - : ', this._isToSaveData, url, attribute, value);
+
+                _this._parent._dataObjectsStorage.saveChildrens(true, url, attribute, value);
+              }
+
             });
             _this._childrenListeners.push(childListener);
 
@@ -266,10 +298,12 @@ class ReporterObject {
         let userURL;
         if (msg.body.identity && msg.body.identity.userProfile.userURL) {
           userURL = msg.body.identity.userProfile.userURL;
-          _this._parent._storeDataObjects.update(_this._url, 'subscriberUsers', userURL);
+          _this._parent._dataObjectsStorage.update(true, _this._url, 'subscriberUsers', userURL);
         }
 
-        _this._parent._storeDataObjects.update(_this._url, 'subscriptions', hypertyURL);
+        _this._parent._dataObjectsStorage.update(true, _this._url, 'subscriptions', hypertyURL);
+
+        reply.body.owner = _this._owner;
 
         //FLOW-OUT: subscription response sent (forward from internal Hyperty)
         _this._bus.postMessage({

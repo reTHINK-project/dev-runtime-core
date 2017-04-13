@@ -300,3 +300,122 @@ export function divideEmail(email) {
 
   return result;
 }
+
+
+export function assign(obj, keyPath, value) {
+
+  if (!obj) obj = {};
+  if (typeof(keyPath) === 'string') keyPath = parseAttributes(keyPath);
+
+  let lastKeyIndex = keyPath.length - 1;
+
+  for (var i = 0; i < lastKeyIndex; ++i) {
+    let key = keyPath[i];
+    if (!(key in obj)) {
+      obj[key] = {};
+    }
+
+    obj = obj[key];
+
+  }
+
+  obj[keyPath[lastKeyIndex]] = value;
+}
+
+export function splitObjectURL(dataObjectURL) {
+  console.info('[utils - splitObjectURL]: ', dataObjectURL);
+
+  let splitedURL = dataObjectURL.split('/');
+  let url = splitedURL[0] + '//' + splitedURL[2] + '/' + splitedURL[3];
+  let resource = splitedURL[5];
+
+  let result = {
+    url: url,
+    resource: resource
+  };
+
+  console.info('[utils - splitObjectURL]: ', result);
+
+  return result;
+}
+
+export function checkAttribute(path) {
+
+  let regex = /((([a-zA-Z]+):\/\/([0-9a-zA-Z][-\w]*[0-9a-zA-Z]\.)+[a-zA-Z]{2,9})\/[a-zA-Z0-9\.]+@[a-zA-Z0-9]+(\-)?[a-zA-Z0-9]+(\.)?[a-zA-Z0-9]{2,10}?\.[a-zA-Z]{2,10})(.+(?=.identity))?/gm;
+
+  let list = [];
+  let final = [];
+  let test = path.match(regex);
+
+  if (test == null) {
+    final = path.split('.');
+  } else {
+    let m;
+    while ((m = regex.exec(path)) !== null) {
+      // This is necessary to avoid infinite loops with zero-width matches
+      if (m.index === regex.lastIndex) {
+        regex.lastIndex++;
+      }
+
+      // The result can be accessed through the `m`-variable.
+      m.forEach((match, groupIndex) => {
+        if (groupIndex === 0) {
+          list.push(match);
+        }
+      });
+    }
+    let result;
+    list.forEach((url) => {
+
+      result = path.replace(url, '*-*');
+      final = result.split('.').map((item) => {
+
+        if (item === '*-*') { return url; }
+
+        return item;
+      });
+    });
+  }
+
+  console.log('[RuntimeCore.Utils.checkAttribute]', final);
+  return final;
+}
+
+export function parseAttributes(path) {
+  let regex = /([0-9a-zA-Z][-\w]*):\/\//g;
+
+  let string3 = 'identity';
+
+  if (!path.includes('://')) {
+    return (path.split('.'));
+  } else {
+    let string1 = path.split(regex)[0];
+
+    let array1 = string1.split('.');
+
+    let string2 = path.replace(string1, '');
+
+    if (path.includes(string3)) {
+
+      let array2 = string2.split(string3 + '.');
+
+      console.log('array2 ' + array2);
+
+      string2 = array2[0].slice('.', -1);
+
+      array2 = array2[1].split('.');
+
+      array1.push(string2, string3);
+
+      array1 = array1.concat(array2);
+
+    } else {
+      array1.push(string2);
+
+    }
+
+    return (array1.filter(Boolean));
+
+  }
+
+}

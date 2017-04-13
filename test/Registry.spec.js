@@ -24,14 +24,17 @@ import AddressAllocation from '../src/allocation/AddressAllocation';
 // Testing Registry
 let runtimeURL = 'hyperty-runtime://ua.pt/123';
 
+let sandboxDummyCapabilities = {browser: true};
 let storageManager = runtimeFactory.storageManager();
 let appSandbox = runtimeFactory.createAppSandbox();
-let sandboxDummyCapabilities = {browser: true};
 
 // let sandboxDummy = {sandbox: 'sandbox', type: 'normal', capabilities: sandboxDummyCapabilities};
 let protostubURL;
 let sandboxDummy = new Sandbox(sandboxDummyCapabilities);
 sandboxDummy.type = 'normal';
+
+console.log('App:', appSandbox);
+console.log('Work:', sandboxDummy);
 
 //registry = new Registry(msgbus, runtimeURL, appSandbox);
 describe('Registry', function() {
@@ -295,6 +298,8 @@ describe('Registry', function() {
     it('should get a sandbox from a domain', function(done) {
       let domain = 'ua.pt';
 
+      console.log('Get Sandbox:', sandboxDummy);
+
       expect(registry.getSandbox(domain).then(function(response) {
         return response;
       })).to.be.fulfilled.and.eventually.to.be.eql(sandboxDummy).and.notify(done);
@@ -319,15 +324,13 @@ describe('Registry', function() {
       .and.notify(done);
     });
 
-
+    // let anotherSandbox = { sandbox: sandbox1, type: 'normal', capabilities: sandboxDummyCapabilities};
     let sandbox1 = new Sandbox(sandboxDummyCapabilities);
-
-    let anotherSandbox = { sandbox: sandbox1, type: 'normal', capabilities: sandboxDummyCapabilities};
 
     it('should register a anotherdomain protoStub URL', function(done) {
       let domainURL = 'anotherDomain.pt';
 
-      expect(registry.registerStub(anotherSandbox, domainURL).then(function(response) {
+      expect(registry.registerStub(sandbox1, domainURL).then(function(response) {
         return response.url;
       })).to.be.fulfilled.and.eventually.contain(domainURL).and.notify(done);
     });
@@ -338,7 +341,7 @@ describe('Registry', function() {
 
       expect(registry.getSandbox(domainURL, sandboxDummyCapabilities).then(function(response) {
         return response;
-      })).to.be.fulfilled.and.eventually.to.be.equal(anotherSandbox).and.notify(done);
+      })).to.be.fulfilled.and.eventually.to.be.equal(sandbox1).and.notify(done);
     });
 
   //  });

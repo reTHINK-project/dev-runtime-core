@@ -1,8 +1,9 @@
 
-import {divideURL, getUserURLFromEmail, getUserEmailFromURL, isDataObjectURL, convertToUserURL, getUserIdentityDomain, isLegacy} from '../utils/utils.js';
+import {divideURL, getUserURLFromEmail, getUserEmailFromURL, isDataObjectURL, convertToUserURL, getUserIdentityDomain, isLegacy } from '../utils/utils.js';
 import Identity from './Identity';
 import Crypto from './Crypto';
 import GuiFake from './GuiFake';
+import { WatchingYou } from 'service-framework/dist/Utils';
 
 /**
 *
@@ -51,8 +52,11 @@ class IdentityModule {
 
     _this._domain = divideURL(_this._runtimeURL).domain;
 
+    _this.watchingYou = new WatchingYou();
+
     //to store items with this format: {identity: identityURL, token: tokenID}
     _this.identities = [];
+    _this.identitiesList =  _this.watchingYou.watch('identitiesList', {}, true);
     _this.emailsList = [];
     let newIdentity = new Identity('guid', 'HUMAN');
     _this.identity = newIdentity;
@@ -81,6 +85,22 @@ class IdentityModule {
 
   }
 
+  callIdentityModuleFunc(methodName, parameters) {
+    let _this = this;
+    let message;
+
+    return new Promise((resolve, reject) => {
+      message = { type: 'execute', to: _this._guiURL, from: _this._idmURL,
+        body: { resource: 'identity', method: methodName, params: parameters }, };
+      _this._messageBus.postMessage(message, (res) => {
+        let result = res.body.value;
+
+        //console.log('TIAGO: return from callIdentityModuleFunc ', result);
+        resolve(result);
+      });
+    });
+  }
+
   /**
   * return the messageBus in this Registry
   * @param {MessageBus}           messageBus
@@ -97,7 +117,60 @@ class IdentityModule {
   set messageBus(messageBus) {
     let _this = this;
     _this._messageBus = messageBus;
+    _this.addGUIListeners();
+  }
 
+  addGUIListeners() {
+    let _this = this;
+
+    // TIAGO
+    _this._messageBus.addListener(_this._idmURL, (msg) => {
+      let funcName = msg.body.method;
+
+      let returnedValue;
+      if (funcName === 'deployGUI') {
+        returnedValue = _this.deployGUI();
+      } else if (funcName === 'getIdentitiesToChoose') {
+        returnedValue = _this.getIdentitiesToChoose();
+      } else if (funcName === 'unregisterIdentity') {
+        let email = msg.body.params.email;
+        returnedValue = _this.unregisterIdentity(email);
+      } else if (funcName === 'generateRSAKeyPair') {
+        // because generateRSAKeyPair is a promise
+        // we have to send the message only after getting the key pair
+        _this.crypto.generateRSAKeyPair().then((keyPair) => {
+          let value = {type: 'execute', value: keyPair, code: 200};
+          let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
+          _this._messageBus.postMessage(replyMsg);
+        });
+        return;
+      } else if (funcName === 'sendGenerateMessage') {
+        let contents = msg.body.params.contents;
+        let origin = msg.body.params.origin;
+        let usernameHint = msg.body.params.usernameHint;
+        let ipDomain = msg.body.params.ipDomain;
+        _this.sendGenerateMessage(contents, origin, usernameHint, ipDomain).then((returnedValue) => {
+          let value = {type: 'execute', value: returnedValue, code: 200};
+          let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
+          _this._messageBus.postMessage(replyMsg);
+        });
+        return;
+      } else if (funcName === 'storeIdentity') {
+        let result = msg.body.params.result;
+        let keyPair = msg.body.params.keyPair;
+        _this.storeIdentity(result, keyPair).then((returnedValue) => {
+          let value = {type: 'execute', value: returnedValue, code: 200};
+          let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
+          _this._messageBus.postMessage(replyMsg);
+        });
+        return;
+      }
+
+      // if the function requested is not a promise
+      let value = {type: 'execute', value: returnedValue, code: 200};
+      let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
+      _this._messageBus.postMessage(replyMsg);
+    });
   }
 
   /**
@@ -231,6 +304,7 @@ class IdentityModule {
     let _this = this;
     return new Promise(function(resolve, reject) {
       console.log('[Identity.IdentityModule.getToken] from->', fromURL, '  to->', toUrl);
+
       if (toUrl) {
 //        console.log('toUrl', toUrl);
         _this.registry.isLegacy(toUrl).then(function(result) {
@@ -242,19 +316,45 @@ class IdentityModule {
             let token = _this.getAccessToken(toUrl);
             if (token)              { return resolve(token); }
 
-            console.log('[Identity.IdentityModule.getToken] NO Identity.. Login now');
             let domain = getUserIdentityDomain(toUrl);
-            console.log('[Identity.IdentityModule.getToken] domain->', domain);
-            _this.callGenerateMethods(domain).then((value) => {
-              console.log('[Identity.IdentityModule.getToken] CallGeneratemethods', value);
-              let token = _this.getAccessToken(toUrl);
-              if (token)                { return resolve(token); }              else {
-                return reject('No Access token found');
-              }
-            }, (err) => {
-              console.error('[Identity.IdentityModule.getToken] error CallGeneratemethods');
-              return reject(err);
-            });
+
+            // check if process to get token has already started
+            if (_this.identitiesList[domain] && _this.identitiesList[domain].status === 'in-progress') {
+              // The process to get the token has already started, let's wait by watching its status
+
+              _this.watchingYou.observe('identitiesList', (change) => {
+
+                console.log('[Identity.IdentityModule.getToken]  identitiesList changed ' + _this.identitiesList);
+
+                let keypath = change.keypath;
+
+                if (keypath.includes('status'))
+                  keypath = keypath.replace('.status', '');
+
+                if (keypath === domain && change.name === 'status' && change.newValue === 'created') {
+                  console.log('[Identity.IdentityModule.getToken] token is created ' + _this.identitiesList[domain]);
+                  return resolve(_this.getAccessToken(toUrl));
+                }
+              });
+            } else { //Token does not exist and the process to get has not started yet
+
+              _this.identitiesList[domain] = {
+                status: 'in-progress'
+              };
+
+              console.log('[Identity.IdentityModule.getToken] for-> ', domain);
+              _this.callGenerateMethods(domain).then((value) => {
+                console.log('[Identity.IdentityModule.getToken] CallGeneratemethods', value);
+                let token = _this.getAccessToken(toUrl);
+                if (token)                { return resolve(token); }              else {
+                  return reject('No Access token found');
+                }
+              }, (err) => {
+                console.error('[Identity.IdentityModule.getToken] error CallGeneratemethods');
+                return reject(err);
+              });
+            }
+
           } else {
             _this._getValidToken(fromURL).then((identity) => {
               resolve(identity);
@@ -471,7 +571,6 @@ class IdentityModule {
   */
   requestIdentityToGUI(identities, idps) {
     let _this = this;
-
     return new Promise(function(resolve, reject) {
 
       //condition to check if the real GUI is deployed. If not, deploys a fake gui
@@ -502,45 +601,6 @@ class IdentityModule {
           reject('error on requesting an identity to the GUI');
         }
       });
-    });
-  }
-
-  openPopup(urlreceived) {
-
-    return new Promise((resolve, reject) => {
-
-      let win = window.open(urlreceived, 'openIDrequest', 'width=800, height=600');
-      if (window.cordova) {
-        win.addEventListener('loadstart', function(e) {
-          let url = e.url;
-          let code = /\&code=(.+)$/.exec(url);
-          let error = /\&error=(.+)$/.exec(url);
-
-          if (code || error) {
-            win.close();
-            resolve(url);
-          }
-        });
-      } else {
-        let pollTimer = setInterval(function() {
-          try {
-            if (win.closed) {
-              reject('Some error occured when trying to get identity.');
-              clearInterval(pollTimer);
-            }
-
-            if (win.document.URL.indexOf('id_token') !== -1 || win.document.URL.indexOf(location.origin) !== -1) {
-              window.clearInterval(pollTimer);
-              let url =   win.document.URL;
-
-              win.close();
-              resolve(url);
-            }
-          } catch (e) {
-            //console.log(e);
-          }
-        }, 500);
-      }
     });
   }
 
@@ -608,19 +668,20 @@ class IdentityModule {
           return resolve(_this.currentIdentity);
         } else {
           console.log('getIdentityAssertion for nodejs');
-          let randomNumber = Math.floor((Math.random() * 10000) + 1);
+          //let randomNumber = Math.floor((Math.random() * 10000) + 1);
+          let nodejsUser = 'nodejs-conference';
 
           let userProfile = {
             avatar: 'https://lh3.googleusercontent.com/-WaCrjVMMV-Q/AAAAAAAAAAI/AAAAAAAAAAs/8OlVqCpSB9c/photo.jpg',
             cn: 'test nodejs',
-            username: 'nodejs-' + randomNumber + '@nodejs.com',
-            userURL: 'user://nodejs.com/nodejs-' + randomNumber
+            username: nodejsUser + '@nodejs.com',
+            userURL: 'user://nodejs.com/' + nodejsUser + '@nodejs.com'
           };
 
           let identityBundle = {
             assertion: 'assertion',
             idp: 'nodejs',
-            identity: 'user://nodejs.com/nodejs-' + randomNumber,
+            identity: 'user://nodejs.com/' + nodejsUser + '@nodejs.com',
             messageInfo: {
               assertion: 'assertion',
               idp: 'nodejs',
@@ -740,6 +801,8 @@ class IdentityModule {
       _this.currentIdentity = newIdentity;
 
       //verify if the id already exists. If already exists then do not add to the identities list;
+      //to be reviewed since the identity contains data like the asssrtion and ley pairs that may be different if generated twice
+
       let idAlreadyExists = false;
       let oldId;
       for (let identity in _this.identities) {
@@ -769,6 +832,8 @@ class IdentityModule {
         _this.emailsList.push(email);
         _this.identities.push(result);
         _this.storageManager.set('idModule:identities', 0, _this.identities).then(() => {
+          if (_this.identitiesList[idToken.idp.domain])
+            _this.identitiesList[idToken.idp.domain].status = 'created';
 
           resolve(newIdentity);
         });
@@ -797,7 +862,7 @@ class IdentityModule {
 
         if (result.loginUrl) {
 
-          _this.openPopup(result.loginUrl).then((value) => {
+          _this.callIdentityModuleFunc('openPopup', {urlreceived: result.loginUrl}).then((value) => {
             resolve(value);
           }, (err) => {
             reject(err);
@@ -968,7 +1033,7 @@ class IdentityModule {
                   let newValue = {value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv), hash: _this.crypto.encode(hash)};
 
                   message.body.value = JSON.stringify(newValue);
-                  console.log('TIAGO outgoing:', message);
+                  //console.log('TIAGO outgoing:', message);
                   resolve(message);
                 });
               });
@@ -1097,7 +1162,7 @@ class IdentityModule {
                   //console.log('result of hash verification! ', result);
 
                   message.body.assertedIdentity = true;
-                  console.log('TIAGO incoming:', message);
+                  //console.log('TIAGO incoming:', message);
                   resolve(message);
                 });
               });
@@ -1351,7 +1416,7 @@ class IdentityModule {
           console.log('senderCertificate');
           let receivedValue = JSON.parse(atob(message.body.value));
 
-          console.log('TIAGO identity', message.body);
+          //console.log('TIAGO identity', message.body);
           _this.validateAssertion(message.body.identity.assertion, undefined, message.body.identity.idp).then((value) => {
             let encryptedPMS = _this.crypto.decode(receivedValue.assymetricEncryption);
 
