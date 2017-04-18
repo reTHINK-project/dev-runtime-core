@@ -249,7 +249,7 @@ class IdentityModule {
    * GetValidToken is for non legacy hyperties and verifies if the Token is still valid
    * if the token is invalid it requests a new token
    * @param  {String} hypertyURL hypertyURL
-   * @return {Promise}           
+   * @return {Promise}
    */
   _getValidToken(hypertyURL) {
     let _this = this;
@@ -349,7 +349,7 @@ class IdentityModule {
               _this.callGenerateMethods(domain).then((value) => {
                 console.log('[Identity.IdentityModule.getToken] CallGeneratemethods', value);
                 let token = _this.getAccessToken(toUrl);
-                if (token) { 
+                if (token) {
                   return resolve(token);
                 } else {
                   return reject('No Access token found');
@@ -464,7 +464,7 @@ class IdentityModule {
             return null; // the getToken function then generates a new token
           }
         } // else this access token has no expiration time
-        
+
         if (identity.hasOwnProperty('messageInfo') && identity.messageInfo.hasOwnProperty('userProfile') && identity.messageInfo.userProfile) {
           identityToReturn = { userProfile: identity.messageInfo.userProfile, access_token: identity.interworking.access_token };
           if (identity.hasOwnProperty('infoToken') && identity.infoToken.hasOwnProperty('id')) {
@@ -532,7 +532,7 @@ class IdentityModule {
     let _this = this;
 
     //let userURL = convertToUserURL(userID);
-    
+
     for (let identity in _this.identities) {
       if (_this.identities[identity].identity === userURL) {
         console.log('splice', _this.identities.splice(identity, 1));
@@ -577,17 +577,15 @@ class IdentityModule {
     let _this = this;
     return new Promise(function(resolve, reject) {
 
-      let guiFakeURL = _this._guiURL + '-fake';
-
       //condition to check if the real GUI is deployed. If not, deploys a fake gui
       if (_this.guiDeployed === false) {
-
+        let guiFakeURL = _this._guiURL;
         let guiFake = new GuiFake(guiFakeURL, _this._messageBus);
         _this.guiFake = guiFake;
         _this.guiDeployed = true;
       }
 
-      let message = {type: 'create', to: guiFakeURL, from: _this._idmURL,
+      let message = {type: 'create', to: _this._guiURL, from: _this._idmURL,
         body: {value: {identities: identities, idps: idps}}};
 
       let id = _this._messageBus.postMessage(message);
