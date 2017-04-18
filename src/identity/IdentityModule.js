@@ -85,50 +85,6 @@ class IdentityModule {
 
   }
 
-  openPopup(urlreceived) {
-
-    console.log('TIAGO openPopup toolkit');
-
-    return new Promise((resolve, reject) => {
-
-      let win = window.open(urlreceived, 'openIDrequest', 'width=800, height=600');
-      if (window.cordova) {
-        win.addEventListener('loadstart', function(e) {
-          let url = e.url;
-          let code = /\&code=(.+)$/.exec(url);
-          let error = /\&error=(.+)$/.exec(url);
-
-          if (code || error) {
-            win.close();
-            return resolve(url);
-          } else {
-            return reject('openPopup error 1 - should not happen');
-          }
-        });
-      } else {
-        let pollTimer = setInterval(function() {
-          try {
-            if (win.closed) {
-              return reject('Some error occured when trying to get identity.');
-              clearInterval(pollTimer);
-            }
-
-            if (win.document.URL.indexOf('id_token') !== -1 || win.document.URL.indexOf(location.origin) !== -1) {
-              window.clearInterval(pollTimer);
-              let url =   win.document.URL;
-
-              win.close();
-              return resolve(url);
-            }
-          } catch (e) {
-            //return reject('openPopup error 2 - should not happen');
-            //console.log('TIAGO', e);
-          }
-        }, 500);
-      }
-    });
-  }
-
   callIdentityModuleFunc(methodName, parameters) {
     let _this = this;
     let message;
@@ -136,11 +92,17 @@ class IdentityModule {
     return new Promise((resolve, reject) => {
       message = { type: 'execute', to: _this._guiURL, from: _this._idmURL,
         body: { resource: 'identity', method: methodName, params: parameters }, };
-      _this._messageBus.postMessage(message, (res) => {
-        let result = res.body.value;
+      let id = _this._messageBus.postMessage(message);
+
+      //add listener without timout
+      _this._messageBus.addResponseListener(_this._idmURL, id, msg => {
+        _this._messageBus.removeResponseListener(_this._idmURL, id);
+
+        let result = msg.body.value;
 
         //console.log('TIAGO: return from callIdentityModuleFunc ', result);
         resolve(result);
+
       });
     });
   }
@@ -915,8 +877,8 @@ class IdentityModule {
 
         if (result.loginUrl) {
 
-          //_this.callIdentityModuleFunc('openPopup', {urlreceived: result.loginUrl}).then((value) => {
-          _this.openPopup(result.loginUrl).then((value) => {
+          _this.callIdentityModuleFunc('openPopup', {urlreceived: result.loginUrl}).then((value) => {
+          //_this.openPopup(result.loginUrl).then((value) => {
             console.log('TIAGO openPopup', value);
             resolve(value);
           }, (err) => {
