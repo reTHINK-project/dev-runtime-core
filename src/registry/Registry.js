@@ -175,10 +175,6 @@ class Registry {
 
     });
 
-    // also set up messageBus in the IdentityModule component
-    // TODO redefine a better way to add the messageBus in the IdModule
-    _this.idModule.messageBus = messageBus;
-
     // Install AddressAllocation
     let addressAllocation = AddressAllocation.instance;
     _this.addressAllocation = addressAllocation;
@@ -1628,7 +1624,6 @@ class Registry {
                 console.log('[Registry - resolveNormalStub] Stub deployed: ', _this.protostubsList[domainUrl]);
               }).catch((reason) => {
                 console.error('[Registry.resolveNormalStub] Error resolving Load ProtocolStub: ', reason);
-                _this.protostubsList[domainUrl].status = 'deployment-failed';
                 reject(reason);
               });
             }
@@ -1779,9 +1774,9 @@ class Registry {
         _this._loader.descriptors.getIdpProxyDescriptor(domain).then((result) => {
 
           console.log('[Registry] [Registry.Registry.isLegacy] Legacy stub descriptor: ', result);
-          _this.idpLegacyProxyList[domain] = result;
 
           if (result.interworking) {
+            _this.idpLegacyProxyList[domain] = result;
             resolve(result.interworking);
           } else {
             resolve(false);

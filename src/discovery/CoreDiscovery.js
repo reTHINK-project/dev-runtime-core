@@ -38,7 +38,7 @@ class CoreDiscovery {
   * @param  {RuntimeURL}          runtimeURL            runtimeURL
   * @param  {graphConnector}    graphConnector
   */
-  constructor(runtimeURL, msgBus, graphConnector, runtimeFactory) {
+  constructor(runtimeURL, msgBus, graphConnector, runtimeFactory, registry) {
     if (!runtimeFactory) throw Error('The catalogue needs the runtimeFactory');
 
     let _this = this;
@@ -47,6 +47,7 @@ class CoreDiscovery {
     _this.httpRequest = runtimeFactory.createHttpRequest();
     _this.domain = divideURL(runtimeURL).domain;
     _this.discoveryURL = runtimeURL + '/discovery/';
+    _this.registry = registry;
 
     _this.messageBus.addListener(_this.discoveryURL, (msg) => {
 
@@ -372,23 +373,28 @@ class CoreDiscovery {
     }
     
     return new Promise(function(resolve, reject) {
+      console.log("[CoreDiscovery.discoverHyperties] sending msg ", msg);
 
-      _this.messageBus.postMessage(msg, (reply) => {
+        _this.messageBus.postMessage(msg, (reply) => {
 
-        if(reply.body.code !== 200)
-          return reject('No Hyperty was found');
+          console.log("[CoreDiscovery.discoverHyperties] rcved reply ", reply);
 
-        let hyperties = reply.body.value;
+          if (reply.body.code === 200) {
+            let hyperties = reply.body.value;
 
-        let finalHyperties = [];
-        for (var key in hyperties) finalHyperties.push(hyperties[key]);
+            let finalHyperties = [];
+            for (var key in hyperties) finalHyperties.push(hyperties[key]);
 
-        if (finalHyperties.length > 0) {
-          console.log("Hyperties Found: ", finalHyperties);
-          resolve(finalHyperties);
-        } else {
-          return reject('No Hyperty was found');
-        }
+            if (finalHyperties.length > 0) {
+              console.log("[CoreDiscovery.discoverHyperties] Hyperties Found: ", finalHyperties);
+              resolve(finalHyperties);
+            } else return reject('No Hyperty was found');
+          } else return reject('No Hyperty was found');
+
+          /*_this.registry.isLegacy(user).then((legacy) => {
+              if (legacy) resolve([{hypertyID: user }])
+              else return reject('No Hyperty was found');
+          });*/
       });
     });
   }
