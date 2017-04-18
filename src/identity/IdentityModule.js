@@ -85,6 +85,50 @@ class IdentityModule {
 
   }
 
+  openPopup(urlreceived) {
+
+    console.log('TIAGO openPopup toolkit');
+
+    return new Promise((resolve, reject) => {
+
+      let win = window.open(urlreceived, 'openIDrequest', 'width=800, height=600');
+      if (window.cordova) {
+        win.addEventListener('loadstart', function(e) {
+          let url = e.url;
+          let code = /\&code=(.+)$/.exec(url);
+          let error = /\&error=(.+)$/.exec(url);
+
+          if (code || error) {
+            win.close();
+            return resolve(url);
+          } else {
+            return reject('openPopup error 1 - should not happen');
+          }
+        });
+      } else {
+        let pollTimer = setInterval(function() {
+          try {
+            if (win.closed) {
+              return reject('Some error occured when trying to get identity.');
+              clearInterval(pollTimer);
+            }
+
+            if (win.document.URL.indexOf('id_token') !== -1 || win.document.URL.indexOf(location.origin) !== -1) {
+              window.clearInterval(pollTimer);
+              let url =   win.document.URL;
+
+              win.close();
+              return resolve(url);
+            }
+          } catch (e) {
+            //return reject('openPopup error 2 - should not happen');
+            //console.log('TIAGO', e);
+          }
+        }, 500);
+      }
+    });
+  }
+
   callIdentityModuleFunc(methodName, parameters) {
     let _this = this;
     let message;
@@ -871,7 +915,8 @@ class IdentityModule {
 
         if (result.loginUrl) {
 
-          _this.callIdentityModuleFunc('openPopup', {urlreceived: result.loginUrl}).then((value) => {
+          //_this.callIdentityModuleFunc('openPopup', {urlreceived: result.loginUrl}).then((value) => {
+          _this.openPopup(result.loginUrl).then((value) => {
             console.log('TIAGO openPopup', value);
             resolve(value);
           }, (err) => {
