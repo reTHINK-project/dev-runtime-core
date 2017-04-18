@@ -14,37 +14,31 @@ class GuiFake {
 
     _this._messageBus.addListener(_this._url, msg => {
 
-      if (msg.hasOwnProperty('type') &&
-          msg.type === 'create' &&
-          msg.body.hasOwnProperty('value') &&
-          msg.body.value.hasOwnProperty('identities') &&
-          msg.body.value.hasOwnProperty('idps')) {
+      // if the method is openpopup then the guifake should not answer
+      if (msg.type === 'execute' && msg.body.method === 'openPopup') { return; }
 
-        let identities = msg.body.value.identities;
-        let idps = msg.body.value.idps;
+      let identities = msg.body.value.identities;
+      let idps = msg.body.value.idps;
 
-        let value;
+      let value;
 
-        if (identities[0] !== undefined) {
-          value = {type: 'identity', value: identities[0], code: 200};
-        } else {
-          value = {type: 'idp', value: idps[0].domain, code: 200};
-        }
-
-        let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
-
-        // to test on the identity side the listener without the timeout
-        // can represent the time the user takes to choose and identity
-        if (msg.body.value === 'wait') {
-
-          setTimeout(() => {
-            _this._messageBus.postMessage(replyMsg);
-          }, _this._waitTime);
-        } else {
-          _this._messageBus.postMessage(replyMsg);
-        }
+      if (identities[0] !== undefined) {
+        value = {type: 'identity', value: identities[0], code: 200};
       } else {
-        console.log('Ignoring messages not intended to FakeGUI.', msg );
+        value = {type: 'idp', value: idps[0].domain, code: 200};
+      }
+
+      let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
+
+      // to test on the identity side the listener without the timeout
+      // can represent the time the user takes to choose and identity
+      if (msg.body.value === 'wait') {
+
+        setTimeout(() => {
+          _this._messageBus.postMessage(replyMsg);
+        }, _this._waitTime);
+      } else {
+        _this._messageBus.postMessage(replyMsg);
       }
     });
   }
