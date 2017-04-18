@@ -99,10 +99,7 @@ class IdentityModule {
         _this._messageBus.removeResponseListener(_this._idmURL, id);
 
         let result = msg.body.value;
-
-        //console.log('TIAGO: return from callIdentityModuleFunc ', result);
         resolve(result);
-
       });
     });
   }
@@ -129,7 +126,6 @@ class IdentityModule {
   addGUIListeners() {
     let _this = this;
 
-    // TIAGO
     _this._messageBus.addListener(_this._idmURL, (msg) => {
       let funcName = msg.body.method;
 
@@ -536,11 +532,10 @@ class IdentityModule {
     let _this = this;
 
     //let userURL = convertToUserURL(userID);
-    console.log('TIAGO userURL', userURL);
-
+    
     for (let identity in _this.identities) {
       if (_this.identities[identity].identity === userURL) {
-        console.log('TIAGO splice', _this.identities.splice(identity, 1));
+        console.log('splice', _this.identities.splice(identity, 1));
       }
     }
   }
@@ -878,8 +873,6 @@ class IdentityModule {
         if (result.loginUrl) {
 
           _this.callIdentityModuleFunc('openPopup', {urlreceived: result.loginUrl}).then((value) => {
-          //_this.openPopup(result.loginUrl).then((value) => {
-            console.log('TIAGO openPopup', value);
             resolve(value);
           }, (err) => {
             reject(err);
@@ -1012,7 +1005,6 @@ class IdentityModule {
         console.log('dataObject value to encrypt: ', message.body.value);
         console.log('IdentityModule - encrypt from hyperty to dataobject ', message);
 
-        // TIAGO - persistence issue #147
         _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
           let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
 
@@ -1026,7 +1018,6 @@ class IdentityModule {
               let sessionKey = _this.crypto.generateRandom();
               _this.dataObjectSessionKeys[dataObjectURL] = {sessionKey: sessionKey, isToEncrypt: true};
 
-              // TIAGO - persistence issue #147
               _this.storageManager.set('dataObjectSessionKeys', 0, _this.dataObjectSessionKeys);
 
               dataObjectKey = _this.dataObjectSessionKeys[dataObjectURL];
@@ -1050,7 +1041,6 @@ class IdentityModule {
                   let newValue = {value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv), hash: _this.crypto.encode(hash)};
 
                   message.body.value = JSON.stringify(newValue);
-                  //console.log('TIAGO outgoing:', message);
                   resolve(message);
                 });
               });
@@ -1155,7 +1145,6 @@ class IdentityModule {
       } else if (isFromHyperty && isToDataObject) {
         console.log('dataObject value to decrypt: ', message.body);
 
-        // TIAGO - persistence issue #147
         _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
           let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
 
@@ -1179,7 +1168,6 @@ class IdentityModule {
                   //console.log('result of hash verification! ', result);
 
                   message.body.assertedIdentity = true;
-                  //console.log('TIAGO incoming:', message);
                   resolve(message);
                 });
               });
@@ -1433,7 +1421,6 @@ class IdentityModule {
           console.log('senderCertificate');
           let receivedValue = JSON.parse(atob(message.body.value));
 
-          //console.log('TIAGO identity', message.body);
           _this.validateAssertion(message.body.identity.assertion, undefined, message.body.identity.idp).then((value) => {
             let encryptedPMS = _this.crypto.decode(receivedValue.assymetricEncryption);
 
@@ -1611,7 +1598,6 @@ class IdentityModule {
 
             _this.dataObjectSessionKeys[dataObjectURL] =  {sessionKey: sessionKey, isToEncrypt: true};
 
-            // TIAGO - persistence issue #147
             _this.storageManager.set('dataObjectSessionKeys', 0, _this.dataObjectSessionKeys);
 
             iv = _this.crypto.generateIV();
@@ -1688,7 +1674,6 @@ class IdentityModule {
         sessionKey = _this.crypto.generateRandom();
         _this.dataObjectSessionKeys[chatKeys.dataObjectURL] = {sessionKey: sessionKey, isToEncrypt: true};
 
-        // TIAGO - persistence issue #147
         _this.storageManager.set('dataObjectSessionKeys', 0, _this.dataObjectSessionKeys);
       } else {
         sessionKey = sessionKeyBundle.sessionKey;
