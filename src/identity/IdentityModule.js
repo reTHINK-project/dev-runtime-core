@@ -92,10 +92,13 @@ class IdentityModule {
     return new Promise((resolve, reject) => {
       message = { type: 'execute', to: _this._guiURL, from: _this._idmURL,
         body: { resource: 'identity', method: methodName, params: parameters }, };
-      _this._messageBus.postMessage(message, (res) => {
-        let result = res.body.value;
+      let id = _this._messageBus.postMessage(message);
 
-        //console.log('TIAGO: return from callIdentityModuleFunc ', result);
+      //add listener without timout
+      _this._messageBus.addResponseListener(_this._idmURL, id, msg => {
+        _this._messageBus.removeResponseListener(_this._idmURL, id);
+
+        let result = msg.body.value;
         resolve(result);
       });
     });
@@ -123,7 +126,6 @@ class IdentityModule {
   addGUIListeners() {
     let _this = this;
 
-    // TIAGO
     _this._messageBus.addListener(_this._idmURL, (msg) => {
       let funcName = msg.body.method;
 
@@ -287,6 +289,7 @@ class IdentityModule {
         } else {
           resolve(identity);
         }
+        resolve(identity);
       }).catch(function(error) {
         console.error('[Identity.IdentityModule.getToken] error on getToken', error);
         reject(error);
@@ -346,7 +349,9 @@ class IdentityModule {
               _this.callGenerateMethods(domain).then((value) => {
                 console.log('[Identity.IdentityModule.getToken] CallGeneratemethods', value);
                 let token = _this.getAccessToken(toUrl);
-                if (token)                { return resolve(token); }              else {
+                if (token) { 
+                  return resolve(token);
+                } else {
                   return reject('No Access token found');
                 }
               }, (err) => {
@@ -459,7 +464,7 @@ class IdentityModule {
             return null; // the getToken function then generates a new token
           }
         } // else this access token has no expiration time
-
+        
         if (identity.hasOwnProperty('messageInfo') && identity.messageInfo.hasOwnProperty('userProfile') && identity.messageInfo.userProfile) {
           identityToReturn = { userProfile: identity.messageInfo.userProfile, access_token: identity.interworking.access_token };
           if (identity.hasOwnProperty('infoToken') && identity.infoToken.hasOwnProperty('id')) {
@@ -527,11 +532,10 @@ class IdentityModule {
     let _this = this;
 
     //let userURL = convertToUserURL(userID);
-    console.log('TIAGO userURL', userURL);
-
+    
     for (let identity in _this.identities) {
       if (_this.identities[identity].identity === userURL) {
-        console.log('TIAGO splice', _this.identities.splice(identity, 1));
+        console.log('splice', _this.identities.splice(identity, 1));
       }
     }
   }
@@ -573,15 +577,17 @@ class IdentityModule {
     let _this = this;
     return new Promise(function(resolve, reject) {
 
+      let guiFakeURL = _this._guiURL + '-fake';
+
       //condition to check if the real GUI is deployed. If not, deploys a fake gui
       if (_this.guiDeployed === false) {
 
-        let guiFake = new GuiFake(_this._guiURL, _this._messageBus);
+        let guiFake = new GuiFake(guiFakeURL, _this._messageBus);
         _this.guiFake = guiFake;
         _this.guiDeployed = true;
       }
 
-      let message = {type: 'create', to: _this._guiURL, from: _this._idmURL,
+      let message = {type: 'create', to: guiFakeURL, from: _this._idmURL,
         body: {value: {identities: identities, idps: idps}}};
 
       let id = _this._messageBus.postMessage(message);
@@ -755,6 +761,10 @@ class IdentityModule {
     let _this = this;
 
     return new Promise((resolve, reject) => {
+
+      if (!result.hasOwnProperty('assertion')) {
+        return reject('StoreIdentity: input is not an identity assertion.');
+      }
 
       let splitedAssertion = result.assertion.split('.');
       let assertionParsed;
@@ -995,7 +1005,6 @@ class IdentityModule {
         console.log('dataObject value to encrypt: ', message.body.value);
         console.log('IdentityModule - encrypt from hyperty to dataobject ', message);
 
-        // TIAGO - persistence issue #147
         _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
           let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
 
@@ -1009,7 +1018,6 @@ class IdentityModule {
               let sessionKey = _this.crypto.generateRandom();
               _this.dataObjectSessionKeys[dataObjectURL] = {sessionKey: sessionKey, isToEncrypt: true};
 
-              // TIAGO - persistence issue #147
               _this.storageManager.set('dataObjectSessionKeys', 0, _this.dataObjectSessionKeys);
 
               dataObjectKey = _this.dataObjectSessionKeys[dataObjectURL];
@@ -1033,7 +1041,6 @@ class IdentityModule {
                   let newValue = {value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv), hash: _this.crypto.encode(hash)};
 
                   message.body.value = JSON.stringify(newValue);
-                  //console.log('TIAGO outgoing:', message);
                   resolve(message);
                 });
               });
@@ -1138,7 +1145,6 @@ class IdentityModule {
       } else if (isFromHyperty && isToDataObject) {
         console.log('dataObject value to decrypt: ', message.body);
 
-        // TIAGO - persistence issue #147
         _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
           let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
 
@@ -1162,7 +1168,6 @@ class IdentityModule {
                   //console.log('result of hash verification! ', result);
 
                   message.body.assertedIdentity = true;
-                  //console.log('TIAGO incoming:', message);
                   resolve(message);
                 });
               });
@@ -1416,7 +1421,6 @@ class IdentityModule {
           console.log('senderCertificate');
           let receivedValue = JSON.parse(atob(message.body.value));
 
-          //console.log('TIAGO identity', message.body);
           _this.validateAssertion(message.body.identity.assertion, undefined, message.body.identity.idp).then((value) => {
             let encryptedPMS = _this.crypto.decode(receivedValue.assymetricEncryption);
 
@@ -1594,7 +1598,6 @@ class IdentityModule {
 
             _this.dataObjectSessionKeys[dataObjectURL] =  {sessionKey: sessionKey, isToEncrypt: true};
 
-            // TIAGO - persistence issue #147
             _this.storageManager.set('dataObjectSessionKeys', 0, _this.dataObjectSessionKeys);
 
             iv = _this.crypto.generateIV();
@@ -1671,7 +1674,6 @@ class IdentityModule {
         sessionKey = _this.crypto.generateRandom();
         _this.dataObjectSessionKeys[chatKeys.dataObjectURL] = {sessionKey: sessionKey, isToEncrypt: true};
 
-        // TIAGO - persistence issue #147
         _this.storageManager.set('dataObjectSessionKeys', 0, _this.dataObjectSessionKeys);
       } else {
         sessionKey = sessionKeyBundle.sessionKey;
