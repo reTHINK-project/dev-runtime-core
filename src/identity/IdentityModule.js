@@ -92,11 +92,17 @@ class IdentityModule {
     return new Promise((resolve, reject) => {
       message = { type: 'execute', to: _this._guiURL, from: _this._idmURL,
         body: { resource: 'identity', method: methodName, params: parameters }, };
-      _this._messageBus.postMessage(message, (res) => {
-        let result = res.body.value;
+      let id = _this._messageBus.postMessage(message);
+
+      //add listener without timout
+      _this._messageBus.addResponseListener(_this._idmURL, id, msg => {
+        _this._messageBus.removeResponseListener(_this._idmURL, id);
+
+        let result = msg.body.value;
 
         //console.log('TIAGO: return from callIdentityModuleFunc ', result);
         resolve(result);
+
       });
     });
   }
@@ -287,6 +293,7 @@ class IdentityModule {
         } else {
           resolve(identity);
         }
+        resolve(identity);
       }).catch(function(error) {
         console.error('[Identity.IdentityModule.getToken] error on getToken', error);
         reject(error);
@@ -346,7 +353,9 @@ class IdentityModule {
               _this.callGenerateMethods(domain).then((value) => {
                 console.log('[Identity.IdentityModule.getToken] CallGeneratemethods', value);
                 let token = _this.getAccessToken(toUrl);
-                if (token)                { return resolve(token); }              else {
+                if (token) { 
+                  return resolve(token);
+                } else {
                   return reject('No Access token found');
                 }
               }, (err) => {
@@ -459,7 +468,7 @@ class IdentityModule {
             return null; // the getToken function then generates a new token
           }
         } // else this access token has no expiration time
-
+        
         if (identity.hasOwnProperty('messageInfo') && identity.messageInfo.hasOwnProperty('userProfile') && identity.messageInfo.userProfile) {
           identityToReturn = { userProfile: identity.messageInfo.userProfile, access_token: identity.interworking.access_token };
           if (identity.hasOwnProperty('infoToken') && identity.infoToken.hasOwnProperty('id')) {
@@ -573,15 +582,17 @@ class IdentityModule {
     let _this = this;
     return new Promise(function(resolve, reject) {
 
+      let guiFakeURL = _this._guiURL + '-fake';
+
       //condition to check if the real GUI is deployed. If not, deploys a fake gui
       if (_this.guiDeployed === false) {
 
-        let guiFake = new GuiFake(_this._guiURL, _this._messageBus);
+        let guiFake = new GuiFake(guiFakeURL, _this._messageBus);
         _this.guiFake = guiFake;
         _this.guiDeployed = true;
       }
 
-      let message = {type: 'create', to: _this._guiURL, from: _this._idmURL,
+      let message = {type: 'create', to: guiFakeURL, from: _this._idmURL,
         body: {value: {identities: identities, idps: idps}}};
 
       let id = _this._messageBus.postMessage(message);
@@ -756,6 +767,10 @@ class IdentityModule {
 
     return new Promise((resolve, reject) => {
 
+      if (!result.hasOwnProperty('assertion')) {
+        return reject('StoreIdentity: input is not an identity assertion.');
+      }
+
       let splitedAssertion = result.assertion.split('.');
       let assertionParsed;
 
@@ -863,6 +878,8 @@ class IdentityModule {
         if (result.loginUrl) {
 
           _this.callIdentityModuleFunc('openPopup', {urlreceived: result.loginUrl}).then((value) => {
+          //_this.openPopup(result.loginUrl).then((value) => {
+            console.log('TIAGO openPopup', value);
             resolve(value);
           }, (err) => {
             reject(err);
