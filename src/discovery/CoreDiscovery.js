@@ -42,7 +42,7 @@ class CoreDiscovery {
     if (!runtimeFactory) throw Error('The catalogue needs the runtimeFactory');
 
     let _this = this;
-    _this.messageBus = msgBus;
+    this._messageBus = msgBus;
     _this.graphConnector = graphConnector;
     _this.httpRequest = runtimeFactory.createHttpRequest();
     _this.domain = divideURL(runtimeURL).domain;
@@ -80,6 +80,21 @@ class CoreDiscovery {
           });
         });
     });
+  }
+
+  /**
+   * Returns the MessageBus.
+   */
+  get messageBus() {
+    return this._messageBus;
+  }
+
+  /**
+   * Sets the MessageBus.
+   * @param {MessageBus}           messageBus    The Message Bus.
+   */
+  set messageBus(messageBus) {
+    this._messageBus = messageBus;
   }
 
   /* function to decide what discovery method to call and later return the response msg  */
@@ -356,7 +371,7 @@ class CoreDiscovery {
         msg.body.criteria = {};
       msg.body.criteria.resources = resources;
     }
-
+    
     return new Promise(function(resolve, reject) {
       console.log("[CoreDiscovery.discoverHyperties] sending msg ", msg);
 
