@@ -1058,6 +1058,48 @@ class IdentityModule {
     });
   }
 
+  encryptDataObject(dataObject, sender) {
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+      console.log('dataObject value to encrypt: ', dataObject);
+
+      let splitedToURL = sender.split('/');
+      let dataObjectURL = splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3];
+      if (splitedToURL.length > 6) {
+        dataObjectURL = splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3] + '/' + splitedToURL[4];
+      }
+
+      _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
+        let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
+
+        //check if there is already a session key for the chat room
+        if (dataObjectKey) {
+
+          // and if is to apply encryption, encrypt the messages
+          if (dataObjectKey.isToEncrypt) {
+            let iv = _this.crypto.generateIV();
+
+            _this.crypto.encryptAES(dataObjectKey.sessionKey, _this.crypto.encode(JSON.stringify(dataObject)), iv).then(encryptedValue => {
+              let newValue = { value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv) };
+              console.log("encrypted dataObject", newValue);
+              return resolve(newValue);
+            });
+
+          // if not, just send the message
+          } else {
+            console.log('The dataObject is not encrypted');
+            return resolve(dataObject);
+          }
+
+          // start the generation of a new session Key
+        } else {
+          return reject('No dataObjectKey for this dataObjectURL:', dataObjectURL);
+        }
+      });
+    });
+  }
+
   decryptMessage(message) {
     let _this = this;
 
@@ -1216,15 +1258,14 @@ class IdentityModule {
 
           //check if is to apply encryption
           if (dataObjectKey.isToEncrypt) {
-            let parsedValue = JSON.parse(dataObject);
-            let iv = _this.crypto.decode(parsedValue.iv);
-            let encryptedValue = _this.crypto.decode(parsedValue.value);
-            let hash = _this.crypto.decode(parsedValue.hash);
+            let iv = _this.crypto.decode(dataObject.iv);
+            let encryptedValue = _this.crypto.decode(dataObject.value);
 
             _this.crypto.decryptAES(dataObjectKey.sessionKey, encryptedValue, iv).then(decryptedValue => {
               let parsedValue = JSON.parse(atob(decryptedValue));
-              console.log('decrypted dataObject,', parsedValue);
-              return resolve(parsedValue);
+              let newValue = { value: parsedValue, iv: _this.crypto.encode(iv) };
+              console.log('decrypted dataObject,', newValue);
+              return resolve(newValue);
             });
 
           //if not, just return the dataObject
