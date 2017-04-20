@@ -236,7 +236,7 @@ class RuntimeUA {
         this.loader = new Loader(this.runtimeURL, this.runtimeConfiguration, this.descriptorInstance);
 
         // Instantiate the identity Module
-        this.identityModule = new IdentityModule(this.runtimeURL, this.runtimeCapabilities, this.storageManager);
+        this.identityModule = new IdentityModule(this.runtimeURL, this.runtimeCapabilities, this.storageManager, this._dataObjectsStorage);
 
         // Use the sandbox factory to create an AppSandbox;
         // In the future can be decided by policyEngine if we need

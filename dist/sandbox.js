@@ -1,5 +1,5 @@
 // version: 0.7.1
-// date: Tue Apr 18 2017 18:33:12 GMT+0100 (WEST)
+// date: Thu Apr 20 2017 12:02:18 GMT+0100 (WEST)
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -43,9 +43,9 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	function __webpack_require__(moduleId) {
 /******/
 /******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId])
+/******/ 		if(installedModules[moduleId]) {
 /******/ 			return installedModules[moduleId].exports;
-/******/
+/******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
 /******/ 		var module = installedModules[moduleId] = {
 /******/ 			i: moduleId,
