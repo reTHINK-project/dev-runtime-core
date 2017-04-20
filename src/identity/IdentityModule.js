@@ -1043,7 +1043,8 @@ class IdentityModule {
         // TIAGO - persistence issue #147
         _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
           let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
-          console.log('dataObjectKey', dataObjectKey);
+          console.log('TIAGO dataObjectKey', dataObjectKey);
+          console.log('TIAGO dataObject', message.body.value);
 
           if (dataObjectKey) {
 
@@ -1087,6 +1088,57 @@ class IdentityModule {
         reject('wrong message to decrypt');
       }
 
+    });
+  }
+
+  decryptDataObject(dataObject, sender) {
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+      //if is not to apply encryption, then returns resolve
+      if (!_this.isToUseEncryption) {
+        console.log('decryption disabled');
+        return resolve(dataObject);
+      }
+
+      //TODO remove this logic and move it to a util function
+
+      let splitedToURL = sender.split('/');
+      let dataObjectURL = splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3];
+      if (splitedToURL.length > 6) {
+        dataObjectURL = splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3] + '/' + splitedToURL[4];
+      }
+
+      console.log('dataObject value to decrypt: ', dataObject);
+
+      _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
+        let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
+
+        if (dataObjectKey) {
+
+          //check if is to apply encryption
+          if (dataObjectKey.isToEncrypt) {
+            let parsedValue = JSON.parse(dataObject);
+            let iv = _this.crypto.decode(parsedValue.iv);
+            let encryptedValue = _this.crypto.decode(parsedValue.value);
+            let hash = _this.crypto.decode(parsedValue.hash);
+
+            _this.crypto.decryptAES(dataObjectKey.sessionKey, encryptedValue, iv).then(decryptedValue => {
+              let parsedValue = JSON.parse(atob(decryptedValue));
+              console.log('decrypted Value,', parsedValue);
+              return resolve(parsedValue);
+            });
+
+          //if not, just return the dataObject
+          } else {
+            console.log('The dataObject is not encrypted');
+            return resolve(dataObject);
+          }
+
+        } else {
+          return reject('No dataObjectKey for this dataObjectURL:', dataObjectURL);
+        }
+      });
     });
   }
 
