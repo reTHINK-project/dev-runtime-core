@@ -44,7 +44,7 @@ class SyncherManager {
   _observers: { ObjectURL: ObserverObject }
   */
 
-  constructor(runtimeURL, bus, registry, catalog, storageManager, allocator, storeDataObjects) {
+  constructor(runtimeURL, bus, registry, catalog, storageManager, allocator, storeDataObjects, identityModule) {
     if (!runtimeURL) throw new Error('[Syncher Manager] - needs the runtimeURL parameter');
     if (!bus) throw new Error('[Syncher Manager] - needs the MessageBus instance');
     if (!registry) throw new Error('[Syncher Manager] - needs the Registry instance');
@@ -57,6 +57,7 @@ class SyncherManager {
     _this._registry = registry;
     _this._catalog = catalog;
     _this._storageManager = storageManager;
+    _this._identityModule = identityModule;
 
     //TODO: these should be saved in persistence engine?
     _this.runtimeURL = runtimeURL;
@@ -326,7 +327,10 @@ class SyncherManager {
           _this._reporters[resource] = reporter;
 
           console.info('[SyncherManager - resume create] - resolved resumed: ', storedObject);
-          resolve(storedObject);
+
+          _this._decryptChildrens(storedObject, childrens).then((decryptedObject)=>{
+            resolve(decryptedObject);
+          });
 
         }).catch((reason) => {
           console.error('[SyncherManager - resume create] - fail on addChildrens: ', reason);
@@ -340,6 +344,52 @@ class SyncherManager {
 
     });
 
+  }
+
+  // to decrypt DataChildObjects if they are encrypted
+
+  _decryptChildrens(storedObject, childrens) {
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+
+      if (!childrens) return resolve(storedObject);
+      else {
+
+        let childrensObj = Object.keys(storedObject['childrens']);
+
+        if (childrensObj.length === 0) {
+          return resolve(storedObject);
+        }
+
+        childrens.forEach((children)=>{
+
+          let childObjects = storedObject['childrens'][children];
+
+          console.log('[SyncherManager._decryptChildrens] dataObjectChilds to decrypt ',  childObjects);
+
+          Object.keys(childObjects).forEach((childId)=>{
+            let child = childObjects[childId];
+            let owner = childId.split('#')[0];
+
+            if ( typeof child.value === 'string'){
+
+              console.log('[SyncherManager._decryptChildrens] createdBy ',  owner, ' object: ', child.value);
+
+              _this._identityModule.decryptDataObject(JSON.parse(child.value), storedObject.data.url).then((decrypted)=>{
+                console.log('[SyncherManager._decryptChildrens] decrypted ',  decrypted);
+
+                storedObject['childrens'][children][childId].value = decrypted.value;
+              }).catch((reason) => {
+                console.warn('[SyncherManager._decryptChildrens] failed : ', reason);
+              });
+            }
+          });
+        });
+        resolve(storedObject);
+      }
+
+    });
   }
 
   _authorise(msg, objURL) {
@@ -603,7 +653,10 @@ class SyncherManager {
         // Object.assign(storedObject.childrens, reply.body.value.childrens);
 
         //console.log('[subscribe] - resume subscription: ', msg, reply, storedObject, observer);
-        resolve(storedObject);
+
+        this._decryptChildrens(storedObject, childrens).then((decryptedObject)=>{
+          resolve(decryptedObject);
+        });
 
         //});
 
