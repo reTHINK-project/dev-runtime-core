@@ -1145,8 +1145,6 @@ class IdentityModule {
 
         _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
           let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
-          console.log('TIAGO dataObjectKey', dataObjectKey);
-          console.log('TIAGO dataObject', message.body.value);
 
           if (dataObjectKey) {
 
@@ -1203,8 +1201,6 @@ class IdentityModule {
         return resolve(dataObject);
       }
 
-      //TODO remove this logic and move it to a util function
-
       let splitedToURL = sender.split('/');
       let dataObjectURL = splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3];
       if (splitedToURL.length > 6) {
@@ -1227,7 +1223,7 @@ class IdentityModule {
 
             _this.crypto.decryptAES(dataObjectKey.sessionKey, encryptedValue, iv).then(decryptedValue => {
               let parsedValue = JSON.parse(atob(decryptedValue));
-              console.log('decrypted Value,', parsedValue);
+              console.log('decrypted dataObject,', parsedValue);
               return resolve(parsedValue);
             });
 
