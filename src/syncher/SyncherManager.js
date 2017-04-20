@@ -224,15 +224,27 @@ class SyncherManager {
 
           // Store for each reporter hyperty the dataObject
           let userURL;
+          let interworking = false;
+
           if (msg.body.hasOwnProperty('identity') && msg.body.identity.userProfile.userURL) {
             userURL = msg.body.identity.userProfile.userURL;
+            if (!userURL.includes('user://')) {
+              interworking = true;
+            }
+          } else {
+            interworking = true;
           }
 
           // Store the dataObject information
-          _this._dataObjectsStorage.set(objURL, true, msg.body.schema, 'on', owner, null, null, childrens, userURL);
 
-          if (msg.body.hasOwnProperty('store') && msg.body.store) {
-            _this._dataObjectsStorage.saveData(true, objURL, null, msg.body.value);
+          if (!interworking) {
+            _this._dataObjectsStorage.set(objURL, true, msg.body.schema, 'on', owner, null, childrens, userURL);
+
+            if (msg.body.hasOwnProperty('store') && msg.body.store) {
+              reporter.isToSaveData = true;
+              _this._dataObjectsStorage.update(true, objURL, 'isToSaveData', true);
+              _this._dataObjectsStorage.saveData(true, objURL, null, msg.body.value);
+            }
           }
 
           reporter.forwardSubscribe([objURL, subscriptionURL]).then(() => {
@@ -290,7 +302,7 @@ class SyncherManager {
         let scheme = properties.scheme ? properties.scheme.constant : 'resource';
         let childrens = properties.children ? properties.children.constant : [];
 
-        console.log('[SyncherManager] - getDataSchemaDescriptor: ', descriptor, childrens, storedObject.childrenResources)
+        console.log('[SyncherManager] - getDataSchemaDescriptor: ', descriptor, childrens, storedObject.childrenResources);
 
         // Do schema validation
         // TODO: check if is need to handle with the result of validation
@@ -305,12 +317,15 @@ class SyncherManager {
           reporter = this._reporters[resource];
         }
 
+        reporter.isToSaveData = storedObject.isToSaveData;
+
         reporter.addChildrens(childrens).then(() => {
 
           reporter.resumeSubscriptions(storedObject.subscriptions);
 
           _this._reporters[resource] = reporter;
 
+          console.info('[SyncherManager - resume create] - resolved resumed: ', storedObject);
           resolve(storedObject);
 
         }).catch((reason) => {
@@ -476,20 +491,33 @@ class SyncherManager {
                 _this._observers[objURL] = observer;
               }
 
+              let interworking = false;
+
               // Store for each reporter hyperty the dataObject
               let userURL;
               if (msg.body.hasOwnProperty('identity') && msg.body.identity.userProfile.userURL) {
                 userURL = msg.body.identity.userProfile.userURL;
+                if (!userURL.includes('user://')) {
+                  interworking = true;
+                }
+              } else {
+                interworking = true;
               }
 
-              _this._dataObjectsStorage.set(objURL, false, msg.body.schema, 'on', reply.body.owner, hypertyURL, null, childrens, userURL);
-
-              if (msg.body.hasOwnProperty('store') && msg.body.store) {
-                _this._dataObjectsStorage.saveData(false, objURL, null, reply.body.value);
+              if (!interworking) {
+                _this._dataObjectsStorage.set(objURL, false, msg.body.schema, 'on', reply.body.owner, hypertyURL, childrens, userURL);
+                if (msg.body.hasOwnProperty('store') && msg.body.store) {
+                  observer.isToSaveData = true;
+                  _this._dataObjectsStorage.update(false, objURL, 'isToSaveData', true);
+                  _this._dataObjectsStorage.saveData(false, objURL, null, reply.body.value.data);
+                }
               }
 
-              //register new hyperty subscription
+              // register new hyperty subscription
               observer.addSubscription(hypertyURL);
+
+              // add childrens and listeners to save data if necessary
+              observer.addChildrens(childrens);
 
               //forward to hyperty:
               reply.id = msg.id;
@@ -528,7 +556,8 @@ class SyncherManager {
       let schema = storedObject.schema;
 
       let hypertyURL = msg.from;
-      let objURLSubscription = objURL + '/subscription';
+
+      // let objURLSubscription = objURL + '/subscription';
 
       let childBaseURL = objURL + '/children/';
 
@@ -551,41 +580,32 @@ class SyncherManager {
         });
 
         //FLOW-OUT: subscribe message to remote ReporterObject -> _onRemoteSubscribe
-        let objSubscribeMsg = {
+        /*let objSubscribeMsg = {
           type: 'subscribe', from: this._url, to: objURLSubscription,
           body: { subscriber: hypertyURL, identity: msg.body.identity }
         };
 
         //subscribe to reporter SM
-        this._bus.postMessage(objSubscribeMsg, (reply) => {
+        this._bus.postMessage(objSubscribeMsg, (reply) => {*/
 
-          let observer = this._observers[objURL];
-          if (!observer) {
-            observer = new ObserverObject(this, objURL, childrens);
-            this._observers[objURL] = observer;
-          }
+        let observer = this._observers[objURL];
+        if (!observer) {
+          observer = new ObserverObject(this, objURL, childrens);
+          observer.isToSaveData = storedObject.isToSaveData;
+          this._observers[objURL] = observer;
+        }
 
-          //register new hyperty subscription
-          observer.addSubscription(hypertyURL);
+        //register new hyperty subscription
+        observer.addSubscription(hypertyURL);
+        observer.addChildrens(childrens);
 
-          // //forward to hyperty:
-          // let response = {
-          //   id: msg.id, from: this._url, to: hypertyURL, type: 'response',
-          //   body: reply.body
-          // };
-          //
-          // response.body.schema = schema;
-          // response.body.resource = objURL;
-          //
-          //
-          //
-          // this._bus.postMessage(response);
+        // Object.assign(storedObject.data, reply.body.value.data);
+        // Object.assign(storedObject.childrens, reply.body.value.childrens);
 
-          Object.assign(storedObject.data, reply.body.value);
-          console.log('[subscribe] - resume subscription: ', msg, reply, storedObject, observer);
-          resolve(storedObject);
+        //console.log('[subscribe] - resume subscription: ', msg, reply, storedObject, observer);
+        resolve(storedObject);
 
-        });
+        //});
 
       }).catch((reason) => {
         console.error('[SyncherManager - resume subscription] - fail on getDataSchemaDescriptor: ', reason);

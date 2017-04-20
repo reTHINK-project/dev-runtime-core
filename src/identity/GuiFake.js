@@ -14,28 +14,37 @@ class GuiFake {
 
     _this._messageBus.addListener(_this._url, msg => {
 
-      let identities = msg.body.value.identities;
-      let idps = msg.body.value.idps;
+      if (msg.hasOwnProperty('type') &&
+          msg.type === 'create' &&
+          msg.body.hasOwnProperty('value') &&
+          msg.body.value.hasOwnProperty('identities') &&
+          msg.body.value.hasOwnProperty('idps')) {
 
-      let value;
+        let identities = msg.body.value.identities;
+        let idps = msg.body.value.idps;
 
-      if (identities[0] !== undefined) {
-        value = {type: 'identity', value: identities[0], code: 200};
-      } else {
-        value = {type: 'idp', value: idps[0].domain, code: 200};
-      }
+        let value;
 
-      let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
+        if (identities[0] !== undefined) {
+          value = {type: 'identity', value: identities[0], code: 200};
+        } else {
+          value = {type: 'idp', value: idps[0].domain, code: 200};
+        }
 
-      // to test on the identity side the listener without the timeout
-      // can represent the time the user takes to choose and identity
-      if (msg.body.value === 'wait') {
+        let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
 
-        setTimeout(() => {
+        // to test on the identity side the listener without the timeout
+        // can represent the time the user takes to choose and identity
+        if (msg.body.value === 'wait') {
+
+          setTimeout(() => {
+            _this._messageBus.postMessage(replyMsg);
+          }, _this._waitTime);
+        } else {
           _this._messageBus.postMessage(replyMsg);
-        }, _this._waitTime);
+        }
       } else {
-        _this._messageBus.postMessage(replyMsg);
+        console.log('Ignoring messages not intended to FakeGUI.', msg );
       }
     });
   }

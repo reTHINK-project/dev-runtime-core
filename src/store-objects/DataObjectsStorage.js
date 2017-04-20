@@ -22,7 +22,7 @@ class DataObjectsStorage {
    * @param {Array<String>} childrenResources - list of childrenResources, like, 'chatmessage';
    * @param {Array<UserURL} subscriberUser - list of subscribed users;
    */
-  set(resource, isReporter, schema, status, owner, subscription, children, childrenResources, subscriberUser) {
+  set(resource, isReporter, schema, status, owner, subscription, childrenResources, subscriberUser) {
 
     let storeDataObject = this._storeDataObject;
     let type = this._getTypeOfObject(isReporter);
@@ -32,14 +32,17 @@ class DataObjectsStorage {
       storeDataObject[type][resource] = {
         resource: resource,
         isReporter: isReporter,
+        isToSaveData: false,
         subscriptions: [],
-        subscriberUsers: []
+        subscriberUsers: [],
+        childrens: {},
+        data: {},
+        version: 0
       };
     }
 
     if (schema) storeDataObject[type][resource].schema = schema;
     if (status) storeDataObject[type][resource].status = status;
-    if (children) storeDataObject[type][resource].children = children;
     if (childrenResources) storeDataObject[type][resource].childrenResources = childrenResources;
 
     if (subscription && !isReporter) {
@@ -72,6 +75,11 @@ class DataObjectsStorage {
     let storeDataObject = this._storeDataObject;
     let type = this._getTypeOfObject(isReporter);
 
+    if (!storeDataObject || !storeDataObject[type] || !storeDataObject[type][resource]) {
+      console.log('[StoreDataObjects - save data] - not saved');
+      return;
+    }
+
     console.log('[StoreDataObjects - saveData] - ', isReporter, type, resource, attribute, value);
 
     if (!storeDataObject[type][resource].hasOwnProperty('data')) {
@@ -81,9 +89,31 @@ class DataObjectsStorage {
     if (attribute) {
       assign(storeDataObject[type][resource].data, attribute, deepClone(value));
     } else {
-      if (value) {
-        storeDataObject[type][resource].data = deepClone(value) || {};
-      }
+      storeDataObject[type][resource].data = deepClone(value) || {};
+    }
+
+    this._storeDataObject = storeDataObject;
+    this._storageManager.set('syncherManager:ObjectURLs', 1, storeDataObject);
+    return storeDataObject[type][resource];
+  }
+
+  saveChildrens(isReporter, resource, attribute, value) {
+    let storeDataObject = this._storeDataObject;
+    let type = this._getTypeOfObject(isReporter);
+
+    if (!storeDataObject || !storeDataObject[type] || !storeDataObject[type][resource]) {
+      console.log('[StoreDataObjects - save childrens] - not saved');
+      return;
+    }
+
+    if (!storeDataObject[type][resource].hasOwnProperty('childrens')) {
+      storeDataObject[type][resource].childrens = {};
+    }
+
+    if (attribute) {
+      assign(storeDataObject[type][resource].childrens, attribute, deepClone(value));
+    } else {
+      storeDataObject[type][resource].childrens = deepClone(value) || {};
     }
 
     this._storeDataObject = storeDataObject;
@@ -104,6 +134,11 @@ class DataObjectsStorage {
     let storeDataObject = this._storeDataObject;
     let type = this._getTypeOfObject(isReporter);
 
+    if (!storeDataObject || !storeDataObject[type] || !storeDataObject[type][resource]) {
+      console.log('[StoreDataObjects - update] - not saved');
+      return;
+    }
+
     console.log('[StoreDataObjects - update] - ', isReporter, type, resource, attribute, value);
 
     if (storeDataObject[type] && storeDataObject[type][resource] && resource && attribute && value) {
@@ -123,10 +158,8 @@ class DataObjectsStorage {
 
       this._storeDataObject = storeDataObject;
       this._storageManager.set('syncherManager:ObjectURLs', 1, storeDataObject);
-
+      return storeDataObject[type][resource];
     }
-
-    return storeDataObject[type][resource];
   }
 
   /**
@@ -140,8 +173,12 @@ class DataObjectsStorage {
   delete(isReporter, resource, attribute, value) {
 
     let storeDataObject = this._storeDataObject;
-
     let type = this._getTypeOfObject(isReporter);
+
+    if (!storeDataObject || !storeDataObject[type] || !storeDataObject[type][resource]) {
+      console.log('[StoreDataObjects - delete] - not saved');
+      return;
+    }
 
     if (storeDataObject[type] && storeDataObject[type][resource] && resource && attribute && value) {
 
@@ -153,9 +190,9 @@ class DataObjectsStorage {
 
       this._storeDataObject = storeDataObject;
       this._storageManager.set('syncherManager:ObjectURLs', 1, storeDataObject);
-    }
 
-    return storeDataObject[type][resource];
+      return storeDataObject[type][resource];
+    }
   }
 
   /**
@@ -191,7 +228,7 @@ class DataObjectsStorage {
         reject(new Error('[StoreDataObjects] - Can\'t delete this ' + resource));
       }
 
-    })
+    });
 
   }
 
@@ -435,7 +472,8 @@ class DataObjectsStorage {
    * @todo documentation
    */
   _updateToArray(storeDataObject, resource, key, value) {
-    if (storeDataObject[resource][key].indexOf(value)) storeDataObject[resource][key].push(value);
+    console.log('[DataObjectsStorage] - _updateToArray: ', storeDataObject, resource, key, value);
+    if (storeDataObject[resource][key].indexOf(value) === -1) storeDataObject[resource][key].push(value);
   }
 
   /**
@@ -444,7 +482,7 @@ class DataObjectsStorage {
    */
   _removeFromArray(storeDataObject, resource, key, value) {
     let indexOfValue = storeDataObject[resource][key].indexOf(value);
-    if (indexOfValue) storeDataObject[resource][key].splice(indexOfValue, 1);
+    if (indexOfValue === -1) storeDataObject[resource][key].splice(indexOfValue, 1);
   }
 
   /**

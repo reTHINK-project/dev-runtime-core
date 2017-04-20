@@ -675,22 +675,22 @@ class Loader {
 
           // Deploy Component step xxx
           try {
+            // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+
+            // Add the message bus listener
+            this.messageBus.addListener(_runtimeIdpProxyURL, (msg) => {
+              _proxySandbox.postMessage(msg);
+            });
+
             return _proxySandbox.deployComponent(_proxySourcePackage.sourceCode, runtimeIdpProxyURL, configuration);
           } catch (e) {
             console.  Error('[Runtime.Loader] Error on deploy component:', e);
             reject(e);
           }
         }, handleError)
-        .then((deployComponentStatus) => {
+        .then(() => {
           if (haveError) return false;
-          console.info('[Runtime.Loader] 8: return deploy component for sandbox status: ', deployComponentStatus);
 
-          // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-
-          // Add the message bus listener
-          this.messageBus.addListener(_runtimeIdpProxyURL, (msg) => {
-            _proxySandbox.postMessage(msg);
-          });
 
           // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
@@ -700,13 +700,13 @@ class Loader {
           //   status: deployComponentStatus
           // };
 
-          this.registry.idpProxyList[domain].status = 'deployed';
+          //this.registry.idpProxyList[domain].status = 'deployed';
           let idpProxy = this.registry.idpProxyList[domain];
 
-          console.log('Deployed: ', idpProxy);
+          console.log('[Runtime.Loader.loadIdpProxy] 8: loaded: ', idpProxy);
 
           resolve(idpProxy);
-          console.info('[Runtime.Loader] ------------------- END ---------------------------\n');
+          console.info('[Runtime.Loader.loadIdpProxy] ------------------- END ---------------------------\n');
 
         }, handleError)
         .catch(errorReason);
