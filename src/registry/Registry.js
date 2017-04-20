@@ -29,7 +29,6 @@ import HypertyInstance from './HypertyInstance';
 import {MessageFactory} from 'service-framework/dist/MessageFactory';
 import {divideURL, isHypertyURL, isURL, isUserURL, generateGUID, getUserIdentityDomain, isBackendServiceURL} from '../utils/utils.js';
 
-import Discovery from './Discovery';
 import 'proxy-observe';
 import { WatchingYou } from 'service-framework/dist/Utils';
 
@@ -142,8 +141,6 @@ class Registry {
       console.log('[Registry listener] ', msg);
 
       let isHyperty = isHypertyURL(msg.from);
-      let isDiscovery = msg.from.substring(msg.from.length - 10, msg.from.length) === '/discovery';
-
       let hasCriteria = msg.body.hasOwnProperty('criteria');
       let isURLResource;
       let isUserResource;
@@ -163,182 +160,27 @@ class Registry {
         hasUser = msg.body.value.hasOwnProperty('user');
       }
 
-      if (isHyperty && isDiscovery) {
-        console.log('[Registry] hypertyDiscovery');
-        if (isDelete && hasName) {
-          console.log('[Registry] deleteDataObject');
-        } else if (isDelete && hasUser) {
-          console.log('[Registry] deleteHyperty');
-        } else if (hasCriteria && isUserResource) {
-          console.log('discoverHyperty');
-          for (let i in _this.remoteHypertyList) {
-            let hyperty = _this.remoteHypertyList[i];
-            if (JSON.stringify(hyperty.resources) === JSON.stringify(msg.body.criteria.resources) &&
-              JSON.stringify(hyperty.dataSchemes) === JSON.stringify(msg.body.criteria.dataSchemes) &&
-              hyperty.user.userURL === msg.body.resource) {
-              let url = hyperty.url;
-              let valueJson = {};
-              valueJson[url] = hyperty.info;
-              let message = {
-                type: 'response',
-                to: msg.from,
-                from: msg.to,
-                body: {
-                  value: valueJson
-                }
-              };
-              return _this._messageBus.postMessage(message);
-            }
-          }
-
-          _this.discovery.discoverHyperty(msg.body.resource, msg.body.criteria.dataSchemes, msg.body.criteria.resources).then((value) => {
-            let mostRecentHyperty;
-            Object.keys(value).forEach(function(a) {
-              let hyperty = new HypertyInstance(undefined, undefined, value[a].descriptor, undefined, a, { userURL: value[a].userID },
-                'guid', _this.runtimeURL, 'ctx', value[a].p2pHandler, value[a].p2pRequester, value[a].dataSchemes, value[a].resources,
-                value[a].startingTime, value[a].lastModified);
-              hyperty.info = value;
-              if (!mostRecentHyperty) {
-                mostRecentHyperty = hyperty;
-              } else {
-                let hypertyDate = new Date(hyperty.lastModified);
-                let mostRecentHypertyDate = new Date(mostRecentHyperty.lastModified);
-
-                if (hypertyDate > mostRecentHypertyDate) {
-                  mostRecentHyperty = hyperty;
-                  console.log('update date');
-                }
-              }
-            });
-
-            if (mostRecentHyperty) {
-              console.log('push');
-              _this.remoteHypertyList.push(mostRecentHyperty);
-            }
-          });
-
-        } else if (hasCriteria && !isURLResource) {
-          console.log('[Registry] discoverDataObject');
-        } else if (isHypertyResource) {
-          console.log('[Registry] discoverDataObjectPerReporter');
-        } else if (isUserResource) {
-          console.log('[Registry] discoverHypertyPerUser');
-        } else if (isURLResource) {
-          console.log('[Registry] discoverDataObjectPerURL');
-        } else if (!isURLResource) {
-          console.log('[Registry] discoverDataObjectPerName');
-        }
-
-      } else {
-
-        //hack to skip responses to responses
-
-        if (msg.type === 'response') {
-          console.error('[Register listener] skipping ', msg);
-          return;
-        }
-
-        // msg sent by identity manager library
-        let userUrl = _this._getIdentityAssociated(msg.body.resource, msg.body.criteria);
-
-        let reply = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: {resource: userUrl}};
-        reply.body.code = (userUrl) ? 200 : 404;
-
-        _this._messageBus.postMessage(reply);
+      if (msg.type === 'response') {
+        console.error('[Register listener] skipping ', msg);
+        return;
       }
-    });
 
-    // also set up messageBus in the IdentityModule component
-    // TODO redefine a better way to add the messageBus in the IdModule
-    _this.idModule.messageBus = messageBus;
+      // msg sent by identity manager library
+      let userUrl = _this._getIdentityAssociated(msg.body.resource, msg.body.criteria);
+
+      let reply = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: {resource: userUrl}};
+      reply.body.code = (userUrl) ? 200 : 404;
+
+      _this._messageBus.postMessage(reply);
+
+    });
 
     // Install AddressAllocation
     let addressAllocation = AddressAllocation.instance;
     _this.addressAllocation = addressAllocation;
     console.log('[Registry - AddressAllocation] - ', addressAllocation);
-
-    let discovery = new Discovery(_this.runtimeURL, messageBus);
-    _this.discovery = discovery;
-
-    // TODO what is this? this should be removed;
-    /*let discoveryServiceFramework = new DiscoveryServiceFramework('hyperty://localhost/123', _this.runtimeURL, messageBus);
-    _this.discoveryServiceFramework = discoveryServiceFramework;*/
-
   }
 
-  /**
-  * function to request about users registered in domain registry, and
-  * return the last hyperty instance registered by the user.
-  * @param  {email}              email
-  * @param  {domain}            domain (Optional)
-  * @return {Promise}          Promise
-  */
-
-  // TODO: implement a cache system
-  discoverHypertyPerUser(email, domain) {
-    let _this = this;
-    let activeDomain;
-
-    if (!domain) {
-      activeDomain = _this._domain;
-    } else {
-      activeDomain = domain;
-    }
-
-    let identityURL = 'user://' + email.substring(email.indexOf('@') + 1, email.length) + '/' + email.substring(0, email.indexOf('@'));
-
-    // message to query domain registry, asking for a user hyperty.
-    let message = {
-      type: 'read', from: _this.registryURL, to: 'domain://registry.' + activeDomain + '/', body: { resource: identityURL}
-    };
-
-    console.log('[Registry] Message: ', message, activeDomain, identityURL);
-
-    //console.log('[Registry] message READ', message);
-    return new Promise(function(resolve, reject) {
-
-      _this._messageBus.postMessage(message, (reply) => {
-        console.log('[Registry] message reply', reply);
-
-        let hyperty;
-        let mostRecent;
-        let lastHyperty;
-        let value = reply.body.value;
-
-        for (hyperty in value) {
-          if (value[hyperty].lastModified !== undefined) {
-            if (mostRecent === undefined) {
-              mostRecent = new Date(value[hyperty].lastModified);
-              lastHyperty = hyperty;
-            } else {
-              let hypertyDate = new Date(value[hyperty].lastModified);
-              if (mostRecent.getTime() < hypertyDate.getTime()) {
-                mostRecent = hypertyDate;
-                lastHyperty = hyperty;
-              }
-            }
-          }
-        }
-
-        console.log('[Registry] Last Hyperty: ', lastHyperty, mostRecent);
-
-        let hypertyURL = lastHyperty;
-
-        if (hypertyURL === undefined) {
-          return reject('User Hyperty not found');
-        }
-
-        let idPackage = {
-          id: email,
-          descriptor: value[hypertyURL].descriptor,
-          hypertyURL: hypertyURL
-        };
-
-        console.log('[Registry] ===> hypertyDiscovery messageBundle: ', idPackage);
-        resolve(idPackage);
-      });
-    });
-  }
 
   _getIdentityAssociated(type, hypertyURL) {
     let _this = this;
@@ -365,42 +207,6 @@ class Registry {
       }
     }
     return '';
-  }
-
-  /**
-  * query the domain registry for information from a dataObject URL
-  * @param  {String}   url            dataObject URL
-  * @return {JSON}     dataObject     data object
-  */
-  discoverDataObjectPerURL(url, domain) {
-
-    let _this = this;
-
-    return new Promise(function(resolve, reject) {
-
-      let activeDomain;
-
-      if (!domain) {
-        activeDomain = _this._domain;
-      } else {
-        activeDomain = domain;
-      }
-
-      let msg = {
-        type: 'read', from: _this.registryURL, to: 'domain://registry.' + activeDomain + '/', body: { resource: url }
-      };
-
-      _this._messageBus.postMessage(msg, (reply) => {
-
-        let dataObject = reply.body.value;
-
-        if (dataObject) {
-          resolve(dataObject);
-        } else {
-          reject('DataObject not found');
-        }
-      });
-    });
   }
 
   /**
@@ -1058,10 +864,8 @@ class Registry {
       _this.idModule.getIdentityAssertion().then(function(result) {
 
         let userProfile = result.userProfile;
-
-        // hack while domain registry does not support discovery per email
-        let email = userProfile.userURL.split('://')[1].split('/')[1];
-        let emailURL = 'user://' + email.split('@')[1] + '/' + email.split('@')[0];
+        console.log('[Registry registerHyperty] userProfile', userProfile);
+        let emailURL = userProfile.userURL;
 
         if (_this._messageBus === undefined) {
           reject('MessageBus not found on registerStub');
@@ -1161,7 +965,38 @@ class Registry {
 
                   if (reply.body.code === 200) {
                     resolve(addressURL.address[0]);
-                  } else {
+                  }else if (reply.body.code === 404) {
+                    console.log('[Registry registerHyperty] The update was not possible. Registering new Hyperty at domain registry');
+
+                    messageValue = {
+                      user: emailURL,
+                      descriptor: descriptorURL,
+                      url: addressURL.address[0],
+                      expires: _this.expiresTime,
+                      resources: hypertyCapabilities.resources,
+                      dataSchemes: hypertyCapabilities.dataSchema,
+                      runtime: runtime,
+                      status: status
+                    };
+
+                    if (p2pHandler) {
+                      messageValue.p2pHandler = p2pHandler;
+                      messageValue.p2pRequester = p2pRequester;
+                    }
+
+                    message = {type: 'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: messageValue, policy: 'policy'}};
+
+                    _this._messageBus.postMessage(message, (reply) =>{
+                      console.log('[Registry registerHyperty] Hyperty registration update response: ', reply);
+
+                      if (reply.body.code === 200)
+                        resolve(addressURL.address[0]);
+                      else
+                        reject('Failed to register an Hyperty');
+
+                    });
+
+                  }else {
                     reject('Failed to register an Hyperty');
                   }
                 });
@@ -1661,7 +1496,7 @@ class Registry {
           // search in the sandboxes list for a entry containing the domain given
           for (let sandbox in _this.sandboxesList.sandbox) {
             //todo: uncomment sandbox constraints match condition with runtime sharing
-            if (sandbox.includes(domain) /*&& _this.sandboxesList.sandbox[sandbox].matches(constraints)*/) {
+            if (sandbox.includes(domain) && _this.sandboxesList.sandbox[sandbox].matches(constraints)) {
               request = _this.sandboxesList.sandbox[sandbox];
               break;
             }
@@ -1789,7 +1624,6 @@ class Registry {
                 console.log('[Registry - resolveNormalStub] Stub deployed: ', _this.protostubsList[domainUrl]);
               }).catch((reason) => {
                 console.error('[Registry.resolveNormalStub] Error resolving Load ProtocolStub: ', reason);
-                _this.protostubsList[domainUrl].status = 'deployment-failed';
                 reject(reason);
               });
             }
@@ -1940,9 +1774,9 @@ class Registry {
         _this._loader.descriptors.getIdpProxyDescriptor(domain).then((result) => {
 
           console.log('[Registry] [Registry.Registry.isLegacy] Legacy stub descriptor: ', result);
-          _this.idpLegacyProxyList[domain] = result;
 
           if (result.interworking) {
+            _this.idpLegacyProxyList[domain] = result;
             resolve(result.interworking);
           } else {
             resolve(false);

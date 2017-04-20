@@ -6,8 +6,11 @@ import ReThinkCtx from '../ReThinkCtx';
 
 class RuntimeCoreCtx extends ReThinkCtx {
 
-  constructor(idModule, runtimeRegistry, storageManager, runtimeCapabilities) {
+  constructor(runtimeURL, idModule, runtimeRegistry, storageManager, runtimeCapabilities) {
     super();
+    this._runtimeURL = runtimeURL;
+    this._pepURL = this._runtimeURL + '/pep';
+    this._guiURL = this._runtimeURL + '/policy-gui';
     this.idModule = idModule;
     this.runtimeRegistry = runtimeRegistry;
     this.activeUserPolicy = undefined;
@@ -15,6 +18,39 @@ class RuntimeCoreCtx extends ReThinkCtx {
     this.userPolicies = {};
     this.storageManager = storageManager;
     this.runtimeCapabilities = runtimeCapabilities;
+  }
+
+  get pepURL() {
+    let _this = this;
+    return _this._pepURL;
+  }
+
+  get guiURL() {
+    let _this = this;
+    return _this._guiURL;
+  }
+
+  get runtimeURL() {
+    let _this = this;
+    return _this._runtimeURL;
+  }
+
+  /**
+  * return the messageBus in this Registry
+  * @param {MessageBus}           messageBus
+  */
+  get messageBus() {
+    let _this = this;
+    return _this._messageBus;
+  }
+
+  /**
+  * Set the messageBus in this Registry
+  * @param {MessageBus}           messageBus
+  */
+  set messageBus(messageBus) {
+    let _this = this;
+    _this._messageBus = messageBus;
   }
 
   get subscription() {
@@ -178,6 +214,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
       if (isDataObjectSubscription & isFromRemoteSM) {
         to.pop();
         let dataObjectURL = to[0] + '//' + to[2] + '/' + to[3];
+        console.log('TIAGO: message ', message);
         _this.idModule.doMutualAuthentication(dataObjectURL, message.body.subscriber).then(() => {
           _this.runtimeRegistry.registerSubscriber(dataObjectURL, message.body.subscriber);
           resolve();
@@ -268,25 +305,16 @@ class RuntimeCoreCtx extends ReThinkCtx {
 
     let from = message.from;
     console.log('[Policy.RuntimeCoreCtx.getIdentity] ', message);
-
+    let sourceURL = undefined;
     if (message.body.source !== undefined) {
       from = message.body.source;
     }
 
-    if (message.type === 'forward')      { from = message.body.from; }
-
-/*    if (message.type === 'update') {
-      return this.idModule.getToken(message.body.source);
+    if (message.type === 'forward') {
+      from = message.body.from;
     }
 
-    if (message.type === 'response' && message.body.source !== undefined) {
-      return this.idModule.getToken(message.body.source);
-    }*/
-
-//    if (divideURL(message.from).type === 'hyperty') {
-
     return this.idModule.getToken(from, message.to);
-
   }
 
   /**
