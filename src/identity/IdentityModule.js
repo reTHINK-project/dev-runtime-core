@@ -166,13 +166,13 @@ class IdentityModule {
           _this._messageBus.postMessage(replyMsg);
         });
         return;
-      } else if (funcName === 'selectIdentityForHyperty') {
+      } /*else if (funcName === 'selectIdentityForHyperty') {
         let origin = msg.body.params.origin;
         let idp = msg.body.params.idp;
         let idHint = msg.body.params.idHint;
         _this.selectIdentityForHyperty(origin, idp, idHint);
         return;
-      }
+      }*/
 
       // if the function requested is not a promise
       let value = {type: 'execute', value: returnedValue, code: 200};
@@ -619,7 +619,7 @@ class IdentityModule {
   *
   * @return {IdAssertion}              IdAssertion
   */
-  getIdentityAssertion(identifier, origin, usernameHint, idpDomain) {
+  getIdentityAssertion(identityBundle) {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
@@ -632,39 +632,37 @@ class IdentityModule {
 
         if (!result) return;
 
-        let identitiesInfo = _this.getIdentitiesToChoose();
+        if (identityBundle &&
+            identityBundle.hasOwnProperty('origin') &&
+            identityBundle.hasOwnProperty('idp') &&
+            identityBundle.hasOwnProperty('idHint')) {
 
-        _this.requestIdentityToGUI(identitiesInfo.identities, identitiesInfo.idps).then(value => {
-
-          if (value.type === 'identity') {
-
-          //  let chosenID = getUserURLFromEmail(value.value);
-          // hack while the user url is not returned from requestIdentityToGUI;
-
-            let chosenID = 'user://' + _this.currentIdentity.idp + '/' + value.value;
-
-            // returns the identity info from the chosen id
-            for (let i in _this.identities) {
-              if (_this.identities[i].identity === chosenID) {
-                return resolve(_this.identities[i].messageInfo);
-              }
-            }
-            reject('no identity was found .');
-          } else if (value.type === 'idp') {
-
-            _this.callGenerateMethods(value.value, origin).then((value) => {
-              resolve(value);
+          let origin = identityBundle.origin;
+          let idp = identityBundle.idp;
+          let idHint = identityBundle.idHint;
+          _this.selectIdentityForHyperty(origin, idp, idHint).then((assertion) => {
+            console.log('[IdentityModule] Identity selected by hyperty.');
+            return resolve(assertion);
+          }, (err) => { // if it got an error then just select identity from GUI
+            console.error('[IdentityModule] Could not select identity from hyperty.');
+            _this.selectIdentityFromGUI().then((newAssertion) => {
+              console.log('[IdentityModule] Identity selected by hyperty.');
+              return resolve(newAssertion);
             }, (err) => {
-              reject(err);
+              return reject(err);
             });
-
-          } else {
-            reject('error on GUI received message.');
-          }
-        });
+          });
+        } else {
+          _this.selectIdentityFromGUI().then((assertion) => {
+            console.log('[IdentityModule] Identity selected from GUI.')
+            return resolve(assertion);
+          }, (err) => {
+            return reject(err);
+          });
+        }
       }).catch(error => {
-        console.log('Error on identity acquisition ', error);
-        reject(error);
+        console.error('Error on identity acquisition ', error);
+        return reject(error);
       });
 
       _this.runtimeCapabilities.isAvailable('node').then((result) => {
@@ -822,6 +820,43 @@ class IdentityModule {
             });
           }
         });
+      });
+    });
+  }
+
+  selectIdentityFromGUI(origin) {
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+      let identitiesInfo = _this.getIdentitiesToChoose();
+
+      _this.requestIdentityToGUI(identitiesInfo.identities, identitiesInfo.idps).then(value => {
+
+        if (value.type === 'identity') {
+
+        //  let chosenID = getUserURLFromEmail(value.value);
+        // hack while the user url is not returned from requestIdentityToGUI;
+
+          let chosenID = 'user://' + _this.currentIdentity.idp + '/' + value.value;
+
+          // returns the identity info from the chosen id
+          for (let i in _this.identities) {
+            if (_this.identities[i].identity === chosenID) {
+              return resolve(_this.identities[i].messageInfo);
+            }
+          }
+          return reject('no identity was found .');
+        } else if (value.type === 'idp') {
+
+          _this.callGenerateMethods(value.value, origin).then((value) => {
+            return resolve(value);
+          }, (err) => {
+            return reject(err);
+          });
+
+        } else {
+          return reject('error on GUI received message.');
+        }
       });
     });
   }
