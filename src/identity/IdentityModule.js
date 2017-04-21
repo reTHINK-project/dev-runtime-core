@@ -166,6 +166,12 @@ class IdentityModule {
           _this._messageBus.postMessage(replyMsg);
         });
         return;
+      } else if (funcName === 'selectIdentityForHyperty') {
+        let origin = msg.body.params.origin;
+        let idp = msg.body.params.idp;
+        let idHint = msg.body.params.idHint;
+        _this.selectIdentityForHyperty(origin, idp, idHint);
+        return;
       }
 
       // if the function requested is not a promise
@@ -724,6 +730,7 @@ class IdentityModule {
         return _this.generateAssertion(publicKey, origin, '', userkeyPair, idp);
 
       }).then(function(url) {
+        _this.myHint = url;
         return _this.generateAssertion(publicKey, origin, url, userkeyPair, idp);
 
       }).then(function(value) {
@@ -735,6 +742,86 @@ class IdentityModule {
       }).catch(function(err) {
         console.log(err);
         reject(err);
+      });
+    });
+  }
+
+  loginSelectedIdentity(publicKey, origin, idp, keyPair, loginUrl) {
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+      _this.callIdentityModuleFunc('openPopup', {urlreceived: loginUrl}).then((idCode) => {
+        return idCode;
+      }, (err) => {
+        console.error('Error while logging in for the selected identity.');
+        return reject(err);
+      }).then((idCode) => {
+        _this.sendGenerateMessage(publicKey, origin, idCode, idp).then((newResponse) => {
+          if (newResponse.hasOwnProperty('assertion')) {
+            _this.storeIdentity(newResponse, keyPair);
+          } else {
+            console.error('Error while logging in for the selected identity.');
+            return reject('Could not generate a valid assertion for selected identity.');
+          }
+        });
+      });
+    });
+  }
+
+  generateSelectedIdentity(publicKey, origin, idp, keyPair) {
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+
+      _this.generateAssertion(publicKey, origin, '', keyPair, idp).then((loginUrl) => {
+        return loginUrl;
+      }).then(function(url) {
+        return _this.generateAssertion(publicKey, origin, url, keyPair, idp);
+      }).then(function(value) {
+        if (value) {
+          return resolve(value);
+        } else {
+          return reject('Error on obtaining Identity');
+        }
+      }).catch(function(err) {
+        console.error(err);
+        return reject(err);
+      });
+    });
+  }
+
+  selectIdentityForHyperty(origin, idp, idHint) {
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+
+      //generates the RSA key pair
+      _this.crypto.generateRSAKeyPair().then(function(keyPair) {
+        let publicKey = btoa(keyPair.public);
+
+        _this.sendGenerateMessage(publicKey, origin, idHint, idp).then((response) => {
+          if (response.hasOwnProperty('assertion')) { // identity was logged in, just save it
+            _this.storeIdentity(response, keyPair).then((value) => {
+              return resolve(value);
+            }, (err) => {
+              return reject(err);
+            });
+          } else if(response.hasOwnProperty('loginUrl')) { // identity was not logged in
+            _this.loginSelectedIdentity(publicKey, origin, idp, keyPair, response.loginUrl).then((value) => {
+              return resolve(value);
+            }, (err) => {
+              return reject(err);
+            });
+          } else { // you should never get here, if you do then the IdP Proxy is not well implemented
+            console.error('GenerateAssertion returned invalid response.');
+            console.log('Proceeding by logging in.');
+            _this.generateSelectedIdentity(publicKey, origin, idp, keyPair).then((value) => {
+              return resolve(value);
+            }, (err) => {
+              return reject(err);
+            });
+          }
+        });
       });
     });
   }
@@ -820,7 +907,7 @@ class IdentityModule {
         }
       }
 
-      if (idAlreadyExists) {
+      if (idAlreadyExists) { // TODO: TIAGO maybe overwrite the identity
         resolve(oldId);
         let exists = false;
 
