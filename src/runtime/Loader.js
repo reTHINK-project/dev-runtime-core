@@ -95,7 +95,7 @@ class Loader {
    *
    * @memberOf Loader
    */
-  loadHyperty(hypertyCatalogueURL, reuseURL = false, appURL, IdpConstraint) {
+  loadHyperty(hypertyCatalogueURL, reuseURL = false, IdpConstraint, appURL) {
 
     if (!this._readyToUse()) return false;
     if (!hypertyCatalogueURL) throw new   Error('[Runtime.Loader] Hyperty descriptor url parameter is needed');
