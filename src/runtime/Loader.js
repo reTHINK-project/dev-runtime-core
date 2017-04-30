@@ -89,12 +89,13 @@ class Loader {
    *
    * @param {URL.HypertyCatalogueURL} hypertyCatalogueURL - The Catalogue URL used to identify descriptors in the Catalogue.
    * @param {boolean|URL.HypertyURL} [reuseURL=false] reuseURL - reuseURL is used to reuse the hypertyURL previously registred, by default the reuse is disabled;
-   * @param {URL} appURL - the app url address; // TODO: improve this description;
+   * @param {URL} appURL - the app url origin address;
+   * @param {object} IdpConstraint - constraints to be used when selecting the identity to be associated with the Hyperty including origin, idp, and idHint.
    * @returns {Promise<Boolean, Error>} this is Promise and returns true if all components are loaded with success or an error if someone fails.
    *
    * @memberOf Loader
    */
-  loadHyperty(hypertyCatalogueURL, reuseURL = false, appURL) {
+  loadHyperty(hypertyCatalogueURL, reuseURL = false, appURL, IdpConstraint) {
 
     if (!this._readyToUse()) return false;
     if (!hypertyCatalogueURL) throw new   Error('[Runtime.Loader] Hyperty descriptor url parameter is needed');
@@ -236,7 +237,7 @@ class Loader {
         console.info('[Runtime.Loader] 6: return the addresses for the hyperty', addresses);
 
         // Register hyperty
-        return this.registry.registerHyperty(_hypertySandbox, hypertyCatalogueURL, _hypertyDescriptor, addresses);
+        return this.registry.registerHyperty(_hypertySandbox, hypertyCatalogueURL, _hypertyDescriptor, addresses, IdpConstraint);
       }, handleError)
       .then((hypertyURL) => {
         if (haveError) return false;

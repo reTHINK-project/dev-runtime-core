@@ -633,6 +633,8 @@ class IdentityModule {
 
         if (!result) return;
 
+        //todo: only idp should be mandatory when identityBundle exists
+
         if (identityBundle &&
             identityBundle.hasOwnProperty('origin') &&
             identityBundle.hasOwnProperty('idp') &&
