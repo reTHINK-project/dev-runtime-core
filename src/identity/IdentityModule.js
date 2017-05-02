@@ -633,13 +633,12 @@ class IdentityModule {
         if (!result) return;
 
         if (identityBundle &&
-            identityBundle.hasOwnProperty('origin') &&
-            identityBundle.hasOwnProperty('idp') &&
-            identityBundle.hasOwnProperty('idHint')) {
+            identityBundle.hasOwnProperty('idp')) {
 
-          let origin = identityBundle.origin;
           let idp = identityBundle.idp;
-          let idHint = identityBundle.idHint;
+          let origin = identityBundle.hasOwnProperty('origin') ? identityBundle.origin : 'origin';
+          let idHint = identityBundle.hasOwnProperty('idHint') ? identityBundle.idHint : '';
+          
           _this.selectIdentityForHyperty(origin, idp, idHint).then((assertion) => {
             console.log('[IdentityModule] Identity selected by hyperty.');
             return resolve(assertion);
