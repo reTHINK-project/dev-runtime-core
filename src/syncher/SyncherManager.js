@@ -330,12 +330,15 @@ class SyncherManager {
 
           console.info('[SyncherManager - resume create] - resolved resumed: ', storedObject);
 
-          resolve(_this._decryptChildrens(storedObject, childrens));
-          }).catch((reason) => {
+          return _this._decryptChildrens(storedObject, childrens);
+        }).then((decryptedObject) => {
+          // console.log('result of previous promise');
+          resolve(decryptedObject);
+        }).catch((reason) => {
           console.error('[SyncherManager - resume create] - fail on addChildrens: ', reason);
           resolve(false);
         });
-        resolve();
+      //  resolve();
       }).catch((reason) => {
         console.error('[SyncherManager - resume create] - fail on getDataSchemaDescriptor: ', reason);
         resolve(false);
@@ -347,6 +350,7 @@ class SyncherManager {
 
   _decryptChildrens(storedObject, childrens) {
     let _this = this;
+    return new Promise((resolve, reject) => {
 
       if (!childrens) return(storedObject);
       else {
@@ -373,34 +377,35 @@ class SyncherManager {
 
               console.log('[SyncherManager._decryptChildrens] createdBy ',  owner, ' object: ', child.value);
 
-              let decrypted = _this._identityModule.decryptDataObject(JSON.parse(child.value), storedObject.data.url);
+              let decrypted = _this._identityModule.decryptDataObject(JSON.parse(child.value), storedObject.data.url).then((decryptedObject) => {
+                storedObject['childrens'][children][childId].value = decryptedObject.value;
+              });
 
               listOfDecryptedObjects.push(decrypted);
-              storedObject['childrens'][children][childId].value = decrypted.value;
             }
           });
+
 
           Promise.all(listOfDecryptedObjects).then((decryptedObjects) => {
 
             console.log('[SyncherManager._decryptChildrens] returning decrypted ', decryptedObjects);
 
-            /*Object.keys(childObjects).forEach((childId)=>{
-              storedObject['childrens'][children][childId].value = decryptedObjects[childId].value;
-              console.log('[SyncherManager._decryptChildrens] adding ', decryptedObjects[childId].value);
+              /*Object.keys(childObjects).forEach((childId)=>{
+                storedObject['childrens'][children][childId].value = decryptedObjects[childId].value;
+                console.log('[SyncherManager._decryptChildrens] adding ', decryptedObjects[childId].value);
 
-            });
+              });
 
-            console.info('[SyncherManager._decryptChildrens] returning decrypted objects : ', storedObject);*/
+              console.info('[SyncherManager._decryptChildrens] returning decrypted objects : ', storedObject);*/
 
-            return storedObject;
+            resolve(storedObject);
 
           }).catch((reason) => {
             console.warn('[SyncherManager._decryptChildrens] failed : ', reason);
           });
-
         });
-      //  return resolve(storedObject);
       }
+    });
   }
 
   _authorise(msg, objURL) {
@@ -665,14 +670,15 @@ class SyncherManager {
 
         //console.log('[subscribe] - resume subscription: ', msg, reply, storedObject, observer);
 
-        resolve(this._decryptChildrens(storedObject, childrens));
-        }).catch((reason) => {
+        return this._decryptChildrens(storedObject, childrens);
+      }).then((decryptedObject) => {
+          // console.log('result of previous promise');
+        resolve(decryptedObject);
+      }).catch((reason) => {
         console.error('[SyncherManager - resume subscription] - fail on getDataSchemaDescriptor: ', reason);
         resolve(false);
       });
-
     });
-
   }
 
   //FLOW-IN: message received from local DataObjectObserver -> unsubscribe
