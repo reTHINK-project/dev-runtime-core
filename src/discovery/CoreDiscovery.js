@@ -371,7 +371,7 @@ class CoreDiscovery {
         msg.body.criteria = {};
       msg.body.criteria.resources = resources;
     }
-    
+
     return new Promise(function(resolve, reject) {
       console.log("[CoreDiscovery.discoverHyperties] sending msg ", msg);
 
@@ -379,7 +379,7 @@ class CoreDiscovery {
 
           console.log("[CoreDiscovery.discoverHyperties] rcved reply ", reply);
 
-          if (reply.body.code === 200) {
+          if (reply.body.code === 200 || reply.body.code === 500) {
             let hyperties = reply.body.value;
 
             let finalHyperties = [];
@@ -487,7 +487,7 @@ class CoreDiscovery {
 
       _this.messageBus.postMessage(msg, (reply) => {
 
-        if(reply.body.code !== 200)
+        if(reply.body.code !== 200 && reply.body.code !== 500)
           return reject('No Hyperty was found');
 
         let hyperty = reply.body.value;
