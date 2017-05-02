@@ -72,21 +72,23 @@ class ObserverObject {
 
           if (msg.type === 'create' && msg.to.includes('children') && this._isToSaveData) {
             let splitedReporterURL = splitObjectURL(msg.to);
+
             let url = splitedReporterURL.url;
 
-            let resource = splitedReporterURL.resource;
-            let value = {
-              identity: msg.body.identity,
-              value: msg.body.value
-            };
-            let objectURLResource = msg.body.resource;
-            let attribute = resource;
+            if (!(typeof msg.body.value === 'string')) {
 
-            if (objectURLResource) attribute += '.' + objectURLResource;
+              console.log('[SyncherManager.ObserverObject] encrypting received data ', msg.body.value);
 
-            console.log('[SyncherManager.ObserverObject - save childrens] - : ', this._isToSaveData, url, attribute, value);
+              _this._parent._identityModule.encryptDataObject(msg.body.value, url).then((encryptedValue)=>{
+                console.log('[SyncherManager.ObserverObject] encrypted data ',  encryptedValue);
 
-            _this._parent._dataObjectsStorage.saveChildrens(false, url, attribute, value);
+                _this._storeChildObject(msg, JSON.stringify(encryptedValue));
+              }).catch((reason) => {
+                console.warn('[SyncherManager.ObserverObject._encryptChild] failed : ', reason);
+              });
+            } else {
+              _this._storeChildObject(msg, msg.body.value);
+            }
           }
 
           console.log('[SyncherManager.ObserverObject children Listeners]', _this._childrenListeners, childListener);
@@ -99,6 +101,31 @@ class ObserverObject {
       });
 
     });
+  }
+
+  // store childObject
+
+  _storeChildObject(msg, data) {
+    let _this = this;
+
+    let splitedReporterURL = splitObjectURL(msg.to);
+
+    let url = splitedReporterURL.url;
+
+    let resource = splitedReporterURL.resource;
+    let value = {
+      identity: msg.body.identity,
+      value: data
+    };
+
+    let objectURLResource = msg.body.resource;
+    let attribute = resource;
+
+    if (objectURLResource) attribute += '.' + objectURLResource;
+
+    console.log('[SyncherManager.ObserverObject._storeChildObject] : ', url, attribute, value);
+
+    _this._parent._dataObjectsStorage.saveChildrens(false, url, attribute, value);
   }
 
   removeSubscription(hyperty) {

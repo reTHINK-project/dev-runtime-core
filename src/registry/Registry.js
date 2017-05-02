@@ -844,9 +844,10 @@ class Registry {
   * To register a new Hyperty in the runtime which returns the HypertyURL allocated to the new Hyperty.
   * @param  {Sandbox}             sandbox               sandbox
   * @param  {HypertyCatalogueURL} HypertyCatalogueURL   descriptor
+  * @param {object} IdpConstraint - constraints to be used when selecting the identity to be associated with the Hyperty including origin, idp, and idHint.
   * @return {HypertyURL}          HypertyURL
   */
-  registerHyperty(sandbox, descriptorURL, descriptor, addressURL) {
+  registerHyperty(sandbox, descriptorURL, descriptor, addressURL, IdpConstraint) {
     let _this = this;
 
     let hypertyCapabilities;
@@ -861,7 +862,7 @@ class Registry {
         domainUrl = domainUrl.replace('catalogue.', '');
       }
 
-      _this.idModule.getIdentityAssertion().then(function(result) {
+      _this.idModule.getIdentityAssertion(IdpConstraint).then(function(result) {
 
         let userProfile = result.userProfile;
         console.log('[Registry registerHyperty] userProfile', userProfile);
