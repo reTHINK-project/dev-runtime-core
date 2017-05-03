@@ -191,22 +191,27 @@ class ReporterObject {
               console.log('[SyncherManager.ReporterObject received]', msg);
 
               if (msg.type === 'create' && msg.to.includes('children') && this._isToSaveData) {
+
+                // if the value is not encrypted lets encrypt it
+                // todo: should be subject to some policy
                 let splitedReporterURL = splitObjectURL(msg.to);
+
                 let url = splitedReporterURL.url;
 
-                let resource = splitedReporterURL.resource;
-                let value = {
-                  identity: msg.body.identity,
-                  value: msg.body.value
-                };
-                let objectURLResource = msg.body.resource;
-                let attribute = resource;
+                if (!(typeof msg.body.value === 'string')) {
 
-                if (objectURLResource) attribute += '.' + objectURLResource;
+                  console.log('[SyncherManager.ReporterObject] encrypting received data ', msg.body.value);
 
-                console.log('[SyncherManager.ReporterObject - save childrens] - : ', this._isToSaveData, url, attribute, value);
+                  _this._parent._identityModule.encryptDataObject(msg.body.value, url).then((encryptedValue)=>{
+                    console.log('[SyncherManager.ReporterObject] encrypted data ',  encryptedValue);
 
-                _this._parent._dataObjectsStorage.saveChildrens(true, url, attribute, value);
+                    _this._storeChildObject(msg, JSON.stringify(encryptedValue));
+                  }).catch((reason) => {
+                    console.warn('[SyncherManager._decryptChildrens] failed : ', reason);
+                  });
+                } else {
+                  _this._storeChildObject(msg, msg.body.value);
+                }
               }
 
             });
@@ -222,6 +227,31 @@ class ReporterObject {
         }
       });
     });
+  }
+
+  // store childObject
+
+  _storeChildObject(msg, data) {
+    let _this = this;
+
+    let splitedReporterURL = splitObjectURL(msg.to);
+
+    let url = splitedReporterURL.url;
+
+    let resource = splitedReporterURL.resource;
+    let value = {
+      identity: msg.body.identity,
+      value: data
+    };
+
+    let objectURLResource = msg.body.resource;
+    let attribute = resource;
+
+    if (objectURLResource) attribute += '.' + objectURLResource;
+
+    console.log('[SyncherManager.ReporterObject._storeChildObject] : ', url, attribute, value);
+
+    _this._parent._dataObjectsStorage.saveChildrens(true, url, attribute, value);
   }
 
   delete() {

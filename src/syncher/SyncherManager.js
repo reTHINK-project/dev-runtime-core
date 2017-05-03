@@ -44,7 +44,7 @@ class SyncherManager {
   _observers: { ObjectURL: ObserverObject }
   */
 
-  constructor(runtimeURL, bus, registry, catalog, storageManager, allocator, storeDataObjects) {
+  constructor(runtimeURL, bus, registry, catalog, storageManager, allocator, storeDataObjects, identityModule) {
     if (!runtimeURL) throw new Error('[Syncher Manager] - needs the runtimeURL parameter');
     if (!bus) throw new Error('[Syncher Manager] - needs the MessageBus instance');
     if (!registry) throw new Error('[Syncher Manager] - needs the Registry instance');
@@ -57,6 +57,7 @@ class SyncherManager {
     _this._registry = registry;
     _this._catalog = catalog;
     _this._storageManager = storageManager;
+    _this._identityModule = identityModule;
 
     //TODO: these should be saved in persistence engine?
     _this.runtimeURL = runtimeURL;
@@ -120,8 +121,8 @@ class SyncherManager {
           let listOfReporters = [];
 
           Object.keys(result).forEach((objURL) => {
-            listOfReporters.push(this._resumeCreate(msg, result[objURL]));
-          });
+              listOfReporters.push(this._resumeCreate(msg, result[objURL]));
+            });
 
           Promise.all(listOfReporters).then((resumedReporters) => {
             console.log('[SyncherManager - Create Resumed]', resumedReporters);
@@ -131,7 +132,9 @@ class SyncherManager {
               return reporter !== false;
             });
 
-            //FLOW-OUT: message response to Syncher -> create
+            console.info('[SyncherManager.onCreate] returning resumed objects : ', successfullyResumed);
+
+            //FLOW-OUT: message response to Syncher -> create resume
             this._bus.postMessage({
               id: msg.id, type: 'response', from: to, to: from,
               body: { code: 200, value: successfullyResumed }
@@ -326,20 +329,83 @@ class SyncherManager {
           _this._reporters[resource] = reporter;
 
           console.info('[SyncherManager - resume create] - resolved resumed: ', storedObject);
-          resolve(storedObject);
 
+          return _this._decryptChildrens(storedObject, childrens);
+        }).then((decryptedObject) => {
+          // console.log('result of previous promise');
+          resolve(decryptedObject);
         }).catch((reason) => {
           console.error('[SyncherManager - resume create] - fail on addChildrens: ', reason);
           resolve(false);
         });
-
+      //  resolve();
       }).catch((reason) => {
         console.error('[SyncherManager - resume create] - fail on getDataSchemaDescriptor: ', reason);
         resolve(false);
       });
-
     });
+  }
 
+  // to decrypt DataChildObjects if they are encrypted
+
+  _decryptChildrens(storedObject, childrens) {
+    let _this = this;
+    return new Promise((resolve, reject) => {
+
+      if (!childrens) return(storedObject);
+      else {
+
+        let childrensObj = Object.keys(storedObject['childrens']);
+
+        if (childrensObj.length === 0) {
+          return(storedObject);
+        }
+
+        childrens.forEach((children)=>{
+
+          let childObjects = storedObject['childrens'][children];
+
+          console.log('[SyncherManager._decryptChildrens] dataObjectChilds to decrypt ',  childObjects);
+
+          let listOfDecryptedObjects = [];
+
+          Object.keys(childObjects).forEach((childId)=>{
+            let child = childObjects[childId];
+            let owner = childId.split('#')[0];
+
+            if ( typeof child.value === 'string'){
+
+              console.log('[SyncherManager._decryptChildrens] createdBy ',  owner, ' object: ', child.value);
+
+              let decrypted = _this._identityModule.decryptDataObject(JSON.parse(child.value), storedObject.data.url).then((decryptedObject) => {
+                storedObject['childrens'][children][childId].value = decryptedObject.value;
+              });
+
+              listOfDecryptedObjects.push(decrypted);
+            }
+          });
+
+
+          Promise.all(listOfDecryptedObjects).then((decryptedObjects) => {
+
+            console.log('[SyncherManager._decryptChildrens] returning decrypted ', decryptedObjects);
+
+              /*Object.keys(childObjects).forEach((childId)=>{
+                storedObject['childrens'][children][childId].value = decryptedObjects[childId].value;
+                console.log('[SyncherManager._decryptChildrens] adding ', decryptedObjects[childId].value);
+
+              });
+
+              console.info('[SyncherManager._decryptChildrens] returning decrypted objects : ', storedObject);*/
+
+            resolve(storedObject);
+
+          }).catch((reason) => {
+            console.warn('[SyncherManager._decryptChildrens] failed : ', reason);
+          });
+        });
+      }
+    });
   }
 
   _authorise(msg, objURL) {
@@ -603,17 +669,16 @@ class SyncherManager {
         // Object.assign(storedObject.childrens, reply.body.value.childrens);
 
         //console.log('[subscribe] - resume subscription: ', msg, reply, storedObject, observer);
-        resolve(storedObject);
 
-        //});
-
+        return this._decryptChildrens(storedObject, childrens);
+      }).then((decryptedObject) => {
+          // console.log('result of previous promise');
+        resolve(decryptedObject);
       }).catch((reason) => {
         console.error('[SyncherManager - resume subscription] - fail on getDataSchemaDescriptor: ', reason);
         resolve(false);
       });
-
     });
-
   }
 
   //FLOW-IN: message received from local DataObjectObserver -> unsubscribe
