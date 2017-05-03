@@ -273,10 +273,12 @@ class IdentityModule {
           } else if (complete_id.info.hasOwnProperty('tokenIDJSON')) {
             expiration_date = complete_id.info.tokenIDJSON.exp;
           } else {
-            throw 'The ID Token does not have an expiration time';
+            // throw 'The ID Token does not have an expiration time';
+            console.log('The ID Token does not have an expiration time');
           }
         } else {
-          throw 'The ID Token does not have an expiration time';
+          // throw 'The ID Token does not have an expiration time';
+          console.log('The ID Token does not have an expiration time')
         }
 
         console.log('[Identity.IdentityModule.getValidToken] Token expires in', expiration_date);
