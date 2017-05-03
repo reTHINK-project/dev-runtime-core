@@ -40,17 +40,22 @@ class NotificationManager {
     this._notificationManagerURL = runtimeURL + '/nm/';
     this._subscribers = {};
 
-    _this.messageBus.addListener(_this.discoveryURL, (msg) => {
+    _this.messageBus.addListener(this._notificationManagerURL, (msg) => {
       //Decide which function to call...
+      //We only need the url that we want to subscribe or not?
+      _subscribe(msg.body.subscribe);
+      //Update map?
+      //Send a response?
     });
   }
 
-  subscribe(url, subscriber, callback) {
+  //We need the callback and the subscriber here?
+  _subscribe(url, subscriber, callback) {
 
     const msg = {
       type: 'subscribe',
       from: this._notificationManagerURL,
-      to: this._runtimeURL + '/nm/',
+      to: this._runtimeURL + '/nm/', //should be the subscription manager present in msg-node
       body: {
         subscribe: url + '/registration',
       }
