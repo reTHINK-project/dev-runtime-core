@@ -37,41 +37,66 @@ class NotificationManager {
   constructor(runtimeURL, msgBus) {
     this._messageBus = msgBus;
     this._runtimeURL = runtimeURL;
+    this._domain = divideURL(runtimeURL).domain;
     this._notificationManagerURL = runtimeURL + '/nm/';
-    this._subscribers = {};
+    this._subscriptions = {};
 
-    _this.messageBus.addListener(this._notificationManagerURL, (msg) => {
+    this._messageBus.addListener(this._notificationManagerURL, (msg) => {
       //Decide which function to call...
-      //We only need the url that we want to subscribe or not?
-      _subscribe(msg.body.subscribe);
-      //Update map?
-      //Send a response?
+      if(msg.type === 'subscribe')
+        _subscribe(msg.body.subscribe, msg.body.subscriber);
+      else if (msg.type === 'notification') {
+        _notify(msg.body);
+      }
     });
   }
 
-  //We need the callback and the subscriber here?
-  _subscribe(url, subscriber, callback) {
+  _subscribe(url, subscriber) {
+
+    if(url in this._subscriptions) {
+      this._subscriptions[url].push(subscriber);
+      return;
+    }
 
     const msg = {
       type: 'subscribe',
       from: this._notificationManagerURL,
-      to: this._runtimeURL + '/nm/', //should be the subscription manager present in msg-node
+      to: 'domain://msg.node.' + this._domain + '/sm',
       body: {
         subscribe: url + '/registration',
       }
     };
 
-    return new Promise(function(resolve, reject) {
+    this._messageBus.postMessage(msg, (reply) => {
+      console.log("[NotificationManager.subscribe] rcved reply ", reply);
 
-      this._messageBus.postMessage(msg, (reply) => {
-        console.log("[NotificationManager.subscribe] rcved reply ", reply);
+      if(reply.body.code === 200) {
+        this._subscriptions[url] = [];
+        this._subscriptions[url].push(subscriber);
+      }
+      else
+        console.error("Error subscribing ", url);
+    });
+  }
 
-        if(reply.body.code === 200)
-          resolve();
-        else
-          reject();
-      });
+  _notify(body) {
+
+    this._subscriptions[body.url].forEach((subscriber) => {
+
+      const msg = {
+        type: 'notification',
+        from: this._notificationManagerURL,
+        to: subscriber,
+        body: {
+          status: body.status,
+        }
+      };
+
+      this._messageBus.postMessage(msg, (reply) => {});
+
     });
   }
 
 }
+
+export default NotificationManager;
