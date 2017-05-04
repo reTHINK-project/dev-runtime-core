@@ -61,7 +61,7 @@ class NotificationManager {
     const msg = {
       type: 'subscribe',
       from: this._notificationManagerURL,
-      to: 'domain://msg.node.' + this._domain + '/sm',
+      to: 'domain://msg-node.' + this._domain + '/sm',
       body: {
         subscribe: url + '/registration',
       }
