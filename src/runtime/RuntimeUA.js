@@ -40,6 +40,8 @@ import { runtimeUtils } from './runtimeUtils';
 import GraphConnector from '../graphconnector/GraphConnector';
 
 import CoreDiscovery from '../discovery/CoreDiscovery';
+import NotificationManager from '../discovery/NotificationManager';
+
 
 import DataObjectsStorage from '../store-objects/DataObjectsStorage';
 import SyncherManager from '../syncher/SyncherManager';
@@ -58,7 +60,8 @@ import RuntimeCoreCtx from '../policy/context/RuntimeCoreCtx';
  * @property {Registry} registry - Registry Module;
  * @property {MessageBus} messageBus - Message Bus is used like a router to redirect the messages from one component to other(s)
  * @property {GraphConnector} graphConnector - Graph Connector handling GUID and contacts
- * @property {CoreDiscovery} discovery - Discovery for discovery hyperties/dataObjects
+ * @property {CoreDiscovery} coreDiscovery - Discovery for discovery hyperties/dataObjects
+ * @property {NotificationManager} notificationManager - Notification Manager to deal with hyperty notifications
  */
 class RuntimeUA {
 
@@ -280,8 +283,10 @@ class RuntimeUA {
         this.graphConnector = new GraphConnector(this.runtimeURL, this.messageBus, this.storageManager);
 
         // Instantiate Discovery
-        console.log("runtimeFactory: ", this.runtimeFactory);
         this.coreDiscovery = new CoreDiscovery(this.runtimeURL, this.messageBus, this.graphConnector, this.runtimeFactory, this.registry);
+
+        // Instantiate NotificationManager
+        this.notificationManager = new NotificationManager(this.runtimeURL, this.messageBus);
 
         // Instantiate Discovery Lib for Testing
         //_this.discovery = new Discovery(_this.runtimeURL, _this.messageBus);
