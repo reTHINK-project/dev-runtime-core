@@ -417,6 +417,8 @@ class Registry {
     let dataObject = _this.dataObjectList[dataObjectURL];
 
     if (dataObject) {
+      if (!dataObject.subscribers) { dataObject.subscribers = []; }
+
       dataObject.subscribers.push(subscriberURL);
       _this.dataObjectList[dataObjectURL] = dataObject;
     }

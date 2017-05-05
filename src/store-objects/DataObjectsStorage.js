@@ -30,6 +30,7 @@ class DataObjectsStorage {
     if (!storeDataObject.hasOwnProperty(type)) storeDataObject[type] = {};
 
     if (!storeDataObject[type].hasOwnProperty(metadata.url)) {
+      storeDataObject[type][metadata.url] = {};
       storeDataObject[type][metadata.url].subscriptions = [];// TODO:do we need this?
       storeDataObject[type][metadata.url].subscriberUsers = [];// TODO:do we need this?
       storeDataObject[type][metadata.url].childrens = {};

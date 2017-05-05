@@ -20,7 +20,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 **/
-import { divideURL } from '../utils/utils';
+import { divideURL, deepClone } from '../utils/utils';
 import { schemaValidation } from '../utils/schemaValidation';
 
 import AddressAllocation from '../allocation/AddressAllocation';
@@ -201,7 +201,7 @@ class SyncherManager {
 
       //request address allocation of a new object from the msg-node
       _this._allocator.create(domain, numOfAddress, objectInfo, scheme, reuseDataObject).then((allocated) => {
-        let objectRegistration = Object.assign(msg.body.value, {});
+        let objectRegistration = deepClone(msg.body.value);
         objectRegistration.url = allocated.address[0];
         objectRegistration.authorise = msg.body.authorise;
         objectRegistration.childrens = childrens;
@@ -243,7 +243,9 @@ class SyncherManager {
             interworking = true;
           }
 
-          let metadata = objectRegistration;
+          // should we use the msg.body.value instead?
+
+          let metadata = deepClone(objectRegistration);
           metadata.subscriberUser = userURL;
           metadata.isReporter = true;
 
@@ -425,13 +427,15 @@ class SyncherManager {
 
     console.log('[SyncherManager -  authorise] - ', msg, objURL);
 
-    msg.body.authorise.forEach((hypertyURL) => {
-      //FLOW-OUT: send invites to list of remote Syncher -> _onRemoteCreate -> onNotification
-      _this._bus.postMessage({
-        type: 'create', from: objSubscriptorURL, to: hypertyURL,
-        body: { identity: msg.body.identity, source: msg.from, value: msg.body.value, schema: msg.body.schema }
+    if (msg.body.authorise) {
+      msg.body.authorise.forEach((hypertyURL) => {
+        //FLOW-OUT: send invites to list of remote Syncher -> _onRemoteCreate -> onNotification
+        _this._bus.postMessage({
+          type: 'create', from: objSubscriptorURL, to: hypertyURL,
+          body: { identity: msg.body.identity, source: msg.from, value: msg.body.value, schema: msg.body.schema }
+        });
       });
-    });
+    }
   }
 
   //FLOW-IN: message received from DataObjectReporter -> delete
@@ -581,7 +585,7 @@ class SyncherManager {
                 interworking = true;
               }
 
-              let metadata = reply.body.value;
+              let metadata = deepClone(reply.body.value);
               delete metadata.data;
               metadata.childrens = childrens;
               metadata.subscriberUser = userURL;
