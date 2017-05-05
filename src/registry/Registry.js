@@ -447,13 +447,14 @@ class Registry {
   * @param  {Array}     resources                     dataObject resources
   * @param  {Array}     authorise                     list of pre authorised authorised IDs
   */
-  registerDataObject(identifier, dataObjectschema, dataObjectUrl, dataObjectReporter, resources, addressURL, authorise) {
+  //registerDataObject(identifier, dataObjectschema, dataObjectUrl, dataObjectReporter, resources, addressURL, authorise) {
+  registerDataObject(objectRegistration) {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
 
       let dataScheme = [];
-      let filteredDataScheme = dataObjectUrl.split(':');
+      let filteredDataScheme = objectRegistration.url.split(':');
       dataScheme.push(filteredDataScheme[0]);
 
       _this.storageManager.get('registry:DataObjectURLs').then((urlsList) => {
@@ -463,7 +464,7 @@ class Registry {
         }
 
         //update the list with the new elements
-        urlsList[identifier + dataObjectschema + resources + dataObjectReporter] = addressURL.address;
+        urlsList[objectRegistration.name + objectRegistration.schema + objectRegistration.resources + objectRegistration.reporter] = objectRegistration.url;
 
         let p2pHandler;
         let p2pRequester;
@@ -473,11 +474,11 @@ class Registry {
           p2pRequester = runtimeUtils.runtimeDescriptor.p2pRequesterStub;
         }
 
-        let runtime = _this.runtimeURL;
-        let status = 'live';
+        /*let runtime = _this.runtimeURL;
+        let status = 'live';*/
 
         //message to register the new data object, within the domain registry
-        let messageValue = {
+        /*let messageValue = {
           name: identifier,
           resources: resources,
           dataSchemes: dataScheme,
@@ -489,28 +490,30 @@ class Registry {
           subscribers: [],
           runtime: runtime,
           status: status
-        };
+        };*/
+        objectRegistration.expires = _this.expiresTime;
+        objectRegistration.dataSchemes = dataScheme;
 
         if (p2pHandler) {
-          messageValue.p2pHandler = p2pHandler;
-          messageValue.p2pRequester = p2pRequester;
+          objectRegistration.p2pHandler = p2pHandler;
+          objectRegistration.p2pRequester = p2pRequester;
         }
 
-        if (_this.isInterworkingProtoStub(dataObjectReporter)) {
-          messageValue.interworking = true;
+        if (_this.isInterworkingProtoStub(objectRegistration.reporter)) {
+          objectRegistration.interworking = true;
         }
 
         let message;
 
-        if (addressURL.newAddress) {
+        if (!objectRegistration.resume) {
 
-          console.log('[Registry] registering new data object URL', dataObjectUrl);
+          console.log('[Registry.registerDataObject] registering new data object URL', objectRegistration);
 
-          message = {type: 'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: messageValue, policy: 'policy'}};
+          message = {type: 'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: objectRegistration, policy: 'policy'}};
 
         } else {
 
-          console.log('[Registry] registering previously registered data object URL', dataObjectUrl);
+          console.log('[Registry.registerDataObject] registering previously registered data object URL', objectRegistration);
 
           /*messageValue = {name: identifier, resources: resources, dataSchemes: dataScheme, schema: dataObjectschema, url: dataObjectUrl, expires: _this.expiresTime, reporter: dataObjectReporter, preAuth: authorise, subscribers: []};
 
@@ -520,12 +523,12 @@ class Registry {
             type: 'update',
             to: 'domain://registry.' + _this.registryDomain + '/',
             from: _this.registryURL,
-            body: {resource: dataObjectUrl, value: {status: 'live'} }
+            body: {resource: objectRegistration.url, value: {status: 'live'} }
           };
 
         }
 
-        _this.dataObjectList[dataObjectUrl] = messageValue;
+        _this.dataObjectList[objectRegistration.url] = objectRegistration;
 
         // step to obtain the list of all URL registered to updated with the new one.
         _this.storageManager.set('registry:DataObjectURLs', 0, urlsList).then(() => {
@@ -538,7 +541,7 @@ class Registry {
           );*/
 
           _this._messageBus.postMessage(message, (reply) => {
-            console.log('[Registry] ===> registerDataObject Reply: ', reply);
+            console.log('[Registry.registerDataObject] ===> registerDataObject Reply: ', reply);
             if (reply.body.code === 200) {
               resolve('ok');
             } else {
