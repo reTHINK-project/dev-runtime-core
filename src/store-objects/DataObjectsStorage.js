@@ -332,9 +332,11 @@ class DataObjectsStorage {
           if (msg.body && msg.body.schema) schemaFoundData = this._getResourcesBySchema(storedDataObjects[type], msg.body.schema);
 
           let metadataFound = [];
-          let metadata = msg.body.value;
-          delete metadata.data;
-          if (msg.body && msg.body.value) metadataFound = this._getResourcesByMetadata(storedDataObjects[type], metadata);
+          if (msg.body && msg.body.value) {
+            let metadata = msg.body.value;
+            delete metadata.data;
+            metadataFound = this._getResourcesByMetadata(storedDataObjects[type], metadata);
+          }
 
           let dataFound = [];
           if (msg.body && msg.body.value && msg.body.value.data) dataFound = this._getResourcesByData(storedDataObjects[type], msg.body.value.data);

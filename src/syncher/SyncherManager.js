@@ -248,6 +248,7 @@ class SyncherManager {
           let metadata = deepClone(objectRegistration);
           metadata.subscriberUser = userURL;
           metadata.isReporter = true;
+          delete metadata.expires;
 
           // Store the dataObject information
           //todo: pass the full data object in a single parameter
@@ -365,13 +366,13 @@ class SyncherManager {
     let _this = this;
     return new Promise((resolve, reject) => {
 
-      if (!childrens) return(storedObject);
+      if (!childrens) resolve(storedObject);
       else {
 
         let childrensObj = Object.keys(storedObject['childrens']);
 
         if (childrensObj.length === 0) {
-          return(storedObject);
+          resolve(storedObject);
         }
 
         childrens.forEach((children)=>{
