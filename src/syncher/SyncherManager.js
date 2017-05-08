@@ -381,7 +381,7 @@ class SyncherManager {
       if (!childrens) resolve(storedObject);
       else {
 
-        let childrensObj = Object.keys(storedObject['childrens']);
+        let childrensObj = Object.keys(storedObject['childrenObjects']);
 
         if (childrensObj.length === 0) {
           resolve(storedObject);
@@ -389,7 +389,7 @@ class SyncherManager {
 
         childrens.forEach((children)=>{
 
-          let childObjects = storedObject['childrens'][children];
+          let childObjects = storedObject['childrenObjects'][children];
 
           console.log('[SyncherManager._decryptChildrens] dataObjectChilds to decrypt ',  childObjects);
 
@@ -404,7 +404,7 @@ class SyncherManager {
               console.log('[SyncherManager._decryptChildrens] createdBy ',  owner, ' object: ', child.value);
 
               let decrypted = _this._identityModule.decryptDataObject(JSON.parse(child.value), storedObject.data.url).then((decryptedObject) => {
-                storedObject['childrens'][children][childId].value = decryptedObject.value;
+                storedObject['childrenObjects'][children][childId].value = decryptedObject.value;
               });
 
               listOfDecryptedObjects.push(decrypted);
