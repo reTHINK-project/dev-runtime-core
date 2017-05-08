@@ -104,7 +104,7 @@ class ReporterObject {
     //FLOW-OUT: message sent to the msg-node SubscriptionManager component
     let nodeSubscribeMsg = {
       type: 'subscribe', from: _this._parent._url, to: 'domain://msg-node.' + _this._domain + '/sm',
-      body: { subscribe: addresses, source: _this._owner }
+      body: { resources: addresses, source: _this._owner }
     };
 
     return new Promise((resolve, reject) => {
@@ -134,7 +134,7 @@ class ReporterObject {
     //FLOW-OUT: message sent to the msg-node SubscriptionManager component
     let nodeUnSubscribeMsg = {
       type: 'unsubscribe', from: _this._parent._url, to: 'domain://msg-node.' + _this._domain + '/sm',
-      body: { subscribe: [address], source: _this._owner }
+      body: { resources: [address], source: _this._owner }
     };
 
     _this._bus.postMessage(nodeUnSubscribeMsg);
@@ -177,7 +177,7 @@ class ReporterObject {
       //FLOW-OUT: message sent to the msg-node SubscriptionManager component
       let nodeSubscribeMsg = {
         type: 'subscribe', from: _this._parent._url, to: 'domain://msg-node.' + _this._domain + '/sm',
-        body: { subscribe: subscriptions, source: _this._owner }
+        body: { resources: subscriptions, source: _this._owner }
       };
 
       _this._bus.postMessage(nodeSubscribeMsg, (reply) => {
