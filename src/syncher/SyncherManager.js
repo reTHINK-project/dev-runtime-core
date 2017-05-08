@@ -522,7 +522,7 @@ class SyncherManager {
       //FLOW-OUT: subscribe message to the msg-node, registering listeners on the broker
       let nodeSubscribeMsg = {
         type: 'subscribe', from: _this._url, to: 'domain://msg-node.' + domain + '/sm',
-        body: { identity: msg.body.identity, subscribe: subscriptions, source: hypertyURL }
+        body: { identity: msg.body.identity, resources: subscriptions, source: hypertyURL }
       };
 
       //subscribe in msg-node
