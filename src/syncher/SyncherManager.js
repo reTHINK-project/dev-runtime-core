@@ -182,7 +182,13 @@ class SyncherManager {
 
       let properties = descriptor.sourcePackage.sourceCode.properties;
       let scheme = properties.scheme ? properties.scheme.constant : 'resource';
-      let childrens = properties.children ? properties.children.constant : [];
+      let childrens = properties.children ? deepClone(properties.children.constant) : [];
+      /*let childrens = {};
+      if (properties.children) {
+        properties.children.constant.forEach((children) => {
+          childrens[children] = {};
+        });
+      }*/
 
       // Do schema validation
       // TODO: check if is need to handle with the result of validation
@@ -317,7 +323,13 @@ class SyncherManager {
 
         let properties = descriptor.sourcePackage.sourceCode.properties;
         let scheme = properties.scheme ? properties.scheme.constant : 'resource';
-        let childrens = properties.children ? properties.children.constant : [];
+        let childrens = properties.children ? deepClone(properties.children.constant) : [];
+        /*let childrens = {};
+        if (properties.children) {
+          properties.children.constant.forEach((children) => {
+            childrens[children] = {};
+          });
+        }*/
 
         console.log('[SyncherManager] - getDataSchemaDescriptor: ', descriptor, childrens, storedObject.childrenResources);
 
@@ -528,7 +540,12 @@ class SyncherManager {
     //get schema from catalogue and parse -> (children)
     _this._catalog.getDataSchemaDescriptor(msg.body.schema).then((descriptor) => {
       let properties = descriptor.sourcePackage.sourceCode.properties;
-      let childrens = properties.children ? properties.children.constant : [];
+      let childrens = properties.children ? deepClone(properties.children.constant) : [];
+      /*if (properties.children) {
+        properties.children.constant.forEach((children) => {
+          childrens[children] = {};
+        });
+      }*/
 
       //children addresses
       let subscriptions = [];
@@ -657,7 +674,7 @@ class SyncherManager {
       // TODO: remove this since children resources should be available in the DataObjectsStorage
       this._catalog.getDataSchemaDescriptor(schema).then((descriptor) => {
         let properties = descriptor.sourcePackage.sourceCode.properties;
-        let childrens = properties.children ? properties.children.constant : [];
+        let childrens = properties.children ? deepClone(properties.children.constant) : [];
 
         //children addresses
         let subscriptions = [];

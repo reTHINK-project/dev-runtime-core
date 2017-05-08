@@ -33,7 +33,7 @@ class DataObjectsStorage {
       storeDataObject[type][metadata.url] = {};
       storeDataObject[type][metadata.url].subscriptions = [];// TODO:do we need this?
       storeDataObject[type][metadata.url].subscriberUsers = [];// TODO:do we need this?
-      storeDataObject[type][metadata.url].childrens = {};
+      storeDataObject[type][metadata.url].childrenObjects = {};
       storeDataObject[type][metadata.url].data = {};
 
       /*storeDataObject[type][metadata.url] = {
@@ -118,13 +118,13 @@ class DataObjectsStorage {
     }
 
     if (!storeDataObject[type][resource].hasOwnProperty('childrens')) {
-      storeDataObject[type][resource].childrens = {};
+      storeDataObject[type][resource].childrenObjects = {};
     }
 
     if (attribute) {
-      assign(storeDataObject[type][resource].childrens, attribute, deepClone(value));
+      assign(storeDataObject[type][resource].childrenObjects, attribute, deepClone(value));
     } else {
-      storeDataObject[type][resource].childrens = deepClone(value) || {};
+      storeDataObject[type][resource].childrenObjects = deepClone(value) || {};
     }
 
     this._storeDataObject = storeDataObject;
