@@ -34,8 +34,11 @@ class Subscription {
     }
 
     _this._childrenListeners = [];
+    console.log('[Subscription] - childID', childrens);
     childrens.forEach((child) => {
       let childId = childBaseURL + child;
+
+      console.log('[Subscription] - childID', childBaseURL, childId, child);
 
       //add children publish address
       let childrenForward = bus.addPublish(childId);

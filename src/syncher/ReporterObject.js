@@ -1,4 +1,4 @@
-import { divideURL } from '../utils/utils';
+import { divideURL, splitObjectURL } from '../utils/utils';
 import Subscription from './Subscription';
 
 class ReporterObject {
@@ -12,7 +12,7 @@ class ReporterObject {
 
     _this._bus = parent._bus;
 
-    _this._domain = divideURL(owner).domain;
+    _this._domain = divideURL(url).domain;
     _this._objSubscriptorURL = _this._url + '/subscription';
 
     _this._subscriptions = {};
@@ -20,6 +20,8 @@ class ReporterObject {
     _this._childrenListeners = [];
 
     _this._forwards = {};
+
+    _this._isToSaveData = false;
 
     _this._allocateListeners();
   }
@@ -29,7 +31,7 @@ class ReporterObject {
 
     //add subscription listener...
     _this._subscriptionListener = _this._bus.addListener(_this._objSubscriptorURL, (msg) => {
-      console.log(_this._objSubscriptorURL + '-RCV: ', msg);
+      console.log('[SyncherManager.ReporterObject received ]', msg);
       switch (msg.type) {
         case 'subscribe': _this._onRemoteSubscribe(msg); break;
         case 'unsubscribe': _this._onRemoteUnSubscribe(msg); break;
@@ -39,9 +41,20 @@ class ReporterObject {
 
     let changeURL = _this._url + '/changes';
     _this._changeListener = _this._bus.addListener(changeURL, (msg) => {
+
+      console.log('[SyncherManager.ReporterObject ] SyncherManager-' + changeURL + '-RCV: ', msg);
+
       //TODO: what todo here? Save changes?
-      console.log('SyncherManager-' + changeURL + '-RCV: ', msg);
+      if (this._isToSaveData && msg.body.attribute) {
+        console.log('[SyncherManager.ReporterObject ] SyncherManager - save data: ', msg);
+        _this._parent._dataObjectsStorage.update(true, _this._url, 'version', msg.body.version);
+        _this._parent._dataObjectsStorage.saveData(true, _this._url, msg.body.attribute, msg.body.value);
+      }
     });
+  }
+
+  set isToSaveData(value) {
+    this._isToSaveData = value;
   }
 
   _releaseListeners() {
@@ -65,6 +78,21 @@ class ReporterObject {
     });
   }
 
+  resumeSubscriptions(subscriptions) {
+    let _this = this;
+
+    Object.keys(subscriptions).forEach((key) => {
+      let hypertyURL = subscriptions[key];
+
+      console.log('[SyncherManager.ReporterObject] - resume subscriptions', _this, hypertyURL, _this._childrens);
+
+      if (!_this._subscriptions[hypertyURL]) {
+        _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, _this._childrens, true);
+      }
+    });
+
+  }
+
   /**
    * Register a listener in the msg-node and in the local MessageBus, so that messages on this address are forwarded to the reporter object
    * @param  {string} address - URL to register the listeners
@@ -81,7 +109,7 @@ class ReporterObject {
 
     return new Promise((resolve, reject) => {
       _this._bus.postMessage(nodeSubscribeMsg, (reply) => {
-        console.log('forward-subscribe-response(reporter): ', reply);
+        console.log('[SyncherManager.ReporterObject ]forward-subscribe-response(reporter): ', reply);
         if (reply.body.code === 200) {
           let newForward = _this._bus.addForward(_this._url, _this._owner);
           _this._forwards[addresses[0]] = newForward;
@@ -127,7 +155,11 @@ class ReporterObject {
       }
 
       let childBaseURL = _this._url + '/children/';
-      _this._childrens.push(childrens);
+      console.log('[SyncherManager.ReporterObject - addChildrens] - childrens: ', childrens, childBaseURL);
+
+      childrens.forEach((child) => {
+        _this._childrens.push(child);
+      });
 
       /*
       _this._childrens.forEach((child) => {
@@ -140,6 +172,8 @@ class ReporterObject {
       let subscriptions = [];
       childrens.forEach((child) => subscriptions.push(childBaseURL + child));
 
+      //_this._storageSubscriptions[_this._objSubscriptorURL] = {url: _this._url, owner: _this._owner, childrens: _this._childrens};
+
       //FLOW-OUT: message sent to the msg-node SubscriptionManager component
       let nodeSubscribeMsg = {
         type: 'subscribe', from: _this._parent._url, to: 'domain://msg-node.' + _this._domain + '/sm',
@@ -147,14 +181,39 @@ class ReporterObject {
       };
 
       _this._bus.postMessage(nodeSubscribeMsg, (reply) => {
-        console.log('node-subscribe-response(reporter): ', reply);
+        console.log('[SyncherManager.ReporterObject ]node-subscribe-response(reporter):', reply);
         if (reply.body.code === 200) {
 
           //add children listeners on local ...
           subscriptions.forEach((childURL) => {
             let childListener = _this._bus.addListener(childURL, (msg) => {
               //TODO: what todo here? Save childrens?
-              console.log('SyncherManager-' + childURL + '-RCV: ', msg);
+              console.log('[SyncherManager.ReporterObject received]', msg);
+
+              if (msg.type === 'create' && msg.to.includes('children') && this._isToSaveData) {
+
+                // if the value is not encrypted lets encrypt it
+                // todo: should be subject to some policy
+                let splitedReporterURL = splitObjectURL(msg.to);
+
+                let url = splitedReporterURL.url;
+
+                if (!(typeof msg.body.value === 'string')) {
+
+                  console.log('[SyncherManager.ReporterObject] encrypting received data ', msg.body.value);
+
+                  _this._parent._identityModule.encryptDataObject(msg.body.value, url).then((encryptedValue)=>{
+                    console.log('[SyncherManager.ReporterObject] encrypted data ',  encryptedValue);
+
+                    _this._storeChildObject(msg, JSON.stringify(encryptedValue));
+                  }).catch((reason) => {
+                    console.warn('[SyncherManager._decryptChildrens] failed : ', reason);
+                  });
+                } else {
+                  _this._storeChildObject(msg, msg.body.value);
+                }
+              }
+
             });
             _this._childrenListeners.push(childListener);
 
@@ -168,6 +227,31 @@ class ReporterObject {
         }
       });
     });
+  }
+
+  // store childObject
+
+  _storeChildObject(msg, data) {
+    let _this = this;
+
+    let splitedReporterURL = splitObjectURL(msg.to);
+
+    let url = splitedReporterURL.url;
+
+    let resource = splitedReporterURL.resource;
+    let value = {
+      identity: msg.body.identity,
+      value: data
+    };
+
+    let objectURLResource = msg.body.resource;
+    let attribute = resource;
+
+    if (objectURLResource) attribute += '.' + objectURLResource;
+
+    console.log('[SyncherManager.ReporterObject._storeChildObject] : ', url, attribute, value);
+
+    _this._parent._dataObjectsStorage.saveChildrens(true, url, attribute, value);
   }
 
   delete() {
@@ -205,13 +289,16 @@ class ReporterObject {
 
     //validate if subscription already exists?
     if (_this._subscriptions[hypertyURL]) {
-      let errorMsg = {
-        id: msg.id, type: 'response', from: msg.to, to: hypertyURL,
-        body: { code: 500, desc: 'Subscription for (' + _this._url + ' : ' +  hypertyURL + ') already exists!' }
-      };
+      // let errorMsg = {
+      //   id: msg.id, type: 'response', from: msg.to, to: hypertyURL,
+      //   body: { code: 500, desc: 'Subscription for (' + _this._url + ' : ' +  hypertyURL + ') already exists!' }
+      // };
+      //
+      // _this._bus.postMessage(errorMsg);
+      // return;
 
-      _this._bus.postMessage(errorMsg);
-      return;
+      // new version because of reusage
+      _this._subscriptions[hypertyURL]._releaseListeners();
     }
 
     //ask to subscribe to Syncher? (depends on the operation mode)
@@ -225,11 +312,28 @@ class ReporterObject {
         body: { type: msg.type, from: hypertyURL, to: _this._url, identity: msg.body.identity }
       };
 
+      //TODO: For Further Study
+      if (msg.body.hasOwnProperty('mutualAuthentication')) forwardMsg.body.mutualAuthentication = msg.body.mutualAuthentication;
+
       _this._bus.postMessage(forwardMsg, (reply) => {
-        console.log('forward-reply: ', reply);
+        console.log('[SyncherManager.ReporterObject ]forward-reply: ', reply);
         if (reply.body.code === 200) {
-          _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, _this._childrens, true);
+          if (!_this._subscriptions[hypertyURL]) {
+            console.log('[SyncherManager.ReporterObject] - _onRemoteSubscribe:', _this._childrens);
+            _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, _this._childrens, true);
+          }
         }
+
+        // Store for each reporter hyperty the dataObject
+        let userURL;
+        if (msg.body.identity && msg.body.identity.userProfile.userURL) {
+          userURL = msg.body.identity.userProfile.userURL;
+          _this._parent._dataObjectsStorage.update(true, _this._url, 'subscriberUsers', userURL);
+        }
+
+        _this._parent._dataObjectsStorage.update(true, _this._url, 'subscriptions', hypertyURL);
+
+        reply.body.owner = _this._owner;
 
         //FLOW-OUT: subscription response sent (forward from internal Hyperty)
         _this._bus.postMessage({

@@ -1,5 +1,7 @@
-import expect from 'expect.js';
+import chai from 'chai';
 import Pipeline from '../src/bus/Pipeline';
+
+let expect = chai.expect;
 
 describe('Pipeline', function() {
   it('fail detected', function() {

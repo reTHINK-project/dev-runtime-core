@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">src/identity/OpenIdLib.js | Service Framework API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  <a href="test.html" data-ice="testLink">Test</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">allocation</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/allocation/AddressAllocation.js~AddressAllocation.html">AddressAllocation</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html">Bus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html">MiniBus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Pipeline.js~Pipeline.html">Pipeline</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">graphconnector</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/BloomFilter.js~BloomFilter.html">BloomFilter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GlobalRegistryRecord.js~GlobalRegistryRecord.html">GlobalRegistryRecord</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GraphConnector.js~GraphConnector.html">GraphConnector</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/graphconnector/GraphConnectorContactData.js~GraphConnectorContactData.html">GraphConnectorContactData</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">identity</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/Crypto.js~Crypto.html">Crypto</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/GuiFake.js~GuiFake.html">GuiFake</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/Identity.js~Identity.html">Identity</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/IdentityModule.js~IdentityModule.html">IdentityModule</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/identity/OpenIdLib.js~OpenIdLib.html">OpenIdLib</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/ActionsService.js~ActionsService.html">ActionsService</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/CombiningAlgorithm.js~CombiningAlgorithm.html">CombiningAlgorithm</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Operators.js~Operators.html">Operators</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/PDP.js~PDP.html">PDP</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/PEP.js~PEP.html">PEP</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Policy.js~Policy.html">Policy</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/ReThinkCtx.js~ReThinkCtx.html">ReThinkCtx</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/Rule.js~Rule.html">Rule</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/combiningAlgorithms</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/AllowOverrides.js~AllowOverrides.html">AllowOverrides</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/BlockOverrides.js~BlockOverrides.html">BlockOverrides</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/combiningAlgorithms/FirstApplicable.js~FirstApplicable.html">FirstApplicable</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/conditions</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/AdvancedCondition.js~AdvancedCondition.html">AdvancedCondition</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/Condition.js~Condition.html">Condition</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/conditions/SubscriptionCondition.js~SubscriptionCondition.html">SubscriptionCondition</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">policy/context</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/policy/context/RuntimeCoreCtx.js~RuntimeCoreCtx.html">RuntimeCoreCtx</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">protostub</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/protostub/IdpProxyStub.js~IdpProxyStub.html">IdpProxyStub</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-activate">activate</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">registry</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/Discovery.js~Discovery.html">Discovery</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/DiscoveryServiceFramework.js~DiscoveryServiceFramework.html">DiscoveryServiceFramework</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/HypertyInstance.js~HypertyInstance.html">HypertyInstance</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/Registry.js~Registry.html">Registry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/registry/RegistryDataModel.js~RegistryDataModel.html">RegistryDataModel</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">runtime</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/Descriptors.js~Descriptors.html">Descriptors</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/Loader.js~Loader.html">Loader</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/runtime/RuntimeUA.js~RuntimeUA.html">RuntimeUA</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-runtimeConfiguration">runtimeConfiguration</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-runtimeUtils">runtimeUtils</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">sandbox</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/sandbox/Sandbox.js~Sandbox.html">Sandbox</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/sandbox/SandboxRegistry.js~SandboxRegistry.html">SandboxRegistry</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-SandboxType">SandboxType</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">syncher</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/ObserverObject.js~ObserverObject.html">ObserverObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/ReporterObject.js~ReporterObject.html">ReporterObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/StoreDataObjects.js~StoreDataObjects.html">StoreDataObjects</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/Subscription.js~Subscription.html">Subscription</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/syncher/SyncherManager.js~SyncherManager.html">SyncherManager</a></span></span></li>
+<li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">utils</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/utils/EventEmitter.js~EventEmitter.html">EventEmitter</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-schemaValidation">schemaValidation</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-buildURL">buildURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-convertToUserURL">convertToUserURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-deepClone">deepClone</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-divideEmail">divideEmail</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-divideURL">divideURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-emptyObject">emptyObject</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-generateGUID">generateGUID</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getConfigurationResources">getConfigurationResources</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserEmailFromURL">getUserEmailFromURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserIdentityDomain">getUserIdentityDomain</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-getUserURLFromEmail">getUserURLFromEmail</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isBackendServiceURL">isBackendServiceURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isDataObjectURL">isDataObjectURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isHypertyURL">isHypertyURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isLegacy">isLegacy</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isURL">isURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-isUserURL">isUserURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-function">F</span><span data-ice="name"><span><a href="function/index.html#static-function-removePathFromURL">removePathFromURL</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-variable">V</span><span data-ice="name"><span><a href="variable/index.html#static-variable-tv4">tv4</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-typedef">T</span><span data-ice="name"><span><a href="typedef/index.html#static-typedef-divideURL">divideURL</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">src/identity/OpenIdLib.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">//import hello from &apos;hellojs&apos;;
+
+/**
+*  class to facilitate the operations with the openID connect, through several Identity Providers
+*
+*/
+class OpenIdLib {
+
+  constructor(identityProvider, clientID) {
+    let _this = this;
+    _this.clientID = clientID;
+    _this.identityProvider = identityProvider;
+
+    switch (identityProvider) {
+      case &apos;google&apos;:
+        let googleInfo = new GoogleInfo();
+        _this.info = googleInfo;
+        break;
+      case &apos;facebook&apos;:
+        let facebookInfo = new FacebookInfo();
+        _this.info = facebookInfo;
+        break;
+      case &apos;windows&apos;:
+        let microsoftInfo = new MicrosoftInfo();
+        _this.info = microsoftInfo;
+        break;
+      default:
+        break;
+    }
+  }
+
+  openPopup() {
+    let _this = this;
+
+    let REDIRECT   =   _this.info.REDIRECT;
+    let URL        =   _this.info.URL;
+
+    let acToken;
+    let tokenType;
+    let expiresIn;
+
+    return new Promise(function(resolve,reject) {
+
+      //function to parse the query string in the given URL to obatin certain values
+      function gup(url, name) {
+        name = name.replace(/[\[]/, &apos;\\\[&apos;).replace(/[\]]/, &apos;\\\]&apos;);
+        let regexS = &apos;[\\#&amp;?]&apos; + name + &apos;=([^&amp;#]*)&apos;;
+        let regex = new RegExp(regexS);
+        let results = regex.exec(url);
+        if (results === null)
+        return &apos;&apos;;
+        else
+        return results[1];
+      }
+
+      /*hello.init({google: &apos;808329566012-tqr8qoh111942gd2kg007t0s8f277roi.apps.googleusercontent.com&apos;,
+                 facebook: &apos;655302667942219&apos;,
+                 windows: &apos;asdf197f6ad6-808f-4ddc-b725-3d8fe2660349&apos;});
+      hello(_this.identityProvider).login({scope: &apos;email&apos;}).then(function(token) {
+        console.log(token);
+        resolve(token.authResponse.access_token);
+      }, function(error) {
+        console.log(&apos;errorValidating &apos;, error);
+        reject(error);
+      });*/
+
+      let win = window.open(URL, &apos;openIDrequest&apos;, &apos;width=800, height=600&apos;);
+      let pollTimer = window.setInterval(function() {
+        try {
+          //console.log(win.document.URL);
+
+          if (win.closed) {
+            reject(&apos;Some error occured.&apos;);
+            clearInterval(pollTimer);
+          }
+
+          let redirectURL = document.URL;//window.location.origin;
+          if (win.document.URL.indexOf(&apos;REDIRECT&apos;) !== -1 || win.document.URL.indexOf(redirectURL) !== -1) {
+            window.clearInterval(pollTimer);
+            let url =   win.document.URL;
+
+            //not working yet. Some problems with the &apos;POST&apos; method
+            if (_this.identityProvider === &apos;windows&apos;) {
+              let code = gup(url, &apos;code&apos;);
+              let sessionState = gup(url, &apos;session_state&apos;);
+
+              let reqAccessURL = _this.info.TOKENEND + &apos;redirect_uri=&apos; + _this.info.REDIRECT + &apos;&amp;grant_type=authorization_code&apos; + &apos;&amp;client_id=&apos; + _this.info.CLIENTID + &apos;&amp;code=&apos; + code;
+
+              win.close();
+
+              let req = new XMLHttpRequest();
+              req.open(&apos;POST&apos;,  _this.info.TOKENEND, true);
+              req.setRequestHeader(&apos;Access-Control-Allow-Origin&apos;, &apos;*&apos;);
+
+              let data = new FormData();
+              data.append(&apos;redirect_uri&apos;, _this.info.REDIRECT);
+              data.append(&apos;grant_type&apos;, &apos;authorization_code&apos;);
+              data.append(&apos;client_id&apos;, _this.info.CLIENTID);
+              data.append(&apos;code&apos;, code);
+
+              req.onreadystatechange = function(e) {
+                if (req.readyState === 4) {
+                  if (req.status === 200) {
+
+                    resolve(&apos;null&apos;);
+                  } else if (req.status === 400) {
+                    reject(&apos;There was an error processing the token&apos;);
+                  } else {
+                    reject(&apos;something else other than 200 was returned&apos;);
+                  }
+                }
+              };
+              req.send(data);
+
+            } else {
+
+              acToken =   gup(url, &apos;access_token&apos;);
+              tokenType = gup(url, &apos;token_type&apos;); //FACEBOOK does not return tokenType in the field
+              expiresIn = gup(url, &apos;expires_in&apos;);
+
+              win.close();
+
+              if (_this.identityProvider === &apos;facebook&apos;) {
+                _this.info.VALIDURL = &apos;https://graph.facebook.com/debug_token?input_token=&apos; + acToken + &apos;&amp;access_token=&apos;;
+              }
+
+              //after receiving the access token, google requires to validate first the token to prevent confused deputy problem.
+              resolve(acToken);
+            }
+          }
+        } catch (e) {
+          //console.log(e);
+        }
+      }, 1000);
+    });
+  }
+
+  validateToken(token) {
+    let _this = this;
+    let tokenID;
+    let VALIDURL = _this.info.VALIDURL;
+    return new Promise(function(resolve, reject) {
+      let req = new XMLHttpRequest();
+      req.open(&apos;GET&apos;, VALIDURL + token, true);
+
+      req.onreadystatechange = function(e) {
+        if (req.readyState === 4) {
+          if (req.status === 200) {
+            tokenID = JSON.parse(req.responseText);
+
+            resolve({token:token, tokenID: tokenID});
+          } else if (req.status === 400) {
+            reject(&apos;There was an error processing the token&apos;);
+          } else {
+            reject(&apos;something else other than 200 was returned&apos;);
+          }
+        }
+      };
+      req.send();
+
+    });
+  }
+
+  //function to exchange the access token with an ID Token containing the information
+  getInfoToken(token, tokenID) {
+    let _this = this;
+
+    return new Promise(function(resolve,reject) {
+      let USERINFURL =   _this.info.USERINFURL;
+
+      let req = new XMLHttpRequest();
+      req.open(&apos;GET&apos;, USERINFURL + token, true);
+
+      req.onreadystatechange = function(e) {
+        if (req.readyState === 4) {
+          if (req.status === 200) {
+            let infoToken = JSON.parse(req.responseText);
+            let email = infoToken.email;
+
+            //contruct the identityURL to be defined as in specification
+            // model: user://&lt;idpdomain&gt;/&lt;user-identifier&gt;
+            let identityURL = &apos;user://&apos; + email.substring(email.indexOf(&apos;@&apos;) + 1, email.length) + &apos;/&apos; + email.substring(0, email.indexOf(&apos;@&apos;));
+
+            //TODO remove later the &apos;token&apos; field key
+            let identityBundle = {identity: identityURL, token: infoToken, accessToken: token, idToken: tokenID, infoToken: infoToken, idp: &apos;google&apos;};
+
+            resolve(identityBundle);
+          } else if (req.status === 400) {
+            reject(&apos;There was an error processing the token&apos;);
+          } else {
+            reject(&apos;something else other than 200 was returned&apos;);
+          }
+        }
+      };
+      req.send();
+    });
+  }
+}
+
+//Google works fine with OpenID connect
+class GoogleInfo {
+  constructor() {
+    let _this = this;
+    _this.OAUTHURL   =   &apos;https://accounts.google.com/o/oauth2/auth?&apos;;
+    _this.SCOPE      =   &apos;email%20profile&apos;;
+    _this.CLIENTID   =   &apos;808329566012-tqr8qoh111942gd2kg007t0s8f277roi.apps.googleusercontent.com&apos;;
+    _this.REDIRECT   =    document.URL;
+    _this.TYPE       =   &apos;token&apos;;
+    _this.VALIDURL   =   &apos;https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=&apos;;
+    _this.USERINFURL =   &apos;https://www.googleapis.com/oauth2/v1/userinfo?access_token=&apos;;
+
+    _this.URL        =   _this.OAUTHURL + &apos;scope=&apos; + _this.SCOPE + &apos;&amp;client_id=&apos; + _this.CLIENTID + &apos;&amp;redirect_uri=&apos; + _this.REDIRECT + &apos;&amp;response_type=&apos; + _this.TYPE;
+  }
+}
+
+//Facebook only provides the support for Oauth2 Tokens, and do not directly provide support for OpenID connect. So, no &apos;oficial&apos; ID token can be requested, just information about the user.
+class FacebookInfo {
+  constructor() {
+    let _this = this;
+    _this.OAUTHURL   =    &apos;https://www.facebook.com/dialog/oauth?&apos;;
+    _this.CLIENTID   =    655302667942219;
+    _this.REDIRECT   =    document.URL; // &apos;http://localhost:8080/example/index.html&apos;;
+    _this.TYPE       =    &apos;token&apos;;
+    _this.VALIDURL   =    &apos;https://graph.facebook.com/debug_token?input_token=&apos;; //must be updated later
+    _this.USERINFURL = &apos;https://graph.facebook.com/v2.5/me?fields=id,name,email,picture&amp;access_token=&apos;;
+    _this.URL        =    _this.OAUTHURL + &apos;client_id=&apos; + _this.CLIENTID + &apos;&amp;redirect_uri=&apos; + _this.REDIRECT + &apos;&amp;response_type=&apos; + _this.TYPE;
+  }
+}
+
+
+//Microsoft is not yet implemented to obtain the Access token / ID token. Some troubles to request the Access token, since it is required to make a http Post request with the authorization code.
+class MicrosoftInfo {
+  constructor() {
+    let _this = this;
+    _this.OAUTHURL   =    &apos;https://login.microsoftonline.com/common/oauth2/authorize?&apos;;
+    _this.CLIENTID   =    &apos;7e2f3589-4b38-4b1c-a321-c9251de00ef2&apos;;
+    _this.REDIRECT   =    document.URL;//&apos;http%3A%2F%2Flocalhost%3A8080%2Fexample%2Findex%2Ehtml&apos;
+    _this.TYPE       =    &apos;code&apos;;
+
+    _this.TOKENEND   =    &apos;https://login.microsoftonline.com/3fa4042c-7c4d-4382-aba8-fc8ec61103a4/oauth2/token&apos;;
+    _this.AUTHEND    =    &apos;https://login.microsoftonline.com/3fa4042c-7c4d-4382-aba8-fc8ec61103a4/oauth2/authorize?&apos;;
+
+    _this.URL        =    _this.AUTHEND + &apos;response_type=&apos; + _this.TYPE + &apos;&amp;client_id=&apos; +
+    _this.CLIENTID ;//+ &apos;&amp;redirect_uri=&apos; + _this.REDIRECT;
+  }
+
+}
+
+export default OpenIdLib;
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.5.2)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

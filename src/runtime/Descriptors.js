@@ -1,4 +1,5 @@
 import {divideURL, getConfigurationResources, buildURL} from '../utils/utils';
+import { runtimeUtils } from './runtimeUtils';
 
 class Descriptors {
 
@@ -10,33 +11,50 @@ class Descriptors {
     this.runtimeConfiguration = runtimeConfiguration;
     this.runtimeURL = runtimeURL;
     this.catalogue = catalogue;
+
+    this.constraints = runtimeUtils.runtimeCapabilities;
   }
 
-  getHypertyDescriptor (hypertyURL) {
-    return this.catalogue.getHypertyDescriptor(hypertyURL);
+  getHypertyDescriptor(hypertyURL) {
+    return this.catalogue.getHypertyDescriptor(hypertyURL, true, this.constraints);
   }
 
-  getStubDescriptor (stubURL) {
+  getStubDescriptor(stubURL) {
 
     return new Promise((resolve, reject) => {
 
-      let dividedURL = divideURL(stubURL);
-      let domain = dividedURL.domain;
-      let protostub = dividedURL.identity;
+      let domain;
+      let protostub;
       let protoStubURL;
 
       let originDividedURL = divideURL(this.runtimeURL);
       let originDomain = originDividedURL.domain;
 
-      if (!domain) {
-        domain = idpProxyURL;
+      if (stubURL.includes('://')) {
+        let dividedURL = divideURL(stubURL);
+        domain = dividedURL.domain;
+        let path = dividedURL.identity;
+
+        if (path) {
+          protostub = path.substring(path.lastIndexOf('/') + 1);
+        } else {
+          protostub = 'default';
+        }
+
+      } else {
+        protostub = 'default';
+        domain = stubURL;
+      }
+
+  /*    if (!domain) {
+        domain = stubURL;
       }
 
       if (!protostub) {
         protostub = 'default';
       } else {
         protostub = protostub.substring(protostub.lastIndexOf('/') + 1);
-      }
+      }*/
 
       protoStubURL = buildURL(this.runtimeConfiguration, 'catalogueURLs', 'protocolstub', protostub);
       if (domain !== this.runtimeConfiguration.domain) {
@@ -51,7 +69,7 @@ class Descriptors {
       }
 
       console.log('Load ProtocolStub for domain, ' + domain + ' : ', protoStubURL);
-      return this.catalogue.getStubDescriptor(protoStubURL).then((result) => {
+      return this.catalogue.getStubDescriptor(protoStubURL, true, this.constraints).then((result) => {
 
         resolve(result);
 
@@ -66,7 +84,7 @@ class Descriptors {
         protoStubURL = resource.prefix + domain + resource.suffix + protostub;
 
         console.log('Fallback -> Load Protocolstub for domain, ' + domain + ' : ', protostub);
-        return this.catalogue.getStubDescriptor(protoStubURL);
+        return this.catalogue.getStubDescriptor(protoStubURL, true, this.constraints);
       }).then((result) => {
         resolve(result);
       }).catch((reason) => {
@@ -79,28 +97,33 @@ class Descriptors {
   getIdpProxyDescriptor(idpProxyURL) {
     return new Promise((resolve, reject) => {
 
-      let dividedURL = divideURL(idpProxyURL);
-      let domain = dividedURL.domain;
-      let idpproxy = dividedURL.identity;
+      let domain;
+      let idpproxy;
 
       let originDividedURL = divideURL(this.runtimeURL);
       let originDomain = originDividedURL.domain;
 
-      if (!domain) {
+      if (idpProxyURL.includes('://')) {
+        let dividedURL = divideURL(idpProxyURL);
+        domain = dividedURL.domain;
+        let path = dividedURL.identity;
+        if (path) {
+          idpproxy = path.substring(path.lastIndexOf('/') + 1);
+        } else {
+          idpproxy = 'default';
+        }
+
+      } else {
+        idpproxy = 'default';
         domain = idpProxyURL;
       }
 
-      if (domain === originDomain || !idpproxy) {
-        idpproxy = 'default';
-      } else {
-        idpproxy = idpproxy.substring(idpproxy.lastIndexOf('/') + 1);
-      }
 
       let resource = getConfigurationResources(this.runtimeConfiguration, 'catalogueURLs', 'idpProxy');
 
       idpProxyURL = resource.prefix + domain + resource.suffix + idpproxy;
       console.log('Load Idp Proxy for domain, ' + domain + ' : ', idpProxyURL);
-      return this.catalogue.getIdpProxyDescriptor(idpProxyURL).then((result) => {
+      return this.catalogue.getIdpProxyDescriptor(idpProxyURL, true, this.constraints).then((result) => {
 
         resolve(result);
 
@@ -112,7 +135,7 @@ class Descriptors {
         idpProxyURL = buildURL(this.runtimeConfiguration, 'catalogueURLs', 'idpProxy', idpproxy);
 
         console.log('Load Idp Proxy for domain, ' + domain + ' : ', idpProxyURL);
-        return this.catalogue.getIdpProxyDescriptor(idpProxyURL);
+        return this.catalogue.getIdpProxyDescriptor(idpProxyURL, true, this.constraints);
       }).then((result) => {
         resolve(result);
       }).catch((reason) => {

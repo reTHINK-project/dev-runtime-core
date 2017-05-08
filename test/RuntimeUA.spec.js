@@ -1,15 +1,18 @@
 import chai from 'chai';
-import sinon from 'sinon';
 import chaiAsPromised from 'chai-as-promised';
 import sinonChai from 'sinon-chai';
+
+chai.config.truncateThreshold = 0;
 
 let expect = chai.expect;
 
 chai.use(chaiAsPromised);
 chai.use(sinonChai);
 
+import { descriptors } from './resources/descriptors.js';
+
 // Testing Module
-import RuntimeUA from '../src/runtime/RuntimeUA';
+import RuntimeUA from  '../src/runtime/RuntimeUA';
 
 // Main dependecies
 import Registry from '../src/registry/Registry';
@@ -20,99 +23,19 @@ import MessageBus from '../src/bus/MessageBus';
 import { divideURL } from '../src/utils/utils';
 
 import { runtimeFactory } from './resources/runtimeFactory';
-import { runtimeConfiguration } from './resources/runtimeConfiguration';
+
+/// import { runtimeConfiguration } from './resources/runtimeConfiguration';
 
 // Testing runtimeUA;
+let domain = 'localhost';
 describe('RuntimeUA', function() {
 
-  let runtime = new RuntimeUA(runtimeFactory, runtimeConfiguration);
+  let runtime = new RuntimeUA(descriptors.Runtimes.Runtime, runtimeFactory, domain);
+  let getDescriptor;
 
   before(function() {
 
-    let Hyperties = {
-      HelloHyperty: {
-        sourcePackage: {
-          sourceCode: '',
-          sourceCodeClassname: 'HelloHyperty',
-          encoding: 'UTF-8',
-          signature: ''
-        },
-        cguid: 10003,
-        version: 0.1,
-        description: 'Description of GroupChat',
-        objectName: 'HelloHyperty',
-        configuration: {},
-        hypertyType: [
-          'chat'
-        ],
-        sourcePackageURL: '/sourcePackage',
-        language: 'javascript',
-        signature: '',
-        messageSchemas: '',
-        dataObjects: [
-          'https://catalogue.sp.domain/.well-known/dataschema/Communication'
-        ],
-        accessControlPolicy: 'somePolicy'
-      }
-    };
-
-    let ProtoStubs = {
-      default: {
-        cguid: '1',
-        type: '0',
-        version: '0.1',
-        description: 'description of VertxProtoStub',
-        objectName: 'VertxProtoStub',
-        sourcePackageURL: '/sourcePackage',
-        sourcePackage: {
-          sourceCode: '',
-          sourceCodeClassname: 'VertxProtoStub',
-          encoding: 'Base64',
-          signature: ''
-        },
-        language: 'Javascript ECMA5',
-        signature: '',
-        messageSchemas: '',
-        configuration: {
-          url: 'wss://127.0.0.1:9090/ws'
-        },
-        constraints: '',
-        hypertyCapabilities: '',
-        protocolCapabilities: '',
-        policies: '',
-        dataObjects: []
-      }
-    };
-
-    let IdpProxies = {
-      default: {
-        cguid: '1',
-        type: '0',
-        version: '0.1',
-        description: 'description of VertxProtoStub',
-        objectName: 'VertxProtoStub',
-        sourcePackageURL: '/sourcePackage',
-        sourcePackage: {
-          sourceCode: '',
-          sourceCodeClassname: 'VertxProtoStub',
-          encoding: 'Base64',
-          signature: ''
-        },
-        language: 'Javascript ECMA5',
-        signature: '',
-        messageSchemas: '',
-        configuration: {
-          url: 'wss://127.0.0.1:9090/ws'
-        },
-        constraints: '',
-        hypertyCapabilities: '',
-        protocolCapabilities: '',
-        policies: '',
-        dataObjects: []
-      }
-    };
-
-    let getDescriptor = (url) => {
+    getDescriptor = (url) => {
 
       return new Promise(function(resolve, reject) {
 
@@ -127,59 +50,111 @@ describe('RuntimeUA', function() {
 
         let result;
 
-        if (url.includes('Hyperties') || url.includes('Hyperty')) {
+        if (url.includes('hyperty')) {
           try {
-            result = Hyperties[identity];
+            result = descriptors.Hyperties[identity];
           } catch (e) {
             reject(e);
           }
 
-        } else if (!(url.includes('Hyperties') || url.includes('Hyperty')) || url.includes('ProtoStubs') || url.includes('protostub')) {
+        } else if (url.includes('protocolstub') || url === dividedURL.domain) {
           try {
-            result = ProtoStubs[identity];
+            result = descriptors.ProtoStubs[identity];
           } catch (e) {
             reject(e);
           }
         } else if (url.includes('idp-proxy')) {
           try {
-            result = IdpProxies[identity];
+            result = descriptors.IdpProxies[identity];
           } catch (e) {
             reject(e);
           }
+        } else if (url.includes('dataschema')) {
+          try {
+            result = descriptors.DataSchemas[identity];
+          } catch (e) {
+            reject(e);
+          }
+
         }
 
-        console.log(result);
         resolve(result);
 
       });
     };
-
-    sinon.stub(runtime.loader.descriptors, 'getHypertyDescriptor', (hypertyURL) => {
-      return getDescriptor(hypertyURL);
-    });
-
-    sinon.stub(runtime.loader.descriptors, 'getStubDescriptor', (stubURL) => {
-      return getDescriptor(stubURL);
-    });
-
-    sinon.stub(runtime.loader.descriptors, 'getIdpProxyDescriptor', (idpProxyURL) => {
-      return getDescriptor(idpProxyURL);
-    });
-
-    sinon.stub(runtime.registry, 'registerHyperty')
-    .returns(new Promise(function(resolve, reject) {
-      resolve('hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d');
-    }));
-
   });
 
   after(function() {
-    runtime.loader.descriptors.getHypertyDescriptor.restore();
-    runtime.loader.descriptors.getStubDescriptor.restore();
-    runtime.loader.descriptors.getIdpProxyDescriptor.restore();
+    runtime.descriptorInstance.getHypertyDescriptor.restore();
+    runtime.descriptorInstance.getStubDescriptor.restore();
+    runtime.descriptorInstance.getIdpProxyDescriptor.restore();
   });
 
   describe('constructor()', function() {
+
+    it('expects the runtime was ready', (done) => {
+
+      expect(runtime.init().then((result) => {
+
+        sinon.stub(runtime.messageBus, 'postMessage', function(msg, replyCallback) {
+          replyCallback({
+            id: 1, type: 'response', from: 'domain://msg-node.sp.domain/address-allocation', to: 'local://fake.url',
+            body: {code: 200, value: {allocated: msg.body.scheme + '://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d'}}
+          });
+        });
+
+        sinon.stub(runtime.descriptorInstance, 'getHypertyDescriptor', (hypertyURL) => {
+          return getDescriptor(hypertyURL);
+        });
+
+        sinon.stub(runtime.descriptorInstance, 'getStubDescriptor', (stubURL) => {
+          return getDescriptor(stubURL);
+        });
+
+        sinon.stub(runtime.descriptorInstance, 'getIdpProxyDescriptor', (idpProxyURL) => {
+          return getDescriptor(idpProxyURL);
+        });
+
+        sinon.stub(runtime.runtimeCatalogue, 'getDataSchemaDescriptor', (dataSchemaURL) => {
+          return getDescriptor(dataSchemaURL);
+        });
+
+        sinon.stub(runtime.registry, 'registerHyperty', (sandbox, descriptorURL, descriptor, addressURL) => {
+          return new Promise(function(resolve) {
+            console.log('AQIO:', addressURL);
+            if (addressURL.newAddress) {
+              resolve('hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d');
+            } else {
+              resolve(addressURL.address);
+            }
+          });
+
+        });
+
+        sinon.stub(runtime.registry, 'checkRegisteredURLs', (info, reuseURL) => {
+
+          return new Promise((resolve) => {
+            console.log('checkRegisteredURLs:', typeof(reuseURL), reuseURL);
+            if (typeof(reuseURL) === 'boolean') {
+              resolve('hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d');
+            } else if (typeof(reuseURL) === 'string') {
+              console.log('checkRegisteredURLs is string:', reuseURL);
+              resolve(reuseURL);
+            } else {
+              resolve('hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d');
+            }
+
+          });
+
+        });
+
+        return result;
+      }))
+      .to.be.fulfilled
+      .and.to.eventually.be.true
+      .and.notify(done);
+
+    });
 
     it('depends of the Registry', function() {
       expect(runtime.registry).to.be.instanceof(Registry);
@@ -199,6 +174,14 @@ describe('RuntimeUA', function() {
 
     it('should throw when given no arguments', function() {
       expect(runtime).to.have.property('runtimeFactory');
+      expect(runtime.runtimeFactory).to.have.property('atob');
+      expect(runtime.runtimeFactory).to.have.property('persistenceManager');
+      expect(runtime.runtimeFactory).to.have.property('runtimeCapabilities');
+      expect(runtime.runtimeFactory).to.have.property('storageManager');
+      expect(runtime.runtimeFactory).to.have.property('createSandbox');
+      expect(runtime.runtimeFactory).to.have.property('createAppSandbox');
+      expect(runtime.runtimeFactory).to.have.property('createHttpRequest');
+      expect(runtime.runtimeFactory).to.have.property('createRuntimeCatalogue');
     });
 
   });
@@ -232,11 +215,39 @@ describe('RuntimeUA', function() {
       let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL);
       let hypertyResolved = ['runtimeHypertyURL', 'status'];
 
+      expect(loadHyperty).to.eventually.to.have.all.keys(hypertyResolved)
+      .and.to.be.fulfilled
+      .and.notify(done);
+
+    });
+
+    it('should load an hyperty based on given true value for the reuse', function(done) {
+
+      let hypertyDescriptorURL = 'hyperty-catalogue://catalogue.sp.domain/.well-known/hyperty/HelloHyperty';
+      let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL, true);
+      let hypertyResolved = ['runtimeHypertyURL', 'status'];
+
       expect(loadHyperty).to.be.fulfilled
       .and.eventually.to.have.all.keys(hypertyResolved)
       .and.notify(done);
 
     });
+
+    it('should load an hyperty based on given reuse URL address', function(done) {
+
+      let hypertyDescriptorURL = 'hyperty-catalogue://catalogue.sp.domain/.well-known/hyperty/HelloHyperty';
+      let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL, 'hyperty://sp.domain/1');
+      let hypertyResolved = {
+        runtimeHypertyURL: 'hyperty://sp.domain/1',
+        status: 'deployed'
+      };
+
+      expect(loadHyperty).to.eventually.to.deep.equal(hypertyResolved)
+      .and.to.be.fulfilled
+      .and.notify(done);
+
+    });
+
 
   });
 
@@ -245,12 +256,6 @@ describe('RuntimeUA', function() {
     it('should throw when given no arguments', function(done) {
       let spDomain = 'sp.domain';
       let loadStubPromise = runtime.loadStub(spDomain);
-
-      loadStubPromise.then(function(a) {
-        console.log(a);
-      }).catch(function(reason) {
-        console.error(reason);
-      });
 
       expect(loadStubPromise).to.be.fulfilled.and.notify(done);
     });
@@ -267,10 +272,12 @@ describe('RuntimeUA', function() {
     it('should be deployed', function(done) {
       let spDomain = 'sp.domain';
       let loadStubPromise = runtime.loadStub(spDomain);
-      let stubResolved = ['url', 'status'];
+
+      //let stubResolved = ['url', 'status'];
 
       expect(loadStubPromise).to.be.fulfilled
-      .and.eventually.to.have.all.keys(stubResolved)
+      .and.eventually.have.all.keys('url', 'status', 'descriptorURL')
+      .and.eventually.to.have.property('url').to.include('runtime://sp.domain/protostub/')
       .and.notify(done);
     });
 
