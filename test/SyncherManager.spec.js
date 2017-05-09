@@ -840,9 +840,7 @@ describe('SyncherManager', function() {
           doc.onResponse((event) => {
             console.log('on-remote-addChild-reply', event);
             expect(event).to.contain.all.keys({ type: 'response', url: hyperURL1, code: 200 });
-            done();
           });
-
         });
 
       });
@@ -854,6 +852,7 @@ describe('SyncherManager', function() {
       dor.onSubscription((subscribeEvent) => {
         dor.onAddChild((event) => {
           console.log('on-remote-addChild', event);
+          delete event.identity;
           expect(event).to.contain.all.keys({
             type: 'create',
             from: hyperURL2,
@@ -861,8 +860,8 @@ describe('SyncherManager', function() {
             childId: hyperURL2 + '#1',
             value: { message: 'Hello World!'}
           });
+          done();
         });
-
         console.log('on-resources: ', subscribeEvent);
         subscribeEvent.accept();
       });
