@@ -328,7 +328,7 @@ class Registry {
     let preAuth = [];
 
     if (dataObject) {
-      preAuth = dataObject.preAuth;
+      preAuth = dataObject.authorise;
     }
     return preAuth;
   }
@@ -476,23 +476,6 @@ class Registry {
           p2pRequester = runtimeUtils.runtimeDescriptor.p2pRequesterStub;
         }
 
-        /*let runtime = _this.runtimeURL;
-        let status = 'live';*/
-
-        //message to register the new data object, within the domain registry
-        /*let messageValue = {
-          name: identifier,
-          resources: resources,
-          dataSchemes: dataScheme,
-          schema: dataObjectschema,
-          url: dataObjectUrl,
-          expires: _this.expiresTime,
-          reporter: dataObjectReporter,
-          preAuth: authorise,
-          subscribers: [],
-          runtime: runtime,
-          status: status
-        };*/
         objectRegistration.expires = _this.expiresTime;
         objectRegistration.dataSchemes = dataScheme;
 
@@ -516,10 +499,6 @@ class Registry {
         } else {
 
           console.log('[Registry.registerDataObject] registering previously registered data object URL', objectRegistration);
-
-          /*messageValue = {name: identifier, resources: resources, dataSchemes: dataScheme, schema: dataObjectschema, url: dataObjectUrl, expires: _this.expiresTime, reporter: dataObjectReporter, preAuth: authorise, subscribers: []};
-
-          message = {type:'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: messageValue, policy: 'policy'}};*/
 
           message = {
             type: 'update',
