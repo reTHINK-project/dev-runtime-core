@@ -63,8 +63,7 @@ class NotificationManager {
       from: this._notificationManagerURL,
       to: 'domain://msg-node.' + this._domain + '/sm',
       body: {
-        resource: url,
-        subscribe: [url, this._notificationManagerURL]
+        resources: [url + '/registration']
       }
     };
 
