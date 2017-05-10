@@ -12,54 +12,65 @@ class DataObjectsStorage {
   /**
    * @description should set the initial state of the dataObjectURL to be resumed if necessary;
    *
-   * @param {DataObjectURL} resource - dataObjectURL to be saved;
+   * @param {DataObjectURL} url - dataObjectURL to be saved;
    * @param {Boolean} isReporter - the object to be saved is a reporter
    * @param {SchemaURL} schema - the schema url
    * @param {String} status - the status of current dataObject
-   * @param {HypertyURL} owner - the hypertyURL identifier
-   * @param {Array<HypertyURL>} subscription - list of subscriptions
+   * @param {HypertyURL} reporter - the Reporter hypertyURL
+   * @param {Array<HypertyURL>} subscription - list of subscriberHyperties
    * @param {Array<DataObjectChild>} children - list of childs of dataObjectURL
-   * @param {Array<String>} childrenResources - list of childrenResources, like, 'chatmessage';
+   * @param {Array<String>} childrens - list of childrens, like, 'chatmessage';
    * @param {Array<UserURL} subscriberUser - list of subscribed users;
    */
-  set(resource, isReporter, schema, status, owner, subscription, childrenResources, subscriberUser) {
+   //set(resource, isReporter, schema, status, owner, subscription, childrenResources, subscriberUser) {
+  set(metadata) {
 
     let storeDataObject = this._storeDataObject;
-    let type = this._getTypeOfObject(isReporter);
+    let type = this._getTypeOfObject(metadata.isReporter);
     if (!storeDataObject.hasOwnProperty(type)) storeDataObject[type] = {};
 
-    if (!storeDataObject[type].hasOwnProperty(resource)) {
-      storeDataObject[type][resource] = {
-        resource: resource,
+    if (!storeDataObject[type].hasOwnProperty(metadata.url)) {
+      storeDataObject[type][metadata.url] = {};
+      storeDataObject[type][metadata.url].subscriberHyperties = [];// TODO:do we need this?
+      storeDataObject[type][metadata.url].subscriberUsers = [];// TODO:do we need this?
+      storeDataObject[type][metadata.url].childrenObjects = {};
+      storeDataObject[type][metadata.url].data = {};
+
+      /*storeDataObject[type][metadata.url] = {
+        metadata.url: metadata.url,
         isReporter: isReporter,
         isToSaveData: false,
-        subscriptions: [],
+        subscriberHyperties: [],
         subscriberUsers: [],
         childrens: {},
         data: {},
         version: 0
-      };
+      };*/
     }
 
-    if (schema) storeDataObject[type][resource].schema = schema;
-    if (status) storeDataObject[type][resource].status = status;
-    if (childrenResources) storeDataObject[type][resource].childrenResources = childrenResources;
+    Object.assign(storeDataObject[type][metadata.url], metadata);
+    delete storeDataObject[type][metadata.url].subscriberUser;
+    delete storeDataObject[type][metadata.url].subscriberHyperty;
 
-    if (subscription && !isReporter) {
-      this._updateToArray(storeDataObject[type], resource, 'subscriptions', subscription);
+    /*if (schema) storeDataObject[type][metadata.url].schema = schema;
+    if (status) storeDataObject[type][metadata.url].status = status;
+    if (childrenResources) storeDataObject[type][metadata.url].childrenResources = childrenResources;*/
+
+    if (metadata.subscriberHyperty && !metadata.isReporter) { // TODO: do we need this?
+      this._updateToArray(storeDataObject[type], metadata.url, 'subscriberHyperties', metadata.subscriberHyperty);
     }
 
-    storeDataObject[type][resource].owner = owner;
+    //storeDataObject[type][metadata.url].owner = owner;
 
-    if (subscriberUser) {
-      if (storeDataObject[type][resource].subscriberUsers.indexOf(subscriberUser)) {
-        this._updateToArray(storeDataObject[type], resource, 'subscriberUsers', subscriberUser);
+    if (metadata.subscriberUser) { // TODO: do we need this?
+      if (storeDataObject[type][metadata.url].subscriberUsers.indexOf(metadata.subscriberUser)) {
+        this._updateToArray(storeDataObject[type], metadata.url, 'subscriberUsers', metadata.subscriberUser);
       }
     }
 
     this._storeDataObject = storeDataObject;
     this._storageManager.set('syncherManager:ObjectURLs', 1, storeDataObject);
-    return storeDataObject[type][resource];
+    return storeDataObject[type][metadata.url];
   }
 
   /**
@@ -107,13 +118,13 @@ class DataObjectsStorage {
     }
 
     if (!storeDataObject[type][resource].hasOwnProperty('childrens')) {
-      storeDataObject[type][resource].childrens = {};
+      storeDataObject[type][resource].childrenObjects = {};
     }
 
     if (attribute) {
-      assign(storeDataObject[type][resource].childrens, attribute, deepClone(value));
+      assign(storeDataObject[type][resource].childrenObjects, attribute, deepClone(value));
     } else {
-      storeDataObject[type][resource].childrens = deepClone(value) || {};
+      storeDataObject[type][resource].childrenObjects = deepClone(value) || {};
     }
 
     this._storeDataObject = storeDataObject;
@@ -143,10 +154,10 @@ class DataObjectsStorage {
 
     if (storeDataObject[type] && storeDataObject[type][resource] && resource && attribute && value) {
 
-      if (attribute === 'subscriptions' || attribute === 'subscriberUsers') {
+      if (attribute === 'subscriberHyperties' || attribute === 'subscriberUsers') {
         let update = true;
 
-        if (attribute === 'subscriptions') {
+        if (attribute === 'subscriberHyperties') {
           update = !this._isOwner(storeDataObject[type][resource], value);
         }
 
@@ -182,7 +193,7 @@ class DataObjectsStorage {
 
     if (storeDataObject[type] && storeDataObject[type][resource] && resource && attribute && value) {
 
-      if (attribute === 'subscriptions' || attribute === 'subscriberUsers') {
+      if (attribute === 'subscriberHyperties' || attribute === 'subscriberUsers') {
         this._removeFromArray(storeDataObject[type], resource, attribute, value);
       } else {
         delete storeDataObject[type][resource][attribute];
@@ -288,7 +299,7 @@ class DataObjectsStorage {
       this.getAll().then((storedDataObjects) => {
 
         if (!storedDataObjects) {
-          console.log('don\'t have stored data objects');
+          console.log('[DataObjectsStorage.getResourcesByCriteria] don\'t have stored data objects');
           return resolve(null);
         }
 
@@ -315,15 +326,24 @@ class DataObjectsStorage {
           let identityFoundData = [];
           if (msg.body && msg.body.identity) identityFoundData = this._getResourcesByIdentity(storedDataObjects[type], msg.body.identity);
 
+          //TODO: remove schema since metadata already includes the schema?
+
           let schemaFoundData = [];
           if (msg.body && msg.body.schema) schemaFoundData = this._getResourcesBySchema(storedDataObjects[type], msg.body.schema);
 
+          let metadataFound = [];
+          if (msg.body && msg.body.value) {
+            let metadata = msg.body.value;
+            delete metadata.data;
+            metadataFound = this._getResourcesByMetadata(storedDataObjects[type], metadata);
+          }
+
           let dataFound = [];
-          if (msg.body && msg.body.value) dataFound = this._getResourcesByData(storedDataObjects[type], msg.body.value);
+          if (msg.body && msg.body.value && msg.body.value.data) dataFound = this._getResourcesByData(storedDataObjects[type], msg.body.value.data);
 
           // you can pass as arrays as you want.. it will be merged in on place
           // removed duplicates;
-          result = this._intersection(resource, identityFoundData, schemaFoundData, dataFound);
+          result = this._intersection(resource, identityFoundData, schemaFoundData, dataFound, metadataFound);
         } else {
           return resolve(null);
         }
@@ -365,7 +385,7 @@ class DataObjectsStorage {
   _getResourcesByOwner(storedData, owner) {
     if (!storedData) return [];
     return Object.keys(storedData).filter((objectURL) => {
-      return storedData[objectURL].owner === owner;
+      return storedData[objectURL].reporter === owner;
     });
   }
 
@@ -377,7 +397,7 @@ class DataObjectsStorage {
     if (!storedData) return [];
 
     return Object.keys(storedData).filter((objectURL) => {
-      return storedData[objectURL].subscriptions.filter((current) => {
+      return storedData[objectURL].subscriberHyperties.filter((current) => {
         return current === subscription;
       }).length;
     });
@@ -393,6 +413,25 @@ class DataObjectsStorage {
       let currentObject = storedData[objectURL];
       return Object.keys(currentObject).filter((key) => {
         return key === 'schema' && currentObject[key] === schema;
+      }).length;
+    });
+  }
+
+  /**
+   * @private
+   * @todo documentation
+   */
+  _getResourcesByMetadata(storedData, metadata) {
+    if (!metadata) return [];
+
+    return Object.keys(storedData).filter((objectURL) => {
+      let currentObject = storedData[objectURL];
+      return Object.keys(currentObject).filter((key) => {
+        // search on storeDataObjects for specific key provided from data;
+        return Object.keys(metadata).filter(searchFor => {
+          return key === searchFor && currentObject[key] === metadata[searchFor];
+        }).length;
+
       }).length;
     });
   }
@@ -424,7 +463,7 @@ class DataObjectsStorage {
     if (!storedData) return false;
 
     return Object.keys(storedData).filter((objectURL) => {
-      return storedData[objectURL].subscriptions.filter((current) => {
+      return storedData[objectURL].subscriberHyperties.filter((current) => {
         return current === subscription;
       }).length;
     }).length > 0 ? true : false;
@@ -438,7 +477,7 @@ class DataObjectsStorage {
     if (!storedData) return false;
 
     return Object.keys(storedData).filter((objectURL) => {
-      return storedData[objectURL].owner === from;
+      return storedData[objectURL].reporter === from;
     }).length > 0 ? true : false;
   }
 
@@ -448,7 +487,7 @@ class DataObjectsStorage {
    */
   _isOwner(value, url) {
     if (!value) return false;
-    return value.owner === url ? true : false;
+    return value.reporter === url ? true : false;
   }
 
   /**
@@ -463,7 +502,7 @@ class DataObjectsStorage {
     }).filter((value, index, self) => {
       return self.indexOf(value) === index;
     });
-    console.log('Result an unique array of strings: ', result);
+    console.log('DataObjectsStorage._intersection] Result an unique array of strings: ', result);
     return result;
   }
 
