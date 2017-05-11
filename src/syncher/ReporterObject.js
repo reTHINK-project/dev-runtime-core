@@ -81,6 +81,9 @@ class ReporterObject {
   resumeSubscriptions(subscriptions) {
     let _this = this;
 
+    if (!subscriptions)
+      return;
+
     Object.keys(subscriptions).forEach((key) => {
       let hypertyURL = subscriptions[key];
 
@@ -198,7 +201,8 @@ class ReporterObject {
 
                 let url = splitedReporterURL.url;
 
-                if (!(typeof msg.body.value === 'string')) {
+                //remove false when mutualAuthentication is enabled
+                if (!(typeof msg.body.value === 'string') && false ) {
 
                   console.log('[SyncherManager.ReporterObject] encrypting received data ', msg.body.value);
 

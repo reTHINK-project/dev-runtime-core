@@ -104,6 +104,7 @@ class RuntimeUA {
     } else {
       throw new Error('Check your Runtime Factory because it need the Storage Manager implementation');
     }
+
     if (typeof runtimeFactory.runtimeCapabilities === 'function') {
       this.runtimeCapabilities = runtimeFactory.runtimeCapabilities(this.storageManager);
     } else {

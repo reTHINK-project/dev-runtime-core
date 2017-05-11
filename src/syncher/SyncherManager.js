@@ -318,7 +318,7 @@ class SyncherManager {
         let scheme = properties.scheme ? properties.scheme.constant : 'resource';
         let childrens = properties.children ? properties.children.constant : [];
 
-        console.log('[SyncherManager] - getDataSchemaDescriptor: ', descriptor, childrens, storedObject.childrenResources);
+        console.log('[SyncherManager] - getDataSchemaDescriptor: ', descriptor, childrens);
 
         // Do schema validation
         // TODO: check if is need to handle with the result of validation
@@ -337,20 +337,20 @@ class SyncherManager {
 
         reporter.addChildrens(childrens).then(() => {
 
-          reporter.resumeSubscriptions(storedObject.subscriptions);
+            reporter.resumeSubscriptions(storedObject.subscriptions);
 
-          _this._reporters[resource] = reporter;
+            _this._reporters[resource] = reporter;
 
-          console.info('[SyncherManager - resume create] - resolved resumed: ', storedObject);
+            console.info('[SyncherManager - resume create] - resolved resumed: ', storedObject);
 
-          return _this._decryptChildrens(storedObject, childrens);
-        }).then((decryptedObject) => {
-          // console.log('result of previous promise');
-          resolve(decryptedObject);
-        }).catch((reason) => {
-          console.error('[SyncherManager - resume create] - fail on addChildrens: ', reason);
-          resolve(false);
-        });
+            return _this._decryptChildrens(storedObject, childrens);
+          }).then((decryptedObject) => {
+            // console.log('result of previous promise');
+            resolve(decryptedObject);
+          }).catch((reason) => {
+            console.error('[SyncherManager - resume create] - fail on addChildrens: ', reason);
+            resolve(false);
+          });
       //  resolve();
       }).catch((reason) => {
         console.error('[SyncherManager - resume create] - fail on getDataSchemaDescriptor: ', reason);
@@ -527,12 +527,18 @@ class SyncherManager {
     //get schema from catalogue and parse -> (children)
     _this._catalog.getDataSchemaDescriptor(msg.body.schema).then((descriptor) => {
       let properties = descriptor.sourcePackage.sourceCode.properties;
-      let childrens = properties.children ? properties.children.constant : [];
 
-      //children addresses
+      let childrens = false;
+
       let subscriptions = [];
       subscriptions.push(objURL + '/changes');
-      childrens.forEach((child) => subscriptions.push(childBaseURL + child));
+
+      if (properties.children) {
+        childrens = properties.children.constant;
+        childrens.forEach((child) => subscriptions.push(childBaseURL + child));
+       }
+
+      //children addresses
 
       //FLOW-OUT: subscribe message to the msg-node, registering listeners on the broker
       let nodeSubscribeMsg = {

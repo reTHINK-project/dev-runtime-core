@@ -75,7 +75,8 @@ class ObserverObject {
 
             let url = splitedReporterURL.url;
 
-            if (!(typeof msg.body.value === 'string')) {
+            //remove false when mutualAuthentication is enabled
+            if (!(typeof msg.body.value === 'string') && false) {
 
               console.log('[SyncherManager.ObserverObject] encrypting received data ', msg.body.value);
 
