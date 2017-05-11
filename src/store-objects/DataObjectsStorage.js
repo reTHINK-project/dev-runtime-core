@@ -17,7 +17,7 @@ class DataObjectsStorage {
    * @param {SchemaURL} schema - the schema url
    * @param {String} status - the status of current dataObject
    * @param {HypertyURL} reporter - the Reporter hypertyURL
-   * @param {Array<HypertyURL>} subscription - list of subscriberHyperties
+   * @param {Array<HypertyURL>} subscription - list of subscriptions
    * @param {Array<DataObjectChild>} children - list of childs of dataObjectURL
    * @param {Array<String>} childrens - list of childrens, like, 'chatmessage';
    * @param {Array<UserURL} subscriberUser - list of subscribed users;
@@ -31,7 +31,7 @@ class DataObjectsStorage {
 
     if (!storeDataObject[type].hasOwnProperty(metadata.url)) {
       storeDataObject[type][metadata.url] = {};
-      storeDataObject[type][metadata.url].subscriberHyperties = [];// TODO:do we need this?
+      storeDataObject[type][metadata.url].subscriptions = [];// TODO:do we need this?
       storeDataObject[type][metadata.url].subscriberUsers = [];// TODO:do we need this?
       storeDataObject[type][metadata.url].childrenObjects = {};
       storeDataObject[type][metadata.url].data = {};
@@ -40,7 +40,7 @@ class DataObjectsStorage {
         metadata.url: metadata.url,
         isReporter: isReporter,
         isToSaveData: false,
-        subscriberHyperties: [],
+        subscriptions: [],
         subscriberUsers: [],
         childrens: {},
         data: {},
@@ -57,7 +57,7 @@ class DataObjectsStorage {
     if (childrenResources) storeDataObject[type][metadata.url].childrenResources = childrenResources;*/
 
     if (metadata.subscriberHyperty && !metadata.isReporter) { // TODO: do we need this?
-      this._updateToArray(storeDataObject[type], metadata.url, 'subscriberHyperties', metadata.subscriberHyperty);
+      this._updateToArray(storeDataObject[type], metadata.url, 'subscriptions', metadata.subscriberHyperty);
     }
 
     //storeDataObject[type][metadata.url].owner = owner;
@@ -154,10 +154,10 @@ class DataObjectsStorage {
 
     if (storeDataObject[type] && storeDataObject[type][resource] && resource && attribute && value) {
 
-      if (attribute === 'subscriberHyperties' || attribute === 'subscriberUsers') {
+      if (attribute === 'subscriptions' || attribute === 'subscriberUsers') {
         let update = true;
 
-        if (attribute === 'subscriberHyperties') {
+        if (attribute === 'subscriptions') {
           update = !this._isOwner(storeDataObject[type][resource], value);
         }
 
@@ -193,7 +193,7 @@ class DataObjectsStorage {
 
     if (storeDataObject[type] && storeDataObject[type][resource] && resource && attribute && value) {
 
-      if (attribute === 'subscriberHyperties' || attribute === 'subscriberUsers') {
+      if (attribute === 'subscriptions' || attribute === 'subscriberUsers') {
         this._removeFromArray(storeDataObject[type], resource, attribute, value);
       } else {
         delete storeDataObject[type][resource][attribute];
@@ -397,7 +397,7 @@ class DataObjectsStorage {
     if (!storedData) return [];
 
     return Object.keys(storedData).filter((objectURL) => {
-      return storedData[objectURL].subscriberHyperties.filter((current) => {
+      return storedData[objectURL].subscriptions.filter((current) => {
         return current === subscription;
       }).length;
     });
@@ -463,7 +463,7 @@ class DataObjectsStorage {
     if (!storedData) return false;
 
     return Object.keys(storedData).filter((objectURL) => {
-      return storedData[objectURL].subscriberHyperties.filter((current) => {
+      return storedData[objectURL].subscriptions.filter((current) => {
         return current === subscription;
       }).length;
     }).length > 0 ? true : false;
