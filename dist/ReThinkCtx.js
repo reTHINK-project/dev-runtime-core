@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 // version: 0.8.0
 // date: Thu May 11 2017 17:38:01 GMT+0100 (GMT Daylight Time)
+=======
+// version: 0.8.1
+// date: Thu May 11 2017 15:13:32 GMT+0100 (WEST)
+>>>>>>> f0d95c0eadaa40b07bebf09448da4ed4a5c3a3ba
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA

@@ -318,7 +318,11 @@ class SyncherManager {
         let scheme = properties.scheme ? properties.scheme.constant : 'resource';
         let childrens = properties.children ? properties.children.constant : [];
 
+<<<<<<< HEAD
         console.log('[SyncherManager] - getDataSchemaDescriptor: ', descriptor, childrens);
+=======
+        console.log('[SyncherManager] - getDataSchemaDescriptor: ', descriptor, childrens, storedObject.childrenObjects);
+>>>>>>> f0d95c0eadaa40b07bebf09448da4ed4a5c3a3ba
 
         // Do schema validation
         // TODO: check if is need to handle with the result of validation
