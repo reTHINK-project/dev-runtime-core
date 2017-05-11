@@ -202,7 +202,7 @@ class ReporterObject {
                 let url = splitedReporterURL.url;
 
                 //remove false when mutualAuthentication is enabled
-                if (!(typeof msg.body.value === 'string') && false ) {
+                if (!(typeof msg.body.value === 'string')) {
 
                   console.log('[SyncherManager.ReporterObject] encrypting received data ', msg.body.value);
 
@@ -211,7 +211,8 @@ class ReporterObject {
 
                     _this._storeChildObject(msg, JSON.stringify(encryptedValue));
                   }).catch((reason) => {
-                    console.warn('[SyncherManager._decryptChildrens] failed : ', reason);
+                    console.warn('[SyncherManager._decryptChildrens] failed : ', reason, ' Storing unencrypted');
+                    _this._storeChildObject(msg, msg.body.value);
                   });
                 } else {
                   _this._storeChildObject(msg, msg.body.value);
