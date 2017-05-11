@@ -42,8 +42,8 @@ describe('dataObjectsStorage', function() {
     metadata.schema = schema;
     metadata.url = url;
     metadata.name = 'WebRTC';
-    metadata.subscriberHyperties = [];
     metadata.subscriberUsers = [];
+    metadata.subscriptions = [];
     metadata.version = 0;
     metadata.reporter = 'hyperty://<domain>/id-3';
     let subscriberHyperty = 'hyperty://<domain>/id-2';
@@ -53,12 +53,12 @@ describe('dataObjectsStorage', function() {
     childrenObjects[metadata.reporter + '#2'] = { message: 'message 3' };
 
     expect(dataObjectsStorage.set(metadata))
-    .to.have.keys('url', 'isReporter', 'subscriberUsers', 'subscriberHyperties', 'version', 'schema', 'status', 'reporter', 'name', 'childrenObjects', 'data');
+    .to.have.keys('url', 'isReporter', 'subscriberUsers', 'subscriptions', 'version', 'schema', 'status', 'reporter', 'name', 'childrenObjects', 'data');
 
     expect(dataObjectsStorage.saveData(true, url, null, data)).to.be.deep.equal({
       url: metadata.url,
       isReporter: metadata.isReporter,
-      subscriberHyperties: [],
+      subscriptions: [],
       subscriberUsers: [],
       data: data,
       version: 0,
@@ -72,7 +72,7 @@ describe('dataObjectsStorage', function() {
     expect(dataObjectsStorage.saveChildrens(true, metadata.url, null, childrenObjects)).to.deep.equal({
       url: metadata.url,
       isReporter: metadata.isReporter,
-      subscriberHyperties: [],
+      subscriptions: [],
       subscriberUsers: [],
       schema: metadata.schema,
       status: metadata.status,
@@ -83,10 +83,10 @@ describe('dataObjectsStorage', function() {
       name: metadata.name
     });
 
-    expect(dataObjectsStorage.update(metadata.isReporter, metadata.url, 'subscriberHyperties', subscriberHyperty)).to.be.deep.equal({
+    expect(dataObjectsStorage.update(metadata.isReporter, metadata.url, 'subscriptions', subscriberHyperty)).to.be.deep.equal({
       url: metadata.url,
       isReporter: metadata.isReporter,
-      subscriberHyperties: [subscriberHyperty],
+      subscriptions: [subscriberHyperty],
       subscriberUsers: [],
       schema: schema,
       status: metadata.status,
@@ -122,7 +122,7 @@ describe('dataObjectsStorage', function() {
       expect(dataObjectsStorage.set(metadata)).to.be.deep.equal({
         url: metadata.url,
         isReporter: metadata.isReporter,
-        subscriberHyperties: [],
+        subscriptions: [],
         subscriberUsers: [],
         childrenObjects: {},
         data: {},
@@ -135,7 +135,7 @@ describe('dataObjectsStorage', function() {
       expect(dataObjectsStorage.update(metadata.isReporter, metadata.url, 'store', true)).to.be.deep.equal({
         url: metadata.url,
         isReporter: metadata.isReporter,
-        subscriberHyperties: [],
+        subscriptions: [],
         subscriberUsers: [],
         childrenObjects: {},
         data: {},
@@ -149,7 +149,7 @@ describe('dataObjectsStorage', function() {
       expect(dataObjectsStorage.saveData(metadata.isReporter, metadata.url, 'participants.1', {name: 'vitor', last: 'silva'})).to.be.deep.equal({
         url: metadata.url,
         isReporter: metadata.isReporter,
-        subscriberHyperties: [],
+        subscriptions: [],
         subscriberUsers: [],
         childrenObjects: {},
         version: 0,
@@ -166,10 +166,10 @@ describe('dataObjectsStorage', function() {
         }
       });
 
-      expect(dataObjectsStorage.update(metadata.isReporter, metadata.url, 'subscriberHyperties', subscriberHyperty)).to.be.deep.equal({
+      expect(dataObjectsStorage.update(metadata.isReporter, metadata.url, 'subscriptions', subscriberHyperty)).to.be.deep.equal({
         url: metadata.url,
         isReporter: metadata.isReporter,
-        subscriberHyperties: [subscriberHyperty],
+        subscriptions: [subscriberHyperty],
         subscriberUsers: [],
         childrenObjects: {},
         version: 0,
@@ -216,7 +216,7 @@ describe('dataObjectsStorage', function() {
       expect(dataObjectsStorage.set(metadata)).to.be.deep.equal({
         url: metadata.url,
         isReporter: metadata.isReporter,
-        subscriberHyperties: [],
+        subscriptions: [],
         subscriberUsers: [],
         childrenObjects: {},
         data: {},
