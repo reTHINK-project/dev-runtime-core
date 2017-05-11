@@ -40,8 +40,7 @@ import { runtimeUtils } from './runtimeUtils';
 import GraphConnector from '../graphconnector/GraphConnector';
 
 import CoreDiscovery from '../discovery/CoreDiscovery';
-import NotificationManager from '../discovery/NotificationManager';
-
+// import Discovery from '../discovery/Discovery';
 
 import DataObjectsStorage from '../store-objects/DataObjectsStorage';
 import SyncherManager from '../syncher/SyncherManager';
@@ -61,7 +60,6 @@ import RuntimeCoreCtx from '../policy/context/RuntimeCoreCtx';
  * @property {MessageBus} messageBus - Message Bus is used like a router to redirect the messages from one component to other(s)
  * @property {GraphConnector} graphConnector - Graph Connector handling GUID and contacts
  * @property {CoreDiscovery} coreDiscovery - Discovery for discovery hyperties/dataObjects
- * @property {NotificationManager} notificationManager - Notification Manager to deal with hyperty notifications
  */
 class RuntimeUA {
 
@@ -285,16 +283,6 @@ class RuntimeUA {
         // Instantiate Discovery
         this.coreDiscovery = new CoreDiscovery(this.runtimeURL, this.messageBus, this.graphConnector, this.runtimeFactory, this.registry);
 
-        // Instantiate NotificationManager
-        this.notificationManager = new NotificationManager(this.runtimeURL, this.messageBus);
-
-        // Instantiate Discovery Lib for Testing
-        //_this.discovery = new Discovery(_this.runtimeURL, _this.messageBus);
-        // _this.loadStub("localhost");
-        // setTimeout(function(){
-        //_this.discovery.discoverHyperties("user://google.com/bernardo.marquesg@gmail.com", ["comasdm"], ["chat"]);
-        // }, 2000);
-
         // Add to App Sandbox the listener;
         appSandbox.addListener('*', (msg) => {
           this.messageBus.postMessage(msg);
@@ -325,6 +313,20 @@ class RuntimeUA {
         this.loader.registry = this.registry;
         this.loader.runtimeCatalogue = this.runtimeCatalogue;
         this.loader.runtimeFactory = this.runtimeFactory;
+
+        //Instantiate Discovery Lib for notification testing
+        // this.discovery = new Discovery("hyperty://localhost/test", this.runtimeURL, this.messageBus);
+        // this.loadStub("localhost");
+        // setTimeout(() => {
+        //   this.discovery.discoverHypertiesDO("user://google.com/openidtest20@gmail.com")
+        //   .then(hyperties => {
+        //     hyperties.forEach(hyperty =>{
+        //       hyperty.onLive(() => console.log(`Notification from ${hyperty.data.hypertyID} changed to live`));
+        //       hyperty.onDisconnected(() => console.log(`Notification from ${hyperty.data.hypertyID} changed to disconnected`));
+        //     });
+        //   });
+        // }, 2000);
+
 
         resolve(true);
 
