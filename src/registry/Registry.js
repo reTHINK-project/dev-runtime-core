@@ -27,7 +27,7 @@ import AddressAllocation from '../allocation/AddressAllocation';
 import HypertyInstance from './HypertyInstance';
 
 import {MessageFactory} from 'service-framework/dist/MessageFactory';
-import {divideURL, isHypertyURL, isURL, isUserURL, generateGUID, getUserIdentityDomain, isBackendServiceURL} from '../utils/utils.js';
+import {divideURL, isHypertyURL, isURL, isUserURL, generateGUID, getUserIdentityDomain, isBackendServiceURL, deepClone} from '../utils/utils.js';
 
 import 'proxy-observe';
 import { WatchingYou } from 'service-framework/dist/Utils';
@@ -453,10 +453,12 @@ class Registry {
   registerDataObject(objectRegistration) {
     let _this = this;
 
+    let registration = deepClone(objectRegistration);
+
     return new Promise(function(resolve, reject) {
 
       let dataScheme = [];
-      let filteredDataScheme = objectRegistration.url.split(':');
+      let filteredDataScheme = registration.url.split(':');
       dataScheme.push(filteredDataScheme[0]);
 
       _this.storageManager.get('registry:DataObjectURLs').then((urlsList) => {
@@ -476,25 +478,32 @@ class Registry {
           p2pRequester = runtimeUtils.runtimeDescriptor.p2pRequesterStub;
         }
 
-        objectRegistration.expires = _this.expiresTime;
-        objectRegistration.dataSchemes = dataScheme;
+        registration.startingTime = registration.created;
+
+        delete registration.authorise;
+        delete registration.created;
+        delete registration.mutual;
+        delete registration.resume;
+
+        registration.expires = _this.expiresTime;
+        registration.dataSchemes = dataScheme;
 
         if (p2pHandler) {
-          objectRegistration.p2pHandler = p2pHandler;
-          objectRegistration.p2pRequester = p2pRequester;
+          registration.p2pHandler = p2pHandler;
+          registration.p2pRequester = p2pRequester;
         }
 
-        if (_this.isInterworkingProtoStub(objectRegistration.reporter)) {
-          objectRegistration.interworking = true;
+        if (_this.isInterworkingProtoStub(registration.reporter)) {
+          registration.interworking = true;
         }
 
         let message;
 
-        if (!objectRegistration.resume) {
+        if (!registration.resume) {
 
           console.log('[Registry.registerDataObject] registering new data object URL', objectRegistration);
 
-          message = {type: 'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: objectRegistration, policy: 'policy'}};
+          message = {type: 'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: registration, policy: 'policy'}};
 
         } else {
 
