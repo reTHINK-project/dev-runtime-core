@@ -81,6 +81,9 @@ class ReporterObject {
   resumeSubscriptions(subscriptions) {
     let _this = this;
 
+    if (!subscriptions)
+      return;
+
     Object.keys(subscriptions).forEach((key) => {
       let hypertyURL = subscriptions[key];
 
@@ -104,7 +107,7 @@ class ReporterObject {
     //FLOW-OUT: message sent to the msg-node SubscriptionManager component
     let nodeSubscribeMsg = {
       type: 'subscribe', from: _this._parent._url, to: 'domain://msg-node.' + _this._domain + '/sm',
-      body: { subscribe: addresses, source: _this._owner }
+      body: { resources: addresses, source: _this._owner }
     };
 
     return new Promise((resolve, reject) => {
@@ -134,7 +137,7 @@ class ReporterObject {
     //FLOW-OUT: message sent to the msg-node SubscriptionManager component
     let nodeUnSubscribeMsg = {
       type: 'unsubscribe', from: _this._parent._url, to: 'domain://msg-node.' + _this._domain + '/sm',
-      body: { subscribe: [address], source: _this._owner }
+      body: { resources: [address], source: _this._owner }
     };
 
     _this._bus.postMessage(nodeUnSubscribeMsg);
@@ -177,7 +180,7 @@ class ReporterObject {
       //FLOW-OUT: message sent to the msg-node SubscriptionManager component
       let nodeSubscribeMsg = {
         type: 'subscribe', from: _this._parent._url, to: 'domain://msg-node.' + _this._domain + '/sm',
-        body: { subscribe: subscriptions, source: _this._owner }
+        body: { resources: subscriptions, source: _this._owner }
       };
 
       _this._bus.postMessage(nodeSubscribeMsg, (reply) => {
@@ -198,6 +201,7 @@ class ReporterObject {
 
                 let url = splitedReporterURL.url;
 
+                //remove false when mutualAuthentication is enabled
                 if (!(typeof msg.body.value === 'string')) {
 
                   console.log('[SyncherManager.ReporterObject] encrypting received data ', msg.body.value);
@@ -207,7 +211,8 @@ class ReporterObject {
 
                     _this._storeChildObject(msg, JSON.stringify(encryptedValue));
                   }).catch((reason) => {
-                    console.warn('[SyncherManager._decryptChildrens] failed : ', reason);
+                    console.warn('[SyncherManager._decryptChildrens] failed : ', reason, ' Storing unencrypted');
+                    _this._storeChildObject(msg, msg.body.value);
                   });
                 } else {
                   _this._storeChildObject(msg, msg.body.value);

@@ -1,6 +1,6 @@
 {
   "name": "runtime-core",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "core runtime development",
   "files": [
     "dist"
@@ -34,7 +34,7 @@
   },
   "homepage": "https://rethink-project.eu/",
   "dependencies": {
-    "service-framework": "github:rethink-project/dev-service-framework#v0.6.0"
+    "service-framework": "github:rethink-project/dev-service-framework#v0.6.1"
   },
   "devDependencies": {
     "babel-core": "^6.21.0",

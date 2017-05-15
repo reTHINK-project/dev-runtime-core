@@ -75,6 +75,7 @@ class ObserverObject {
 
             let url = splitedReporterURL.url;
 
+            //remove false when mutualAuthentication is enabled
             if (!(typeof msg.body.value === 'string')) {
 
               console.log('[SyncherManager.ObserverObject] encrypting received data ', msg.body.value);
@@ -84,7 +85,8 @@ class ObserverObject {
 
                 _this._storeChildObject(msg, JSON.stringify(encryptedValue));
               }).catch((reason) => {
-                console.warn('[SyncherManager.ObserverObject._encryptChild] failed : ', reason);
+                console.warn('[SyncherManager.ObserverObject._encryptChild] failed, storing unencrypted ', reason);
+                _this._storeChildObject(msg, msg.body.value);
               });
             } else {
               _this._storeChildObject(msg, msg.body.value);

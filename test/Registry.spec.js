@@ -389,14 +389,15 @@ describe('Registry', function() {
 
   describe('registerDataObject(identifier, dataObjectschema, dataObjectUrl, dataObjectReporter, authorise)', function() {
     it('should register a new Data Object in the runtime registry', function(done) {
-      let identifier = 'hello-chat';
-      let dataObjectschema = 'hyperty-catalogue://catalogue.localhost/.well-known/dataschema/Communication';
-      let dataObjectUrl = 'comm://localhost/9303b707-f301-4929-ad7d-65a89a356871';
-      let dataObjectReporter = 'hyperty://localhost/d692091f-192c-420c-a763-a180f13e626a';
-      let authorise = ['user://gmail.com/user15'];
-      let addressURL = {newAddress: true, address: ['comm://localhost/9303b707-f301-4929-ad7d-65a89a356871']};
+      let objectRegistration = {};
+      objectRegistration.name = 'hello-chat';
+      objectRegistration.schema = 'hyperty-catalogue://catalogue.localhost/.well-known/dataschema/Communication';
+      objectRegistration.url = 'comm://localhost/9303b707-f301-4929-ad7d-65a89a356871';
+      objectRegistration.reporter = 'hyperty://localhost/d692091f-192c-420c-a763-a180f13e626a';
+      objectRegistration.authorise = ['user://gmail.com/user15'];
+      objectRegistration.resources = ['fake'];
 
-      expect(registry.registerDataObject(identifier, dataObjectschema, dataObjectUrl, dataObjectReporter, ['fake'], addressURL, authorise).then(function(response) {
+      expect(registry.registerDataObject(objectRegistration).then(function(response) {
         return response;
       })).to.be.fulfilled.and.eventually.equal('ok').and.notify(done);
     });
@@ -441,7 +442,7 @@ describe('Registry', function() {
 
       expect(registry.checkRegisteredURLs(info).then(function(response) {
         return response;
-      })).to.be.fulfilled.and.eventually.to.be.eql(['comm://localhost/9303b707-f301-4929-ad7d-65a89a356871']).and.notify(done);
+      })).to.be.fulfilled.and.eventually.to.be.eql('comm://localhost/9303b707-f301-4929-ad7d-65a89a356871').and.notify(done);
 
     });
 

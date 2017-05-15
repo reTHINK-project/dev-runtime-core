@@ -161,10 +161,13 @@ class RuntimeCoreCtx extends ReThinkCtx {
     return new Promise((resolve, reject) => {
       console.log('[Policy.RuntimeCoreCtx.prepareToForward]', message);
 
+      // uncomment this to enable mutual authentication
+      return resolve(message);
+
       // TODO remove this validation. When the Nodejs auth was completed this should work like browser;
       this.runtimeCapabilities.isAvailable('node').then((result) => {
 
-        console.log('[RuntimeCoreCtx - isAvailable - node] - ', result);
+      console.log('[RuntimeCoreCtx - isAvailable - node] - ', result);
         if (result) {
           return resolve(message);
         } else {
@@ -172,7 +175,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
             let isSubscription = message.type === 'subscribe';
             let isFromRemoteSM = _this.isFromRemoteSM(message.from);
 
-            if (isSubscription & isFromRemoteSM) {            
+            if (isSubscription & isFromRemoteSM) {
               // TODO: should verify why the mutualAuthentication is not working
               // TODO: this should uncommented
              _this.doMutualAuthentication(message).then(() => {
