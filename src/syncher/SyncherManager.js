@@ -527,16 +527,12 @@ class SyncherManager {
     //get schema from catalogue and parse -> (children)
     _this._catalog.getDataSchemaDescriptor(msg.body.schema).then((descriptor) => {
       let properties = descriptor.sourcePackage.sourceCode.properties;
-
-      let childrens = false;
+      let childrens = properties.children ? properties.children.constant : [];
 
       let subscriptions = [];
       subscriptions.push(objURL + '/changes');
 
-      if (properties.children) {
-        childrens = properties.children.constant;
-        childrens.forEach((child) => subscriptions.push(childBaseURL + child));
-       }
+      childrens.forEach((child) => subscriptions.push(childBaseURL + child));
 
       //children addresses
 
