@@ -27,6 +27,7 @@ class ObserverObject {
       if (this._isToSaveData && msg.body.attribute) {
         console.log('[SyncherManager.ObserverObject ] SyncherManager - save data: ', msg);
         _this._parent._dataObjectsStorage.update(false, _this._url, 'version', msg.body.version);
+        _this._parent._dataObjectsStorage.update(false, _this._url, 'lastModified', msg.body.lastModified);
         _this._parent._dataObjectsStorage.saveData(false, _this._url, msg.body.attribute, msg.body.value);
       }
 
