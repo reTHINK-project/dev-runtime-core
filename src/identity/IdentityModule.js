@@ -167,13 +167,7 @@ class IdentityModule {
           _this._messageBus.postMessage(replyMsg);
         });
         return;
-      } /*else if (funcName === 'selectIdentityForHyperty') {
-        let origin = msg.body.params.origin;
-        let idp = msg.body.params.idp;
-        let idHint = msg.body.params.idHint;
-        _this.selectIdentityForHyperty(origin, idp, idHint);
-        return;
-      }*/
+      }
 
       // if the function requested is not a promise
       let value = {type: 'execute', value: returnedValue, code: 200};
@@ -1416,6 +1410,7 @@ class IdentityModule {
 
       // check if the sender is a dataObject and if so stores that value
       let reporterURL = _this.registry.getReporterURLSynchonous(sender);
+      console.log("TIAGO: reporterURL", reporterURL);
       if (reporterURL) {
         dataObjectURL = sender;
         sender = reporterURL;
@@ -1434,6 +1429,8 @@ class IdentityModule {
 
       let chatKeys = _this.chatKeys[sender + '<->' + receiver];
       let userURL = _this._registry.getHypertyOwner(sender);
+
+      console.log("TIAGO: userURL", userURL, "for sender:", sender);
 
       if (userURL) {
 
