@@ -1410,7 +1410,7 @@ class IdentityModule {
 
       // check if the sender is a dataObject and if so stores that value
       let reporterURL = _this.registry.getReporterURLSynchonous(sender);
-      console.log("TIAGO: reporterURL", reporterURL);
+      console.log("TIAGO: reporterURL:", reporterURL, ", for sender:", sender);
       if (reporterURL) {
         dataObjectURL = sender;
         sender = reporterURL;
