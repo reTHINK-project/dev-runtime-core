@@ -597,7 +597,7 @@ class SyncherManager {
               if (!interworking) {
                 //_this._dataObjectsStorage.set(objURL, false, msg.body.schema, 'on', reply.body.owner, hypertyURL, childrens, userURL);
                 _this._dataObjectsStorage.set(metadata);
-                if (msg.body.hasOwnProperty('store') && msg.body.store) {
+                if (metadata.hasOwnProperty('store') && metadata.store) {
                   observer.isToSaveData = true;
                   _this._dataObjectsStorage.update(false, objURL, 'isToSaveData', true);
                   _this._dataObjectsStorage.saveData(false, objURL, null, reply.body.value.data);
