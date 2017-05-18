@@ -48,6 +48,7 @@ class ReporterObject {
       if (this._isToSaveData && msg.body.attribute) {
         console.log('[SyncherManager.ReporterObject ] SyncherManager - save data: ', msg);
         _this._parent._dataObjectsStorage.update(true, _this._url, 'version', msg.body.version);
+        _this._parent._dataObjectsStorage.update(true, _this._url, 'lastModified', msg.body.lastModified);
         _this._parent._dataObjectsStorage.saveData(true, _this._url, msg.body.attribute, msg.body.value);
       }
     });
