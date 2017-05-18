@@ -119,6 +119,17 @@ class Registry {
     return _this._loader;
   }
 
+
+  set dataObjectsStorage(dataObjectsStorage) {
+    let _this = this;
+    _this._dataObjectsStorage = dataObjectsStorage;
+  }
+
+  get dataObjectsStorage() {
+    let _this = this;
+    return _this._dataObjectsStorage;
+  }
+
   /**
   * return the messageBus in this Registry
   * @param {MessageBus}           messageBus
@@ -289,10 +300,17 @@ class Registry {
   */
   getReporterURLSynchonous(dataObjectURL) {
     let _this = this;
-
     let dataObject = _this.dataObjectList[dataObjectURL];
 
-    return (dataObject) ? dataObject.reporter : undefined;
+    if(dataObject)
+      return dataObject.reporter
+    else {
+      let storedDataObject = this.dataObjectsStorage._storeDataObject;
+      if(('reporters' in storedDataObject) && (dataObjectURL in storedDataObject.reporters))
+        return storedDataObject.reporters[dataObjectURL].reporter;
+      else
+          return undefined;
+    }
   }
 
   /**

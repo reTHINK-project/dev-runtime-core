@@ -167,13 +167,7 @@ class IdentityModule {
           _this._messageBus.postMessage(replyMsg);
         });
         return;
-      } /*else if (funcName === 'selectIdentityForHyperty') {
-        let origin = msg.body.params.origin;
-        let idp = msg.body.params.idp;
-        let idHint = msg.body.params.idHint;
-        _this.selectIdentityForHyperty(origin, idp, idHint);
-        return;
-      }*/
+      }
 
       // if the function requested is not a promise
       let value = {type: 'execute', value: returnedValue, code: 200};
