@@ -250,6 +250,9 @@ class RuntimeUA {
         // Set the loader to load Hyperties, Stubs and IdpProxies
         this.registry.loader = this.loader;
 
+        // Set the dataObjectsStorage
+        this.registry.dataObjectsStorage = this._dataObjectsStorage;
+
         // Instantiate the Message Bus
         this.messageBus = new MessageBus(this.registry);
 
