@@ -1410,7 +1410,6 @@ class IdentityModule {
 
       // check if the sender is a dataObject and if so stores that value
       let reporterURL = _this.registry.getReporterURLSynchonous(sender);
-      console.log("TIAGO: reporterURL:", reporterURL, ", for sender:", sender);
       if (reporterURL) {
         dataObjectURL = sender;
         sender = reporterURL;
@@ -1429,8 +1428,6 @@ class IdentityModule {
 
       let chatKeys = _this.chatKeys[sender + '<->' + receiver];
       let userURL = _this._registry.getHypertyOwner(sender);
-
-      console.log("TIAGO: userURL", userURL, "for sender:", sender);
 
       if (userURL) {
 
