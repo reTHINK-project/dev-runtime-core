@@ -263,6 +263,8 @@ class SyncherManager {
             }
           }
 
+          // adding listeners to forward to reporter
+
           reporter.forwardSubscribe([objectRegistration.url, subscriptionURL]).then(() => {
             reporter.addChildrens(childrens).then(() => {
               _this._reporters[objectRegistration.url] = reporter;
@@ -335,7 +337,8 @@ class SyncherManager {
 
         reporter.isToSaveData = storedObject.isToSaveData;
 
-        reporter.addChildrens(childrens).then(() => {
+        reporter.forwardSubscribe([storedObject.url]).then(() => {
+          reporter.addChildrens(childrens).then(() => {
 
             reporter.resumeSubscriptions(storedObject.subscriptions);
 
@@ -345,12 +348,13 @@ class SyncherManager {
 
             return _this._decryptChildrens(storedObject, childrens);
           }).then((decryptedObject) => {
-            // console.log('result of previous promise');
+              // console.log('result of previous promise');
             resolve(decryptedObject);
           }).catch((reason) => {
             console.error('[SyncherManager - resume create] - fail on addChildrens: ', reason);
             resolve(false);
           });
+        });
       //  resolve();
       }).catch((reason) => {
         console.error('[SyncherManager - resume create] - fail on getDataSchemaDescriptor: ', reason);
