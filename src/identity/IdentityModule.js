@@ -62,6 +62,7 @@ class IdentityModule {
     let newIdentity = new Identity('guid', 'HUMAN');
     _this.identity = newIdentity;
     _this.crypto = new Crypto();
+    _this.currentIdentity;
 
     //stores the association of the dataObject and the Hyperty registered within
     _this.dataObjectsIdentity = {};
@@ -241,7 +242,25 @@ class IdentityModule {
 
         if (identities) {
           _this.identities = identities;
+
+          identities.forEach((identity) => {
+            let timeNow = _this._seconds_since_epoch();
+            let expires = 0;
+
+            if (identity.info && identity.info.expires ) {
+              expires = identity.info.expires;
+            }  else if (identity.info && identity.info.tokenIDJSON && identity.info.tokenIDJSON.exp)
+              expires = identity.info.tokenIDJSON.exp;
+
+            if (expires > timeNow) {
+              _this.currentIdentity = identity.messageInfo;
+              _this.currentIdentity.expires = expires;
+            }
+
+          });
         }
+
+
         resolve();
       });
     });
@@ -268,7 +287,7 @@ class IdentityModule {
         let expiration_date = undefined;
 
         if (complete_id.hasOwnProperty('info')) {
-          if (complete_id.info.hasOwnProperty('expirates')) {
+          if (complete_id.info.hasOwnProperty('expires')) {
             expiration_date = complete_id.info.expires;
           } else if (complete_id.info.hasOwnProperty('tokenIDJSON')) {
             expiration_date = complete_id.info.tokenIDJSON.exp;
@@ -643,7 +662,7 @@ class IdentityModule {
           let idp = identityBundle.idp;
           let origin = identityBundle.hasOwnProperty('origin') ? identityBundle.origin : 'origin';
           let idHint = identityBundle.hasOwnProperty('idHint') ? identityBundle.idHint : '';
-          
+
           _this.selectIdentityForHyperty(origin, idp, idHint).then((assertion) => {
             console.log('[IdentityModule] Identity selected by hyperty.');
             return resolve(assertion);
@@ -657,12 +676,18 @@ class IdentityModule {
             });
           });
         } else {
-          _this.selectIdentityFromGUI().then((assertion) => {
+
+          if (_this.currentIdentity && _this.currentIdentity.expires > _this._seconds_since_epoch() )
+          {
+            return resolve(_this.currentIdentity);
+          } else {
+            _this.selectIdentityFromGUI().then((assertion) => {
             console.log('[IdentityModule] Identity selected from GUI.')
             return resolve(assertion);
           }, (err) => {
             return reject(err);
           });
+          }
         }
       }).catch(error => {
         console.error('Error on identity acquisition ', error);
@@ -714,6 +739,10 @@ class IdentityModule {
         reject(error);
       });
     });
+  }
+
+  getExistingValidToken() {
+
   }
 
   callGenerateMethods(idp, origin) {
@@ -928,7 +957,7 @@ class IdentityModule {
       let userProfileBundle = {username: email, cn: commonName, avatar: infoToken.picture, locale: infoToken.locale, userURL: identifier};
 
       //creation of a new JSON with the identity to send via messages
-      let newIdentity = {userProfile: userProfileBundle, idp: result.idp.domain, assertion: result.assertion};
+      let newIdentity = {userProfile: userProfileBundle, idp: result.idp.domain, assertion: result.assertion, expires: result.info.expires};
       result.messageInfo = newIdentity;
       result.keyPair = keyPair;
 
