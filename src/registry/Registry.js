@@ -497,6 +497,8 @@ class Registry {
           registration.interworking = true;
         }
 
+        registration.status = 'live';
+
         let message;
 
         if (!registration.resume) {
