@@ -180,7 +180,7 @@ describe('SyncherManager', function() {
 
       sync2.read(dor.url).then((data) => {
         console.log('on-read-reply', data);
-        expect(data).to.contain.all.keys({ communication: { name: 'chat-x' }, x: 10, y: 10 });
+        expect(data.data).to.contain.all.keys({ communication: { name: 'chat-x' }, x: 10, y: 10 });
         done();
       });
     });
@@ -262,7 +262,7 @@ describe('SyncherManager', function() {
       Object.values(doos).forEach((doo) => {
         console.log('on-subscribe-resume-reply DataObjectObserver: ', doo);
 
-        expect(doo.data).to.contain.all.keys({ communication: { name: 'chat-x' }, x: 10, y: 10, test: ['a', 'b', 'c']});
+        expect(doo.data.data).to.contain.all.keys({ communication: { name: 'chat-x' }, x: 10, y: 10, test: ['a', 'b', 'c']});
 
         // doo.onChange('*', (changeEvent) => {
         //   console.log('on-subscribe-resume on-change: ', JSON.stringify(changeEvent), doo.data);
