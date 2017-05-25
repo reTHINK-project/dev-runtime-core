@@ -729,7 +729,7 @@ class SyncherManager {
         body: { code: 200 }
       });
 
-      this._dataObjectsStorage.delete(true, objURL, 'subscriptions', hypertyURL);
+      this._dataObjectsStorage.deleteResource(objURL);
 
       //TODO: remove Object if no more subscription?
       //delete _this._observers[objURL];
