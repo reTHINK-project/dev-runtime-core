@@ -1,8 +1,12 @@
 {
-  "title": "Service Framework",
+  "title": "Decentralized bus API",
   "source": "./src",
   "destination": "./docs/api",
+  "includes": ["bus"],
   "lint": true,
+  "manual": [
+    "./specs/bus.md"
+  ],
   "test": {
     "type": "mocha",
     "source": "./test"

@@ -1,7 +1,7 @@
 {
   "type": "File",
   "start": 0,
-  "end": 939,
+  "end": 963,
   "loc": {
     "start": {
       "line": 1,
@@ -15,7 +15,7 @@
   "program": {
     "type": "Program",
     "start": 0,
-    "end": 939,
+    "end": 963,
     "loc": {
       "start": {
         "line": 1,
@@ -30,8 +30,8 @@
     "body": [
       {
         "type": "ImportDeclaration",
-        "start": 878,
-        "end": 914,
+        "start": 900,
+        "end": 936,
         "loc": {
           "start": {
             "line": 23,
@@ -45,8 +45,8 @@
         "specifiers": [
           {
             "type": "ImportDefaultSpecifier",
-            "start": 885,
-            "end": 892,
+            "start": 907,
+            "end": 914,
             "loc": {
               "start": {
                 "line": 23,
@@ -59,8 +59,8 @@
             },
             "local": {
               "type": "Identifier",
-              "start": 885,
-              "end": 892,
+              "start": 907,
+              "end": 914,
               "loc": {
                 "start": {
                   "line": 23,
@@ -80,8 +80,8 @@
         ],
         "source": {
           "type": "StringLiteral",
-          "start": 898,
-          "end": 913,
+          "start": 920,
+          "end": 935,
           "loc": {
             "start": {
               "line": 23,
@@ -101,9 +101,9 @@
         "leadingComments": [
           {
             "type": "CommentBlock",
-            "value": "*\n* Copyright 2016 PT Inovação e Sistemas SA\n* Copyright 2016 INESC-ID\n* Copyright 2016 QUOBIS NETWORKS SL\n* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V\n* Copyright 2016 ORANGE SA\n* Copyright 2016 Deutsche Telekom AG\n* Copyright 2016 Apizee\n* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN\n*\n* Licensed under the Apache License, Version 2.0 (the \"License\");\n* you may not use this file except in compliance with the License.\n* You may obtain a copy of the License at\n*\n*   http://www.apache.org/licenses/LICENSE-2.0\n*\n* Unless required by applicable law or agreed to in writing, software\n* distributed under the License is distributed on an \"AS IS\" BASIS,\n* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n* See the License for the specific language governing permissions and\n* limitations under the License.\n*",
+            "value": "*\r\n* Copyright 2016 PT Inovação e Sistemas SA\r\n* Copyright 2016 INESC-ID\r\n* Copyright 2016 QUOBIS NETWORKS SL\r\n* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V\r\n* Copyright 2016 ORANGE SA\r\n* Copyright 2016 Deutsche Telekom AG\r\n* Copyright 2016 Apizee\r\n* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN\r\n*\r\n* Licensed under the Apache License, Version 2.0 (the \"License\");\r\n* you may not use this file except in compliance with the License.\r\n* You may obtain a copy of the License at\r\n*\r\n*   http://www.apache.org/licenses/LICENSE-2.0\r\n*\r\n* Unless required by applicable law or agreed to in writing, software\r\n* distributed under the License is distributed on an \"AS IS\" BASIS,\r\n* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\r\n* See the License for the specific language governing permissions and\r\n* limitations under the License.\r\n*",
             "start": 0,
-            "end": 877,
+            "end": 898,
             "loc": {
               "start": {
                 "line": 1,
@@ -119,8 +119,8 @@
       },
       {
         "type": "ExportDefaultDeclaration",
-        "start": 915,
-        "end": 938,
+        "start": 938,
+        "end": 961,
         "loc": {
           "start": {
             "line": 24,
@@ -133,8 +133,8 @@
         },
         "declaration": {
           "type": "Identifier",
-          "start": 930,
-          "end": 937,
+          "start": 953,
+          "end": 960,
           "loc": {
             "start": {
               "line": 24,
@@ -157,9 +157,9 @@
   "comments": [
     {
       "type": "CommentBlock",
-      "value": "*\n* Copyright 2016 PT Inovação e Sistemas SA\n* Copyright 2016 INESC-ID\n* Copyright 2016 QUOBIS NETWORKS SL\n* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V\n* Copyright 2016 ORANGE SA\n* Copyright 2016 Deutsche Telekom AG\n* Copyright 2016 Apizee\n* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN\n*\n* Licensed under the Apache License, Version 2.0 (the \"License\");\n* you may not use this file except in compliance with the License.\n* You may obtain a copy of the License at\n*\n*   http://www.apache.org/licenses/LICENSE-2.0\n*\n* Unless required by applicable law or agreed to in writing, software\n* distributed under the License is distributed on an \"AS IS\" BASIS,\n* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n* See the License for the specific language governing permissions and\n* limitations under the License.\n*",
+      "value": "*\r\n* Copyright 2016 PT Inovação e Sistemas SA\r\n* Copyright 2016 INESC-ID\r\n* Copyright 2016 QUOBIS NETWORKS SL\r\n* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V\r\n* Copyright 2016 ORANGE SA\r\n* Copyright 2016 Deutsche Telekom AG\r\n* Copyright 2016 Apizee\r\n* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN\r\n*\r\n* Licensed under the Apache License, Version 2.0 (the \"License\");\r\n* you may not use this file except in compliance with the License.\r\n* You may obtain a copy of the License at\r\n*\r\n*   http://www.apache.org/licenses/LICENSE-2.0\r\n*\r\n* Unless required by applicable law or agreed to in writing, software\r\n* distributed under the License is distributed on an \"AS IS\" BASIS,\r\n* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\r\n* See the License for the specific language governing permissions and\r\n* limitations under the License.\r\n*",
       "start": 0,
-      "end": 877,
+      "end": 898,
       "loc": {
         "start": {
           "line": 1,
@@ -175,9 +175,9 @@
   "tokens": [
     {
       "type": "CommentBlock",
-      "value": "*\n* Copyright 2016 PT Inovação e Sistemas SA\n* Copyright 2016 INESC-ID\n* Copyright 2016 QUOBIS NETWORKS SL\n* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V\n* Copyright 2016 ORANGE SA\n* Copyright 2016 Deutsche Telekom AG\n* Copyright 2016 Apizee\n* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN\n*\n* Licensed under the Apache License, Version 2.0 (the \"License\");\n* you may not use this file except in compliance with the License.\n* You may obtain a copy of the License at\n*\n*   http://www.apache.org/licenses/LICENSE-2.0\n*\n* Unless required by applicable law or agreed to in writing, software\n* distributed under the License is distributed on an \"AS IS\" BASIS,\n* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n* See the License for the specific language governing permissions and\n* limitations under the License.\n*",
+      "value": "*\r\n* Copyright 2016 PT Inovação e Sistemas SA\r\n* Copyright 2016 INESC-ID\r\n* Copyright 2016 QUOBIS NETWORKS SL\r\n* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V\r\n* Copyright 2016 ORANGE SA\r\n* Copyright 2016 Deutsche Telekom AG\r\n* Copyright 2016 Apizee\r\n* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN\r\n*\r\n* Licensed under the Apache License, Version 2.0 (the \"License\");\r\n* you may not use this file except in compliance with the License.\r\n* You may obtain a copy of the License at\r\n*\r\n*   http://www.apache.org/licenses/LICENSE-2.0\r\n*\r\n* Unless required by applicable law or agreed to in writing, software\r\n* distributed under the License is distributed on an \"AS IS\" BASIS,\r\n* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\r\n* See the License for the specific language governing permissions and\r\n* limitations under the License.\r\n*",
       "start": 0,
-      "end": 877,
+      "end": 898,
       "loc": {
         "start": {
           "line": 1,
@@ -204,8 +204,8 @@
         "updateContext": null
       },
       "value": "import",
-      "start": 878,
-      "end": 884,
+      "start": 900,
+      "end": 906,
       "loc": {
         "start": {
           "line": 23,
@@ -230,8 +230,8 @@
         "binop": null
       },
       "value": "MiniBus",
-      "start": 885,
-      "end": 892,
+      "start": 907,
+      "end": 914,
       "loc": {
         "start": {
           "line": 23,
@@ -256,8 +256,8 @@
         "binop": null
       },
       "value": "from",
-      "start": 893,
-      "end": 897,
+      "start": 915,
+      "end": 919,
       "loc": {
         "start": {
           "line": 23,
@@ -283,8 +283,8 @@
         "updateContext": null
       },
       "value": "./bus/MiniBus",
-      "start": 898,
-      "end": 913,
+      "start": 920,
+      "end": 935,
       "loc": {
         "start": {
           "line": 23,
@@ -309,8 +309,8 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 913,
-      "end": 914,
+      "start": 935,
+      "end": 936,
       "loc": {
         "start": {
           "line": 23,
@@ -337,8 +337,8 @@
         "updateContext": null
       },
       "value": "export",
-      "start": 915,
-      "end": 921,
+      "start": 938,
+      "end": 944,
       "loc": {
         "start": {
           "line": 24,
@@ -365,8 +365,8 @@
         "updateContext": null
       },
       "value": "default",
-      "start": 922,
-      "end": 929,
+      "start": 945,
+      "end": 952,
       "loc": {
         "start": {
           "line": 24,
@@ -391,8 +391,8 @@
         "binop": null
       },
       "value": "MiniBus",
-      "start": 930,
-      "end": 937,
+      "start": 953,
+      "end": 960,
       "loc": {
         "start": {
           "line": 24,
@@ -417,8 +417,8 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 937,
-      "end": 938,
+      "start": 960,
+      "end": 961,
       "loc": {
         "start": {
           "line": 24,
@@ -443,8 +443,8 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 939,
-      "end": 939,
+      "start": 963,
+      "end": 963,
       "loc": {
         "start": {
           "line": 25,
