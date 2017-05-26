@@ -2,7 +2,11 @@
   "title": "Service Framework",
   "source": "./src",
   "destination": "./docs/api",
+  "includes": ["bus/Bus.js"],
   "lint": true,
+  "manual": [
+    "./README.md"
+  ],
   "test": {
     "type": "mocha",
     "source": "./test"

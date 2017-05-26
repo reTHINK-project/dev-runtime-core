@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../">
+  <title data-ice="title">test/CoreDiscovery.spec.js | Service Framework API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  <a href="./manual/index.html" data-ice="manualHeaderLink">Manual</a>
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  <a href="test.html" data-ice="testLink">Test</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html">Bus</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">test/CoreDiscovery.spec.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import chai from &apos;chai&apos;;
+import chaiAsPromised from &apos;chai-as-promised&apos;;
+import sinonChai from &apos;sinon-chai&apos;;
+
+let expect = chai.expect;
+chai.use(chaiAsPromised);
+chai.use(sinonChai);
+
+// dependencies
+import MessageBus from &apos;../src/bus/MessageBus&apos;;
+import Descriptors from &apos;../src/runtime/Descriptors&apos;;
+import { runtimeFactory } from &apos;./resources/runtimeFactory&apos;;
+import GraphConnector from &apos;../src/graphconnector/GraphConnector&apos;;
+import CoreDiscovery from &apos;../src/discovery/CoreDiscovery&apos;;
+import Registry from &apos;../src/registry/Registry&apos;;
+import AddressAllocation from &apos;../src/allocation/AddressAllocation&apos;;
+
+let msgbus;
+let runtimeURL = &apos;hyperty-runtime://ua.pt/123&apos;;
+let domain = &apos;ua.pt&apos;;
+let appSandbox = runtimeFactory.createAppSandbox();
+let storageManager = runtimeFactory.storageManager();
+let runtimeCatalogue = runtimeFactory.createRuntimeCatalogue();
+let runtimeCapabilities = runtimeFactory.runtimeCapabilities(storageManager);
+let coreDiscovery;
+
+let hyperty = {&apos;hyperty://ist.pt/1&apos;:
+                {descriptor: &apos;hyperty-catalogue://ist.pt/.well-known/hyperty/HelloHyperty&apos;,
+                 lastModified: &apos;&quot;2016-03-03T13:32:06Z&quot;&apos;,
+                 dataSchemes: [&apos;comm&apos;],
+                 resources:   [&apos;chat&apos;]}
+};
+
+let dataObject = {&apos;comm://ist.pt/1&apos;:
+                {schema: &apos;hyperty-catalogue://catalogue.hybroker.rethink.ptinovacao.pt/.well-known/dataschema/Communication&apos;,
+                 url: &apos;comm://ist.pt/1&apos;,
+                 name: &apos;mychat&apos;,
+                 lastModified: &apos;&quot;2016-03-03T13:32:06Z&quot;&apos;,
+                 dataSchemes: [&apos;comm&apos;],
+                 resources:   [&apos;chat&apos;]}
+};
+
+describe(&apos;CoreDiscovery&apos;, function() {
+
+  // this will be executed before all the tests, and you can garantee this will be setted
+  before(() =&gt; {
+
+      let identityModule = {
+          getIdentities: () =&gt; {
+              let identities = [];
+              let identityBundle = {identity: &apos;user://gmail.com/openidtest10&apos;, token: &apos;idToken&apos;};
+              identities.push(identityBundle);
+              return identities;
+          }
+      };
+
+      // instanciate the registry;
+      let registry = new Registry(runtimeURL, appSandbox, identityModule, runtimeCatalogue, runtimeCapabilities, storageManager);
+      msgbus = new MessageBus(registry);
+      new AddressAllocation(runtimeURL, msgbus, registry);
+      registry.messageBus = msgbus;
+      // Prepare the on instance to handle with the fallbacks and runtimeCatalogue;
+      let descriptorInstance = new Descriptors(runtimeURL, runtimeCatalogue, {});
+      let graphConnector = new GraphConnector(runtimeURL, msgbus, storageManager);
+      coreDiscovery = new CoreDiscovery(runtimeURL, msgbus, graphConnector, runtimeFactory);
+
+      coreDiscovery.messageBus.addListener(&apos;domain://registry.ua.pt/&apos;, (msg) =&gt; {
+        console.info(msg);
+        let message_hyperties = {
+            id: msg.id, type: &apos;response&apos;, from: &apos;domain://registry.ua.pt/&apos;, to: msg.from,
+            body: {
+                code: 200,
+                value: [hyperty]
+            }
+        };
+
+        let message_hyperty = {
+            id: msg.id, type: &apos;response&apos;, from: &apos;domain://registry.ua.pt/&apos;, to: msg.from,
+            body: {
+                code: 200,
+                value: hyperty
+            }
+        };
+
+        let message_dataObjects = {
+            id: msg.id, type: &apos;response&apos;, from: &apos;domain://registry.ua.pt/&apos;, to: msg.from,
+            body: {
+                code: 200,
+                value: [dataObject]
+            }
+        };
+
+        let message_dataObject = {
+            id: msg.id, type: &apos;response&apos;, from: &apos;domain://registry.ua.pt/&apos;, to: msg.from,
+            body: {
+                code: 200,
+                value: dataObject
+            }
+        };
+
+        if(msg.body.resource === &apos;/hyperty/idp-identifier/openidtest20@gmail.com&apos;)
+          coreDiscovery.messageBus.postMessage(message_hyperties); //discoverHyperties
+        else if(msg.body.resource === &apos;/comm&apos;)
+          coreDiscovery.messageBus.postMessage(message_dataObjects); //discoverDataObjects &amp;&amp; //discoverDataObjectsPerReporter
+        else if (msg.body.resource === &apos;hyperty://ist.pt/1&apos;)
+          coreDiscovery.messageBus.postMessage(message_hyperty); //discoverHypertyPerURL
+        else if (msg.body.resource === &apos;comm://ist.pt/1&apos;)
+          coreDiscovery.messageBus.postMessage(message_dataObject); //discoverDataObjectPerURL
+        else if (msg.body.resource === &apos;myChat&apos;)
+          coreDiscovery.messageBus.postMessage(message_dataObjects); //discoverDataObjectsPerName
+
+      });
+  });
+
+  describe(&apos;construction&apos;, function() {
+      it(&apos;should create a new CoreDiscovery without error&apos;, function() {
+          expect(coreDiscovery).to.be.instanceof(CoreDiscovery);
+      });
+  });
+
+  describe(&apos;discoverHyperties()&apos;, function() {
+    it(&apos;should conclude the advanced search without error&apos;, function(done) {
+
+      expect(coreDiscovery.discoverHyperties(&apos;openidtest20@gmail.com&apos;, [&apos;comm&apos;], [&apos;chat&apos;], domain).then(function(response) {
+        return response;
+      })).to.be.fulfilled.and.eventually.eql([hyperty]).and.notify(done);
+    });
+  });
+
+  describe(&apos;discoverDataObjects()&apos;, function() {
+    it(&apos;should conclude the advanced search without error&apos;, function(done) {
+
+      expect(coreDiscovery.discoverDataObjects(&apos;openidtest20@gmail.com&apos;, [&apos;comm&apos;], [&apos;chat&apos;], domain).then(function(response) {
+        return response;
+      })).to.be.fulfilled.and.eventually.eql([dataObject]).and.notify(done);
+    });
+  });
+
+  describe(&apos;discoverHypertyPerURL()&apos;, function() {
+    it(&apos;should conclude the advanced search without error&apos;, function(done) {
+
+      expect(coreDiscovery.discoverHypertyPerURL(&apos;hyperty://ist.pt/1&apos;).then(function(response) {
+        return response;
+      })).to.be.fulfilled.and.eventually.eql(hyperty).and.notify(done);
+    });
+  });
+
+  describe(&apos;discoverDataObjectPerURL()&apos;, function() {
+    it(&apos;should conclude the advanced search without error&apos;, function(done) {
+
+      expect(coreDiscovery.discoverDataObjectPerURL(&apos;comm://ist.pt/1&apos;).then(function(response) {
+        return response;
+      })).to.be.fulfilled.and.eventually.eql(dataObject).and.notify(done);
+    });
+  });
+
+  describe(&apos;discoverDataObjectsPerName()&apos;, function() {
+    it(&apos;should conclude the advanced search without error&apos;, function(done) {
+
+      expect(coreDiscovery.discoverDataObjectsPerName(&apos;myChat&apos;, [&apos;comm&apos;], [&apos;chat&apos;]).then(function(response) {
+        return response;
+      })).to.be.fulfilled.and.eventually.eql([dataObject]).and.notify(done);
+    });
+  });
+
+  describe(&apos;discoverDataObjectsPerReporter()&apos;, function() {
+    it(&apos;should conclude the advanced search without error&apos;, function(done) {
+
+      expect(coreDiscovery.discoverDataObjectsPerReporter(&apos;hyperty://ist.pt/1&apos;, [&apos;comm&apos;], [&apos;chat&apos;]).then(function(response) {
+        return response;
+      })).to.be.fulfilled.and.eventually.eql([dataObject]).and.notify(done);
+    });
+  });
+
+});
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.5.2)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>
