@@ -381,7 +381,6 @@ class Registry {
   *
   */
   unregisterDataObject(url) {
-    //TODO working but the user
     let _this = this;
 
     let message = { type: 'update', from: _this.registryURL,
@@ -978,7 +977,7 @@ class Registry {
 
                   if (reply.body.code === 200) {
                     resolve(addressURL.address[0]);
-                  }else if (reply.body.code === 404) {
+                  } else if (reply.body.code === 404) {
                     console.log('[Registry registerHyperty] The update was not possible. Registering new Hyperty at domain registry');
 
                     messageValue = {
