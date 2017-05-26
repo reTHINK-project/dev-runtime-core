@@ -455,6 +455,8 @@ class SyncherManager {
 
       this._dataObjectsStorage.deleteResource(objURL);
 
+      _this._registry.unregisterDataObject(objURL);
+
       //TODO: unregister object?
       _this._bus.postMessage({
         id: msg.id, type: 'response', from: msg.to, to: msg.from,
