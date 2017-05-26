@@ -1,13 +1,35 @@
 {
-  "coverage": "87.5%",
-  "expectCount": 8,
-  "actualCount": 7,
+  "coverage": "76.19%",
+  "expectCount": 21,
+  "actualCount": 16,
   "files": {
     "src/bus/Bus.js": {
       "expectCount": 8,
       "actualCount": 7,
       "undocumentLines": [
         40
+      ]
+    },
+    "src/bus/MessageBus.js": {
+      "expectCount": 7,
+      "actualCount": 5,
+      "undocumentLines": [
+        43,
+        53
+      ]
+    },
+    "src/bus/MiniBus.js": {
+      "expectCount": 3,
+      "actualCount": 2,
+      "undocumentLines": [
+        32
+      ]
+    },
+    "src/bus/Pipeline.js": {
+      "expectCount": 3,
+      "actualCount": 2,
+      "undocumentLines": [
+        35
       ]
     }
   }
