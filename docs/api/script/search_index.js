@@ -1,5 +1,29 @@
 window.esdocSearchIndex = [
   [
+    "runtime-core/src/bus/bus.js~bus",
+    "class/src/bus/Bus.js~Bus.html",
+    "<span>Bus</span> <span class=\"search-result-import-path\">runtime-core/src/bus/Bus.js</span>",
+    "class"
+  ],
+  [
+    "runtime-core/src/bus/messagebus.js~messagebus",
+    "class/src/bus/MessageBus.js~MessageBus.html",
+    "<span>MessageBus</span> <span class=\"search-result-import-path\">runtime-core/src/bus/MessageBus.js</span>",
+    "class"
+  ],
+  [
+    "runtime-core/src/bus/minibus.js~minibus",
+    "class/src/bus/MiniBus.js~MiniBus.html",
+    "<span>MiniBus</span> <span class=\"search-result-import-path\">runtime-core/src/bus/MiniBus.js</span>",
+    "class"
+  ],
+  [
+    "runtime-core/src/bus/pipeline.js~pipeline",
+    "class/src/bus/Pipeline.js~Pipeline.html",
+    "<span>Pipeline</span> <span class=\"search-result-import-path\">runtime-core/src/bus/Pipeline.js</span>",
+    "class"
+  ],
+  [
     "",
     "test-file/test/AddressAllocation.spec.js.html#lineNumber15",
     "AddressAllocation",
@@ -1705,13 +1729,13 @@ window.esdocSearchIndex = [
   ],
   [
     "",
-    "test-file/test/Descriptors.spec.js.html#lineNumber87",
+    "test-file/test/Descriptors.spec.js.html#lineNumber97",
     "Should get configuration and parse to Descriptors should get protocolstub",
     "test"
   ],
   [
     "",
-    "test-file/test/Descriptors.spec.js.html#lineNumber97",
+    "test-file/test/Descriptors.spec.js.html#lineNumber87",
     "Should get configuration and parse to Descriptors should get protocolstub",
     "test"
   ],
@@ -1888,6 +1912,138 @@ window.esdocSearchIndex = [
     "test-file/test/DataObjectsStorage.spec.js.html#lineNumber249",
     "dataObjectsStorage should update a resource with new Subscriber Users",
     "test"
+  ],
+  [
+    "src/bus/bus.js",
+    "file/src/bus/Bus.js.html",
+    "src/bus/Bus.js",
+    "file"
+  ],
+  [
+    "src/bus/bus.js~bus#addlistener",
+    "class/src/bus/Bus.js~Bus.html#instance-method-addListener",
+    "src/bus/Bus.js~Bus#addListener",
+    "method"
+  ],
+  [
+    "src/bus/bus.js~bus#addresponselistener",
+    "class/src/bus/Bus.js~Bus.html#instance-method-addResponseListener",
+    "src/bus/Bus.js~Bus#addResponseListener",
+    "method"
+  ],
+  [
+    "src/bus/bus.js~bus#bind",
+    "class/src/bus/Bus.js~Bus.html#instance-method-bind",
+    "src/bus/Bus.js~Bus#bind",
+    "method"
+  ],
+  [
+    "src/bus/bus.js~bus#constructor",
+    "class/src/bus/Bus.js~Bus.html#instance-constructor-constructor",
+    "src/bus/Bus.js~Bus#constructor",
+    "method"
+  ],
+  [
+    "src/bus/bus.js~bus#postmessage",
+    "class/src/bus/Bus.js~Bus.html#instance-method-postMessage",
+    "src/bus/Bus.js~Bus#postMessage",
+    "method"
+  ],
+  [
+    "src/bus/bus.js~bus#removealllistenersof",
+    "class/src/bus/Bus.js~Bus.html#instance-method-removeAllListenersOf",
+    "src/bus/Bus.js~Bus#removeAllListenersOf",
+    "method"
+  ],
+  [
+    "src/bus/bus.js~bus#removeresponselistener",
+    "class/src/bus/Bus.js~Bus.html#instance-method-removeResponseListener",
+    "src/bus/Bus.js~Bus#removeResponseListener",
+    "method"
+  ],
+  [
+    "src/bus/messagebus.js",
+    "file/src/bus/MessageBus.js.html",
+    "src/bus/MessageBus.js",
+    "file"
+  ],
+  [
+    "src/bus/messagebus.js~messagebus#addforward",
+    "class/src/bus/MessageBus.js~MessageBus.html#instance-method-addForward",
+    "src/bus/MessageBus.js~MessageBus#addForward",
+    "method"
+  ],
+  [
+    "src/bus/messagebus.js~messagebus#addpublish",
+    "class/src/bus/MessageBus.js~MessageBus.html#instance-method-addPublish",
+    "src/bus/MessageBus.js~MessageBus#addPublish",
+    "method"
+  ],
+  [
+    "src/bus/messagebus.js~messagebus#constructor",
+    "class/src/bus/MessageBus.js~MessageBus.html#instance-constructor-constructor",
+    "src/bus/MessageBus.js~MessageBus#constructor",
+    "method"
+  ],
+  [
+    "src/bus/messagebus.js~messagebus#forward",
+    "class/src/bus/MessageBus.js~MessageBus.html#instance-method-forward",
+    "src/bus/MessageBus.js~MessageBus#forward",
+    "method"
+  ],
+  [
+    "src/bus/messagebus.js~messagebus#pipeline",
+    "class/src/bus/MessageBus.js~MessageBus.html#instance-get-pipeline",
+    "src/bus/MessageBus.js~MessageBus#pipeline",
+    "member"
+  ],
+  [
+    "src/bus/messagebus.js~messagebus#postmessage",
+    "class/src/bus/MessageBus.js~MessageBus.html#instance-method-postMessage",
+    "src/bus/MessageBus.js~MessageBus#postMessage",
+    "method"
+  ],
+  [
+    "src/bus/minibus.js",
+    "file/src/bus/MiniBus.js.html",
+    "src/bus/MiniBus.js",
+    "file"
+  ],
+  [
+    "src/bus/minibus.js~minibus#constructor",
+    "class/src/bus/MiniBus.js~MiniBus.html#instance-constructor-constructor",
+    "src/bus/MiniBus.js~MiniBus#constructor",
+    "method"
+  ],
+  [
+    "src/bus/minibus.js~minibus#postmessage",
+    "class/src/bus/MiniBus.js~MiniBus.html#instance-method-postMessage",
+    "src/bus/MiniBus.js~MiniBus#postMessage",
+    "method"
+  ],
+  [
+    "src/bus/pipeline.js",
+    "file/src/bus/Pipeline.js.html",
+    "src/bus/Pipeline.js",
+    "file"
+  ],
+  [
+    "src/bus/pipeline.js~pipeline#constructor",
+    "class/src/bus/Pipeline.js~Pipeline.html#instance-constructor-constructor",
+    "src/bus/Pipeline.js~Pipeline#constructor",
+    "method"
+  ],
+  [
+    "src/bus/pipeline.js~pipeline#process",
+    "class/src/bus/Pipeline.js~Pipeline.html#instance-method-process",
+    "src/bus/Pipeline.js~Pipeline#process",
+    "method"
+  ],
+  [
+    "src/minibus.js",
+    "file/src/minibus.js.html",
+    "src/minibus.js",
+    "file"
   ],
   [
     "test/addressallocation.spec.js",

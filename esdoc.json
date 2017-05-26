@@ -2,7 +2,7 @@
   "title": "Decentralized bus API",
   "source": "./src",
   "destination": "./docs/api",
-  "includes": ["bus/Bus.js"],
+  "includes": ["bus"],
   "lint": true,
   "manual": [
     "./specs/bus.md"
