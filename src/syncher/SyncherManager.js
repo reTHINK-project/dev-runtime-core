@@ -723,7 +723,7 @@ class SyncherManager {
     let observer = _this._observers[objURL];
     if (observer) {
       //TODO: is there any policy verification before delete?
-      observer.removeSubscription(hypertyURL);
+      observer.removeSubscription(msg);
 
       //TODO: destroy object in the registry?
       _this._bus.postMessage({
