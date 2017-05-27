@@ -385,7 +385,12 @@ class Registry {
 
     let message = { type: 'update', from: _this.registryURL,
       to: 'domain://registry.' + _this._domain + '/',
-      body: { resource: '/dataObject/' + url, value: 'disconnected', attribute: 'status' }};
+      body: {
+        resource: url,
+        value: {
+          status: 'disconnected'
+        }
+      }};
 
     _this._messageBus.postMessage(message, (reply) => {
       console.log('[Registry] unregister dataObject Reply', reply);

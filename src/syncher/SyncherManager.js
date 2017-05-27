@@ -371,7 +371,6 @@ class SyncherManager {
 
       if (!childrens) resolve(storedObject);
       else {
-
         let childrensObj = Object.keys(storedObject['childrenObjects']);
 
         if (childrensObj.length === 0) {

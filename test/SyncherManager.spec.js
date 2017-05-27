@@ -80,6 +80,11 @@ describe('SyncherManager', function() {
       return false;
     },
 
+    unregisterDataObject: (url) => {
+      console.log('Unregister Data Object:', url);
+      return true;
+    },
+
     getPreAuthSubscribers: () => {
       return ['hyperty://domain/hyperty-instance'];
     },
@@ -221,6 +226,11 @@ describe('SyncherManager', function() {
       console.log('on-create-reply', dor);
       dor.inviteObservers([hyperURL2]);
 
+      dor.onRead((event) => {
+        console.log('on-read');
+        event.accept();
+      });
+
       dor.onSubscription((subscribeEvent) => {
         console.log('on-resources: ', subscribeEvent);
 
@@ -262,7 +272,7 @@ describe('SyncherManager', function() {
       Object.values(doos).forEach((doo) => {
         console.log('on-subscribe-resume-reply DataObjectObserver: ', doo);
 
-        expect(doo.data.data).to.contain.all.keys({ communication: { name: 'chat-x' }, x: 10, y: 10, test: ['a', 'b', 'c']});
+        expect(doo.data).to.contain.all.keys({ communication: { name: 'chat-x' }, x: 10, y: 10, test: ['a', 'b', 'c']});
 
         // doo.onChange('*', (changeEvent) => {
         //   console.log('on-subscribe-resume on-change: ', JSON.stringify(changeEvent), doo.data);
@@ -1005,9 +1015,14 @@ describe('SyncherManager', function() {
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
     sync1.create(schemaURL, [hyperURL2], initialData).then((dor) => {
       console.log('create: ', dor.url);
+
       dor.onSubscription((subscribeEvent) => {
-        console.log('onSubscription: ', subscribeEvent);
-        subscribeEvent.accept();
+
+        if (subscribeEvent.accept instanceof Function) {
+          console.log('onSubscription: ', subscribeEvent);
+          subscribeEvent.accept();
+        }
+
       });
     });
   });
