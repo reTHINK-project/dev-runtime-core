@@ -346,7 +346,7 @@ class Registry {
 
       for (let index in _this.hypertiesList) {
         let hyperty = _this.hypertiesList[index];
-        let result = _this.unregisterHypertyInstance(hyperty.user.userURL, hyperty.hypertyURL);
+        let result = _this.unregisterHypertyInstance(hyperty.hypertyURL);
         unregisterResults.push(result);
       }
 
@@ -359,20 +359,41 @@ class Registry {
 
   /**
   *  function to unregister an hypertyInstance in the Domain Registry
-  *  @param   {String}      user        user url
   *  @param   {String}      hypertyInstance   HypertyInsntance url
   *
   */
-  unregisterHypertyInstance(user, hypertyInstance) {
+  unregisterHypertyInstance(hypertyInstance) {
     //TODO working but the user
     let _this = this;
 
-    let message = { type: 'delete', from: _this.registryURL,
+    let message = { type: 'update', from: _this.registryURL,
       to: 'domain://registry.' + _this._domain + '/',
-      body: { value: {user: user, url: hypertyInstance }}};
+      body: { resource: '/hyperty/' + hypertyInstance, value: 'disconnected', attribute: 'status' }};
 
     _this._messageBus.postMessage(message, (reply) => {
       console.log('[Registry] unregister hyperty Reply', reply);
+    });
+  }
+
+  /**
+  *  function to unregister an hypertyInstance in the Domain Registry
+  *  @param   {String}      hypertyInstance   HypertyInsntance url
+  *
+  */
+  unregisterDataObject(url) {
+    let _this = this;
+
+    let message = { type: 'update', from: _this.registryURL,
+      to: 'domain://registry.' + _this._domain + '/',
+      body: {
+        resource: url,
+        value: {
+          status: 'disconnected'
+        }
+      }};
+
+    _this._messageBus.postMessage(message, (reply) => {
+      console.log('[Registry] unregister dataObject Reply', reply);
     });
   }
 
@@ -496,6 +517,8 @@ class Registry {
         if (_this.isInterworkingProtoStub(registration.reporter)) {
           registration.interworking = true;
         }
+
+        registration.status = 'live';
 
         let message;
 
@@ -959,7 +982,7 @@ class Registry {
 
                   if (reply.body.code === 200) {
                     resolve(addressURL.address[0]);
-                  }else if (reply.body.code === 404) {
+                  } else if (reply.body.code === 404) {
                     console.log('[Registry registerHyperty] The update was not possible. Registering new Hyperty at domain registry');
 
                     messageValue = {
