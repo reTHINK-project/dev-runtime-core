@@ -230,6 +230,20 @@ class IdentityModule {
     throw 'identity not found';
   }
 
+  setIdentity(userURL, newIdentity) {
+    let _this = this;
+
+    for (let index in _this.identities) {
+
+      let identity = _this.identities[index];
+      if (identity.identity === userURL) {
+        _this.identities[index] = newIdentity;
+      }
+    }
+
+    throw 'identity not found';
+  }
+
   _seconds_since_epoch() {
     return Math.floor( Date.now() / 1000 );
   }
@@ -308,11 +322,16 @@ class IdentityModule {
         // but this works for now...
         if (time_now >= expiration_date) {
           // delete current identity
-          _this.deleteIdentity(complete_id.identity);
+          //_this.deleteIdentity(complete_id.identity);
 
           // generate new idToken
-          _this.callGenerateMethods(identity.idp).then((value) => {
+          /*_this.callGenerateMethods(identity.idp).then((value) => {
             resolve(value.messageInfo);
+          });*/
+          _this.sendRefreshMessage(identity.idp).then((newIdentity) => {
+            _this.setIdentity(identity.userProfile.userURL, newIdentity);
+            _this.setCurrentIdentity(newIdentity);
+            resolve(newIdentity);
           });
         } else {
           resolve(identity);
@@ -488,7 +507,7 @@ class IdentityModule {
           // but this works for now...
           if (time_now >= expiration_date) {
             // delete current identity
-            _this.deleteIdentity(identity.identity);
+            //_this.deleteIdentity(identity.identity);
             return null; // the getToken function then generates a new token
           }
         } // else this access token has no expiration time
@@ -890,6 +909,24 @@ class IdentityModule {
         } else {
           return reject('error on GUI received message.');
         }
+      });
+    });
+  }
+
+  sendRefreshMessage(idpDomain) {
+    let _this = this;
+    let domain = _this._resolveDomain(idpDomain);
+    let message;
+    let assertion = _this.getIdentity(_this.currentIdentity.userProfile.userURL);
+
+    return new Promise((resolve, reject) => {
+      message = {type: 'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'refreshAssertion', params: {identity: assertion}}};
+      _this._messageBus.postMessage(message, (res) => {
+        let result = res.body.value;
+
+        console.log('TIAGO new assertion:', result);
+        resolve(result);
+
       });
     });
   }
