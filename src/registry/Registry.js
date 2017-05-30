@@ -582,6 +582,8 @@ class Registry {
         resources = descriptor.hypertyType;
       }
 
+      let objName = descriptor.objectName;
+
       let descriptorDataSchema = descriptor.dataObjects;
       let dataSchemasArray = [];
 
@@ -602,7 +604,7 @@ class Registry {
         console.log('[Registry] Hyperty Schemas', filteredDataSchemas);
         console.log('[Registry] Hyperty resources', resources);
 
-        resolve({resources: resources, dataSchema: filteredDataSchemas});
+        resolve({resources: resources, dataSchema: filteredDataSchemas, name: objName});
       });
     });
   }
@@ -647,9 +649,9 @@ class Registry {
 
         if (objectType === 'registry:HypertyURLs') {
           _this._getResourcesAndSchemes(info).then((value) => {
-            if (urlsList[value.resources + value.dataSchema]) {
+            if (urlsList[value.resources + value.dataSchema + value.name]) {
               console.log('[Registry] reusage of hyperty URL');
-              return resolve(urlsList[value.resources + value.dataSchema]);
+              return resolve(urlsList[value.resources + value.dataSchema + value.name]);
             } else {
               console.log('[Registry] no hyperty URL was previously registered ');
               return resolve(undefined);
@@ -903,7 +905,7 @@ class Registry {
                 urlsList = {};
               }
 
-              urlsList[hypertyCapabilities.resources + hypertyCapabilities.dataSchema] = addressURL.address;
+              urlsList[hypertyCapabilities.resources + hypertyCapabilities.dataSchema + hypertyCapabilities.name] = addressURL.address;
               _this.storageManager.set('registry:HypertyURLs', 0, urlsList).then(() => {
 
                 _this.registryDomain = domainUrl;
