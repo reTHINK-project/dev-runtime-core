@@ -9,7 +9,7 @@ module.exports = function(config) {
       './test/PolicyEngine.spec.js'
     ],
     preprocessors: {
-      './test/*.spec.js': ['webpack']
+      './test/*.spec.js': ['webpack', 'sourcemap']
     },
 
     // webpack configuration
@@ -43,6 +43,6 @@ module.exports = function(config) {
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
-    singleRun: false
+    singleRun: true
   });
 };
