@@ -1103,9 +1103,9 @@ class Registry {
       return (_this.protostubsList[domainURL]);
     } else {
 
-    /*  _this.protostubsList[domainURL] = {
-        status: STATUS.CREATED
-      };*/
+      _this.protostubsList[domainURL] = {
+        status: STATUS.DEPLOYING
+      };
 
       throw new Error('[Registry - discoverProtoStub ] Message Node Protostub Not Found. Creating one');
 
@@ -1574,6 +1574,8 @@ class Registry {
         } else {
           registredComponent  = _this.protostubsList.hasOwnProperty(domainUrl) ? _this.protostubsList[domainUrl] : false;
         }
+
+        console.info('[Registry.resolve] registred:', registredComponent);
 
         // TODO since the protostubs have other states this should be revised, because the status could change from DEPLOYED to LIVE
         // TODO and this validation will trigger a new load of IDPProxy or Protostub;
