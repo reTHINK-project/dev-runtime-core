@@ -153,8 +153,8 @@ class IdentityModule {
         let contents = msg.body.params.contents;
         let origin = msg.body.params.origin;
         let usernameHint = msg.body.params.usernameHint;
-        let ipDomain = msg.body.params.ipDomain;
-        _this.sendGenerateMessage(contents, origin, usernameHint, ipDomain).then((returnedValue) => {
+        let idpDomain = msg.body.params.idpDomain;
+        _this.sendGenerateMessage(contents, origin, usernameHint, idpDomain).then((returnedValue) => {
           let value = {type: 'execute', value: returnedValue, code: 200};
           let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
           _this._messageBus.postMessage(replyMsg);
