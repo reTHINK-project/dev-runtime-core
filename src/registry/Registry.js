@@ -366,12 +366,22 @@ class Registry {
     //TODO working but the user
     let _this = this;
 
-    let message = { type: 'update', from: _this.registryURL,
-      to: 'domain://registry.' + _this._domain + '/',
-      body: { resource: '/hyperty/' + hypertyInstance, value: 'disconnected', attribute: 'status' }};
+    let closeMsg = { type: 'execute', from: _this.registryURL,
+      to: hypertyInstance,
+      body: { method: 'close' }};
 
-    _this._messageBus.postMessage(message, (reply) => {
-      console.log('[Registry] unregister hyperty Reply', reply);
+    // Send message to hyperty to close
+    _this._messageBus.postMessage(closeMsg, (reply) => {
+      console.log('[Registry.unregisterHypertyInstance] Close Reply', reply);
+
+      let message = { type: 'update', from: _this.registryURL,
+        to: 'domain://registry.' + _this._domain + '/',
+        body: { resource: '/hyperty/' + hypertyInstance, value: 'disconnected', attribute: 'status' }};
+
+      _this._messageBus.postMessage(message, (reply) => {
+        console.log('[Registry] unregister hyperty Reply', reply);
+
+      });
     });
   }
 
