@@ -161,40 +161,37 @@ class RuntimeCoreCtx extends ReThinkCtx {
     return new Promise((resolve, reject) => {
       console.log('[Policy.RuntimeCoreCtx.prepareToForward]', message);
 
+      // uncomment this to enable mutual authentication
+      return resolve(message);
+
       // TODO remove this validation. When the Nodejs auth was completed this should work like browser;
       this.runtimeCapabilities.isAvailable('node').then((result) => {
 
-        console.log('[RuntimeCoreCtx - isAvailable - node] - ', result);
+      console.log('[RuntimeCoreCtx - isAvailable - node] - ', result);
         if (result) {
           return resolve(message);
         } else {
-          if (isIncoming & result) {
+          if (isIncoming) {
             let isSubscription = message.type === 'subscribe';
             let isFromRemoteSM = _this.isFromRemoteSM(message.from);
+
             if (isSubscription & isFromRemoteSM) {
-
-              // TODO: should do mutualAuthentication and this should be removed
-              resolve(message);
-
               // TODO: should verify why the mutualAuthentication is not working
               // TODO: this should uncommented
-              /*_this.doMutualAuthentication(message).then(() => {
+             _this.doMutualAuthentication(message).then(() => {
                 resolve(message);
               }, (error) => {
                 reject(error);
-              });*/
+              });
 
             } else {
               resolve(message);
             }
           } else {
 
-            // TODO should encrypt messages and this should be removed;
-            resolve(message);
-
             // TODO: should verify why the mutualAuthentication is not working
             // TODO: this should uncommented
-            /*if (_this._isToCypherModule(message)) {
+            if (_this._isToCypherModule(message)) {
               _this.idModule.encryptMessage(message).then((message) => {
                 resolve(message);
               }, (error) => {
@@ -202,7 +199,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
               });
             } else {
               resolve(message);
-            }*/
+            }
           }
         }
       });

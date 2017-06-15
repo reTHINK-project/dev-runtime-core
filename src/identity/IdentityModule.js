@@ -38,7 +38,7 @@ class IdentityModule {
   /**
   * This is the constructor to initialise the Identity Module it does not require any input.
   */
-  constructor(runtimeURL, runtimeCapabilities, storageManager) {
+  constructor(runtimeURL, runtimeCapabilities, storageManager, dataObjectsStorage) {
     let _this = this;
 
     if (!runtimeURL) throw new Error('runtimeURL is missing.');
@@ -46,6 +46,7 @@ class IdentityModule {
 
     _this._runtimeURL = runtimeURL;
     _this.storageManager = storageManager;
+    _this.dataObjectsStorage = dataObjectsStorage;
     _this._idmURL = _this._runtimeURL + '/idm';
     _this._guiURL = _this._runtimeURL + '/identity-gui';
     _this.runtimeCapabilities = runtimeCapabilities;
@@ -61,6 +62,7 @@ class IdentityModule {
     let newIdentity = new Identity('guid', 'HUMAN');
     _this.identity = newIdentity;
     _this.crypto = new Crypto();
+    _this.currentIdentity;
 
     //stores the association of the dataObject and the Hyperty registered within
     _this.dataObjectsIdentity = {};
@@ -166,7 +168,13 @@ class IdentityModule {
           _this._messageBus.postMessage(replyMsg);
         });
         return;
-      }
+      } /*else if (funcName === 'selectIdentityForHyperty') {
+        let origin = msg.body.params.origin;
+        let idp = msg.body.params.idp;
+        let idHint = msg.body.params.idHint;
+        _this.selectIdentityForHyperty(origin, idp, idHint);
+        return;
+      }*/
 
       // if the function requested is not a promise
       let value = {type: 'execute', value: returnedValue, code: 200};
@@ -234,7 +242,25 @@ class IdentityModule {
 
         if (identities) {
           _this.identities = identities;
+
+          identities.forEach((identity) => {
+            let timeNow = _this._seconds_since_epoch();
+            let expires = 0;
+
+            if (identity.info && identity.info.expires ) {
+              expires = identity.info.expires;
+            }  else if (identity.info && identity.info.tokenIDJSON && identity.info.tokenIDJSON.exp)
+              expires = identity.info.tokenIDJSON.exp;
+
+            if (expires > timeNow) {
+              _this.currentIdentity = identity.messageInfo;
+              _this.currentIdentity.expires = expires;
+            }
+
+          });
         }
+
+
         resolve();
       });
     });
@@ -261,15 +287,17 @@ class IdentityModule {
         let expiration_date = undefined;
 
         if (complete_id.hasOwnProperty('info')) {
-          if (complete_id.info.hasOwnProperty('expirates')) {
+          if (complete_id.info.hasOwnProperty('expires')) {
             expiration_date = complete_id.info.expires;
           } else if (complete_id.info.hasOwnProperty('tokenIDJSON')) {
             expiration_date = complete_id.info.tokenIDJSON.exp;
           } else {
-            throw 'The ID Token does not have an expiration time';
+            // throw 'The ID Token does not have an expiration time';
+            console.log('The ID Token does not have an expiration time');
           }
         } else {
-          throw 'The ID Token does not have an expiration time';
+          // throw 'The ID Token does not have an expiration time';
+          console.log('The ID Token does not have an expiration time')
         }
 
         console.log('[Identity.IdentityModule.getValidToken] Token expires in', expiration_date);
@@ -613,7 +641,7 @@ class IdentityModule {
   *
   * @return {IdAssertion}              IdAssertion
   */
-  getIdentityAssertion(identifier, origin, usernameHint, idpDomain) {
+  getIdentityAssertion(identityBundle) {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
@@ -626,39 +654,44 @@ class IdentityModule {
 
         if (!result) return;
 
-        let identitiesInfo = _this.getIdentitiesToChoose();
+        //todo: only idp should be mandatory when identityBundle exists
 
-        _this.requestIdentityToGUI(identitiesInfo.identities, identitiesInfo.idps).then(value => {
+        if (identityBundle &&
+            identityBundle.hasOwnProperty('idp')) {
 
-          if (value.type === 'identity') {
+          let idp = identityBundle.idp;
+          let origin = identityBundle.hasOwnProperty('origin') ? identityBundle.origin : 'origin';
+          let idHint = identityBundle.hasOwnProperty('idHint') ? identityBundle.idHint : '';
 
-          //  let chosenID = getUserURLFromEmail(value.value);
-          // hack while the user url is not returned from requestIdentityToGUI;
-
-            let chosenID = 'user://' + _this.currentIdentity.idp + '/' + value.value;
-
-            // returns the identity info from the chosen id
-            for (let i in _this.identities) {
-              if (_this.identities[i].identity === chosenID) {
-                return resolve(_this.identities[i].messageInfo);
-              }
-            }
-            reject('no identity was found .');
-          } else if (value.type === 'idp') {
-
-            _this.callGenerateMethods(value.value, origin).then((value) => {
-              resolve(value);
+          _this.selectIdentityForHyperty(origin, idp, idHint).then((assertion) => {
+            console.log('[IdentityModule] Identity selected by hyperty.');
+            return resolve(assertion);
+          }, (err) => { // if it got an error then just select identity from GUI
+            console.error('[IdentityModule] Could not select identity from hyperty.');
+            _this.selectIdentityFromGUI().then((newAssertion) => {
+              console.log('[IdentityModule] Identity selected by hyperty.');
+              return resolve(newAssertion);
             }, (err) => {
-              reject(err);
+              return reject(err);
             });
+          });
+        } else {
 
+          if (_this.currentIdentity && _this.currentIdentity.expires > _this._seconds_since_epoch() )
+          {
+            return resolve(_this.currentIdentity);
           } else {
-            reject('error on GUI received message.');
+            _this.selectIdentityFromGUI().then((assertion) => {
+            console.log('[IdentityModule] Identity selected from GUI.')
+            return resolve(assertion);
+          }, (err) => {
+            return reject(err);
+          });
           }
-        });
+        }
       }).catch(error => {
-        console.log('Error on identity acquisition ', error);
-        reject(error);
+        console.error('Error on identity acquisition ', error);
+        return reject(error);
       });
 
       _this.runtimeCapabilities.isAvailable('node').then((result) => {
@@ -708,6 +741,10 @@ class IdentityModule {
     });
   }
 
+  getExistingValidToken() {
+
+  }
+
   callGenerateMethods(idp, origin) {
     let _this = this;
 
@@ -724,6 +761,7 @@ class IdentityModule {
         return _this.generateAssertion(publicKey, origin, '', userkeyPair, idp);
 
       }).then(function(url) {
+        _this.myHint = url;
         return _this.generateAssertion(publicKey, origin, url, userkeyPair, idp);
 
       }).then(function(value) {
@@ -735,6 +773,123 @@ class IdentityModule {
       }).catch(function(err) {
         console.log(err);
         reject(err);
+      });
+    });
+  }
+
+  loginSelectedIdentity(publicKey, origin, idp, keyPair, loginUrl) {
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+      _this.callIdentityModuleFunc('openPopup', {urlreceived: loginUrl}).then((idCode) => {
+        return idCode;
+      }, (err) => {
+        console.error('Error while logging in for the selected identity.');
+        return reject(err);
+      }).then((idCode) => {
+        _this.sendGenerateMessage(publicKey, origin, idCode, idp).then((newResponse) => {
+          if (newResponse.hasOwnProperty('assertion')) {
+            _this.storeIdentity(newResponse, keyPair);
+          } else {
+            console.error('Error while logging in for the selected identity.');
+            return reject('Could not generate a valid assertion for selected identity.');
+          }
+        });
+      });
+    });
+  }
+
+  generateSelectedIdentity(publicKey, origin, idp, keyPair) {
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+
+      _this.generateAssertion(publicKey, origin, '', keyPair, idp).then((loginUrl) => {
+        return loginUrl;
+      }).then(function(url) {
+        return _this.generateAssertion(publicKey, origin, url, keyPair, idp);
+      }).then(function(value) {
+        if (value) {
+          return resolve(value);
+        } else {
+          return reject('Error on obtaining Identity');
+        }
+      }).catch(function(err) {
+        console.error(err);
+        return reject(err);
+      });
+    });
+  }
+
+  selectIdentityForHyperty(origin, idp, idHint) {
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+
+      //generates the RSA key pair
+      _this.crypto.generateRSAKeyPair().then(function(keyPair) {
+        let publicKey = btoa(keyPair.public);
+
+        _this.sendGenerateMessage(publicKey, origin, idHint, idp).then((response) => {
+          if (response.hasOwnProperty('assertion')) { // identity was logged in, just save it
+            _this.storeIdentity(response, keyPair).then((value) => {
+              return resolve(value);
+            }, (err) => {
+              return reject(err);
+            });
+          } else if(response.hasOwnProperty('loginUrl')) { // identity was not logged in
+            _this.loginSelectedIdentity(publicKey, origin, idp, keyPair, response.loginUrl).then((value) => {
+              return resolve(value);
+            }, (err) => {
+              return reject(err);
+            });
+          } else { // you should never get here, if you do then the IdP Proxy is not well implemented
+            console.error('GenerateAssertion returned invalid response.');
+            console.log('Proceeding by logging in.');
+            _this.generateSelectedIdentity(publicKey, origin, idp, keyPair).then((value) => {
+              return resolve(value);
+            }, (err) => {
+              return reject(err);
+            });
+          }
+        });
+      });
+    });
+  }
+
+  selectIdentityFromGUI(origin) {
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+      let identitiesInfo = _this.getIdentitiesToChoose();
+
+      _this.requestIdentityToGUI(identitiesInfo.identities, identitiesInfo.idps).then(value => {
+
+        if (value.type === 'identity') {
+
+        //  let chosenID = getUserURLFromEmail(value.value);
+        // hack while the user url is not returned from requestIdentityToGUI;
+
+          let chosenID = 'user://' + _this.currentIdentity.idp + '/' + value.value;
+
+          // returns the identity info from the chosen id
+          for (let i in _this.identities) {
+            if (_this.identities[i].identity === chosenID) {
+              return resolve(_this.identities[i].messageInfo);
+            }
+          }
+          return reject('no identity was found .');
+        } else if (value.type === 'idp') {
+
+          _this.callGenerateMethods(value.value, origin).then((value) => {
+            return resolve(value);
+          }, (err) => {
+            return reject(err);
+          });
+
+        } else {
+          return reject('error on GUI received message.');
+        }
       });
     });
   }
@@ -802,7 +957,7 @@ class IdentityModule {
       let userProfileBundle = {username: email, cn: commonName, avatar: infoToken.picture, locale: infoToken.locale, userURL: identifier};
 
       //creation of a new JSON with the identity to send via messages
-      let newIdentity = {userProfile: userProfileBundle, idp: result.idp.domain, assertion: result.assertion};
+      let newIdentity = {userProfile: userProfileBundle, idp: result.idp.domain, assertion: result.assertion, expires: result.info.expires};
       result.messageInfo = newIdentity;
       result.keyPair = keyPair;
 
@@ -820,7 +975,7 @@ class IdentityModule {
         }
       }
 
-      if (idAlreadyExists) {
+      if (idAlreadyExists) { // TODO: TIAGO maybe overwrite the identity
         resolve(oldId);
         let exists = false;
 
@@ -1006,55 +1161,96 @@ class IdentityModule {
         _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
           let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
 
-          //if no key exists, create a new one if is the reporter of dataObject
-          if (!dataObjectKey) {
-            let isHypertyReporter = _this.registry.getReporterURLSynchonous(dataObjectURL);
+          _this.dataObjectsStorage.getDataObject(dataObjectURL).then((isHypertyReporter) => {
+            //if no key exists, create a new one if is the reporter of dataObject
+            if (!dataObjectKey) {
+              // if the hyperty is the reporter of the dataObject then generates a session key
+              if (isHypertyReporter.owner && isHypertyReporter.owner === message.from) {
 
-            // if the hyperty is the reporter of the dataObject then generates a session key
-            if (isHypertyReporter && isHypertyReporter === message.from) {
+                let sessionKey = _this.crypto.generateRandom();
+                _this.dataObjectSessionKeys[dataObjectURL] = {sessionKey: sessionKey, isToEncrypt: true};
 
-              let sessionKey = _this.crypto.generateRandom();
-              _this.dataObjectSessionKeys[dataObjectURL] = {sessionKey: sessionKey, isToEncrypt: true};
-
-              _this.storageManager.set('dataObjectSessionKeys', 0, _this.dataObjectSessionKeys);
-
-              dataObjectKey = _this.dataObjectSessionKeys[dataObjectURL];
+                // TIAGO - persistence issue #147
+                _this.storageManager.set('dataObjectSessionKeys', 0, _this.dataObjectSessionKeys);
+                dataObjectKey = _this.dataObjectSessionKeys[dataObjectURL];
+              }
             }
-          }
 
-          //check if there is already a session key for the chat room
-          if (dataObjectKey) {
+            //check if there is already a session key for the chat room
+            if (dataObjectKey) {
 
-            // and if is to apply encryption, encrypt the messages
-            if (dataObjectKey.isToEncrypt) {
-              let iv = _this.crypto.generateIV();
+              // and if is to apply encryption, encrypt the messages
+              if (dataObjectKey.isToEncrypt) {
+                let iv = _this.crypto.generateIV();
 
-              _this.crypto.encryptAES(dataObjectKey.sessionKey, _this.crypto.encode(JSON.stringify(message.body.value)), iv).then(encryptedValue => {
+                _this.crypto.encryptAES(dataObjectKey.sessionKey, _this.crypto.encode(JSON.stringify(message.body.value)), iv).then(encryptedValue => {
 
-                let filteredMessage = _this._filterMessageToHash(message, message.body.value + iv, dataObjectKey.sessionKey);
+                  let filteredMessage = _this._filterMessageToHash(message, message.body.value + iv, dataObjectKey.sessionKey);
 
-                _this.crypto.hashHMAC(dataObjectKey.sessionKey, filteredMessage).then(hash => {
-                  //console.log('hash ', hash);
+                  _this.crypto.hashHMAC(dataObjectKey.sessionKey, filteredMessage).then(hash => {
+                    //console.log('hash ', hash);
 
-                  let newValue = {value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv), hash: _this.crypto.encode(hash)};
+                    let newValue = {value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv), hash: _this.crypto.encode(hash)};
 
-                  message.body.value = JSON.stringify(newValue);
-                  resolve(message);
+                    message.body.value = JSON.stringify(newValue);
+                    resolve(message);
+                  });
                 });
-              });
 
-            // if not, just send the message
+              // if not, just send the message
+              } else {
+                resolve(message);
+              }
+
+              // start the generation of a new session Key
             } else {
-              resolve(message);
+              reject('failed to decrypt message');
             }
-
-            // start the generation of a new session Key
-          } else {
-            reject('failed to decrypt message');
-          }
-
+          });
         });
       }
+    });
+  }
+
+  encryptDataObject(dataObject, sender) {
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+      console.log('dataObject value to encrypt: ', dataObject);
+
+      let splitedToURL = sender.split('/');
+      let dataObjectURL = splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3];
+      if (splitedToURL.length > 6) {
+        dataObjectURL = splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3] + '/' + splitedToURL[4];
+      }
+
+      _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
+        let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
+
+        //check if there is already a session key for the chat room
+        if (dataObjectKey) {
+
+          // and if is to apply encryption, encrypt the messages
+          if (dataObjectKey.isToEncrypt) {
+            let iv = _this.crypto.generateIV();
+
+            _this.crypto.encryptAES(dataObjectKey.sessionKey, _this.crypto.encode(JSON.stringify(dataObject)), iv).then(encryptedValue => {
+              let newValue = { value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv) };
+              console.log("encrypted dataObject", newValue);
+              return resolve(newValue);
+            });
+
+          // if not, just send the message
+          } else {
+            console.log('The dataObject is not encrypted');
+            return resolve(dataObject);
+          }
+
+          // start the generation of a new session Key
+        } else {
+          return reject('No dataObjectKey for this dataObjectURL:', dataObjectURL);
+        }
+      });
     });
   }
 
@@ -1191,6 +1387,54 @@ class IdentityModule {
     });
   }
 
+  decryptDataObject(dataObject, sender) {
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+      //if is not to apply encryption, then returns resolve
+      if (!_this.isToUseEncryption) {
+        console.log('decryption disabled');
+        return resolve(dataObject);
+      }
+
+      let splitedToURL = sender.split('/');
+      let dataObjectURL = splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3];
+      if (splitedToURL.length > 6) {
+        dataObjectURL = splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3] + '/' + splitedToURL[4];
+      }
+
+      console.log('dataObject value to decrypt: ', dataObject);
+
+      _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
+        let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
+
+        if (dataObjectKey) {
+
+          //check if is to apply encryption
+          if (dataObjectKey.isToEncrypt) {
+            let iv = _this.crypto.decode(dataObject.iv);
+            let encryptedValue = _this.crypto.decode(dataObject.value);
+
+            _this.crypto.decryptAES(dataObjectKey.sessionKey, encryptedValue, iv).then(decryptedValue => {
+              let parsedValue = JSON.parse(atob(decryptedValue));
+              let newValue = { value: parsedValue, iv: _this.crypto.encode(iv) };
+              console.log('decrypted dataObject,', newValue);
+              return resolve(newValue);
+            });
+
+          //if not, just return the dataObject
+          } else {
+            console.log('The dataObject is not encrypted');
+            return resolve(dataObject);
+          }
+
+        } else {
+          return reject('No dataObjectKey for this dataObjectURL:', dataObjectURL);
+        }
+      });
+    });
+  }
+
   doMutualAuthentication(sender, receiver) {
     console.log('doMutualAuthentication: ', sender, receiver);
     let _this = this;
@@ -1261,7 +1505,7 @@ class IdentityModule {
   _doHandShakePhase(message, chatKeys) {
     let _this = this;
 
-    //console.log('handshakeType');
+    console.log('handshake phase');
 
     return new Promise(function(resolve, reject) {
 
