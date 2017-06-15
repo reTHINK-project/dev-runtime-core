@@ -948,6 +948,11 @@ class Registry {
                 //message to register the new hyperty, within the domain registry
                 let messageValue;
                 let message;
+                let registrationExpires = _this.expiresTime;
+
+                // set a different expires value if configured in the Hyperty descriptor
+
+                if (descriptor.configuration && descriptor.configuration.expires) registrationExpires = descriptor.configuration.expires;
 
                 if (addressURL.newAddress) {
                   console.log('[Registry registerHyperty] registering new Hyperty URL', addressURL.address[0]);
@@ -956,12 +961,14 @@ class Registry {
                     user: emailURL,
                     descriptor: descriptorURL,
                     url: addressURL.address[0],
-                    expires: _this.expiresTime,
+                    expires: registrationExpires,
                     resources: hypertyCapabilities.resources,
                     dataSchemes: hypertyCapabilities.dataSchema,
                     runtime: runtime,
                     status: status
                   };
+
+                  // set a different expires if defined in the hyperty configuration
 
                   if (p2pHandler) {
                     messageValue.p2pHandler = p2pHandler;
@@ -1001,7 +1008,7 @@ class Registry {
                       user: emailURL,
                       descriptor: descriptorURL,
                       url: addressURL.address[0],
-                      expires: _this.expiresTime,
+                      expires: registrationExpires,
                       resources: hypertyCapabilities.resources,
                       dataSchemes: hypertyCapabilities.dataSchema,
                       runtime: runtime,
@@ -1025,7 +1032,7 @@ class Registry {
 
                     });
 
-                  }else {
+                  } else {
                     reject('Failed to register an Hyperty');
                   }
                 });
@@ -1050,7 +1057,7 @@ class Registry {
                   _this._messageBus.postMessage(message, (reply) => {
                     console.log('[Registry registerHyperty] KeepAlive Reply: ', reply);
                   });
-                }, (((_this.expiresTime / 1.1) / 2) * 1000));
+                }, (((registrationExpires / 1.1) / 2) * 1000));
 
               }).catch(function(reason) {
                 console.log('[Registry registerHyperty] Error: ', reason);
