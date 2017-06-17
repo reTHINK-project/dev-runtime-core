@@ -63,6 +63,7 @@ class IdentityModule {
     _this.identity = newIdentity;
     _this.crypto = new Crypto();
     _this.currentIdentity;
+    _this.defaultIdentity;
 
     //stores the association of the dataObject and the Hyperty registered within
     _this.dataObjectsIdentity = {};
@@ -152,8 +153,8 @@ class IdentityModule {
         let contents = msg.body.params.contents;
         let origin = msg.body.params.origin;
         let usernameHint = msg.body.params.usernameHint;
-        let ipDomain = msg.body.params.ipDomain;
-        _this.sendGenerateMessage(contents, origin, usernameHint, ipDomain).then((returnedValue) => {
+        let idpDomain = msg.body.params.idpDomain;
+        _this.sendGenerateMessage(contents, origin, usernameHint, idpDomain).then((returnedValue) => {
           let value = {type: 'execute', value: returnedValue, code: 200};
           let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
           _this._messageBus.postMessage(replyMsg);
@@ -252,9 +253,9 @@ class IdentityModule {
             }  else if (identity.info && identity.info.tokenIDJSON && identity.info.tokenIDJSON.exp)
               expires = identity.info.tokenIDJSON.exp;
 
-            if (expires > timeNow) {
-              _this.currentIdentity = identity.messageInfo;
-              _this.currentIdentity.expires = expires;
+            if (expires > timeNow && !identity.interworking) {
+              _this.defaultIdentity = identity.messageInfo;
+              _this.defaultIdentity.expires = expires;
             }
 
           });
@@ -677,9 +678,9 @@ class IdentityModule {
           });
         } else {
 
-          if (_this.currentIdentity && _this.currentIdentity.expires > _this._seconds_since_epoch() )
+          if (_this.defaultIdentity && _this.defaultIdentity.expires > _this._seconds_since_epoch() )
           {
-            return resolve(_this.currentIdentity);
+            return resolve(_this.defaultIdentity);
           } else {
             _this.selectIdentityFromGUI().then((assertion) => {
             console.log('[IdentityModule] Identity selected from GUI.')
@@ -871,6 +872,8 @@ class IdentityModule {
         // hack while the user url is not returned from requestIdentityToGUI;
 
           let chosenID = 'user://' + _this.currentIdentity.idp + '/' + value.value;
+
+          _this.defaultIdentity = _this.currentIdentity;
 
           // returns the identity info from the chosen id
           for (let i in _this.identities) {

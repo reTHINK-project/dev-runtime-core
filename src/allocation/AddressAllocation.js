@@ -56,7 +56,7 @@ class AddressAllocation {
 
   static get instance() {
     if (!instance) {
-      throw new Error('The address allocation was not instaniated');
+      throw new Error('The address allocation was not instantiated');
     }
 
     return instance

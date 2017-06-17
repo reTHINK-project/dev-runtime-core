@@ -212,6 +212,7 @@ class DataObjectsStorage {
    */
   deleteResource(resource) {
 
+
     return new Promise((resolve, reject) => {
 
       if (resource) {
@@ -221,14 +222,17 @@ class DataObjectsStorage {
 
           if (tmp.hasOwnProperty('observers') && tmp.observers.hasOwnProperty(resource)) {
             delete tmp.observers[resource];
+
             resolve(tmp.observers[resource]);
             this._storageManager.set('syncherManager:ObjectURLs', 1, tmp);
+            this._storeDataObject = tmp;
           }
 
           if (tmp.hasOwnProperty('reporters') && tmp.reporters.hasOwnProperty(resource)) {
             delete tmp.reporters[resource];
             resolve(tmp.reporters[resource]);
             this._storageManager.set('syncherManager:ObjectURLs', 1, tmp);
+            this._storeDataObject = tmp;
           }
 
           resolve('The ' + resource + ' dosen\t exists, nothing was deleted');

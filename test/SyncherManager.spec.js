@@ -80,6 +80,11 @@ describe('SyncherManager', function() {
       return false;
     },
 
+    unregisterDataObject: (url) => {
+      console.log('Unregister Data Object:', url);
+      return true;
+    },
+
     getPreAuthSubscribers: () => {
       return ['hyperty://domain/hyperty-instance'];
     },
@@ -180,7 +185,7 @@ describe('SyncherManager', function() {
 
       sync2.read(dor.url).then((data) => {
         console.log('on-read-reply', data);
-        expect(data).to.contain.all.keys({ communication: { name: 'chat-x' }, x: 10, y: 10 });
+        expect(data.data).to.contain.all.keys({ communication: { name: 'chat-x' }, x: 10, y: 10 });
         done();
       });
     });
@@ -220,6 +225,11 @@ describe('SyncherManager', function() {
     sync1.create(schemaURL, [], initialData, true, false).then((dor) => {
       console.log('on-create-reply', dor);
       dor.inviteObservers([hyperURL2]);
+
+      dor.onRead((event) => {
+        console.log('on-read');
+        event.accept();
+      });
 
       dor.onSubscription((subscribeEvent) => {
         console.log('on-resources: ', subscribeEvent);
@@ -1005,9 +1015,14 @@ describe('SyncherManager', function() {
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
     sync1.create(schemaURL, [hyperURL2], initialData).then((dor) => {
       console.log('create: ', dor.url);
+
       dor.onSubscription((subscribeEvent) => {
-        console.log('onSubscription: ', subscribeEvent);
-        subscribeEvent.accept();
+
+        if (subscribeEvent.accept instanceof Function) {
+          console.log('onSubscription: ', subscribeEvent);
+          subscribeEvent.accept();
+        }
+
       });
     });
   });

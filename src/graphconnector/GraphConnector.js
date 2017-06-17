@@ -37,8 +37,6 @@ import Buffer from 'buffer';
  */
 class GraphConnector {
 
-  // TODO: import / export methods
-
   /**
    * Constructs a new and empty Graph Connector.
    * @param {string}   hypertyRuntimeURL    The Hyperty Runtime URL.
@@ -113,7 +111,12 @@ class GraphConnector {
     Buffer.TYPED_ARRAY_SUPPORT = true;
     let mnemonic = bip39.generateMnemonic(160);
 
-    let saltWord = bip39.generateMnemonic(8);
+    let saltWords = bip39.generateMnemonic(128);
+    // take first word from saltWords as saltWord
+    let firstIndex = saltWords.indexOf(' ');
+    let saltWord = saltWords.substring(0, firstIndex);
+
+    // create keys
     this._createKeys(mnemonic, saltWord);
 
     // set lasUpdate date

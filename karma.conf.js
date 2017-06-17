@@ -9,7 +9,7 @@ module.exports = function(config) {
       './test/PolicyEngine.spec.js'
     ],
     preprocessors: {
-      './test/*.spec.js': ['webpack']
+      './test/*.spec.js': ['webpack', 'sourcemap']
     },
 
     // webpack configuration

@@ -105,6 +105,8 @@ class CoreDiscovery {
     let resources = [];
     let dataSchemes = [];
 
+    console.log('[CoreDiscovery.discoveryManager] received: ', msg);
+
     if(msg.body.criteria){
       if(msg.body.criteria.resources)
         resources = msg.body.criteria.resources;
