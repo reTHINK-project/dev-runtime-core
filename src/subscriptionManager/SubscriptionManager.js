@@ -59,6 +59,28 @@ class SubscriptionManager {
       }
     });
 
+    _this._init();
+
+  }
+
+  _init() {
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+
+      _this._storage.get('subscriptions').then((subscriptions) => {
+        if (subscriptions) {
+          Object.values(subscriptions).forEach((subscription)=>{
+            _this._createSubscription(subscription.domain, subscription.resources, subscription.subscriber, subscription.identity);
+
+          });
+
+        }
+      });
+
+    });
+
+
   }
 
   get url() { return this._url; }
@@ -74,16 +96,53 @@ class SubscriptionManager {
     let subscriber = msg.from;
     let domain = divideURL(resources[0]).domain; //we are assuming resources are all from the same domain
 
-    //FLOW-OUT: subscribe message to the msg-node, registering listeners on the broker
-    let nodeSubscribeMsg = {
-      type: 'subscribe', from: _this._url, to: 'domain://msg-node.' + domain + '/sm',
-      body: { identity: msg.body.identity, resources: resources, source: subscriber }
-    };
+    let identity = msg.body.identity;
 
-    //subscribe in msg-node
-    _this._bus.postMessage(nodeSubscribeMsg, (reply) => {
-      console.log('[SubscriptionManager] node-subscribe-response: ', reply);
-      //if (reply.body.code === 200) {//TODO: uncomment when  MN replies with correct response body code
+    _this._createSubscription(domain, resources, subscriber, identity).then((reply)=>{
+      //forward to hyperty:
+      reply.id = msg.id;
+      reply.from = _this._url;
+      reply.to = subscriber;
+      reply.body = msg.body;
+      reply.body.code = 200;
+
+      console.log('[subscribe] - new subscription: ', msg, reply, subscriber);
+
+      _this._bus.postMessage(reply);
+
+      _this._storage.get('subscriptions').then((subscriptions)=>{
+        if (!subscriptions) {
+          subscriptions = {};
+        }
+
+        subscriptions[subscriber] = {
+          domain: domain,
+          resources: resources,
+          subscriber: subscriber,
+          identity: identity
+        };
+        _this._storage.set('subscriptions', 1, subscriptions);
+      });
+    });
+  }
+
+  _createSubscription(domain, resources, subscriber, identity) {
+
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+      //FLOW-OUT: subscribe message to the msg-node, registering listeners on the broker
+
+      let nodeSubscribeMsg = {
+        type: 'subscribe', from: _this._url, to: 'domain://msg-node.' + domain + '/sm',
+        body: { identity: identity, resources: resources, source: subscriber }
+      };
+
+      //subscribe in msg-node
+      _this._bus.postMessage(nodeSubscribeMsg, (reply) => {
+        console.log('[SubscriptionManager] node-subscribe-response: ', reply);
+
+        //if (reply.body.code === 200) {//TODO: uncomment when  MN replies with correct response body code
 
         //TODO: support multiple routes for multiple resources
 
@@ -93,26 +152,11 @@ class SubscriptionManager {
           _this._subscriptions[subscriber] = new Subscription(_this._bus, subscriber, resources[0]);
         }
 
-        //forward to hyperty:
-        reply.id = msg.id;
-        reply.from = _this._url;
-        reply.to = subscriber;
-        reply.body = msg.body;
-        reply.body.code = 200;
+        resolve(reply);
 
-        console.log('[subscribe] - new subscription: ', msg, reply, subscriber);
+      });
 
-        this._bus.postMessage(reply);
-
-      /*} else {
-        //listener rejected
-        _this._bus.postMessage({
-          id: msg.id, type: 'response', from: msg.to, to: subscriber,
-          body: reply.body
-        });
-      }*/
     });
-
   }
 
 
@@ -135,6 +179,13 @@ class SubscriptionManager {
 
       subscription._releaseListeners();
       delete _this._subscriptions[unsubscriber];
+
+      _this._storage.get('subscriptions').then((subscriptions)=>{
+        if (subscriptions) {
+          delete subscriptions[unsubscriber];
+          _this._storage.set('subscriptions', 1, subscriptions);
+        }
+      });
     }
 
     _this._bus.postMessage({
