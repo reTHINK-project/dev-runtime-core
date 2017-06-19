@@ -135,7 +135,7 @@ class RuntimeUA {
 
           this.runtimeURL = results[0] ? results[0].runtimeURL : results[0];
           if (!this.runtimeURL) {
-            this.runtimeURL = 'runtime://' + this.domain + '/' + generateGUID();
+            this.runtimeURL = 'hyperty-runtime://' + this.domain + '/' + generateGUID();
             this.storageManager.set('runtime:URL', 1, {runtimeURL: this.runtimeURL});
           }
 
