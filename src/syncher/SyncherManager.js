@@ -371,7 +371,6 @@ class SyncherManager {
 
       if (!childrens) resolve(storedObject);
       else {
-
         let childrensObj = Object.keys(storedObject['childrenObjects']);
 
         if (childrensObj.length === 0) {
@@ -454,6 +453,8 @@ class SyncherManager {
       object.delete();
 
       this._dataObjectsStorage.deleteResource(objURL);
+
+      _this._registry.unregisterDataObject(objURL);
 
       //TODO: unregister object?
       _this._bus.postMessage({
@@ -721,7 +722,7 @@ class SyncherManager {
     let observer = _this._observers[objURL];
     if (observer) {
       //TODO: is there any policy verification before delete?
-      observer.removeSubscription(hypertyURL);
+      observer.removeSubscription(msg);
 
       //TODO: destroy object in the registry?
       _this._bus.postMessage({
@@ -729,7 +730,7 @@ class SyncherManager {
         body: { code: 200 }
       });
 
-      this._dataObjectsStorage.delete(true, objURL, 'subscriptions', hypertyURL);
+      this._dataObjectsStorage.deleteResource(objURL);
 
       //TODO: remove Object if no more subscription?
       //delete _this._observers[objURL];

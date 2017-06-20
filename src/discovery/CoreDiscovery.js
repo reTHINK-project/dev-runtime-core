@@ -105,6 +105,8 @@ class CoreDiscovery {
     let resources = [];
     let dataSchemes = [];
 
+    console.log('[CoreDiscovery.discoveryManager] received: ', msg);
+
     if(msg.body.criteria){
       if(msg.body.criteria.resources)
         resources = msg.body.criteria.resources;
@@ -371,7 +373,7 @@ class CoreDiscovery {
         msg.body.criteria = {};
       msg.body.criteria.resources = resources;
     }
-    
+
     return new Promise(function(resolve, reject) {
       console.log("[CoreDiscovery.discoverHyperties] sending msg ", msg);
 

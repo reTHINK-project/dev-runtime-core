@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../">
+  <title data-ice="title">test/DataObjectsStorage.spec.js | Service Framework API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  <a href="./manual/index.html" data-ice="manualHeaderLink">Manual</a>
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  <a href="test.html" data-ice="testLink">Test</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html">Bus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html">MiniBus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Pipeline.js~Pipeline.html">Pipeline</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">test/DataObjectsStorage.spec.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import chai from &apos;chai&apos;;
+import chaiAsPromised from &apos;chai-as-promised&apos;;
+
+import DataObjectsStorage from &apos;../src/store-objects/DataObjectsStorage&apos;;
+import { runtimeFactory } from &apos;./resources/runtimeFactory&apos;;
+
+chai.config.truncateThreshold = 0;
+
+let expect = chai.expect;
+chai.use(chaiAsPromised);
+
+describe(&apos;dataObjectsStorage&apos;, function() {
+
+  let storageManager;
+  let dataObjectsStorage;
+  let runtimeURL = &apos;hyperty-runtime://fake-runtime&apos;;
+  let syncherManagerURL = runtimeURL + &apos;/sm&apos;;
+
+  let owner = &apos;hyperty://&lt;domain&gt;/id-owner&apos;;
+  let url = &apos;resource://obj1&apos;;
+  let userURL = &apos;user://&lt;domain&gt;/&lt;my-name&gt;&apos;;
+  let schema = &apos;schema://fake-schema-url&apos;;
+  let schemaList = [&apos;schema://fake-schema-url/Communication&apos;, &apos;schema://fake-schema-url/Context&apos;, &apos;schema://fake-schema-url/Connection&apos;];
+
+  before(() =&gt; {
+
+    storageManager = runtimeFactory.storageManager();
+    dataObjectsStorage = new DataObjectsStorage(storageManager, {});
+
+  });
+
+  it(&apos;should set dataObject information to be saved on storage&apos;, (done) =&gt; {
+
+    let metadata = {};
+
+    metadata.status = &apos;live&apos;;
+    metadata.isReporter = true;
+    let data = {
+      x: 1,
+      y: 2
+    };
+    metadata.schema = schema;
+    metadata.url = url;
+    metadata.name = &apos;WebRTC&apos;;
+    metadata.subscriberUsers = [];
+    metadata.subscriptions = [];
+    metadata.version = 0;
+    metadata.reporter = &apos;hyperty://&lt;domain&gt;/id-3&apos;;
+    let subscriberHyperty = &apos;hyperty://&lt;domain&gt;/id-2&apos;;
+    let childrenObjects = {};
+    childrenObjects[metadata.reporter + &apos;#1&apos;] = { message: &apos;message 1&apos; };
+    childrenObjects[subscriberHyperty + &apos;#1&apos;] = { message: &apos;message 2&apos; };
+    childrenObjects[metadata.reporter + &apos;#2&apos;] = { message: &apos;message 3&apos; };
+
+    expect(dataObjectsStorage.set(metadata))
+    .to.have.keys(&apos;url&apos;, &apos;isReporter&apos;, &apos;subscriberUsers&apos;, &apos;subscriptions&apos;, &apos;version&apos;, &apos;schema&apos;, &apos;status&apos;, &apos;reporter&apos;, &apos;name&apos;, &apos;childrenObjects&apos;, &apos;data&apos;);
+
+    expect(dataObjectsStorage.saveData(true, url, null, data)).to.be.deep.equal({
+      url: metadata.url,
+      isReporter: metadata.isReporter,
+      subscriptions: [],
+      subscriberUsers: [],
+      data: data,
+      version: 0,
+      schema: metadata.schema,
+      status: metadata.status,
+      reporter: metadata.reporter,
+      childrenObjects: {},
+      name: metadata.name
+    });
+
+    expect(dataObjectsStorage.saveChildrens(true, metadata.url, null, childrenObjects)).to.deep.equal({
+      url: metadata.url,
+      isReporter: metadata.isReporter,
+      subscriptions: [],
+      subscriberUsers: [],
+      schema: metadata.schema,
+      status: metadata.status,
+      reporter: metadata.reporter,
+      data: data,
+      childrenObjects: childrenObjects,
+      version: 0,
+      name: metadata.name
+    });
+
+    expect(dataObjectsStorage.update(metadata.isReporter, metadata.url, &apos;subscriptions&apos;, subscriberHyperty)).to.be.deep.equal({
+      url: metadata.url,
+      isReporter: metadata.isReporter,
+      subscriptions: [subscriberHyperty],
+      subscriberUsers: [],
+      schema: schema,
+      status: metadata.status,
+      reporter: metadata.reporter,
+      data: data,
+      childrenObjects: childrenObjects,
+      version: 0,
+      name: metadata.name
+    });
+
+    done();
+
+  });
+
+  it(&apos;should set a bundle of information to be saved on storage like reporter&apos;, (done) =&gt; {
+
+    let num = 4;
+
+    for (let i = 0; i &lt; num; i++) {
+
+      let metadata = {};
+
+      metadata.status = &apos;live&apos;;
+      metadata.version = 0;
+      metadata.isReporter = true;
+      metadata.url = &apos;&lt;scheme&gt;://&lt;domain&gt;/id-&apos; + i;
+      let rand = Math.round(Math.random() * 2);
+      metadata.schema = schemaList[rand];
+      metadata.reporter = &apos;hyperty://&lt;domain&gt;/id-&apos; + (num - i);
+      let subscriberHyperty = &apos;hyperty://&lt;domain&gt;/id-&apos; + ((num - i) * 2);
+
+      // resource, isReporter, schema, status, data, subscription, children, childrenResources, subscriberUser
+      expect(dataObjectsStorage.set(metadata)).to.be.deep.equal({
+        url: metadata.url,
+        isReporter: metadata.isReporter,
+        subscriptions: [],
+        subscriberUsers: [],
+        childrenObjects: {},
+        data: {},
+        version: 0,
+        schema: metadata.schema,
+        status: metadata.status,
+        reporter: metadata.reporter
+      });
+
+      expect(dataObjectsStorage.update(metadata.isReporter, metadata.url, &apos;store&apos;, true)).to.be.deep.equal({
+        url: metadata.url,
+        isReporter: metadata.isReporter,
+        subscriptions: [],
+        subscriberUsers: [],
+        childrenObjects: {},
+        data: {},
+        version: 0,
+        schema: metadata.schema,
+        status: metadata.status,
+        reporter: metadata.reporter,
+        store: true
+      });
+
+      expect(dataObjectsStorage.saveData(metadata.isReporter, metadata.url, &apos;participants.1&apos;, {name: &apos;vitor&apos;, last: &apos;silva&apos;})).to.be.deep.equal({
+        url: metadata.url,
+        isReporter: metadata.isReporter,
+        subscriptions: [],
+        subscriberUsers: [],
+        childrenObjects: {},
+        version: 0,
+        schema: metadata.schema,
+        status: metadata.status,
+        reporter: metadata.reporter,
+        store: true,
+        data: {
+          participants: {
+            1: {
+              name: &apos;vitor&apos;, last: &apos;silva&apos;
+            }
+          }
+        }
+      });
+
+      expect(dataObjectsStorage.update(metadata.isReporter, metadata.url, &apos;subscriptions&apos;, subscriberHyperty)).to.be.deep.equal({
+        url: metadata.url,
+        isReporter: metadata.isReporter,
+        subscriptions: [subscriberHyperty],
+        subscriberUsers: [],
+        childrenObjects: {},
+        version: 0,
+        schema: metadata.schema,
+        status: metadata.status,
+        reporter: metadata.reporter,
+        store: true,
+        data: {
+          participants: {
+            1: {
+              name: &apos;vitor&apos;, last: &apos;silva&apos;
+            }
+          }
+        }
+      });
+
+      if (i === num - 1) {
+        console.log(&apos;DONE&apos;, i);
+        done();
+      }
+    }
+
+  });
+
+  it(&apos;should set a bundle of information to be saved on storage like observers&apos;, (done) =&gt; {
+
+    let num = 4;
+    let letters = [&apos;A&apos;, &apos;B&apos;, &apos;C&apos;, &apos;D&apos;];
+
+    for (let i = 0; i &lt; num; i++) {
+
+      let metadata = {};
+
+      metadata.status = &apos;live&apos;;
+      metadata.version = 0;
+      metadata.isReporter = false;
+      metadata.url = &apos;&lt;scheme&gt;://&lt;domain&gt;/id-&apos; + letters[i];
+      let rand = Math.round(Math.random() * 2);
+      metadata.schema = schemaList[rand];
+      metadata.reporter = &apos;hyperty://&lt;domain&gt;/id-&apos; + (num - i);
+      let subscriberHyperty = &apos;hyperty://&lt;domain&gt;/id-&apos; + letters[(num - i)];
+
+      // resource, isReporter, schema, status, data, subscription, children, childrenResources, subscriberUser
+      expect(dataObjectsStorage.set(metadata)).to.be.deep.equal({
+        url: metadata.url,
+        isReporter: metadata.isReporter,
+        subscriptions: [],
+        subscriberUsers: [],
+        childrenObjects: {},
+        data: {},
+        version: 0,
+        schema: metadata.schema,
+        status: metadata.status,
+        reporter: metadata.reporter
+      });
+
+      if (i === num - 1) {
+        done();
+      }
+    }
+
+  });
+
+  it(&apos;should update a resource with new Hyperty Subscribers&apos;, (done) =&gt; {
+    let url = &apos;&lt;scheme&gt;://&lt;domain&gt;/id-2&apos;;
+    let hypertySubscribers = [&apos;hyperty://&lt;domain&gt;/id-3&apos;, &apos;hyperty://&lt;domain&gt;/id-2&apos;];
+    let isReporter = true;
+
+    expect(dataObjectsStorage.update(isReporter, url, &apos;hypertySubscribers&apos;, hypertySubscribers[0]).hypertySubscribers).to.contains(hypertySubscribers[0], hypertySubscribers[1]);
+
+    // .to.have.deep.property(&apos;subscriptions&apos;, [&apos;hyperty://&lt;domain&gt;/id-4&apos;, &apos;hyperty://&lt;domain&gt;/id-3&apos;]);
+
+    // expect(dataObjectsStorage._storeDataObject[type][resource].subscriptions).to.contains(subscriptions[0], subscriptions[1]);
+    done();
+  });
+
+  it(&apos;should update a resource with new Subscriber Users&apos;, (done) =&gt; {
+    let resource = &apos;&lt;scheme&gt;://&lt;domain&gt;/id-2&apos;;
+    let isReporter = true;
+
+    expect(dataObjectsStorage.update(isReporter, resource, &apos;subscriberUsers&apos;, userURL).subscriberUsers).to.contains(userURL);
+    done();
+  });
+
+  // it(&apos;should update the data resource&apos;, (done) =&gt; {
+  //   let resource = &apos;&lt;scheme&gt;://&lt;domain&gt;/id-2&apos;;
+  //   let isReporter = true;
+  //   dataObjectsStorage.updateData(resource, &apos;subscriberUsers&apos;, userURL, isReporter);
+  //
+  //   let type = isReporter ? &apos;reporters&apos; : &apos;observers&apos;;
+  //
+  //   expect(dataObjectsStorage._storeDataObject[type][resource].subscriberUsers).to.contains(userURL);
+  //   done();
+  // });
+
+  it(&apos;should get specific dataObject by hypertyURL&apos;, (done) =&gt; {
+
+    let msg = {
+      type: &apos;create&apos;,
+      from: &apos;hyperty://&lt;domain&gt;/id-2&apos;,
+      to: syncherManagerURL
+    };
+
+    expect(dataObjectsStorage.getResourcesByCriteria(msg, true))
+    .to.be.fulfilled
+    .and.eventually.to.include.keys(&apos;&lt;scheme&gt;://&lt;domain&gt;/id-2&apos;)
+    .and.notify(done);
+
+  });
+
+  it(&apos;should get specific dataObject by identity&apos;, (done) =&gt; {
+
+    let msg = {
+      type: &apos;create&apos;,
+      from: &apos;hyperty://&lt;domain&gt;/id-3&apos;,
+      to: syncherManagerURL,
+      body: {
+        identity: userURL
+      }
+
+    };
+
+    expect(dataObjectsStorage.getResourcesByCriteria(msg, true))
+    .to.be.fulfilled
+    .and.eventually.to.include.keys(&apos;&lt;scheme&gt;://&lt;domain&gt;/id-2&apos;)
+    .and.notify(done);
+
+  });
+
+  it(&apos;should get specific dataObject by schema&apos;, (done) =&gt; {
+
+    let msg = {
+      type: &apos;create&apos;,
+      from: &apos;hyperty://&lt;domain&gt;/id-3&apos;,
+      to: syncherManagerURL,
+      body: {
+        schema: schema
+      }
+
+    };
+
+    expect(dataObjectsStorage.getResourcesByCriteria(msg, true))
+    .to.be.fulfilled
+    .and.eventually.to.include.keys(url)
+    .and.notify(done);
+
+  });
+
+  it(&apos;should get specific dataObject by some data&apos;, (done) =&gt; {
+
+    let msg = {
+      type: &apos;create&apos;,
+      from: &apos;hyperty://&lt;domain&gt;/id-3&apos;,
+      to: syncherManagerURL,
+      body: {
+        value: {
+          name: &apos;WebRTC&apos;
+        }
+      }
+
+    };
+
+    expect(dataObjectsStorage.getResourcesByCriteria(msg, true))
+    .to.be.fulfilled
+    .and.eventually.to.include.keys(url)
+    .and.notify(done);
+
+  });
+
+  it(&apos;should delete a specific value from specific resource&apos;, (done) =&gt; {
+    let resource = &apos;&lt;scheme&gt;://&lt;domain&gt;/id-3&apos;;
+    let subscription = &apos;hyperty://&lt;domain&gt;/id-1&apos;;
+    dataObjectsStorage.delete(resource, &apos;subscriptions&apos;, subscription);
+
+    done();
+  });
+
+  it(&apos;should not delete a resource&apos;, (done) =&gt; {
+    let resource = &apos;&lt;scheme&gt;://&lt;domain&gt;/id-8&apos;;
+    expect(dataObjectsStorage.deleteResource(resource)).to.be.fulfilled
+    .and.eventually.to.be.eq(&apos;The &apos; + resource + &apos; dosen\t exists, nothing was deleted&apos;).and.notify(done);
+  });
+
+  it(&apos;should delete a resource&apos;, (done) =&gt; {
+    let resource = &apos;&lt;scheme&gt;://&lt;domain&gt;/id-1&apos;;
+    expect(dataObjectsStorage.deleteResource(resource))
+    .to.be.fulfilled
+    .and.eventually.to.be.undefined.and.notify(done);
+  });
+
+});
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.5.2)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

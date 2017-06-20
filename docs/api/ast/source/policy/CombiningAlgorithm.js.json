@@ -1,7 +1,7 @@
 {
   "type": "File",
   "start": 0,
-  "end": 66,
+  "end": 71,
   "loc": {
     "start": {
       "line": 1,
@@ -15,7 +15,7 @@
   "program": {
     "type": "Program",
     "start": 0,
-    "end": 66,
+    "end": 71,
     "loc": {
       "start": {
         "line": 1,
@@ -31,7 +31,7 @@
       {
         "type": "Identifier",
         "start": 0,
-        "end": 29,
+        "end": 31,
         "loc": {
           "start": {
             "line": 1,
@@ -63,7 +63,7 @@
         "body": {
           "type": "ClassBody",
           "start": 25,
-          "end": 29,
+          "end": 31,
           "loc": {
             "start": {
               "line": 1,
@@ -82,8 +82,8 @@
       },
       {
         "type": "Identifier",
-        "start": 31,
-        "end": 65,
+        "start": 35,
+        "end": 69,
         "loc": {
           "start": {
             "line": 5,
@@ -96,8 +96,8 @@
         },
         "declaration": {
           "type": "Identifier",
-          "start": 46,
-          "end": 64,
+          "start": 50,
+          "end": 68,
           "loc": {
             "start": {
               "line": 5,
@@ -117,8 +117,8 @@
       },
       {
         "type": "ExportDefaultDeclaration",
-        "start": 31,
-        "end": 65,
+        "start": 35,
+        "end": 69,
         "loc": {
           "start": {
             "line": 5,
@@ -132,7 +132,7 @@
         "declaration": {
           "type": "ClassDeclaration",
           "start": 0,
-          "end": 29,
+          "end": 31,
           "loc": {
             "start": {
               "line": 1,
@@ -164,7 +164,7 @@
           "body": {
             "type": "ClassBody",
             "start": 25,
-            "end": 29,
+            "end": 31,
             "loc": {
               "start": {
                 "line": 1,
@@ -279,8 +279,8 @@
         "postfix": false,
         "binop": null
       },
-      "start": 28,
-      "end": 29,
+      "start": 30,
+      "end": 31,
       "loc": {
         "start": {
           "line": 3,
@@ -307,8 +307,8 @@
         "updateContext": null
       },
       "value": "export",
-      "start": 31,
-      "end": 37,
+      "start": 35,
+      "end": 41,
       "loc": {
         "start": {
           "line": 5,
@@ -335,8 +335,8 @@
         "updateContext": null
       },
       "value": "default",
-      "start": 38,
-      "end": 45,
+      "start": 42,
+      "end": 49,
       "loc": {
         "start": {
           "line": 5,
@@ -361,8 +361,8 @@
         "binop": null
       },
       "value": "CombiningAlgorithm",
-      "start": 46,
-      "end": 64,
+      "start": 50,
+      "end": 68,
       "loc": {
         "start": {
           "line": 5,
@@ -387,8 +387,8 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 64,
-      "end": 65,
+      "start": 68,
+      "end": 69,
       "loc": {
         "start": {
           "line": 5,
@@ -413,8 +413,8 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 66,
-      "end": 66,
+      "start": 71,
+      "end": 71,
       "loc": {
         "start": {
           "line": 6,

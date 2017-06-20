@@ -1,7 +1,7 @@
 {
   "type": "File",
   "start": 0,
-  "end": 1165,
+  "end": 1207,
   "loc": {
     "start": {
       "line": 1,
@@ -15,7 +15,7 @@
   "program": {
     "type": "Program",
     "start": 0,
-    "end": 1165,
+    "end": 1207,
     "loc": {
       "start": {
         "line": 1,
@@ -30,8 +30,8 @@
     "body": [
       {
         "type": "ClassDeclaration",
-        "start": 914,
-        "end": 1164,
+        "start": 939,
+        "end": 1205,
         "loc": {
           "start": {
             "line": 26,
@@ -44,8 +44,8 @@
         },
         "id": {
           "type": "Identifier",
-          "start": 920,
-          "end": 925,
+          "start": 945,
+          "end": 950,
           "loc": {
             "start": {
               "line": 26,
@@ -63,8 +63,8 @@
         "superClass": null,
         "body": {
           "type": "ClassBody",
-          "start": 926,
-          "end": 1164,
+          "start": 951,
+          "end": 1205,
           "loc": {
             "start": {
               "line": 26,
@@ -78,8 +78,8 @@
           "body": [
             {
               "type": "ClassMethod",
-              "start": 981,
-              "end": 1037,
+              "start": 1011,
+              "end": 1069,
               "loc": {
                 "start": {
                   "line": 31,
@@ -93,8 +93,8 @@
               "computed": false,
               "key": {
                 "type": "Identifier",
-                "start": 981,
-                "end": 1013,
+                "start": 1011,
+                "end": 1043,
                 "loc": {
                   "start": {
                     "line": 31,
@@ -118,8 +118,8 @@
               "params": [],
               "body": {
                 "type": "BlockStatement",
-                "start": 1017,
-                "end": 1037,
+                "start": 1047,
+                "end": 1069,
                 "loc": {
                   "start": {
                     "line": 31,
@@ -137,8 +137,8 @@
                   {
                     "type": "CommentLine",
                     "value": " Body...",
-                    "start": 1023,
-                    "end": 1033,
+                    "start": 1054,
+                    "end": 1064,
                     "loc": {
                       "start": {
                         "line": 32,
@@ -152,9 +152,9 @@
                   },
                   {
                     "type": "CommentBlock",
-                    "value": "*\n   * Sends Connectivity Statistics data to QoS Broker\n   ",
-                    "start": 1041,
-                    "end": 1104,
+                    "value": "*\r\n   * Sends Connectivity Statistics data to QoS Broker\r\n   ",
+                    "start": 1075,
+                    "end": 1140,
                     "loc": {
                       "start": {
                         "line": 35,
@@ -171,9 +171,9 @@
               "leadingComments": [
                 {
                   "type": "CommentBlock",
-                  "value": "*\n   * Get Connectivity Statistics data\n   ",
-                  "start": 931,
-                  "end": 978,
+                  "value": "*\r\n   * Get Connectivity Statistics data\r\n   ",
+                  "start": 958,
+                  "end": 1007,
                   "loc": {
                     "start": {
                       "line": 28,
@@ -189,8 +189,8 @@
             },
             {
               "type": "ClassMethod",
-              "start": 1107,
-              "end": 1161,
+              "start": 1144,
+              "end": 1200,
               "loc": {
                 "start": {
                   "line": 38,
@@ -204,8 +204,8 @@
               "computed": false,
               "key": {
                 "type": "Identifier",
-                "start": 1107,
-                "end": 1141,
+                "start": 1144,
+                "end": 1178,
                 "loc": {
                   "start": {
                     "line": 38,
@@ -229,8 +229,8 @@
               "params": [],
               "body": {
                 "type": "BlockStatement",
-                "start": 1144,
-                "end": 1161,
+                "start": 1181,
+                "end": 1200,
                 "loc": {
                   "start": {
                     "line": 38,
@@ -248,8 +248,8 @@
                   {
                     "type": "CommentLine",
                     "value": " Body",
-                    "start": 1150,
-                    "end": 1157,
+                    "start": 1188,
+                    "end": 1195,
                     "loc": {
                       "start": {
                         "line": 39,
@@ -266,9 +266,9 @@
               "leadingComments": [
                 {
                   "type": "CommentBlock",
-                  "value": "*\n   * Sends Connectivity Statistics data to QoS Broker\n   ",
-                  "start": 1041,
-                  "end": 1104,
+                  "value": "*\r\n   * Sends Connectivity Statistics data to QoS Broker\r\n   ",
+                  "start": 1075,
+                  "end": 1140,
                   "loc": {
                     "start": {
                       "line": 35,
@@ -287,9 +287,9 @@
         "leadingComments": [
           {
             "type": "CommentBlock",
-            "value": "*\n* Copyright 2016 PT Inovação e Sistemas SA\n* Copyright 2016 INESC-ID\n* Copyright 2016 QUOBIS NETWORKS SL\n* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V\n* Copyright 2016 ORANGE SA\n* Copyright 2016 Deutsche Telekom AG\n* Copyright 2016 Apizee\n* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN\n*\n* Licensed under the Apache License, Version 2.0 (the \"License\");\n* you may not use this file except in compliance with the License.\n* You may obtain a copy of the License at\n*\n*   http://www.apache.org/licenses/LICENSE-2.0\n*\n* Unless required by applicable law or agreed to in writing, software\n* distributed under the License is distributed on an \"AS IS\" BASIS,\n* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n* See the License for the specific language governing permissions and\n* limitations under the License.\n*",
+            "value": "*\r\n* Copyright 2016 PT Inovação e Sistemas SA\r\n* Copyright 2016 INESC-ID\r\n* Copyright 2016 QUOBIS NETWORKS SL\r\n* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V\r\n* Copyright 2016 ORANGE SA\r\n* Copyright 2016 Deutsche Telekom AG\r\n* Copyright 2016 Apizee\r\n* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN\r\n*\r\n* Licensed under the Apache License, Version 2.0 (the \"License\");\r\n* you may not use this file except in compliance with the License.\r\n* You may obtain a copy of the License at\r\n*\r\n*   http://www.apache.org/licenses/LICENSE-2.0\r\n*\r\n* Unless required by applicable law or agreed to in writing, software\r\n* distributed under the License is distributed on an \"AS IS\" BASIS,\r\n* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\r\n* See the License for the specific language governing permissions and\r\n* limitations under the License.\r\n*",
             "start": 0,
-            "end": 877,
+            "end": 898,
             "loc": {
               "start": {
                 "line": 1,
@@ -303,9 +303,9 @@
           },
           {
             "type": "CommentBlock",
-            "value": "*\n * QoS User Agent Interface\n ",
-            "start": 878,
-            "end": 913,
+            "value": "*\r\n * QoS User Agent Interface\r\n ",
+            "start": 900,
+            "end": 937,
             "loc": {
               "start": {
                 "line": 23,
@@ -325,9 +325,9 @@
   "comments": [
     {
       "type": "CommentBlock",
-      "value": "*\n* Copyright 2016 PT Inovação e Sistemas SA\n* Copyright 2016 INESC-ID\n* Copyright 2016 QUOBIS NETWORKS SL\n* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V\n* Copyright 2016 ORANGE SA\n* Copyright 2016 Deutsche Telekom AG\n* Copyright 2016 Apizee\n* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN\n*\n* Licensed under the Apache License, Version 2.0 (the \"License\");\n* you may not use this file except in compliance with the License.\n* You may obtain a copy of the License at\n*\n*   http://www.apache.org/licenses/LICENSE-2.0\n*\n* Unless required by applicable law or agreed to in writing, software\n* distributed under the License is distributed on an \"AS IS\" BASIS,\n* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n* See the License for the specific language governing permissions and\n* limitations under the License.\n*",
+      "value": "*\r\n* Copyright 2016 PT Inovação e Sistemas SA\r\n* Copyright 2016 INESC-ID\r\n* Copyright 2016 QUOBIS NETWORKS SL\r\n* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V\r\n* Copyright 2016 ORANGE SA\r\n* Copyright 2016 Deutsche Telekom AG\r\n* Copyright 2016 Apizee\r\n* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN\r\n*\r\n* Licensed under the Apache License, Version 2.0 (the \"License\");\r\n* you may not use this file except in compliance with the License.\r\n* You may obtain a copy of the License at\r\n*\r\n*   http://www.apache.org/licenses/LICENSE-2.0\r\n*\r\n* Unless required by applicable law or agreed to in writing, software\r\n* distributed under the License is distributed on an \"AS IS\" BASIS,\r\n* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\r\n* See the License for the specific language governing permissions and\r\n* limitations under the License.\r\n*",
       "start": 0,
-      "end": 877,
+      "end": 898,
       "loc": {
         "start": {
           "line": 1,
@@ -341,9 +341,9 @@
     },
     {
       "type": "CommentBlock",
-      "value": "*\n * QoS User Agent Interface\n ",
-      "start": 878,
-      "end": 913,
+      "value": "*\r\n * QoS User Agent Interface\r\n ",
+      "start": 900,
+      "end": 937,
       "loc": {
         "start": {
           "line": 23,
@@ -357,9 +357,9 @@
     },
     {
       "type": "CommentBlock",
-      "value": "*\n   * Get Connectivity Statistics data\n   ",
-      "start": 931,
-      "end": 978,
+      "value": "*\r\n   * Get Connectivity Statistics data\r\n   ",
+      "start": 958,
+      "end": 1007,
       "loc": {
         "start": {
           "line": 28,
@@ -374,8 +374,8 @@
     {
       "type": "CommentLine",
       "value": " Body...",
-      "start": 1023,
-      "end": 1033,
+      "start": 1054,
+      "end": 1064,
       "loc": {
         "start": {
           "line": 32,
@@ -389,9 +389,9 @@
     },
     {
       "type": "CommentBlock",
-      "value": "*\n   * Sends Connectivity Statistics data to QoS Broker\n   ",
-      "start": 1041,
-      "end": 1104,
+      "value": "*\r\n   * Sends Connectivity Statistics data to QoS Broker\r\n   ",
+      "start": 1075,
+      "end": 1140,
       "loc": {
         "start": {
           "line": 35,
@@ -406,8 +406,8 @@
     {
       "type": "CommentLine",
       "value": " Body",
-      "start": 1150,
-      "end": 1157,
+      "start": 1188,
+      "end": 1195,
       "loc": {
         "start": {
           "line": 39,
@@ -423,9 +423,9 @@
   "tokens": [
     {
       "type": "CommentBlock",
-      "value": "*\n* Copyright 2016 PT Inovação e Sistemas SA\n* Copyright 2016 INESC-ID\n* Copyright 2016 QUOBIS NETWORKS SL\n* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V\n* Copyright 2016 ORANGE SA\n* Copyright 2016 Deutsche Telekom AG\n* Copyright 2016 Apizee\n* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN\n*\n* Licensed under the Apache License, Version 2.0 (the \"License\");\n* you may not use this file except in compliance with the License.\n* You may obtain a copy of the License at\n*\n*   http://www.apache.org/licenses/LICENSE-2.0\n*\n* Unless required by applicable law or agreed to in writing, software\n* distributed under the License is distributed on an \"AS IS\" BASIS,\n* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n* See the License for the specific language governing permissions and\n* limitations under the License.\n*",
+      "value": "*\r\n* Copyright 2016 PT Inovação e Sistemas SA\r\n* Copyright 2016 INESC-ID\r\n* Copyright 2016 QUOBIS NETWORKS SL\r\n* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V\r\n* Copyright 2016 ORANGE SA\r\n* Copyright 2016 Deutsche Telekom AG\r\n* Copyright 2016 Apizee\r\n* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN\r\n*\r\n* Licensed under the Apache License, Version 2.0 (the \"License\");\r\n* you may not use this file except in compliance with the License.\r\n* You may obtain a copy of the License at\r\n*\r\n*   http://www.apache.org/licenses/LICENSE-2.0\r\n*\r\n* Unless required by applicable law or agreed to in writing, software\r\n* distributed under the License is distributed on an \"AS IS\" BASIS,\r\n* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\r\n* See the License for the specific language governing permissions and\r\n* limitations under the License.\r\n*",
       "start": 0,
-      "end": 877,
+      "end": 898,
       "loc": {
         "start": {
           "line": 1,
@@ -439,9 +439,9 @@
     },
     {
       "type": "CommentBlock",
-      "value": "*\n * QoS User Agent Interface\n ",
-      "start": 878,
-      "end": 913,
+      "value": "*\r\n * QoS User Agent Interface\r\n ",
+      "start": 900,
+      "end": 937,
       "loc": {
         "start": {
           "line": 23,
@@ -468,8 +468,8 @@
         "updateContext": null
       },
       "value": "class",
-      "start": 914,
-      "end": 919,
+      "start": 939,
+      "end": 944,
       "loc": {
         "start": {
           "line": 26,
@@ -494,8 +494,8 @@
         "binop": null
       },
       "value": "QoSUA",
-      "start": 920,
-      "end": 925,
+      "start": 945,
+      "end": 950,
       "loc": {
         "start": {
           "line": 26,
@@ -519,8 +519,8 @@
         "postfix": false,
         "binop": null
       },
-      "start": 926,
-      "end": 927,
+      "start": 951,
+      "end": 952,
       "loc": {
         "start": {
           "line": 26,
@@ -534,9 +534,9 @@
     },
     {
       "type": "CommentBlock",
-      "value": "*\n   * Get Connectivity Statistics data\n   ",
-      "start": 931,
-      "end": 978,
+      "value": "*\r\n   * Get Connectivity Statistics data\r\n   ",
+      "start": 958,
+      "end": 1007,
       "loc": {
         "start": {
           "line": 28,
@@ -561,8 +561,8 @@
         "binop": null
       },
       "value": "getCurrentConnectivityStatistics",
-      "start": 981,
-      "end": 1013,
+      "start": 1011,
+      "end": 1043,
       "loc": {
         "start": {
           "line": 31,
@@ -586,8 +586,8 @@
         "postfix": false,
         "binop": null
       },
-      "start": 1013,
-      "end": 1014,
+      "start": 1043,
+      "end": 1044,
       "loc": {
         "start": {
           "line": 31,
@@ -611,8 +611,8 @@
         "postfix": false,
         "binop": null
       },
-      "start": 1014,
-      "end": 1015,
+      "start": 1044,
+      "end": 1045,
       "loc": {
         "start": {
           "line": 31,
@@ -636,8 +636,8 @@
         "postfix": false,
         "binop": null
       },
-      "start": 1017,
-      "end": 1018,
+      "start": 1047,
+      "end": 1048,
       "loc": {
         "start": {
           "line": 31,
@@ -652,8 +652,8 @@
     {
       "type": "CommentLine",
       "value": " Body...",
-      "start": 1023,
-      "end": 1033,
+      "start": 1054,
+      "end": 1064,
       "loc": {
         "start": {
           "line": 32,
@@ -677,8 +677,8 @@
         "postfix": false,
         "binop": null
       },
-      "start": 1036,
-      "end": 1037,
+      "start": 1068,
+      "end": 1069,
       "loc": {
         "start": {
           "line": 33,
@@ -692,9 +692,9 @@
     },
     {
       "type": "CommentBlock",
-      "value": "*\n   * Sends Connectivity Statistics data to QoS Broker\n   ",
-      "start": 1041,
-      "end": 1104,
+      "value": "*\r\n   * Sends Connectivity Statistics data to QoS Broker\r\n   ",
+      "start": 1075,
+      "end": 1140,
       "loc": {
         "start": {
           "line": 35,
@@ -719,8 +719,8 @@
         "binop": null
       },
       "value": "sendConnectivityStatisticsToBroker",
-      "start": 1107,
-      "end": 1141,
+      "start": 1144,
+      "end": 1178,
       "loc": {
         "start": {
           "line": 38,
@@ -744,8 +744,8 @@
         "postfix": false,
         "binop": null
       },
-      "start": 1141,
-      "end": 1142,
+      "start": 1178,
+      "end": 1179,
       "loc": {
         "start": {
           "line": 38,
@@ -769,8 +769,8 @@
         "postfix": false,
         "binop": null
       },
-      "start": 1142,
-      "end": 1143,
+      "start": 1179,
+      "end": 1180,
       "loc": {
         "start": {
           "line": 38,
@@ -794,8 +794,8 @@
         "postfix": false,
         "binop": null
       },
-      "start": 1144,
-      "end": 1145,
+      "start": 1181,
+      "end": 1182,
       "loc": {
         "start": {
           "line": 38,
@@ -810,8 +810,8 @@
     {
       "type": "CommentLine",
       "value": " Body",
-      "start": 1150,
-      "end": 1157,
+      "start": 1188,
+      "end": 1195,
       "loc": {
         "start": {
           "line": 39,
@@ -835,8 +835,8 @@
         "postfix": false,
         "binop": null
       },
-      "start": 1160,
-      "end": 1161,
+      "start": 1199,
+      "end": 1200,
       "loc": {
         "start": {
           "line": 40,
@@ -860,8 +860,8 @@
         "postfix": false,
         "binop": null
       },
-      "start": 1163,
-      "end": 1164,
+      "start": 1204,
+      "end": 1205,
       "loc": {
         "start": {
           "line": 42,
@@ -886,8 +886,8 @@
         "binop": null,
         "updateContext": null
       },
-      "start": 1165,
-      "end": 1165,
+      "start": 1207,
+      "end": 1207,
       "loc": {
         "start": {
           "line": 43,

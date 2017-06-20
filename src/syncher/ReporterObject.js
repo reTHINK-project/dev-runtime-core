@@ -355,14 +355,20 @@ class ReporterObject {
   //FLOW-IN: message received from remote ObserverObject -> removeSubscription
   _onRemoteUnSubscribe(msg) {
     let _this = this;
-    let hypertyURL = msg.body.subscriber;
+    let unsubscriber = msg.body.source;
 
-    let subscription = _this._subscriptions[hypertyURL];
+    let subscription = _this._subscriptions[unsubscriber];
     if (subscription) {
       subscription._releaseListeners();
-      delete _this._subscriptions[hypertyURL];
+      delete _this._subscriptions[unsubscriber];
 
-      //TODO: send un-subscribe message to Syncher? (depends on the operation mode)
+      let forwardMsg = {
+        type: 'forward', from: _this._url, to: _this._owner,
+        body: { type: msg.type, from: unsubscriber, to: _this._url, identity: msg.body.identity }
+      };
+
+
+      _this._bus.postMessage(forwardMsg);
     }
 
   }
