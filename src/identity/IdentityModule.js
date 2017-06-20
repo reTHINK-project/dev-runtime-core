@@ -231,26 +231,6 @@ class IdentityModule {
     throw 'identity not found';
   }
 
-  setIdentity(userURL, newIdentity) {
-    let _this = this;
-
-    for (let index in _this.identities) {
-
-      let identity = _this.identities[index];
-      if (identity.identity === userURL) {
-        newIdentity.identity = identity.identity;
-        newIdentity.messageInfo = identity.messageInfo;
-        newIdentity.keyPair = identity.keyPair;
-        console.log('TIAGO before', _this.identities[index]);
-        console.log('TIAGO after', newIdentity);
-        _this.identities[index] = newIdentity;
-        return;
-      }
-    }
-
-    throw 'identity not found';
-  }
-
   _seconds_since_epoch() {
     return Math.floor( Date.now() / 1000 );
   }
@@ -317,6 +297,8 @@ class IdentityModule {
             console.log('The ID Token does not have an expiration time');
             resolve(identity);
           }
+        } else if (complete_id.hasOwnProperty("infoToken") && complete_id.infoToken.hasOwnProperty("exp")) {
+          expiration_date = complete_id.infoToken.exp;
         } else {
           // throw 'The ID Token does not have an expiration time';
           console.log('The ID Token does not have an expiration time');
@@ -328,19 +310,21 @@ class IdentityModule {
 
         if (time_now >= expiration_date) {
           _this.sendRefreshMessage(identity.idp).then((newIdentity) => {
-            _this.deleteIdentity(complete_id.identity);
-            _this.storeIdentity(newIdentity, identity.keyPair).then((value) => {
-              resolve(value);
-            }, (err) => {
-              console.error('[Identity.IdentityModule.getToken] error on getToken', err);
-              reject(err);
-            });
-          }, (err) => { // no refresh token -> generate new token with login
-            _this.deleteIdentity(complete_id.identity);
-            // generate new idToken
-            _this.callGenerateMethods(identity.idp).then((value) => {
-              resolve(value.messageInfo);
-            });
+            if (newIdentity.hasOwnProperty('assertion')) {
+              _this.deleteIdentity(complete_id.identity);
+              _this.storeIdentity(newIdentity, identity.keyPair).then((value) => {
+                resolve(value);
+              }, (err) => {
+                console.error('[Identity.IdentityModule.getToken] error on getToken', err);
+                reject(err);
+              });
+            } else {
+              _this.deleteIdentity(complete_id.identity);
+              // generate new idToken
+              _this.callGenerateMethods(identity.idp).then((value) => {
+                resolve(value);
+              });
+            }
           });
 
         } else {
@@ -506,7 +490,7 @@ class IdentityModule {
       let identity = _this.identities[index];
       if (identity.hasOwnProperty('interworking') && identity.interworking.domain === domainToCheck) {
         // check if there is expiration time
-        if (identity.hasOwnProperty('info') && identity.info.hasOwnProperty('expirates')) {
+        if (identity.hasOwnProperty('info') && identity.info.hasOwnProperty('expires')) {
           expiration_date = identity.info.expires;
           console.log('[Identity.IdentityModule.getAccessToken] Token expires in', expiration_date);
           console.log('[Identity.IdentityModule.getAccessToken] time now:', time_now);
@@ -1004,8 +988,15 @@ class IdentityModule {
       let commonName = idToken.name || email.substring(0, email.indexOf('@'));
       let userProfileBundle = {username: email, cn: commonName, avatar: infoToken.picture, locale: infoToken.locale, userURL: identifier};
 
+      let expires = undefined;
+      if (infoToken.hasOwnProperty("exp")) {
+        expires = infoToken.exp;
+      } else if (result.hasOwnProperty("info") && result.info.hasOwnProperty("expires")) {
+        expires = result.info.expires;
+      }
+
       //creation of a new JSON with the identity to send via messages
-      let newIdentity = {userProfile: userProfileBundle, idp: result.idp.domain, assertion: result.assertion, expires: result.info.expires};
+      let newIdentity = {userProfile: userProfileBundle, idp: result.idp.domain, assertion: result.assertion, expires: expires};
       result.messageInfo = newIdentity;
       result.keyPair = keyPair;
 
