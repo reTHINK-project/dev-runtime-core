@@ -238,7 +238,13 @@ class IdentityModule {
 
       let identity = _this.identities[index];
       if (identity.identity === userURL) {
+        newIdentity.identity = identity.identity;
+        newIdentity.messageInfo = identity.messageInfo;
+        newIdentity.keyPair = identity.keyPair;
+        console.log('TIAGO before', _this.identities[index]);
+        console.log('TIAGO after', newIdentity);
         _this.identities[index] = newIdentity;
+        return;
       }
     }
 
@@ -309,35 +315,37 @@ class IdentityModule {
           } else {
             // throw 'The ID Token does not have an expiration time';
             console.log('The ID Token does not have an expiration time');
+            resolve(identity);
           }
         } else {
           // throw 'The ID Token does not have an expiration time';
-          console.log('The ID Token does not have an expiration time')
+          console.log('The ID Token does not have an expiration time');
+          resolve(identity);
         }
 
         console.log('[Identity.IdentityModule.getValidToken] Token expires in', expiration_date);
         console.log('[Identity.IdentityModule.getValidToken] time now:', time_now);
 
-        // TODO: this should not be verified in this way
-        // we should contact the IDP to verify this instead of using the local clock
-        // but this works for now...
         if (time_now >= expiration_date) {
-          // delete current identity
-          //_this.deleteIdentity(complete_id.identity);
-
-          // generate new idToken
-          /*_this.callGenerateMethods(identity.idp).then((value) => {
-            resolve(value.messageInfo);
-          });*/
           _this.sendRefreshMessage(identity.idp).then((newIdentity) => {
-            _this.setIdentity(identity.userProfile.userURL, newIdentity);
-            _this.setCurrentIdentity(newIdentity);
-            resolve(newIdentity);
+            _this.deleteIdentity(complete_id.identity);
+            _this.storeIdentity(newIdentity, identity.keyPair).then((value) => {
+              resolve(value);
+            }, (err) => {
+              console.error('[Identity.IdentityModule.getToken] error on getToken', err);
+              reject(err);
+            });
+          }, (err) => { // no refresh token -> generate new token with login
+            _this.deleteIdentity(complete_id.identity);
+            // generate new idToken
+            _this.callGenerateMethods(identity.idp).then((value) => {
+              resolve(value.messageInfo);
+            });
           });
+
         } else {
           resolve(identity);
         }
-        resolve(identity);
       }).catch(function(error) {
         console.error('[Identity.IdentityModule.getToken] error on getToken', error);
         reject(error);
