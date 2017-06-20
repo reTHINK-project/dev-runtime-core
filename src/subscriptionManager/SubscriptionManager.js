@@ -59,11 +59,9 @@ class SubscriptionManager {
       }
     });
 
-    _this._init();
-
   }
 
-  _init() {
+  init() {
     let _this = this;
 
     return new Promise((resolve, reject) => {
@@ -76,6 +74,7 @@ class SubscriptionManager {
           });
 
         }
+        resolve();
       });
 
     });

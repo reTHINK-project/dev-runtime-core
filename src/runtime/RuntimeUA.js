@@ -308,8 +308,6 @@ class RuntimeUA {
         // Instanciate the SyncherManager;
         this.syncherManager = new SyncherManager(this.runtimeURL, this.messageBus, this.registry, this.runtimeCatalogue, this.storageManager, null, this._dataObjectsStorage, this.identityModule);
 
-        // Instanciate the SubscriptionManager;
-        this.subscriptionManager = new SubscriptionManager(this.runtimeURL, this.messageBus, this.storageManager);
 
         // Set into loader the needed components;
         this.loader.runtimeURL = this.runtimeURL;
@@ -331,9 +329,12 @@ class RuntimeUA {
         //   });
         // }, 2000);
 
+        // Instanciate the SubscriptionManager;
+        this.subscriptionManager = new SubscriptionManager(this.runtimeURL, this.messageBus, this.storageManager);
 
-        resolve(true);
-
+        this.subscriptionManager.init().then(()=>{
+          resolve(true);
+        });
       } catch (e) {
         reject(e);
       }
