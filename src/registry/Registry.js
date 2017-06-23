@@ -516,7 +516,8 @@ class Registry {
         delete registration.mutual;
         delete registration.resume;
 
-        registration.expires = _this.expiresTime;
+        if (!registration.expires) registration.expires = _this.expiresTime;
+
         registration.dataSchemes = dataScheme;
 
         if (p2pHandler) {
@@ -571,6 +572,33 @@ class Registry {
               reject('error on register DataObject');
             }
           });
+
+          //timer to keep the registration alive
+          // the time is defined by a little less than half of the expires time defined
+          let keepAliveTimer = setInterval(function() {
+
+            /*let message = _this.messageFactory.createCreateMessageRequest(
+            _this.registryURL,
+            'domain://registry.' + _this.registryDomain + '/',
+            messageValue,
+            'policy'
+          );*/
+
+            let message = {
+              type: 'update',
+              from: _this.registryURL,
+              to: 'domain://registry.' + _this.registryDomain + '/',
+              body: { resource: registration.url, value: {status: 'live'} }
+            };
+
+            _this._messageBus.postMessage(message, (reply) => {
+              console.log('[Registry.registerDataObject] KeepAlive Reply: ', reply);
+            });
+          }, (((registration.expires / 1.1) / 2) * 1000));
+
+        }).catch(function(reason) {
+          console.log('[Registry registerHyperty] Error: ', reason);
+          reject(reason);
         });
       });
     });

@@ -205,6 +205,8 @@ class SyncherManager {
         objectRegistration.url = allocated.address[0];
         objectRegistration.authorise = msg.body.authorise;
         objectRegistration.childrens = childrens;
+        objectRegistration.expires = 30;//TODO: get it from data object configuration description when present
+
         delete objectRegistration.data;
 
         console.log('[SyncherManager._newCreate] ALLOCATOR CREATE:', allocated);
@@ -326,6 +328,12 @@ class SyncherManager {
         // TODO: check if is need to handle with the result of validation
         schemaValidation(scheme, descriptor, initialData);
 
+        let objectRegistration = deepClone(msg.body.value);
+        objectRegistration.url = storedObject.url;
+        objectRegistration.expires = 30;//TODO: get it from data object configuration description when present
+
+        delete objectRegistration.data;
+
         //all OK -> create reporter and register listeners
         let reporter;
 
@@ -355,6 +363,12 @@ class SyncherManager {
             resolve(false);
           });
         });
+        console.info('[SyncherManager._resumeCreate] Register Object: ', objectRegistration);
+        _this._registry.registerDataObject(objectRegistration).then((resolve) => {
+          console.log('[SyncherManager._resumeCreate] DataObject registration successfully updated', resolve);
+
+        });
+
       //  resolve();
       }).catch((reason) => {
         console.error('[SyncherManager - resume create] - fail on getDataSchemaDescriptor: ', reason);

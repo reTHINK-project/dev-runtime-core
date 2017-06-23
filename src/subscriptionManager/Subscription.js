@@ -5,6 +5,8 @@ class Subscription {
     _this._subscriber = subscriber;
     _this.resource = resource;
 
+    console.log('[SubscriptionManager.Subscription] new: ', subscriber, resource)
+
     //add forward
     _this._listener = bus.addForward(resource, subscriber);
 

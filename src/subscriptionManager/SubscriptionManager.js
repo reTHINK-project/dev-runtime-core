@@ -67,6 +67,7 @@ class SubscriptionManager {
     return new Promise((resolve, reject) => {
 
       _this._storage.get('subscriptions').then((subscriptions) => {
+        console.log('[SubscriptionManager.init] resume subscriptions: ', subscriptions);
         if (subscriptions) {
           Object.values(subscriptions).forEach((subscription)=>{
             _this._createSubscription(subscription.domain, subscription.resources, subscription.subscriber, subscription.identity);
@@ -105,7 +106,7 @@ class SubscriptionManager {
       reply.body = msg.body;
       reply.body.code = 200;
 
-      console.log('[subscribe] - new subscription: ', msg, reply, subscriber);
+      console.log('[SubscriptionManager] - craeteSubscription: ', msg, reply, subscriber);
 
       _this._bus.postMessage(reply);
 
@@ -164,7 +165,7 @@ class SubscriptionManager {
     let _this = this;
 
     let unsubscriber = msg.from;
-    let resource = msg.body.resources[0];
+    let resource = msg.body.resource;
 
     let subscription = _this._subscriptions[unsubscriber];
     if (subscription) {
@@ -173,7 +174,7 @@ class SubscriptionManager {
       //FLOW-OUT: message sent to msg-node SubscriptionManager component
       _this._bus.postMessage({
         type: 'unsubscribe', from: _this._url, to: 'domain://msg-node.' + domain + '/sm',
-        body: { resource: resource, source: unsubscriber }
+        body: { resources: [resource], source: unsubscriber }
       });
 
       subscription._releaseListeners();
