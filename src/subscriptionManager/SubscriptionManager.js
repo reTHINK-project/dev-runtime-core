@@ -164,7 +164,7 @@ class SubscriptionManager {
     let _this = this;
 
     let unsubscriber = msg.from;
-    let resource = msg.body.resource;
+    let resource = msg.body.resources[0];
 
     let subscription = _this._subscriptions[unsubscriber];
     if (subscription) {
