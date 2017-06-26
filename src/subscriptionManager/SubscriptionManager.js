@@ -232,7 +232,7 @@ class SubscriptionManager {
 
       } else {
         reply = {
-          type: 'response', from: msg.to, to: msg.from,
+          type: 'response', from: msg.to, to: msg.from, id: msg.id,
           body: { code: 404, description: 'Not Found' }
         };
       }
