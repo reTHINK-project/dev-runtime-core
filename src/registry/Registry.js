@@ -533,26 +533,26 @@ class Registry {
 
         let message;
 
-        if (!registration.resume) {
+        if (!objectRegistration.resume) {
 
-          console.log('[Registry.registerDataObject] registering new data object URL', objectRegistration);
+          console.log('[Registry.registerDataObject] registering new data object URL', registration);
 
           message = {type: 'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: registration, policy: 'policy'}};
 
         } else {
 
-          console.log('[Registry.registerDataObject] registering previously registered data object URL', objectRegistration);
+          console.log('[Registry.registerDataObject] registering previously registered data object URL', registration);
 
           message = {
             type: 'update',
             to: 'domain://registry.' + _this.registryDomain + '/',
             from: _this.registryURL,
-            body: {resource: objectRegistration.url, value: {status: 'live'} }
+            body: {resource: registration.url, value: {status: 'live'} }
           };
 
         }
 
-        _this.dataObjectList[objectRegistration.url] = objectRegistration;
+        _this.dataObjectList[registration.url] = objectRegistration;
 
         // step to obtain the list of all URL registered to updated with the new one.
         _this.storageManager.set('registry:DataObjectURLs', 0, urlsList).then(() => {

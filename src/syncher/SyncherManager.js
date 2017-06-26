@@ -205,7 +205,7 @@ class SyncherManager {
         objectRegistration.url = allocated.address[0];
         objectRegistration.authorise = msg.body.authorise;
         objectRegistration.childrens = childrens;
-        objectRegistration.expires = 30;//TODO: get it from data object configuration description when present
+        //objectRegistration.expires = 30;//TODO: get it from data object configuration description when present
 
         delete objectRegistration.data;
 
@@ -330,7 +330,7 @@ class SyncherManager {
 
         let objectRegistration = deepClone(msg.body.value);
         objectRegistration.url = storedObject.url;
-        objectRegistration.expires = 30;//TODO: get it from data object configuration description when present
+        //objectRegistration.expires = 30;//TODO: get it from data object configuration description when present
 
         delete objectRegistration.data;
 
