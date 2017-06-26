@@ -250,7 +250,8 @@ class SyncherManager {
           let metadata = deepClone(objectRegistration);
           metadata.subscriberUser = userURL;
           metadata.isReporter = true;
-          delete metadata.expires;
+
+          //delete metadata.expires;
 
           // Store the dataObject information
 
@@ -330,7 +331,7 @@ class SyncherManager {
 
         let objectRegistration = deepClone(msg.body.value);
         objectRegistration.url = storedObject.url;
-        //objectRegistration.expires = 30;//TODO: get it from data object configuration description when present
+        objectRegistration.expires = storedObject.expires;
 
         delete objectRegistration.data;
 

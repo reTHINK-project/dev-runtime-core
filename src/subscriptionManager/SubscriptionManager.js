@@ -56,6 +56,7 @@ class SubscriptionManager {
       switch (msg.type) {
         case 'subscribe': _this._onSubscribe(msg); break;
         case 'unsubscribe': _this._onUnSubscribe(msg); break;
+        case 'read': _this._onRead(msg); break;
       }
     });
 
@@ -115,12 +116,20 @@ class SubscriptionManager {
           subscriptions = {};
         }
 
-        subscriptions[subscriber] = {
-          domain: domain,
-          resources: resources,
-          subscriber: subscriber,
-          identity: identity
-        };
+        if (!subscriptions[subscriber]) {
+
+
+          subscriptions[subscriber] = {
+            domain: domain,
+            resources: resources,
+            subscriber: subscriber,
+            identity: identity
+          };
+
+        } else {
+          subscriptions[subscriber].resources = subscriptions[subscriber].resources.concat(resources);
+        }
+
         _this._storage.set('subscriptions', 1, subscriptions);
       });
     });
@@ -149,8 +158,12 @@ class SubscriptionManager {
         let subscription = _this._subscriptions[subscriber];
         console.log('[SubscriptionManager] - ',  _this._subscriptions, resources, _this._subscriptions.hasOwnProperty(subscriber));
         if (!subscription) {
-          _this._subscriptions[subscriber] = new Subscription(_this._bus, subscriber, resources[0]);
+          _this._subscriptions[subscriber] = {};
         }
+
+        resources.forEach((resource)=>{
+          _this._subscriptions[subscriber][resource] = new Subscription(_this._bus, subscriber, resource);
+        });
 
         resolve(reply);
 
@@ -167,9 +180,9 @@ class SubscriptionManager {
     let unsubscriber = msg.from;
     let resource = msg.body.resource;
 
-    let subscription = _this._subscriptions[unsubscriber];
-    if (subscription) {
+    if (_this._subscriptions[unsubscriber] && _this._subscriptions[unsubscriber][resource]) {
       let domain = divideURL(resource).domain;
+      let subscription = _this._subscriptions[unsubscriber][resource];
 
       //FLOW-OUT: message sent to msg-node SubscriptionManager component
       _this._bus.postMessage({
@@ -178,11 +191,14 @@ class SubscriptionManager {
       });
 
       subscription._releaseListeners();
-      delete _this._subscriptions[unsubscriber];
+      delete _this._subscriptions[unsubscriber][resource];
 
       _this._storage.get('subscriptions').then((subscriptions)=>{
         if (subscriptions) {
-          delete subscriptions[unsubscriber];
+          let i = subscriptions[unsubscriber].resources.indexOf(resource);
+          if (i != -1) {
+            subscriptions[unsubscriber].resources.splice(i, 1);
+          }
           _this._storage.set('subscriptions', 1, subscriptions);
         }
       });
@@ -193,6 +209,35 @@ class SubscriptionManager {
       body: { code: 200 }
     });
 
+  }
+
+  //message received to read existing routing paths. At this point limited to read all existing routing paths set for one listener
+  _onRead(msg) {
+
+    let _this = this;
+
+    let listenerAddress = msg.body.resource;
+    let reply;
+
+    console.log('[SubscriptionManager] - request to read Subscriptions: ', msg );
+
+    _this._storage.get('subscriptions').then((subscriptions)=>{
+      if (subscriptions && subscriptions[listenerAddress]) {
+        let resources = subscriptions[listenerAddress].resources;
+
+        reply = {
+          type: 'response', from: msg.to, to: msg.from,
+          body: { code: 200, value: resources }
+        };
+
+      } else {
+        reply = {
+          type: 'response', from: msg.to, to: msg.from,
+          body: { code: 404, description: 'Not Found' }
+        };
+      }
+      _this._bus.postMessage(reply);
+    });
   }
 }
 
