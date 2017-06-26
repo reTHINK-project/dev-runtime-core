@@ -94,7 +94,7 @@ describe('Registry', function() {
 
     // to emulate registrations
 
-    registry.messageBus.addListener('domain://registry.ua.pt/', (msg) => {
+    registry.messageBus.addListener('domain://registry.ua.pt', (msg) => {
       console.log('MSG BUS LISTENER for Domain Registry: ', msg);
       let responseMessage = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: {code: 200}};
 
