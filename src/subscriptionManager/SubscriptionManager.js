@@ -226,13 +226,13 @@ class SubscriptionManager {
         let resources = subscriptions[listenerAddress].resources;
 
         reply = {
-          type: 'response', from: msg.to, to: msg.from,
+          id: msg.id, type: 'response', from: msg.to, to: msg.from,
           body: { code: 200, value: resources }
         };
 
       } else {
         reply = {
-          type: 'response', from: msg.to, to: msg.from, id: msg.id,
+          id: msg.id, type: 'response', from: msg.to, to: msg.from,
           body: { code: 404, description: 'Not Found' }
         };
       }
