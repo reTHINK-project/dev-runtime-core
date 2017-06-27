@@ -203,6 +203,24 @@ class IdentityModule {
   }
 
   /**
+  * return the registry in this idModule
+  * @param {discovery}           discovery
+  */
+  get discovery() {
+    let _this = this;
+    return _this._discovery;
+  }
+
+  /**
+  * Set the registry in this idModule
+  * @param {discovery}     reg
+  */
+  set discovery(discovery) {
+    let _this = this;
+    _this._discovery = discovery;
+  }
+
+  /**
   * Function to return all the identities registered within a session by a user.
   * These identities are returned in an array containing a JSON package for each user identity.
   * @return {Array<Identities>}         Identities
@@ -1992,7 +2010,7 @@ class IdentityModule {
 
             // search in domain registry for the hyperty associated to the dataObject
             // search in case is a subscriber who wants to know the reporter
-            _this.registry.discoverDataObjectPerURL(finalURL, splitedURL[2]).then(dataObject => {
+            _this.discovery.discoverDataObjectPerURL(finalURL, splitedURL[2]).then(dataObject => {
               _this.dataObjectsIdentity[finalURL] = dataObject.reporter;
               resolve(dataObject.reporter);
             }, err => {
