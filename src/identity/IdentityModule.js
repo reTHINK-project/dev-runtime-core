@@ -326,7 +326,7 @@ class IdentityModule {
         console.log('[Identity.IdentityModule.getValidToken] time now:', time_now);
 
         if (time_now >= expiration_date) {
-          _this.sendRefreshMessage(identity.idp).then((newIdentity) => {
+          _this.sendRefreshMessage(identity).then((newIdentity) => {
             if (newIdentity.hasOwnProperty('assertion')) {
               _this.deleteIdentity(complete_id.identity);
               _this.storeIdentity(newIdentity, identity.keyPair).then((value) => {
@@ -770,10 +770,6 @@ class IdentityModule {
     });
   }
 
-  getExistingValidToken() {
-
-  }
-
   callGenerateMethods(idp, origin) {
     let _this = this;
 
@@ -925,11 +921,11 @@ class IdentityModule {
     });
   }
 
-  sendRefreshMessage(idpDomain) {
+  sendRefreshMessage(oldIdentity) {
     let _this = this;
-    let domain = _this._resolveDomain(idpDomain);
+    let domain = _this._resolveDomain(oldIdentity.idp);
     let message;
-    let assertion = _this.getIdentity(_this.currentIdentity.userProfile.userURL);
+    let assertion = _this.getIdentity(oldIdentity.userProfile.userURL);
 
     return new Promise((resolve, reject) => {
       message = {type: 'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'refreshAssertion', params: {identity: assertion}}};
