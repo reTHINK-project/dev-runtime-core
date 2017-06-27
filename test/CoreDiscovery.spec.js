@@ -64,10 +64,10 @@ describe('CoreDiscovery', function() {
       let graphConnector = new GraphConnector(runtimeURL, msgbus, storageManager);
       coreDiscovery = new CoreDiscovery(runtimeURL, msgbus, graphConnector, runtimeFactory);
 
-      coreDiscovery.messageBus.addListener('domain://registry.ua.pt/', (msg) => {
+      coreDiscovery.messageBus.addListener('domain://registry.ua.pt', (msg) => {
         console.info(msg);
         let message_hyperties = {
-            id: msg.id, type: 'response', from: 'domain://registry.ua.pt/', to: msg.from,
+            id: msg.id, type: 'response', from: 'domain://registry.ua.pt', to: msg.from,
             body: {
                 code: 200,
                 value: [hyperty]
@@ -75,7 +75,7 @@ describe('CoreDiscovery', function() {
         };
 
         let message_hyperty = {
-            id: msg.id, type: 'response', from: 'domain://registry.ua.pt/', to: msg.from,
+            id: msg.id, type: 'response', from: 'domain://registry.ua.pt', to: msg.from,
             body: {
                 code: 200,
                 value: hyperty
@@ -83,7 +83,7 @@ describe('CoreDiscovery', function() {
         };
 
         let message_dataObjects = {
-            id: msg.id, type: 'response', from: 'domain://registry.ua.pt/', to: msg.from,
+            id: msg.id, type: 'response', from: 'domain://registry.ua.pt', to: msg.from,
             body: {
                 code: 200,
                 value: [dataObject]
@@ -91,7 +91,7 @@ describe('CoreDiscovery', function() {
         };
 
         let message_dataObject = {
-            id: msg.id, type: 'response', from: 'domain://registry.ua.pt/', to: msg.from,
+            id: msg.id, type: 'response', from: 'domain://registry.ua.pt', to: msg.from,
             body: {
                 code: 200,
                 value: dataObject
