@@ -381,7 +381,7 @@ class SyncherManager {
 
           let childObjects = storedObject['childrenObjects'][children];
 
-          console.log('[SyncherManager._decryptChildrens] dataObjectChilds to decrypt ',  childObjects);
+          console.log('[SyncherManager._decryptChildrens] dataObjectChilds to decrypt ', childObjects);
 
           let listOfDecryptedObjects = [];
 
@@ -393,9 +393,7 @@ class SyncherManager {
 
               console.log('[SyncherManager._decryptChildrens] createdBy ',  owner, ' object: ', child.value);
 
-              let decrypted = _this._identityModule.decryptDataObject(JSON.parse(child.value), storedObject.data.url).then((decryptedObject) => {
-                storedObject['childrenObjects'][children][childId].value = decryptedObject.value;
-              });
+              let decrypted = _this._identityModule.decryptDataObject(JSON.parse(child.value), storedObject.data.url);
 
               listOfDecryptedObjects.push(decrypted);
             }
@@ -406,13 +404,11 @@ class SyncherManager {
 
             console.log('[SyncherManager._decryptChildrens] returning decrypted ', decryptedObjects);
 
-              /*Object.keys(childObjects).forEach((childId)=>{
-                storedObject['childrens'][children][childId].value = decryptedObjects[childId].value;
-                console.log('[SyncherManager._decryptChildrens] adding ', decryptedObjects[childId].value);
+            decryptedObjects.forEach((decryptedObject) => {
+              storedObject['childrenObjects'][children][childId].value = decryptedObject.value;
+            })
 
-              });
-
-              console.info('[SyncherManager._decryptChildrens] returning decrypted objects : ', storedObject);*/
+            console.log('[SyncherManager._decryptChildrens] storedObject ', storedObject);
 
             resolve(storedObject);
 
@@ -573,10 +569,19 @@ class SyncherManager {
             console.log('reporter-subscribe-response-new: ', reply);
             if (reply.body.code === 200) {
 
+              console.log('[SyncherManager._newSubscription] - observers: ', _this._observers, objURL, _this._observers[objURL]);
+
               let observer = _this._observers[objURL];
               if (!observer) {
                 observer = new ObserverObject(_this, objURL, childrens);
+                console.log('[SyncherManager._newSubscription] - observers: create new ObserverObject: ', observer);
                 _this._observers[objURL] = observer;
+
+                // register new hyperty subscription
+                observer.addSubscription(hypertyURL);
+
+                // add childrens and listeners to save data if necessary
+                observer.addChildrens(childrens);
               }
 
               let interworking = false;
@@ -593,7 +598,11 @@ class SyncherManager {
               }
 
               let metadata = deepClone(reply.body.value);
+              let childrenObjects = metadata.childrenObjects || {};
+
               delete metadata.data;
+              delete metadata.childrenObjects;
+
               metadata.childrens = childrens;
               metadata.subscriberUser = userURL;
               metadata.isReporter = false;
@@ -606,14 +615,10 @@ class SyncherManager {
                   observer.isToSaveData = true;
                   _this._dataObjectsStorage.update(false, objURL, 'isToSaveData', true);
                   _this._dataObjectsStorage.saveData(false, objURL, null, reply.body.value.data);
+                  console.log('[SyncherManager._newSubscription] - save resources: ', childrenObjects);
+                  _this._dataObjectsStorage.saveChildrens(false, objURL, 'resources', childrenObjects);
                 }
               }
-
-              // register new hyperty subscription
-              observer.addSubscription(hypertyURL);
-
-              // add childrens and listeners to save data if necessary
-              observer.addChildrens(childrens);
 
               //forward to hyperty:
               reply.id = msg.id;
