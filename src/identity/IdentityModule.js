@@ -126,6 +126,23 @@ class IdentityModule {
     _this.addGUIListeners();
   }
 
+  /**
+  * return the coreDiscovery component
+  */
+  get coreDiscovery() {
+    let _this = this;
+    return _this._coreDiscovery;
+  }
+
+  /**
+  * Set the coreDiscovery component
+  * @param {coreDiscovery} coreDiscovery
+  */
+  set coreDiscovery(coreDiscovery) {
+    let _this = this;
+    _this._coreDiscovery = coreDiscovery;
+  }
+
   addGUIListeners() {
     let _this = this;
 
@@ -1014,7 +1031,7 @@ class IdentityModule {
         }
       }
 
-      if (idAlreadyExists) { // TODO: TIAGO maybe overwrite the identity
+      if (idAlreadyExists) { // TODO: maybe overwrite the identity
         resolve(oldId);
         let exists = false;
 
@@ -1209,7 +1226,6 @@ class IdentityModule {
                 let sessionKey = _this.crypto.generateRandom();
                 _this.dataObjectSessionKeys[dataObjectURL] = {sessionKey: sessionKey, isToEncrypt: true};
 
-                // TIAGO - persistence issue #147
                 _this.storageManager.set('dataObjectSessionKeys', 0, _this.dataObjectSessionKeys);
                 dataObjectKey = _this.dataObjectSessionKeys[dataObjectURL];
               }
@@ -2025,10 +2041,9 @@ class IdentityModule {
           if (subscriberHyperty) {
             resolve(subscriberHyperty);
           } else {
-
             // search in domain registry for the hyperty associated to the dataObject
             // search in case is a subscriber who wants to know the reporter
-            _this.registry.discoverDataObjectPerURL(finalURL, splitedURL[2]).then(dataObject => {
+            _this._coreDiscovery.discoverDataObjectPerURL(finalURL, splitedURL[2]).then(dataObject => {
               _this.dataObjectsIdentity[finalURL] = dataObject.reporter;
               resolve(dataObject.reporter);
             }, err => {

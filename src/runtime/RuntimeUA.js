@@ -307,6 +307,9 @@ class RuntimeUA {
         // Register registry on IdentityModule
         this.identityModule.registry = this.registry;
 
+        // Register coreDiscovery on IdentityModule
+        this.identityModule.coreDiscovery = this.coreDiscovery;
+
         // Use sandbox factory to use specific methods
         // and set the message bus to the factory
         this.runtimeFactory.messageBus = this.messageBus;
