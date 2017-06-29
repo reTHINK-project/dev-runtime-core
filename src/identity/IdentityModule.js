@@ -326,8 +326,8 @@ class IdentityModule {
         console.log('[Identity.IdentityModule.getValidToken] time now:', time_now);
 
         if (time_now >= expiration_date) {
-          _this.sendRefreshMessage(identity).then((newIdentity) => {
-            if (newIdentity.hasOwnProperty('assertion')) {
+          if (identity.idp === 'google.com') {
+            _this.sendRefreshMessage(identity).then((newIdentity) => {
               _this.deleteIdentity(complete_id.identity);
               _this.storeIdentity(newIdentity, identity.keyPair).then((value) => {
                 resolve(value);
@@ -335,15 +335,14 @@ class IdentityModule {
                 console.error('[Identity.IdentityModule.getToken] error on getToken', err);
                 reject(err);
               });
-            } else {
-              _this.deleteIdentity(complete_id.identity);
-              // generate new idToken
-              _this.callGenerateMethods(identity.idp).then((value) => {
-                resolve(value);
-              });
-            }
-          });
-
+            });
+          } else { // microsoft.com
+            _this.deleteIdentity(complete_id.identity);
+            // generate new idToken
+            _this.callGenerateMethods(identity.idp).then((value) => {
+              resolve(value);
+            });
+          }
         } else {
           resolve(identity);
         }
