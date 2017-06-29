@@ -615,8 +615,6 @@ class SyncherManager {
                   observer.isToSaveData = true;
                   _this._dataObjectsStorage.update(false, objURL, 'isToSaveData', true);
                   _this._dataObjectsStorage.saveData(false, objURL, null, reply.body.value.data);
-                  console.log('[SyncherManager._newSubscription] - save resources: ', childrenObjects);
-                  _this._dataObjectsStorage.saveChildrens(false, objURL, 'resources', childrenObjects);
                 }
               }
 
