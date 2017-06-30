@@ -377,7 +377,7 @@ class Registry {
       let message = { type: 'update', from: _this.registryURL,
         to: 'domain://registry.' + _this._domain,
         body: { resource: '/hyperty/' + hypertyInstance, value: 'disconnected', attribute: 'status' }};
-
+        
       _this._messageBus.postMessage(message, (reply) => {
         console.log('[Registry] unregister hyperty Reply', reply);
 
@@ -516,7 +516,8 @@ class Registry {
         delete registration.mutual;
         delete registration.resume;
 
-        registration.expires = _this.expiresTime;
+        if (!registration.expires) registration.expires = _this.expiresTime;
+
         registration.dataSchemes = dataScheme;
 
         if (p2pHandler) {
@@ -532,26 +533,26 @@ class Registry {
 
         let message;
 
-        if (!registration.resume) {
+        if (!objectRegistration.resume) {
 
-          console.log('[Registry.registerDataObject] registering new data object URL', objectRegistration);
+          console.log('[Registry.registerDataObject] registering new data object URL', registration);
 
           message = {type: 'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain, body: {value: registration, policy: 'policy'}};
 
         } else {
 
-          console.log('[Registry.registerDataObject] registering previously registered data object URL', objectRegistration);
+          console.log('[Registry.registerDataObject] registering previously registered data object URL', registration);
 
           message = {
             type: 'update',
             to: 'domain://registry.' + _this.registryDomain,
             from: _this.registryURL,
-            body: {resource: objectRegistration.url, value: {status: 'live'} }
+            body: {resource: registration.url, value: {status: 'live'} }
           };
 
         }
 
-        _this.dataObjectList[objectRegistration.url] = objectRegistration;
+        _this.dataObjectList[registration.url] = objectRegistration;
 
         // step to obtain the list of all URL registered to updated with the new one.
         _this.storageManager.set('registry:DataObjectURLs', 0, urlsList).then(() => {
@@ -571,6 +572,33 @@ class Registry {
               reject('error on register DataObject');
             }
           });
+
+          //timer to keep the registration alive
+          // the time is defined by a little less than half of the expires time defined
+          let keepAliveTimer = setInterval(function() {
+
+            /*let message = _this.messageFactory.createCreateMessageRequest(
+            _this.registryURL,
+            'domain://registry.' + _this.registryDomain + '/',
+            messageValue,
+            'policy'
+          );*/
+
+            let message = {
+              type: 'update',
+              from: _this.registryURL,
+              to: 'domain://registry.' + _this.registryDomain + '/',
+              body: { resource: registration.url, value: {status: 'live'} }
+            };
+
+            _this._messageBus.postMessage(message, (reply) => {
+              console.log('[Registry.registerDataObject] KeepAlive Reply: ', reply);
+            });
+          }, (((registration.expires / 1.1) / 2) * 1000));
+
+        }).catch(function(reason) {
+          console.log('[Registry registerHyperty] Error: ', reason);
+          reject(reason);
         });
       });
     });
