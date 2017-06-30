@@ -35,17 +35,6 @@ class DataObjectsStorage {
       storeDataObject[type][metadata.url].subscriberUsers = [];// TODO:do we need this?
       storeDataObject[type][metadata.url].childrenObjects = {};
       storeDataObject[type][metadata.url].data = {};
-
-      /*storeDataObject[type][metadata.url] = {
-        metadata.url: metadata.url,
-        isReporter: isReporter,
-        isToSaveData: false,
-        subscriptions: [],
-        subscriberUsers: [],
-        childrens: {},
-        data: {},
-        version: 0
-      };*/
     }
 
     Object.assign(storeDataObject[type][metadata.url], metadata);
