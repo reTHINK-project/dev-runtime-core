@@ -126,6 +126,23 @@ class IdentityModule {
     _this.addGUIListeners();
   }
 
+  /**
+  * return the coreDiscovery component
+  */
+  get coreDiscovery() {
+    let _this = this;
+    return _this._coreDiscovery;
+  }
+
+  /**
+  * Set the coreDiscovery component
+  * @param {coreDiscovery} coreDiscovery
+  */
+  set coreDiscovery(coreDiscovery) {
+    let _this = this;
+    _this._coreDiscovery = coreDiscovery;
+  }
+
   addGUIListeners() {
     let _this = this;
 
@@ -295,30 +312,40 @@ class IdentityModule {
           } else {
             // throw 'The ID Token does not have an expiration time';
             console.log('The ID Token does not have an expiration time');
+            resolve(identity);
           }
+        } else if (complete_id.hasOwnProperty("infoToken") && complete_id.infoToken.hasOwnProperty("exp")) {
+          expiration_date = complete_id.infoToken.exp;
         } else {
           // throw 'The ID Token does not have an expiration time';
-          console.log('The ID Token does not have an expiration time')
+          console.log('The ID Token does not have an expiration time');
+          resolve(identity);
         }
 
         console.log('[Identity.IdentityModule.getValidToken] Token expires in', expiration_date);
         console.log('[Identity.IdentityModule.getValidToken] time now:', time_now);
 
-        // TODO: this should not be verified in this way
-        // we should contact the IDP to verify this instead of using the local clock
-        // but this works for now...
         if (time_now >= expiration_date) {
-          // delete current identity
-          _this.deleteIdentity(complete_id.identity);
-
-          // generate new idToken
-          _this.callGenerateMethods(identity.idp).then((value) => {
-            resolve(value.messageInfo);
-          });
+          if (identity.idp === 'google.com') {
+            _this.sendRefreshMessage(identity).then((newIdentity) => {
+              _this.deleteIdentity(complete_id.identity);
+              _this.storeIdentity(newIdentity, identity.keyPair).then((value) => {
+                resolve(value);
+              }, (err) => {
+                console.error('[Identity.IdentityModule.getToken] error on getToken', err);
+                reject(err);
+              });
+            });
+          } else { // microsoft.com
+            _this.deleteIdentity(complete_id.identity);
+            // generate new idToken
+            _this.callGenerateMethods(identity.idp).then((value) => {
+              resolve(value);
+            });
+          }
         } else {
           resolve(identity);
         }
-        resolve(identity);
       }).catch(function(error) {
         console.error('[Identity.IdentityModule.getToken] error on getToken', error);
         reject(error);
@@ -479,7 +506,7 @@ class IdentityModule {
       let identity = _this.identities[index];
       if (identity.hasOwnProperty('interworking') && identity.interworking.domain === domainToCheck) {
         // check if there is expiration time
-        if (identity.hasOwnProperty('info') && identity.info.hasOwnProperty('expirates')) {
+        if (identity.hasOwnProperty('info') && identity.info.hasOwnProperty('expires')) {
           expiration_date = identity.info.expires;
           console.log('[Identity.IdentityModule.getAccessToken] Token expires in', expiration_date);
           console.log('[Identity.IdentityModule.getAccessToken] time now:', time_now);
@@ -489,7 +516,7 @@ class IdentityModule {
           // but this works for now...
           if (time_now >= expiration_date) {
             // delete current identity
-            _this.deleteIdentity(identity.identity);
+            //_this.deleteIdentity(identity.identity);
             return null; // the getToken function then generates a new token
           }
         } // else this access token has no expiration time
@@ -742,10 +769,6 @@ class IdentityModule {
     });
   }
 
-  getExistingValidToken() {
-
-  }
-
   callGenerateMethods(idp, origin) {
     let _this = this;
 
@@ -897,6 +920,24 @@ class IdentityModule {
     });
   }
 
+  sendRefreshMessage(oldIdentity) {
+    let _this = this;
+    let domain = _this._resolveDomain(oldIdentity.idp);
+    let message;
+    let assertion = _this.getIdentity(oldIdentity.userProfile.userURL);
+
+    return new Promise((resolve, reject) => {
+      message = {type: 'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'refreshAssertion', params: {identity: assertion}}};
+      _this._messageBus.postMessage(message, (res) => {
+        let result = res.body.value;
+
+        console.log('TIAGO new assertion:', result);
+        resolve(result);
+
+      });
+    });
+  }
+
   sendGenerateMessage(contents, origin, usernameHint, idpDomain) {
     let _this = this;
     let domain = _this._resolveDomain(idpDomain);
@@ -959,8 +1000,15 @@ class IdentityModule {
       let commonName = idToken.name || email.substring(0, email.indexOf('@'));
       let userProfileBundle = {username: email, cn: commonName, avatar: infoToken.picture, locale: infoToken.locale, userURL: identifier};
 
+      let expires = undefined;
+      if (infoToken.hasOwnProperty("exp")) {
+        expires = infoToken.exp;
+      } else if (result.hasOwnProperty("info") && result.info.hasOwnProperty("expires")) {
+        expires = result.info.expires;
+      }
+
       //creation of a new JSON with the identity to send via messages
-      let newIdentity = {userProfile: userProfileBundle, idp: result.idp.domain, assertion: result.assertion, expires: result.info.expires};
+      let newIdentity = {userProfile: userProfileBundle, idp: result.idp.domain, assertion: result.assertion, expires: expires};
       result.messageInfo = newIdentity;
       result.keyPair = keyPair;
 
@@ -978,7 +1026,7 @@ class IdentityModule {
         }
       }
 
-      if (idAlreadyExists) { // TODO: TIAGO maybe overwrite the identity
+      if (idAlreadyExists) { // TODO: maybe overwrite the identity
         resolve(oldId);
         let exists = false;
 
@@ -1173,7 +1221,6 @@ class IdentityModule {
                 let sessionKey = _this.crypto.generateRandom();
                 _this.dataObjectSessionKeys[dataObjectURL] = {sessionKey: sessionKey, isToEncrypt: true};
 
-                // TIAGO - persistence issue #147
                 _this.storageManager.set('dataObjectSessionKeys', 0, _this.dataObjectSessionKeys);
                 dataObjectKey = _this.dataObjectSessionKeys[dataObjectURL];
               }
@@ -1989,10 +2036,9 @@ class IdentityModule {
           if (subscriberHyperty) {
             resolve(subscriberHyperty);
           } else {
-
             // search in domain registry for the hyperty associated to the dataObject
             // search in case is a subscriber who wants to know the reporter
-            _this.registry.discoverDataObjectPerURL(finalURL, splitedURL[2]).then(dataObject => {
+            _this._coreDiscovery.discoverDataObjectPerURL(finalURL, splitedURL[2]).then(dataObject => {
               _this.dataObjectsIdentity[finalURL] = dataObject.reporter;
               resolve(dataObject.reporter);
             }, err => {

@@ -375,9 +375,9 @@ class Registry {
       console.log('[Registry.unregisterHypertyInstance] Close Reply', reply);
 
       let message = { type: 'update', from: _this.registryURL,
-        to: 'domain://registry.' + _this._domain + '/',
-        body: { resource: hypertyInstance, value: 'disconnected', attribute: 'status' }};
-
+        to: 'domain://registry.' + _this._domain,
+        body: { resource: '/hyperty/' + hypertyInstance, value: 'disconnected', attribute: 'status' }};
+        
       _this._messageBus.postMessage(message, (reply) => {
         console.log('[Registry] unregister hyperty Reply', reply);
 
@@ -394,7 +394,7 @@ class Registry {
     let _this = this;
 
     let message = { type: 'update', from: _this.registryURL,
-      to: 'domain://registry.' + _this._domain + '/',
+      to: 'domain://registry.' + _this._domain,
       body: {
         resource: url,
         value: {
@@ -415,7 +415,7 @@ class Registry {
     let _this = this;
 
     let message = { type: 'delete', from: _this.registryURL,
-      to: 'domain://registry.' + _this._domain + '/',
+      to: 'domain://registry.' + _this._domain,
       body: { value: {name: name}}};
 
     _this._messageBus.postMessage(message, (reply) => {
@@ -430,7 +430,7 @@ class Registry {
     let _this = this;
 
     let message = { type: 'UPDATE', from: _this.registryURL,
-      to: 'domain://registry.' + _this._domain + '/',
+      to: 'domain://registry.' + _this._domain,
       body: { resource: resource, value: value}};
 
     _this._messageBus.post.postMessage(message, (reply) => {
@@ -537,7 +537,7 @@ class Registry {
 
           console.log('[Registry.registerDataObject] registering new data object URL', registration);
 
-          message = {type: 'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: registration, policy: 'policy'}};
+          message = {type: 'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain, body: {value: registration, policy: 'policy'}};
 
         } else {
 
@@ -545,7 +545,7 @@ class Registry {
 
           message = {
             type: 'update',
-            to: 'domain://registry.' + _this.registryDomain + '/',
+            to: 'domain://registry.' + _this.registryDomain,
             from: _this.registryURL,
             body: {resource: registration.url, value: {status: 'live'} }
           };
@@ -559,7 +559,7 @@ class Registry {
 
           /*let message = _this.messageFactory.createCreateMessageRequest(
             _this.registryURL,
-            'domain://registry.' + _this.registryDomain + '/',
+            'domain://registry.' + _this.registryDomain,
             messageValue,
             'policy'
           );*/
@@ -798,7 +798,7 @@ class Registry {
         let message = {
           type: 'read',
           from: _this.registryURL,
-          to: 'domain://registry.' + _this._domain + '/',
+          to: 'domain://registry.' + _this._domain,
           body: {
             resource: dataObjectURL
           }
@@ -867,7 +867,7 @@ class Registry {
         let message = {
           type: 'read',
           from: _this.registryURL,
-          to: 'domain://registry.' + _this._domain + '/',
+          to: 'domain://registry.' + _this._domain,
           body: {
             resource: hypertyURL
           }
@@ -1005,14 +1005,14 @@ class Registry {
 
                   console.log('[Registry registerHyperty] registering new Hyperty at domain registry ', messageValue);
 
-                  message = {type: 'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: messageValue, policy: 'policy'}};
+                  message = {type: 'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain, body: {value: messageValue, policy: 'policy'}};
 
                 } else {
                   console.log('[Registry registerHyperty] registering previously registered Hyperty URL', addressURL.address[0]);
 
                   message = {
                     type: 'update',
-                    to: 'domain://registry.' + _this.registryDomain + '/',
+                    to: 'domain://registry.' + _this.registryDomain,
                     from: _this.registryURL,
                     body: {resource: addressURL.address[0], value: { status: 'live', user: emailURL }}
                   };
@@ -1048,7 +1048,7 @@ class Registry {
                       messageValue.p2pRequester = p2pRequester;
                     }
 
-                    message = {type: 'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: messageValue, policy: 'policy'}};
+                    message = {type: 'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain, body: {value: messageValue, policy: 'policy'}};
 
                     _this._messageBus.postMessage(message, (reply) =>{
                       console.log('[Registry registerHyperty] Hyperty registration update response: ', reply);
@@ -1071,7 +1071,7 @@ class Registry {
 
                   /*let message = _this.messageFactory.createCreateMessageRequest(
                     _this.registryURL,
-                    'domain://registry.' + _this.registryDomain + '/',
+                    'domain://registry.' + _this.registryDomain,
                     messageValue,
                     'policy'
                   );*/
@@ -1079,7 +1079,7 @@ class Registry {
                   let message = {
                     type: 'update',
                     from: _this.registryURL,
-                    to: 'domain://registry.' + _this.registryDomain + '/',
+                    to: 'domain://registry.' + _this.registryDomain,
                     body: { resource: addressURL.address[0], value: {status: 'live'} }};
 
                   _this._messageBus.postMessage(message, (reply) => {

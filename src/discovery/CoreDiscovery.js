@@ -351,7 +351,7 @@ class CoreDiscovery {
     let msg = {
       type: 'read',
       from: _this.discoveryURL,
-      to: 'domain://registry.' + activeDomain + '/',
+      to: 'domain://registry.' + activeDomain,
       body: {
 
       }
@@ -479,7 +479,7 @@ class CoreDiscovery {
     let msg = {
       type: 'read',
       from: _this.discoveryURL,
-      to: 'domain://registry.' + activeDomain + '/',
+      to: 'domain://registry.' + activeDomain,
       body: {
         resource: url
       }
@@ -520,7 +520,7 @@ class CoreDiscovery {
     let msg = {
       type: 'read',
       from: _this.discoveryURL,
-      to: 'domain://registry.' + activeDomain + '/',
+      to: 'domain://registry.' + activeDomain,
       body: {
         resource: url
       }
@@ -557,7 +557,7 @@ class CoreDiscovery {
     let msg = {
       type: 'read',
       from: _this.discoveryURL,
-      to: 'domain://registry.' + activeDomain + '/',
+      to: 'domain://registry.' + activeDomain,
       body: {
         resource: name,
       }
@@ -611,7 +611,7 @@ class CoreDiscovery {
     let msg = {
       type: 'read',
       from: _this.discoveryURL,
-      to: 'domain://registry.' + activeDomain + '/',
+      to: 'domain://registry.' + activeDomain,
       body: {
         resource: "/comm",
         criteria: {
