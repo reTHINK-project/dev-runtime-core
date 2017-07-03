@@ -127,7 +127,11 @@ class SubscriptionManager {
           };
 
         } else {
-          subscriptions[subscriber].resources = subscriptions[subscriber].resources.concat(resources);
+          resources.forEach((resource) => {
+            if (!(subscriptions[subscriber].resources.includes(resource))) {
+              subscriptions[subscriber].resources.push(resource);
+            }
+          });
         }
 
         _this._storage.set('subscriptions', 1, subscriptions);
