@@ -377,7 +377,7 @@ class Registry {
       let message = { type: 'update', from: _this.registryURL,
         to: 'domain://registry.' + _this._domain,
         body: { resource: '/hyperty/' + hypertyInstance, value: 'disconnected', attribute: 'status' }};
-        
+
       _this._messageBus.postMessage(message, (reply) => {
         console.log('[Registry] unregister hyperty Reply', reply);
 
@@ -587,7 +587,7 @@ class Registry {
             let message = {
               type: 'update',
               from: _this.registryURL,
-              to: 'domain://registry.' + _this.registryDomain + '/',
+              to: 'domain://registry.' + _this.registryDomain,
               body: { resource: registration.url, value: {status: 'live'} }
             };
 
