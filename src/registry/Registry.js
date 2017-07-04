@@ -1624,7 +1624,9 @@ class Registry {
 
         // TODO since the protostubs have other states this should be revised, because the status could change from DEPLOYED to LIVE
         // TODO and this validation will trigger a new load of IDPProxy or Protostub;
-        if (registredComponent && registredComponent.hasOwnProperty('status') && (registredComponent.status === STATUS.DEPLOYED || registredComponent.status === STATUS.CREATED || registredComponent.status === STATUS.LIVE)) {
+        if (registredComponent && registredComponent.hasOwnProperty('status') &&
+         (registredComponent.status === STATUS.DEPLOYED || registredComponent.status === STATUS.CREATED ||
+          registredComponent.status === STATUS.LIVE || registredComponent.status === STATUS.DISCONNECTED)) {
           console.info('[Registry.resolve] Resolved: ', registredComponent.url, registredComponent.status);
           resolve(registredComponent.url);
         } else {
