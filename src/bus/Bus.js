@@ -223,6 +223,53 @@ class Bus {
   postMessage(inMsg, responseCallback) { }
 
   /**
+   * Function to post messages with a number of retries in case timeouts occur.
+   * @param  {Message} msg Message to send. Message ID is automatically added to the message.
+   * @param  {Function} responseCallback Optional parameter, if the developer what's automatic response management.
+   * @param  {integer} retries number of retries when timeouts occur
+   * @return {boolean} message delivery result;
+   */
+
+
+  postMessageWithRetries(msg, retries, callback) {
+
+    let _this = this;
+
+    let retry = 0;
+    //let timeout = true;
+
+    let sendMsg = function() {
+
+      return new Promise((resolve, reject) => {
+        _this.postMessage(msg, (reply) => {
+          if (reply.body.code === 408 || reply.body.code === 500) reject();
+          else {
+            console.log('[Bus.postMessageWithRetries] msg delivered: ', msg);
+            callback(reply);
+            resolve();
+          }
+        });
+      });
+    };
+
+    let tryAgain = () => {
+      sendMsg().then(()=>{
+        //timeout = false;
+        return;
+      }, ()=>{
+        console.warn(`[Bus.postMessageWithRetries] Message Bounced (retry ${retry}): '`, msg);
+        if (retry++ < retries) {
+          setTimeout(() => { tryAgain(); }, 1000);
+        } else {
+          const error = `[Error] Message Bounced (delivery attempts ${retries}): '`;
+          throw new Error(error + msg);
+        }
+      });
+    };
+    tryAgain();
+  }
+
+  /**
    * Not public available, used by the class extension implementation, to process messages from the public "postMessage" without a registered listener.
    * Used to send the message to an external interface, like a WebWorker, IFrame, etc.
    * @param  {Message.Message} msg Message

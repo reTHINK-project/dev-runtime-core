@@ -27,7 +27,7 @@ import AddressAllocation from '../allocation/AddressAllocation';
 import HypertyInstance from './HypertyInstance';
 
 import {MessageFactory} from 'service-framework/dist/MessageFactory';
-import {divideURL, isHypertyURL, isURL, isUserURL, generateGUID, getUserIdentityDomain, isBackendServiceURL, deepClone} from '../utils/utils.js';
+import {divideURL, isHypertyURL, isURL, isUserURL, generateGUID, getUserIdentityDomain, isBackendServiceURL, deepClone, postMessageWhileTimeout} from '../utils/utils.js';
 
 import 'proxy-observe';
 import { WatchingYou } from 'service-framework/dist/Utils';
@@ -77,6 +77,7 @@ class Registry {
     _this.storageManager = storageManager;
     _this.runtimeCapabilities = runtimeCapabilities;
     _this.identifier = generateGUID();
+    _this.registrationRetries = 5;// number of attempts to register Hyperties and DataObjects when errors occurs
 
     // the expires in 3600, represents 1 hour
     //the expires is in seconds, unit of measure received by the domain registry
@@ -564,14 +565,20 @@ class Registry {
             'policy'
           );*/
 
-          _this._messageBus.postMessage(message, (reply) => {
-            console.log('[Registry.registerDataObject] ===> registerDataObject Reply: ', reply);
-            if (reply.body.code === 200) {
-              resolve('ok');
-            } else {
-              reject('error on register DataObject');
-            }
-          });
+          try {
+            _this._messageBus.postMessageWithRetries(message, _this._registrationRetries, (reply) => {
+              console.log('[Registry.registerDataObject] ===> registerDataObject Reply: ', reply);
+              if (reply.body.code === 200) {
+                resolve('ok');
+              } else {
+                reject('error on register DataObject');
+              }
+            });
+          } catch (e) {
+            console.error(e);
+            reject(e);
+          }
+
 
           //timer to keep the registration alive
           // the time is defined by a little less than half of the expires time defined
@@ -925,7 +932,7 @@ class Registry {
         let emailURL = userProfile.userURL;
 
         if (_this._messageBus === undefined) {
-          reject('MessageBus not found on registerStub');
+          reject('[Registry registerHyperty] MessageBus is undefined');
         } else {
           //call check if the protostub exist: to be removed
           /*  _this.resolve(domainUrl).then(function(a) {
@@ -1024,46 +1031,53 @@ class Registry {
 
                 console.log('[Registry registerHyperty] updating Hyperty registration at domain registry  - ', message);
 
-                _this._messageBus.postMessage(message, (reply) => {
-                  console.log('[Registry registerHyperty] Hyperty registration update response: ', reply);
+                try {
+                  _this._messageBus.postMessageWithRetries(message, _this.registrationRetries, (reply) => {
+                    console.log('[Registry registerHyperty] Hyperty registration update response: ', reply);
 
-                  if (reply.body.code === 200) {
-                    resolve(addressURL.address[0]);
-                  } else if (reply.body.code === 404) {
-                    console.log('[Registry registerHyperty] The update was not possible. Registering new Hyperty at domain registry');
+                    if (reply.body.code === 200) {
+                      resolve(addressURL.address[0]);
+                    } else if (reply.body.code === 404) {
+                      console.log('[Registry registerHyperty] The update was not possible. Registering new Hyperty at domain registry');
 
-                    messageValue = {
-                      user: emailURL,
-                      descriptor: descriptorURL,
-                      url: addressURL.address[0],
-                      expires: registrationExpires,
-                      resources: hypertyCapabilities.resources,
-                      dataSchemes: hypertyCapabilities.dataSchema,
-                      runtime: runtime,
-                      status: status
-                    };
+                      messageValue = {
+                        user: emailURL,
+                        descriptor: descriptorURL,
+                        url: addressURL.address[0],
+                        expires: registrationExpires,
+                        resources: hypertyCapabilities.resources,
+                        dataSchemes: hypertyCapabilities.dataSchema,
+                        runtime: runtime,
+                        status: status
+                      };
 
-                    if (p2pHandler) {
-                      messageValue.p2pHandler = p2pHandler;
-                      messageValue.p2pRequester = p2pRequester;
-                    }
+                      if (p2pHandler) {
+                        messageValue.p2pHandler = p2pHandler;
+                        messageValue.p2pRequester = p2pRequester;
+                      }
 
-                    message = {type: 'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain, body: {value: messageValue, policy: 'policy'}};
+                      message = {type: 'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain, body: {value: messageValue, policy: 'policy'}};
 
-                    _this._messageBus.postMessage(message, (reply) =>{
-                      console.log('[Registry registerHyperty] Hyperty registration update response: ', reply);
+                      try {
+                        _this._messageBus.postMessageWithRetries(message, _this.registrationRetries, (reply) =>{
+                          console.log('[Registry registerHyperty] Hyperty registration update response: ', reply);
 
-                      if (reply.body.code === 200)
-                        resolve(addressURL.address[0]);
-                      else
-                        reject('Failed to register an Hyperty');
+                          if (reply.body.code === 200) resolve(addressURL.address[0]);
+                          else throw new Error('Failed to register an Hyperty: ' + reply);
 
-                    });
+                        });
+                      } catch (e) {
+                        console.error(e);
+                        reject(e);
+                      }
+                    } else throw new Error('Failed to register an Hyperty: ', reply);
 
-                  } else {
-                    reject('Failed to register an Hyperty');
-                  }
-                });
+                  });
+
+                } catch (e) {
+                  console.error(e);
+                  reject(e);
+                }
 
                 //timer to keep the registration alive
                 // the time is defined by a little less than half of the expires time defined
@@ -1095,7 +1109,7 @@ class Registry {
           });
         }
       }, function(err) {
-        reject('[Registry registerHyperty] Failed to obtain an identity', err);
+        reject('[Registry registerHyperty] ', err);
       });
     });
   }
