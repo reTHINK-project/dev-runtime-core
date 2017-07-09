@@ -65,4 +65,4 @@ Taking into account the results for PoliTHINK and XACML in both platforms, we ob
 
 ### 5. Summary
 
-In this chapter we presented the evaluation of the implemented solution. For the two types of policies, i.e., that are composed of simple or advanced conditions, we studied the behavior of the solution by observing the time it takes to load and evaluate policies while increasing the policies' complexity. Our implementation revealed itself as an efficient solution for the reTHINK framework when compared to the XACML policy specification language, both in terms of memory usage and processing time.
+We presented the evaluation of the implemented solution. For the two types of policies, i.e., that are composed of simple or advanced conditions, we studied the behavior of the solution by observing the time it takes to load and evaluate policies while increasing the policies' complexity. Our implementation revealed itself as an efficient solution for the reTHINK framework when compared to the XACML policy specification language, both in terms of memory usage and processing time.
