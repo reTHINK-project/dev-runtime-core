@@ -37,7 +37,7 @@ import Descriptors from './Descriptors';
 import { runtimeConfiguration } from './runtimeConfiguration';
 import { runtimeUtils } from './runtimeUtils';
 
-import GraphConnector from '../graphconnector/GraphConnector';
+//import GraphConnector from '../graphconnector/GraphConnector';
 
 import CoreDiscovery from '../discovery/CoreDiscovery';
 // import Discovery from '../discovery/Discovery';
@@ -279,10 +279,10 @@ class RuntimeUA {
         ];
 
         // Instantiate the Graph Connector
-        this.graphConnector = new GraphConnector(this.runtimeURL, this.messageBus, this.storageManager);
+        //this.graphConnector = new GraphConnector(this.runtimeURL, this.messageBus, this.storageManager);
 
         // Instantiate Discovery
-        this.coreDiscovery = new CoreDiscovery(this.runtimeURL, this.messageBus, this.graphConnector, this.runtimeFactory, this.registry);
+        this.coreDiscovery = new CoreDiscovery(this.runtimeURL, this.messageBus, null, this.runtimeFactory, this.registry);
 
         // Add to App Sandbox the listener;
         appSandbox.addListener('*', (msg) => {

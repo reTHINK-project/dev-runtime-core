@@ -38,7 +38,7 @@ export const descriptors = {
       messageSchemas: '',
       dataObjects: [],
       accessControlPolicy: 'somePolicy',
-      p2pHandlerStub: 'https://catalogue.sp.domain/.well-known/protocolstub/P2PHandlerStub',
+      p2pHandlerStub: '',
       p2pRequesterStub: ''
     }
   },
