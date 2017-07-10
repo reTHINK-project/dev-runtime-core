@@ -18,7 +18,7 @@ module.exports = function(config) {
       devtool: 'inline-source-map'
     },
 
-    reporters: ['spec'],
+    reporters: ['spec', 'html'],
 
     specReporter: {
       maxLogLines: 5,             // limit number of lines logged per test
@@ -30,13 +30,38 @@ module.exports = function(config) {
       failFast: false              // test would finish with error when a first fail occurs.
     },
 
+    // the default configuration
+    htmlReporter: {
+      outputFile: 'test/units.html',
+
+      // Optional
+      pageTitle: 'Unit Tests',
+      subPageTitle: 'reThink Project performance tests',
+      groupSuites: true,
+      useCompactStyle: true,
+      useLegacyStyle: true
+    },
+
     plugins: ['karma-spec-reporter',
-              'karma-webpack',
-              'karma-sourcemap-loader',
-              'karma-mocha', 'karma-chai',
-              'karma-sinon',
-              'karma-mocha-reporter',
-              'karma-chrome-launcher'],
+      'karma-webpack',
+      'karma-sourcemap-loader',
+      'karma-mocha', 'karma-chai',
+      'karma-sinon',
+      'karma-htmlfile-reporter',
+      'karma-mocha-reporter',
+      'karma-chrome-launcher'],
+
+    customDebugFile: './test/units.html',
+
+    // customContextFile: './test/units.html',
+
+    client: {
+      mocha: {
+        reporter: 'html'
+      },
+      runInParent: true,
+      captureConsole: true
+    },
 
     port: 9876,
     colors: true,

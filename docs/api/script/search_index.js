@@ -25,6 +25,12 @@ window.esdocSearchIndex = [
   ],
   [
     "",
+    "test-file/test/PerformanceTests/HypertyRegistration.spec.js.html#lineNumber15",
+    "AddressAllocation",
+    "test"
+  ],
+  [
+    "",
     "test-file/test/AddressAllocation.spec.js.html#lineNumber15",
     "AddressAllocation",
     "test"
@@ -39,6 +45,12 @@ window.esdocSearchIndex = [
     "",
     "test-file/test/AddressAllocation.spec.js.html#lineNumber64",
     "AddressAllocation should create a new hyperty address",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PerformanceTests/HypertyRegistration.spec.js.html#lineNumber64",
+    "AddressAllocation should register a new hyperty address",
     "test"
   ],
   [
@@ -471,6 +483,30 @@ window.esdocSearchIndex = [
     "",
     "test-file/test/CoreDiscovery.spec.js.html#lineNumber140",
     "CoreDiscovery discoverHypertyPerURL() should conclude the advanced search without error",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PerformanceTests/TradeMessages.spec.js.html#lineNumber6",
+    "Deliver Messages",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PerformanceTests/TradeMessages.spec.js.html#lineNumber39",
+    "Deliver Messages pipeline msg change",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PerformanceTests/TradeMessages.spec.js.html#lineNumber7",
+    "Deliver Messages sending message ",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PerformanceTests/TradeMessages.spec.js.html#lineNumber56",
+    "Deliver Messages sending using external system",
     "test"
   ],
   [
@@ -1561,13 +1597,37 @@ window.esdocSearchIndex = [
   ],
   [
     "",
+    "test-file/test/DataSynchronisation.spec.js.html#lineNumber21",
+    "RuntimeUA",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PerformanceTests/RuntimeStubIdpDeploy.spec.js.html#lineNumber31",
+    "RuntimeUA",
+    "test"
+  ],
+  [
+    "",
     "test-file/test/RuntimeUA.spec.js.html#lineNumber31",
     "RuntimeUA",
     "test"
   ],
   [
     "",
+    "test-file/test/DataSynchronisation.spec.js.html#lineNumber362",
+    "RuntimeUA Data Synch",
+    "test"
+  ],
+  [
+    "",
     "test-file/test/RuntimeUA.spec.js.html#lineNumber93",
+    "RuntimeUA constructor()",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PerformanceTests/RuntimeStubIdpDeploy.spec.js.html#lineNumber78",
     "RuntimeUA constructor()",
     "test"
   ],
@@ -1599,6 +1659,12 @@ window.esdocSearchIndex = [
     "",
     "test-file/test/RuntimeUA.spec.js.html#lineNumber95",
     "RuntimeUA constructor() expects the runtime was ready",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PerformanceTests/RuntimeStubIdpDeploy.spec.js.html#lineNumber80",
+    "RuntimeUA constructor() should load Runtime with success",
     "test"
   ],
   [
@@ -1651,6 +1717,18 @@ window.esdocSearchIndex = [
   ],
   [
     "",
+    "test-file/test/PerformanceTests/RuntimeStubIdpDeploy.spec.js.html#lineNumber122",
+    "RuntimeUA loadIdpProxy(google.com)",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PerformanceTests/RuntimeStubIdpDeploy.spec.js.html#lineNumber124",
+    "RuntimeUA loadIdpProxy(google.com) IDP Proxy should be deployed",
+    "test"
+  ],
+  [
+    "",
     "test-file/test/RuntimeUA.spec.js.html#lineNumber295",
     "RuntimeUA loadIdpProxy(google.com) should be a Promise",
     "test"
@@ -1669,8 +1747,20 @@ window.esdocSearchIndex = [
   ],
   [
     "",
+    "test-file/test/PerformanceTests/RuntimeStubIdpDeploy.spec.js.html#lineNumber108",
+    "RuntimeUA loadStub(sp-domain)",
+    "test"
+  ],
+  [
+    "",
     "test-file/test/RuntimeUA.spec.js.html#lineNumber254",
     "RuntimeUA loadStub(sp-domain)",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PerformanceTests/RuntimeStubIdpDeploy.spec.js.html#lineNumber110",
+    "RuntimeUA loadStub(sp-domain) Stub should be deployed",
     "test"
   ],
   [
@@ -1689,6 +1779,24 @@ window.esdocSearchIndex = [
     "",
     "test-file/test/RuntimeUA.spec.js.html#lineNumber256",
     "RuntimeUA loadStub(sp-domain) should throw when given no arguments",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/DataSynchronisation.spec.js.html#lineNumber312",
+    "RuntimeUA should create a new data Object address",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/DataSynchronisation.spec.js.html#lineNumber291",
+    "RuntimeUA should create a new hyperty address for Reporter",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/DataSynchronisation.spec.js.html#lineNumber203",
+    "RuntimeUA should load Runtime with success",
     "test"
   ],
   [
@@ -1747,73 +1855,97 @@ window.esdocSearchIndex = [
   ],
   [
     "",
-    "test-file/test/SyncherManager.spec.js.html#lineNumber872",
+    "test-file/test/PerformanceTests/DataSynchronisation.spec.js.html#lineNumber18",
+    "SyncherManager",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PerformanceTests/DataSynchronisation.spec.js.html#lineNumber167",
+    "SyncherManager Data Synchronisation between reporter and observer",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/SyncherManager.spec.js.html#lineNumber882",
     "SyncherManager children deltas generate and process",
     "test"
   ],
   [
     "",
-    "test-file/test/SyncherManager.spec.js.html#lineNumber912",
+    "test-file/test/SyncherManager.spec.js.html#lineNumber922",
     "SyncherManager create and delete",
     "test"
   ],
   [
     "",
-    "test-file/test/SyncherManager.spec.js.html#lineNumber819",
+    "test-file/test/SyncherManager.spec.js.html#lineNumber829",
     "SyncherManager observer addChild",
     "test"
   ],
   [
     "",
-    "test-file/test/SyncherManager.spec.js.html#lineNumber800",
+    "test-file/test/SyncherManager.spec.js.html#lineNumber810",
     "SyncherManager reporter addChild",
     "test"
   ],
   [
     "",
-    "test-file/test/SyncherManager.spec.js.html#lineNumber189",
+    "test-file/test/SyncherManager.spec.js.html#lineNumber194",
     "SyncherManager reporter observer integration",
     "test"
   ],
   [
     "",
-    "test-file/test/SyncherManager.spec.js.html#lineNumber162",
+    "test-file/test/SyncherManager.spec.js.html#lineNumber167",
     "SyncherManager reporter read",
     "test"
   ],
   [
     "",
-    "test-file/test/SyncherManager.spec.js.html#lineNumber241",
+    "test-file/test/SyncherManager.spec.js.html#lineNumber251",
     "SyncherManager should resume observers",
     "test"
   ],
   [
     "",
-    "test-file/test/SyncherManager.spec.js.html#lineNumber303",
+    "test-file/test/PerformanceTests/DataSynchronisation.spec.js.html#lineNumber224",
+    "SyncherManager should resume observers",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PerformanceTests/DataSynchronisation.spec.js.html#lineNumber286",
     "SyncherManager should resume reporters",
     "test"
   ],
   [
     "",
-    "test-file/test/SyncherManager.spec.js.html#lineNumber1015",
+    "test-file/test/SyncherManager.spec.js.html#lineNumber313",
+    "SyncherManager should resume reporters",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/SyncherManager.spec.js.html#lineNumber1030",
     "SyncherManager should use the storageManager",
     "test"
   ],
   [
     "",
-    "test-file/test/SyncherManager.spec.js.html#lineNumber1094",
+    "test-file/test/SyncherManager.spec.js.html#lineNumber1109",
     "SyncherManager should use the storageManager should resume the url stored on storageManager",
     "test"
   ],
   [
     "",
-    "test-file/test/SyncherManager.spec.js.html#lineNumber1023",
+    "test-file/test/SyncherManager.spec.js.html#lineNumber1038",
     "SyncherManager should use the storageManager should save the url on storageManager",
     "test"
   ],
   [
     "",
-    "test-file/test/SyncherManager.spec.js.html#lineNumber974",
+    "test-file/test/SyncherManager.spec.js.html#lineNumber984",
     "SyncherManager subscribe and unsubscribe",
     "test"
   ],
@@ -1950,6 +2082,12 @@ window.esdocSearchIndex = [
     "method"
   ],
   [
+    "src/bus/bus.js~bus#postmessagewithretries",
+    "class/src/bus/Bus.js~Bus.html#instance-method-postMessageWithRetries",
+    "src/bus/Bus.js~Bus#postMessageWithRetries",
+    "method"
+  ],
+  [
     "src/bus/bus.js~bus#removealllistenersof",
     "class/src/bus/Bus.js~Bus.html#instance-method-removeAllListenersOf",
     "src/bus/Bus.js~Bus#removeAllListenersOf",
@@ -2064,6 +2202,12 @@ window.esdocSearchIndex = [
     "testFile"
   ],
   [
+    "test/datasynchronisation.spec.js",
+    "test-file/test/DataSynchronisation.spec.js.html",
+    "test/DataSynchronisation.spec.js",
+    "testFile"
+  ],
+  [
     "test/descriptors.spec.js",
     "test-file/test/Descriptors.spec.js.html",
     "test/Descriptors.spec.js",
@@ -2091,6 +2235,30 @@ window.esdocSearchIndex = [
     "test/minibus.spec.js",
     "test-file/test/MiniBus.spec.js.html",
     "test/MiniBus.spec.js",
+    "testFile"
+  ],
+  [
+    "test/performancetests/datasynchronisation.spec.js",
+    "test-file/test/PerformanceTests/DataSynchronisation.spec.js.html",
+    "test/PerformanceTests/DataSynchronisation.spec.js",
+    "testFile"
+  ],
+  [
+    "test/performancetests/hypertyregistration.spec.js",
+    "test-file/test/PerformanceTests/HypertyRegistration.spec.js.html",
+    "test/PerformanceTests/HypertyRegistration.spec.js",
+    "testFile"
+  ],
+  [
+    "test/performancetests/runtimestubidpdeploy.spec.js",
+    "test-file/test/PerformanceTests/RuntimeStubIdpDeploy.spec.js.html",
+    "test/PerformanceTests/RuntimeStubIdpDeploy.spec.js",
+    "testFile"
+  ],
+  [
+    "test/performancetests/trademessages.spec.js",
+    "test-file/test/PerformanceTests/TradeMessages.spec.js.html",
+    "test/PerformanceTests/TradeMessages.spec.js",
     "testFile"
   ],
   [

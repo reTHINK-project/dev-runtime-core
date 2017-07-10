@@ -1,11 +1,11 @@
 {
-  "coverage": "76.19%",
-  "expectCount": 21,
-  "actualCount": 16,
+  "coverage": "77.27%",
+  "expectCount": 22,
+  "actualCount": 17,
   "files": {
     "src/bus/Bus.js": {
-      "expectCount": 8,
-      "actualCount": 7,
+      "expectCount": 9,
+      "actualCount": 8,
       "undocumentLines": [
         40
       ]

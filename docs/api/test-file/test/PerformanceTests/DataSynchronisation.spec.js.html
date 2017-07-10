@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">test/PerformanceTests/DataSynchronisation.spec.js | Service Framework API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  <a href="./manual/index.html" data-ice="manualHeaderLink">Manual</a>
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  <a href="test.html" data-ice="testLink">Test</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html">Bus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html">MiniBus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Pipeline.js~Pipeline.html">Pipeline</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">test/PerformanceTests/DataSynchronisation.spec.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import { runtimeFactory } from &apos;../resources/runtimeFactory&apos;;
+import {Syncher, DataObjectReporter, DataObjectObserver} from &apos;service-framework/dist/Syncher&apos;;
+import SyncherManager from &apos;../../src/syncher/SyncherManager&apos;;
+import DataObjectsStorage from &apos;../../src//store-objects/DataObjectsStorage&apos;;
+import MessageBus from &apos;../../src/bus/MessageBus&apos;;
+
+import PEP from &apos;../../src/policy/PEP&apos;;
+import RuntimeCoreCtx from &apos;../../src/policy/context/RuntimeCoreCtx&apos;;
+
+import chai from &apos;chai&apos;;
+import chaiAsPromised from &apos;chai-as-promised&apos;;
+
+chai.config.truncateThreshold = 0;
+
+let expect = chai.expect;
+chai.use(chaiAsPromised);
+
+describe(&apos;SyncherManager&apos;, function() {
+  let storageManager = runtimeFactory.storageManager();
+  let dataObjectsStorage = new DataObjectsStorage(storageManager, {});
+
+  let schemaURL = &apos;schema://fake-schema-url&apos;;
+  let runtimeURL = &apos;hyperty-runtime://fake-runtime&apos;;
+
+  let objURL = &apos;resource://obj1&apos;;
+  let objURLChanges = objURL + &apos;/changes&apos;;
+
+  let hyperURL1 = &apos;hyperty://h1.domain/h1&apos;;
+  let hyperURL2 = &apos;hyperty://h2.domain/h2&apos;;
+
+  let initialData = {
+    communication: { name: &apos;chat-x&apos; },
+    x: 10, y: 10
+  };
+
+  let msgNodeResponseFunc = (bus, msg) =&gt; {
+
+    if (msg.type === &apos;subscribe&apos;) {
+      if (msg.id === 2) {
+        //reporter subscribe
+        expect(msg).to.contain.all.keys({
+          id: 2, type: &apos;subscribe&apos;, from: &apos;hyperty-runtime://fake-runtime/sm&apos;, to: &apos;domain://msg-node.h1.domain/sm&apos;,
+          body: { resources: [objURL + &apos;/children/children1&apos;, objURL + &apos;/children/children2&apos;], source: hyperURL1 }
+        });
+      } else {
+        //observer subscribe
+        expect(msg).to.contain.all.keys({
+          id: 5, type: &apos;subscribe&apos;, from: &apos;hyperty-runtime://fake-runtime/sm&apos;, to: &apos;domain://msg-node.obj1/sm&apos;,
+          body: { resources: [objURL + &apos;/changes&apos;, objURL + &apos;/children/children1&apos;, objURL + &apos;/children/children2&apos;], source: hyperURL2 }
+        });
+      }
+
+      //simulate msg-node response
+      bus.postMessage({
+        id: msg.id, type: &apos;response&apos;, from: msg.to, to: msg.from,
+        body: { code: 200 }
+      });
+    }
+  };
+
+  //fake object allocator -&gt; always return the same URL
+  let allocator = {
+    create: () =&gt; {
+      return new Promise((resolve) =&gt; {
+        resolve({address: [objURL]});
+      });
+    }
+  };
+
+  let registry = {
+    registerDataObject: (objectRegistration) =&gt; {
+      console.log(&apos;REGISTRY-OBJECT: &apos;, objectRegistration);
+      return new Promise((resolve) =&gt; {
+        resolve(&apos;ok&apos;);
+      });
+    },
+
+    isInterworkingProtoStub: (url) =&gt; {
+      console.log(&apos;isInterworkingProtoStub: &apos;, url);
+      return false;
+    },
+
+    unregisterDataObject: (url) =&gt; {
+      console.log(&apos;Unregister Data Object:&apos;, url);
+      return true;
+    },
+
+    getPreAuthSubscribers: () =&gt; {
+      return [&apos;hyperty://domain/hyperty-instance&apos;];
+    },
+    getHypertyName: () =&gt; {
+      return &apos;HypertyChat&apos;;
+    },
+    isDataObjectURL: (dataObjectURL) =&gt; {
+      let splitURL = dataObjectURL.split.skip(&apos;://&apos;);
+      return splitURL[0] === &apos;comm&apos;;
+    },
+    registerSubscribedDataObject: () =&gt; {},
+    registerSubscriber: () =&gt; {},
+    isLocal: (url) =&gt; {
+      console.log(&apos;isLocal: &apos;, url);
+      return false;
+    },
+    runtimeURL: &apos;runtime://localhost/7601&apos;
+  };
+
+  let identityModule = {
+    decryptMessage: (message) =&gt; {
+      return new Promise((resolve) =&gt; {
+        resolve(message);
+      });
+    },
+    encryptMessage: (message) =&gt; {
+      return new Promise((resolve) =&gt; {
+        resolve(message);
+      });
+    },
+    getToken: () =&gt; {
+      return new Promise((resolve) =&gt; {
+        resolve({ userProfile: {username: &apos;user@domain&apos; } });
+      });
+    }
+  };
+
+  let catalog = {
+    getDataSchemaDescriptor: (schema) =&gt; {
+      console.log(&apos;REQUEST-SCHEMA: &apos;, schema);
+      return new Promise((resolve, reject) =&gt; {
+        if (schema) {
+          resolve({ sourcePackage: { sourceCode: {
+            properties: {
+              scheme: { constant: &apos;resource&apos; },
+              children: { constant: [&apos;children1&apos;, &apos;children2&apos;] }
+            }
+          }}});
+        } else {
+          reject(&apos;No schema provided&apos;);
+        }
+      });
+    }
+  };
+
+  let runtimeCoreCtx = new RuntimeCoreCtx(runtimeURL, identityModule, registry, storageManager, runtimeFactory.runtimeCapabilities());
+  let policyEngine = new PEP(runtimeCoreCtx);
+
+  let handlers = [
+
+    // Policy message authorise
+    function(ctx) {
+      policyEngine.authorise(ctx.msg).then(function(changedMgs) {
+
+        changedMgs.body.identity = {
+          userProfile: {
+            userURL: &apos;user://user@domain.pt&apos;
+          }
+        };
+
+        ctx.msg = changedMgs;
+        ctx.next();
+      }).catch(function(reason) {
+        console.error(reason);
+        ctx.fail(reason);
+      });
+    }
+  ];
+
+  it(&apos;Data Synchronisation between reporter and observer&apos;, function(done) {
+    let bus = new MessageBus();
+    bus.pipeline.handlers = handlers;
+
+    bus._onPostMessage = (msg) =&gt; {
+      console.log(&apos;[reporter observer integration - onPostMessage]: &apos;, msg);
+
+      msgNodeResponseFunc(bus, msg);
+    };
+
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
+
+    let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
+    sync2.onNotification((notifyEvent) =&gt; {
+      console.log(&apos;on-create-notify: &apos;, notifyEvent);
+
+      notifyEvent.ack();
+
+      sync2.subscribe(schemaURL, notifyEvent.url, true, false).then((doo) =&gt; {
+        console.log(&apos;on-subscribe-reply&apos;, doo, doo.data);
+
+        doo.onChange(&apos;*&apos;, (changeEvent) =&gt; {
+          console.log(&apos;on-change: &apos;, JSON.stringify(changeEvent));
+          expect(changeEvent).to.contain.all.keys({ cType: &apos;add&apos;, oType: &apos;object&apos;, field: &apos;test&apos;, data: [&apos;a&apos;, &apos;b&apos;, &apos;c&apos;] });
+          expect(doo.data).to.contain.all.keys({ communication: { name: &apos;chat-x&apos; }, x: 10, y: 10, test: [&apos;a&apos;, &apos;b&apos;, &apos;c&apos;] });
+          done();
+        });
+      });
+    });
+
+    let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
+    sync1.create(schemaURL, [], initialData, true, false).then((dor) =&gt; {
+      console.log(&apos;on-create-reply&apos;, dor);
+      dor.inviteObservers([hyperURL2]);
+
+      dor.onRead((event) =&gt; {
+        console.log(&apos;on-read&apos;);
+        event.accept();
+      });
+
+      dor.onSubscription((subscribeEvent) =&gt; {
+        console.log(&apos;on-resources: &apos;, subscribeEvent);
+
+        //we may have some problems in the time sequence here.
+        //change-msg can reach the observer first
+        subscribeEvent.accept();
+
+        // TODO: We had the settimeout because when the proxyobserve trigger will trigger with this version of object..
+        // this hack should make it trigger in next cycle;
+        setTimeout(() =&gt; {
+          dor.data.test = [&apos;a&apos;, &apos;b&apos;, &apos;c&apos;];
+        });
+
+      });
+    });
+  });
+
+  it(&apos;should resume observers&apos;, function(done) {
+
+    let bus = new MessageBus();
+    bus._onMessage((a) =&gt; {
+      console.log(&apos;BUS:&apos;, a);
+    });
+
+    bus._onPostMessage = (msg) =&gt; {
+      console.log(&apos;_onPostMessage: &apos;, msg);
+      msgNodeResponseFunc(bus, msg);
+    };
+
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
+
+    let a;
+
+    let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
+    sync2.resumeObservers({}).then((doos) =&gt; {
+
+      console.log(&apos;on-subscribe-resume-reply&apos;, doos);
+
+      Object.values(doos).forEach((doo) =&gt; {
+        console.log(&apos;on-subscribe-resume-reply DataObjectObserver: &apos;, doo);
+
+        expect(doo.data).to.contain.all.keys({ communication: { name: &apos;chat-x&apos; }, x: 10, y: 10, test: [&apos;a&apos;, &apos;b&apos;, &apos;c&apos;]});
+
+        // doo.onChange(&apos;*&apos;, (changeEvent) =&gt; {
+        //   console.log(&apos;on-subscribe-resume on-change: &apos;, JSON.stringify(changeEvent), doo.data);
+        //   expect(changeEvent).to.contain.all.keys({ cType: &apos;add&apos;, oType: &apos;object&apos;, field: &apos;test&apos;, data: [&apos;a&apos;, &apos;b&apos;, &apos;c&apos;] });
+        // });
+
+        done();
+      });
+
+      a.data.test = [&apos;a&apos;, &apos;b&apos;, &apos;c&apos;];
+
+    }).catch((error) =&gt; {
+      expect(error).to.be.equal(&apos;No data objects observers to be resumed&apos;)
+      done();
+    });
+
+    let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
+    sync1.create(schemaURL, [], initialData).then((dor) =&gt; {
+      console.log(&apos;on-create-resume-reply&apos;, dor);
+      a = dor;
+      dor.inviteObservers([hyperURL2]);
+
+      dor.onRead((readEvent) =&gt; {
+        readEvent.accept();
+      });
+
+      dor.onSubscription((subscribeEvent) =&gt; {
+        console.log(&apos;on-resume-resources: &apos;, subscribeEvent);
+
+        //we may have some problems in the time sequence here.
+        //change-msg can reach the observer first
+        subscribeEvent.accept();
+      });
+    });
+
+  });
+
+  it(&apos;should resume reporters&apos;, function(done) {
+
+    let bus = new MessageBus();
+
+    bus._onPostMessage = (msg) =&gt; {
+      console.log(&apos;_onPostMessage: &apos;, msg);
+      msgNodeResponseFunc(bus, msg);
+    };
+
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
+
+    let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
+    sync1.resumeReporters({}).then((dors) =&gt; {
+
+      console.log(&apos;on-subscribe-resume-reply&apos;, dors);
+
+      Object.values(dors).forEach((dor) =&gt; {
+
+        console.log(&apos;on-create-resume-reply DataObjectReporter: &apos;, dor);
+
+        dor.data.newTest = [&apos;a&apos;, &apos;b&apos;, &apos;c&apos;];
+        expect(dor.data).to.contain.all.keys({ communication: { name: &apos;chat-x&apos; }, x: 10, y: 10, test: [&apos;a&apos;, &apos;b&apos;, &apos;c&apos;], newTest: [&apos;a&apos;, &apos;b&apos;, &apos;c&apos;] });
+        done();
+
+      });
+
+    }).catch((error) =&gt; {
+      console.log(&apos;AQUI:&apos;, error);
+      expect(error).to.be.equal(&apos;No data objects reporters to be resumed&apos;)
+      done();
+    });
+
+  });
+
+});
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.5.2)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>
