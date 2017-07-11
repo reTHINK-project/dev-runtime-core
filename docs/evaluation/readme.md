@@ -1,8 +1,17 @@
 ## Runtime evaluation
 
+### Description of Component
+
+The Hyperty Runtime supports the execution of Hyperties including:
+•	Deployment of Hyperties
+•	Deployment of Protocol Stubs
+•	Communication between Hyperties
+•	Management of Identities associated to Hyperties
+
+
 ###	Metrics
 
-Device side Hyperty Runtime (browser and standalone runtime) as well as Server side Runtime (NodeJS runtime) were.
+Device side Hyperty Runtime (browser and standalone runtime) as well as Server side Runtime (NodeJS runtime) were implemented based on common runtime core platform.
 
 #### Functional Metrics
 
@@ -30,7 +39,7 @@ Messages are correctly delivered by the Runtime:
 *	Among Hyperties in different runtimes, from the same domain (intra-domain)
 *	Among Hyperties in different runtimes, from different domains (inter-domain)
 
-Identity Management
+Identity Management:
 
 *	User is able to select IDP to be used independently of the Hyperty
 *	User is able to login with selected IDP
@@ -38,18 +47,18 @@ Identity Management
 *	Identity Assertions contained in the body of incoming messages are correctly validated by the IDP
 * Communication between two hyperties is encrypted with tokens generated from the IdP Proxies.
 
-Data Synchronisation
+Data Synchronisation:
 
 * Reporter creates a new object and invites one or more Observers
 * Observer subscribes an existing object
 * The object handled by the Observer is synchronised with the changes performed by the Reporter
 
-Address reusage and data objects resume
+Address reusage and data objects resume:
+
 * Address allocated to hyperty is reused between sessions
 * Address allocated to data objects are reused between sessions
 * Data Objects created by Reporters are resumed between sessions
 * Data Objects subscribed by Observers are resumed between sessions
-
 
 #### Non-Functional Metrics
 
