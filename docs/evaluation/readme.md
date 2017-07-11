@@ -89,7 +89,7 @@ For the Core runtime, the execution time is the only non-functional metric used.
 
 The evaluation of the Hyperty Runtime is performed with Karma Unit tests implemented [here](https://github.com/reTHINK-project/dev-runtime-core/tree/master/test), and for each one the execution time was measured as defined above. For quality control purposes, these tests are automatically executed every time a `git push` or `git pull request` is performed to develop and master branch and its status is depicted following best Continuous Delivery practices. The quality status is depicted in the Github repository *readme* page:
 
-![Runtime Quality Status](build-status.png)
+![Runtime Quality Status](build-status.PNG)
 
 The most updated full detailed report of the tests execution are provided at https://travis-ci.org/reTHINK-project/dev-runtime-core where we can continuously monitor the runtime quality including:
 
@@ -105,7 +105,7 @@ The most updated full detailed report of the tests execution are provided at htt
 * Identity Assertions contained in the body of incoming messages are correctly validated by the IDP
 
 
-![Travis Automated Tests Report Sample](travis-report.png)
+![Travis Automated Tests Report Sample](travis-report.PNG)
 
 ###	Non-Functional Runtime Tests
 
