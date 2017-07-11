@@ -15,7 +15,7 @@ chai.config.truncateThreshold = 0;
 let expect = chai.expect;
 chai.use(chaiAsPromised);
 
-describe('SyncherManager', function() {
+describe('Data Synchronisation', function() {
   let storageManager = runtimeFactory.storageManager();
   let dataObjectsStorage = new DataObjectsStorage(storageManager, {});
 
@@ -32,151 +32,181 @@ describe('SyncherManager', function() {
     communication: { name: 'chat-x' },
     x: 10, y: 10
   };
+  let msgNodeResponseFunc;
+  let allocator;
+  let registry;
+  let identityModule;
+  let catalog;
+  let runtimeCoreCtx;
+  let policyEngine;
+  let bus;
+  let dataObjectReporter;
+  let dataObjectObserver;
+  let sync1;
+  let sync2;
 
-  let msgNodeResponseFunc = (bus, msg) => {
+  before(() => {
+    msgNodeResponseFunc = (bus, msg) => {
 
-    if (msg.type === 'subscribe') {
-      if (msg.id === 2) {
-        //reporter subscribe
-        expect(msg).to.contain.all.keys({
-          id: 2, type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.h1.domain/sm',
-          body: { resources: [objURL + '/children/children1', objURL + '/children/children2'], source: hyperURL1 }
-        });
-      } else {
-        //observer subscribe
-        expect(msg).to.contain.all.keys({
-          id: 5, type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.obj1/sm',
-          body: { resources: [objURL + '/changes', objURL + '/children/children1', objURL + '/children/children2'], source: hyperURL2 }
+      if (msg.type === 'subscribe') {
+        if (msg.id === 2) {
+          //reporter subscribe
+          expect(msg).to.contain.all.keys({
+            id: 2, type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.h1.domain/sm',
+            body: { resources: [objURL + '/children/children1', objURL + '/children/children2'], source: hyperURL1 }
+          });
+        } else {
+          //observer subscribe
+          expect(msg).to.contain.all.keys({
+            id: 5, type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.obj1/sm',
+            body: { resources: [objURL + '/changes', objURL + '/children/children1', objURL + '/children/children2'], source: hyperURL2 }
+          });
+        }
+
+        //simulate msg-node response
+        bus.postMessage({
+          id: msg.id, type: 'response', from: msg.to, to: msg.from,
+          body: { code: 200 }
         });
       }
+    };
 
-      //simulate msg-node response
-      bus.postMessage({
-        id: msg.id, type: 'response', from: msg.to, to: msg.from,
-        body: { code: 200 }
-      });
-    }
-  };
+    allocator = {
+      create: () => {
+        return new Promise((resolve) => {
+          resolve({address: [objURL]});
+        });
+      }
+    };
 
-  //fake object allocator -> always return the same URL
-  let allocator = {
-    create: () => {
-      return new Promise((resolve) => {
-        resolve({address: [objURL]});
-      });
-    }
-  };
+    registry = {
+      registerDataObject: (objectRegistration) => {
+        console.log('REGISTRY-OBJECT: ', objectRegistration);
+        return new Promise((resolve) => {
+          resolve('ok');
+        });
+      },
 
-  let registry = {
-    registerDataObject: (objectRegistration) => {
-      console.log('REGISTRY-OBJECT: ', objectRegistration);
-      return new Promise((resolve) => {
-        resolve('ok');
-      });
-    },
+      isInterworkingProtoStub: (url) => {
+        console.log('isInterworkingProtoStub: ', url);
+        return false;
+      },
 
-    isInterworkingProtoStub: (url) => {
-      console.log('isInterworkingProtoStub: ', url);
-      return false;
-    },
+      unregisterDataObject: (url) => {
+        console.log('Unregister Data Object:', url);
+        return true;
+      },
 
-    unregisterDataObject: (url) => {
-      console.log('Unregister Data Object:', url);
-      return true;
-    },
+      getPreAuthSubscribers: () => {
+        return ['hyperty://domain/hyperty-instance'];
+      },
+      getHypertyName: () => {
+        return 'HypertyChat';
+      },
+      isDataObjectURL: (dataObjectURL) => {
+        let splitURL = dataObjectURL.split.skip('://');
+        return splitURL[0] === 'comm';
+      },
+      registerSubscribedDataObject: () => {},
+      registerSubscriber: () => {},
+      isLocal: (url) => {
+        console.log('isLocal: ', url);
+        return false;
+      },
+      runtimeURL: 'runtime://localhost/7601'
+    };
 
-    getPreAuthSubscribers: () => {
-      return ['hyperty://domain/hyperty-instance'];
-    },
-    getHypertyName: () => {
-      return 'HypertyChat';
-    },
-    isDataObjectURL: (dataObjectURL) => {
-      let splitURL = dataObjectURL.split.skip('://');
-      return splitURL[0] === 'comm';
-    },
-    registerSubscribedDataObject: () => {},
-    registerSubscriber: () => {},
-    isLocal: (url) => {
-      console.log('isLocal: ', url);
-      return false;
-    },
-    runtimeURL: 'runtime://localhost/7601'
-  };
+    identityModule = {
+      decryptMessage: (message) => {
+        return new Promise((resolve) => {
+          resolve(message);
+        });
+      },
+      encryptMessage: (message) => {
+        return new Promise((resolve) => {
+          resolve(message);
+        });
+      },
+      getToken: () => {
+        return new Promise((resolve) => {
+          resolve({ userProfile: {username: 'user@domain' } });
+        });
+      }
+    };
 
-  let identityModule = {
-    decryptMessage: (message) => {
-      return new Promise((resolve) => {
-        resolve(message);
-      });
-    },
-    encryptMessage: (message) => {
-      return new Promise((resolve) => {
-        resolve(message);
-      });
-    },
-    getToken: () => {
-      return new Promise((resolve) => {
-        resolve({ userProfile: {username: 'user@domain' } });
-      });
-    }
-  };
-
-  let catalog = {
-    getDataSchemaDescriptor: (schema) => {
-      console.log('REQUEST-SCHEMA: ', schema);
-      return new Promise((resolve, reject) => {
-        if (schema) {
-          resolve({ sourcePackage: { sourceCode: {
-            properties: {
-              scheme: { constant: 'resource' },
-              children: { constant: ['children1', 'children2'] }
-            }
-          }}});
-        } else {
-          reject('No schema provided');
-        }
-      });
-    }
-  };
-
-  let runtimeCoreCtx = new RuntimeCoreCtx(runtimeURL, identityModule, registry, storageManager, runtimeFactory.runtimeCapabilities());
-  let policyEngine = new PEP(runtimeCoreCtx);
-
-  let handlers = [
-
-    // Policy message authorise
-    function(ctx) {
-      policyEngine.authorise(ctx.msg).then(function(changedMgs) {
-
-        changedMgs.body.identity = {
-          userProfile: {
-            userURL: 'user://user@domain.pt'
+    catalog = {
+      getDataSchemaDescriptor: (schema) => {
+        console.log('REQUEST-SCHEMA: ', schema);
+        return new Promise((resolve, reject) => {
+          if (schema) {
+            resolve({ sourcePackage: { sourceCode: {
+              properties: {
+                scheme: { constant: 'resource' },
+                children: { constant: ['children1', 'children2'] }
+              }
+            }}});
+          } else {
+            reject('No schema provided');
           }
-        };
+        });
+      }
+    };
 
-        ctx.msg = changedMgs;
-        ctx.next();
-      }).catch(function(reason) {
-        console.error(reason);
-        ctx.fail(reason);
-      });
-    }
-  ];
+    runtimeCoreCtx = new RuntimeCoreCtx(runtimeURL, identityModule, registry, storageManager, runtimeFactory.runtimeCapabilities());
+    policyEngine = new PEP(runtimeCoreCtx);
 
-  it('Data Synchronisation between reporter and observer', function(done) {
-    let bus = new MessageBus();
-    bus.pipeline.handlers = handlers;
+    bus = new MessageBus();
+    bus.pipeline.handlers =  [
 
+      // Policy message authorise
+      function(ctx) {
+        policyEngine.authorise(ctx.msg).then(function(changedMgs) {
+
+          changedMgs.body.identity = {
+            userProfile: {
+              userURL: 'user://user@domain.pt'
+            }
+          };
+
+          ctx.msg = changedMgs;
+          ctx.next();
+        }).catch(function(reason) {
+          console.error(reason);
+          ctx.fail(reason);
+        });
+      }
+    ];
     bus._onPostMessage = (msg) => {
       console.log('[reporter observer integration - onPostMessage]: ', msg);
 
       msgNodeResponseFunc(bus, msg);
     };
-
     new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
+  });
 
-    let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
+  it('Create Reporter and create dataObject', function(done) {
+    sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
+    sync1.create(schemaURL, [], initialData, true, false).then((dor) => {
+      console.log('on-create-reply', dor);
+      dataObjectReporter = dor;
+      dataObjectReporter.onRead((event) => {
+        console.log('on-read');
+        event.accept();
+      });
+      dataObjectReporter.onSubscription((subscribeEvent) => {
+        console.log('on-resources: ', subscribeEvent);
+        subscribeEvent.accept();
+      });
+      done();
+    });
+  });
+
+  it('create observer and subscribe to dataObjectReporter', function(done) {
+
+    dataObjectReporter.inviteObservers([hyperURL2]);
+
+
+    sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
       console.log('on-create-notify: ', notifyEvent);
 
@@ -184,60 +214,29 @@ describe('SyncherManager', function() {
 
       sync2.subscribe(schemaURL, notifyEvent.url, true, false).then((doo) => {
         console.log('on-subscribe-reply', doo, doo.data);
-
-        doo.onChange('*', (changeEvent) => {
-          console.log('on-change: ', JSON.stringify(changeEvent));
-          expect(changeEvent).to.contain.all.keys({ cType: 'add', oType: 'object', field: 'test', data: ['a', 'b', 'c'] });
-          expect(doo.data).to.contain.all.keys({ communication: { name: 'chat-x' }, x: 10, y: 10, test: ['a', 'b', 'c'] });
-          done();
-        });
-      });
-    });
-
-    let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
-    sync1.create(schemaURL, [], initialData, true, false).then((dor) => {
-      console.log('on-create-reply', dor);
-      dor.inviteObservers([hyperURL2]);
-
-      dor.onRead((event) => {
-        console.log('on-read');
-        event.accept();
-      });
-
-      dor.onSubscription((subscribeEvent) => {
-        console.log('on-resources: ', subscribeEvent);
-
-        //we may have some problems in the time sequence here.
-        //change-msg can reach the observer first
-        subscribeEvent.accept();
-
-        // TODO: We had the settimeout because when the proxyobserve trigger will trigger with this version of object..
-        // this hack should make it trigger in next cycle;
-        setTimeout(() => {
-          dor.data.test = ['a', 'b', 'c'];
-        });
+        dataObjectObserver = doo;
+        done();
 
       });
     });
   });
 
-  it('should resume observers', function(done) {
+  it('Update dataObjectReporter and Sync with Observer', function(done) {
 
-    let bus = new MessageBus();
-    bus._onMessage((a) => {
-      console.log('BUS:', a);
+    dataObjectObserver.onChange('*', (changeEvent) => {
+      console.log('on-change: ', JSON.stringify(changeEvent));
+      expect(changeEvent).to.contain.all.keys({ cType: 'add', oType: 'object', field: 'test', data: ['a', 'b', 'c'] });
+      expect(dataObjectObserver.data).to.contain.all.keys({ communication: { name: 'chat-x' }, x: 10, y: 10, test: ['a', 'b', 'c'] });
+      done();
     });
 
-    bus._onPostMessage = (msg) => {
-      console.log('_onPostMessage: ', msg);
-      msgNodeResponseFunc(bus, msg);
-    };
+    dataObjectReporter.data.test = ['a', 'b', 'c'];
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
+  });
+
+  it('Data Objects subscribed by Observers are resumed', function(done) {
 
     let a;
-
-    let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.resumeObservers({}).then((doos) => {
 
       console.log('on-subscribe-resume-reply', doos);
@@ -246,12 +245,6 @@ describe('SyncherManager', function() {
         console.log('on-subscribe-resume-reply DataObjectObserver: ', doo);
 
         expect(doo.data).to.contain.all.keys({ communication: { name: 'chat-x' }, x: 10, y: 10, test: ['a', 'b', 'c']});
-
-        // doo.onChange('*', (changeEvent) => {
-        //   console.log('on-subscribe-resume on-change: ', JSON.stringify(changeEvent), doo.data);
-        //   expect(changeEvent).to.contain.all.keys({ cType: 'add', oType: 'object', field: 'test', data: ['a', 'b', 'c'] });
-        // });
-
         done();
       });
 
@@ -262,39 +255,10 @@ describe('SyncherManager', function() {
       done();
     });
 
-    let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
-    sync1.create(schemaURL, [], initialData).then((dor) => {
-      console.log('on-create-resume-reply', dor);
-      a = dor;
-      dor.inviteObservers([hyperURL2]);
-
-      dor.onRead((readEvent) => {
-        readEvent.accept();
-      });
-
-      dor.onSubscription((subscribeEvent) => {
-        console.log('on-resume-resources: ', subscribeEvent);
-
-        //we may have some problems in the time sequence here.
-        //change-msg can reach the observer first
-        subscribeEvent.accept();
-      });
-    });
-
   });
 
-  it('should resume reporters', function(done) {
+  it('Data Objects created by Reporters are resumed', function(done) {
 
-    let bus = new MessageBus();
-
-    bus._onPostMessage = (msg) => {
-      console.log('_onPostMessage: ', msg);
-      msgNodeResponseFunc(bus, msg);
-    };
-
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
-
-    let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
     sync1.resumeReporters({}).then((dors) => {
 
       console.log('on-subscribe-resume-reply', dors);

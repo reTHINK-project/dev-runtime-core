@@ -4,7 +4,7 @@ import MessageBus from '../../src/bus/MessageBus';
 let expect = chai.expect;
 
 describe('Deliver Messages', function() {
-  it('sending message ', function(done) {
+  it('sending message among Hyperties in the same runtime', function(done) {
     let msgResult;
 
     let mockRegistry = {

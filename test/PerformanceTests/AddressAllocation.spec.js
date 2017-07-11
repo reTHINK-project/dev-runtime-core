@@ -61,9 +61,9 @@ describe('AddressAllocation', function() {
     aa = AddressAllocation.instance;
   });
 
-  it('should register a new hyperty address', function(done) {
+  it('should create a new hyperty address', function(done) {
 
-    let number = 2;
+    let number = 1;
     let scheme = 'hyperty';
     let info = {
       name: 'test',
@@ -74,6 +74,56 @@ describe('AddressAllocation', function() {
     expect(aa.create(domain, number, info, scheme))
     .eventually.to.eql({newAddress: true, address: 'hyperty://' + domain + '/' + guid})
     .notify(done);
+  });
+
+  it('should create a new data Object address', function(done) {
+
+    let number = 1;
+    let scheme = 'comm';
+    let info = {
+      name: 'dataObjectName',
+      schema: 'hyperty-catalogue://' + domain + '/.well-known/dataschema/communication',
+      reporter: ['comm://' + domain + '/' + guid],
+      resources: ['chat']
+    };
+    expect(aa.create(domain, number, info, scheme))
+    .eventually.to.eql({newAddress: true, address: 'comm://' + domain + '/' + guid})
+    .notify(done);
+  });
+
+
+  it('should reuse an hyperty url address', function(done) {
+
+    let number = 1;
+    let scheme = 'hyperty';
+    let info = {
+      name: 'test',
+      schema: 'hyperty-catalogue://' + domain + '/.well-known/dataschema/hello',
+      reporter: [],
+      resources: []
+    };
+
+    expect(aa.create(domain, number, info, scheme, true))
+    .eventually.to.eql({newAddress: false, address: 'hyperty://' + domain + '/' + guid})
+    .notify(done);
+
+  });
+
+  it('should reuse a dataobject address ', function(done) {
+
+    let number = 1;
+    let scheme = 'comm';
+    let info = {
+      name: 'dataObjectName',
+      schema: 'hyperty-catalogue://' + domain + '/.well-known/dataschema/communication',
+      reporter: ['comm://' + domain + '/' + guid],
+      resources: ['chat']
+    };
+
+    expect(aa.create(domain, number, info, scheme, 'hyperty://' + domain + '/' + guid))
+    .eventually.to.eql({newAddress: false, address:  'comm://' + domain + '/' + guid})
+    .notify(done);
+
   });
 
 });
