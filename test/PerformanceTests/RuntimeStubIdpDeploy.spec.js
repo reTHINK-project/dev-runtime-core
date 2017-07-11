@@ -75,61 +75,50 @@ describe('RuntimeUA', function() {
     runtime.descriptorInstance.getIdpProxyDescriptor.restore();
   });
 
-  describe('constructor()', function() {
+  it('should load Runtime with success', (done) => {
 
-    it('should load Runtime with success', (done) => {
+    expect(runtime.init().then((result) => {
 
-      expect(runtime.init().then((result) => {
-
-        sinon.stub(runtime.messageBus, 'postMessage', function(msg, replyCallback) {
-          replyCallback({
-            id: 1, type: 'response', from: 'domain://msg-node.sp.domain/address-allocation', to: 'local://fake.url',
-            body: {code: 200, value: {allocated: msg.body.scheme + '://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d'}}
-          });
+      sinon.stub(runtime.messageBus, 'postMessage', function(msg, replyCallback) {
+        replyCallback({
+          id: 1, type: 'response', from: 'domain://msg-node.sp.domain/address-allocation', to: 'local://fake.url',
+          body: {code: 200, value: {allocated: msg.body.scheme + '://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d'}}
         });
-        sinon.stub(runtime.descriptorInstance, 'getStubDescriptor', (stubURL) => {
-          return getDescriptor(stubURL);
-        });
+      });
+      sinon.stub(runtime.descriptorInstance, 'getStubDescriptor', (stubURL) => {
+        return getDescriptor(stubURL);
+      });
 
-        sinon.stub(runtime.descriptorInstance, 'getIdpProxyDescriptor', (idpProxyURL) => {
-          return getDescriptor(idpProxyURL);
-        });
+      sinon.stub(runtime.descriptorInstance, 'getIdpProxyDescriptor', (idpProxyURL) => {
+        return getDescriptor(idpProxyURL);
+      });
 
-        return result;
-      }))
-      .to.be.fulfilled
-      .and.to.eventually.be.true
-      .and.notify(done);
-
-    });
+      return result;
+    }))
+    .to.be.fulfilled
+    .and.to.eventually.be.true
+    .and.notify(done);
 
   });
 
-  describe('loadStub(sp-domain)', function() {
+  it('Stub should be deployed', function(done) {
+    let spDomain = 'sp.domain';
+    let loadStubPromise = runtime.loadStub(spDomain);
 
-    it('Stub should be deployed', function(done) {
-      let spDomain = 'sp.domain';
-      let loadStubPromise = runtime.loadStub(spDomain);
-
-      expect(loadStubPromise).to.be.fulfilled
-      .and.eventually.have.all.keys('url', 'status', 'descriptorURL')
-      .and.eventually.to.have.property('url').to.include('runtime://sp.domain/protostub/')
-      .and.notify(done);
-    });
-
+    expect(loadStubPromise).to.be.fulfilled
+    .and.eventually.have.all.keys('url', 'status', 'descriptorURL')
+    .and.eventually.to.have.property('url').to.include('runtime://sp.domain/protostub/')
+    .and.notify(done);
   });
 
-  describe('loadIdpProxy(google.com)', function() {
-
-    it('IDP Proxy should be deployed', function(done) {
-      let domain = 'google.com';
-      let loadIdpPromise = runtime.loadIdpProxy(domain);
-      let stubResolved = ['url', 'status'];
-      expect(loadIdpPromise).to.be.fulfilled
-      .and.eventually.to.have.all.keys(stubResolved)
-      .and.notify(done);
-    });
-
+  it('IDP Proxy should be deployed', function(done) {
+    let domain = 'google.com';
+    let loadIdpPromise = runtime.loadIdpProxy(domain);
+    let stubResolved = ['url', 'status'];
+    expect(loadIdpPromise).to.be.fulfilled
+    .and.eventually.to.have.all.keys(stubResolved)
+    .and.notify(done);
   });
+
 
 });

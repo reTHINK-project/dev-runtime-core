@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Spec for</title>
+  <style>
+.karma-spec-as-html {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: .9em;
+  line-height: 1.5;
+}
+.karma-spec-as-html .suite ul {list-style-type: none; margin-top: .4em }
+.karma-spec-as-html .suite li { margin-bottom: .8em; }
+.karma-spec-as-html .suite { margin-top: 1em }
+.karma-spec-as-html .success {color: green }
+.karma-spec-as-html .success:before { content: "✓ " }
+.karma-spec-as-html .failure {color: red }
+.karma-spec-as-html .failure:before { content: "✗ " }
+  </style>
+</head>
+<body>
+  <div class="karma-spec-as-html">
+<h1>Spec</h1><div class="suite">
+<ul>
+    <li class="suite">SyncherManager
+      <ul>
+        <li class="success">Data Synchronisation between reporter and observer</li>
+        <li class="success">should resume observers</li>
+        <li class="success">should resume reporters</li>
+      </ul>
+    </li>
+    <li class="suite">AddressAllocation
+      <ul>
+        <li class="success">should register a new hyperty address</li>
+      </ul>
+    </li>
+    <li class="suite">RuntimeUA
+      <ul>
+        <li class="suite">constructor()
+          <ul>
+            <li class="success">should load Runtime with success</li>
+          </ul>
+        </li>
+        <li class="suite">loadStub(sp-domain)
+          <ul>
+            <li class="success">Stub should be deployed</li>
+          </ul>
+        </li>
+        <li class="suite">loadIdpProxy(google.com)
+          <ul>
+            <li class="success">IDP Proxy should be deployed</li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li class="suite">Deliver Messages
+      <ul>
+        <li class="success">sending message </li>
+        <li class="success">pipeline msg change</li>
+        <li class="success">sending using external system</li>
+      </ul>
+    </li>
+</ul>
+</div>
+
+<p class="summaryOfTestRun">Chrome 59.0.3071 (Linux 0.0.0): Executed 10 of 10 SUCCESS (0.612 secs / 0.247 secs)</p>
+
+  </div>
+</body>
+</html>
