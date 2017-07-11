@@ -38,7 +38,7 @@ describe('RuntimeUA', function() {
     getDescriptor = (url) => {
 
       return new Promise(function(resolve, reject) {
-
+        console.log('ON DESCRIPTOR', url);
         let dividedURL = divideURL(url);
         let identity = dividedURL.identity;
 
@@ -52,15 +52,27 @@ describe('RuntimeUA', function() {
 
         if (url.includes('protocolstub') || url === dividedURL.domain) {
           try {
-            result = descriptors.ProtoStubs[identity];
+
+            let def = descriptors.ProtoStubs[identity];
+            let sc = atob(def.sourcePackage.sourceCode);
+
+            def.sourcePackage.sourceCode = sc;
+
+            result = def;
           } catch (e) {
-            reject(e);
+            return reject(e);
           }
         } else if (url.includes('idp-proxy')) {
+          console.log('identity', identity);
           try {
-            result = descriptors.IdpProxies[identity];
+            let def = descriptors.IdpProxies[identity];
+            let sc = atob(def.sourcePackage.sourceCode);
+
+            def.sourcePackage.sourceCode = sc;
+
+            result = def;
           } catch (e) {
-            reject(e);
+            return reject(e);
           }
         }
 
@@ -79,18 +91,26 @@ describe('RuntimeUA', function() {
 
     expect(runtime.init().then((result) => {
 
-      sinon.stub(runtime.messageBus, 'postMessage', function(msg, replyCallback) {
-        replyCallback({
-          id: 1, type: 'response', from: 'domain://msg-node.sp.domain/address-allocation', to: 'local://fake.url',
-          body: {code: 200, value: {allocated: msg.body.scheme + '://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d'}}
-        });
-      });
+      // sinon.stub(runtime.messageBus, 'postMessage', function(msg, replyCallback) {
+      //
+      //   console.log('MSG->', msg);
+      //
+      //   if (replyCallback) {
+      //     replyCallback({
+      //       id: 1, type: 'response', from: 'domain://msg-node.localhost/address-allocation', to: 'local://localhost',
+      //       body: {code: 200, value: {allocated: msg.body.scheme + '://localhost/9c8c1949-e08e-4554-b201-bab201bdb21d'}}
+      //     });
+      //   }
+      //
+      // });
       sinon.stub(runtime.descriptorInstance, 'getStubDescriptor', (stubURL) => {
+        console.log('stubURL', stubURL);
         return getDescriptor(stubURL);
       });
 
       sinon.stub(runtime.descriptorInstance, 'getIdpProxyDescriptor', (idpProxyURL) => {
-        return getDescriptor(idpProxyURL);
+        let url = 'https://localhost/.well-known/idp-proxy/' +  idpProxyURL;
+        return getDescriptor(url);
       });
 
       return result;
@@ -102,12 +122,12 @@ describe('RuntimeUA', function() {
   });
 
   it('Stub should be deployed', function(done) {
-    let spDomain = 'sp.domain';
+    let spDomain = 'localhost';
     let loadStubPromise = runtime.loadStub(spDomain);
 
     expect(loadStubPromise).to.be.fulfilled
     .and.eventually.have.all.keys('url', 'status', 'descriptorURL')
-    .and.eventually.to.have.property('url').to.include('runtime://sp.domain/protostub/')
+    .and.eventually.to.have.property('status').to.include('live')
     .and.notify(done);
   });
 
@@ -116,7 +136,8 @@ describe('RuntimeUA', function() {
     let loadIdpPromise = runtime.loadIdpProxy(domain);
     let stubResolved = ['url', 'status'];
     expect(loadIdpPromise).to.be.fulfilled
-    .and.eventually.to.have.all.keys(stubResolved)
+    .and.eventually.have.all.keys('url', 'status')
+    .and.eventually.to.have.property('status').to.include('live')
     .and.notify(done);
   });
 
