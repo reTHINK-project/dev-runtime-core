@@ -25,8 +25,12 @@
  * The Graph Connector contains the contact list/address book.
  * @author beierle@tu-berlin.de
  */
-class GraphConnectorLight {
+class GraphConnector {
+
+  constructor(hypertyRuntimeURL, messageBus, storageManager) {
+
+  }
 
 }
 
-export default GraphConnectorLight;
+export default GraphConnector;

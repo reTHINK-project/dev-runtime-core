@@ -35,7 +35,7 @@ import Buffer from 'buffer';
  * The Graph Connector contains the contact list/address book.
  * @author beierle@tu-berlin.de
  */
-class GraphConnectorBase {
+class GraphConnector {
 
   /**
    * Constructs a new and empty Graph Connector.
@@ -1340,4 +1340,4 @@ class GraphConnectorBase {
   }
 }
 
-export default GraphConnectorBase;
+export default GraphConnector;

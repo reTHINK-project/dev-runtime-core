@@ -3,7 +3,7 @@ module.exports = function(config) {
     basePath: '',
     frameworks: ['mocha', 'chai', 'sinon'],
     files: [
-      './test/PerformanceTests/*.spec.js'
+      './test/**/*.spec.js'
     ],
     exclude: [
       './test/PolicyEngine.spec.js'
@@ -51,7 +51,7 @@ module.exports = function(config) {
       'karma-mocha-reporter',
       'karma-chrome-launcher'],
 
-    customDebugFile: './test/units.html',
+    // customDebugFile: './test/units.html',
 
     // customContextFile: './test/units.html',
 
@@ -59,7 +59,6 @@ module.exports = function(config) {
       mocha: {
         reporter: 'html'
       },
-      runInParent: true,
       captureConsole: true
     },
 

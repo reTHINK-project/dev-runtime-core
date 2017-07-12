@@ -1,12 +1,14 @@
 let GraphConnector;
 if (process.env.MODE !== 'light') {
-  let GraphConnectorBase = require('./GraphConnectorBase');
-  GraphConnector = GraphConnectorBase;
+  GraphConnector = require('./GraphConnectorBase');
+  console.log('GraphConnector Base:', GraphConnector.hasOwnProperty('default'));
+  if (GraphConnector && GraphConnector.hasOwnProperty('default')) GraphConnector = GraphConnector.default;
 } else {
-  let GraphConnectorLight = require('./GraphConnectorLight');
-  GraphConnector = GraphConnectorLight;
+  GraphConnector = require('./GraphConnectorLight');
+  console.log('GraphConnector Light:', GraphConnector.hasOwnProperty('default'));
+  if (GraphConnector &&  GraphConnector.hasOwnProperty('default')) GraphConnector = GraphConnector.default;
 }
 
-console.log(GraphConnector);
+console.log('AQUI:', GraphConnector);
 
 export default GraphConnector;

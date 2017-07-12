@@ -21,7 +21,7 @@
 * limitations under the License.
 **/
 
-import 'babel-polyfill';
+// import 'babel-polyfill';
 
 //Main dependecies
 import Registry from '../registry/Registry';
@@ -274,10 +274,10 @@ class RuntimeUA {
           }
         ];
 
+        console.log('GRAPHCONNECTOR:', GraphConnector);
+
         // Instantiate the Graph Connector
         this.graphConnector = new GraphConnector(this.runtimeURL, this.messageBus, this.storageManager);
-
-        console.log('GRAPHCONNECTOR:', this.graphConnector);
 
         // Instantiate Discovery
         this.coreDiscovery = new CoreDiscovery(this.runtimeURL, this.messageBus, null, this.runtimeFactory, this.registry);

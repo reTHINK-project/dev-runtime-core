@@ -10,6 +10,7 @@ chai.use(chaiAsPromised);
 chai.use(sinonChai);
 
 import { descriptors } from '../resources/descriptors.js';
+import { getDescriptor } from '../resources/getDescriptor.js';
 
 // Testing Module
 import RuntimeUA from  '../../dist/Runtime.js';
@@ -31,56 +32,6 @@ let domain = 'localhost';
 describe('RuntimeUA', function() {
 
   let runtime = new RuntimeUA(descriptors.Runtimes.Runtime, runtimeFactory, domain);
-  let getDescriptor;
-
-  before(function() {
-
-    getDescriptor = (url) => {
-
-      return new Promise(function(resolve, reject) {
-        console.log('ON DESCRIPTOR', url);
-        let dividedURL = divideURL(url);
-        let identity = dividedURL.identity;
-
-        if (!identity) {
-          identity = 'default';
-        } else {
-          identity = identity.substring(identity.lastIndexOf('/') + 1);
-        }
-
-        let result;
-
-        if (url.includes('protocolstub') || url === dividedURL.domain) {
-          try {
-
-            let def = descriptors.ProtoStubs[identity];
-            let sc = atob(def.sourcePackage.sourceCode);
-
-            def.sourcePackage.sourceCode = sc;
-
-            result = def;
-          } catch (e) {
-            return reject(e);
-          }
-        } else if (url.includes('idp-proxy')) {
-          console.log('identity', identity);
-          try {
-            let def = descriptors.IdpProxies[identity];
-            let sc = atob(def.sourcePackage.sourceCode);
-
-            def.sourcePackage.sourceCode = sc;
-
-            result = def;
-          } catch (e) {
-            return reject(e);
-          }
-        }
-
-        resolve(result);
-
-      });
-    };
-  });
 
   after(function() {
     runtime.descriptorInstance.getStubDescriptor.restore();

@@ -589,4 +589,3 @@ describe('Graph Connector', function() {
         });
 
 });
-

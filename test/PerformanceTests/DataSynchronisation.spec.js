@@ -222,12 +222,15 @@ describe('Data Synchronisation', function() {
   });
 
   it('Update dataObjectReporter and Sync with Observer', function(done) {
-
+    let testDone = false;
     dataObjectObserver.onChange('*', (changeEvent) => {
       console.log('on-change: ', JSON.stringify(changeEvent));
       expect(changeEvent).to.contain.all.keys({ cType: 'add', oType: 'object', field: 'test', data: ['a', 'b', 'c'] });
       expect(dataObjectObserver.data).to.contain.all.keys({ communication: { name: 'chat-x' }, x: 10, y: 10, test: ['a', 'b', 'c'] });
-      done();
+      if (!testDone) {
+        testDone = true;
+        done();
+      }
     });
 
     dataObjectReporter.data.test = ['a', 'b', 'c'];

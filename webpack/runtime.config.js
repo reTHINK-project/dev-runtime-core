@@ -4,7 +4,7 @@ var getModeConfig = require('./shared.configs').getModeConfig;
 
 module.exports = {
   entry: {
-    Runtime: './src/runtime/RuntimeUA.js'
+    Runtime: ['babel-polyfill', './src/runtime/RuntimeUA.js']
   },
   output: {
     path: path.join(__dirname, '..', 'dist'),
