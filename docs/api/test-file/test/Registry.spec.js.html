@@ -137,7 +137,7 @@ describe(&apos;Registry&apos;, function() {
 
     // to emulate registrations
 
-    registry.messageBus.addListener(&apos;domain://registry.ua.pt/&apos;, (msg) =&gt; {
+    registry.messageBus.addListener(&apos;domain://registry.ua.pt&apos;, (msg) =&gt; {
       console.log(&apos;MSG BUS LISTENER for Domain Registry: &apos;, msg);
       let responseMessage = {id: msg.id, type: &apos;response&apos;, to: msg.from, from: msg.to, body: {code: 200}};
 

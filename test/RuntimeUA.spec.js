@@ -10,6 +10,7 @@ chai.use(chaiAsPromised);
 chai.use(sinonChai);
 
 import { descriptors } from './resources/descriptors.js';
+import { getDescriptor } from './resources/getDescriptor.js';
 
 // Testing Module
 import RuntimeUA from  '../src/runtime/RuntimeUA';
@@ -31,57 +32,11 @@ let domain = 'localhost';
 describe('RuntimeUA', function() {
 
   let runtime = new RuntimeUA(descriptors.Runtimes.Runtime, runtimeFactory, domain);
-  let getDescriptor;
 
   before(function() {
 
-    getDescriptor = (url) => {
+    runtime.graphConnector = function() {};
 
-      return new Promise(function(resolve, reject) {
-
-        let dividedURL = divideURL(url);
-        let identity = dividedURL.identity;
-
-        if (!identity) {
-          identity = 'default';
-        } else {
-          identity = identity.substring(identity.lastIndexOf('/') + 1);
-        }
-
-        let result;
-
-        if (url.includes('hyperty')) {
-          try {
-            result = descriptors.Hyperties[identity];
-          } catch (e) {
-            reject(e);
-          }
-
-        } else if (url.includes('protocolstub') || url === dividedURL.domain) {
-          try {
-            result = descriptors.ProtoStubs[identity];
-          } catch (e) {
-            reject(e);
-          }
-        } else if (url.includes('idp-proxy')) {
-          try {
-            result = descriptors.IdpProxies[identity];
-          } catch (e) {
-            reject(e);
-          }
-        } else if (url.includes('dataschema')) {
-          try {
-            result = descriptors.DataSchemas[identity];
-          } catch (e) {
-            reject(e);
-          }
-
-        }
-
-        resolve(result);
-
-      });
-    };
   });
 
   after(function() {
@@ -96,30 +51,35 @@ describe('RuntimeUA', function() {
 
       expect(runtime.init().then((result) => {
 
-        sinon.stub(runtime.messageBus, 'postMessage', function(msg, replyCallback) {
-          replyCallback({
-            id: 1, type: 'response', from: 'domain://msg-node.sp.domain/address-allocation', to: 'local://fake.url',
-            body: {code: 200, value: {allocated: msg.body.scheme + '://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d'}}
-          });
+        sinon.stub(runtime.messageBus, 'postMessage').callsFake(function(msg, replyCallback) {
+
+          if (replyCallback) {
+            replyCallback({
+              id: 1, type: 'response', from: 'domain://msg-node.sp.domain/address-allocation', to: 'local://fake.url',
+              body: {code: 200, value: {allocated: msg.body.scheme + '://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d'}}
+            });
+          }
+
         });
 
-        sinon.stub(runtime.descriptorInstance, 'getHypertyDescriptor', (hypertyURL) => {
+        sinon.stub(runtime.descriptorInstance, 'getHypertyDescriptor').callsFake(function(hypertyURL) {
           return getDescriptor(hypertyURL);
         });
 
-        sinon.stub(runtime.descriptorInstance, 'getStubDescriptor', (stubURL) => {
+        sinon.stub(runtime.descriptorInstance, 'getStubDescriptor').callsFake(function(stubURL) {
           return getDescriptor(stubURL);
         });
 
-        sinon.stub(runtime.descriptorInstance, 'getIdpProxyDescriptor', (idpProxyURL) => {
-          return getDescriptor(idpProxyURL);
+        sinon.stub(runtime.descriptorInstance, 'getIdpProxyDescriptor').callsFake(function(idpProxyURL){
+          let url = 'https://localhost/.well-known/idp-proxy/' +  idpProxyURL;
+          return getDescriptor(url);
         });
 
-        sinon.stub(runtime.runtimeCatalogue, 'getDataSchemaDescriptor', (dataSchemaURL) => {
+        sinon.stub(runtime.runtimeCatalogue, 'getDataSchemaDescriptor').callsFake(function(dataSchemaURL){
           return getDescriptor(dataSchemaURL);
         });
 
-        sinon.stub(runtime.registry, 'registerHyperty', (sandbox, descriptorURL, descriptor, addressURL) => {
+        sinon.stub(runtime.registry, 'registerHyperty').callsFake(function(sandbox, descriptorURL, descriptor, addressURL) {
           return new Promise(function(resolve) {
             console.log('AQIO:', addressURL);
             if (addressURL.newAddress) {
@@ -131,7 +91,7 @@ describe('RuntimeUA', function() {
 
         });
 
-        sinon.stub(runtime.registry, 'checkRegisteredURLs', (info, reuseURL) => {
+        sinon.stub(runtime.registry, 'checkRegisteredURLs').callsFake(function(info, reuseURL) {
 
           return new Promise((resolve) => {
             console.log('checkRegisteredURLs:', typeof(reuseURL), reuseURL);

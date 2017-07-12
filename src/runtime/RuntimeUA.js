@@ -21,7 +21,7 @@
 * limitations under the License.
 **/
 
-import 'babel-polyfill';
+// import 'babel-polyfill';
 
 //Main dependecies
 import Registry from '../registry/Registry';
@@ -40,7 +40,6 @@ import { runtimeUtils } from './runtimeUtils';
 import GraphConnector from '../graphconnector/GraphConnector';
 
 import CoreDiscovery from '../discovery/CoreDiscovery';
-// import Discovery from '../discovery/Discovery';
 
 import DataObjectsStorage from '../store-objects/DataObjectsStorage';
 import SyncherManager from '../syncher/SyncherManager';
@@ -156,8 +155,8 @@ class RuntimeUA {
             console.info('[RuntimeUA - init] P2P not supported');
             return ('P2P Not Supported');
           }
-        })
-        .then((result) => {
+
+        }).then((result) => {
           console.info('[runtime ua - init] - status: ', result);
           resolve(true);
         }, (reason) => {
@@ -258,9 +257,6 @@ class RuntimeUA {
         // Prepare the address allocation instance;
         this.addressAllocation = new AddressAllocation(this.runtimeURL, this.messageBus, this.registry);
 
-        // before the merge
-        //this.policyEngine = new PEP(new RuntimeCoreCtx(this.identityModule, this.registry, this.storageManager, this.runtimeCapabilities));
-
         // Instantiate the Policy Engine
         this.policyEngine = new PEP(new RuntimeCoreCtx(this.runtimeURL, this.identityModule, this.registry, this.storageManager, this.runtimeCapabilities));
 
@@ -279,7 +275,7 @@ class RuntimeUA {
         ];
 
         // Instantiate the Graph Connector
-        this.graphConnector = new GraphConnector(this.runtimeURL, this.messageBus, this.storageManager);
+        this.graphConnector = process.env.MODE !== 'light' ? new GraphConnector(this.runtimeURL, this.messageBus, this.storageManager) : null;
 
         // Instantiate Discovery
         this.coreDiscovery = new CoreDiscovery(this.runtimeURL, this.messageBus, this.graphConnector, this.runtimeFactory, this.registry);

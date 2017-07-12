@@ -973,7 +973,7 @@ describe('SyncherManager', function() {
           expect(sync1.reporters[dor.url]).to.eql(dor);
           dor.delete();
           delete sync1.reporters[dor.url];
-          expect(sync1.reporters[dor.url]).to.be.empty;
+          expect(sync1.reporters[dor.url]).to.be.undefined;
           console.log('reporter-deleted');
         }, 100);
 

@@ -107,10 +107,10 @@ describe(&apos;CoreDiscovery&apos;, function() {
       let graphConnector = new GraphConnector(runtimeURL, msgbus, storageManager);
       coreDiscovery = new CoreDiscovery(runtimeURL, msgbus, graphConnector, runtimeFactory);
 
-      coreDiscovery.messageBus.addListener(&apos;domain://registry.ua.pt/&apos;, (msg) =&gt; {
+      coreDiscovery.messageBus.addListener(&apos;domain://registry.ua.pt&apos;, (msg) =&gt; {
         console.info(msg);
         let message_hyperties = {
-            id: msg.id, type: &apos;response&apos;, from: &apos;domain://registry.ua.pt/&apos;, to: msg.from,
+            id: msg.id, type: &apos;response&apos;, from: &apos;domain://registry.ua.pt&apos;, to: msg.from,
             body: {
                 code: 200,
                 value: [hyperty]
@@ -118,7 +118,7 @@ describe(&apos;CoreDiscovery&apos;, function() {
         };
 
         let message_hyperty = {
-            id: msg.id, type: &apos;response&apos;, from: &apos;domain://registry.ua.pt/&apos;, to: msg.from,
+            id: msg.id, type: &apos;response&apos;, from: &apos;domain://registry.ua.pt&apos;, to: msg.from,
             body: {
                 code: 200,
                 value: hyperty
@@ -126,7 +126,7 @@ describe(&apos;CoreDiscovery&apos;, function() {
         };
 
         let message_dataObjects = {
-            id: msg.id, type: &apos;response&apos;, from: &apos;domain://registry.ua.pt/&apos;, to: msg.from,
+            id: msg.id, type: &apos;response&apos;, from: &apos;domain://registry.ua.pt&apos;, to: msg.from,
             body: {
                 code: 200,
                 value: [dataObject]
@@ -134,7 +134,7 @@ describe(&apos;CoreDiscovery&apos;, function() {
         };
 
         let message_dataObject = {
-            id: msg.id, type: &apos;response&apos;, from: &apos;domain://registry.ua.pt/&apos;, to: msg.from,
+            id: msg.id, type: &apos;response&apos;, from: &apos;domain://registry.ua.pt&apos;, to: msg.from,
             body: {
                 code: 200,
                 value: dataObject

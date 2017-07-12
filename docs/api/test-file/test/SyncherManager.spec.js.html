@@ -123,6 +123,11 @@ describe(&apos;SyncherManager&apos;, function() {
       return false;
     },
 
+    unregisterDataObject: (url) =&gt; {
+      console.log(&apos;Unregister Data Object:&apos;, url);
+      return true;
+    },
+
     getPreAuthSubscribers: () =&gt; {
       return [&apos;hyperty://domain/hyperty-instance&apos;];
     },
@@ -264,6 +269,11 @@ describe(&apos;SyncherManager&apos;, function() {
       console.log(&apos;on-create-reply&apos;, dor);
       dor.inviteObservers([hyperURL2]);
 
+      dor.onRead((event) =&gt; {
+        console.log(&apos;on-read&apos;);
+        event.accept();
+      });
+
       dor.onSubscription((subscribeEvent) =&gt; {
         console.log(&apos;on-resources: &apos;, subscribeEvent);
 
@@ -305,7 +315,7 @@ describe(&apos;SyncherManager&apos;, function() {
       Object.values(doos).forEach((doo) =&gt; {
         console.log(&apos;on-subscribe-resume-reply DataObjectObserver: &apos;, doo);
 
-        expect(doo.data.data).to.contain.all.keys({ communication: { name: &apos;chat-x&apos; }, x: 10, y: 10, test: [&apos;a&apos;, &apos;b&apos;, &apos;c&apos;]});
+        expect(doo.data).to.contain.all.keys({ communication: { name: &apos;chat-x&apos; }, x: 10, y: 10, test: [&apos;a&apos;, &apos;b&apos;, &apos;c&apos;]});
 
         // doo.onChange(&apos;*&apos;, (changeEvent) =&gt; {
         //   console.log(&apos;on-subscribe-resume on-change: &apos;, JSON.stringify(changeEvent), doo.data);
@@ -1048,9 +1058,14 @@ describe(&apos;SyncherManager&apos;, function() {
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
     sync1.create(schemaURL, [hyperURL2], initialData).then((dor) =&gt; {
       console.log(&apos;create: &apos;, dor.url);
+
       dor.onSubscription((subscribeEvent) =&gt; {
-        console.log(&apos;onSubscription: &apos;, subscribeEvent);
-        subscribeEvent.accept();
+
+        if (subscribeEvent.accept instanceof Function) {
+          console.log(&apos;onSubscription: &apos;, subscribeEvent);
+          subscribeEvent.accept();
+        }
+
       });
     });
   });
