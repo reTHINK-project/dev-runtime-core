@@ -64,7 +64,17 @@ class CoreDiscovery {
           });
         })
         .catch(function(err) {
+          let description;
+          let code;
 
+          if(err === 'GraphConnector') {
+            description = 'This search is not available at the moment. Try later.';
+            code = 500;
+          }
+          else {
+            description = 'Not Found';
+            code = 404;
+          }
           //FLOW-OUT: error message response
           _this.messageBus.postMessage({
             id: msg.id,
@@ -72,8 +82,8 @@ class CoreDiscovery {
             from: msg.to,
             to: msg.from,
             body: {
-              code: 404,
-              description: "Not Found"
+              code: code,
+              description: description
             }
           });
         });
@@ -132,17 +142,29 @@ class CoreDiscovery {
         return _this.discoverDataObjectsPerReporter(msg.body.resource.split('reporter/')[1], dataSchemes, resources, msg.body.criteria.domain);
         break;
       case 'guid':
-        if(atributes[0] == 'hyperty')
-          return _this.discoverHypertiesPerGUID(msg.body.resource.split('user-guid://')[1], dataSchemes, resources);
-        else
-          return _this.discoverDataObjectsPerGUID(msg.body.resource.split('user-guid://')[1], dataSchemes, resources);
-        break;
+        if(typeof _this.graphConnector !== 'undefined' &&  _this.graphConnector !== null) {
+          if(atributes[0] == 'hyperty')
+            return _this.discoverHypertiesPerGUID(msg.body.resource.split('user-guid://')[1], dataSchemes, resources);
+          else
+            return _this.discoverDataObjectsPerGUID(msg.body.resource.split('user-guid://')[1], dataSchemes, resources);
+          break;
+        }
+        else {
+          return Promise.reject('GraphConnector');
+          break;
+        }
       case 'userprofile':
-        if(atributes[0] == 'hyperty')
-          return _this.discoverHypertiesPerUserProfileData(msg.body.resource.split('userprofile/')[1], dataSchemes, resources);
-        else
-          return _this.discoverDataObjectsPerUserProfileData(msg.body.resource.split('userprofile/')[1], dataSchemes, resources);
-        break;
+        if(typeof _this.graphConnector !== 'undefined' &&  _this.graphConnector !== null) {
+          if(atributes[0] == 'hyperty')
+            return _this.discoverHypertiesPerUserProfileData(msg.body.resource.split('userprofile/')[1], dataSchemes, resources);
+          else
+            return _this.discoverDataObjectsPerUserProfileData(msg.body.resource.split('userprofile/')[1], dataSchemes, resources);
+          break;
+        }
+        else {
+          return Promise.reject('GraphConnector');
+          break;
+        }
     }
   }
 
