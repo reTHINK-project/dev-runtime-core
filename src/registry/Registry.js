@@ -251,7 +251,7 @@ class Registry {
     let hypertyName;
 
     //if is not an hyperty, check if is a dataObject and obtain his reporter
-    let hypertyURL = (isHypertyURL) ? hypertyURL = url : _this.getReporterURLSynchonous(url);
+    let hypertyURL = isHypertyURL ? url : _this.getReporterURLSynchonous(url);
 
     for (let index in _this.hypertiesList) {
       let hyperty = _this.hypertiesList[index];

@@ -22,8 +22,6 @@
 **/
 
 import {divideURL, convertToUserURL} from '../utils/utils';
-import GraphConnector from '../graphconnector/GraphConnector';
-
 
 /**
 * Core Discovery interface

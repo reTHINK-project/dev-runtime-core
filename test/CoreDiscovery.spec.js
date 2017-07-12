@@ -54,6 +54,8 @@ describe('CoreDiscovery', function() {
           }
       };
 
+      console.log('CoreDiscovery - GraphConnector:', GraphConnector);
+
       // instanciate the registry;
       let registry = new Registry(runtimeURL, appSandbox, identityModule, runtimeCatalogue, runtimeCapabilities, storageManager);
       msgbus = new MessageBus(registry);
