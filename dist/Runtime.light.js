@@ -1,5 +1,5 @@
 // version: 0.8.1
-// date: Wed Jul 12 2017 12:37:55 GMT+0100 (WEST)
+// date: Wed Jul 12 2017 13:11:59 GMT+0100 (WEST)
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -26,7 +26,7 @@
 
 
 // version: 0.8.1
-// date: Wed Jul 12 2017 12:37:55 GMT+0100 (WEST)
+// date: Wed Jul 12 2017 13:11:59 GMT+0100 (WEST)
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -3255,7 +3255,7 @@ var n=r(0),i=r(375)(/[\\^$*+?.()|[\]{}]/g,"\\$&");n(n.S,"RegExp",{escape:functio
 /***/
 function(e,t){e.exports=function(e,t){var r=t===Object(t)?function(e){return t[e]}:t;return function(t){return String(t).replace(e,r)}}},/* 376 */
 /***/
-function(e,t,r){"use strict";function _interopRequireDefault(e){return e&&e.__esModule?e:{default:e}}Object.defineProperty(t,"__esModule",{value:!0});var n=r(11),i=_interopRequireDefault(n),o=r(130),a=_interopRequireDefault(o),s=r(1),u=_interopRequireDefault(s),c=r(3),f=_interopRequireDefault(c),l=r(399),d=_interopRequireDefault(l),p=r(426),h=_interopRequireDefault(p),y=r(430),v=_interopRequireDefault(y),g=r(441),m=_interopRequireDefault(g),b=r(14),_=r(89),w=_interopRequireDefault(_),R=r(444),O=_interopRequireDefault(R),P=r(445),E=_interopRequireDefault(P),S=r(446),k=r(132),x=r(447),M=_interopRequireDefault(x),A=r(449),U=_interopRequireDefault(A),L=r(450),j=_interopRequireDefault(L),I=r(455),D=_interopRequireDefault(I),T=r(466),N=_interopRequireDefault(T),C=r(468),F=_interopRequireDefault(C),q=function(){/**
+function(e,t,r){"use strict";function _interopRequireDefault(e){return e&&e.__esModule?e:{default:e}}Object.defineProperty(t,"__esModule",{value:!0});var n=r(11),i=_interopRequireDefault(n),o=r(130),a=_interopRequireDefault(o),s=r(1),u=_interopRequireDefault(s),c=r(3),f=_interopRequireDefault(c),l=r(399),d=_interopRequireDefault(l),p=r(426),h=_interopRequireDefault(p),y=r(430),v=_interopRequireDefault(y),g=r(441),m=_interopRequireDefault(g),b=r(14),_=r(89),w=_interopRequireDefault(_),R=r(444),O=_interopRequireDefault(R),P=r(445),E=_interopRequireDefault(P),S=r(446),k=r(132),x=r(447),M=(_interopRequireDefault(x),r(449)),A=_interopRequireDefault(M),U=r(450),L=_interopRequireDefault(U),j=r(455),I=_interopRequireDefault(j),D=r(466),T=_interopRequireDefault(D),N=r(468),C=_interopRequireDefault(N),F=function(){/**
    * Create a new instance of Runtime User Agent
    * @param {descriptor} runtimeDescriptor - pass all the hyperty runtime descriptor
    * @param {runtimeFactory} runtimeFactory - Specific implementation for the environment where the core runtime will run;
@@ -3271,7 +3271,7 @@ this.runtimeConfiguration=(0,a.default)({domain:r},S.runtimeConfiguration),this.
    *
    * @memberOf RuntimeUA
    */
-return(0,f.default)(RuntimeUA,[{key:"init",value:function(){var e=this;return new i.default(function(t,r){e.domain=e.runtimeConfiguration.domain;try{var n=e.runtimeCapabilities.getRuntimeCapabilities(),o=e.storageManager.get("runtime:URL"),s=e.storageManager.get("syncherManager:ObjectURLs");i.default.all([o,n,s]).then(function(t){return e.runtimeURL=t[0]?t[0].runtimeURL:t[0],e.runtimeURL||(e.runtimeURL="runtime://"+e.domain+"/"+(0,b.generateGUID)(),e.storageManager.set("runtime:URL",1,{runtimeURL:e.runtimeURL})),e.capabilities=t[1],(0,a.default)(k.runtimeUtils.runtimeCapabilities.constraints,t[1]),e._dataObjectsStorage=new j.default(e.storageManager,t[2]||{}),e._loadComponents()}).then(function(t){return e.p2p?e._loadP2PHandler():"P2P Not Supported"}).then(function(e){t(!0)},function(e){t(!0)})}catch(e){r(e)}})}},{key:"_loadP2PHandler",value:function(){var e=this;return new i.default(function(t){var r=k.runtimeUtils.runtimeDescriptor,n=r.p2pHandlerStub,i={isHandlerStub:!0,runtimeURL:e.runtimeURL};e.loader.loadStub(n,i).then(function(r){var n=e.runtimeURL+"/ua",i={type:"subscribe",from:n,to:"domain://msg-node."+e.domain+"/sm",body:{subscribe:[r.url],source:e.runtimeURL}};e.messageBus.addListener(n,function(e){}),e.messageBus.postMessage(i,function(e){}),t(!0)}).catch(function(e){t(!1)})})}},{key:"_loadComponents",value:function(){var e=this;return new i.default(function(t,r){try{
+return(0,f.default)(RuntimeUA,[{key:"init",value:function(){var e=this;return new i.default(function(t,r){e.domain=e.runtimeConfiguration.domain;try{var n=e.runtimeCapabilities.getRuntimeCapabilities(),o=e.storageManager.get("runtime:URL"),s=e.storageManager.get("syncherManager:ObjectURLs");i.default.all([o,n,s]).then(function(t){return e.runtimeURL=t[0]?t[0].runtimeURL:t[0],e.runtimeURL||(e.runtimeURL="runtime://"+e.domain+"/"+(0,b.generateGUID)(),e.storageManager.set("runtime:URL",1,{runtimeURL:e.runtimeURL})),e.capabilities=t[1],(0,a.default)(k.runtimeUtils.runtimeCapabilities.constraints,t[1]),e._dataObjectsStorage=new L.default(e.storageManager,t[2]||{}),e._loadComponents()}).then(function(t){return e.p2p?e._loadP2PHandler():"P2P Not Supported"}).then(function(e){t(!0)},function(e){t(!0)})}catch(e){r(e)}})}},{key:"_loadP2PHandler",value:function(){var e=this;return new i.default(function(t){var r=k.runtimeUtils.runtimeDescriptor,n=r.p2pHandlerStub,i={isHandlerStub:!0,runtimeURL:e.runtimeURL};e.loader.loadStub(n,i).then(function(r){var n=e.runtimeURL+"/ua",i={type:"subscribe",from:n,to:"domain://msg-node."+e.domain+"/sm",body:{subscribe:[r.url],source:e.runtimeURL}};e.messageBus.addListener(n,function(e){}),e.messageBus.postMessage(i,function(e){}),t(!0)}).catch(function(e){t(!1)})})}},{key:"_loadComponents",value:function(){var e=this;return new i.default(function(t,r){try{
 // Prepare the on instance to handle with the fallbacks and runtimeCatalogue;
 e.descriptorInstance=new E.default(e.runtimeURL,e.runtimeCatalogue,e.runtimeConfiguration),
 // Prepare the loader to load the hyperties, protostubs and idpproxy;
@@ -3291,13 +3291,13 @@ e.messageBus=new m.default(e.registry),
 // Prepare the address allocation instance;
 e.addressAllocation=new w.default(e.runtimeURL,e.messageBus,e.registry),
 // Instantiate the Policy Engine
-e.policyEngine=new v.default(new F.default(e.runtimeURL,e.identityModule,e.registry,e.storageManager,e.runtimeCapabilities)),e.messageBus.pipeline.handlers=[
+e.policyEngine=new v.default(new C.default(e.runtimeURL,e.identityModule,e.registry,e.storageManager,e.runtimeCapabilities)),e.messageBus.pipeline.handlers=[
 // Policy message authorise
 function(t){e.policyEngine.authorise(t.msg).then(function(e){t.msg=e,t.next()}).catch(function(e){t.fail(e)})}],
 // Instantiate the Graph Connector
-e.graphConnector=new M.default(e.runtimeURL,e.messageBus,e.storageManager),
+e.graphConnector=null,
 // Instantiate Discovery
-e.coreDiscovery=new U.default(e.runtimeURL,e.messageBus,null,e.runtimeFactory,e.registry),
+e.coreDiscovery=new A.default(e.runtimeURL,e.messageBus,e.graphConnector,e.runtimeFactory,e.registry),
 // Add to App Sandbox the listener;
 n.addListener("*",function(t){e.messageBus.postMessage(t)}),
 // Register messageBus on Registry
@@ -3314,7 +3314,7 @@ e.identityModule.coreDiscovery=e.coreDiscovery,
 // and set the message bus to the factory
 e.runtimeFactory.messageBus=e.messageBus,
 // Instanciate the SyncherManager;
-e.syncherManager=new D.default(e.runtimeURL,e.messageBus,e.registry,e.runtimeCatalogue,e.storageManager,null,e._dataObjectsStorage,e.identityModule),
+e.syncherManager=new I.default(e.runtimeURL,e.messageBus,e.registry,e.runtimeCatalogue,e.storageManager,null,e._dataObjectsStorage,e.identityModule),
 // Set into loader the needed components;
 e.loader.runtimeURL=e.runtimeURL,e.loader.messageBus=e.messageBus,e.loader.registry=e.registry,e.loader.runtimeCatalogue=e.runtimeCatalogue,e.loader.runtimeFactory=e.runtimeFactory,
 //Instantiate Discovery Lib for notification testing
@@ -3330,7 +3330,7 @@ e.loader.runtimeURL=e.runtimeURL,e.loader.messageBus=e.messageBus,e.loader.regis
 //   });
 // }, 2000);
 // Instanciate the SubscriptionManager;
-e.subscriptionManager=new N.default(e.runtimeURL,e.messageBus,e.storageManager),e.subscriptionManager.init().then(function(){t(!0)})}catch(e){r(e)}})}},{key:"loadHyperty",value:function(e){var t=arguments.length>1&&void 0!==arguments[1]&&arguments[1],r=arguments[2];if(!e)throw new Error("Hyperty descriptor url parameter is needed");return this.loader.loadHyperty(e,t,r)}},{key:"loadStub",value:function(e){if(!e)throw new Error("ProtoStub descriptor url parameter is needed");return this.loader.loadStub(e)}},{key:"loadIdpProxy",value:function(e){if(!e)throw new Error("The IDP Proxy URL is a needed parameter, could be a DOMAIN or a URL");return this.loader.loadIdpProxy(e)}},{key:"close",value:function(){var e=this;return new i.default(function(t,r){e.registry.unregisterAllHyperties().then(function(e){t(!0)}).catch(function(e){r(!1)})})}}]),RuntimeUA}();t.default=q,e.exports=t.default},/* 377 */
+e.subscriptionManager=new T.default(e.runtimeURL,e.messageBus,e.storageManager),e.subscriptionManager.init().then(function(){t(!0)})}catch(e){r(e)}})}},{key:"loadHyperty",value:function(e){var t=arguments.length>1&&void 0!==arguments[1]&&arguments[1],r=arguments[2];if(!e)throw new Error("Hyperty descriptor url parameter is needed");return this.loader.loadHyperty(e,t,r)}},{key:"loadStub",value:function(e){if(!e)throw new Error("ProtoStub descriptor url parameter is needed");return this.loader.loadStub(e)}},{key:"loadIdpProxy",value:function(e){if(!e)throw new Error("The IDP Proxy URL is a needed parameter, could be a DOMAIN or a URL");return this.loader.loadIdpProxy(e)}},{key:"close",value:function(){var e=this;return new i.default(function(t,r){e.registry.unregisterAllHyperties().then(function(e){t(!0)}).catch(function(e){r(!1)})})}}]),RuntimeUA}();t.default=F,e.exports=t.default},/* 377 */
 /***/
 function(e,t,r){r(167),r(119),r(175),r(386),e.exports=r(10).Promise},/* 378 */
 /***/

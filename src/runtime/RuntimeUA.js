@@ -274,13 +274,11 @@ class RuntimeUA {
           }
         ];
 
-        console.log('GRAPHCONNECTOR:', GraphConnector);
-
         // Instantiate the Graph Connector
-        this.graphConnector = new GraphConnector(this.runtimeURL, this.messageBus, this.storageManager);
+        this.graphConnector = process.env.MODE !== 'light' ? new GraphConnector(this.runtimeURL, this.messageBus, this.storageManager) : null;
 
         // Instantiate Discovery
-        this.coreDiscovery = new CoreDiscovery(this.runtimeURL, this.messageBus, null, this.runtimeFactory, this.registry);
+        this.coreDiscovery = new CoreDiscovery(this.runtimeURL, this.messageBus, this.graphConnector, this.runtimeFactory, this.registry);
 
         // Add to App Sandbox the listener;
         appSandbox.addListener('*', (msg) => {
