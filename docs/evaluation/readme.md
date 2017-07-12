@@ -15,7 +15,7 @@ Device side Hyperty Runtime (browser and standalone runtime) as well as Server s
 
 #### Functional Metrics
 
-More than 500 functional metrics are defined to evaluate the Hyperty Runtime including:
+More than 150 functional metrics are defined to evaluate the Hyperty Runtime including:
 
 Hyperty is correctly deployed in the Runtime:
 
@@ -94,7 +94,7 @@ The evaluation of the Hyperty Runtime is performed with Karma Unit tests impleme
 The most updated full detailed report of the tests execution are provided at https://travis-ci.org/reTHINK-project/dev-runtime-core where we can continuously monitor the runtime quality including:
 
 * Hyperties are correctly deployed in the Runtime including the allocation of addresses, the registration in the Domain Registry and the association of User Identities;
-* Protostubs are correctly deployed in the Runtime including Protocol Stub is successfully retrieved from the Catalogue server, an Hyperty Runtime URL is successfully allocated to the protocol stub, and the protocol stub is instantiated and connected to the Message Node.
+* Protostubs are correctly deployed in the Runtime including Protocol Stub is successfully retrieved from the Catalogue server, an Hyperty Runtime URL is successfully allocated to the Protocol Stub, and the Protocol Stub is instantiated and connected to the Message Node.
 * Idp Proxy is correctly deployed in the Runtime that is used to authenticate user with  selected IdP e.g. Google IdP. The IDP Proxy is successfully retrieved from the Catalogue server, an Hyperty Runtime URL is successfully allocated to the IDP Proxy, and the IDP Proxy is instantiated and successfully connected to Google IDP.
 * Messages are correctly delivered by the Runtime including:
  * messages were successfully exchanged among Hyperties running in different runtimes, from the same domain (intra-domain).
