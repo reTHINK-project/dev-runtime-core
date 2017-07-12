@@ -1,57 +1,68 @@
 ## Runtime evaluation
 
-*to be completed*
+### Description of Component
+
+The Hyperty Runtime supports the execution of Hyperties including:
+•	Deployment of Hyperties
+•	Deployment of Protocol Stubs
+•	Communication between Hyperties
+•	Management of Identities associated to Hyperties
+
 
 ###	Metrics
 
-Device side Hyperty Runtime (browser and standalone runtime) as well as Server side Runtime (NodeJS runtime) were.
+Device side Hyperty Runtime (browser and standalone runtime) as well as Server side Runtime (NodeJS runtime) were implemented based on common runtime core platform.
 
 #### Functional Metrics
 
-Only functional metrics are used to evaluate the Hyperty Runtime in the Browser including:
+More than 500 functional metrics are defined to evaluate the Hyperty Runtime including:
 
-Hyperty is correctly deployed in the Runtime including:
-•	Address Allocation
-•	Registration in the Domain Registry
-•	Associated with user Identity
+Hyperty is correctly deployed in the Runtime:
 
-Protostub is correctly deployed in the Runtime including:
-•	Address Allocation
-•	Connected to the Message Node
+*	Address Allocation
+*	Registration in the Domain Registry
+*	Associated with user Identity
 
-Idp Proxy is correctly deployed in the Runtime including:
-•	Address Allocation
-•	Connected to the IDP
+Protostub is correctly deployed in the Runtime:
+
+*	Address Allocation
+*	Connected to the Message Node
+
+Idp Proxy is correctly deployed in the Runtime:
+
+*	Address Allocation
+*	Connected to the IDP
 
 Messages are correctly delivered by the Runtime:
-•	Among Hyperties in the same runtime (intra-runtime)
-•	Among Hyperties in different runtimes, from the same domain (intra-domain)
-•	Among Hyperties in different runtimes, from different domains (inter-domain)
 
-Identity Management
-•	User is able to select IDP to be used independently of the Hyperty
-•	User is able to login with selected IDP
-•	Identity Assertions are correctly generated and added to the body of outgoing Messages
-•	Identity Assertions contained in the body of incoming messages are correctly validated by the IDP
+*	Among Hyperties in the same runtime (intra-runtime)
+*	Among Hyperties in different runtimes, from the same domain (intra-domain)
+*	Among Hyperties in different runtimes, from different domains (inter-domain)
 
-Data Synchronisation
+Identity Management:
+
+*	User is able to select IDP to be used independently of the Hyperty
+*	User is able to login with selected IDP
+*	Identity Assertions are correctly generated and added to the body of outgoing Messages
+*	Identity Assertions contained in the body of incoming messages are correctly validated by the IDP
+* Communication between two hyperties is encrypted with tokens generated from the IdP Proxies.
+
+Data Synchronisation:
+
 * Reporter creates a new object and invites one or more Observers
 * Observer subscribes an existing object
 * The object handled by the Observer is synchronised with the changes performed by the Reporter
 
-Address reusage and data objects resume
+Address reusage and data objects resume:
+
 * Address allocated to hyperty is reused between sessions
 * Address allocated to data objects are reused between sessions
 * Data Objects created by Reporters are resumed between sessions
 * Data Objects subscribed by Observers are resumed between sessions
 
-P2P Hyperty Communication
-*
-
-
 #### Non-Functional Metrics
 
-The following non-functional metrics are used to evaluate the NodeJS runtime:
+For the Core runtime, the execution time is the only non-functional metric used. For the NodeJS runtime, since it can be used in a server, additional non-functional metrics are defined:
 
 **Deployment Performance**
 
@@ -74,35 +85,57 @@ The following non-functional metrics are used to evaluate the NodeJS runtime:
 1. Number of Observer parent data objects resumed / sec with different numbers of data object childs
 
 
-###	Functional Tests
-*to be updated*
-The evaluation of the Hyperty Runtime was performed with the Hello World Reporter and Hello World Observer Hyperties hosted by “hysmart.rethink.ptinovacao.pt” domain. In general all tests were successfully performed.
-Hyperty is correctly deployed in the Runtime including:
-The Hyperty Deployment was tested with Hello World Reporter Hyperty that was successfully deployed in the Runtime, including the allocation of addresses, the registration in the Domain Registry and the association of User Identities:
+###	Functional Runtime Tests
+
+The evaluation of the Hyperty Runtime is performed with Karma Unit tests implemented [here](https://github.com/reTHINK-project/dev-runtime-core/tree/master/test), and for each one the execution time was measured as defined above. For quality control purposes, these tests are automatically executed every time a `git push` or `git pull request` is performed to develop and master branch and its status is depicted following best Continuous Delivery practices. The quality status is depicted in the Github repository *readme* page:
+
+![Runtime Quality Status](build-status.PNG)
+
+The most updated full detailed report of the tests execution are provided at https://travis-ci.org/reTHINK-project/dev-runtime-core where we can continuously monitor the runtime quality including:
+
+* Hyperties are correctly deployed in the Runtime including the allocation of addresses, the registration in the Domain Registry and the association of User Identities;
+* Protostubs are correctly deployed in the Runtime including Protocol Stub is successfully retrieved from the Catalogue server, an Hyperty Runtime URL is successfully allocated to the protocol stub, and the protocol stub is instantiated and connected to the Message Node.
+* Idp Proxy is correctly deployed in the Runtime that is used to authenticate user with  selected IdP e.g. Google IdP. The IDP Proxy is successfully retrieved from the Catalogue server, an Hyperty Runtime URL is successfully allocated to the IDP Proxy, and the IDP Proxy is instantiated and successfully connected to Google IDP.
+* Messages are correctly delivered by the Runtime including:
+ * messages were successfully exchanged among Hyperties running in different runtimes, from the same domain (intra-domain).
+ * messages were successfully exchanged among two Hyperties running in different runtimes, from different domains (inter-domain).
+* User is able to select IDP to be used independently of the Hyperty
+* The user successfully authenticates with selected IdP.
+* Identity Assertions are correctly generated and added to the body of outgoing Messages
+* Identity Assertions contained in the body of incoming messages are correctly validated by the IDP
 
 
+![Travis Automated Tests Report Sample](travis-report.PNG)
 
- *Hyperty Deployment in The Runtime picture*
-Protostub is correctly deployed in the Runtime including:
-The allocation of Hyperty addresses triggers the deployment of the Protocol Stub process that is used to connect to the Message Node serving “hybroker.rethink.ptinovacao.pt” domain. The Protocol Stub is successfully retrieved from the Catalogue server, an Hyperty Runtime URL is successfully allocated to the protocol stub, and the protocol stub is instantiated and connected to the Message Node (in this case is Vertx Message Node).
+###	Non-Functional Runtime Tests
 
-Figure 9 – Protocol Stub deployed in the Runtime
-Idp Proxy is correctly deployed in the Runtime including:
-During the deployment of the Hello World Hyperty, the association with a User Identity triggers the deployment of the Google IDP Proxy process that is used to authenticate user with a Google account. The Google IDP Proxy is successfully retrieved from the Catalogue server, an Hyperty Runtime URL is successfully allocated to the IDP Proxy, and the IDP Proxy is instantiated and successfully connected to Google IDP.
+The following execution time measurements were taken:
 
-Figure 10 – IDP Proxy deployed in the Runtime
-Messages are correctly delivered by the Runtime:
-The Hello World Reporter Hyperty and the Hello World Observer Hyperty were successfully executed with users from the same domain i.e. messages were successfully exchanged among these two Hyperties running in different runtimes, from the same domain (intra-domain). In this case an update on Object Hello performed by the Hello World Reporter Hyperty (see Figure 11) is received by the Hello World Observer Hyperty (see Figure 12).
+| Test | Execution Time (ms) |
+| :--------------------------------------: | :--------------------------------------: |
+| Runtime installation   |                 36                 |
+| Protostub deployment   |                 10                 |
+| Idp Proxy deployment   |                 6                 |
+| New Hypert Address Allocation   |                 3                 |
+| Hypert Address Reusage   |                 2                 |
+| Intra-runtime Hyperty Message Delivery  |                 4                 |
+| Inter-runtime Hyperty Message Delivery  |                 5                 |
+| Inter-domain Hyperty Message Delivery  |                 NA                 |
+| New Data Object Address Allocation   |                 1                 |
+| Data Object Address Reusage   |                 1                 |
+| Data Object creation (new Reporter)   |                 27                 |
+| Data Object subscription (new Observer)  |                 42                 |
+| Data Object Observer Resume   |                 34                 |
+| Data Object Reporter Resume   |                 20                 |
+| Data Object Update synchronised with Observer   |                 13                 |
 
-Figure 11 – Hello World Reporter publishes updates to Hello World Data Object
+Additional non-functional evaluations are provided for:
 
-Figure 12 - Hello World Observer receives updates on Hello World Data Object
+* Identity Module (see [here](identity-module/IdMEvaluation.md))
+* Policy Engine (see [here](policy-engine/README.md))
 
-Also the Hello World Reporter Hyperty and the Hello World Observer Hyperty were successfully executed with users from different domains i.e. messages were successfully exchanged among these two Hyperties running in different runtimes, from different domains (inter-domain).
 
-Identity Management
-During the deployment of the Hello World Hyperty and the association with an Identity, the user was successfully authenticated with a Google account.
-The following functionalities are still pending:
-•	User is able to select IDP to be used independently of the Hyperty
-•	Identity Assertions are correctly generated and added to the body of outgoing Messages
-•	Identity Assertions contained in the body of incoming messages are correctly validated by the IDP
+### Evaluation analysis
+
+
+*to be provided*
