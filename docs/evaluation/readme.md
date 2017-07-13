@@ -109,25 +109,29 @@ The most updated full detailed report of the tests execution are provided at htt
 
 ###	Non-Functional Runtime Tests
 
-The following execution time measurements were taken:
+The Core Runtime was evaluated in two versions:
 
-| Test | Execution Time (ms) |
-| :--------------------------------------: | :--------------------------------------: |
-| Runtime installation   |                 36                 |
-| Protostub deployment   |                 10                 |
-| Idp Proxy deployment   |                 6                 |
-| New Hypert Address Allocation   |                 3                 |
-| Hypert Address Reusage   |                 2                 |
-| Intra-runtime Hyperty Message Delivery  |                 4                 |
-| Inter-runtime Hyperty Message Delivery  |                 5                 |
-| Inter-domain Hyperty Message Delivery  |                 NA                 |
-| New Data Object Address Allocation   |                 1                 |
-| Data Object Address Reusage   |                 1                 |
-| Data Object creation (new Reporter)   |                 27                 |
-| Data Object subscription (new Observer)  |                 42                 |
-| Data Object Observer Resume   |                 34                 |
-| Data Object Reporter Resume   |                 20                 |
-| Data Object Update synchronised with Observer   |                 13                 |
+* in the normal minified version including all implemented components with 1.315KB size;
+* in the light version where the Graph Connector was removed with 500KB size;
+
+A following execution time measurements were taken (Average):
+
+| **Test**                                 | **Runtime Execution Time (ms)**          | **Runtime Light Execution Time (ms)** |
+| :--------------------------------------: | :--------------------------------------: | :--------------------------------------: |
+| Runtime installation                     |                 52                 |                39                 |
+| Protostub deployment                     |                 23                 |                18                 |
+| Idp Proxy deployment                     |                 9                |                 8                 |
+| Intra-runtime Hyperty Message Delivery   |                 6                 |                 5                 |
+| Inter-runtime Hyperty Message Delivery   |                 6                 |                 6                 |
+| New Hypert Address Allocation            |                 4                 |                 4                 |
+| Hypert Address Reusage                   |                 2                 |                 2                 |
+| New Data Object Address Allocation       |                 1                 |                 1                 |
+| Data Object Address Reusage              |                 1                 |                 1                 |
+| Data Object creation (new Reporter)      |                 28                 |                 28                 |
+| Data Object subscription (new Observer)  |                 61                 |                 63                 |
+| Data Object Update synchronised with Observer   |                 16                 |                 16                 |
+| Data Object Observer Resume              |                 31                 |                 31                 |
+| Data Object Reporter Resume              |                 28                 |                 28                 |
 
 Additional non-functional evaluations are provided for:
 
@@ -137,5 +141,5 @@ Additional non-functional evaluations are provided for:
 
 ### Evaluation analysis
 
-
-*to be provided*
+The results obtained for the runtime core evaluation shows in general, good results. We can conclude that the overhead introduced by the messaging framework (the message bus components) and by the security components (policy engine and identity module) is marginal (always under 10 ms) and does compensate the benefits gained by the security by design approach. The execution time for the dynamic deployment of Protostubs and IdP Proxies is also very small (8 to 23 ms) and does not hurt the user experience. It means the network download time from the Catalogue is the one that may impact the user experience and the storage of these components by the Runtime Catalogue has significantly increase the Runtime performance. The Runtime installation execution time is better than expected (around 50 ms ) and we have noticed that there is a non-linear correlation with the size of the runtime execution file (around 25 percent of improvement when comparing the normal runtime installation time with the light runtime installation time). Since the file size has a higher impact on the download time from the Catalogue, we can conclude that the reduction of the runtime components size, notably of the Graph Connector, is one important aspect to be improved in future.
+The execution time for the data synchronization is approximately 50% of the full process, taking into account the message delivery time is around 8ms (see inter-runtime message delivery test). We should however note that the data object subscription execution is much higher than the data object creation time and should be further improved in future optimizations.
