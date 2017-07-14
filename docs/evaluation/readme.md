@@ -62,7 +62,7 @@ Address reusage and data objects resume:
 
 #### Non-Functional Metrics
 
-For the Core runtime, the execution time is the only non-functional metric used. For the NodeJS runtime, since it can be used in a server, additional non-functional metrics are defined:
+For the Core runtime and the Browser Runtime, the execution time is the only non-functional metric used. For the NodeJS runtime, since it can be used in a server, additional non-functional metrics are defined:
 
 **Deployment Performance**
 
@@ -109,12 +109,23 @@ The most updated full detailed report of the tests execution are provided at htt
 
 ###	Non-Functional Runtime Tests
 
+**Runtime Core Performance**
+
+The Core Runtime non-functional tests were performed with a local Catalogue and remote Message Node (Vertx server implementation) and Registry Domain servers hosted at the Hysmart testbed.
+
+The used machine has the following characteristics:
+
+* Intel Core i5-3210 CPU @ 2.6 GHz
+* 8 GB RAM
+* SSD
+* OS: Windows 8.1
+
 The Core Runtime was evaluated in two versions:
 
 * in the normal minified version including all implemented components with 1.315KB size;
 * in the light version where the Graph Connector was removed with 500KB size;
 
-A following execution time measurements were taken (Average):
+The following execution time measurements were taken (Average values):
 
 | **Test**                                 | **Runtime Execution Time (ms)**          | **Runtime Light Execution Time (ms)** |
 | :--------------------------------------: | :--------------------------------------: | :--------------------------------------: |
@@ -132,6 +143,63 @@ A following execution time measurements were taken (Average):
 | Data Object Update synchronised with Observer   |                 16                 |                 16                 |
 | Data Object Observer Resume              |                 31                 |                 31                 |
 | Data Object Reporter Resume              |                 28                 |                 28                 |
+| :--------------------------------------: | :--------------------------------------: | :--------------------------------------: |
+
+**Hyperty Deployment on Browser and NodeJS Runtime implementations**
+
+The Hyperty deployment was tested on the Browser Runtime and NodeJS Runtime implementations in the same machine as described above but now having the Message Node (Vertx implementation) and the Domain Registry running locally.
+
+| **Test**                                 | **Execution Time at Browser Runtime(ms)**          | **Execution Time at NodeJS Runtime(ms)** |
+| :--------------------------------------: | :--------------------------------------: | :--------------------------------------: |
+| Hyperty Deployment                     |                805                 |               1782                  |
+| :--------------------------------------: | :--------------------------------------: | :--------------------------------------: |
+
+As we can see, the NodeJS takes twice the time to deploy an Hyperty when compared with the Browser runtime. It should be noted that the Hyperty deployment implies a few transactions with the Message Node (Address Allocation and Routing Path set for its address) as well as with the Domain Registry (registration entry creation).
+
+#### NodeJS Load Performance
+
+The NodeJS non-functional tests were performed with all functionalities deployed locally in a single machine, including the Catalogue, the Message Node (Vertx server implementation), the Registry Domain and the NodeJS runtime itself.
+
+The used machine has the following characteristics:
+
+* Intel Core i7 with hyper treading
+* 8 GB RAM
+* SSD
+* OS: Ubuntu 14.04
+
+**Data Object Reporters creation Performance**
+
+The purpose of this test is to assess the behavior of the NodeJS runtime with an increasing number of Data Object Reporters, which also includes all transactions required to allocate data object addresses and its registration in the Domain Registry.
+
+![Data Object Reporters creation Performance](nodejs-reporter-performance.png)
+
+As shown in the figure below, the data object creation rate is almost linear and aligned with runtime core tests (a bit better which can be justified by the different machines used).
+
+![Data Object Reporters creation Rate](nodejs-reporter-creation-rate.png)
+
+
+**Data Object Observers creation Performance**
+
+The purpose of this test is to assess the behavior of the NodeJS runtime with an increasing number of Data Object Observers, which also includes all transactions required to setup the data synchronisation stream and to get authorisation from the Reporter Hyperty.
+
+![Data Object Observers creation Performance](nodejs-observer-performance.png)
+
+ The Observer creation takes much longer (around 100% worst) when compared with the Reporter creation performance, whicj is aligned with the Runtime Core tests results. In the figure below we can also see a degradation of the performance when we increase the creation rate of Data Object Observers. This probably means there is some implementation bug not noticed so far.
+
+![Data Object Observers creation Rate](nodejs-observer-creation-rate.png)
+
+**Data Object Synchronization Performance**
+
+The purpose of this test is to evaluate how the NodeJS runtime handles the synchronization of an increasing number of changes on Data Objects.
+
+![Data Object Synchronization Performance](nodejs-synchronisation-performance.png)
+
+In general, the synchronisation process seems to be well performed and aligned with the Data Object synchronisation tests performed for the Runtime Core (around 10ms) with some degradation with the increasing rate of the Data Object changes. Having a deeper look on the results (see figure below) we can see that increasing the number of Data Objects to be synchronised decreases the performance of the synchronisation process which should be further tested in future.
+
+![Data Object Synchronization Performance per Data Object Reporter](nodejs-synchronisation-performance-per-reporter.png)
+
+
+#### Identity Module and Policy Engine Performance
 
 Additional non-functional evaluations are provided for:
 
@@ -142,4 +210,7 @@ Additional non-functional evaluations are provided for:
 ### Evaluation analysis
 
 The results obtained for the runtime core evaluation shows in general, good results. We can conclude that the overhead introduced by the messaging framework (the message bus components) and by the security components (policy engine and identity module) is marginal (always under 10 ms) and does compensate the benefits gained by the security by design approach. The execution time for the dynamic deployment of Protostubs and IdP Proxies is also very small (8 to 23 ms) and does not hurt the user experience. It means the network download time from the Catalogue is the one that may impact the user experience and the storage of these components by the Runtime Catalogue has significantly increase the Runtime performance. The Runtime installation execution time is better than expected (around 50 ms ) and we have noticed that there is a non-linear correlation with the size of the runtime execution file (around 25 percent of improvement when comparing the normal runtime installation time with the light runtime installation time). Since the file size has a higher impact on the download time from the Catalogue, we can conclude that the reduction of the runtime components size, notably of the Graph Connector, is one important aspect to be improved in future.
-The execution time for the data synchronization is approximately 50% of the full process, taking into account the message delivery time is around 8ms (see inter-runtime message delivery test). We should however note that the data object subscription execution is much higher than the data object creation time and should be further improved in future optimizations.
+The execution time for the data synchronization is approximately 50% of the full process, taking into account the message delivery time is around 8ms (see inter-runtime message delivery test), which we consider an acceptable cost to be paid to benefit from having seamless interoperability among peers without having to standardize protocols or APIs.
+Data Synchronisation rate with NodeJS Runtime is in aligned with these results but some improvement should be considered to improve the performance when the data changes rate is increased.
+
+As expected, the Data Object creation execution time (Reporter and Observer) is where most of the data synchronisation cost is. The obtained results are considered very good for the browser runtime where high rates of data object creations are not expected (edge computing benefit). However, these results are not so good for the NodeJS runtime taking into account that it should be used at the back-end with higher rate of data objects creation. Furthermore, the data object subscription execution is much higher than the data object creation time (around 100 percent higher) and the performance becomes worst when the creation rate of Data Object Observers is increased. As already mentioned above, this probably means there is some implementation bug not noticed so far that has to be carefully investigated. At the end, we also conclude that the Data Object creation process should be further simplified, notably for Server side hyperties by, for example, giving the option not to register Data Objects like - WebRTC Connection Data Objects - to Domain Registry. Finally, should be noted that having the option to resume data objects between sessions will also dramatically reduce the impact of the Data Object creation high cost. For example, WebRTC Connection data objects would only be created for communication between new users.
