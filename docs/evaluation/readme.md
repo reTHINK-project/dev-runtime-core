@@ -3,10 +3,11 @@
 ### Description of Component
 
 The Hyperty Runtime supports the execution of Hyperties including:
-•	Deployment of Hyperties
-•	Deployment of Protocol Stubs
-•	Communication between Hyperties
-•	Management of Identities associated to Hyperties
+
+*	Deployment of Hyperties
+*	Deployment of Protocol Stubs
+*	Communication between Hyperties
+*	Management of Identities associated to Hyperties
 
 
 ###	Metrics
@@ -143,7 +144,6 @@ The following execution time measurements were taken (Average values):
 | Data Object Update synchronised with Observer   |                 16                 |                 16                 |
 | Data Object Observer Resume              |                 31                 |                 31                 |
 | Data Object Reporter Resume              |                 28                 |                 28                 |
-| :--------------------------------------: | :--------------------------------------: | :--------------------------------------: |
 
 **Hyperty Deployment on Browser and NodeJS Runtime implementations**
 
@@ -152,7 +152,6 @@ The Hyperty deployment was tested on the Browser Runtime and NodeJS Runtime impl
 | **Test**                                 | **Execution Time at Browser Runtime(ms)**          | **Execution Time at NodeJS Runtime(ms)** |
 | :--------------------------------------: | :--------------------------------------: | :--------------------------------------: |
 | Hyperty Deployment                     |                805                 |               1782                  |
-| :--------------------------------------: | :--------------------------------------: | :--------------------------------------: |
 
 As we can see, the NodeJS takes twice the time to deploy an Hyperty when compared with the Browser runtime. It should be noted that the Hyperty deployment implies a few transactions with the Message Node (Address Allocation and Routing Path set for its address) as well as with the Domain Registry (registration entry creation).
 
