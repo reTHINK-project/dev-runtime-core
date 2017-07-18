@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <base data-ice="baseUrl" href="../../../">
+  <title data-ice="title">test/PerformanceTests/RuntimeStubIdpDeploy.spec.js | Service Framework API Document</title>
+  <link type="text/css" rel="stylesheet" href="css/style.css">
+  <link type="text/css" rel="stylesheet" href="css/prettify-tomorrow.css">
+  <script src="script/prettify/prettify.js"></script>
+  
+  
+  <script src="script/manual.js"></script>
+</head>
+<body class="layout-container" data-ice="rootContainer">
+
+<header>
+  <a href="./">Home</a>
+  <a href="./manual/index.html" data-ice="manualHeaderLink">Manual</a>
+  <a href="identifiers.html">Reference</a>
+  <a href="source.html">Source</a>
+  <a href="test.html" data-ice="testLink">Test</a>
+  
+  <div class="search-box">
+  <span>
+    <img src="./image/search.png">
+    <span class="search-input-edge"></span><input class="search-input"><span class="search-input-edge"></span>
+  </span>
+    <ul class="search-result"></ul>
+  </div>
+</header>
+
+<nav class="navigation" data-ice="nav"><div>
+  <ul>
+    
+  <li data-ice="doc"><div data-ice="dirPath" class="nav-dir-path">bus</div><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Bus.js~Bus.html">Bus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MessageBus.js~MessageBus.html">MessageBus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/MiniBus.js~MiniBus.html">MiniBus</a></span></span></li>
+<li data-ice="doc"><span data-ice="kind" class="kind-class">C</span><span data-ice="name"><span><a href="class/src/bus/Pipeline.js~Pipeline.html">Pipeline</a></span></span></li>
+</ul>
+</div>
+</nav>
+
+<div class="content" data-ice="content"><h1 data-ice="title">test/PerformanceTests/RuntimeStubIdpDeploy.spec.js</h1>
+<pre class="source-code line-number raw-source-code"><code class="prettyprint linenums" data-ice="content">import chai from &apos;chai&apos;;
+import chaiAsPromised from &apos;chai-as-promised&apos;;
+import sinonChai from &apos;sinon-chai&apos;;
+
+chai.config.truncateThreshold = 0;
+
+let expect = chai.expect;
+
+chai.use(chaiAsPromised);
+chai.use(sinonChai);
+
+import { descriptors } from &apos;../resources/descriptors.js&apos;;
+
+// Testing Module
+import RuntimeUA from  &apos;../../dist/Runtime.js&apos;;
+
+// Main dependecies
+import Registry from &apos;../../src/registry/Registry&apos;;
+import IdentityModule from &apos;../../src/identity/IdentityModule&apos;;
+import PEP from &apos;../../src/policy/PEP&apos;;
+import MessageBus from &apos;../../src/bus/MessageBus&apos;;
+
+import { divideURL } from &apos;../../src/utils/utils&apos;;
+
+import { runtimeFactory } from &apos;../resources/runtimeFactory&apos;;
+
+/// import { runtimeConfiguration } from &apos;./resources/runtimeConfiguration&apos;;
+
+// Testing runtimeUA;
+let domain = &apos;localhost&apos;;
+describe(&apos;RuntimeUA&apos;, function() {
+
+  let runtime = new RuntimeUA(descriptors.Runtimes.Runtime, runtimeFactory, domain);
+  let getDescriptor;
+
+  before(function() {
+
+    getDescriptor = (url) =&gt; {
+
+      return new Promise(function(resolve, reject) {
+
+        let dividedURL = divideURL(url);
+        let identity = dividedURL.identity;
+
+        if (!identity) {
+          identity = &apos;default&apos;;
+        } else {
+          identity = identity.substring(identity.lastIndexOf(&apos;/&apos;) + 1);
+        }
+
+        let result;
+
+        if (url.includes(&apos;protocolstub&apos;) || url === dividedURL.domain) {
+          try {
+            result = descriptors.ProtoStubs[identity];
+          } catch (e) {
+            reject(e);
+          }
+        } else if (url.includes(&apos;idp-proxy&apos;)) {
+          try {
+            result = descriptors.IdpProxies[identity];
+          } catch (e) {
+            reject(e);
+          }
+        }
+
+        resolve(result);
+
+      });
+    };
+  });
+
+  after(function() {
+    runtime.descriptorInstance.getStubDescriptor.restore();
+    runtime.descriptorInstance.getIdpProxyDescriptor.restore();
+  });
+
+  describe(&apos;constructor()&apos;, function() {
+
+    it(&apos;should load Runtime with success&apos;, (done) =&gt; {
+
+      expect(runtime.init().then((result) =&gt; {
+
+        sinon.stub(runtime.messageBus, &apos;postMessage&apos;, function(msg, replyCallback) {
+          replyCallback({
+            id: 1, type: &apos;response&apos;, from: &apos;domain://msg-node.sp.domain/address-allocation&apos;, to: &apos;local://fake.url&apos;,
+            body: {code: 200, value: {allocated: msg.body.scheme + &apos;://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d&apos;}}
+          });
+        });
+        sinon.stub(runtime.descriptorInstance, &apos;getStubDescriptor&apos;, (stubURL) =&gt; {
+          return getDescriptor(stubURL);
+        });
+
+        sinon.stub(runtime.descriptorInstance, &apos;getIdpProxyDescriptor&apos;, (idpProxyURL) =&gt; {
+          return getDescriptor(idpProxyURL);
+        });
+
+        return result;
+      }))
+      .to.be.fulfilled
+      .and.to.eventually.be.true
+      .and.notify(done);
+
+    });
+
+  });
+
+  describe(&apos;loadStub(sp-domain)&apos;, function() {
+
+    it(&apos;Stub should be deployed&apos;, function(done) {
+      let spDomain = &apos;sp.domain&apos;;
+      let loadStubPromise = runtime.loadStub(spDomain);
+
+      expect(loadStubPromise).to.be.fulfilled
+      .and.eventually.have.all.keys(&apos;url&apos;, &apos;status&apos;, &apos;descriptorURL&apos;)
+      .and.eventually.to.have.property(&apos;url&apos;).to.include(&apos;runtime://sp.domain/protostub/&apos;)
+      .and.notify(done);
+    });
+
+  });
+
+  describe(&apos;loadIdpProxy(google.com)&apos;, function() {
+
+    it(&apos;IDP Proxy should be deployed&apos;, function(done) {
+      let domain = &apos;google.com&apos;;
+      let loadIdpPromise = runtime.loadIdpProxy(domain);
+      let stubResolved = [&apos;url&apos;, &apos;status&apos;];
+      expect(loadIdpPromise).to.be.fulfilled
+      .and.eventually.to.have.all.keys(stubResolved)
+      .and.notify(done);
+    });
+
+  });
+
+});
+</code></pre>
+
+</div>
+
+<footer class="footer">
+  Generated by <a href="https://esdoc.org">ESDoc<span data-ice="esdocVersion">(0.5.2)</span><img src="./image/esdoc-logo-mini-black.png"></a>
+</footer>
+
+<script src="script/search_index.js"></script>
+<script src="script/search.js"></script>
+<script src="script/pretty-print.js"></script>
+<script src="script/inherited-summary.js"></script>
+<script src="script/test-summary.js"></script>
+<script src="script/inner-link.js"></script>
+<script src="script/patch-for-local.js"></script>
+</body>
+</html>

@@ -35,17 +35,6 @@ class DataObjectsStorage {
       storeDataObject[type][metadata.url].subscriberUsers = [];// TODO:do we need this?
       storeDataObject[type][metadata.url].childrenObjects = {};
       storeDataObject[type][metadata.url].data = {};
-
-      /*storeDataObject[type][metadata.url] = {
-        metadata.url: metadata.url,
-        isReporter: isReporter,
-        isToSaveData: false,
-        subscriptions: [],
-        subscriberUsers: [],
-        childrens: {},
-        data: {},
-        version: 0
-      };*/
     }
 
     Object.assign(storeDataObject[type][metadata.url], metadata);
@@ -212,6 +201,7 @@ class DataObjectsStorage {
    */
   deleteResource(resource) {
 
+
     return new Promise((resolve, reject) => {
 
       if (resource) {
@@ -221,14 +211,17 @@ class DataObjectsStorage {
 
           if (tmp.hasOwnProperty('observers') && tmp.observers.hasOwnProperty(resource)) {
             delete tmp.observers[resource];
+
             resolve(tmp.observers[resource]);
             this._storageManager.set('syncherManager:ObjectURLs', 1, tmp);
+            this._storeDataObject = tmp;
           }
 
           if (tmp.hasOwnProperty('reporters') && tmp.reporters.hasOwnProperty(resource)) {
             delete tmp.reporters[resource];
             resolve(tmp.reporters[resource]);
             this._storageManager.set('syncherManager:ObjectURLs', 1, tmp);
+            this._storeDataObject = tmp;
           }
 
           resolve('The ' + resource + ' dosen\t exists, nothing was deleted');

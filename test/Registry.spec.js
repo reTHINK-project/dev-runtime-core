@@ -15,7 +15,10 @@ import Sandbox from '../src/sandbox/Sandbox';
 import MessageBus from '../src/bus/MessageBus';
 import Loader from '../src/runtime/Loader';
 import Descriptors from '../src/runtime/Descriptors';
-import { descriptors } from './resources/descriptors';
+
+import { descriptors } from './resources/descriptors.js';
+import { getDescriptor } from './resources/getDescriptor.js';
+
 import {divideURL} from '../src/utils/utils';
 import { runtimeFactory } from './resources/runtimeFactory';
 
@@ -94,7 +97,7 @@ describe('Registry', function() {
 
     // to emulate registrations
 
-    registry.messageBus.addListener('domain://registry.ua.pt/', (msg) => {
+    registry.messageBus.addListener('domain://registry.ua.pt', (msg) => {
       console.log('MSG BUS LISTENER for Domain Registry: ', msg);
       let responseMessage = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: {code: 200}};
 
@@ -109,51 +112,6 @@ describe('Registry', function() {
 
       msgbus.postMessage(responseMessage);
     });
-
-    let getDescriptor = (url) => {
-
-      return new Promise(function(resolve, reject) {
-
-        let dividedURL = divideURL(url);
-        let identity = dividedURL.identity;
-
-        if (!identity) {
-          identity = 'default';
-        } else {
-          identity = identity.substring(identity.lastIndexOf('/') + 1);
-        }
-
-        let result;
-
-        if (url.includes('hyperty')) {
-          try {
-            result = descriptors.Hyperties[identity];
-          } catch (e) {
-            reject(e);
-          }
-
-        } else if (url.includes('protocolstub') || url === dividedURL.domain) {
-          try {
-            result = descriptors.ProtoStubs[identity];
-          } catch (e) {
-            reject(e);
-          }
-        } else if (url.includes('idp-proxy')) {
-          try {
-            result = descriptors.IdpProxies[identity];
-          } catch (e) {
-            reject(e);
-          }
-        } else if (url.includes('dataschema')) {
-          try {
-            result = descriptors.DataSchemas[identity];
-          } catch (e) {
-            reject(e);
-          }
-        }
-        resolve(result);
-      });
-    };
 
     console.log('registry ', descriptorInstance);
     sinon.stub(descriptorInstance, 'getHypertyDescriptor', (hypertyURL) => {

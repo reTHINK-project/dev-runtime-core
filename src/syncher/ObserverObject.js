@@ -27,6 +27,7 @@ class ObserverObject {
       if (this._isToSaveData && msg.body.attribute) {
         console.log('[SyncherManager.ObserverObject ] SyncherManager - save data: ', msg);
         _this._parent._dataObjectsStorage.update(false, _this._url, 'version', msg.body.version);
+        _this._parent._dataObjectsStorage.update(false, _this._url, 'lastModified', msg.body.lastModified);
         _this._parent._dataObjectsStorage.saveData(false, _this._url, msg.body.attribute, msg.body.value);
       }
 
@@ -130,8 +131,10 @@ class ObserverObject {
     _this._parent._dataObjectsStorage.saveChildrens(false, url, attribute, value);
   }
 
-  removeSubscription(hyperty) {
+  removeSubscription(msg) {
     let _this = this;
+
+    let hyperty = msg.from;
 
     let domain = divideURL(hyperty).domain;
     let objURLSubscription = _this._url + '/subscription';
@@ -141,7 +144,7 @@ class ObserverObject {
       //FLOW-OUT: message sent to remote ReporterObject -> _onRemoteUnSubscribe
       _this._bus.postMessage({
         type: 'unsubscribe', from: _this._parent._url, to: objURLSubscription,
-        body: { resource: _this._url }
+        body: { source: hyperty, identity: msg.body.identity }
       });
 
       //TODO: should I wait for response before unsubscribe on msg-node

@@ -62,6 +62,8 @@ class IdentityModule {
     let newIdentity = new Identity('guid', 'HUMAN');
     _this.identity = newIdentity;
     _this.crypto = new Crypto();
+    _this.currentIdentity;
+    _this.defaultIdentity;
 
     //stores the association of the dataObject and the Hyperty registered within
     _this.dataObjectsIdentity = {};
@@ -124,6 +126,23 @@ class IdentityModule {
     _this.addGUIListeners();
   }
 
+  /**
+  * return the coreDiscovery component
+  */
+  get coreDiscovery() {
+    let _this = this;
+    return _this._coreDiscovery;
+  }
+
+  /**
+  * Set the coreDiscovery component
+  * @param {coreDiscovery} coreDiscovery
+  */
+  set coreDiscovery(coreDiscovery) {
+    let _this = this;
+    _this._coreDiscovery = coreDiscovery;
+  }
+
   addGUIListeners() {
     let _this = this;
 
@@ -151,8 +170,8 @@ class IdentityModule {
         let contents = msg.body.params.contents;
         let origin = msg.body.params.origin;
         let usernameHint = msg.body.params.usernameHint;
-        let ipDomain = msg.body.params.ipDomain;
-        _this.sendGenerateMessage(contents, origin, usernameHint, ipDomain).then((returnedValue) => {
+        let idpDomain = msg.body.params.idpDomain;
+        _this.sendGenerateMessage(contents, origin, usernameHint, idpDomain).then((returnedValue) => {
           let value = {type: 'execute', value: returnedValue, code: 200};
           let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
           _this._messageBus.postMessage(replyMsg);
@@ -241,7 +260,25 @@ class IdentityModule {
 
         if (identities) {
           _this.identities = identities;
+
+          identities.forEach((identity) => {
+            let timeNow = _this._seconds_since_epoch();
+            let expires = 0;
+
+            if (identity.info && identity.info.expires ) {
+              expires = identity.info.expires;
+            }  else if (identity.info && identity.info.tokenIDJSON && identity.info.tokenIDJSON.exp)
+              expires = identity.info.tokenIDJSON.exp;
+
+            if (expires > timeNow && !identity.interworking) {
+              _this.defaultIdentity = identity.messageInfo;
+              _this.defaultIdentity.expires = expires;
+            }
+
+          });
         }
+
+
         resolve();
       });
     });
@@ -268,37 +305,47 @@ class IdentityModule {
         let expiration_date = undefined;
 
         if (complete_id.hasOwnProperty('info')) {
-          if (complete_id.info.hasOwnProperty('expirates')) {
+          if (complete_id.info.hasOwnProperty('expires')) {
             expiration_date = complete_id.info.expires;
           } else if (complete_id.info.hasOwnProperty('tokenIDJSON')) {
             expiration_date = complete_id.info.tokenIDJSON.exp;
           } else {
             // throw 'The ID Token does not have an expiration time';
             console.log('The ID Token does not have an expiration time');
+            resolve(identity);
           }
+        } else if (complete_id.hasOwnProperty("infoToken") && complete_id.infoToken.hasOwnProperty("exp")) {
+          expiration_date = complete_id.infoToken.exp;
         } else {
           // throw 'The ID Token does not have an expiration time';
-          console.log('The ID Token does not have an expiration time')
+          console.log('The ID Token does not have an expiration time');
+          resolve(identity);
         }
 
         console.log('[Identity.IdentityModule.getValidToken] Token expires in', expiration_date);
         console.log('[Identity.IdentityModule.getValidToken] time now:', time_now);
 
-        // TODO: this should not be verified in this way
-        // we should contact the IDP to verify this instead of using the local clock
-        // but this works for now...
         if (time_now >= expiration_date) {
-          // delete current identity
-          _this.deleteIdentity(complete_id.identity);
-
-          // generate new idToken
-          _this.callGenerateMethods(identity.idp).then((value) => {
-            resolve(value.messageInfo);
-          });
+          if (identity.idp === 'google.com') {
+            _this.sendRefreshMessage(identity).then((newIdentity) => {
+              _this.deleteIdentity(complete_id.identity);
+              _this.storeIdentity(newIdentity, identity.keyPair).then((value) => {
+                resolve(value);
+              }, (err) => {
+                console.error('[Identity.IdentityModule.getToken] error on getToken', err);
+                reject(err);
+              });
+            });
+          } else { // microsoft.com
+            _this.deleteIdentity(complete_id.identity);
+            // generate new idToken
+            _this.callGenerateMethods(identity.idp).then((value) => {
+              resolve(value);
+            });
+          }
         } else {
           resolve(identity);
         }
-        resolve(identity);
       }).catch(function(error) {
         console.error('[Identity.IdentityModule.getToken] error on getToken', error);
         reject(error);
@@ -459,7 +506,7 @@ class IdentityModule {
       let identity = _this.identities[index];
       if (identity.hasOwnProperty('interworking') && identity.interworking.domain === domainToCheck) {
         // check if there is expiration time
-        if (identity.hasOwnProperty('info') && identity.info.hasOwnProperty('expirates')) {
+        if (identity.hasOwnProperty('info') && identity.info.hasOwnProperty('expires')) {
           expiration_date = identity.info.expires;
           console.log('[Identity.IdentityModule.getAccessToken] Token expires in', expiration_date);
           console.log('[Identity.IdentityModule.getAccessToken] time now:', time_now);
@@ -469,7 +516,7 @@ class IdentityModule {
           // but this works for now...
           if (time_now >= expiration_date) {
             // delete current identity
-            _this.deleteIdentity(identity.identity);
+            //_this.deleteIdentity(identity.identity);
             return null; // the getToken function then generates a new token
           }
         } // else this access token has no expiration time
@@ -643,7 +690,7 @@ class IdentityModule {
           let idp = identityBundle.idp;
           let origin = identityBundle.hasOwnProperty('origin') ? identityBundle.origin : 'origin';
           let idHint = identityBundle.hasOwnProperty('idHint') ? identityBundle.idHint : '';
-          
+
           _this.selectIdentityForHyperty(origin, idp, idHint).then((assertion) => {
             console.log('[IdentityModule] Identity selected by hyperty.');
             return resolve(assertion);
@@ -657,12 +704,18 @@ class IdentityModule {
             });
           });
         } else {
-          _this.selectIdentityFromGUI().then((assertion) => {
+
+          if (_this.defaultIdentity && _this.defaultIdentity.expires > _this._seconds_since_epoch() )
+          {
+            return resolve(_this.defaultIdentity);
+          } else {
+            _this.selectIdentityFromGUI().then((assertion) => {
             console.log('[IdentityModule] Identity selected from GUI.')
             return resolve(assertion);
           }, (err) => {
             return reject(err);
           });
+          }
         }
       }).catch(error => {
         console.error('Error on identity acquisition ', error);
@@ -843,6 +896,8 @@ class IdentityModule {
 
           let chosenID = 'user://' + _this.currentIdentity.idp + '/' + value.value;
 
+          _this.defaultIdentity = _this.currentIdentity;
+
           // returns the identity info from the chosen id
           for (let i in _this.identities) {
             if (_this.identities[i].identity === chosenID) {
@@ -861,6 +916,24 @@ class IdentityModule {
         } else {
           return reject('error on GUI received message.');
         }
+      });
+    });
+  }
+
+  sendRefreshMessage(oldIdentity) {
+    let _this = this;
+    let domain = _this._resolveDomain(oldIdentity.idp);
+    let message;
+    let assertion = _this.getIdentity(oldIdentity.userProfile.userURL);
+
+    return new Promise((resolve, reject) => {
+      message = {type: 'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'refreshAssertion', params: {identity: assertion}}};
+      _this._messageBus.postMessage(message, (res) => {
+        let result = res.body.value;
+
+        console.log('TIAGO new assertion:', result);
+        resolve(result);
+
       });
     });
   }
@@ -927,8 +1000,15 @@ class IdentityModule {
       let commonName = idToken.name || email.substring(0, email.indexOf('@'));
       let userProfileBundle = {username: email, cn: commonName, avatar: infoToken.picture, locale: infoToken.locale, userURL: identifier};
 
+      let expires = undefined;
+      if (infoToken.hasOwnProperty("exp")) {
+        expires = infoToken.exp;
+      } else if (result.hasOwnProperty("info") && result.info.hasOwnProperty("expires")) {
+        expires = result.info.expires;
+      }
+
       //creation of a new JSON with the identity to send via messages
-      let newIdentity = {userProfile: userProfileBundle, idp: result.idp.domain, assertion: result.assertion};
+      let newIdentity = {userProfile: userProfileBundle, idp: result.idp.domain, assertion: result.assertion, expires: expires};
       result.messageInfo = newIdentity;
       result.keyPair = keyPair;
 
@@ -946,7 +1026,7 @@ class IdentityModule {
         }
       }
 
-      if (idAlreadyExists) { // TODO: TIAGO maybe overwrite the identity
+      if (idAlreadyExists) { // TODO: maybe overwrite the identity
         resolve(oldId);
         let exists = false;
 
@@ -1141,7 +1221,6 @@ class IdentityModule {
                 let sessionKey = _this.crypto.generateRandom();
                 _this.dataObjectSessionKeys[dataObjectURL] = {sessionKey: sessionKey, isToEncrypt: true};
 
-                // TIAGO - persistence issue #147
                 _this.storageManager.set('dataObjectSessionKeys', 0, _this.dataObjectSessionKeys);
                 dataObjectKey = _this.dataObjectSessionKeys[dataObjectURL];
               }
@@ -1957,10 +2036,9 @@ class IdentityModule {
           if (subscriberHyperty) {
             resolve(subscriberHyperty);
           } else {
-
             // search in domain registry for the hyperty associated to the dataObject
             // search in case is a subscriber who wants to know the reporter
-            _this.registry.discoverDataObjectPerURL(finalURL, splitedURL[2]).then(dataObject => {
+            _this._coreDiscovery.discoverDataObjectPerURL(finalURL, splitedURL[2]).then(dataObject => {
               _this.dataObjectsIdentity[finalURL] = dataObject.reporter;
               resolve(dataObject.reporter);
             }, err => {

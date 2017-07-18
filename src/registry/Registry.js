@@ -27,7 +27,7 @@ import AddressAllocation from '../allocation/AddressAllocation';
 import HypertyInstance from './HypertyInstance';
 
 import {MessageFactory} from 'service-framework/dist/MessageFactory';
-import {divideURL, isHypertyURL, isURL, isUserURL, generateGUID, getUserIdentityDomain, isBackendServiceURL, deepClone} from '../utils/utils.js';
+import {divideURL, isHypertyURL, isURL, isUserURL, generateGUID, getUserIdentityDomain, isBackendServiceURL, deepClone, postMessageWhileTimeout} from '../utils/utils.js';
 
 import 'proxy-observe';
 import { WatchingYou } from 'service-framework/dist/Utils';
@@ -77,6 +77,7 @@ class Registry {
     _this.storageManager = storageManager;
     _this.runtimeCapabilities = runtimeCapabilities;
     _this.identifier = generateGUID();
+    _this.registrationRetries = 5;// number of attempts to register Hyperties and DataObjects when errors occurs
 
     // the expires in 3600, represents 1 hour
     //the expires is in seconds, unit of measure received by the domain registry
@@ -250,7 +251,7 @@ class Registry {
     let hypertyName;
 
     //if is not an hyperty, check if is a dataObject and obtain his reporter
-    let hypertyURL = (isHypertyURL) ? hypertyURL = url : _this.getReporterURLSynchonous(url);
+    let hypertyURL = isHypertyURL ? url : _this.getReporterURLSynchonous(url);
 
     for (let index in _this.hypertiesList) {
       let hyperty = _this.hypertiesList[index];
@@ -346,7 +347,7 @@ class Registry {
 
       for (let index in _this.hypertiesList) {
         let hyperty = _this.hypertiesList[index];
-        let result = _this.unregisterHypertyInstance(hyperty.user.userURL, hyperty.hypertyURL);
+        let result = _this.unregisterHypertyInstance(hyperty.hypertyURL);
         unregisterResults.push(result);
       }
 
@@ -359,20 +360,51 @@ class Registry {
 
   /**
   *  function to unregister an hypertyInstance in the Domain Registry
-  *  @param   {String}      user        user url
   *  @param   {String}      hypertyInstance   HypertyInsntance url
   *
   */
-  unregisterHypertyInstance(user, hypertyInstance) {
+  unregisterHypertyInstance(hypertyInstance) {
     //TODO working but the user
     let _this = this;
 
-    let message = { type: 'delete', from: _this.registryURL,
-      to: 'domain://registry.' + _this._domain + '/',
-      body: { value: {user: user, url: hypertyInstance }}};
+    let closeMsg = { type: 'execute', from: _this.registryURL,
+      to: hypertyInstance,
+      body: { method: 'close' }};
+
+    // Send message to hyperty to close
+    _this._messageBus.postMessage(closeMsg, (reply) => {
+      console.log('[Registry.unregisterHypertyInstance] Close Reply', reply);
+
+      let message = { type: 'update', from: _this.registryURL,
+        to: 'domain://registry.' + _this._domain,
+        body: { resource: '/hyperty/' + hypertyInstance, value: 'disconnected', attribute: 'status' }};
+
+      _this._messageBus.postMessage(message, (reply) => {
+        console.log('[Registry] unregister hyperty Reply', reply);
+
+      });
+    });
+  }
+
+  /**
+  *  function to unregister an hypertyInstance in the Domain Registry
+  *  @param   {String}      hypertyInstance   HypertyInsntance url
+  *
+  */
+  unregisterDataObject(url) {
+    let _this = this;
+
+    let message = { type: 'update', from: _this.registryURL,
+      to: 'domain://registry.' + _this._domain,
+      body: {
+        resource: url,
+        value: {
+          status: 'disconnected'
+        }
+      }};
 
     _this._messageBus.postMessage(message, (reply) => {
-      console.log('[Registry] unregister hyperty Reply', reply);
+      console.log('[Registry] unregister dataObject Reply', reply);
     });
   }
 
@@ -384,7 +416,7 @@ class Registry {
     let _this = this;
 
     let message = { type: 'delete', from: _this.registryURL,
-      to: 'domain://registry.' + _this._domain + '/',
+      to: 'domain://registry.' + _this._domain,
       body: { value: {name: name}}};
 
     _this._messageBus.postMessage(message, (reply) => {
@@ -399,7 +431,7 @@ class Registry {
     let _this = this;
 
     let message = { type: 'UPDATE', from: _this.registryURL,
-      to: 'domain://registry.' + _this._domain + '/',
+      to: 'domain://registry.' + _this._domain,
       body: { resource: resource, value: value}};
 
     _this._messageBus.post.postMessage(message, (reply) => {
@@ -485,7 +517,8 @@ class Registry {
         delete registration.mutual;
         delete registration.resume;
 
-        registration.expires = _this.expiresTime;
+        if (!registration.expires) registration.expires = _this.expiresTime;
+
         registration.dataSchemes = dataScheme;
 
         if (p2pHandler) {
@@ -497,47 +530,82 @@ class Registry {
           registration.interworking = true;
         }
 
+        registration.status = 'live';
+
         let message;
 
-        if (!registration.resume) {
+        if (!objectRegistration.resume) {
 
-          console.log('[Registry.registerDataObject] registering new data object URL', objectRegistration);
+          console.log('[Registry.registerDataObject] registering new data object URL', registration);
 
-          message = {type: 'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: registration, policy: 'policy'}};
+          message = {type: 'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain, body: {value: registration, policy: 'policy'}};
 
         } else {
 
-          console.log('[Registry.registerDataObject] registering previously registered data object URL', objectRegistration);
+          console.log('[Registry.registerDataObject] registering previously registered data object URL', registration);
 
           message = {
             type: 'update',
-            to: 'domain://registry.' + _this.registryDomain + '/',
+            to: 'domain://registry.' + _this.registryDomain,
             from: _this.registryURL,
-            body: {resource: objectRegistration.url, value: {status: 'live'} }
+            body: {resource: registration.url, value: {status: 'live'} }
           };
 
         }
 
-        _this.dataObjectList[objectRegistration.url] = objectRegistration;
+        _this.dataObjectList[registration.url] = objectRegistration;
 
         // step to obtain the list of all URL registered to updated with the new one.
         _this.storageManager.set('registry:DataObjectURLs', 0, urlsList).then(() => {
 
           /*let message = _this.messageFactory.createCreateMessageRequest(
             _this.registryURL,
+            'domain://registry.' + _this.registryDomain,
+            messageValue,
+            'policy'
+          );*/
+
+          try {
+            _this._messageBus.postMessageWithRetries(message, _this._registrationRetries, (reply) => {
+              console.log('[Registry.registerDataObject] ===> registerDataObject Reply: ', reply);
+              if (reply.body.code === 200) {
+                resolve('ok');
+              } else {
+                reject('error on register DataObject');
+              }
+            });
+          } catch (e) {
+            console.error(e);
+            reject(e);
+          }
+
+
+          //timer to keep the registration alive
+          // the time is defined by a little less than half of the expires time defined
+          let keepAliveTimer = setInterval(function() {
+
+            /*let message = _this.messageFactory.createCreateMessageRequest(
+            _this.registryURL,
             'domain://registry.' + _this.registryDomain + '/',
             messageValue,
             'policy'
           );*/
 
-          _this._messageBus.postMessage(message, (reply) => {
-            console.log('[Registry.registerDataObject] ===> registerDataObject Reply: ', reply);
-            if (reply.body.code === 200) {
-              resolve('ok');
-            } else {
-              reject('error on register DataObject');
-            }
-          });
+            let message = {
+              type: 'update',
+              from: _this.registryURL,
+              to: 'domain://registry.' + _this.registryDomain,
+              body: { resource: registration.url, value: {status: 'live'} }
+            };
+
+            _this._messageBus.postMessage(message, (reply) => {
+              console.log('[Registry.registerDataObject] KeepAlive Reply: ', reply);
+            });
+          }, (((registration.expires / 1.1) / 2) * 1000));
+
+        }).catch(function(reason) {
+          console.log('[Registry registerHyperty] Error: ', reason);
+          reject(reason);
         });
       });
     });
@@ -559,6 +627,8 @@ class Registry {
         resources = descriptor.hypertyType;
       }
 
+      let objName = descriptor.objectName;
+
       let descriptorDataSchema = descriptor.dataObjects;
       let dataSchemasArray = [];
 
@@ -579,7 +649,7 @@ class Registry {
         console.log('[Registry] Hyperty Schemas', filteredDataSchemas);
         console.log('[Registry] Hyperty resources', resources);
 
-        resolve({resources: resources, dataSchema: filteredDataSchemas});
+        resolve({resources: resources, dataSchema: filteredDataSchemas, name: objName});
       });
     });
   }
@@ -624,9 +694,9 @@ class Registry {
 
         if (objectType === 'registry:HypertyURLs') {
           _this._getResourcesAndSchemes(info).then((value) => {
-            if (urlsList[value.resources + value.dataSchema]) {
+            if (urlsList[value.resources + value.dataSchema + value.name]) {
               console.log('[Registry] reusage of hyperty URL');
-              return resolve(urlsList[value.resources + value.dataSchema]);
+              return resolve(urlsList[value.resources + value.dataSchema + value.name]);
             } else {
               console.log('[Registry] no hyperty URL was previously registered ');
               return resolve(undefined);
@@ -735,7 +805,7 @@ class Registry {
         let message = {
           type: 'read',
           from: _this.registryURL,
-          to: 'domain://registry.' + _this._domain + '/',
+          to: 'domain://registry.' + _this._domain,
           body: {
             resource: dataObjectURL
           }
@@ -804,7 +874,7 @@ class Registry {
         let message = {
           type: 'read',
           from: _this.registryURL,
-          to: 'domain://registry.' + _this._domain + '/',
+          to: 'domain://registry.' + _this._domain,
           body: {
             resource: hypertyURL
           }
@@ -862,7 +932,7 @@ class Registry {
         let emailURL = userProfile.userURL;
 
         if (_this._messageBus === undefined) {
-          reject('MessageBus not found on registerStub');
+          reject('[Registry registerHyperty] MessageBus is undefined');
         } else {
           //call check if the protostub exist: to be removed
           /*  _this.resolve(domainUrl).then(function(a) {
@@ -880,7 +950,7 @@ class Registry {
                 urlsList = {};
               }
 
-              urlsList[hypertyCapabilities.resources + hypertyCapabilities.dataSchema] = addressURL.address;
+              urlsList[hypertyCapabilities.resources + hypertyCapabilities.dataSchema + hypertyCapabilities.name] = addressURL.address;
               _this.storageManager.set('registry:HypertyURLs', 0, urlsList).then(() => {
 
                 _this.registryDomain = domainUrl;
@@ -913,6 +983,11 @@ class Registry {
                 //message to register the new hyperty, within the domain registry
                 let messageValue;
                 let message;
+                let registrationExpires = _this.expiresTime;
+
+                // set a different expires value if configured in the Hyperty descriptor
+
+                if (descriptor.configuration && descriptor.configuration.expires) registrationExpires = descriptor.configuration.expires;
 
                 if (addressURL.newAddress) {
                   console.log('[Registry registerHyperty] registering new Hyperty URL', addressURL.address[0]);
@@ -921,12 +996,14 @@ class Registry {
                     user: emailURL,
                     descriptor: descriptorURL,
                     url: addressURL.address[0],
-                    expires: _this.expiresTime,
+                    expires: registrationExpires,
                     resources: hypertyCapabilities.resources,
                     dataSchemes: hypertyCapabilities.dataSchema,
                     runtime: runtime,
                     status: status
                   };
+
+                  // set a different expires if defined in the hyperty configuration
 
                   if (p2pHandler) {
                     messageValue.p2pHandler = p2pHandler;
@@ -935,14 +1012,14 @@ class Registry {
 
                   console.log('[Registry registerHyperty] registering new Hyperty at domain registry ', messageValue);
 
-                  message = {type: 'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: messageValue, policy: 'policy'}};
+                  message = {type: 'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain, body: {value: messageValue, policy: 'policy'}};
 
                 } else {
                   console.log('[Registry registerHyperty] registering previously registered Hyperty URL', addressURL.address[0]);
 
                   message = {
                     type: 'update',
-                    to: 'domain://registry.' + _this.registryDomain + '/',
+                    to: 'domain://registry.' + _this.registryDomain,
                     from: _this.registryURL,
                     body: {resource: addressURL.address[0], value: { status: 'live', user: emailURL }}
                   };
@@ -954,46 +1031,53 @@ class Registry {
 
                 console.log('[Registry registerHyperty] updating Hyperty registration at domain registry  - ', message);
 
-                _this._messageBus.postMessage(message, (reply) => {
-                  console.log('[Registry registerHyperty] Hyperty registration update response: ', reply);
+                try {
+                  _this._messageBus.postMessageWithRetries(message, _this.registrationRetries, (reply) => {
+                    console.log('[Registry registerHyperty] Hyperty registration update response: ', reply);
 
-                  if (reply.body.code === 200) {
-                    resolve(addressURL.address[0]);
-                  }else if (reply.body.code === 404) {
-                    console.log('[Registry registerHyperty] The update was not possible. Registering new Hyperty at domain registry');
+                    if (reply.body.code === 200) {
+                      resolve(addressURL.address[0]);
+                    } else if (reply.body.code === 404) {
+                      console.log('[Registry registerHyperty] The update was not possible. Registering new Hyperty at domain registry');
 
-                    messageValue = {
-                      user: emailURL,
-                      descriptor: descriptorURL,
-                      url: addressURL.address[0],
-                      expires: _this.expiresTime,
-                      resources: hypertyCapabilities.resources,
-                      dataSchemes: hypertyCapabilities.dataSchema,
-                      runtime: runtime,
-                      status: status
-                    };
+                      messageValue = {
+                        user: emailURL,
+                        descriptor: descriptorURL,
+                        url: addressURL.address[0],
+                        expires: registrationExpires,
+                        resources: hypertyCapabilities.resources,
+                        dataSchemes: hypertyCapabilities.dataSchema,
+                        runtime: runtime,
+                        status: status
+                      };
 
-                    if (p2pHandler) {
-                      messageValue.p2pHandler = p2pHandler;
-                      messageValue.p2pRequester = p2pRequester;
-                    }
+                      if (p2pHandler) {
+                        messageValue.p2pHandler = p2pHandler;
+                        messageValue.p2pRequester = p2pRequester;
+                      }
 
-                    message = {type: 'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain + '/', body: {value: messageValue, policy: 'policy'}};
+                      message = {type: 'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain, body: {value: messageValue, policy: 'policy'}};
 
-                    _this._messageBus.postMessage(message, (reply) =>{
-                      console.log('[Registry registerHyperty] Hyperty registration update response: ', reply);
+                      try {
+                        _this._messageBus.postMessageWithRetries(message, _this.registrationRetries, (reply) =>{
+                          console.log('[Registry registerHyperty] Hyperty registration update response: ', reply);
 
-                      if (reply.body.code === 200)
-                        resolve(addressURL.address[0]);
-                      else
-                        reject('Failed to register an Hyperty');
+                          if (reply.body.code === 200) resolve(addressURL.address[0]);
+                          else throw new Error('Failed to register an Hyperty: ' + reply);
 
-                    });
+                        });
+                      } catch (e) {
+                        console.error(e);
+                        reject(e);
+                      }
+                    } else throw new Error('Failed to register an Hyperty: ', reply);
 
-                  }else {
-                    reject('Failed to register an Hyperty');
-                  }
-                });
+                  });
+
+                } catch (e) {
+                  console.error(e);
+                  reject(e);
+                }
 
                 //timer to keep the registration alive
                 // the time is defined by a little less than half of the expires time defined
@@ -1001,7 +1085,7 @@ class Registry {
 
                   /*let message = _this.messageFactory.createCreateMessageRequest(
                     _this.registryURL,
-                    'domain://registry.' + _this.registryDomain + '/',
+                    'domain://registry.' + _this.registryDomain,
                     messageValue,
                     'policy'
                   );*/
@@ -1009,13 +1093,13 @@ class Registry {
                   let message = {
                     type: 'update',
                     from: _this.registryURL,
-                    to: 'domain://registry.' + _this.registryDomain + '/',
+                    to: 'domain://registry.' + _this.registryDomain,
                     body: { resource: addressURL.address[0], value: {status: 'live'} }};
 
                   _this._messageBus.postMessage(message, (reply) => {
                     console.log('[Registry registerHyperty] KeepAlive Reply: ', reply);
                   });
-                }, (((_this.expiresTime / 1.1) / 2) * 1000));
+                }, (((registrationExpires / 1.1) / 2) * 1000));
 
               }).catch(function(reason) {
                 console.log('[Registry registerHyperty] Error: ', reason);
@@ -1025,7 +1109,7 @@ class Registry {
           });
         }
       }, function(err) {
-        reject('[Registry registerHyperty] Failed to obtain an identity', err);
+        reject('[Registry registerHyperty] ', err);
       });
     });
   }
@@ -1078,9 +1162,9 @@ class Registry {
       return (_this.protostubsList[domainURL]);
     } else {
 
-    /*  _this.protostubsList[domainURL] = {
-        status: STATUS.CREATED
-      };*/
+      _this.protostubsList[domainURL] = {
+        status: STATUS.DEPLOYING
+      };
 
       throw new Error('[Registry - discoverProtoStub ] Message Node Protostub Not Found. Creating one');
 
@@ -1550,9 +1634,13 @@ class Registry {
           registredComponent  = _this.protostubsList.hasOwnProperty(domainUrl) ? _this.protostubsList[domainUrl] : false;
         }
 
+        console.info('[Registry.resolve] registred:', registredComponent);
+
         // TODO since the protostubs have other states this should be revised, because the status could change from DEPLOYED to LIVE
         // TODO and this validation will trigger a new load of IDPProxy or Protostub;
-        if (registredComponent && registredComponent.hasOwnProperty('status') && (registredComponent.status === STATUS.DEPLOYED || registredComponent.status === STATUS.CREATED || registredComponent.status === STATUS.LIVE)) {
+        if (registredComponent && registredComponent.hasOwnProperty('status') &&
+         (registredComponent.status === STATUS.DEPLOYED || registredComponent.status === STATUS.CREATED ||
+          registredComponent.status === STATUS.LIVE || registredComponent.status === STATUS.DISCONNECTED)) {
           console.info('[Registry.resolve] Resolved: ', registredComponent.url, registredComponent.status);
           resolve(registredComponent.url);
         } else {

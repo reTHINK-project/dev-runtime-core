@@ -22,8 +22,6 @@
 **/
 
 import {divideURL, convertToUserURL} from '../utils/utils';
-import GraphConnector from '../graphconnector/GraphConnector';
-
 
 /**
 * Core Discovery interface
@@ -66,7 +64,17 @@ class CoreDiscovery {
           });
         })
         .catch(function(err) {
+          let description;
+          let code;
 
+          if(err === 'GraphConnector') {
+            description = 'This search is not available at the moment. Try later.';
+            code = 500;
+          }
+          else {
+            description = 'Not Found';
+            code = 404;
+          }
           //FLOW-OUT: error message response
           _this.messageBus.postMessage({
             id: msg.id,
@@ -74,8 +82,8 @@ class CoreDiscovery {
             from: msg.to,
             to: msg.from,
             body: {
-              code: 404,
-              description: "Not Found"
+              code: code,
+              description: description
             }
           });
         });
@@ -105,6 +113,8 @@ class CoreDiscovery {
     let resources = [];
     let dataSchemes = [];
 
+    console.log('[CoreDiscovery.discoveryManager] received: ', msg);
+
     if(msg.body.criteria){
       if(msg.body.criteria.resources)
         resources = msg.body.criteria.resources;
@@ -132,17 +142,29 @@ class CoreDiscovery {
         return _this.discoverDataObjectsPerReporter(msg.body.resource.split('reporter/')[1], dataSchemes, resources, msg.body.criteria.domain);
         break;
       case 'guid':
-        if(atributes[0] == 'hyperty')
-          return _this.discoverHypertiesPerGUID(msg.body.resource.split('user-guid://')[1], dataSchemes, resources);
-        else
-          return _this.discoverDataObjectsPerGUID(msg.body.resource.split('user-guid://')[1], dataSchemes, resources);
-        break;
+        if(typeof _this.graphConnector !== 'undefined' &&  _this.graphConnector !== null) {
+          if(atributes[0] == 'hyperty')
+            return _this.discoverHypertiesPerGUID(msg.body.resource.split('user-guid://')[1], dataSchemes, resources);
+          else
+            return _this.discoverDataObjectsPerGUID(msg.body.resource.split('user-guid://')[1], dataSchemes, resources);
+          break;
+        }
+        else {
+          return Promise.reject('GraphConnector');
+          break;
+        }
       case 'userprofile':
-        if(atributes[0] == 'hyperty')
-          return _this.discoverHypertiesPerUserProfileData(msg.body.resource.split('userprofile/')[1], dataSchemes, resources);
-        else
-          return _this.discoverDataObjectsPerUserProfileData(msg.body.resource.split('userprofile/')[1], dataSchemes, resources);
-        break;
+        if(typeof _this.graphConnector !== 'undefined' &&  _this.graphConnector !== null) {
+          if(atributes[0] == 'hyperty')
+            return _this.discoverHypertiesPerUserProfileData(msg.body.resource.split('userprofile/')[1], dataSchemes, resources);
+          else
+            return _this.discoverDataObjectsPerUserProfileData(msg.body.resource.split('userprofile/')[1], dataSchemes, resources);
+          break;
+        }
+        else {
+          return Promise.reject('GraphConnector');
+          break;
+        }
     }
   }
 
@@ -349,7 +371,7 @@ class CoreDiscovery {
     let msg = {
       type: 'read',
       from: _this.discoveryURL,
-      to: 'domain://registry.' + activeDomain + '/',
+      to: 'domain://registry.' + activeDomain,
       body: {
 
       }
@@ -371,7 +393,7 @@ class CoreDiscovery {
         msg.body.criteria = {};
       msg.body.criteria.resources = resources;
     }
-    
+
     return new Promise(function(resolve, reject) {
       console.log("[CoreDiscovery.discoverHyperties] sending msg ", msg);
 
@@ -379,7 +401,7 @@ class CoreDiscovery {
 
           console.log("[CoreDiscovery.discoverHyperties] rcved reply ", reply);
 
-          if (reply.body.code === 200) {
+          if (reply.body.code === 200 || reply.body.code === 500) {
             let hyperties = reply.body.value;
 
             let finalHyperties = [];
@@ -477,7 +499,7 @@ class CoreDiscovery {
     let msg = {
       type: 'read',
       from: _this.discoveryURL,
-      to: 'domain://registry.' + activeDomain + '/',
+      to: 'domain://registry.' + activeDomain,
       body: {
         resource: url
       }
@@ -487,7 +509,7 @@ class CoreDiscovery {
 
       _this.messageBus.postMessage(msg, (reply) => {
 
-        if(reply.body.code !== 200)
+        if(reply.body.code !== 200 && reply.body.code !== 500)
           return reject('No Hyperty was found');
 
         let hyperty = reply.body.value;
@@ -518,7 +540,7 @@ class CoreDiscovery {
     let msg = {
       type: 'read',
       from: _this.discoveryURL,
-      to: 'domain://registry.' + activeDomain + '/',
+      to: 'domain://registry.' + activeDomain,
       body: {
         resource: url
       }
@@ -555,7 +577,7 @@ class CoreDiscovery {
     let msg = {
       type: 'read',
       from: _this.discoveryURL,
-      to: 'domain://registry.' + activeDomain + '/',
+      to: 'domain://registry.' + activeDomain,
       body: {
         resource: name,
       }
@@ -609,7 +631,7 @@ class CoreDiscovery {
     let msg = {
       type: 'read',
       from: _this.discoveryURL,
-      to: 'domain://registry.' + activeDomain + '/',
+      to: 'domain://registry.' + activeDomain,
       body: {
         resource: "/comm",
         criteria: {

@@ -21,7 +21,7 @@
 * limitations under the License.
 **/
 
-import 'babel-polyfill';
+// import 'babel-polyfill';
 
 //Main dependecies
 import Registry from '../registry/Registry';
@@ -43,6 +43,7 @@ import CoreDiscovery from '../discovery/CoreDiscovery';
 
 import DataObjectsStorage from '../store-objects/DataObjectsStorage';
 import SyncherManager from '../syncher/SyncherManager';
+import SubscriptionManager from '../subscriptionManager/SubscriptionManager';
 import RuntimeCoreCtx from '../policy/context/RuntimeCoreCtx';
 
 /**
@@ -58,7 +59,7 @@ import RuntimeCoreCtx from '../policy/context/RuntimeCoreCtx';
  * @property {Registry} registry - Registry Module;
  * @property {MessageBus} messageBus - Message Bus is used like a router to redirect the messages from one component to other(s)
  * @property {GraphConnector} graphConnector - Graph Connector handling GUID and contacts
- * @property {CoreDiscovery} discovery - Discovery for discovery hyperties/dataObjects
+ * @property {CoreDiscovery} coreDiscovery - Discovery for discovery hyperties/dataObjects
  */
 class RuntimeUA {
 
@@ -90,25 +91,25 @@ class RuntimeUA {
     if (typeof runtimeFactory.createRuntimeCatalogue === 'function') {
       this.persistenceManager = runtimeFactory.createRuntimeCatalogue();
     } else {
-      throw new Error('Check your Runtime Factory because it need the Runtime Catalogue implementation');
+      throw new Error('Check your Runtime Factory because it needs the Runtime Catalogue implementation');
     }
 
     if (typeof runtimeFactory.persistenceManager === 'function') {
       this.persistenceManager = runtimeFactory.persistenceManager();
     } else {
-      throw new Error('Check your Runtime Factory because it need the Persistence Manager implementation');
+      throw new Error('Check your Runtime Factory because it needs the Persistence Manager implementation');
     }
 
     if (typeof runtimeFactory.storageManager === 'function') {
       this.storageManager = runtimeFactory.storageManager();
     } else {
-      throw new Error('Check your Runtime Factory because it need the Storage Manager implementation');
+      throw new Error('Check your Runtime Factory because it needs the Storage Manager implementation');
     }
 
     if (typeof runtimeFactory.runtimeCapabilities === 'function') {
       this.runtimeCapabilities = runtimeFactory.runtimeCapabilities(this.storageManager);
     } else {
-      console.info('Check your RuntimeFactory because it need the Runtime Capabilities implementation');
+      console.info('Check your RuntimeFactory because it needs the Runtime Capabilities implementation');
     }
 
   }
@@ -154,8 +155,8 @@ class RuntimeUA {
             console.info('[RuntimeUA - init] P2P not supported');
             return ('P2P Not Supported');
           }
-        })
-        .then((result) => {
+
+        }).then((result) => {
           console.info('[runtime ua - init] - status: ', result);
           resolve(true);
         }, (reason) => {
@@ -256,9 +257,6 @@ class RuntimeUA {
         // Prepare the address allocation instance;
         this.addressAllocation = new AddressAllocation(this.runtimeURL, this.messageBus, this.registry);
 
-        // before the merge
-        //this.policyEngine = new PEP(new RuntimeCoreCtx(this.identityModule, this.registry, this.storageManager, this.runtimeCapabilities));
-
         // Instantiate the Policy Engine
         this.policyEngine = new PEP(new RuntimeCoreCtx(this.runtimeURL, this.identityModule, this.registry, this.storageManager, this.runtimeCapabilities));
 
@@ -277,18 +275,10 @@ class RuntimeUA {
         ];
 
         // Instantiate the Graph Connector
-        this.graphConnector = new GraphConnector(this.runtimeURL, this.messageBus, this.storageManager);
+        this.graphConnector = process.env.MODE !== 'light' ? new GraphConnector(this.runtimeURL, this.messageBus, this.storageManager) : null;
 
         // Instantiate Discovery
-        console.log("runtimeFactory: ", this.runtimeFactory);
         this.coreDiscovery = new CoreDiscovery(this.runtimeURL, this.messageBus, this.graphConnector, this.runtimeFactory, this.registry);
-
-        // Instantiate Discovery Lib for Testing
-        //_this.discovery = new Discovery(_this.runtimeURL, _this.messageBus);
-        // _this.loadStub("localhost");
-        // setTimeout(function(){
-        //_this.discovery.discoverHyperties("user://google.com/bernardo.marquesg@gmail.com", ["comasdm"], ["chat"]);
-        // }, 2000);
 
         // Add to App Sandbox the listener;
         appSandbox.addListener('*', (msg) => {
@@ -307,12 +297,16 @@ class RuntimeUA {
         // Register registry on IdentityModule
         this.identityModule.registry = this.registry;
 
+        // Register coreDiscovery on IdentityModule
+        this.identityModule.coreDiscovery = this.coreDiscovery;
+
         // Use sandbox factory to use specific methods
         // and set the message bus to the factory
         this.runtimeFactory.messageBus = this.messageBus;
 
         // Instanciate the SyncherManager;
         this.syncherManager = new SyncherManager(this.runtimeURL, this.messageBus, this.registry, this.runtimeCatalogue, this.storageManager, null, this._dataObjectsStorage, this.identityModule);
+
 
         // Set into loader the needed components;
         this.loader.runtimeURL = this.runtimeURL;
@@ -321,8 +315,25 @@ class RuntimeUA {
         this.loader.runtimeCatalogue = this.runtimeCatalogue;
         this.loader.runtimeFactory = this.runtimeFactory;
 
-        resolve(true);
+        //Instantiate Discovery Lib for notification testing
+        // this.discovery = new Discovery("hyperty://localhost/test", this.runtimeURL, this.messageBus);
+        // this.loadStub("localhost");
+        // setTimeout(() => {
+        //   this.discovery.discoverHypertiesDO("user://google.com/openidtest20@gmail.com")
+        //   .then(hyperties => {
+        //     hyperties.forEach(hyperty =>{
+        //       hyperty.onLive(() => console.log(`Notification from ${hyperty.data.hypertyID} changed to live`));
+        //       hyperty.onDisconnected(() => console.log(`Notification from ${hyperty.data.hypertyID} changed to disconnected`));
+        //     });
+        //   });
+        // }, 2000);
 
+        // Instanciate the SubscriptionManager;
+        this.subscriptionManager = new SubscriptionManager(this.runtimeURL, this.messageBus, this.storageManager);
+
+        this.subscriptionManager.init().then(()=>{
+          resolve(true);
+        });
       } catch (e) {
         reject(e);
       }

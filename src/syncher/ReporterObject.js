@@ -48,6 +48,7 @@ class ReporterObject {
       if (this._isToSaveData && msg.body.attribute) {
         console.log('[SyncherManager.ReporterObject ] SyncherManager - save data: ', msg);
         _this._parent._dataObjectsStorage.update(true, _this._url, 'version', msg.body.version);
+        _this._parent._dataObjectsStorage.update(true, _this._url, 'lastModified', msg.body.lastModified);
         _this._parent._dataObjectsStorage.saveData(true, _this._url, msg.body.attribute, msg.body.value);
       }
     });
@@ -354,14 +355,20 @@ class ReporterObject {
   //FLOW-IN: message received from remote ObserverObject -> removeSubscription
   _onRemoteUnSubscribe(msg) {
     let _this = this;
-    let hypertyURL = msg.body.subscriber;
+    let unsubscriber = msg.body.source;
 
-    let subscription = _this._subscriptions[hypertyURL];
+    let subscription = _this._subscriptions[unsubscriber];
     if (subscription) {
       subscription._releaseListeners();
-      delete _this._subscriptions[hypertyURL];
+      delete _this._subscriptions[unsubscriber];
 
-      //TODO: send un-subscribe message to Syncher? (depends on the operation mode)
+      let forwardMsg = {
+        type: 'forward', from: _this._url, to: _this._owner,
+        body: { type: msg.type, from: unsubscriber, to: _this._url, identity: msg.body.identity }
+      };
+
+
+      _this._bus.postMessage(forwardMsg);
     }
 
   }

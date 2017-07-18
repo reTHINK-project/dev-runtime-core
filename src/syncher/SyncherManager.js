@@ -205,6 +205,8 @@ class SyncherManager {
         objectRegistration.url = allocated.address[0];
         objectRegistration.authorise = msg.body.authorise;
         objectRegistration.childrens = childrens;
+        //objectRegistration.expires = 30;//TODO: get it from data object configuration description when present
+
         delete objectRegistration.data;
 
         console.log('[SyncherManager._newCreate] ALLOCATOR CREATE:', allocated);
@@ -248,7 +250,8 @@ class SyncherManager {
           let metadata = deepClone(objectRegistration);
           metadata.subscriberUser = userURL;
           metadata.isReporter = true;
-          delete metadata.expires;
+
+          //delete metadata.expires;
 
           // Store the dataObject information
 
@@ -262,6 +265,8 @@ class SyncherManager {
               if (msg.body.value.data) { _this._dataObjectsStorage.saveData(true, objectRegistration.url, null, msg.body.value.data); }
             }
           }
+
+          // adding listeners to forward to reporter
 
           reporter.forwardSubscribe([objectRegistration.url, subscriptionURL]).then(() => {
             reporter.addChildrens(childrens).then(() => {
@@ -324,6 +329,12 @@ class SyncherManager {
         // TODO: check if is need to handle with the result of validation
         schemaValidation(scheme, descriptor, initialData);
 
+        let objectRegistration = deepClone(msg.body.value);
+        objectRegistration.url = storedObject.url;
+        objectRegistration.expires = storedObject.expires;
+
+        delete objectRegistration.data;
+
         //all OK -> create reporter and register listeners
         let reporter;
 
@@ -335,7 +346,8 @@ class SyncherManager {
 
         reporter.isToSaveData = storedObject.isToSaveData;
 
-        reporter.addChildrens(childrens).then(() => {
+        reporter.forwardSubscribe([storedObject.url]).then(() => {
+          reporter.addChildrens(childrens).then(() => {
 
             reporter.resumeSubscriptions(storedObject.subscriptions);
 
@@ -345,12 +357,19 @@ class SyncherManager {
 
             return _this._decryptChildrens(storedObject, childrens);
           }).then((decryptedObject) => {
-            // console.log('result of previous promise');
+              // console.log('result of previous promise');
             resolve(decryptedObject);
           }).catch((reason) => {
             console.error('[SyncherManager - resume create] - fail on addChildrens: ', reason);
             resolve(false);
           });
+        });
+        console.info('[SyncherManager._resumeCreate] Register Object: ', objectRegistration);
+        _this._registry.registerDataObject(objectRegistration).then((resolve) => {
+          console.log('[SyncherManager._resumeCreate] DataObject registration successfully updated', resolve);
+
+        });
+
       //  resolve();
       }).catch((reason) => {
         console.error('[SyncherManager - resume create] - fail on getDataSchemaDescriptor: ', reason);
@@ -367,7 +386,6 @@ class SyncherManager {
 
       if (!childrens) resolve(storedObject);
       else {
-
         let childrensObj = Object.keys(storedObject['childrenObjects']);
 
         if (childrensObj.length === 0) {
@@ -378,7 +396,7 @@ class SyncherManager {
 
           let childObjects = storedObject['childrenObjects'][children];
 
-          console.log('[SyncherManager._decryptChildrens] dataObjectChilds to decrypt ',  childObjects);
+          console.log('[SyncherManager._decryptChildrens] dataObjectChilds to decrypt ', childObjects);
 
           let listOfDecryptedObjects = [];
 
@@ -390,9 +408,7 @@ class SyncherManager {
 
               console.log('[SyncherManager._decryptChildrens] createdBy ',  owner, ' object: ', child.value);
 
-              let decrypted = _this._identityModule.decryptDataObject(JSON.parse(child.value), storedObject.data.url).then((decryptedObject) => {
-                storedObject['childrenObjects'][children][childId].value = decryptedObject.value;
-              });
+              let decrypted = _this._identityModule.decryptDataObject(JSON.parse(child.value), storedObject.data.url);
 
               listOfDecryptedObjects.push(decrypted);
             }
@@ -403,13 +419,11 @@ class SyncherManager {
 
             console.log('[SyncherManager._decryptChildrens] returning decrypted ', decryptedObjects);
 
-              /*Object.keys(childObjects).forEach((childId)=>{
-                storedObject['childrens'][children][childId].value = decryptedObjects[childId].value;
-                console.log('[SyncherManager._decryptChildrens] adding ', decryptedObjects[childId].value);
+            decryptedObjects.forEach((decryptedObject) => {
+              storedObject['childrenObjects'][children][childId].value = decryptedObject.value;
+            })
 
-              });
-
-              console.info('[SyncherManager._decryptChildrens] returning decrypted objects : ', storedObject);*/
+            console.log('[SyncherManager._decryptChildrens] storedObject ', storedObject);
 
             resolve(storedObject);
 
@@ -450,6 +464,8 @@ class SyncherManager {
       object.delete();
 
       this._dataObjectsStorage.deleteResource(objURL);
+
+      _this._registry.unregisterDataObject(objURL);
 
       //TODO: unregister object?
       _this._bus.postMessage({
@@ -568,10 +584,19 @@ class SyncherManager {
             console.log('reporter-subscribe-response-new: ', reply);
             if (reply.body.code === 200) {
 
+              console.log('[SyncherManager._newSubscription] - observers: ', _this._observers, objURL, _this._observers[objURL]);
+
               let observer = _this._observers[objURL];
               if (!observer) {
                 observer = new ObserverObject(_this, objURL, childrens);
+                console.log('[SyncherManager._newSubscription] - observers: create new ObserverObject: ', observer);
                 _this._observers[objURL] = observer;
+
+                // register new hyperty subscription
+                observer.addSubscription(hypertyURL);
+
+                // add childrens and listeners to save data if necessary
+                observer.addChildrens(childrens);
               }
 
               let interworking = false;
@@ -588,7 +613,11 @@ class SyncherManager {
               }
 
               let metadata = deepClone(reply.body.value);
+              let childrenObjects = metadata.childrenObjects || {};
+
               delete metadata.data;
+              delete metadata.childrenObjects;
+
               metadata.childrens = childrens;
               metadata.subscriberUser = userURL;
               metadata.isReporter = false;
@@ -597,18 +626,12 @@ class SyncherManager {
               if (!interworking) {
                 //_this._dataObjectsStorage.set(objURL, false, msg.body.schema, 'on', reply.body.owner, hypertyURL, childrens, userURL);
                 _this._dataObjectsStorage.set(metadata);
-                if (msg.body.hasOwnProperty('store') && msg.body.store) {
+                if ((metadata.hasOwnProperty('store') && metadata.store) || (metadata.hasOwnProperty('isToSaveData') && metadata.isToSaveData)) {
                   observer.isToSaveData = true;
                   _this._dataObjectsStorage.update(false, objURL, 'isToSaveData', true);
                   _this._dataObjectsStorage.saveData(false, objURL, null, reply.body.value.data);
                 }
               }
-
-              // register new hyperty subscription
-              observer.addSubscription(hypertyURL);
-
-              // add childrens and listeners to save data if necessary
-              observer.addChildrens(childrens);
 
               //forward to hyperty:
               reply.id = msg.id;
@@ -717,7 +740,7 @@ class SyncherManager {
     let observer = _this._observers[objURL];
     if (observer) {
       //TODO: is there any policy verification before delete?
-      observer.removeSubscription(hypertyURL);
+      observer.removeSubscription(msg);
 
       //TODO: destroy object in the registry?
       _this._bus.postMessage({
@@ -725,7 +748,7 @@ class SyncherManager {
         body: { code: 200 }
       });
 
-      this._dataObjectsStorage.delete(true, objURL, 'subscriptions', hypertyURL);
+      this._dataObjectsStorage.deleteResource(objURL);
 
       //TODO: remove Object if no more subscription?
       //delete _this._observers[objURL];
