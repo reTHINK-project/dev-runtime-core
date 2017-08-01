@@ -42,6 +42,7 @@ import GraphConnector from '../graphconnector/GraphConnector';
 import CoreDiscovery from '../discovery/CoreDiscovery';
 
 import DataObjectsStorage from '../store-objects/DataObjectsStorage';
+import HypertyResourcesStorage from '../hyperty-resources-storage/HypertyResourcesStorage';
 import SyncherManager from '../syncher/SyncherManager';
 import SubscriptionManager from '../subscriptionManager/SubscriptionManager';
 import RuntimeCoreCtx from '../policy/context/RuntimeCoreCtx';
@@ -131,8 +132,9 @@ class RuntimeUA {
         let getCapabilities = this.runtimeCapabilities.getRuntimeCapabilities();
         let getRuntimeURL = this.storageManager.get('runtime:URL');
         let getStoredDataObjects = this.storageManager.get('syncherManager:ObjectURLs');
+        let getHypertyStorageObjects = this.storageManager.get('hypertyResources');
 
-        Promise.all([getRuntimeURL, getCapabilities, getStoredDataObjects]).then((results) => {
+        Promise.all([getRuntimeURL, getCapabilities, getStoredDataObjects, getHypertyStorageObjects]).then((results) => {
 
           this.runtimeURL = results[0] ? results[0].runtimeURL : results[0];
           if (!this.runtimeURL) {
@@ -145,8 +147,13 @@ class RuntimeUA {
 
           this._dataObjectsStorage = new DataObjectsStorage(this.storageManager, results[2] || {});
 
+          this._hypertyResources = results[3] || {};
+
           return this._loadComponents();
+
         }).then((status) => {
+
+          this._hypertyResourcesStorage = new HypertyResourcesStorage(this.runtimeURL, this.messageBus, this.storageManager, this._hypertyResources);
 
           if (this.p2p) {
             console.info('[RuntimeUA - init] load p2pHandler: ', status);
