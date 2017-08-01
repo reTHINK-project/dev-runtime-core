@@ -259,7 +259,8 @@ class Bus {
       }, ()=>{
         console.warn(`[Bus.postMessageWithRetries] Message Bounced (retry ${retry}): '`, msg);
         if (retry++ < retries) {
-          setTimeout(() => { tryAgain(); }, 1000);
+          tryAgain();
+          // setTimeout(() => { tryAgain(); }, 1000);
         } else {
           const error = `[Error] Message Bounced (delivery attempts ${retries}): '`;
           throw new Error(error + msg);

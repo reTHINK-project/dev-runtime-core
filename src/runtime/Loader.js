@@ -294,7 +294,7 @@ class Loader {
 
   /**
   * Deploy Stub from Catalogue URL or domain url
-  * @param  {URL.URL}     domain          domain
+  * @param  {URL.URL}     protostubURL    Catalogue URL for the ProtoStub to be loaded or the domain to be target by the protostub
   * @param  {Object}      p2pConfig       configuration of p2p
   */
   loadStub(protostubURL, p2pConfig) {
