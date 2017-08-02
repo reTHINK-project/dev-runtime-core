@@ -40,7 +40,7 @@ class HypertyResourcesStorage {
 
     let _this = this;
 
-    if (!message.body || message.body.value) throw new Error('[HypertyResourcesStorage._onCreate] mandatory message body value missing: ', message);
+    if (!message.body || !message.body.value) throw new Error('[HypertyResourcesStorage._onCreate] mandatory message body value missing: ', message);
 
     let contentUrl = _this._url + '/' + generateGUID();
 
