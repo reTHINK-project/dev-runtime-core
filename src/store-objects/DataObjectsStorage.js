@@ -22,7 +22,7 @@ class DataObjectsStorage {
    * @param {Array<String>} childrens - list of childrens, like, 'chatmessage';
    * @param {Array<UserURL} subscriberUser - list of subscribed users;
    */
-   //set(resource, isReporter, schema, status, owner, subscription, childrenResources, subscriberUser) {
+
   set(metadata) {
 
     let storeDataObject = this._storeDataObject;
@@ -211,17 +211,16 @@ class DataObjectsStorage {
 
           if (tmp.hasOwnProperty('observers') && tmp.observers.hasOwnProperty(resource)) {
             delete tmp.observers[resource];
-
-            resolve(tmp.observers[resource]);
             this._storageManager.set('syncherManager:ObjectURLs', 1, tmp);
             this._storeDataObject = tmp;
+            return resolve(tmp.observers[resource]);
           }
 
           if (tmp.hasOwnProperty('reporters') && tmp.reporters.hasOwnProperty(resource)) {
             delete tmp.reporters[resource];
-            resolve(tmp.reporters[resource]);
             this._storageManager.set('syncherManager:ObjectURLs', 1, tmp);
             this._storeDataObject = tmp;
+            return resolve(tmp.reporters[resource]);
           }
 
           resolve('The ' + resource + ' dosen\t exists, nothing was deleted');

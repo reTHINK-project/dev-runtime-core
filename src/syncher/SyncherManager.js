@@ -205,6 +205,7 @@ class SyncherManager {
         objectRegistration.url = allocated.address[0];
         objectRegistration.authorise = msg.body.authorise;
         objectRegistration.childrens = childrens;
+
         //objectRegistration.expires = 30;//TODO: get it from data object configuration description when present
 
         delete objectRegistration.data;
@@ -217,6 +218,7 @@ class SyncherManager {
 
         //To register the dataObject in the runtimeRegistry
         console.info('[SyncherManager._newCreate] Register Object: ', objectRegistration);
+
         //_this._registry.registerDataObject(msg.body.value.name, msg.body.value.schema, objURL, msg.body.value.reporter, msg.body.value.resources, allocated, msg.body.authorise).then((resolve) => {
         _this._registry.registerDataObject(objectRegistration).then((resolve) => {
           console.log('[SyncherManager._newCreate] DataObject successfully registered', resolve);
@@ -357,7 +359,8 @@ class SyncherManager {
 
             return _this._decryptChildrens(storedObject, childrens);
           }).then((decryptedObject) => {
-              // console.log('result of previous promise');
+
+            // console.log('result of previous promise');
             resolve(decryptedObject);
           }).catch((reason) => {
             console.error('[SyncherManager - resume create] - fail on addChildrens: ', reason);
@@ -463,15 +466,21 @@ class SyncherManager {
       //TODO: is there any policy verification before delete?
       object.delete();
 
-      this._dataObjectsStorage.deleteResource(objURL);
+      this._dataObjectsStorage.deleteResource(objURL).then((result) => {
 
-      _this._registry.unregisterDataObject(objURL);
 
-      //TODO: unregister object?
-      _this._bus.postMessage({
-        id: msg.id, type: 'response', from: msg.to, to: msg.from,
-        body: { code: 200 }
+        console.log('[SyncherManager - onDelete] - deleteResource: ', result);
+
+        _this._registry.unregisterDataObject(objURL);
+
+        //TODO: unregister object?
+        _this._bus.postMessage({
+          id: msg.id, type: 'response', from: msg.to, to: msg.from,
+          body: { code: 200 }
+        });
+
       });
+
     }
   }
 
