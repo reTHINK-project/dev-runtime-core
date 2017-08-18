@@ -104,10 +104,15 @@ class SyncherManager {
 
     if (!msg.body.hasOwnProperty('resume') || (msg.body.hasOwnProperty('resume') && !msg.body.resume)) {
 
-      // If from the hyperty side, don't call the resumeReporter we will have resume = false'
-      // so we will create a not resumed object and always create a new object;
-      console.info('[SyncherManager - Create New Object]', msg);
-      this._newCreate(msg);
+      // check if this is an invitation message
+      if (msg.body.authorise) {
+        this._authorise(msg);
+        console.info('[SyncherManager.onCreate - invite observers]', msg);
+      } else { // this is to create a new data object
+          console.info('[SyncherManager.onCreate - Create New Object]', msg);
+          this._newCreate(msg);
+        }
+
     } else {
 
       // If from the hyperty side, call the resumeReporter we will have resume = true'
@@ -174,10 +179,10 @@ class SyncherManager {
 
     // Process invitation message to observers
 
-    if (msg.body.authorise) {
+    /*if (msg.body.authorise) {
       _this._authorise(msg);
       return;
-    }
+    }*/
 
     //get schema from catalogue and parse -> (scheme, children)
     _this._catalog.getDataSchemaDescriptor(msg.body.schema).then((descriptor) => {
@@ -280,13 +285,6 @@ class SyncherManager {
                 body: { code: 200, resource: objectRegistration.url, childrenResources: childrens }
               });
 
-              //send create to all observers, responses will be deliver to the Hyperty owner?
-              //schedule for next cycle needed, because the Reporter should be available.
-              //TODO: remove since invitations are handled in another msg?
-              /*setTimeout(() => {
-                //will invite other hyperties
-                _this._authorise(msg);
-              });*/
             });
           });
         }, function(error) {
@@ -444,14 +442,14 @@ class SyncherManager {
     let _this = this;
 
     if (!msg.body.resource) {
-      throw new Error('[SyncherManager._authorise] invitation request without data object url:' msg);
+      throw new Error('[SyncherManager._authorise] invitation request without data object url:', msg);
       return;
     }
 
     let objSubscriptorURL = msg.body.resource + '/subscription';
     let p2p = msg.body.p2p ? msg.body.p2p : false;
 
-    console.log('[SyncherManager -  authorise] - ', msg, objURL);
+    console.log('[SyncherManager -  authorise] - ', msg);
 
     if (msg.body.authorise) {
       msg.body.authorise.forEach((hypertyURL) => {
