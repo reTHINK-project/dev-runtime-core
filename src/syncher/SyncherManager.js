@@ -439,6 +439,8 @@ class SyncherManager {
     let _this = this;
     let objSubscriptorURL = objURL + '/subscription';
 
+    let p2p = msg.body.p2p ? msg.body.p2p : false;
+
     console.log('[SyncherManager -  authorise] - ', msg, objURL);
 
     if (msg.body.authorise) {
@@ -446,7 +448,7 @@ class SyncherManager {
         //FLOW-OUT: send invites to list of remote Syncher -> _onRemoteCreate -> onNotification
         _this._bus.postMessage({
           type: 'create', from: objSubscriptorURL, to: hypertyURL,
-          body: { identity: msg.body.identity, source: msg.from, value: msg.body.value, schema: msg.body.schema }
+          body: { p2p: p2p, identity: msg.body.identity, source: msg.from, value: msg.body.value, schema: msg.body.schema }
         });
       });
     }

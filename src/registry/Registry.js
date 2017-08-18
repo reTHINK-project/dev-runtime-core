@@ -726,16 +726,16 @@ class Registry {
   * @return {HypertyDataObjectInstance}  addressURL     return the Data Object instance registered URL, return undefined otherwise
   */
 
-  checkP2P(url) {
+  checkP2P(url, p2p) {
 
     if (url.includes('runtime://') && url.includes('/sm')) {
 
       url = url = url.substring(0, url.indexOf('/sm'));
-      return this.checkP2PRuntime(url);
+      return this.checkP2PRuntime(url, p2p);
     }
 
     if (url.includes('hyperty://')) {
-      return this.checkP2PHyperty(url);
+      return this.checkP2PHyperty(url, p2p);
     } else {
 
         // remove data object suffixes
@@ -751,7 +751,7 @@ class Registry {
         url = url.substring(0, url.indexOf('/children/'));
       }
 
-      return this.checkP2PDataObject(url);
+      return this.checkP2PDataObject(url, p2p);
     }
   }
 
@@ -783,7 +783,7 @@ class Registry {
   * @return {HypertyDataObjectInstance}  addressURL     return the Data Object instance registered URL, return undefined otherwise
   */
 
-  checkP2PDataObject(dataObjectURL) {
+  checkP2PDataObject(dataObjectURL, p2p) {
     let _this = this;
 
     return new Promise((resolve, reject) => {
@@ -798,7 +798,7 @@ class Registry {
         resolve(dataobject[0]);
       } else if (dataobject.length !== 0) {
         reject('[Registry checkP2PDataObject] Data Object found does not support P2P', dataobject[0]);
-      } else {
+      } else if (p2p) {
 
       // look on Domain Registry
 
@@ -830,7 +830,7 @@ class Registry {
             reject('[Registry checkP2PDataObject] not found', reply.body.code);
           }
         });
-      }
+      } else reject('[Registry checkP2PDataObject] no P2P Connection found');
     });
   }
 
@@ -840,7 +840,7 @@ class Registry {
   * @return {addressURL}  addressURL     return the URL if there is any previousy registered URL, return undefined otherwise
   */
 
-  checkP2PHyperty(hypertyURL) {
+  checkP2PHyperty(hypertyURL, p2p) {
     let _this = this;
 
     return new Promise((resolve, reject) => {
@@ -868,7 +868,7 @@ class Registry {
 
       // look on Domain Registry
 
-      if (!hyperty) {
+      if (!hyperty && p2p) {
         console.log('[Registry - checkP2PHyperty] - search in Domain Registry: ', hyperty);
 
         let message = {
@@ -899,7 +899,7 @@ class Registry {
             reject('[Registry checkP2PHyperty] Hyperty with P2PHandler not found', reply.body.code);
           }
         });
-      }
+      } else reject('[Registry checkP2PHyperty] No P2P Connection available for ', hypertyURL);
     });
   }
 
@@ -1029,11 +1029,11 @@ class Registry {
                   }
                 }
 
-                console.log('[Registry registerHyperty] updating Hyperty registration at domain registry  - ', message);
+                console.log('[Registry registerHyperty] Hyperty registration at domain registry  - ', message);
 
                 try {
                   _this._messageBus.postMessageWithRetries(message, _this.registrationRetries, (reply) => {
-                    console.log('[Registry registerHyperty] Hyperty registration update response: ', reply);
+                    console.log('[Registry registerHyperty] Hyperty registration response: ', reply);
 
                     if (reply.body.code === 200) {
                       resolve(addressURL.address[0]);
@@ -1728,9 +1728,12 @@ class Registry {
   * @param  {URL.URL}  url       url
   * @return {Promise<URL.URL>}                 Promise <URL.URL>
   */
-  resolve(url) {
-    console.log('[Registry - Resolve] -  ' + url);
+  resolve(msg) {
+    console.log('[Registry - Resolve] -  ' + msg);
     let _this = this;
+    let url = msg.to;
+
+    let p2p = msg.body.p2p ? msg.body.p2p : false;
 
     return new Promise((resolve, reject) => {
 
@@ -1743,7 +1746,7 @@ class Registry {
         });
 
       } else {
-        _this.checkP2P(url).then((registeredP2P) => {
+        _this.checkP2P(url, p2p).then((registeredP2P) => {
 
           console.log('[Registry - resolve] found registered P2P: ', registeredP2P);
 
@@ -1767,7 +1770,14 @@ class Registry {
               _this.p2pConnectionList[registeredP2P.runtimeURL] = p2pConnection;
               */
 
-              // todo: Skip in case p2p option is false
+              // Skip in case p2p option is false
+
+              if (!msg.body.p2p) {
+                _this.resolveNormalStub(url).then((returnURL) => {
+                  resolve(returnURL);
+                });
+
+              }
 
               console.log('[Registry - resolve] loadStub with p2pRequester: ', registeredP2P);
 
