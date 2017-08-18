@@ -7,6 +7,8 @@ class DataObjectsStorage {
 
     this._storageManager = storageManager;
     this._storeDataObject = storedDataObjects;
+
+    this._cache = {};
   }
 
   /**
@@ -201,13 +203,12 @@ class DataObjectsStorage {
    */
   deleteResource(resource) {
 
-
     return new Promise((resolve, reject) => {
 
       if (resource) {
 
         return this.getAll().then((storedDataObjects) => {
-          let tmp = storedDataObjects;
+          let tmp = Object.assign(storedDataObjects, this._storeDataObject || {});
 
           if (tmp.hasOwnProperty('observers') && tmp.observers.hasOwnProperty(resource)) {
             delete tmp.observers[resource];
