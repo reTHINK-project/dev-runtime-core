@@ -172,8 +172,10 @@ class SyncherManager {
       domain = divideURL(_this.runtimeURL).domain;
     }
 
-    if (msg.body.resource) {
-      _this._authorise(msg, msg.body.resource);
+    // Process invitation message to observers
+
+    if (msg.body.authorise) {
+      _this._authorise(msg);
       return;
     }
 
@@ -280,10 +282,11 @@ class SyncherManager {
 
               //send create to all observers, responses will be deliver to the Hyperty owner?
               //schedule for next cycle needed, because the Reporter should be available.
-              setTimeout(() => {
+              //TODO: remove since invitations are handled in another msg?
+              /*setTimeout(() => {
                 //will invite other hyperties
-                _this._authorise(msg, objectRegistration.url);
-              });
+                _this._authorise(msg);
+              });*/
             });
           });
         }, function(error) {
@@ -435,10 +438,17 @@ class SyncherManager {
     });
   }
 
-  _authorise(msg, objURL) {
-    let _this = this;
-    let objSubscriptorURL = objURL + '/subscription';
+  // Process invitations to observers
 
+  _authorise(msg) {
+    let _this = this;
+
+    if (!msg.body.resource) {
+      throw new Error('[SyncherManager._authorise] invitation request without data object url:' msg);
+      return;
+    }
+
+    let objSubscriptorURL = msg.body.resource + '/subscription';
     let p2p = msg.body.p2p ? msg.body.p2p : false;
 
     console.log('[SyncherManager -  authorise] - ', msg, objURL);
