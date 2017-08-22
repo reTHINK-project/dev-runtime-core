@@ -225,8 +225,8 @@ class SyncherManager {
         //To register the dataObject in the runtimeRegistry
         console.info('[SyncherManager._newCreate] Register Object: ', objectRegistration);
         //_this._registry.registerDataObject(msg.body.value.name, msg.body.value.schema, objURL, msg.body.value.reporter, msg.body.value.resources, allocated, msg.body.authorise).then((resolve) => {
-        _this._registry.registerDataObject(objectRegistration).then((resolve) => {
-          console.log('[SyncherManager._newCreate] DataObject successfully registered', resolve);
+        _this._registry.registerDataObject(objectRegistration).then((registeredObject) => {
+          console.log('[SyncherManager._newCreate] DataObject successfully registered', registeredObject);
 
           //all OK -> create reporter and register listeners
           let reporter;
@@ -258,7 +258,13 @@ class SyncherManager {
           metadata.subscriberUser = userURL;
           metadata.isReporter = true;
 
-          //delete metadata.expires;
+          // lets collect info about p2p data sync if available from registration
+
+          if (registeredObject.p2pHandler) {
+            metadata.p2pHandler = registeredObject.p2pHandler;
+            metadata.p2pRequester = registeredObject.p2pRequester;
+          }
+
 
           // Store the dataObject information
 
@@ -279,11 +285,18 @@ class SyncherManager {
             reporter.addChildrens(childrens).then(() => {
               _this._reporters[objectRegistration.url] = reporter;
 
-              //FLOW-OUT: message response to Syncher -> create
-              _this._bus.postMessage({
+              let responseMsg = {
                 id: msg.id, type: 'response', from: msg.to, to: owner,
                 body: { code: 200, resource: objectRegistration.url, childrenResources: childrens }
-              });
+              };
+
+              if (metadata.p2pHandler) {
+                responseMsg.body.p2pHandler = metadata.p2pHandler;
+                responseMsg.body.p2pRequester = metadata.p2pRequester;
+              }
+
+              //FLOW-OUT: message response to Syncher -> create
+              _this._bus.postMessage(responseMsg);
 
             });
           });
@@ -454,6 +467,7 @@ class SyncherManager {
     if (msg.body.authorise) {
       msg.body.authorise.forEach((hypertyURL) => {
         //FLOW-OUT: send invites to list of remote Syncher -> _onRemoteCreate -> onNotification
+
         _this._bus.postMessage({
           type: 'create', from: objSubscriptorURL, to: hypertyURL,
           body: { p2p: p2p, identity: msg.body.identity, source: msg.from, value: msg.body.value, schema: msg.body.schema }
