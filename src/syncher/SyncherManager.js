@@ -760,7 +760,7 @@ class SyncherManager {
       this._dataObjectsStorage.deleteResource(objURL);
 
       //TODO: remove Object if no more subscription?
-      //delete _this._observers[objURL];
+      delete _this._observers[objURL];
     }
   }
 
