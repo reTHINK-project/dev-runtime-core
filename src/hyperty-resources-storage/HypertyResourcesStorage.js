@@ -70,7 +70,7 @@ class HypertyResourcesStorage {
 
     let _this = this;
 
-    if (!message.body || message.body.resource) throw new Error('[HypertyResourcesStorage._onRead] mandatory message body resource missing: ', message);
+    if (!message.body || !message.body.resource) throw new Error('[HypertyResourcesStorage._onRead] mandatory message body resource missing: ', message);
 
     let contentUrl = message.body.resource;
 
@@ -79,6 +79,7 @@ class HypertyResourcesStorage {
       to: message.from,
       id: message.id,
       type: 'response',
+      body: {}
     }
 
     let content = _this._hypertyResources[contentUrl];
@@ -91,7 +92,7 @@ class HypertyResourcesStorage {
       response.body.code = 404;
     }
 
-    _this._hypertyResources[contentUrl] = message.body.value;
+    //_this._hypertyResources[contentUrl] = message.body.value;
 
     _this._bus.postMessage(response);
 
