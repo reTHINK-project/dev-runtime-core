@@ -1022,12 +1022,14 @@ class IdentityModule {
       for (let identity in _this.identities) {
         if (_this.identities[identity].identity === result.identity) {
           idAlreadyExists = true;
-          oldId = _this.identities[identity].messageInfo;
+          oldId = _this.identities[identity];
         }
       }
 
       if (idAlreadyExists) { // TODO: maybe overwrite the identity
-        resolve(oldId);
+
+        oldId = Object.assign(oldId, result);
+        resolve(oldId.messageInfo);
         let exists = false;
 
         //check if the identity exists in emailList, if not add it
