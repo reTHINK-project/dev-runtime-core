@@ -42,7 +42,7 @@ class Bus {
     _this._msgId = 0;
     _this._subscriptions = {};
 
-    _this._responseTimeOut = 5000; //default to 3s
+    _this._responseTimeOut = 15000; //default to 3s
     _this._responseCallbacks = {};
 
     _this._registerExternalListener();
@@ -166,6 +166,7 @@ class Bus {
     }
   }
 
+//TODO: provisional responses should reset timeout
   _onResponse(msg) {
     let _this = this;
 
@@ -173,8 +174,7 @@ class Bus {
       let responseId = msg.to + msg.id;
       let responseFun = _this._responseCallbacks[responseId];
 
-      //if it's a provisional response, don't delete response listener
-      if (msg.body.code >= 200) {
+      if (msg.body.code >= 200) { //if it's a provisional response, don't delete response listener
         delete _this._responseCallbacks[responseId];
       }
 
@@ -182,6 +182,8 @@ class Bus {
         responseFun(msg);
         return true;
       }
+
+
     }
 
     return false;

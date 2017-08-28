@@ -87,6 +87,7 @@ class HypertyResourcesStorage {
     if (content) {
       response.body.code = 200;
       response.body.value = content;
+      response.body.p2p = true;
 
     } else {
       response.body.code = 404;

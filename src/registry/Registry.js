@@ -1579,7 +1579,8 @@ class Registry {
           }
 
           if (p2pConnection.status === STATUS.LIVE) {
-            resolve(p2pConnection.url);
+            msg.body.peer = registeredP2P.runtime;
+            resolve(p2pConnection.url, msg);
           } else {
 
             if (p2pConnection.status === STATUS.CREATED || p2pConnection.status === STATUS.PROGRESS) {
