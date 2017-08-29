@@ -858,7 +858,13 @@ class Registry {
                     console.log('[Registry registerHyperty] Hyperty registration response: ', reply);
 
                     if (reply.body.code === 200) {
-                      resolve(addressURL.address[0]);
+                      let result = { url: addressURL.address[0]};
+                      if (p2pHandler) {
+                          result.p2pHandler = p2pHandler;
+                          result.p2pRequester = p2pRequester;
+                        }
+
+                      resolve(result);
                     } else if (reply.body.code === 404) {
                       console.log('[Registry registerHyperty] The update was not possible. Registering new Hyperty at domain registry');
 
@@ -884,8 +890,16 @@ class Registry {
                         _this._messageBus.postMessageWithRetries(message, _this.registrationRetries, (reply) =>{
                           console.log('[Registry registerHyperty] Hyperty registration update response: ', reply);
 
-                          if (reply.body.code === 200) resolve(addressURL.address[0]);
-                          else throw new Error('Failed to register an Hyperty: ' + reply);
+                          if (reply.body.code === 200) {
+                            let result = { url: addressURL.address[0]};
+                            if (p2pHandler) {
+                                result.p2pHandler = p2pHandler;
+                                result.p2pRequester = p2pRequester;
+                              }
+
+                            resolve(result);
+
+                          } else throw new Error('Failed to register an Hyperty: ' + reply);
 
                         });
                       } catch (e) {

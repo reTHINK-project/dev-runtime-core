@@ -258,14 +258,6 @@ class SyncherManager {
           metadata.subscriberUser = userURL;
           metadata.isReporter = true;
 
-          // lets collect info about p2p data sync if available from registration
-
-          if (registeredObject.p2pHandler) {
-            metadata.p2pHandler = registeredObject.p2pHandler;
-            metadata.p2pRequester = registeredObject.p2pRequester;
-          }
-
-
           // Store the dataObject information
 
           if (!interworking) {
@@ -289,11 +281,6 @@ class SyncherManager {
                 id: msg.id, type: 'response', from: msg.to, to: owner,
                 body: { code: 200, resource: objectRegistration.url, childrenResources: childrens }
               };
-
-              if (metadata.p2pHandler) {
-                responseMsg.body.p2pHandler = metadata.p2pHandler;
-                responseMsg.body.p2pRequester = metadata.p2pRequester;
-              }
 
               //FLOW-OUT: message response to Syncher -> create
               _this._bus.postMessage(responseMsg);
