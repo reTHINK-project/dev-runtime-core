@@ -1,5 +1,9 @@
 // version: 0.9.1
+<<<<<<< HEAD
 // date: Tue Aug 29 2017 10:34:14 GMT+0100 (GMT Daylight Time)
+=======
+// date: Mon Aug 28 2017 15:12:57 GMT+0100 (WEST)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -26,7 +30,11 @@
 
 
 // version: 0.9.1
+<<<<<<< HEAD
 // date: Tue Aug 29 2017 10:34:14 GMT+0100 (GMT Daylight Time)
+=======
+// date: Mon Aug 28 2017 15:12:57 GMT+0100 (WEST)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -53,7 +61,11 @@
 
 
 // version: 0.9.1
+<<<<<<< HEAD
 // date: Tue Aug 29 2017 10:19:06 GMT+0100 (GMT Daylight Time)
+=======
+// date: Mon Aug 28 2017 12:21:24 GMT+0100 (WEST)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -80,7 +92,11 @@
 
 
 // version: 0.9.1
+<<<<<<< HEAD
 // date: Tue Aug 29 2017 10:19:06 GMT+0100 (GMT Daylight Time)
+=======
+// date: Mon Aug 28 2017 12:21:24 GMT+0100 (WEST)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -107,7 +123,11 @@
 
 
 // version: 0.9.1
+<<<<<<< HEAD
 // date: Mon Aug 28 2017 22:35:16 GMT+0100 (GMT Daylight Time)
+=======
+// date: Mon Aug 28 2017 12:15:42 GMT+0100 (WEST)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -134,7 +154,11 @@
 
 
 // version: 0.9.1
+<<<<<<< HEAD
 // date: Mon Aug 28 2017 22:35:16 GMT+0100 (GMT Daylight Time)
+=======
+// date: Mon Aug 28 2017 12:15:42 GMT+0100 (WEST)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -161,7 +185,11 @@
 
 
 // version: 0.9.1
+<<<<<<< HEAD
 // date: Mon Aug 28 2017 22:30:46 GMT+0100 (GMT Daylight Time)
+=======
+// date: Mon Aug 28 2017 12:14:08 GMT+0100 (WEST)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -188,7 +216,11 @@
 
 
 // version: 0.9.1
+<<<<<<< HEAD
 // date: Mon Aug 28 2017 22:30:46 GMT+0100 (GMT Daylight Time)
+=======
+// date: Mon Aug 28 2017 12:14:08 GMT+0100 (WEST)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -215,7 +247,11 @@
 
 
 // version: 0.9.1
+<<<<<<< HEAD
 // date: Mon Aug 28 2017 15:20:09 GMT+0100 (GMT Daylight Time)
+=======
+// date: Wed Aug 23 2017 16:29:34 GMT+0100 (WEST)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -242,7 +278,11 @@
 
 
 // version: 0.9.1
+<<<<<<< HEAD
 // date: Mon Aug 28 2017 15:20:09 GMT+0100 (GMT Daylight Time)
+=======
+// date: Wed Aug 23 2017 16:29:34 GMT+0100 (WEST)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -269,7 +309,11 @@
 
 
 // version: 0.9.1
+<<<<<<< HEAD
 // date: Sat Aug 26 2017 01:04:11 GMT+0100 (GMT Daylight Time)
+=======
+// date: Wed Aug 23 2017 15:00:37 GMT+0100 (WEST)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -296,7 +340,11 @@
 
 
 // version: 0.9.1
+<<<<<<< HEAD
 // date: Sat Aug 26 2017 01:04:11 GMT+0100 (GMT Daylight Time)
+=======
+// date: Wed Aug 23 2017 15:00:37 GMT+0100 (WEST)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -323,7 +371,11 @@
 
 
 // version: 0.9.1
+<<<<<<< HEAD
 // date: Sat Aug 26 2017 00:59:07 GMT+0100 (GMT Daylight Time)
+=======
+// date: Tue Aug 22 2017 16:25:43 GMT+0100 (WEST)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -350,7 +402,11 @@
 
 
 // version: 0.9.1
+<<<<<<< HEAD
 // date: Sat Aug 26 2017 00:59:07 GMT+0100 (GMT Daylight Time)
+=======
+// date: Tue Aug 22 2017 16:25:43 GMT+0100 (WEST)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -377,7 +433,11 @@
 
 
 // version: 0.9.1
+<<<<<<< HEAD
 // date: Sat Aug 26 2017 00:50:10 GMT+0100 (GMT Daylight Time)
+=======
+// date: Tue Aug 22 2017 15:59:37 GMT+0100 (WEST)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -404,7 +464,11 @@
 
 
 // version: 0.9.1
+<<<<<<< HEAD
 // date: Sat Aug 26 2017 00:50:10 GMT+0100 (GMT Daylight Time)
+=======
+// date: Tue Aug 22 2017 15:59:37 GMT+0100 (WEST)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -431,7 +495,11 @@
 
 
 // version: 0.9.1
+<<<<<<< HEAD
 // date: Sat Aug 26 2017 00:42:05 GMT+0100 (GMT Daylight Time)
+=======
+// date: Tue Aug 22 2017 10:01:40 GMT+0100 (WEST)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -458,7 +526,11 @@
 
 
 // version: 0.9.1
+<<<<<<< HEAD
 // date: Sat Aug 26 2017 00:42:05 GMT+0100 (GMT Daylight Time)
+=======
+// date: Tue Aug 22 2017 10:01:40 GMT+0100 (WEST)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -485,7 +557,11 @@
 
 
 // version: 0.9.1
+<<<<<<< HEAD
 // date: Sat Aug 26 2017 00:32:39 GMT+0100 (GMT Daylight Time)
+=======
+// date: Fri Aug 18 2017 18:12:39 GMT+0100 (WEST)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -512,7 +588,11 @@
 
 
 // version: 0.9.1
+<<<<<<< HEAD
 // date: Sat Aug 26 2017 00:32:39 GMT+0100 (GMT Daylight Time)
+=======
+// date: Fri Aug 18 2017 18:12:39 GMT+0100 (WEST)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -539,7 +619,11 @@
 
 
 // version: 0.9.1
+<<<<<<< HEAD
 // date: Sat Aug 26 2017 00:07:31 GMT+0100 (GMT Daylight Time)
+=======
+// date: Fri Aug 18 2017 14:40:13 GMT+0100 (WEST)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -566,7 +650,11 @@
 
 
 // version: 0.9.1
+<<<<<<< HEAD
 // date: Sat Aug 26 2017 00:07:31 GMT+0100 (GMT Daylight Time)
+=======
+// date: Fri Aug 18 2017 14:40:13 GMT+0100 (WEST)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -593,7 +681,11 @@
 
 
 // version: 0.9.1
+<<<<<<< HEAD
 // date: Fri Aug 25 2017 23:47:36 GMT+0100 (GMT Daylight Time)
+=======
+// date: Fri Aug 18 2017 14:25:37 GMT+0100 (WEST)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -620,6 +712,7 @@
 
 
 // version: 0.9.1
+<<<<<<< HEAD
 // date: Fri Aug 25 2017 23:47:36 GMT+0100 (GMT Daylight Time)
 // licence: 
 /**
@@ -2295,6 +2388,9 @@
 
 // version: 0.9.1
 // date: Tue Aug 01 2017 20:01:57 GMT+0100 (GMT Daylight Time)
+=======
+// date: Fri Aug 18 2017 14:25:37 GMT+0100 (WEST)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
