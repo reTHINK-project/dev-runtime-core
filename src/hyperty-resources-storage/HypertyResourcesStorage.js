@@ -93,6 +93,8 @@ class HypertyResourcesStorage {
       response.body.code = 404;
     }
 
+    //response.body.code = 404;
+
     //_this._hypertyResources[contentUrl] = message.body.value;
 
     _this._bus.postMessage(response);
