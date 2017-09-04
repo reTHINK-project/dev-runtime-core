@@ -281,6 +281,52 @@ class P2PConnectionResolve  {
       delete this._remoteP2PEntities[url];
     }
 
+    reconnectP2PRequester(p2pRequester) {
+      let _this = this;
+
+      console.log('[P2PConenctionResolve.reconnectP2PRequester] lets try to reconnect P2P Requester Stub: ', p2pRequester);
+
+      return new Promise((resolve, reject) => {
+
+        let remoteRuntime = p2pRequester.runtime;
+
+        let message = {
+          type: 'execute',
+          from: _this._registry.registryURL,
+          to: p2pRequester.url,
+          body: {
+            method: 'connect',
+            params: [p2pRequester.p2pHandler]
+          }
+        };
+
+        // lets prepare the p2pRequesterSTub reconnect by setting an observer to its status changes
+
+        _this._registry.watchingYou.observe('p2pRequesterStub', (change) => {
+
+          console.log('[P2PConenctionResolve.reconnectP2PRequester] p2pRequesterStubs changed ' + _this._registry.p2pRequesterStub);
+
+          if (change.keypath.split('.')[0] === remoteRuntime && change.name === 'status') {
+            switch (change.newValue) {
+              case 'live':
+                console.log('[P2PConenctionResolve.reconnectP2PRequester] p2pRequester is live ' + _this._registry.p2pRequesterStub[remoteRuntime]);
+                resolve(_this._registry.p2pRequesterStub[remoteRuntime].url);
+                break;
+              case 'failed':
+                console.log('[P2PConenctionResolve.reconnectP2PRequester] p2pRequester reconnect failed ' + _this._registry.p2pRequesterStub[remoteRuntime]);
+                reject('P2P Requester reconnect failed');
+                break;
+              default:
+            }
+          }
+        });
+
+        //  stub load
+        _this._registry._messageBus.postMessage(message, (reply) => {
+          console.log('[P2PConenctionResolve.reconnectP2PRequester] reconnect request reply', reply);
+        });
+      });
+    }
 
 }
 

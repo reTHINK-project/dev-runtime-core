@@ -133,8 +133,9 @@ class RuntimeUA {
         let getRuntimeURL = this.storageManager.get('runtime:URL');
         let getStoredDataObjects = this.storageManager.get('syncherManager:ObjectURLs');
         let getHypertyStorageObjects = this.storageManager.get('hypertyResources');
+        let getP2PHandlerURL = this.storageManager.get('p2pHandler:URL');
 
-        Promise.all([getRuntimeURL, getCapabilities, getStoredDataObjects, getHypertyStorageObjects]).then((results) => {
+        Promise.all([getRuntimeURL, getCapabilities, getStoredDataObjects, getHypertyStorageObjects, getP2PHandlerURL]).then((results) => {
 
           this.runtimeURL = results[0] ? results[0].runtimeURL : results[0];
           if (!this.runtimeURL) {
@@ -142,12 +143,21 @@ class RuntimeUA {
             this.storageManager.set('runtime:URL', 1, {runtimeURL: this.runtimeURL});
           }
 
+
           this.capabilities = results[1];
           Object.assign(runtimeUtils.runtimeCapabilities.constraints, results[1]);
 
           this._dataObjectsStorage = new DataObjectsStorage(this.storageManager, results[2] || {});
 
           this._hypertyResources = results[3] || {};
+
+          this.p2pHandlerURL = results[4] ? results[4].p2pHandlerURL : results[4];
+          if (!this.p2pHandlerURL) {
+            this.p2pHandlerURL = this.runtimeURL + '/p2phandler/' + generateGUID();
+            console.info('[RuntimeUA - init] P2PHandlerURL: ', this.p2pHandlerURL);
+
+            this.storageManager.set('p2pHandler:URL', 1, {p2pHandlerURL: this.p2pHandlerURL});
+          }
 
           return this._loadComponents();
 
@@ -253,7 +263,7 @@ class RuntimeUA {
         let appSandbox = this.runtimeFactory.createAppSandbox();
 
         // Instantiate the Registry Module
-        this.registry = new Registry(this.runtimeURL, appSandbox, this.identityModule, this.runtimeCatalogue, this.runtimeCapabilities, this.storageManager);
+        this.registry = new Registry(this.runtimeURL, appSandbox, this.identityModule, this.runtimeCatalogue, this.runtimeCapabilities, this.storageManager, this.p2pHandlerURL);
 
         // Set the loader to load Hyperties, Stubs and IdpProxies
         this.registry.loader = this.loader;
