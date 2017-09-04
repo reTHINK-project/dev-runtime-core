@@ -1,4 +1,4 @@
-import { generateGUID } from '../utils/utils';
+import { generateGUID, deepClone } from '../utils/utils';
 
 class HypertyResourcesStorage {
 
@@ -44,7 +44,13 @@ class HypertyResourcesStorage {
 
     let contentUrl = _this._url + '/' + generateGUID();
 
-    _this._hypertyResources[contentUrl] = message.body.value;
+    let content = message.body.value;
+
+    if (!content.contentURL) content.contentURL = [];
+
+    content.contentURL.push(contentUrl);
+
+    _this._hypertyResources[contentUrl] = content;
 
     _this._storageManager.set('hypertyResources', 1, _this._hypertyResources).then(() => {
       let response = {
@@ -85,21 +91,48 @@ class HypertyResourcesStorage {
     let content = _this._hypertyResources[contentUrl];
 
     if (content) {
-      response.body.code = 200;
-      response.body.value = content;
-      response.body.p2p = true;
 
+      if (content.resourceType = 'file') _this._onReadFile(response, content);
+      else {
+        response.body.code = 200;
+        response.body.p2p = true;
+        response.body.value = content;
+        _this._bus.postMessage(response);
+      }
     } else {
       response.body.code = 404;
+      response.body.desc = 'Content Not Found for '+contentUrl;
+      _this._bus.postMessage(response);
+
     }
 
     //response.body.code = 404;
 
     //_this._hypertyResources[contentUrl] = message.body.value;
 
-    _this._bus.postMessage(response);
 
   }
+
+ _onReadFile(response, resource) {
+   let _this = this;
+   let content;
+
+     let reader = new FileReader();
+
+     reader.onload = function(theFile) {
+
+       console.log('[FileHypertyResource.init] file loaded ', theFile);
+
+       response.body.code = 200;
+       response.body.p2p = true;
+       response.body.value = deepClone(resource);
+       response.body.value.content = theFile.target.result;
+       _this._bus.postMessage(response);
+
+       }
+
+     reader.readAsArrayBuffer(resource.content);
+ }
 
   /**
    * @description should delete an HypertyResource from the storage;
