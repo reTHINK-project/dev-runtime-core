@@ -1210,6 +1210,8 @@ class Registry {
         if (runtimeProtoStubURL.includes('/p2prequester/')) {
           _this.p2pRequesterStub[remoteRuntimeURL].status = msg.body.value;
           console.log('[Registry - onProtostubStatusEvent] - P2P Requester status: ', _this.p2pRequesterStub[remoteRuntimeURL]);
+        } else {// if from P2PHandler with status disconencted, lets remove from p2pConnectionList
+          if (msg.body.value === 'disconnected') delete _this.p2pConnectionList[remoteRuntimeURL];
         }
 
       } else {
