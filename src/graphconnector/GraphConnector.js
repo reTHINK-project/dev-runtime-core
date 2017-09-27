@@ -9,6 +9,4 @@ if (process.env.MODE !== 'light') {
   if (GraphConnector &&  GraphConnector.hasOwnProperty('default')) GraphConnector = GraphConnector.default;
 }
 
-console.log('AQUI:', GraphConnector);
-
 export default GraphConnector;

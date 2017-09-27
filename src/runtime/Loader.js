@@ -289,6 +289,7 @@ class Loader {
           status: deployComponentStatus
         };
 
+        console.info('[Runtime.Loader] Hyperty: ', hyperty);
         resolve(hyperty);
 
         // we have completed step 21 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
