@@ -1582,12 +1582,14 @@ class Registry {
 
       if (!_this.p2pHandlerStub[_this.runtimeURL] || isBackendServiceURL(url) || url.includes(_this.runtimeURL) || url.includes('/p2phandler/') || url.includes('/p2prequester/')) {
 
+        console.log('[Registry - resolve] - Resolve normal stub: ', _this.p2pHandlerStub, _this.runtimeURL, isBackendServiceURL(url), p2p, url);
         _this.resolveNormalStub(url).then((returnURL) => {
           resolve(returnURL);
         });
 
       } else {
 
+        console.log('[Registry - resolve] - checkP2P: ', p2p, url, _this._p2pConnectionResolve);
         _this._p2pConnectionResolve.checkP2P(msg).then((registeredP2P) => {
 
           console.log('[Registry - resolve] found registered P2P: ', registeredP2P);
@@ -1685,7 +1687,7 @@ class Registry {
         console.log('[Registry._setupP2PConnection] p2pRequester deployed: ', _this.p2pRequesterStub[remoteRuntime]);
 
 
-        }).catch((error) => {
+      }).catch((error) => {
         reject(error);
       });
     });
