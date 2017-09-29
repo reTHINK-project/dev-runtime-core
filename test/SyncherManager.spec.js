@@ -905,7 +905,10 @@ describe('SyncherManager', function() {
     sync1.create(schemaURL, [hyperURL2], initialData).then((dor) => {
       dor.onSubscription((subscribeEvent) => {
         dor.onAddChild((event) => {
-          let children1 = dor.childrens[event.childId];
+          let children1 = event.child; //dor.childrens[event.childId];
+
+          console.log('Children 1: ', dor, children1, event);
+
           children1.onChange((changeEvent) => {
             console.log('onChange: ', changeEvent);
             expect(changeEvent).to.contain.all.keys({ cType: 'update', oType: 'object', field: 'message', data: 'Hello Luis!' });

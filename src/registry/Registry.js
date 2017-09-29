@@ -797,8 +797,7 @@ class Registry {
                 let runtime = _this.runtimeURL;
                 let status = 'live';
 
-                let hyperty = new HypertyInstance(_this.identifier, _this.registryURL,
-                descriptorURL, descriptor, addressURL.address[0], userProfile, 'guid', _this.runtimeURL, 'ctx', p2pHandler, p2pRequester, hypertyCapabilities.dataSchema, hypertyCapabilities.resources);
+                let hyperty = new HypertyInstance(_this.identifier, _this.registryURL, descriptorURL, descriptor, addressURL.address[0], userProfile, 'guid', _this.runtimeURL, 'ctx', p2pHandler, p2pRequester, hypertyCapabilities.dataSchema, hypertyCapabilities.resources);
 
                 _this.hypertiesList.push(hyperty);
 
@@ -861,9 +860,9 @@ class Registry {
                     if (reply.body.code === 200) {
                       let result = { url: addressURL.address[0]};
                       if (p2pHandler) {
-                          result.p2pHandler = p2pHandler;
-                          result.p2pRequester = p2pRequester;
-                        }
+                        result.p2pHandler = p2pHandler;
+                        result.p2pRequester = p2pRequester;
+                      }
 
                       resolve(result);
                     } else if (reply.body.code === 404) {
@@ -894,9 +893,9 @@ class Registry {
                           if (reply.body.code === 200) {
                             let result = { url: addressURL.address[0]};
                             if (p2pHandler) {
-                                result.p2pHandler = p2pHandler;
-                                result.p2pRequester = p2pRequester;
-                              }
+                              result.p2pHandler = p2pHandler;
+                              result.p2pRequester = p2pRequester;
+                            }
 
                             resolve(result);
 
@@ -1070,7 +1069,7 @@ class Registry {
 
       console.info('[Registry - registerStub] - stubID ', stubID);
 
-  /*    if (!stubID.indexOf('msg-node.')) {
+      /* if (!stubID.indexOf('msg-node.')) {
         stubID = stubID.substring(stubID.indexOf('.') + 1);
       }*/
 
@@ -1089,6 +1088,7 @@ class Registry {
           _this.p2pHandlerAssociation[_this.runtimeURL] = [];
 
           _this.sandboxesList.sandbox[stubID] = sandbox;
+          console.info('[Registry - registerStub - P2PHandlerStub] - ', stubID, ' - ', runtimeProtoStubURL);
           resolve(_this.p2pHandlerStub[stubID]);
         } else {
           P2PRequesterStub = p2pConfig.p2pRequesterStub;
@@ -1096,7 +1096,6 @@ class Registry {
           console.info('[Registry - registerStub - P2PRequesterStub] - ', P2PRequesterStub, ' - ', runtimeProtoStubURL);
 
           // to be clarified what is this p2pHandlerAssociation
-
           _this.p2pHandlerAssociation[_this.runtimeURL].push(runtimeProtoStubURL);
           _this.p2pRequesterStub[stubID] = {
             url: runtimeProtoStubURL,
@@ -1210,17 +1209,18 @@ class Registry {
         if (runtimeProtoStubURL.includes('/p2prequester/')) {
           _this.p2pRequesterStub[remoteRuntimeURL].status = msg.body.value;
           console.log('[Registry - onProtostubStatusEvent] - P2P Requester status: ', _this.p2pRequesterStub[remoteRuntimeURL]);
-        } else {// if from P2PHandler with status disconencted, lets remove from p2pConnectionList
+        } else {
+          // if from P2PHandler with status disconencted, lets remove from p2pConnectionList
           if (msg.body.value === 'disconnected') delete _this.p2pConnectionList[remoteRuntimeURL];
         }
 
       } else {
         if (runtimeProtoStubURL.includes('/p2prequester/')) {
-            // It is an event from P2P Requester without mandatory "resource" field
+          // It is an event from P2P Requester without mandatory "resource" field
           console.error('[Registry onProtostubStatusEvent] resource missing: ', msg);
           return;
         } else {
-            // It is an event from P2P Handler
+          // It is an event from P2P Handler
           _this.p2pHandlerStub[_this.runtimeURL].status = msg.body.value;
           console.log('[Registry - onProtostubStatusEvent] - P2PHandler Stub status: ', _this.p2pHandlerStub[_this.runtimeURL]);
         }
@@ -1567,23 +1567,29 @@ class Registry {
   * @return {Promise<URL.URL>}                 Promise <URL.URL>
   */
   resolve(msg) {
-    console.log('[Registry - Resolve] -  ' + msg);
+    console.log('[Registry - Resolve] -  ', msg);
     let _this = this;
-    let url = msg.to;
-
-    let p2p = msg.body.p2p ? msg.body.p2p : false;
 
     return new Promise((resolve, reject) => {
+
+      let url = msg.to ? msg.to : msg;
+
+      let p2p = (msg.body && msg.body.p2p) ? msg.body.p2p : false;
+
+      console.log('P2P: ', p2p, url);
 
       // Skip p2p procedure when not supported by the Runtime or for backend services
 
       if (!_this.p2pHandlerStub[_this.runtimeURL] || isBackendServiceURL(url) || url.includes(_this.runtimeURL) || url.includes('/p2phandler/') || url.includes('/p2prequester/')) {
 
+        console.log('[Registry - resolve] - Resolve normal stub: ', _this.p2pHandlerStub, _this.runtimeURL, isBackendServiceURL(url), p2p, url);
         _this.resolveNormalStub(url).then((returnURL) => {
           resolve(returnURL);
         });
 
       } else {
+
+        console.log('[Registry - resolve] - checkP2P: ', p2p, url, _this._p2pConnectionResolve);
         _this._p2pConnectionResolve.checkP2P(msg).then((registeredP2P) => {
 
           console.log('[Registry - resolve] found registered P2P: ', registeredP2P);
@@ -1603,7 +1609,7 @@ class Registry {
             case STATUS.CREATED: // p2p connection setup is ongoing, use MN Stub
             case STATUS.PROGRESS:
               _this.resolveNormalStub(url).then((returnURL) => {
-              resolve(returnURL);
+                resolve(returnURL);
               });
               break;
             case STATUS.DISCONNECTED: // p2p connection stub was disconnected, let's ask to connect again
@@ -1620,22 +1626,25 @@ class Registry {
               });
               break;
             default:
-              if (!msg.body.p2p) { // no p2p connection exists and the message sender does not ask one. Lets use the MN Stub
+
+              console.log('p2p: ', p2p);
+              if (!p2p) { // no p2p connection exists and the message sender does not ask one. Lets use the MN Stub
                 _this.resolveNormalStub(url).then((returnURL) => {
                   resolve(returnURL);
                 });
 
-              } else _this._setupP2PRequester(registeredP2P).then((returnURL) => { // no p2p connection exists but the message sender is asking one. Lets try to setup one
-                resolve(returnURL);
-              }, (reason) => {
-                console.info('[Registry - Resolve] - Reason: ', reason);
-
-                _this.resolveNormalStub(url).then((returnURL) => {
+              } else {
+                _this._setupP2PRequester(registeredP2P).then((returnURL) => { // no p2p connection exists but the message sender is asking one. Lets try to setup one
                   resolve(returnURL);
+                }, (reason) => {
+                  console.info('[Registry - Resolve] - Reason: ', reason);
+
+                  _this.resolveNormalStub(url).then((returnURL) => {
+                    resolve(returnURL);
+                  });
                 });
-              });
+              }
               break;
-
           }
         }, (reason) => {
           console.info('[Registry - Resolve] - Reason: ', reason);
@@ -1678,7 +1687,7 @@ class Registry {
         console.log('[Registry._setupP2PConnection] p2pRequester deployed: ', _this.p2pRequesterStub[remoteRuntime]);
 
 
-        }).catch((error) => {
+      }).catch((error) => {
         reject(error);
       });
     });
