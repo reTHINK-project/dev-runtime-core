@@ -131,7 +131,8 @@ class HypertyResourcesStorage {
 
        }
 
-     reader.readAsArrayBuffer(resource.content);
+    if (resource.mimetype.includes('text/')) reader.readAsText(resource.content);
+    else reader.readAsArrayBuffer(resource.content);
  }
 
   /**
