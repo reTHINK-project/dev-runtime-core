@@ -104,10 +104,15 @@ class SyncherManager {
 
     if (!msg.body.hasOwnProperty('resume') || (msg.body.hasOwnProperty('resume') && !msg.body.resume)) {
 
-      // If from the hyperty side, don't call the resumeReporter we will have resume = false'
-      // so we will create a not resumed object and always create a new object;
-      console.info('[SyncherManager - Create New Object]', msg);
-      this._newCreate(msg);
+      // check if this is an invitation message
+      if (msg.body.authorise) {
+        this._authorise(msg);
+        console.info('[SyncherManager.onCreate - invite observers]', msg);
+      } else { // this is to create a new data object
+          console.info('[SyncherManager.onCreate - Create New Object]', msg);
+          this._newCreate(msg);
+        }
+
     } else {
 
       // If from the hyperty side, call the resumeReporter we will have resume = true'
@@ -172,10 +177,12 @@ class SyncherManager {
       domain = divideURL(_this.runtimeURL).domain;
     }
 
-    if (msg.body.resource) {
-      _this._authorise(msg, msg.body.resource);
+    // Process invitation message to observers
+
+    /*if (msg.body.authorise) {
+      _this._authorise(msg);
       return;
-    }
+    }*/
 
     //get schema from catalogue and parse -> (scheme, children)
     _this._catalog.getDataSchemaDescriptor(msg.body.schema).then((descriptor) => {
@@ -220,8 +227,8 @@ class SyncherManager {
         console.info('[SyncherManager._newCreate] Register Object: ', objectRegistration);
 
         //_this._registry.registerDataObject(msg.body.value.name, msg.body.value.schema, objURL, msg.body.value.reporter, msg.body.value.resources, allocated, msg.body.authorise).then((resolve) => {
-        _this._registry.registerDataObject(objectRegistration).then((resolve) => {
-          console.log('[SyncherManager._newCreate] DataObject successfully registered', resolve);
+        _this._registry.registerDataObject(objectRegistration).then((registeredObject) => {
+          console.log('[SyncherManager._newCreate] DataObject successfully registered', registeredObject);
 
           //all OK -> create reporter and register listeners
           let reporter;
@@ -253,8 +260,6 @@ class SyncherManager {
           metadata.subscriberUser = userURL;
           metadata.isReporter = true;
 
-          //delete metadata.expires;
-
           // Store the dataObject information
 
           if (!interworking) {
@@ -274,18 +279,14 @@ class SyncherManager {
             reporter.addChildrens(childrens).then(() => {
               _this._reporters[objectRegistration.url] = reporter;
 
-              //FLOW-OUT: message response to Syncher -> create
-              _this._bus.postMessage({
+              let responseMsg = {
                 id: msg.id, type: 'response', from: msg.to, to: owner,
                 body: { code: 200, resource: objectRegistration.url, childrenResources: childrens }
-              });
+              };
 
-              //send create to all observers, responses will be deliver to the Hyperty owner?
-              //schedule for next cycle needed, because the Reporter should be available.
-              setTimeout(() => {
-                //will invite other hyperties
-                _this._authorise(msg, objectRegistration.url);
-              });
+              //FLOW-OUT: message response to Syncher -> create
+              _this._bus.postMessage(responseMsg);
+
             });
           });
         }, function(error) {
@@ -438,18 +439,28 @@ class SyncherManager {
     });
   }
 
-  _authorise(msg, objURL) {
-    let _this = this;
-    let objSubscriptorURL = objURL + '/subscription';
+  // Process invitations to observers
 
-    console.log('[SyncherManager -  authorise] - ', msg, objURL);
+  _authorise(msg) {
+    let _this = this;
+
+    if (!msg.body.resource) {
+      throw new Error('[SyncherManager._authorise] invitation request without data object url:', msg);
+      return;
+    }
+
+    let objSubscriptorURL = msg.body.resource + '/subscription';
+    let p2p = msg.body.p2p ? msg.body.p2p : false;
+
+    console.log('[SyncherManager -  authorise] - ', msg);
 
     if (msg.body.authorise) {
       msg.body.authorise.forEach((hypertyURL) => {
         //FLOW-OUT: send invites to list of remote Syncher -> _onRemoteCreate -> onNotification
+
         _this._bus.postMessage({
           type: 'create', from: objSubscriptorURL, to: hypertyURL,
-          body: { identity: msg.body.identity, source: msg.from, value: msg.body.value, schema: msg.body.schema }
+          body: { p2p: p2p, identity: msg.body.identity, source: msg.from, value: msg.body.value, schema: msg.body.schema }
         });
       });
     }

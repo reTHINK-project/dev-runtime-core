@@ -239,12 +239,12 @@ class Loader {
         // Register hyperty
         return this.registry.registerHyperty(_hypertySandbox, hypertyCatalogueURL, _hypertyDescriptor, addresses, IdpConstraint);
       }, handleError)
-      .then((hypertyURL) => {
+      .then((registrationResult) => {
         if (haveError) return false;
-        console.info('[Runtime.Loader] 7: Hyperty url, after register hyperty', hypertyURL);
+        console.info('[Runtime.Loader] 7: registration result', registrationResult);
 
         // we have completed step 16 of https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
-        _hypertyURL = hypertyURL;
+        _hypertyURL = registrationResult.url;
 
         // Extend original hyperty configuration;
         let configuration = {};
@@ -256,6 +256,12 @@ class Loader {
           }
         }
         configuration.runtimeURL = this._runtimeURL;
+
+        if (registrationResult.p2pHandler) {
+          configuration.p2pHandler = registrationResult.p2pHandler;
+          configuration.p2pRequester = registrationResult.p2pRequester;
+        }
+
 
         // We will deploy the component - step 17 of https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
 
@@ -283,6 +289,7 @@ class Loader {
           status: deployComponentStatus
         };
 
+        console.info('[Runtime.Loader] Hyperty: ', hyperty);
         resolve(hyperty);
 
         // we have completed step 21 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.

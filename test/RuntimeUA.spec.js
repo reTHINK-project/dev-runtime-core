@@ -70,12 +70,12 @@ describe('RuntimeUA', function() {
           return getDescriptor(stubURL);
         });
 
-        sinon.stub(runtime.descriptorInstance, 'getIdpProxyDescriptor').callsFake(function(idpProxyURL){
+        sinon.stub(runtime.descriptorInstance, 'getIdpProxyDescriptor').callsFake(function(idpProxyURL) {
           let url = 'https://localhost/.well-known/idp-proxy/' +  idpProxyURL;
           return getDescriptor(url);
         });
 
-        sinon.stub(runtime.runtimeCatalogue, 'getDataSchemaDescriptor').callsFake(function(dataSchemaURL){
+        sinon.stub(runtime.runtimeCatalogue, 'getDataSchemaDescriptor').callsFake(function(dataSchemaURL) {
           return getDescriptor(dataSchemaURL);
         });
 
@@ -99,7 +99,7 @@ describe('RuntimeUA', function() {
               resolve('hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d');
             } else if (typeof(reuseURL) === 'string') {
               console.log('checkRegisteredURLs is string:', reuseURL);
-              resolve(reuseURL);
+              resolve({url: reuseURL });
             } else {
               resolve('hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d');
             }
@@ -176,8 +176,8 @@ describe('RuntimeUA', function() {
       let hypertyResolved = ['runtimeHypertyURL', 'status'];
 
       expect(loadHyperty).to.eventually.to.have.all.keys(hypertyResolved)
-      .and.to.be.fulfilled
-      .and.notify(done);
+        .and.to.be.fulfilled
+        .and.notify(done);
 
     });
 
@@ -188,8 +188,8 @@ describe('RuntimeUA', function() {
       let hypertyResolved = ['runtimeHypertyURL', 'status'];
 
       expect(loadHyperty).to.be.fulfilled
-      .and.eventually.to.have.all.keys(hypertyResolved)
-      .and.notify(done);
+        .and.eventually.to.have.all.keys(hypertyResolved)
+        .and.notify(done);
 
     });
 
@@ -203,8 +203,8 @@ describe('RuntimeUA', function() {
       };
 
       expect(loadHyperty).to.eventually.to.deep.equal(hypertyResolved)
-      .and.to.be.fulfilled
-      .and.notify(done);
+        .and.to.be.fulfilled
+        .and.notify(done);
 
     });
 
