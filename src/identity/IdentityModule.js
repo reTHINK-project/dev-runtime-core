@@ -711,6 +711,11 @@ class IdentityModule {
           } else {
             _this.selectIdentityFromGUI().then((assertion) => {
             console.log('[IdentityModule] Identity selected from GUI.')
+
+            if (assertion.hasOwnProperty('messageInfo')) {
+              return resolve(assertion.messageInfo);
+            }
+
             return resolve(assertion);
           }, (err) => {
             return reject(err);
