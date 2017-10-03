@@ -1577,6 +1577,11 @@ class Registry {
       let p2p = (msg.body && msg.body.p2p) ? msg.body.p2p : false;
 
       console.log('P2P: ', p2p, url);
+      console.log('P2P - p2pHandlerStub: ', !_this.p2pHandlerStub[_this.runtimeURL], _this.p2pHandlerStub, _this.runtimeURL);
+      console.log('P2P - isBackendServiceURL: ', isBackendServiceURL(url), isBackendServiceURL, url);
+      console.log('P2P - includes runtimeURL: ', url.includes(_this.runtimeURL));
+      console.log('P2P - includes p2phandler: ', url.includes('/p2phandler/'));
+      console.log('P2P - includes p2prequester: ', url.includes('/p2prequester/'));
 
       // Skip p2p procedure when not supported by the Runtime or for backend services
 
