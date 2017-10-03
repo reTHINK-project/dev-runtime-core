@@ -329,7 +329,7 @@ describe('Registry', function() {
       expect(registry.resolve(url).then(function(response) {
         console.log('response:', response);
         return response;
-      }))
+      }).catch(console.error))
         .to.be.fulfilled
         .and.eventually.to.contain('runtime://ua.pt/protostub/')
         .and.notify(done);
