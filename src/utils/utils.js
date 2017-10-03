@@ -276,10 +276,10 @@ export function isBackendServiceURL(url) {
   let subDomain;
 
   if (splitedDomain.length > 1) {
-    subDomain = splitedDomain[0];
+    subDomain = splitedDomain.filter(item => backendSubDomains.indexOf(item) !== -1)[0];
   }
 
-  if (subDomain && backendSubDomains.indexOf(subDomain)) {
+  if (subDomain && backendSubDomains.indexOf(subDomain) !== -1) {
     return true;
   }
 
