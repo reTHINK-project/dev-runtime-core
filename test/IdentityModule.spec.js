@@ -47,6 +47,7 @@ let loginUrl = undefined;
 let loginURLResponse = undefined;
 let assertion_val = undefined;
 
+
 describe('Crypto tests', function() {
 	before('Init structures before test', function(){
 		crypto = new Crypto()
@@ -423,8 +424,9 @@ describe('Identity Module tests', function() {
 
 	it('test loginSelectedIdentity', function(done){
 		crypto.generateRSAKeyPair().then( keyPair => {
+      
 			identityModule.loginSelectedIdentity(assertion_val, hyperURL1, idpDomain, keyPair, loginUrl).then( result => {
-				done();
+				assert.fail('Method not implemented correctly');
 			}).then(done, done);
 		});
 	});
@@ -432,8 +434,8 @@ describe('Identity Module tests', function() {
 	it('test generateSelectedIdentity', function(done){
 		crypto.generateRSAKeyPair().then( keyPair => {
 
-			identityModule.loginSelectedIdentity(assertion_val, hyperURL1, idpDomain, keyPair, loginUrl).then( result => {
-				assert(result.hasOwnProperty('assertion'), 'result does not have the required fields');
+			identityModule.generateSelectedIdentity(assertion_val, hyperURL1, idpDomain, keyPair, loginUrl).then( result => {
+				assert(result.hasOwnProperty('assertion'), 'Result does not have the required fields');
 			}).then(done, done);
 		});
 	});
@@ -526,7 +528,9 @@ describe('Identity Module tests', function() {
 			});
 		});
 	});
+
 });
+
 
 let runtimeCapabilitiesPopulate = (arg) => {
   return Promise.resolve(true)};
@@ -566,7 +570,7 @@ let msgNodeResponseFuncPopulate = (bus, msg) => {
 			}   
 		};
 		log(resMsg);
-		if(msg.body.method === 'generateAssertion' && msg.body.resource !== 'identity'){
+		if(msg.body.method === 'generateAssertion' && msg.body.params.usernameHint != ''){
 			log('msgNodeResponseFunc generateAssertion');
 			if(msg.body.params.usernameHint == ''){
 				log('msgNodeResponseFunc loginUrl');
