@@ -599,7 +599,7 @@ class Registry {
               type: 'update',
               from: _this.registryURL,
               to: 'domain://registry.' + _this.registryDomain,
-              body: { resource: registration.url, value: {status: 'live'} }
+              body: { resource: registration.url, value: {status: 'live'}, method: 'refresh' }
             };
 
             _this._messageBus.postMessage(message, (reply) => {
@@ -930,7 +930,7 @@ class Registry {
                     type: 'update',
                     from: _this.registryURL,
                     to: 'domain://registry.' + _this.registryDomain,
-                    body: { resource: addressURL.address[0], value: {status: 'live'} }};
+                    body: { resource: addressURL.address[0], value: {status: 'live'}, method: 'refresh' }};
 
                   _this._messageBus.postMessage(message, (reply) => {
                     console.log('[Registry registerHyperty] KeepAlive Reply: ', reply);
