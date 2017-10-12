@@ -40,9 +40,9 @@ class SubscriptionManager {
     _this._bus = bus;
     _this._storage = storage;
 
-    //TODO: should we store and resume of subscriptions to support persistence of routes between sessions?
-
     _this._subscriptions = {};
+
+    _this._subscriptionsStorage = {};
 
     //TODO: these should be saved in persistence engine?
     _this.runtimeURL = runtimeURL;
@@ -70,6 +70,9 @@ class SubscriptionManager {
       _this._storage.get('subscriptions').then((subscriptions) => {
         console.log('[SubscriptionManager.init] resume subscriptions: ', subscriptions);
         if (subscriptions) {
+
+          _this._subscriptionsStorage = subscriptions;
+
           Object.values(subscriptions).forEach((subscription)=>{
             _this._createSubscription(subscription.domain, subscription.resources, subscription.subscriber, subscription.identity);
 
@@ -111,15 +114,11 @@ class SubscriptionManager {
 
       _this._bus.postMessage(reply);
 
-      _this._storage.get('subscriptions').then((subscriptions)=>{
-        if (!subscriptions) {
-          subscriptions = {};
-        }
 
-        if (!subscriptions[subscriber]) {
+        if (!_this._subscriptionsStorage[subscriber]) {
 
 
-          subscriptions[subscriber] = {
+          _this._subscriptionsStorage[subscriber] = {
             domain: domain,
             resources: resources,
             subscriber: subscriber,
@@ -128,14 +127,13 @@ class SubscriptionManager {
 
         } else {
           resources.forEach((resource) => {
-            if (!(subscriptions[subscriber].resources.includes(resource))) {
-              subscriptions[subscriber].resources.push(resource);
+            if (!(_this._subscriptionsStorage[subscriber].resources.includes(resource))) {
+              _this._subscriptionsStorage[subscriber].resources.push(resource);
             }
           });
         }
 
-        _this._storage.set('subscriptions', 1, subscriptions);
-      });
+        _this._storage.set('subscriptions', 1, _this._subscriptionsStorage);
     });
   }
 
@@ -184,35 +182,33 @@ class SubscriptionManager {
     let unsubscriber = msg.from;
     let resource = msg.body.resource;
 
-    _this._storage.get('subscriptions').then((subscriptions)=>{
-      if (_this._subscriptions[unsubscriber] && _this._subscriptions[unsubscriber][resource]) {
-        let domain = divideURL(resource).domain;
-        let subscription = _this._subscriptions[unsubscriber][resource];
+    if (_this._subscriptions[unsubscriber] && _this._subscriptions[unsubscriber][resource]) {
+      let domain = divideURL(resource).domain;
+      let subscription = _this._subscriptions[unsubscriber][resource];
 
-        //FLOW-OUT: message sent to msg-node SubscriptionManager component
-        _this._bus.postMessage({
-          type: 'unsubscribe', from: _this._url, to: 'domain://msg-node.' + domain + '/sm',
-          body: { resources: [resource], source: unsubscriber }
-        });
-
-        subscription._releaseListeners();
-        delete _this._subscriptions[unsubscriber][resource];
-
-          if (subscriptions) {
-            let i = subscriptions[unsubscriber].resources.indexOf(resource);
-            if (i != -1) {
-              subscriptions[unsubscriber].resources.splice(i, 1);
-            }
-            _this._storage.set('subscriptions', 1, subscriptions);
-          }
-      }
-
+      //FLOW-OUT: message sent to msg-node SubscriptionManager component
       _this._bus.postMessage({
-        id: msg.id, type: 'response', from: msg.to, to: msg.from,
-        body: { code: 200 }
+        type: 'unsubscribe', from: _this._url, to: 'domain://msg-node.' + domain + '/sm',
+        body: { resources: [resource], source: unsubscriber }
       });
 
+      subscription._releaseListeners();
+      delete _this._subscriptions[unsubscriber][resource];
+
+      if (_this._subscriptionsStorage[unsubscriber]) {
+        let i = _this._subscriptionsStorage[unsubscriber].resources.indexOf(resource);
+        if (i != -1) {
+          _this._subscriptionsStorage[unsubscriber].resources.splice(i, 1);
+        }
+        _this._storage.set('subscriptions', 1, _this._subscriptionsStorage);
+      }
+    }
+
+    _this._bus.postMessage({
+      id: msg.id, type: 'response', from: msg.to, to: msg.from,
+      body: { code: 200 }
     });
+
   }
 
   //message received to read existing routing paths. At this point limited to read all existing routing paths set for one listener
