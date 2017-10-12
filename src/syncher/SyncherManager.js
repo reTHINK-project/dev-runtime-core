@@ -461,6 +461,16 @@ class SyncherManager {
         _this._bus.postMessage({
           type: 'create', from: objSubscriptorURL, to: hypertyURL,
           body: { p2p: p2p, identity: msg.body.identity, source: msg.from, value: msg.body.value, schema: msg.body.schema }
+        }, (reply) => {// lets forward the invitation response
+          let response = {
+            from: msg.to,
+            to: msg.from,
+            id: msg.id,
+            type: reply.type,
+            body: reply.body
+          };
+
+          _this._bus.postMessage(response);
         });
       });
     }

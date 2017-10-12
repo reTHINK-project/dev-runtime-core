@@ -184,35 +184,35 @@ class SubscriptionManager {
     let unsubscriber = msg.from;
     let resource = msg.body.resource;
 
-    if (_this._subscriptions[unsubscriber] && _this._subscriptions[unsubscriber][resource]) {
-      let domain = divideURL(resource).domain;
-      let subscription = _this._subscriptions[unsubscriber][resource];
+    _this._storage.get('subscriptions').then((subscriptions)=>{
+      if (_this._subscriptions[unsubscriber] && _this._subscriptions[unsubscriber][resource]) {
+        let domain = divideURL(resource).domain;
+        let subscription = _this._subscriptions[unsubscriber][resource];
 
-      //FLOW-OUT: message sent to msg-node SubscriptionManager component
-      _this._bus.postMessage({
-        type: 'unsubscribe', from: _this._url, to: 'domain://msg-node.' + domain + '/sm',
-        body: { resources: [resource], source: unsubscriber }
-      });
+        //FLOW-OUT: message sent to msg-node SubscriptionManager component
+        _this._bus.postMessage({
+          type: 'unsubscribe', from: _this._url, to: 'domain://msg-node.' + domain + '/sm',
+          body: { resources: [resource], source: unsubscriber }
+        });
 
-      subscription._releaseListeners();
-      delete _this._subscriptions[unsubscriber][resource];
+        subscription._releaseListeners();
+        delete _this._subscriptions[unsubscriber][resource];
 
-      _this._storage.get('subscriptions').then((subscriptions)=>{
-        if (subscriptions) {
-          let i = subscriptions[unsubscriber].resources.indexOf(resource);
-          if (i != -1) {
-            subscriptions[unsubscriber].resources.splice(i, 1);
+          if (subscriptions) {
+            let i = subscriptions[unsubscriber].resources.indexOf(resource);
+            if (i != -1) {
+              subscriptions[unsubscriber].resources.splice(i, 1);
+            }
+            _this._storage.set('subscriptions', 1, subscriptions);
           }
-          _this._storage.set('subscriptions', 1, subscriptions);
-        }
+      }
+
+      _this._bus.postMessage({
+        id: msg.id, type: 'response', from: msg.to, to: msg.from,
+        body: { code: 200 }
       });
-    }
 
-    _this._bus.postMessage({
-      id: msg.id, type: 'response', from: msg.to, to: msg.from,
-      body: { code: 200 }
     });
-
   }
 
   //message received to read existing routing paths. At this point limited to read all existing routing paths set for one listener
