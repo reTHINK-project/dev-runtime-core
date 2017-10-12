@@ -40,9 +40,9 @@ class SubscriptionManager {
     _this._bus = bus;
     _this._storage = storage;
 
-    //TODO: should we store and resume of subscriptions to support persistence of routes between sessions?
-
     _this._subscriptions = {};
+
+    _this._subscriptionsStorage = {};
 
     //TODO: these should be saved in persistence engine?
     _this.runtimeURL = runtimeURL;
@@ -70,6 +70,9 @@ class SubscriptionManager {
       _this._storage.get('subscriptions').then((subscriptions) => {
         console.log('[SubscriptionManager.init] resume subscriptions: ', subscriptions);
         if (subscriptions) {
+
+          _this._subscriptionsStorage = subscriptions;
+
           Object.values(subscriptions).forEach((subscription)=>{
             _this._createSubscription(subscription.domain, subscription.resources, subscription.subscriber, subscription.identity);
 
@@ -111,15 +114,11 @@ class SubscriptionManager {
 
       _this._bus.postMessage(reply);
 
-      _this._storage.get('subscriptions').then((subscriptions)=>{
-        if (!subscriptions) {
-          subscriptions = {};
-        }
 
-        if (!subscriptions[subscriber]) {
+        if (!_this._subscriptionsStorage[subscriber]) {
 
 
-          subscriptions[subscriber] = {
+          _this._subscriptionsStorage[subscriber] = {
             domain: domain,
             resources: resources,
             subscriber: subscriber,
@@ -128,14 +127,13 @@ class SubscriptionManager {
 
         } else {
           resources.forEach((resource) => {
-            if (!(subscriptions[subscriber].resources.includes(resource))) {
-              subscriptions[subscriber].resources.push(resource);
+            if (!(_this._subscriptionsStorage[subscriber].resources.includes(resource))) {
+              _this._subscriptionsStorage[subscriber].resources.push(resource);
             }
           });
         }
 
-        _this._storage.set('subscriptions', 1, subscriptions);
-      });
+        _this._storage.set('subscriptions', 1, _this._subscriptionsStorage);
     });
   }
 
@@ -197,15 +195,13 @@ class SubscriptionManager {
       subscription._releaseListeners();
       delete _this._subscriptions[unsubscriber][resource];
 
-      _this._storage.get('subscriptions').then((subscriptions)=>{
-        if (subscriptions) {
-          let i = subscriptions[unsubscriber].resources.indexOf(resource);
-          if (i != -1) {
-            subscriptions[unsubscriber].resources.splice(i, 1);
-          }
-          _this._storage.set('subscriptions', 1, subscriptions);
+      if (_this._subscriptionsStorage[unsubscriber]) {
+        let i = _this._subscriptionsStorage[unsubscriber].resources.indexOf(resource);
+        if (i != -1) {
+          _this._subscriptionsStorage[unsubscriber].resources.splice(i, 1);
         }
-      });
+        _this._storage.set('subscriptions', 1, _this._subscriptionsStorage);
+      }
     }
 
     _this._bus.postMessage({
