@@ -1087,7 +1087,7 @@ class Registry {
 
           _this.p2pHandlerAssociation[_this.runtimeURL] = [];
 
-          _this.sandboxesList.sandbox[stubID] = sandbox;
+          _this.sandboxesList.sandbox[runtimeProtoStubURL] = sandbox;
           console.info('[Registry - registerStub - P2PHandlerStub] - ', stubID, ' - ', runtimeProtoStubURL);
           resolve(_this.p2pHandlerStub[stubID]);
         } else {
@@ -1102,7 +1102,7 @@ class Registry {
             status: STATUS.CREATED
           };
 
-          _this.sandboxesList.sandbox[stubID] = sandbox;
+          _this.sandboxesList.sandbox[runtimeProtoStubURL] = sandbox;
 
           //Setup P2P Requester path into MN
 
@@ -1413,7 +1413,10 @@ class Registry {
           for (let sandbox in _this.sandboxesList.sandbox) {
             //todo: uncomment sandbox constraints match condition with runtime sharing
             if (sandbox.includes(domain) && _this.sandboxesList.sandbox[sandbox].matches(constraints)) {
-              request = _this.sandboxesList.sandbox[sandbox];
+              const current = _this.sandboxesList.sandbox[sandbox];
+              const match = Object.keys(constraints).filter(constraint => constraint.includes(current.type)).length > 0 ? true : false;
+
+              if (match) { request = current; }
               break;
             }
           }
