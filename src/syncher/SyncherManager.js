@@ -245,7 +245,7 @@ class SyncherManager {
           let userURL;
           let interworking = false;
 
-          if (msg.body.hasOwnProperty('identity') && msg.body.identity.userProfile.userURL) {
+          if (msg.body.hasOwnProperty('identity') && msg.body.identity.userProfile && msg.body.identity.userProfile.userURL) {
             userURL = msg.body.identity.userProfile.userURL;
             if (!userURL.includes('user://')) {
               interworking = true;
@@ -633,7 +633,7 @@ class SyncherManager {
 
               // Store for each reporter hyperty the dataObject
               let userURL;
-              if (msg.body.hasOwnProperty('identity') && msg.body.identity.userProfile.userURL) {
+              if (msg.body.hasOwnProperty('identity') && msg.body.identity.userProfile && msg.body.identity.userProfile.userURL) {
                 userURL = msg.body.identity.userProfile.userURL;
                 if (!userURL.includes('user://')) {
                   interworking = true;
