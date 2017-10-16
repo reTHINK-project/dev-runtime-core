@@ -22,6 +22,7 @@
 **/
 
 import { runtimeUtils } from '../runtime/runtimeUtils';
+import { SandboxType} from '../sandbox/Sandbox';
 
 import AddressAllocation from '../allocation/AddressAllocation';
 import HypertyInstance from './HypertyInstance';
@@ -1414,7 +1415,11 @@ class Registry {
             //todo: uncomment sandbox constraints match condition with runtime sharing
             if (sandbox.includes(domain) && _this.sandboxesList.sandbox[sandbox].matches(constraints)) {
               const current = _this.sandboxesList.sandbox[sandbox];
-              const match = Object.keys(constraints).filter(constraint => constraint.includes(current.type)).length > 0 ? true : false;
+              const match = Object.keys(constraints).filter(constraint => {
+                return (constraint === 'browser' && current.type === SandboxType.NORMAL) ||
+                      (constraint === 'windowSanbox' && current.type === SandboxType.WINDOW)
+
+              }).length > 0 ? true : false;
 
               if (match) { request = current; }
               break;

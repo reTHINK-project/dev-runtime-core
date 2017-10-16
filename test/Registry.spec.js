@@ -16,7 +16,6 @@ import MessageBus from '../src/bus/MessageBus';
 import Loader from '../src/runtime/Loader';
 import Descriptors from '../src/runtime/Descriptors';
 
-import { descriptors } from './resources/descriptors.js';
 import { getDescriptor } from './resources/getDescriptor.js';
 
 import { generateGUID } from '../src/utils/utils';
@@ -31,6 +30,7 @@ let p2pHandlerURL;
 let sandboxDummyCapabilities = {browser: true};
 let storageManager = runtimeFactory.storageManager();
 let appSandbox = runtimeFactory.createAppSandbox();
+appSandbox.type = 'app';
 
 // let sandboxDummy = {sandbox: 'sandbox', type: 'normal', capabilities: sandboxDummyCapabilities};
 let protostubURL;
@@ -266,39 +266,11 @@ describe('Registry', function() {
     });
   });
 
-  describe('getSandbox(url)', function() {
-
-    it('should get a sandbox from a domain', function(done) {
-      let domain = 'ua.pt';
-
-      console.log('Get Sandbox:', sandboxDummy);
-
-      expect(registry.getSandbox(domain).then(function(response) {
-        return response;
-      })).to.be.fulfilled.and.eventually.to.be.eql(sandboxDummy).and.notify(done);
-
-    });
-
-    it('should get a sandbox from a specific hypertyIstance', function(done) {
-      let hypertyInstance = 'hyperty://ua.pt/1';
-
-      expect(registry.getSandbox(hypertyInstance).then(function(response) {
-        return response;
-      })).to.be.fulfilled.and.eventually.to.be.eql(sandboxDummy).and.notify(done);
-    });
-
-    it('should get a sandbox from a specific protostubURL', function(done) {
-
-    //  let protostubURL = 'runtime://ua.pt/protostub/123';
-
-      expect(registry.getSandbox(protostubURL, sandboxDummyCapabilities))
-      .to.be.fulfilled
-      .and.eventually.to.be.eql(sandboxDummy)
-      .and.notify(done);
-    });
+  describe('getSandbox(url, constraints)', function() {
 
     // let anotherSandbox = { sandbox: sandbox1, type: 'normal', capabilities: sandboxDummyCapabilities};
     let sandbox1 = new Sandbox(sandboxDummyCapabilities);
+    sandbox1.type = 'normal';
 
     it('should register a anotherdomain protoStub URL', function(done) {
       let domainURL = 'anotherDomain.pt';
@@ -312,12 +284,43 @@ describe('Registry', function() {
     it('should get a sandbox from another domain', function(done) {
       let domainURL = 'anotherDomain.pt';
 
-      expect(registry.getSandbox(domainURL, sandboxDummyCapabilities).then(function(response) {
-        return response;
-      })).to.be.fulfilled.and.eventually.to.be.equal(sandbox1).and.notify(done);
+      expect(registry.getSandbox(domainURL, sandboxDummyCapabilities))
+        .to.be.fulfilled
+        .and.eventually.to.be.equal(sandbox1)
+        .and.notify(done);
     });
 
-  //  });
+
+    it('should get a sandbox from a domain', function(done) {
+      let domain = 'ua.pt';
+
+      console.log('Get Sandbox:', sandboxDummy, registry);
+
+      expect(registry.getSandbox(domain, sandboxDummyCapabilities))
+        .to.be.fulfilled
+        .and.eventually.to.be.eql(sandboxDummy)
+        .and.notify(done);
+
+    });
+
+    it('should get a sandbox from a specific hypertyIstance', function(done) {
+      let hypertyInstance = 'hyperty://ua.pt/1';
+
+      expect(registry.getSandbox(hypertyInstance, sandboxDummyCapabilities))
+        .to.be.fulfilled
+        .and.eventually.to.be.eql(sandboxDummy)
+        .and.notify(done);
+    });
+
+    it('should get a sandbox from a specific protostubURL', function(done) {
+
+    //  let protostubURL = 'runtime://ua.pt/protostub/123';
+
+      expect(registry.getSandbox(protostubURL, sandboxDummyCapabilities))
+        .to.be.fulfilled
+        .and.eventually.to.be.eql(sandboxDummy)
+        .and.notify(done);
+    });
 
   });
 

@@ -125,7 +125,7 @@ class HypertyResourcesStorage {
 
        response.body.code = 200;
        response.body.p2p = true;
-       response.body.value = deepClone(resource);
+       response.body.value = resource;
        response.body.value.content = theFile.target.result;
        _this._bus.postMessage(response);
 
