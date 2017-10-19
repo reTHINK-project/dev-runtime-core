@@ -348,9 +348,22 @@ class RuntimeUA {
         // Instanciate the SubscriptionManager;
         this.subscriptionManager = new SubscriptionManager(this.runtimeURL, this.messageBus, this.storageManager);
 
-        this.subscriptionManager.init().then(()=>{
-          resolve(true);
+        // this.subscriptionManager.init().then(()=>{
+        //   resolve(true);
+        // });
+
+        const prepareComponents = [];
+        prepareComponents.push(this.subscriptionManager.init());
+        prepareComponents.push(this.identityModule.loadIdentities());
+
+        Promise.all(prepareComponents).then((result) => {
+          if (result.length === 2) {
+            resolve(true);
+          }
+        }).catch((reason) => {
+          throw Error(reason);
         });
+
       } catch (e) {
         reject(e);
       }

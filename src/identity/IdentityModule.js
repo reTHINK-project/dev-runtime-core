@@ -84,7 +84,7 @@ class IdentityModule {
     // TODO improve later, this exists because the crypto lib uses browser cryptographic methods
     //_this.isToUseEncryption = (window) ? true : false;
 
-    _this._loadIdentities();
+    // _this.loadIdentities();
 
   }
 
@@ -252,7 +252,7 @@ class IdentityModule {
     return Math.floor( Date.now() / 1000 );
   }
 
-  _loadIdentities() {
+  loadIdentities() {
     let _this = this;
     return new Promise((resolve) => {
 
@@ -265,14 +265,20 @@ class IdentityModule {
             let timeNow = _this._seconds_since_epoch();
             let expires = 0;
 
-            if (identity.info && identity.info.expires ) {
+            if (identity.info && identity.info.expires) {
               expires = identity.info.expires;
-            }  else if (identity.info && identity.info.tokenIDJSON && identity.info.tokenIDJSON.exp)
+            }  else if (identity.info && identity.info.tokenIDJSON && identity.info.tokenIDJSON.exp) {
               expires = identity.info.tokenIDJSON.exp;
+            }
 
-            if (expires > timeNow && !identity.interworking) {
+            if (!identity.hasOwnProperty('interworking') && !identity.interworking) {
               _this.defaultIdentity = identity.messageInfo;
-              _this.defaultIdentity.expires = expires;
+
+              if (parseInt(expires) > timeNow) {
+                _this.defaultIdentity.expires = parseInt(expires);
+                _this.currentIdentity = _this.defaultIdentity;
+              }
+
             }
 
           });
@@ -713,9 +719,11 @@ class IdentityModule {
             console.log('[IdentityModule] Identity selected from GUI.')
 
             if (assertion.hasOwnProperty('messageInfo')) {
+              _this.defaultIdentity = assertion.messageInfo;
               return resolve(assertion.messageInfo);
             }
 
+            _this.defaultIdentity = assertion;
             return resolve(assertion);
           }, (err) => {
             return reject(err);
@@ -1052,13 +1060,15 @@ class IdentityModule {
       } else {
         _this.emailsList.push(email);
         _this.identities.push(result);
-        _this.storageManager.set('idModule:identities', 0, _this.identities).then(() => {
-          if (_this.identitiesList[idToken.idp.domain])
-            _this.identitiesList[idToken.idp.domain].status = 'created';
-
-          resolve(newIdentity);
-        });
       }
+
+      _this.storageManager.set('idModule:identities', 0, _this.identities).then(() => {
+
+        if (_this.identitiesList[idToken.idp.domain])
+          _this.identitiesList[idToken.idp.domain].status = 'created';
+
+        resolve(newIdentity);
+      });
 
     });
   }
