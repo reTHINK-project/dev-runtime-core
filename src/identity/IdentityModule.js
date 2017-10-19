@@ -1,5 +1,5 @@
 
-import {divideURL, getUserURLFromEmail, getUserEmailFromURL, isDataObjectURL, convertToUserURL, getUserIdentityDomain, isLegacy } from '../utils/utils.js';
+import {divideURL, getUserEmailFromURL, isDataObjectURL, getUserIdentityDomain, isLegacy } from '../utils/utils.js';
 import Identity from './Identity';
 import Crypto from './Crypto';
 import GuiFake from './GuiFake';
@@ -94,7 +94,7 @@ class IdentityModule {
 
     return new Promise((resolve, reject) => {
       message = { type: 'execute', to: _this._guiURL, from: _this._idmURL,
-        body: { resource: 'identity', method: methodName, params: parameters }, };
+        body: { resource: 'identity', method: methodName, params: parameters }};
       let id = _this._messageBus.postMessage(message);
 
       //add listener without timout
@@ -249,7 +249,7 @@ class IdentityModule {
   }
 
   _seconds_since_epoch() {
-    return Math.floor( Date.now() / 1000 );
+    return Math.floor(Date.now() / 1000);
   }
 
   loadIdentities() {
@@ -320,7 +320,7 @@ class IdentityModule {
             console.log('The ID Token does not have an expiration time');
             resolve(identity);
           }
-        } else if (complete_id.hasOwnProperty("infoToken") && complete_id.infoToken.hasOwnProperty("exp")) {
+        } else if (complete_id.hasOwnProperty('infoToken') && complete_id.infoToken.hasOwnProperty('exp')) {
           expiration_date = complete_id.infoToken.exp;
         } else {
           // throw 'The ID Token does not have an expiration time';
@@ -344,6 +344,7 @@ class IdentityModule {
             });
           } else { // microsoft.com
             _this.deleteIdentity(complete_id.identity);
+
             // generate new idToken
             _this.callGenerateMethods(identity.idp).then((value) => {
               resolve(value);
@@ -371,7 +372,7 @@ class IdentityModule {
       console.log('[Identity.IdentityModule.getToken] from->', fromURL, '  to->', toUrl);
 
       if (toUrl) {
-//        console.log('toUrl', toUrl);
+        // console.log('toUrl', toUrl);
         _this.registry.isLegacy(toUrl).then(function(result) {
           console.log('[Identity.IdentityModule.getToken] isLEGACY: ', result);
           if (result) {
@@ -393,8 +394,9 @@ class IdentityModule {
 
                 let keypath = change.keypath;
 
-                if (keypath.includes('status'))
+                if (keypath.includes('status')) {
                   keypath = keypath.replace('.status', '');
+                }
 
                 if (keypath === domain && change.name === 'status' && change.newValue === 'created') {
                   console.log('[Identity.IdentityModule.getToken] token is created ' + _this.identitiesList[domain]);
@@ -496,7 +498,7 @@ class IdentityModule {
   getAccessToken(url) {
     let _this = this;
 
-  /*  let urlSplit = url.split('.');
+    /* let urlSplit = url.split('.');
     let length = urlSplit.length;*/
 
     let domainToCheck = divideURL(url).domain;
@@ -711,23 +713,23 @@ class IdentityModule {
           });
         } else {
 
-          if (_this.defaultIdentity && _this.defaultIdentity.expires > _this._seconds_since_epoch() )
-          {
+          if (_this.defaultIdentity && _this.defaultIdentity.expires > _this._seconds_since_epoch()) {
             return resolve(_this.defaultIdentity);
           } else {
             _this.selectIdentityFromGUI().then((assertion) => {
-            console.log('[IdentityModule] Identity selected from GUI.')
 
-            if (assertion.hasOwnProperty('messageInfo')) {
-              _this.defaultIdentity = assertion.messageInfo;
-              return resolve(assertion.messageInfo);
-            }
+              console.log('[IdentityModule] Identity selected from GUI.');
 
-            _this.defaultIdentity = assertion;
-            return resolve(assertion);
-          }, (err) => {
-            return reject(err);
-          });
+              if (assertion.hasOwnProperty('messageInfo')) {
+                _this.defaultIdentity = assertion.messageInfo;
+                return resolve(assertion.messageInfo);
+              }
+
+              _this.defaultIdentity = assertion;
+              return resolve(assertion);
+            }, (err) => {
+              return reject(err);
+            });
           }
         }
       }).catch(error => {
@@ -746,6 +748,7 @@ class IdentityModule {
           return resolve(_this.currentIdentity);
         } else {
           console.log('getIdentityAssertion for nodejs');
+
           //let randomNumber = Math.floor((Math.random() * 10000) + 1);
           let nodejsUser = 'nodejs-conference';
 
@@ -874,7 +877,7 @@ class IdentityModule {
             }, (err) => {
               return reject(err);
             });
-          } else if(response.hasOwnProperty('loginUrl')) { // identity was not logged in
+          } else if (response.hasOwnProperty('loginUrl')) { // identity was not logged in
             _this.loginSelectedIdentity(publicKey, origin, idp, keyPair, response.loginUrl).then((value) => {
               return resolve(value);
             }, (err) => {
@@ -1014,9 +1017,9 @@ class IdentityModule {
       let userProfileBundle = {username: email, cn: commonName, avatar: infoToken.picture, locale: infoToken.locale, userURL: identifier};
 
       let expires = undefined;
-      if (infoToken.hasOwnProperty("exp")) {
+      if (infoToken.hasOwnProperty('exp')) {
         expires = infoToken.exp;
-      } else if (result.hasOwnProperty("info") && result.info.hasOwnProperty("expires")) {
+      } else if (result.hasOwnProperty('info') && result.info.hasOwnProperty('expires')) {
         expires = result.info.expires;
       }
 
@@ -1064,8 +1067,9 @@ class IdentityModule {
 
       _this.storageManager.set('idModule:identities', 0, _this.identities).then(() => {
 
-        if (_this.identitiesList[idToken.idp.domain])
+        if (_this.identitiesList[idToken.idp.domain]) {
           _this.identitiesList[idToken.idp.domain].status = 'created';
+        }
 
         resolve(newIdentity);
       });
@@ -1303,7 +1307,7 @@ class IdentityModule {
 
             _this.crypto.encryptAES(dataObjectKey.sessionKey, _this.crypto.encode(JSON.stringify(dataObject)), iv).then(encryptedValue => {
               let newValue = { value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv) };
-              console.log("encrypted dataObject", newValue);
+              console.log('encrypted dataObject', newValue);
               return resolve(newValue);
             });
 
@@ -1581,9 +1585,10 @@ class IdentityModule {
       let hash;
       let value = {};
       let filteredMessage;
+
       switch (handshakeType) {
 
-        case 'startHandShake':
+        case 'startHandShake': {
           chatKeys.keys.fromRandom = _this.crypto.generateRandom();
 
           let startHandShakeMsg = {
@@ -1607,7 +1612,8 @@ class IdentityModule {
           }
 
           break;
-        case 'senderHello':
+        }
+        case 'senderHello': {
 
           console.log('senderHello');
           chatKeys.handshakeHistory.senderHello = _this._filterMessageToHash(message);
@@ -1627,7 +1633,8 @@ class IdentityModule {
           resolve({message: senderHelloMsg, chatKeys: chatKeys});
 
           break;
-        case 'receiverHello':
+        }
+        case 'receiverHello': {
 
           console.log('receiverHello');
           chatKeys.handshakeHistory.receiverHello = _this._filterMessageToHash(message);
@@ -1725,7 +1732,8 @@ class IdentityModule {
           }, error => reject(error));
 
           break;
-        case 'senderCertificate':
+        }
+        case 'senderCertificate': {
 
           console.log('senderCertificate');
           let receivedValue = JSON.parse(atob(message.body.value));
@@ -1834,7 +1842,8 @@ class IdentityModule {
           });
 
           break;
-        case 'receiverFinishedMessage':
+        }
+        case 'receiverFinishedMessage': {
 
           console.log('receiverFinishedMessage');
           chatKeys.authenticated = true;
@@ -1876,7 +1885,9 @@ class IdentityModule {
           });
 
           break;
-        case 'reporterSessionKey':
+        }
+
+        case 'reporterSessionKey': {
 
           console.log('reporterSessionKey');
 
@@ -1936,7 +1947,9 @@ class IdentityModule {
           });
 
           break;
-        case 'receiverAcknowledge':
+        }
+
+        case 'receiverAcknowledge': {
 
           console.log('receiverAcknowledge');
 
@@ -1961,6 +1974,8 @@ class IdentityModule {
           });
 
           break;
+        }
+
         default:
           reject(message);
       }
