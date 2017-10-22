@@ -103,8 +103,9 @@ class SyncherManager {
     let to = msg.to;
 
     // check if message is to save new childrenObjects in the local storage
+    // TODO: check if message is to store new child in the local storage and call storeChild. How to distinguish from others?
 
-    if (msg.body.attribute && msg.body.attribute === 'childrenObjects') this._storeChildrens(msg);
+    if (msg.body.attribute) this._storeChildrens(msg);
     else {
 
       if (!msg.body.hasOwnProperty('resume') || (msg.body.hasOwnProperty('resume') && !msg.body.resume)) {
@@ -176,8 +177,12 @@ class SyncherManager {
    let _this = this;
 
    let resource = msg.body.resource;
+   let attribute = msg.body.attribute;
 
-   if (resource) _this._dataObjectsStorage.saveChildrens(false, resource, undefined, msg.body.value);
+   if (attribute === 'childrenObjects')
+      _this._dataObjectsStorage.saveChildrens(false, resource, undefined, msg.body.value);
+   else
+    _this._dataObjectsStorage.saveChildrens(true, resource, attribute, msg.body.value);
 
  }
 
