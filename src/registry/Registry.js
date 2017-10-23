@@ -22,6 +22,7 @@
 **/
 
 import { runtimeUtils } from '../runtime/runtimeUtils';
+import { SandboxType} from '../sandbox/Sandbox';
 
 import AddressAllocation from '../allocation/AddressAllocation';
 import HypertyInstance from './HypertyInstance';
@@ -599,7 +600,7 @@ class Registry {
               type: 'update',
               from: _this.registryURL,
               to: 'domain://registry.' + _this.registryDomain,
-              body: { resource: registration.url, value: {status: 'live'} }
+              body: { resource: registration.url, value: {status: 'live'}, method: 'refresh' }
             };
 
             _this._messageBus.postMessage(message, (reply) => {
@@ -930,7 +931,7 @@ class Registry {
                     type: 'update',
                     from: _this.registryURL,
                     to: 'domain://registry.' + _this.registryDomain,
-                    body: { resource: addressURL.address[0], value: {status: 'live'} }};
+                    body: { resource: addressURL.address[0], value: {status: 'live'}, method: 'refresh' }};
 
                   _this._messageBus.postMessage(message, (reply) => {
                     console.log('[Registry registerHyperty] KeepAlive Reply: ', reply);
@@ -1087,7 +1088,7 @@ class Registry {
 
           _this.p2pHandlerAssociation[_this.runtimeURL] = [];
 
-          _this.sandboxesList.sandbox[stubID] = sandbox;
+          _this.sandboxesList.sandbox[runtimeProtoStubURL] = sandbox;
           console.info('[Registry - registerStub - P2PHandlerStub] - ', stubID, ' - ', runtimeProtoStubURL);
           resolve(_this.p2pHandlerStub[stubID]);
         } else {
@@ -1102,7 +1103,7 @@ class Registry {
             status: STATUS.CREATED
           };
 
-          _this.sandboxesList.sandbox[stubID] = sandbox;
+          _this.sandboxesList.sandbox[runtimeProtoStubURL] = sandbox;
 
           //Setup P2P Requester path into MN
 
@@ -1413,7 +1414,14 @@ class Registry {
           for (let sandbox in _this.sandboxesList.sandbox) {
             //todo: uncomment sandbox constraints match condition with runtime sharing
             if (sandbox.includes(domain) && _this.sandboxesList.sandbox[sandbox].matches(constraints)) {
-              request = _this.sandboxesList.sandbox[sandbox];
+              const current = _this.sandboxesList.sandbox[sandbox];
+              const match = Object.keys(constraints).filter(constraint => {
+                return (constraint === 'browser' && current.type === SandboxType.NORMAL) ||
+                      (constraint === 'windowSanbox' && current.type === SandboxType.WINDOW)
+
+              }).length > 0 ? true : false;
+
+              if (match) { request = current; }
               break;
             }
           }
@@ -1577,6 +1585,11 @@ class Registry {
       let p2p = (msg.body && msg.body.p2p) ? msg.body.p2p : false;
 
       console.log('P2P: ', p2p, url);
+      console.log('P2P - p2pHandlerStub: ', !_this.p2pHandlerStub[_this.runtimeURL], _this.p2pHandlerStub, _this.runtimeURL);
+      console.log('P2P - isBackendServiceURL: ', isBackendServiceURL(url), isBackendServiceURL, url);
+      console.log('P2P - includes runtimeURL: ', url.includes(_this.runtimeURL));
+      console.log('P2P - includes p2phandler: ', url.includes('/p2phandler/'));
+      console.log('P2P - includes p2prequester: ', url.includes('/p2prequester/'));
 
       // Skip p2p procedure when not supported by the Runtime or for backend services
 

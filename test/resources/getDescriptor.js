@@ -9,6 +9,8 @@ export const getDescriptor = function (url) {
     let dividedURL = divideURL(url);
     let identity = dividedURL.identity;
 
+    console.log('AQUI:', url, dividedURL.domain, url === dividedURL.domain);
+
     if (!identity) {
       identity = 'default';
     } else {
@@ -26,6 +28,10 @@ export const getDescriptor = function (url) {
       }
 
     } else if (url.includes('protocolstub') || url === dividedURL.domain) {
+      if (url.includes(identity)) {
+        identity = 'default';
+      }
+
       let def = descriptors.ProtoStubs[identity];
       try {
 
@@ -59,6 +65,8 @@ export const getDescriptor = function (url) {
       }
 
     }
+
+    console.log('RESULT:', result);
 
     resolve(result);
 

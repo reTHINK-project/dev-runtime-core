@@ -12,7 +12,7 @@ class HypertyResourcesStorage {
 
     _this._bus = bus;
 
-    _this._url = runtimeURL + '/storage'
+    _this._url = runtimeURL + '/storage';
 
     _this._storageManager = storageManager;
 
@@ -58,8 +58,8 @@ class HypertyResourcesStorage {
         to: message.from,
         id: message.id,
         type: 'response',
-        body: { value: contentUrl, code:200 }
-      }
+        body: { value: contentUrl, code: 200 }
+      };
 
       _this._bus.postMessage(response);
     });
@@ -86,22 +86,24 @@ class HypertyResourcesStorage {
       id: message.id,
       type: 'response',
       body: {}
-    }
+    };
 
     let content = _this._hypertyResources[contentUrl];
 
     if (content) {
 
-      if (content.resourceType = 'file') _this._onReadFile(response, content);
-      else {
+      if (content.resourceType === 'file') {
+        _this._onReadFile(response, content);
+      } else {
         response.body.code = 200;
         response.body.p2p = true;
         response.body.value = content;
         _this._bus.postMessage(response);
       }
+
     } else {
       response.body.code = 404;
-      response.body.desc = 'Content Not Found for '+contentUrl;
+      response.body.desc = 'Content Not Found for ' + contentUrl;
       _this._bus.postMessage(response);
 
     }
@@ -113,27 +115,29 @@ class HypertyResourcesStorage {
 
   }
 
- _onReadFile(response, resource) {
-   let _this = this;
-   let content;
+  _onReadFile(response, resource) {
+    let _this = this;
 
-     let reader = new FileReader();
+    let reader = new FileReader();
 
-     reader.onload = function(theFile) {
+    reader.onload = function(theFile) {
 
-       console.log('[FileHypertyResource.init] file loaded ', theFile);
+      console.log('[FileHypertyResource.init] file loaded ', theFile);
 
-       response.body.code = 200;
-       response.body.p2p = true;
-       response.body.value = deepClone(resource);
-       response.body.value.content = theFile.target.result;
-       _this._bus.postMessage(response);
+      response.body.code = 200;
+      response.body.p2p = true;
+      response.body.value = deepClone(resource);
+      response.body.value.content = theFile.target.result;
+      _this._bus.postMessage(response);
+    };
 
-       }
-
-    if (resource.mimetype.includes('text/')) reader.readAsText(resource.content);
-    else reader.readAsArrayBuffer(resource.content);
- }
+    if (resource.mimetype.includes('text/')) {
+      reader.readAsText(resource.content);
+    } else {
+      const current = resource.content;
+      reader.readAsArrayBuffer(current);
+    }
+  }
 
   /**
    * @description should delete an HypertyResource from the storage;
@@ -156,7 +160,7 @@ class HypertyResourcesStorage {
         id: message.id,
         type: 'response',
         body: { code: 200 }
-      }
+      };
 
       _this._bus.postMessage(response);
     });

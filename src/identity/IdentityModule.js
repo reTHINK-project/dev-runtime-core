@@ -1,5 +1,4 @@
-'use strict mode';
-import {divideURL, getUserURLFromEmail, getUserEmailFromURL, isDataObjectURL, convertToUserURL, getUserIdentityDomain, isLegacy } from '../utils/utils.js';
+import {divideURL, getUserEmailFromURL, isDataObjectURL, getUserIdentityDomain, isLegacy } from '../utils/utils.js';
 import Identity from './Identity';
 import Crypto from './Crypto';
 import GuiFake from './GuiFake';
@@ -85,7 +84,7 @@ class IdentityModule {
     // TODO improve later, this exists because the crypto lib uses browser cryptographic methods
     //_this.isToUseEncryption = (window) ? true : false;
 
-    _this._loadIdentities();
+    // _this.loadIdentities();
 
   }
   
@@ -202,111 +201,43 @@ class IdentityModule {
     return _this.currentIdentity;
   }
   
-  
-   /**
-  * Function that fetch an identityAssertion from a user.
-  *H:\Desktop\workspace_js
-  * @return {IdAssertion}              IdAssertion
-  */
-  /*
-  getIdentityAssertion(identityBundle) {
+  loadIdentities() {
     let _this = this;
-    return new Promise(function(resolve, reject) {
-      _this.runtimeCapabilities.isAvailable('browser').then((isBrowserEnv) => {
-        if(isBrowserEnv){
-          //todo: only idp should be mandatory when identityBundle exists
-          if (identityBundle && identityBundle.hasOwnProperty('idp')) {
-            let idp = identityBundle.idp;
-            let origin = identityBundle.hasOwnProperty('origin') ? identityBundle.origin : 'origin';
-            let idHint = identityBundle.hasOwnProperty('idHint') ? identityBundle.idHint : '';
+    return new Promise((resolve) => {
 
-            _this.selectIdentityForHyperty(origin, idp, idHint).then((assertion) => {
-              console.log('[IdentityModule] Identity selected by hyperty.');
-              return resolve(assertion);
-            }, (err) => { // if it got an error then just select identity from GUI
-              console.error('[IdentityModule] Could not select identity from hyperty.');
-              _this.selectIdentityFromGUI().then((newAssertion) => {
-                console.log('[IdentityModule] Identity selected by hyperty.');
-                return resolve(newAssertion);
-              }, (err) => {
-                return reject(err);
-              });
-            });
-          }else{
-            if (_this.defaultIdentity && _this.defaultIdentity.expires > _this._seconds_since_epoch() )
-            {
-              return resolve(_this.defaultIdentity);
-            } else {
-              _this.selectIdentityFromGUI().then((assertion) => {
-              console.log('[IdentityModule] Identity selected from GUI.')
+      _this.storageManager.get('idModule:identities').then((identities) => {
 
-              if (assertion.hasOwnProperty('messageInfo')) {
-                return resolve(assertion.messageInfo);
+        if (identities) {
+          _this.identities = identities;
+
+          identities.forEach((identity) => {
+            let timeNow = _this._seconds_since_epoch();
+            let expires = 0;
+
+            if (identity.info && identity.info.expires) {
+              expires = identity.info.expires;
+            }  else if (identity.info && identity.info.tokenIDJSON && identity.info.tokenIDJSON.exp) {
+              expires = identity.info.tokenIDJSON.exp;
+            }
+
+            if (!identity.hasOwnProperty('interworking') && !identity.interworking) {
+              _this.defaultIdentity = identity.messageInfo;
+
+              if (parseInt(expires) > timeNow) {
+                _this.defaultIdentity.expires = parseInt(expires);
+                _this.currentIdentity = _this.defaultIdentity;
               }
 
-              return resolve(assertion);
-            }, (err) => {
-              return reject(err);
-            });
             }
-          }
+
+          });
         }
-        _this.runtimeCapabilities.isAvailable('node').then((isNodeEnv) => {
-          if(isNodeEnv){
-            console.log('node identity acquisition ', isNodeEnv);
-
-            if (!isNodeEnv) return;
-
-            if (_this.currentIdentity !== undefined) {
-              //TODO verify whether the token is still valid or not.
-              // should be needed to make further requests, to obtain a valid token
-              return resolve(_this.currentIdentity);
-            } else {
-              console.log('getIdentityAssertion for nodejs');
-              //let randomNumber = Math.floor((Math.random() * 10000) + 1);
-              let nodejsUser = 'nodejs-conference';
-
-              let userProfile = {
-                avatar: 'https://lh3.googleusercontent.com/-WaCrjVMMV-Q/AAAAAAAAAAI/AAAAAAAAAAs/8OlVqCpSB9c/photo.jpg',
-                cn: 'test nodejs',
-                username: nodejsUser + '@nodejs.com',
-                userURL: 'user://nodejs.com/' + nodejsUser + '@nodejs.com'
-              };
-
-              let identityBundle = {
-                assertion: 'assertion',
-                idp: 'nodejs',
-                identity: 'user://nodejs.com/' + nodejsUser + '@nodejs.com',
-                messageInfo: {
-                  assertion: 'assertion',
-                  idp: 'nodejs',
-                  userProfile: userProfile
-                },
-                userProfile: userProfile
-              };
-              _this.currentIdentity = identityBundle;
-              _this.identities.push(identityBundle);
-              _this.storageManager.set('idModule:identities', 0, _this.identities).then(() => {
-
-                return resolve(identityBundle);
-              });
-            }
-          }
-        }
-        reject('RuntimeCapabilities could not define what enviroment (browser or node) was in use');
-      }).catch(error => {
-          console.log('Error on identity acquisition ', error);
-          reject(error);
-        });
-    }).catch(error => {
-      console.log('Error on identity acquisition ', error);
-      reject(error);
+        resolve();
+      });
     });
   }
-*/
   
-  
-  /**
+/**
   * Function that fetch an identityAssertion from a user.
   *
   * @return {IdAssertion}              IdAssertion
@@ -347,21 +278,23 @@ class IdentityModule {
           });
         } else {
 
-          if (_this.defaultIdentity && _this.defaultIdentity.expires > _this._seconds_since_epoch() )
-          {
+          if (_this.defaultIdentity && _this.defaultIdentity.expires > _this._seconds_since_epoch()) {
             return resolve(_this.defaultIdentity);
           } else {
             _this.selectIdentityFromGUI().then((assertion) => {
-            console.log('[IdentityModule] Identity selected from GUI.')
 
-            if (assertion.hasOwnProperty('messageInfo')) {
-              return resolve(assertion.messageInfo);
-            }
+              console.log('[IdentityModule] Identity selected from GUI.');
 
-            return resolve(assertion);
-          }, (err) => {
-            return reject(err);
-          });
+              if (assertion.hasOwnProperty('messageInfo')) {
+                _this.defaultIdentity = assertion.messageInfo;
+                return resolve(assertion.messageInfo);
+              }
+
+              _this.defaultIdentity = assertion;
+              return resolve(assertion);
+            }, (err) => {
+              return reject(err);
+            });
           }
         }
       }).catch(error => {
@@ -380,6 +313,7 @@ class IdentityModule {
           return resolve(_this.currentIdentity);
         } else {
           console.log('getIdentityAssertion for nodejs');
+
           //let randomNumber = Math.floor((Math.random() * 10000) + 1);
           let nodejsUser = 'nodejs-conference';
 
@@ -408,13 +342,14 @@ class IdentityModule {
             return resolve(identityBundle);
           });
         }
+
       }).catch(error => {
         console.log('Error on identity acquisition ', error);
         reject(error);
       });
-      //reject('RuntimeCapabilities could not define what enviroment (browser or node) was in use');
     });
   }
+
 
     /**
   * Function to return all the users URLs registered within a session
@@ -517,9 +452,6 @@ class IdentityModule {
   }
 
   selectIdentityForHyperty(origin, idp, idHint) {
-		log('selectIdentityForHyperty:origin', origin);
-		log('selectIdentityForHyperty:idp', idp);
-		log('selectIdentityForHyperty:idHint', idHint);
     let _this = this;
 
     return new Promise((resolve, reject) => {
@@ -535,7 +467,119 @@ class IdentityModule {
             }, (err) => {
               return reject(err);
             });
-          } else if(response.hasOwnProperty('loginUrl')) { // identity was not logged in
+          } else if (response.hasOwnProperty('loginUrl')) { // identity was not logged in
+            _this.loginSelectedIdentity(publicKey, origin, idp, keyPair, response.loginUrl).then((value) => {
+              return resolve(value);
+            }, (err) => {
+              return reject(err);
+            });
+          } else { // you should never get here, if you do then the IdP Proxy is not well implemented
+            console.error('GenerateAssertion returned invalid response.');
+            console.log('Proceeding by logging in.');
+            _this.generateSelectedIdentity(publicKey, origin, idp, keyPair).then((value) => {
+              return resolve(value);
+            }, (err) => {
+              return reject(err);
+            });
+          }
+        });
+      });
+    });
+  }
+
+  callGenerateMethods(idp, origin) {
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+
+      let publicKey;
+      let userkeyPair;
+
+      //generates the RSA key pair
+      _this.crypto.generateRSAKeyPair().then(function(keyPair) {
+
+        publicKey = btoa(keyPair.public);
+        userkeyPair = keyPair;
+        return _this.generateAssertion(publicKey, origin, '', userkeyPair, idp);
+
+      }).then(function(url) {
+        _this.myHint = url;
+        return _this.generateAssertion(publicKey, origin, url, userkeyPair, idp);
+
+      }).then(function(value) {
+        if (value) {
+          resolve(value);
+        } else {
+          reject('Error on obtaining Identity');
+        }
+      }).catch(function(err) {
+        console.log(err);
+        reject(err);
+      });
+    });
+  }
+
+  loginSelectedIdentity(publicKey, origin, idp, keyPair, loginUrl) {
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+      _this.callIdentityModuleFunc('openPopup', {urlreceived: loginUrl}).then((idCode) => {
+        return idCode;
+      }, (err) => {
+        console.error('Error while logging in for the selected identity.');
+        return reject(err);
+      }).then((idCode) => {
+        _this.sendGenerateMessage(publicKey, origin, idCode, idp).then((newResponse) => {
+          if (newResponse.hasOwnProperty('assertion')) {
+            _this.storeIdentity(newResponse, keyPair);
+          } else {
+            console.error('Error while logging in for the selected identity.');
+            return reject('Could not generate a valid assertion for selected identity.');
+          }
+        });
+      });
+    });
+  }
+
+  generateSelectedIdentity(publicKey, origin, idp, keyPair) {
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+
+      _this.generateAssertion(publicKey, origin, '', keyPair, idp).then((loginUrl) => {
+        return loginUrl;
+      }).then(function(url) {
+        return _this.generateAssertion(publicKey, origin, url, keyPair, idp);
+      }).then(function(value) {
+        if (value) {
+          return resolve(value);
+        } else {
+          return reject('Error on obtaining Identity');
+        }
+      }).catch(function(err) {
+        console.error(err);
+        return reject(err);
+      });
+    });
+  }
+
+  selectIdentityForHyperty(origin, idp, idHint) {
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+
+      //generates the RSA key pair
+      _this.crypto.generateRSAKeyPair().then(function(keyPair) {
+        let publicKey = btoa(keyPair.public);
+
+        _this.sendGenerateMessage(publicKey, origin, idHint, idp).then((response) => {
+          if (response.hasOwnProperty('assertion')) { // identity was logged in, just save it
+            _this.storeIdentity(response, keyPair).then((value) => {
+              return resolve(value);
+            }, (err) => {
+              return reject(err);
+            });
+          } else if (response.hasOwnProperty('loginUrl')) { // identity was not logged in
             _this.loginSelectedIdentity(publicKey, origin, idp, keyPair, response.loginUrl).then((value) => {
               return resolve(value);
             }, (err) => {
@@ -644,9 +688,9 @@ class IdentityModule {
       let userProfileBundle = {username: email, cn: commonName, avatar: infoToken.picture, locale: infoToken.locale, userURL: identifier};
 
       let expires = undefined;
-      if (infoToken.hasOwnProperty("exp")) {
+      if (infoToken.hasOwnProperty('exp')) {
         expires = infoToken.exp;
-      } else if (result.hasOwnProperty("info") && result.info.hasOwnProperty("expires")) {
+      } else if (result.hasOwnProperty('info') && result.info.hasOwnProperty('expires')) {
         expires = result.info.expires;
       }
 
@@ -690,13 +734,16 @@ class IdentityModule {
       } else {
         _this.emailsList.push(email);
         _this.identities.push(result);
-        _this.storageManager.set('idModule:identities', 0, _this.identities).then(() => {
-          if (_this.identitiesList[idToken.idp.domain])
-            _this.identitiesList[idToken.idp.domain].status = 'created';
-
-          resolve(newIdentity);
-        });
       }
+
+      _this.storageManager.set('idModule:identities', 0, _this.identities).then(() => {
+
+        if (_this.identitiesList[idToken.idp.domain]) {
+          _this.identitiesList[idToken.idp.domain].status = 'created';
+        }
+
+        resolve(newIdentity);
+      });
 
     });
   }
@@ -924,7 +971,7 @@ class IdentityModule {
 
             _this.crypto.encryptAES(dataObjectKey.sessionKey, _this.crypto.encode(JSON.stringify(dataObject)), iv).then(encryptedValue => {
               let newValue = { value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv) };
-              console.log("encrypted dataObject", newValue);
+              console.log('encrypted dataObject', newValue);
               return resolve(newValue);
             }).catch(err => {reject('On encryptDataObject from method encryptAES error: ' + err)});
 
@@ -1760,38 +1807,6 @@ class IdentityModule {
     });
   }
 
-  _loadIdentities() {
-    let _this = this;
-    return new Promise((resolve) => {
-
-      _this.storageManager.get('idModule:identities').then((identities) => {
-
-        if (identities) {
-          _this.identities = identities;
-
-          identities.forEach((identity) => {
-            let timeNow = _this._seconds_since_epoch();
-            let expires = 0;
-
-            if (identity.info && identity.info.expires ) {
-              expires = identity.info.expires;
-            }  else if (identity.info && identity.info.tokenIDJSON && identity.info.tokenIDJSON.exp)
-              expires = identity.info.tokenIDJSON.exp;
-
-            if (expires > timeNow && !identity.interworking) {
-              _this.defaultIdentity = identity.messageInfo;
-              _this.defaultIdentity.expires = expires;
-            }
-
-          });
-        }
-        resolve();
-      }).catch(err => {
-        reject('On _loadIdentities from chained promises storageManager.get error: ' + err);
-      });
-    });
-  }
-
   /**
   * Function that resolve and create the domainURL in case it is provided one. If not, resolve the default domainURL
   * @param {String}     idpDomain     idpDomain (Optional)
@@ -1819,9 +1834,10 @@ class IdentityModule {
       let hash;
       let value = {};
       let filteredMessage;
+
       switch (handshakeType) {
 
-        case 'startHandShake':
+        case 'startHandShake': {
           chatKeys.keys.fromRandom = _this.crypto.generateRandom();
 
           let startHandShakeMsg = {
@@ -1847,7 +1863,8 @@ class IdentityModule {
           
           break;
           
-        case 'senderHello':
+        }
+        case 'senderHello': {
 
           console.log('senderHello');
           chatKeys.handshakeHistory.senderHello = _this._filterMessageToHash(message);
@@ -1867,7 +1884,8 @@ class IdentityModule {
           resolve({message: senderHelloMsg, chatKeys: chatKeys});
 
           break;
-        case 'receiverHello':
+        }
+        case 'receiverHello': {
 
           console.log('receiverHello');
           chatKeys.handshakeHistory.receiverHello = _this._filterMessageToHash(message);
@@ -1965,7 +1983,8 @@ class IdentityModule {
           }, error => reject(error));
 
           break;
-        case 'senderCertificate':
+        }
+        case 'senderCertificate': {
 
           console.log('senderCertificate');
           let receivedValue = JSON.parse(atob(message.body.value));
@@ -2076,8 +2095,8 @@ class IdentityModule {
            });
 
           break;
-          
-        case 'receiverFinishedMessage':
+        }
+        case 'receiverFinishedMessage': {
 
           console.log('receiverFinishedMessage');
           chatKeys.authenticated = true;
@@ -2121,7 +2140,9 @@ class IdentityModule {
           });
 
           break;
-        case 'reporterSessionKey':
+        }
+
+        case 'reporterSessionKey': {
 
           console.log('reporterSessionKey');
 
@@ -2183,7 +2204,9 @@ class IdentityModule {
             });
 
           break;
-        case 'receiverAcknowledge':
+        }
+
+        case 'receiverAcknowledge': {
 
           console.log('receiverAcknowledge');
 
@@ -2210,6 +2233,8 @@ class IdentityModule {
             });
 
           break;
+        }
+
         default:
           reject(message);
       }
