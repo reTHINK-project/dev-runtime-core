@@ -1,9 +1,9 @@
-
 import {divideURL, getUserEmailFromURL, isDataObjectURL, getUserIdentityDomain, isLegacy } from '../utils/utils.js';
 import Identity from './Identity';
 import Crypto from './Crypto';
 import GuiFake from './GuiFake';
 import { WatchingYou } from 'service-framework/dist/Utils';
+const util = require('util');
 
 /**
 *
@@ -87,25 +87,8 @@ class IdentityModule {
     // _this.loadIdentities();
 
   }
-
-  callIdentityModuleFunc(methodName, parameters) {
-    let _this = this;
-    let message;
-
-    return new Promise((resolve, reject) => {
-      message = { type: 'execute', to: _this._guiURL, from: _this._idmURL,
-        body: { resource: 'identity', method: methodName, params: parameters }};
-      let id = _this._messageBus.postMessage(message);
-
-      //add listener without timout
-      _this._messageBus.addResponseListener(_this._idmURL, id, msg => {
-        _this._messageBus.removeResponseListener(_this._idmURL, id);
-
-        let result = msg.body.value;
-        resolve(result);
-      });
-    });
-  }
+  
+//******************* GET AND SET METHODS *******************
 
   /**
   * return the messageBus in this Registry
@@ -143,64 +126,6 @@ class IdentityModule {
     _this._coreDiscovery = coreDiscovery;
   }
 
-  addGUIListeners() {
-    let _this = this;
-
-    _this._messageBus.addListener(_this._idmURL, (msg) => {
-      let funcName = msg.body.method;
-
-      let returnedValue;
-      if (funcName === 'deployGUI') {
-        returnedValue = _this.deployGUI();
-      } else if (funcName === 'getIdentitiesToChoose') {
-        returnedValue = _this.getIdentitiesToChoose();
-      } else if (funcName === 'unregisterIdentity') {
-        let email = msg.body.params.email;
-        returnedValue = _this.unregisterIdentity(email);
-      } else if (funcName === 'generateRSAKeyPair') {
-        // because generateRSAKeyPair is a promise
-        // we have to send the message only after getting the key pair
-        _this.crypto.generateRSAKeyPair().then((keyPair) => {
-          let value = {type: 'execute', value: keyPair, code: 200};
-          let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
-          _this._messageBus.postMessage(replyMsg);
-        });
-        return;
-      } else if (funcName === 'sendGenerateMessage') {
-        let contents = msg.body.params.contents;
-        let origin = msg.body.params.origin;
-        let usernameHint = msg.body.params.usernameHint;
-        let idpDomain = msg.body.params.idpDomain;
-        _this.sendGenerateMessage(contents, origin, usernameHint, idpDomain).then((returnedValue) => {
-          let value = {type: 'execute', value: returnedValue, code: 200};
-          let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
-          _this._messageBus.postMessage(replyMsg);
-        });
-        return;
-      } else if (funcName === 'storeIdentity') {
-        let result = msg.body.params.result;
-        let keyPair = msg.body.params.keyPair;
-        _this.storeIdentity(result, keyPair).then((returnedValue) => {
-          let value = {type: 'execute', value: returnedValue, code: 200};
-          let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
-          _this._messageBus.postMessage(replyMsg);
-        });
-        return;
-      } /*else if (funcName === 'selectIdentityForHyperty') {
-        let origin = msg.body.params.origin;
-        let idp = msg.body.params.idp;
-        let idHint = msg.body.params.idHint;
-        _this.selectIdentityForHyperty(origin, idp, idHint);
-        return;
-      }*/
-
-      // if the function requested is not a promise
-      let value = {type: 'execute', value: returnedValue, code: 200};
-      let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
-      _this._messageBus.postMessage(replyMsg);
-    });
-  }
-
   /**
   * return the registry in this idModule
   * @param {registry}           registry
@@ -219,16 +144,8 @@ class IdentityModule {
     _this._registry = registry;
   }
 
-  /**
-  * Function to return all the identities registered within a session by a user.
-  * These identities are returned in an array containing a JSON package for each user identity.
-  * @return {Array<Identities>}         Identities
-  */
-  getIdentities() {
-    let _this = this;
-    return _this.identities;
-  }
-
+  
+ //******************* IDENTITY RELEATED METHODS *******************
   /**
   * gets all the information from a given userURL
   * @param  {String}  userURL     user url
@@ -248,10 +165,42 @@ class IdentityModule {
     throw 'identity not found';
   }
 
-  _seconds_since_epoch() {
-    return Math.floor(Date.now() / 1000);
+  /**
+  * Function to set the current Identity with a given Identity
+  * @param {Identity}        identity         identity
+  */
+  setCurrentIdentity(identity) {
+    let _this = this;
+    _this.currentIdentity = identity;
   }
 
+  /**
+  * Function to return all the identities registered within a session by a user.
+  * These identities are returned in an array containing a JSON package for each user identity.
+  * @return {Array<Identities>}         Identities
+  */
+  getIdentities() {
+    let _this = this;
+    return _this.identities;
+  }
+
+  getIdentitiesToChoose() {
+    let _this = this;
+    let identities = _this.emailsList;
+    let idps = [{domain: 'google.com', type: 'idToken'}, {domain: 'microsoft.com', type: 'idToken'}, {domain: 'orange.fr', type: 'idToken'}, {domain: 'slack.com', type: 'Legacy'}];
+
+    return {identities: identities, idps: idps};
+  }
+
+  /**
+  * Function to return the selected Identity within a session
+  * @return {Identity}        identity         identity
+  */
+  getCurrentIdentity() {
+    let _this = this;
+    return _this.currentIdentity;
+  }
+  
   loadIdentities() {
     let _this = this;
     return new Promise((resolve) => {
@@ -283,396 +232,12 @@ class IdentityModule {
 
           });
         }
-
-
         resolve();
       });
     });
   }
-
-  deployGUI() {
-    let _this = this;
-    _this.guiDeployed = true;
-  }
-
-  /**
-   * GetValidToken is for non legacy hyperties and verifies if the Token is still valid
-   * if the token is invalid it requests a new token
-   * @param  {String} hypertyURL hypertyURL
-   * @return {Promise}
-   */
-  _getValidToken(hypertyURL) {
-    let _this = this;
-    return new Promise((resolve, reject) => {
-      _this.getIdToken(hypertyURL).then(function(identity) {
-        console.log('[Identity.IdentityModule.getValidToken] Token', identity);
-        let time_now = _this._seconds_since_epoch();
-        let complete_id = _this.getIdentity(identity.userProfile.userURL);
-        let expiration_date = undefined;
-
-        if (complete_id.hasOwnProperty('info')) {
-          if (complete_id.info.hasOwnProperty('expires')) {
-            expiration_date = complete_id.info.expires;
-          } else if (complete_id.info.hasOwnProperty('tokenIDJSON')) {
-            expiration_date = complete_id.info.tokenIDJSON.exp;
-          } else {
-            // throw 'The ID Token does not have an expiration time';
-            console.log('The ID Token does not have an expiration time');
-            resolve(identity);
-          }
-        } else if (complete_id.hasOwnProperty('infoToken') && complete_id.infoToken.hasOwnProperty('exp')) {
-          expiration_date = complete_id.infoToken.exp;
-        } else {
-          // throw 'The ID Token does not have an expiration time';
-          console.log('The ID Token does not have an expiration time');
-          resolve(identity);
-        }
-
-        console.log('[Identity.IdentityModule.getValidToken] Token expires in', expiration_date);
-        console.log('[Identity.IdentityModule.getValidToken] time now:', time_now);
-
-        if (time_now >= expiration_date) {
-          if (identity.idp === 'google.com') {
-            _this.sendRefreshMessage(identity).then((newIdentity) => {
-              _this.deleteIdentity(complete_id.identity);
-              _this.storeIdentity(newIdentity.body.params.identity, newIdentity.body.params.identity.keyPair).then((value) => {
-                resolve(value);
-              }, (err) => {
-                console.error('[Identity.IdentityModule.getToken] error on getToken', err);
-                reject(err);
-              });
-            });
-          } else { // microsoft.com
-            _this.deleteIdentity(complete_id.identity);
-
-            // generate new idToken
-            _this.callGenerateMethods(identity.idp).then((value) => {
-              resolve(value);
-            });
-          }
-        } else {
-          resolve(identity);
-        }
-      }).catch(function(error) {
-        console.error('[Identity.IdentityModule.getToken] error on getToken', error);
-        reject(error);
-      });
-    });
-  }
-
-  /**
-  * get a Token to be added to a message
-  * @param  {String}  fromURL     origin of the message
-  * @param  {String}  toURL     target of the message
-  * @return {JSON}    token    token to be added to the message
-  */
-  getToken(fromURL, toUrl) {
-    let _this = this;
-    return new Promise(function(resolve, reject) {
-      console.log('[Identity.IdentityModule.getToken] from->', fromURL, '  to->', toUrl);
-
-      if (toUrl) {
-        // console.log('toUrl', toUrl);
-        _this.registry.isLegacy(toUrl).then(function(result) {
-          console.log('[Identity.IdentityModule.getToken] isLEGACY: ', result);
-          if (result) {
-
-            // TODO: check if in the future other legacy hyperties have expiration times
-            // if so the check should be made here (or in the getAccessToken function)
-            let token = _this.getAccessToken(toUrl);
-            if (token)              { return resolve(token); }
-
-            let domain = getUserIdentityDomain(toUrl);
-
-            // check if process to get token has already started
-            if (_this.identitiesList[domain] && _this.identitiesList[domain].status === 'in-progress') {
-              // The process to get the token has already started, let's wait by watching its status
-
-              _this.watchingYou.observe('identitiesList', (change) => {
-
-                console.log('[Identity.IdentityModule.getToken]  identitiesList changed ' + _this.identitiesList);
-
-                let keypath = change.keypath;
-
-                if (keypath.includes('status')) {
-                  keypath = keypath.replace('.status', '');
-                }
-
-                if (keypath === domain && change.name === 'status' && change.newValue === 'created') {
-                  console.log('[Identity.IdentityModule.getToken] token is created ' + _this.identitiesList[domain]);
-                  return resolve(_this.getAccessToken(toUrl));
-                }
-              });
-            } else { //Token does not exist and the process to get has not started yet
-
-              _this.identitiesList[domain] = {
-                status: 'in-progress'
-              };
-
-              console.log('[Identity.IdentityModule.getToken] for-> ', domain);
-              _this.callGenerateMethods(domain).then((value) => {
-                console.log('[Identity.IdentityModule.getToken] CallGeneratemethods', value);
-                let token = _this.getAccessToken(toUrl);
-                if (token) {
-                  return resolve(token);
-                } else {
-                  return reject('No Access token found');
-                }
-              }, (err) => {
-                console.error('[Identity.IdentityModule.getToken] error CallGeneratemethods');
-                return reject(err);
-              });
-            }
-
-          } else {
-            _this._getValidToken(fromURL).then((identity) => {
-              resolve(identity);
-            });
-          }
-        });
-      } else {
-        _this._getValidToken(fromURL).then((identity) => {
-          resolve(identity);
-        });
-      }
-    });
-  }
-
-  /**
-  * get an Id Token for a HypertyURL
-  * @param  {String}  hypertyURL     the Hyperty address
-  * @return {JSON}    token    Id token to be added to the message
-  */
-  getIdToken(hypertyURL) {
-    let _this = this;
-    return new Promise(function(resolve, reject) {
-      let splitURL = hypertyURL.split('://');
-      if (splitURL[0] !== 'hyperty') {
-
-        _this._getHypertyFromDataObject(hypertyURL).then((returnedHypertyURL) => {
-          let userURL = _this.registry.getHypertyOwner(returnedHypertyURL);
-
-          if (userURL) {
-
-            for (let index in _this.identities) {
-              let identity = _this.identities[index];
-              if (identity.identity === userURL) {
-                return resolve(identity.messageInfo);
-              }
-            }
-          } else {
-            return reject('no identity was found ');
-          }
-        }).catch((reason) => {
-          console.error('no identity was found: ', reason);
-          reject(reason);
-        });
-      } else {
-        let userURL = _this.registry.getHypertyOwner(hypertyURL);
-        if (userURL) {
-
-          for (let index in _this.identities) {
-            let identity = _this.identities[index];
-            if (identity.identity === userURL) {
-              // TODO check this getIdToken when we run on nodejs environment;
-              if (identity.hasOwnProperty('messageInfo')) {
-                return resolve(identity.messageInfo);
-              } else {
-                return resolve(identity);
-              }
-            }
-          }
-        } else {
-          return reject('no identity was found.');
-        }
-      }
-    });
-  }
-
-  /**
-  * get an Access Token for a legacyURL
-  * @param  {String}  legacyURL     the legacy address
-  * @return {JSON}    token    Access token to be added to the message
-  */
-
-  getAccessToken(url) {
-    let _this = this;
-
-    /* let urlSplit = url.split('.');
-    let length = urlSplit.length;*/
-
-    let domainToCheck = divideURL(url).domain;
-
-    if (url.includes('protostub')) {
-      domainToCheck = domainToCheck.replace(domainToCheck.split('.')[0] + '.', '');
-    }
-
-    let identityToReturn;
-    let expiration_date = undefined;
-    let time_now = _this._seconds_since_epoch();
-    for (let index in _this.identities) {
-      let identity = _this.identities[index];
-      if (identity.hasOwnProperty('interworking') && identity.interworking.domain === domainToCheck) {
-        // check if there is expiration time
-        if (identity.hasOwnProperty('info') && identity.info.hasOwnProperty('expires')) {
-          expiration_date = identity.info.expires;
-          console.log('[Identity.IdentityModule.getAccessToken] Token expires in', expiration_date);
-          console.log('[Identity.IdentityModule.getAccessToken] time now:', time_now);
-
-          // TODO: this should not be verified in this way
-          // we should contact the IDP to verify this instead of using the local clock
-          // but this works for now...
-          if (time_now >= expiration_date) {
-            // delete current identity
-            //_this.deleteIdentity(identity.identity);
-            return null; // the getToken function then generates a new token
-          }
-        } // else this access token has no expiration time
-
-        if (identity.hasOwnProperty('messageInfo') && identity.messageInfo.hasOwnProperty('userProfile') && identity.messageInfo.userProfile) {
-          identityToReturn = { userProfile: identity.messageInfo.userProfile, access_token: identity.interworking.access_token };
-          if (identity.hasOwnProperty('infoToken') && identity.infoToken.hasOwnProperty('id')) {
-            identityToReturn.userProfile.id = identity.infoToken.id;
-          }
-        }
-        return identityToReturn;
-      }
-    }
-
-    return null;
-  }
-
-  getIdentitiesToChoose() {
-    let _this = this;
-    let identities = _this.emailsList;
-    let idps = [{domain: 'google.com', type: 'idToken'}, {domain: 'microsoft.com', type: 'idToken'}, {domain: 'orange.fr', type: 'idToken'}, {domain: 'slack.com', type: 'Legacy'}];
-
-    return {identities: identities, idps: idps};
-  }
-
-  /**
-  * Function to return all the users URLs registered within a session
-  * These users URLs are returned in an array of strings.
-  * @param  {Boolean}  emailFormat (Optional)   boolean to indicate to return in email format
-  * @return {Array<String>}         users
-  */
-  getUsersIDs(emailFormat) {
-    let _this = this;
-    let users = [];
-
-    //if request comes with the emailFormat option, then convert url to email format
-    let converter = (emailFormat) ? getUserEmailFromURL : (value) => { return value; };
-
-    for (let index in _this.identities) {
-      let identity = _this.identities[index];
-      users.push(converter(identity.identity));
-    }
-    return users;
-  }
-
-  /**
-  * Function to return the selected Identity within a session
-  * @return {Identity}        identity         identity
-  */
-  getCurrentIdentity() {
-    let _this = this;
-    return _this.currentIdentity;
-  }
-
-  /**
-  * Function to set the current Identity with a given Identity
-  * @param {Identity}        identity         identity
-  */
-  setCurrentIdentity(identity) {
-    let _this = this;
-    _this.currentIdentity = identity;
-  }
-
-  /**
-  * Function to remove an identity from the Identities array
-  * @param {String}    userURL      userURL
-  */
-  deleteIdentity(userURL) {
-    let _this = this;
-
-    //let userURL = convertToUserURL(userID);
-
-    for (let identity in _this.identities) {
-      if (_this.identities[identity].identity === userURL) {
-        console.log('splice', _this.identities.splice(identity, 1));
-      }
-    }
-  }
-
-  /**
-  * Function to unregister an identity from the emailsList array and not show in to the GUI
-  * @param {String}    email      email
-  */
-  unregisterIdentity(email) {
-    let _this = this;
-
-    for (let e in _this.emailsList) {
-      if (_this.emailsList[e] === email) {
-        _this.emailsList.splice(e, 1);
-      }
-    }
-  }
-
-  /**
-  * Function that resolve and create the domainURL in case it is provided one. If not, resolve the default domainURL
-  * @param {String}     idpDomain     idpDomain (Optional)
-  */
-  _resolveDomain(idpDomain) {
-    if (!idpDomain) {
-      return 'domain-idp://google.com';
-    } else {
-      return 'domain-idp://' + idpDomain;
-    }
-  }
-
-  /**
-  * Function that sends a request to the GUI using messages. Sends all identities registered and
-  * the Idps supported, and return the identity/idp received by the GUI
-  * @param {Array<identity>}  identities      list of identitiies
-  * @param {Array<String>}    idps            list of idps to authenticate
-  * @return {Promise}         returns a chosen identity or idp
-  */
-  requestIdentityToGUI(identities, idps) {
-    let _this = this;
-    return new Promise(function(resolve, reject) {
-
-      //condition to check if the real GUI is deployed. If not, deploys a fake gui
-      if (_this.guiDeployed === false) {
-        let guiFakeURL = _this._guiURL;
-        let guiFake = new GuiFake(guiFakeURL, _this._messageBus);
-        _this.guiFake = guiFake;
-        _this.guiDeployed = true;
-      }
-
-      let message = {type: 'create', to: _this._guiURL, from: _this._idmURL,
-        body: {value: {identities: identities, idps: idps}}};
-
-      let id = _this._messageBus.postMessage(message);
-
-      //add listener without timout
-      _this._messageBus.addResponseListener(_this._idmURL, id, msg => {
-        _this._messageBus.removeResponseListener(_this._idmURL, id);
-
-        // todo: to return the user URL and not the email or identifier
-
-        if (msg.body.code === 200) {
-          let selectedIdentity = msg.body;
-
-          console.log('selectedIdentity: ', selectedIdentity.value);
-          resolve(selectedIdentity);
-        } else {
-          reject('error on requesting an identity to the GUI');
-        }
-      });
-    });
-  }
-
-  /**
+  
+/**
   * Function that fetch an identityAssertion from a user.
   *
   * @return {IdAssertion}              IdAssertion
@@ -785,6 +350,143 @@ class IdentityModule {
     });
   }
 
+
+    /**
+  * Function to return all the users URLs registered within a session
+  * These users URLs are returned in an array of strings.
+  * @param  {Boolean}  emailFormat (Optional)   boolean to indicate to return in email format
+  * @return {Array<String>}         users
+  */
+  getUsersIDs(emailFormat) {
+    log('getUsersIDs:emailFormat', emailFormat);
+    let _this = this;
+    let users = [];
+
+    //if request comes with the emailFormat option, then convert url to email format
+    let converter = (emailFormat) ? getUserEmailFromURL : (value) => { return value; };
+    log('getUsersIDs:converter', converter);
+
+    for (let index in _this.identities) {
+      let identity = _this.identities[index];
+      users.push(converter(identity.identity));
+    }
+    log('getUsersIDs:users', users);
+    return users;
+  }
+
+  /**
+  * Function to remove an identity from the Identities array
+  * @param {String}    userURL      userURL
+  */
+  deleteIdentity(userURL) {
+    let _this = this;
+
+    //let userURL = convertToUserURL(userID);
+
+    for (let identity in _this.identities) {
+      if (_this.identities[identity].identity === userURL) {
+        console.log('splice', _this.identities.splice(identity, 1));
+      }
+    }
+  }
+
+  /**
+  * Function to unregister an identity from the emailsList array and not show in to the GUI
+  * @param {String}    email      email
+  */
+  unregisterIdentity(email) {
+    let _this = this;
+
+    for (let e in _this.emailsList) {
+      if (_this.emailsList[e] === email) {
+        _this.emailsList.splice(e, 1);
+      }
+    }
+  }
+
+  /**
+  * Function that sends a request to the GUI using messages. Sends all identities registered and
+  * the Idps supported, and return the identity/idp received by the GUI
+  * @param {Array<identity>}  identities      list of identitiies
+  * @param {Array<String>}    idps            list of idps to authenticate
+  * @return {Promise}         returns a chosen identity or idp
+  */
+  requestIdentityToGUI(identities, idps) {
+    let _this = this;
+    return new Promise(function(resolve, reject) {
+
+      //condition to check if the real GUI is deployed. If not, deploys a fake gui
+      if (_this.guiDeployed === false) {
+        let guiFakeURL = _this._guiURL;
+        let guiFake = new GuiFake(guiFakeURL, _this._messageBus);
+        _this.guiFake = guiFake;
+        _this.guiDeployed = true;
+      }
+
+      let message = {type: 'create', to: _this._guiURL, from: _this._idmURL,
+        body: {value: {identities: identities, idps: idps}}};
+
+      let id = _this._messageBus.postMessage(message);
+
+      //add listener without timout
+      try{
+        _this._messageBus.addResponseListener(_this._idmURL, id, msg => {
+          _this._messageBus.removeResponseListener(_this._idmURL, id);
+
+
+          // todo: to return the user URL and not the email or identifier
+
+          if (msg.body.code === 200) {
+            let selectedIdentity = msg.body;
+
+            console.log('selectedIdentity: ', selectedIdentity.value);
+            resolve(selectedIdentity);
+          } else {
+            reject('error on requesting an identity to the GUI');
+          }
+        });
+      }catch (err){
+        reject('In method callIdentityModuleFunc error: ' + err);
+      }
+    });
+  }
+
+  selectIdentityForHyperty(origin, idp, idHint) {
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+
+      //generates the RSA key pair
+      _this.crypto.generateRSAKeyPair().then(function(keyPair) {
+        let publicKey = btoa(keyPair.public);
+
+        _this.sendGenerateMessage(publicKey, origin, idHint, idp).then((response) => {
+          if (response.hasOwnProperty('assertion')) { // identity was logged in, just save it
+            _this.storeIdentity(response, keyPair).then((value) => {
+              return resolve(value);
+            }, (err) => {
+              return reject(err);
+            });
+          } else if (response.hasOwnProperty('loginUrl')) { // identity was not logged in
+            _this.loginSelectedIdentity(publicKey, origin, idp, keyPair, response.loginUrl).then((value) => {
+              return resolve(value);
+            }, (err) => {
+              return reject(err);
+            });
+          } else { // you should never get here, if you do then the IdP Proxy is not well implemented
+            console.error('GenerateAssertion returned invalid response.');
+            console.log('Proceeding by logging in.');
+            _this.generateSelectedIdentity(publicKey, origin, idp, keyPair).then((value) => {
+              return resolve(value);
+            }, (err) => {
+              return reject(err);
+            });
+          }
+        });
+      });
+    });
+  }
+
   callGenerateMethods(idp, origin) {
     let _this = this;
 
@@ -892,8 +594,8 @@ class IdentityModule {
               return reject(err);
             });
           }
-        });
-      });
+        }).catch(err => {reject('On selectIdentityForHyperty from method sendGenerateMessage error:  ' + err)});
+      }).catch(err => {reject('On selectIdentityForHyperty from method generateRSAKeyPair error:  ' + err)});
     });
   }
 
@@ -932,41 +634,7 @@ class IdentityModule {
         } else {
           return reject('error on GUI received message.');
         }
-      });
-    });
-  }
-
-  sendRefreshMessage(oldIdentity) {
-    let _this = this;
-    let domain = _this._resolveDomain(oldIdentity.idp);
-    let message;
-    let assertion = _this.getIdentity(oldIdentity.userProfile.userURL);
-
-    return new Promise((resolve, reject) => {
-      message = {type: 'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'refreshAssertion', params: {identity: assertion}}};
-      _this._messageBus.postMessage(message, (res) => {
-        let result = res.body.value;
-
-        console.log('TIAGO new assertion:', result);
-        resolve(result);
-
-      });
-    });
-  }
-
-  sendGenerateMessage(contents, origin, usernameHint, idpDomain) {
-    let _this = this;
-    let domain = _this._resolveDomain(idpDomain);
-    let message;
-
-    return new Promise((resolve, reject) => {
-      message = {type: 'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'generateAssertion', params: {contents: contents, origin: origin, usernameHint: usernameHint}}};
-      _this._messageBus.postMessage(message, (res) => {
-        let result = res.body.value;
-
-        resolve(result);
-
-      });
+      }).catch(err => {reject('On selectIdentityFromGUI from method requestIdentityToGUI error:  ' + err);});
     });
   }
 
@@ -983,11 +651,14 @@ class IdentityModule {
       let assertionParsed;
 
       //verify if the token contains the 3 components, or just the assertion
-      if (splitedAssertion[1]) {
-        assertionParsed = JSON.parse(atob(splitedAssertion[1]));
-      } else {
-
-        assertionParsed = JSON.parse(atob(result.assertion));
+      try{
+        if (splitedAssertion[1]) {
+          assertionParsed = JSON.parse(atob(splitedAssertion[1]));
+        } else {
+          assertionParsed = JSON.parse(atob(result.assertion));
+        }
+      }catch(err){
+        return reject("In storeIdentity, error parsing assertion: " + err);
       }
       let idToken;
 
@@ -1077,78 +748,78 @@ class IdentityModule {
     });
   }
 
-  /**
-  * Requests the IdpProxy from a given Domain for an identityAssertion
-  *
-  * @param  {DOMString} contents     contents
-  * @param  {DOMString} origin       origin
-  * @param  {DOMString} usernameHint usernameHint
-  * @param  {JSON}      keyPair       user keyPair
-  * @return {IdAssertion}              IdAssertion
-  */
-  generateAssertion(contents, origin, usernameHint, keyPair, idpDomain) {
+  loginSelectedIdentity(publicKey, origin, idp, keyPair, loginUrl) {
     let _this = this;
 
-    console.log('generateAssertion');
-
-    return new Promise(function(resolve, reject) {
-
-      _this.sendGenerateMessage(contents, origin, usernameHint, idpDomain).then((result) => {
-
-        if (result.loginUrl) {
-
-          _this.callIdentityModuleFunc('openPopup', {urlreceived: result.loginUrl}).then((value) => {
-            resolve(value);
-          }, (err) => {
-            reject(err);
-          });
-        } else if (result) {
-
-          _this.storeIdentity(result, keyPair).then((value) => {
-            resolve(value);
-          }, (err) => {
-            reject(err);
-          });
-
-        } else {
-          reject('error on obtaining identity information');
-        }
-
+    return new Promise((resolve, reject) => {
+      _this.callIdentityModuleFunc('openPopup', {urlreceived: loginUrl}).then((idCode) => {
+        return idCode;
+      }, (err) => {
+        console.error('Error while logging in for the selected identity.');
+        return reject(err);
+      }).then((idCode) => {
+        _this.sendGenerateMessage(publicKey, origin, idCode, idp).then((newResponse) => {
+          if (newResponse.hasOwnProperty('assertion')) {
+            _this.storeIdentity(newResponse, keyPair).then(result => {
+              resolve('Login was successfull');
+            }).catch(err => {reject('Login has failed:' + err)})
+          } else {
+            console.error('Error while logging in for the selected identity.');
+            return reject('Could not generate a valid assertion for selected identity.');
+          }
+        }).catch(err => {reject('On loginSelectedIdentity from method sendGenerateMessage error:  ' + err);});
       });
     });
   }
 
-  /**
-  * OTHER USER'S IDENTITY
-  */
-
-  /**
-  * Requests the IdpProxy from a given Domain to validate an IdentityAssertion
-  * Returns a promise with the result from the validation.
-  * @param  {DOMString} assertion
-  * @param  {DOMString} origin       origin
-  * @return {Promise}         Promise         promise with the result from the validation
-  */
-  validateAssertion(assertion, origin, idpDomain) {
+  generateSelectedIdentity(publicKey, origin, idp, keyPair) {
     let _this = this;
 
-    let domain = _this._resolveDomain(idpDomain);
+    return new Promise((resolve, reject) => {
 
-    let message = {type: 'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'validateAssertion',
-      params: {assertion: assertion, origin: origin}}};
-
-    return new Promise(function(resolve, reject) {
-      _this._messageBus.postMessage(message, (result) => {
-        if (result.body.code === 200) {
-          resolve(result.body.value);
+      _this.generateAssertion(publicKey, origin, '', keyPair, idp).then((loginUrl) => {
+        return loginUrl;
+      }).then(function(url) {
+        return _this.generateAssertion(publicKey, origin, url, keyPair, idp);
+      }).then(function(value) {
+        if (value) {
+          return resolve(value);
         } else {
-          reject('error', result.body.code);
+          return reject('Error on obtaining Identity');
         }
+      }).catch(function(err) {
+        console.error(err);
+        return reject(err);
       });
     });
   }
 
+  callIdentityModuleFunc(methodName, parameters) {
+    let _this = this;
+    let message;
+
+    return new Promise((resolve, reject) => {
+      message = { type: 'execute', to: _this._guiURL, from: _this._idmURL,
+        body: { resource: 'identity', method: methodName, params: parameters }, };
+      let id = _this._messageBus.postMessage(message);
+
+      //add listener without timout
+      try{
+        _this._messageBus.addResponseListener(_this._idmURL, id, msg => {
+          _this._messageBus.removeResponseListener(_this._idmURL, id);
+          let result = msg.body.value;
+          resolve(result);
+        });
+      }catch (err){
+        reject('In method callIdentityModuleFunc error: ' + err);
+      }
+    });
+  }
+
+  
+//******************* ENCRYPTION METHODS *******************
   encryptMessage(message) {
+    log('encryptMessage:message', message);
     let _this = this;
 
     console.log('encrypt message ');
@@ -1161,13 +832,8 @@ class IdentityModule {
         console.log('encryption disabled');
         return resolve(message);
       }
-
-      //TODO remove this logic and move it to a util function
-      let splitedToURL = message.to.split('/');
-      let dataObjectURL = splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3];
-      if (splitedToURL.length > 6) {
-        dataObjectURL = splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3] + '/' + splitedToURL[4];
-      }
+      
+      let dataObjectURL = _this._parseMessageURL(message.to);
 
       let isToDataObject = isDataObjectURL(dataObjectURL);
       let isToLegacyIdentity = isLegacy(message.to);
@@ -1222,7 +888,8 @@ class IdentityModule {
               reject('encrypt handshake protocol phase ');
             });
           }
-        }
+        } else
+          reject("In encryptMessage: Hyperty owner URL was not found");
 
       //if from hyperty to a dataObjectURL
       } else if (isFromHyperty && isToDataObject) {
@@ -1242,7 +909,8 @@ class IdentityModule {
                 let sessionKey = _this.crypto.generateRandom();
                 _this.dataObjectSessionKeys[dataObjectURL] = {sessionKey: sessionKey, isToEncrypt: true};
 
-                _this.storageManager.set('dataObjectSessionKeys', 0, _this.dataObjectSessionKeys);
+                _this.storageManager.set('dataObjectSessionKeys', 0, _this.dataObjectSessionKeys).catch(err => {
+                  reject('On encryptMessage from method storageManager.set error: ' + err);});
                 dataObjectKey = _this.dataObjectSessionKeys[dataObjectURL];
               }
             }
@@ -1275,10 +943,10 @@ class IdentityModule {
 
               // start the generation of a new session Key
             } else {
-              reject('failed to decrypt message');
+              reject('Data object key could not be defined: Failed to decrypt message ');
             }
-          });
-        });
+          }).catch(err => {reject('On encryptMessage from method dataObjectsStorage.getDataObject error: ' + err)});
+        }).catch(err => {reject('On encryptMessage from method storageManager.get error: ' + err)});
       }
     });
   }
@@ -1289,11 +957,7 @@ class IdentityModule {
     return new Promise(function(resolve, reject) {
       console.log('dataObject value to encrypt: ', dataObject);
 
-      let splitedToURL = sender.split('/');
-      let dataObjectURL = splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3];
-      if (splitedToURL.length > 6) {
-        dataObjectURL = splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3] + '/' + splitedToURL[4];
-      }
+      let dataObjectURL = _this._parseMessageURL(sender);
 
       _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
         let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
@@ -1309,7 +973,7 @@ class IdentityModule {
               let newValue = { value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv) };
               console.log('encrypted dataObject', newValue);
               return resolve(newValue);
-            });
+            }).catch(err => {reject('On encryptDataObject from method encryptAES error: ' + err)});
 
           // if not, just send the message
           } else {
@@ -1321,14 +985,14 @@ class IdentityModule {
         } else {
           return reject('No dataObjectKey for this dataObjectURL:', dataObjectURL);
         }
-      });
+      }).catch(err => {reject('On encryptDataObject from method storageManager.get error: ' + err)});
     });
   }
 
   decryptMessage(message) {
     let _this = this;
-
-    console.log('decrypt message ');
+    
+    log('decryptMessage:message', message);
 
     return new Promise(function(resolve, reject) {
       let isHandShakeType = message.type === 'handshake';
@@ -1339,13 +1003,7 @@ class IdentityModule {
         return resolve(message);
       }
 
-      //TODO remove this logic and move it to a util function
-
-      let splitedToURL = message.to.split('/');
-      let dataObjectURL = splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3];
-      if (splitedToURL.length > 6) {
-        dataObjectURL = splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3] + '/' + splitedToURL[4];
-      }
+      let dataObjectURL = _this._parseMessageURL(message.to);
 
       let isToDataObject = isDataObjectURL(dataObjectURL);
       let isFromHyperty = divideURL(message.from).type === 'hyperty';
@@ -1467,12 +1125,8 @@ class IdentityModule {
         console.log('decryption disabled');
         return resolve(dataObject);
       }
-
-      let splitedToURL = sender.split('/');
-      let dataObjectURL = splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3];
-      if (splitedToURL.length > 6) {
-        dataObjectURL = splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3] + '/' + splitedToURL[4];
-      }
+      
+      let dataObjectURL = _this._parseMessageURL(sender);
 
       console.log('dataObject value to decrypt: ', dataObject);
 
@@ -1491,7 +1145,7 @@ class IdentityModule {
               let newValue = { value: parsedValue, iv: _this.crypto.encode(iv) };
               console.log('decrypted dataObject,', newValue);
               return resolve(newValue);
-            });
+            }).catch(err => {reject('On decryptDataObject from method encryptAES error: ' + err)});
 
           //if not, just return the dataObject
           } else {
@@ -1507,7 +1161,8 @@ class IdentityModule {
   }
 
   doMutualAuthentication(sender, receiver) {
-    console.log('doMutualAuthentication: ', sender, receiver);
+    log('doMutualAuthentication:sender ', sender);
+    log('doMutualAuthentication:receiver ', receiver);
     let _this = this;
 
     return new Promise(function(resolve, reject) {
@@ -1561,19 +1216,613 @@ class IdentityModule {
 
             _this._messageBus.postMessage(value.message);
             resolve('exchange of chat sessionKey initiated');
-          });
+          }).catch(err => {reject('On doMutualAuthentication from method _sendReporterSessionKey error: ' + err)});
         } else {
-
           _this._doHandShakePhase(msg, chatKeys);
         }
       } else {
-        reject('error on doMutualAuthentication');
+        reject('Mutual authentication error: Hyperty owner could not be resolved');
       }
     });
 
   }
 
+  
+//******************* TOKEN METHODS *******************  
+  /**
+  * get a Token to be added to a message
+  * @param  {String}  fromURL     origin of the message
+  * @param  {String}  toURL     target of the message
+  * @return {JSON}    token    token to be added to the message
+  */
+  getToken(fromURL, toUrl) {
+    let _this = this;
+    return new Promise(function(resolve, reject) {
+      console.log('[Identity.IdentityModule.getToken] from->', fromURL, '  to->', toUrl);
+
+      if (toUrl) {
+//        console.log('toUrl', toUrl);
+        _this.registry.isLegacy(toUrl).then(function(result) {
+          console.log('[Identity.IdentityModule.getToken] isLEGACY: ', result);
+          if (result) {
+
+            // TODO: check if in the future other legacy hyperties have expiration times
+            // if so the check should be made here (or in the getAccessToken function)
+            let token = _this.getAccessToken(toUrl);
+            if (token)              { return resolve(token); }
+
+            let domain = getUserIdentityDomain(toUrl);
+
+            // check if process to get token has already started
+            if (_this.identitiesList[domain] && _this.identitiesList[domain].status === 'in-progress') {
+              // The process to get the token has already started, let's wait by watching its status
+
+              _this.watchingYou.observe('identitiesList', (change) => {
+
+                console.log('[Identity.IdentityModule.getToken]  identitiesList changed ' + _this.identitiesList);
+
+                let keypath = change.keypath;
+
+                if (keypath.includes('status'))
+                  keypath = keypath.replace('.status', '');
+
+                if (keypath === domain && change.name === 'status' && change.newValue === 'created') {
+                  console.log('[Identity.IdentityModule.getToken] token is created ' + _this.identitiesList[domain]);
+                  return resolve(_this.getAccessToken(toUrl));
+                }
+              });
+            } else { //Token does not exist and the process to get has not started yet
+
+              _this.identitiesList[domain] = {
+                status: 'in-progress'
+              };
+
+              console.log('[Identity.IdentityModule.getToken] for-> ', domain);
+              _this.callGenerateMethods(domain).then((value) => {
+                console.log('[Identity.IdentityModule.getToken] CallGeneratemethods', value);
+                let token = _this.getAccessToken(toUrl);
+                if (token) {
+                  return resolve(token);
+                } else {
+                  return reject('No Access token found');
+                }
+              }, (err) => {
+                console.error('[Identity.IdentityModule.getToken] error CallGeneratemethods');
+                return reject(err);
+              });
+            }
+
+          } else {
+            _this._getValidToken(fromURL).then((identity) => {
+              resolve(identity);
+            }).catch(err => {reject('On getToken from method _getValidToken error: ' + err)});
+          }
+        }).catch(err => {reject('On getToken from method isLegacy error: ' + err)});
+      } else {
+        _this._getValidToken(fromURL).then((identity) => {
+          resolve(identity);
+        });
+      }
+    });
+  }
+
+  /**
+  * get an Id Token for a HypertyURL
+  * @param  {String}  hypertyURL     the Hyperty address
+  * @return {JSON}    token    Id token to be added to the message
+  */
+  getIdToken(hypertyURL) {
+    log('getIdToken:hypertyURL ', hypertyURL);
+    let _this = this;
+    return new Promise(function(resolve, reject) {
+      let splitURL = hypertyURL.split('://');
+      if (splitURL[0] !== 'hyperty') {
+
+        _this._getHypertyFromDataObject(hypertyURL).then((returnedHypertyURL) => {
+          
+          let userURL = _this.registry.getHypertyOwner(returnedHypertyURL);
+
+          if (userURL) {
+
+            for (let index in _this.identities) {
+              let identity = _this.identities[index];
+              if (identity.identity === userURL) {
+                return resolve(identity.messageInfo);
+              }
+            }
+          } else {
+            return reject('no identity was found ');
+          }
+        }).catch((reason) => {
+          console.error('no identity was found: ', reason);
+          reject(reason);
+        });
+      } else {
+        let userURL = _this.registry.getHypertyOwner(hypertyURL);
+        if (userURL) {
+
+          for (let index in _this.identities) {
+            let identity = _this.identities[index];
+            if (identity.identity === userURL) {
+              // TODO check this getIdToken when we run on nodejs environment;
+              if (identity.hasOwnProperty('messageInfo')) {
+                return resolve(identity.messageInfo);
+              } else {
+                return resolve(identity);
+              }
+            }
+          }
+        } else {
+          return reject('no identity was found.');
+        }
+      }
+    });
+  }
+
+  /**
+  * get an Access Token for a legacyURL
+  * @param  {String}  legacyURL     the legacy address
+  * @return {JSON}    token    Access token to be added to the message
+  */
+  getAccessToken(url) {
+    let _this = this;
+
+  /*  let urlSplit = url.split('.');
+    let length = urlSplit.length;*/
+
+    let domainToCheck = divideURL(url).domain;
+
+    if (url.includes('protostub')) {
+      domainToCheck = domainToCheck.replace(domainToCheck.split('.')[0] + '.', '');
+    }
+
+    let identityToReturn;
+    let expiration_date = undefined;
+    let time_now = _this._seconds_since_epoch();
+    for (let index in _this.identities) {
+      let identity = _this.identities[index];
+      if (identity.hasOwnProperty('interworking') && identity.interworking.domain === domainToCheck) {
+        // check if there is expiration time
+        if (identity.hasOwnProperty('info') && identity.info.hasOwnProperty('expires')) {
+          expiration_date = identity.info.expires;
+          console.log('[Identity.IdentityModule.getAccessToken] Token expires in', expiration_date);
+          console.log('[Identity.IdentityModule.getAccessToken] time now:', time_now);
+
+          // TODO: this should not be verified in this way
+          // we should contact the IDP to verify this instead of using the local clock
+          // but this works for now...
+          if (time_now >= expiration_date) {
+            // delete current identity
+            //_this.deleteIdentity(identity.identity);
+            return null; // the getToken function then generates a new token
+          }
+        } // else this access token has no expiration time
+
+        if (identity.hasOwnProperty('messageInfo') && identity.messageInfo.hasOwnProperty('userProfile') && identity.messageInfo.userProfile) {
+          identityToReturn = { userProfile: identity.messageInfo.userProfile, access_token: identity.interworking.access_token };
+          if (identity.hasOwnProperty('infoToken') && identity.infoToken.hasOwnProperty('id')) {
+            identityToReturn.userProfile.id = identity.infoToken.id;
+          }
+        }
+        return identityToReturn;
+      }
+    }
+
+    return null;
+  }
+
+  
+//******************* OTHER METHODS *******************   
+  sendRefreshMessage(oldIdentity) {
+    let _this = this;
+    let domain = _this._resolveDomain(oldIdentity.idp);
+    let message;
+    let assertion = _this.getIdentity(oldIdentity.userProfile.userURL);
+    
+    log('sendRefreshMessage:oldIdentity', oldIdentity);
+
+    return new Promise((resolve, reject) => {
+      message = {type: 'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'refreshAssertion', params: {identity: assertion}}};
+      try{
+        _this._messageBus.postMessage(message, (res) => {
+          let result = res.body.value;
+          console.log('TIAGO new assertion:', result);
+          resolve(result);
+        });
+      } catch (err){
+        reject("In sendRefreshMessage on postMessage error: " + err);d
+      }
+    });
+  }
+
+  sendGenerateMessage(contents, origin, usernameHint, idpDomain) {
+    let _this = this;
+    let domain = _this._resolveDomain(idpDomain);
+    let message;
+
+    return new Promise((resolve, reject) => {
+      message = {type: 'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'generateAssertion', params: {contents: contents, origin: origin, usernameHint: usernameHint}}};
+      try{  
+       _this._messageBus.postMessage(message, (res) => {
+          let result = res.body.value;
+          resolve(result);
+        });
+       } catch (err){
+        reject("In sendRefreshMessage on postMessage error: " + err);
+      }
+    });
+  }
+
+  /**
+  * Requests the IdpProxy from a given Domain for an identityAssertion
+  *
+  * @param  {DOMString} contents     contents
+  * @param  {DOMString} origin       origin
+  * @param  {DOMString} usernameHint usernameHint
+  * @param  {JSON}      keyPair       user keyPair
+  * @return {IdAssertion}              IdAssertion
+  */
+  generateAssertion(contents, origin, usernameHint, keyPair, idpDomain) {
+    let _this = this;
+
+    console.log('generateAssertion');
+
+    return new Promise(function(resolve, reject) {
+
+      _this.sendGenerateMessage(contents, origin, usernameHint, idpDomain).then((result) => {
+
+        if (result.loginUrl) {
+
+          _this.callIdentityModuleFunc('openPopup', {urlreceived: result.loginUrl}).then((value) => {
+            resolve(value);
+          }, (err) => {
+            reject(err);
+          });
+        } else if (result) {
+
+          _this.storeIdentity(result, keyPair).then((value) => {
+            resolve(value);
+          }, (err) => {
+            reject(err);
+          });
+
+        } else {
+          reject('error on obtaining identity information');
+        }
+
+      }).catch(err => {reject('On generateAssertion from method sendGenerateMessage error: ' + err)});
+    });
+  }
+
+  /**
+  * Requests the IdpProxy from a given Domain to validate an IdentityAssertion
+  * Returns a promise with the result from the validation.
+  * @param  {DOMString} assertion
+  * @param  {DOMString} origin       origin
+  * @return {Promise}         Promise         promise with the result from the validation
+  */
+  validateAssertion(assertion, origin, idpDomain) {
+    let _this = this;
+
+    let domain = _this._resolveDomain(idpDomain);
+
+    let message = {type: 'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'validateAssertion',
+      params: {assertion: assertion, origin: origin}}};
+
+    return new Promise(function(resolve, reject) {
+      try{
+        _this._messageBus.postMessage(message, (result) => {
+          if (result.body.code === 200) {
+            resolve(result.body.value);
+          } else {
+            reject('error', result.body.code);
+          }
+        });
+      } catch(err){
+        reject('On validateAssertion from method postMessage error: ' + err);
+      }
+    });
+  }
+
+  callGenerateMethods(idp, origin) {
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+
+      let publicKey;
+      let userkeyPair;
+
+      //generates the RSA key pair
+      _this.crypto.generateRSAKeyPair().then(function(keyPair) {
+
+        publicKey = btoa(keyPair.public);
+        userkeyPair = keyPair;
+        return _this.generateAssertion(publicKey, origin, '', userkeyPair, idp);
+
+      }).then(function(url) {
+        _this.myHint = url;
+        return _this.generateAssertion(publicKey, origin, url, userkeyPair, idp);
+
+      }).then(function(value) {
+        if (value) {
+          resolve(value);
+        } else {
+          reject('Error on obtaining Identity');
+        }
+      }).catch(function(err) {
+        console.log(err);
+        reject(err);
+      });
+    });
+  }
+
+  addGUIListeners() {
+    let _this = this;
+
+    _this._messageBus.addListener(_this._idmURL, (msg) => {
+      let funcName = msg.body.method;
+
+      let returnedValue;
+      if (funcName === 'deployGUI') {
+        returnedValue = _this.deployGUI();
+      } else if (funcName === 'getIdentitiesToChoose') {
+        returnedValue = _this.getIdentitiesToChoose();
+      } else if (funcName === 'unregisterIdentity') {
+        let email = msg.body.params.email;
+        returnedValue = _this.unregisterIdentity(email);
+      } else if (funcName === 'generateRSAKeyPair') {
+        // because generateRSAKeyPair is a promise
+        // we have to send the message only after getting the key pair
+        _this.crypto.generateRSAKeyPair().then((keyPair) => {
+          let value = {type: 'execute', value: keyPair, code: 200};
+          let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
+          try{
+            _this._messageBus.postMessage(replyMsg);
+          }catch (err){
+            reject('On addGUIListeners from if generateRSAKeyPair method postMessage error: ' + err);
+          }
+        });
+        return;
+      } else if (funcName === 'sendGenerateMessage') {
+        let contents = msg.body.params.contents;
+        let origin = msg.body.params.origin;
+        let usernameHint = msg.body.params.usernameHint;
+        let idpDomain = msg.body.params.idpDomain;
+        _this.sendGenerateMessage(contents, origin, usernameHint, idpDomain).then((returnedValue) => {
+          let value = {type: 'execute', value: returnedValue, code: 200};
+          let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
+          try{
+            _this._messageBus.postMessage(replyMsg);
+          }catch (err){
+            reject('On addGUIListeners from if sendGenerateMessage method postMessage error: ' + err);
+          }
+        });
+        return;
+      } else if (funcName === 'storeIdentity') {
+        let result = msg.body.params.result;
+        let keyPair = msg.body.params.keyPair;
+        _this.storeIdentity(result, keyPair).then((returnedValue) => {
+          let value = {type: 'execute', value: returnedValue, code: 200};
+          let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
+          try{
+            _this._messageBus.postMessage(replyMsg);
+          }catch (err){
+            reject('On addGUIListeners from if storeIdentity method postMessage error: ' + err);
+          }
+        });
+        return;
+      } /*else if (funcName === 'selectIdentityForHyperty') {
+        let origin = msg.body.params.origin;
+        let idp = msg.body.params.idp;
+        let idHint = msg.body.params.idHint;
+        _this.selectIdentityForHyperty(origin, idp, idHint);
+        return;
+      }*/
+
+      // if the function requested is not a promise
+      let value = {type: 'execute', value: returnedValue, code: 200};
+      let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
+      try{
+        _this._messageBus.postMessage(replyMsg);
+      }catch (err){
+        reject('On addGUIListeners from if storeIdentity method postMessage error: ' + err);
+      }
+    });
+  }
+
+  deployGUI() {
+    let _this = this;
+    _this.guiDeployed = true;
+  }
+
+//******************* PRIVATE METHODS *******************
+  /**
+   * GetValidToken is for non legacy hyperties and verifies if the Token is still valid
+   * if the token is invalid it requests a new token
+   * @param  {String} hypertyURL hypertyURL
+   * @return {Promise}
+   */
+  _getValidToken(hypertyURL) {
+    log('_getValidToken:hypertyURL', hypertyURL);
+    let _this = this;
+    return new Promise((resolve, reject) => {
+      _this.getIdToken(hypertyURL).then(function(identity) {
+        console.log('[Identity.IdentityModule.getValidToken] Token', identity);
+        let time_now = _this._seconds_since_epoch();
+        let complete_id = _this.getIdentity(identity.userProfile.userURL);
+        let expiration_date = undefined;
+
+        if (complete_id.hasOwnProperty('info')) {
+          if (complete_id.info.hasOwnProperty('expires')) {
+            expiration_date = complete_id.info.expires;
+          } else if (complete_id.info.hasOwnProperty('tokenIDJSON')) {
+            expiration_date = complete_id.info.tokenIDJSON.exp;
+          } else {
+            // throw 'The ID Token does not have an expiration time';
+            console.log('The ID Token does not have an expiration time');
+            resolve(identity);
+          }
+        } else if (complete_id.hasOwnProperty("infoToken") && complete_id.infoToken.hasOwnProperty("exp")) {
+          expiration_date = complete_id.infoToken.exp;
+        } else {
+          // throw 'The ID Token does not have an expiration time';
+          console.log('The ID Token does not have an expiration time');
+          resolve(identity);
+        }
+
+        console.log('[Identity.IdentityModule.getValidToken] Token expires in', expiration_date);
+        console.log('[Identity.IdentityModule.getValidToken] time now:', time_now);
+
+        if (time_now >= expiration_date) {
+          if (identity.idp === 'google.com') {
+            _this.sendRefreshMessage(identity).then((newIdentity) => {
+              _this.deleteIdentity(complete_id.identity);
+              _this.storeIdentity(newIdentity.body.params.identity, newIdentity.body.params.identity.keyPair).then((value) => {
+                resolve(value);
+              }, (err) => {
+                console.error('[Identity.IdentityModule.getToken] error on getToken', err);
+                reject(err);
+              });
+            });
+          } else { // microsoft.com
+            _this.deleteIdentity(complete_id.identity);
+            // generate new idToken
+            _this.callGenerateMethods(identity.idp).then((value) => {
+              resolve(value);
+            }).catch(err => {reject('On addGUIListeners from if storeIdentity method postMessage error: ' + err)});
+          }
+        } else {
+          resolve(identity);
+        }
+      }).catch(function(error) {
+        console.error('[Identity.IdentityModule.getToken] error on getToken', error);
+        reject(error);
+      });
+    });
+  }
+
+    /**
+  * returns the reporter associated to the dataObject URL
+  * @param   {String}   dataObjectURL         dataObject url
+  * @return   {String}  reporter              dataObject url reporter
+  */
+  _getHypertyFromDataObject(dataObjectURL) {
+    log('_getHypertyFromDataObject:dataObjectURL', dataObjectURL);
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+
+      let finalURL = _this._parseMessageURL(dataObjectURL);
+
+      // check if is the creator of the hyperty
+      let reporterURL = _this.registry.getReporterURLSynchonous(finalURL);
+      log('_getHypertyFromDataObject:reporterURL', reporterURL);
+
+      if (reporterURL) {
+        resolve(reporterURL);
+      } else {
+        // check if there is already an association from an hypertyURL to the dataObject
+        let storedReporterURL = _this.dataObjectsIdentity[finalURL];
+        log('_getHypertyFromDataObject:storedReporterURL', storedReporterURL);
+
+        if (storedReporterURL) {
+          resolve(storedReporterURL);
+        } else {
+          // check if there is any hyperty that subscribed the dataObjectURL
+          let subscriberHyperty = _this.registry.getDataObjectSubscriberHyperty(dataObjectURL);
+          log('_getHypertyFromDataObject:subscriberHyperty', subscriberHyperty);
+
+          if (subscriberHyperty) {
+            resolve(subscriberHyperty);
+          } else {
+            // search in domain registry for the hyperty associated to the dataObject
+            // search in case is a subscriber who wants to know the reporter
+            _this._coreDiscovery.discoverDataObjectPerURL(finalURL, splitedURL[2]).then(dataObject => {
+              log('_getHypertyFromDataObject:dataObject', dataObject);
+              _this.dataObjectsIdentity[finalURL] = dataObject.reporter;
+              log('_getHypertyFromDataObject:dataObject.reporter', dataObject.reporter);
+              resolve(dataObject.reporter);
+            }, err => {
+              reject(err);
+            });
+          }
+        }
+      }
+    });
+  }
+
+  _sendReporterSessionKey(message, chatKeys) {
+    let _this = this;
+    let sessionKeyBundle = _this.dataObjectSessionKeys[chatKeys.dataObjectURL];
+    let reporterSessionKeyMsg;
+    let valueToEncrypt;
+    let sessionKey;
+    let iv;
+    let value = {};
+
+    return new Promise(function(resolve, reject) {
+
+      //if there is not yet a session Key, generates a new one
+      if (!sessionKeyBundle) {
+        sessionKey = _this.crypto.generateRandom();
+        _this.dataObjectSessionKeys[chatKeys.dataObjectURL] = {sessionKey: sessionKey, isToEncrypt: true};
+
+        _this.storageManager.set('dataObjectSessionKeys', 0, _this.dataObjectSessionKeys).catch(err => {
+          reject('On _sendReporterSessionKey from method storageManager.set error: ' + err);
+        });
+      } else {
+        sessionKey = sessionKeyBundle.sessionKey;
+      }
+      try{
+        valueToEncrypt = JSON.stringify({value: _this.crypto.encode(sessionKey), dataObjectURL: chatKeys.dataObjectURL});
+      } catch (err){
+        return reject('On _sendReporterSessionKey from method storageManager.set error: ' + err);
+      }
+      iv = _this.crypto.generateIV();
+      value.iv = _this.crypto.encode(iv);
+      _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, valueToEncrypt, iv).then(encryptedValue => {
+
+        reporterSessionKeyMsg = {
+          type: 'handshake',
+          to: message.from,
+          from: message.to,
+          body: {
+            handshakePhase: 'reporterSessionKey',
+            value: _this.crypto.encode(encryptedValue)
+          }
+        };
+
+        let filteredMessage = _this._filterMessageToHash(reporterSessionKeyMsg, valueToEncrypt + iv, chatKeys.hypertyFrom.messageInfo);
+
+        return _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, filteredMessage);
+      }).then(hashedMessage => {
+
+        let valueWithHash = btoa(JSON.stringify({value: reporterSessionKeyMsg.body.value, hash: _this.crypto.encode(hashedMessage), iv: value.iv}));
+
+        reporterSessionKeyMsg.body.value = valueWithHash;
+        resolve({message: reporterSessionKeyMsg, chatKeys: chatKeys});
+      }).catch(err => {
+        reject('On _sendReporterSessionKey from chained promises encryptAES error: ' + err);
+      });
+    });
+  }
+
+  /**
+  * Function that resolve and create the domainURL in case it is provided one. If not, resolve the default domainURL
+  * @param {String}     idpDomain     idpDomain (Optional)
+  */
+  _resolveDomain(idpDomain) {
+    if (!idpDomain) {
+      return 'domain-idp://google.com';
+    } else {
+      return 'domain-idp://' + idpDomain;
+    }
+  }
+
   _doHandShakePhase(message, chatKeys) {
+  // log('_doHandShakePhase:dataObject', message);
+	//	log('_doHandShakePhase:chatKeys', chatKeys);
+    
     let _this = this;
 
     console.log('handshake phase');
@@ -1604,14 +1853,16 @@ class IdentityModule {
 
           // check if was the encrypt function or the mutual authentication that request the
           // start of the handShakePhase.
+
           if (chatKeys.initialMessage) {
             resolve({message: startHandShakeMsg, chatKeys: chatKeys});
           } else {
             _this.chatKeys[message.from + '<->' + message.to] = chatKeys;
             _this._messageBus.postMessage(startHandShakeMsg);
           }
-
+          
           break;
+          
         }
         case 'senderHello': {
 
@@ -1839,7 +2090,9 @@ class IdentityModule {
             chatKeys.handshakeHistory.receiverFinishedMessage = _this._filterMessageToHash(receiverFinishedMessage, 'ok!' + iv, chatKeys.hypertyFrom.messageInfo);
             chatKeys.authenticated = true;
             resolve({message: receiverFinishedMessage, chatKeys: chatKeys});
-          });
+          }).catch( err => {
+            reject('On _doHandShakePhase from senderCertificate error: ' + err);
+           });
 
           break;
         }
@@ -1879,7 +2132,9 @@ class IdentityModule {
               } else {
                 _this._sendReporterSessionKey(message, chatKeys).then(value => {
                   resolve(value);
-                });
+                }).catch( err => {
+                  reject('On _doHandShakePhase from receiverFinishedMessage error: ' + err);
+                 });
               }
             });
           });
@@ -1944,7 +2199,9 @@ class IdentityModule {
 
             receiverAcknowledgeMsg.body.value = finalValue;
             resolve({message: receiverAcknowledgeMsg, chatKeys: chatKeys});
-          });
+          }).catch( err => {
+              reject('On _doHandShakePhase from receiverFinishedMessage error: ' + err);
+            });
 
           break;
         }
@@ -1971,113 +2228,15 @@ class IdentityModule {
               callback('handShakeEnd');
             }
             resolve('handShakeEnd');
-          });
+          }).catch( err => {
+              reject('On _doHandShakePhase from receiverAcknowledge error: ' + err);
+            });
 
           break;
         }
 
         default:
           reject(message);
-      }
-    });
-  }
-
-  _sendReporterSessionKey(message, chatKeys) {
-    let _this = this;
-    let sessionKeyBundle = _this.dataObjectSessionKeys[chatKeys.dataObjectURL];
-    let reporterSessionKeyMsg;
-    let valueToEncrypt;
-    let sessionKey;
-    let iv;
-    let value = {};
-
-    return new Promise(function(resolve, reject) {
-
-      //if there is not yet a session Key, generates a new one
-      if (!sessionKeyBundle) {
-        sessionKey = _this.crypto.generateRandom();
-        _this.dataObjectSessionKeys[chatKeys.dataObjectURL] = {sessionKey: sessionKey, isToEncrypt: true};
-
-        _this.storageManager.set('dataObjectSessionKeys', 0, _this.dataObjectSessionKeys);
-      } else {
-        sessionKey = sessionKeyBundle.sessionKey;
-      }
-
-      valueToEncrypt = JSON.stringify({value: _this.crypto.encode(sessionKey), dataObjectURL: chatKeys.dataObjectURL});
-
-      iv = _this.crypto.generateIV();
-      value.iv = _this.crypto.encode(iv);
-      _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, valueToEncrypt, iv).then(encryptedValue => {
-
-        reporterSessionKeyMsg = {
-          type: 'handshake',
-          to: message.from,
-          from: message.to,
-          body: {
-            handshakePhase: 'reporterSessionKey',
-            value: _this.crypto.encode(encryptedValue)
-          }
-        };
-
-        let filteredMessage = _this._filterMessageToHash(reporterSessionKeyMsg, valueToEncrypt + iv, chatKeys.hypertyFrom.messageInfo);
-
-        return _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, filteredMessage);
-      }).then(hashedMessage => {
-
-        let valueWithHash = btoa(JSON.stringify({value: reporterSessionKeyMsg.body.value, hash: _this.crypto.encode(hashedMessage), iv: value.iv}));
-
-        reporterSessionKeyMsg.body.value = valueWithHash;
-        resolve({message: reporterSessionKeyMsg, chatKeys: chatKeys});
-      });
-    });
-  }
-
-  /**
-  * returns the reporter associated to the dataObject URL
-  * @param   {String}   dataObjectURL         dataObject url
-  * @return   {String}  reporter              dataObject url reporter
-  */
-  _getHypertyFromDataObject(dataObjectURL) {
-    let _this = this;
-
-    return new Promise(function(resolve, reject) {
-
-      //TODO remove this logic and move it to a util function
-
-      let splitedURL = dataObjectURL.split('/');
-      let finalURL = splitedURL[0] + '//' + splitedURL[2] + '/' + splitedURL[3];
-      if (splitedURL.length > 6) {
-        finalURL = splitedURL[0] + '//' + splitedURL[2] + '/' + splitedURL[3] + '/' + splitedURL[4];
-      }
-
-      // check if is the creator of the hyperty
-      let reporterURL = _this.registry.getReporterURLSynchonous(finalURL);
-
-      if (reporterURL) {
-        resolve(reporterURL);
-      } else {
-        // check if there is already an association from an hypertyURL to the dataObject
-        let storedReporterURL = _this.dataObjectsIdentity[finalURL];
-
-        if (storedReporterURL) {
-          resolve(storedReporterURL);
-        } else {
-          // check if there is any hyperty that subscribed the dataObjectURL
-          let subscriberHyperty = _this.registry.getDataObjectSubscriberHyperty(dataObjectURL);
-
-          if (subscriberHyperty) {
-            resolve(subscriberHyperty);
-          } else {
-            // search in domain registry for the hyperty associated to the dataObject
-            // search in case is a subscriber who wants to know the reporter
-            _this._coreDiscovery.discoverDataObjectPerURL(finalURL, splitedURL[2]).then(dataObject => {
-              _this.dataObjectsIdentity[finalURL] = dataObject.reporter;
-              resolve(dataObject.reporter);
-            }, err => {
-              reject(err);
-            });
-          }
-        }
       }
     });
   }
@@ -2164,6 +2323,23 @@ class IdentityModule {
 
     return newChatCrypto;
   }
+  
+  _seconds_since_epoch() {
+    return Math.floor( Date.now() / 1000 );
+  }
+  
+  _parseMessageURL(URL){
+    let splitedToURL = URL.split('/');
+    if (splitedToURL.length <= 6)
+      return splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3];
+    else
+      return splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3] + '/' + splitedToURL[4];
+  }
+
+}
+
+function log(f1, f2){
+	console.log(f1, JSON.stringify(util.inspect(f2)));
 }
 
 export default IdentityModule;
