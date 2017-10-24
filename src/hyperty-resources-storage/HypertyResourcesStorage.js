@@ -45,6 +45,17 @@ class HypertyResourcesStorage {
     let contentUrl = _this._url + '/' + generateGUID();
 
     let content = message.body.value;
+    let resourceURL = message.body.value.url;
+
+    // TODO: should verify if the current ressource already exists;
+    // because when we, in the app, and did read to a resource a new create was sended;
+    // we should control this;
+    let resourceFind = Object.keys(_this._hypertyResources).find(item => _this._hypertyResources[item].url === resourceURL);
+
+    console.log('Resource Find: ', resourceFind);
+    if (resourceFind) {
+      return;
+    }
 
     if (!content.contentURL) content.contentURL = [];
 
