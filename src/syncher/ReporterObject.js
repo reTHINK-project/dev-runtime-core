@@ -1,4 +1,4 @@
-import { divideURL } from '../utils/utils';
+import { divideURL, splitObjectURL } from '../utils/utils';
 import Subscription from './Subscription';
 
 class ReporterObject {
@@ -11,7 +11,6 @@ class ReporterObject {
     _this._url = url;
 
     _this._bus = parent._bus;
-    _this._storageManager = parent._storageManager;
 
     _this._domain = divideURL(url).domain;
     _this._objSubscriptorURL = _this._url + '/subscription';
@@ -21,6 +20,8 @@ class ReporterObject {
     _this._childrenListeners = [];
 
     _this._forwards = {};
+
+    _this._isToSaveData = false;
 
     _this._allocateListeners();
   }
@@ -40,12 +41,21 @@ class ReporterObject {
 
     let changeURL = _this._url + '/changes';
     _this._changeListener = _this._bus.addListener(changeURL, (msg) => {
+
+      console.log('[SyncherManager.ReporterObject ] SyncherManager-' + changeURL + '-RCV: ', msg);
+
       //TODO: what todo here? Save changes?
-      if (msg.body.attribute) {
+      if (this._isToSaveData && msg.body.attribute) {
+        console.log('[SyncherManager.ReporterObject ] SyncherManager - save data: ', msg);
+        _this._parent._dataObjectsStorage.update(true, _this._url, 'version', msg.body.version);
+        _this._parent._dataObjectsStorage.update(true, _this._url, 'lastModified', msg.body.lastModified);
         _this._parent._dataObjectsStorage.saveData(true, _this._url, msg.body.attribute, msg.body.value);
       }
-      console.log('[SyncherManager.ReporterObject ] SyncherManager-' + changeURL + '-RCV: ', msg);
     });
+  }
+
+  set isToSaveData(value) {
+    this._isToSaveData = value;
   }
 
   _releaseListeners() {
@@ -72,13 +82,19 @@ class ReporterObject {
   resumeSubscriptions(subscriptions) {
     let _this = this;
 
+    if (!subscriptions)
+      return;
+
     Object.keys(subscriptions).forEach((key) => {
       let hypertyURL = subscriptions[key];
+
+      console.log('[SyncherManager.ReporterObject] - resume subscriptions', _this, hypertyURL, _this._childrens);
 
       if (!_this._subscriptions[hypertyURL]) {
         _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, _this._childrens, true);
       }
     });
+
   }
 
   /**
@@ -92,7 +108,7 @@ class ReporterObject {
     //FLOW-OUT: message sent to the msg-node SubscriptionManager component
     let nodeSubscribeMsg = {
       type: 'subscribe', from: _this._parent._url, to: 'domain://msg-node.' + _this._domain + '/sm',
-      body: { subscribe: addresses, source: _this._owner }
+      body: { resources: addresses, source: _this._owner }
     };
 
     return new Promise((resolve, reject) => {
@@ -122,7 +138,7 @@ class ReporterObject {
     //FLOW-OUT: message sent to the msg-node SubscriptionManager component
     let nodeUnSubscribeMsg = {
       type: 'unsubscribe', from: _this._parent._url, to: 'domain://msg-node.' + _this._domain + '/sm',
-      body: { subscribe: [address], source: _this._owner }
+      body: { resources: [address], source: _this._owner }
     };
 
     _this._bus.postMessage(nodeUnSubscribeMsg);
@@ -165,7 +181,7 @@ class ReporterObject {
       //FLOW-OUT: message sent to the msg-node SubscriptionManager component
       let nodeSubscribeMsg = {
         type: 'subscribe', from: _this._parent._url, to: 'domain://msg-node.' + _this._domain + '/sm',
-        body: { subscribe: subscriptions, source: _this._owner }
+        body: { resources: subscriptions, source: _this._owner }
       };
 
       _this._bus.postMessage(nodeSubscribeMsg, (reply) => {
@@ -177,6 +193,33 @@ class ReporterObject {
             let childListener = _this._bus.addListener(childURL, (msg) => {
               //TODO: what todo here? Save childrens?
               console.log('[SyncherManager.ReporterObject received]', msg);
+
+              if (msg.type === 'create' && msg.to.includes('children') && this._isToSaveData) {
+
+                // if the value is not encrypted lets encrypt it
+                // todo: should be subject to some policy
+                let splitedReporterURL = splitObjectURL(msg.to);
+
+                let url = splitedReporterURL.url;
+
+                //remove false when mutualAuthentication is enabled
+                if (!(typeof msg.body.value === 'string')) {
+
+                  console.log('[SyncherManager.ReporterObject] encrypting received data ', msg.body.value);
+
+                  _this._parent._identityModule.encryptDataObject(msg.body.value, url).then((encryptedValue)=>{
+                    console.log('[SyncherManager.ReporterObject] encrypted data ',  encryptedValue);
+
+                    _this._storeChildObject(msg, JSON.stringify(encryptedValue));
+                  }).catch((reason) => {
+                    console.warn('[SyncherManager._decryptChildrens] failed : ', reason, ' Storing unencrypted');
+                    _this._storeChildObject(msg, msg.body.value);
+                  });
+                } else {
+                  _this._storeChildObject(msg, msg.body.value);
+                }
+              }
+
             });
             _this._childrenListeners.push(childListener);
 
@@ -190,6 +233,31 @@ class ReporterObject {
         }
       });
     });
+  }
+
+  // store childObject
+
+  _storeChildObject(msg, data) {
+    let _this = this;
+
+    let splitedReporterURL = splitObjectURL(msg.to);
+
+    let url = splitedReporterURL.url;
+
+    let resource = splitedReporterURL.resource;
+    let value = {
+      identity: msg.body.identity,
+      value: data
+    };
+
+    let objectURLResource = msg.body.resource;
+    let attribute = resource;
+
+    if (objectURLResource) attribute += '.' + objectURLResource;
+
+    console.log('[SyncherManager.ReporterObject._storeChildObject] : ', url, attribute, value);
+
+    _this._parent._dataObjectsStorage.saveChildrens(true, url, attribute, value);
   }
 
   delete() {
@@ -287,14 +355,20 @@ class ReporterObject {
   //FLOW-IN: message received from remote ObserverObject -> removeSubscription
   _onRemoteUnSubscribe(msg) {
     let _this = this;
-    let hypertyURL = msg.body.subscriber;
+    let unsubscriber = msg.body.source;
 
-    let subscription = _this._subscriptions[hypertyURL];
+    let subscription = _this._subscriptions[unsubscriber];
     if (subscription) {
       subscription._releaseListeners();
-      delete _this._subscriptions[hypertyURL];
+      delete _this._subscriptions[unsubscriber];
 
-      //TODO: send un-subscribe message to Syncher? (depends on the operation mode)
+      let forwardMsg = {
+        type: 'forward', from: _this._url, to: _this._owner,
+        body: { type: msg.type, from: unsubscriber, to: _this._url, identity: msg.body.identity }
+      };
+
+
+      _this._bus.postMessage(forwardMsg);
     }
 
   }

@@ -21,7 +21,7 @@
 * limitations under the License.
 **/
 
-import 'babel-polyfill';
+// import 'babel-polyfill';
 
 //Main dependecies
 import Registry from '../registry/Registry';
@@ -37,10 +37,14 @@ import Descriptors from './Descriptors';
 import { runtimeConfiguration } from './runtimeConfiguration';
 import { runtimeUtils } from './runtimeUtils';
 
-// import GraphConnector from '../graphconnector/GraphConnector';
+import GraphConnector from '../graphconnector/GraphConnector';
+
+import CoreDiscovery from '../discovery/CoreDiscovery';
 
 import DataObjectsStorage from '../store-objects/DataObjectsStorage';
+import HypertyResourcesStorage from '../hyperty-resources-storage/HypertyResourcesStorage';
 import SyncherManager from '../syncher/SyncherManager';
+import SubscriptionManager from '../subscriptionManager/SubscriptionManager';
 import RuntimeCoreCtx from '../policy/context/RuntimeCoreCtx';
 
 /**
@@ -56,6 +60,7 @@ import RuntimeCoreCtx from '../policy/context/RuntimeCoreCtx';
  * @property {Registry} registry - Registry Module;
  * @property {MessageBus} messageBus - Message Bus is used like a router to redirect the messages from one component to other(s)
  * @property {GraphConnector} graphConnector - Graph Connector handling GUID and contacts
+ * @property {CoreDiscovery} coreDiscovery - Discovery for discovery hyperties/dataObjects
  */
 class RuntimeUA {
 
@@ -87,24 +92,25 @@ class RuntimeUA {
     if (typeof runtimeFactory.createRuntimeCatalogue === 'function') {
       this.persistenceManager = runtimeFactory.createRuntimeCatalogue();
     } else {
-      throw new Error('Check your Runtime Factory because it need the Runtime Catalogue implementation');
+      throw new Error('Check your Runtime Factory because it needs the Runtime Catalogue implementation');
     }
 
     if (typeof runtimeFactory.persistenceManager === 'function') {
       this.persistenceManager = runtimeFactory.persistenceManager();
     } else {
-      throw new Error('Check your Runtime Factory because it need the Persistence Manager implementation');
+      throw new Error('Check your Runtime Factory because it needs the Persistence Manager implementation');
     }
 
     if (typeof runtimeFactory.storageManager === 'function') {
       this.storageManager = runtimeFactory.storageManager();
     } else {
-      throw new Error('Check your Runtime Factory because it need the Storage Manager implementation');
+      throw new Error('Check your Runtime Factory because it needs the Storage Manager implementation');
     }
+
     if (typeof runtimeFactory.runtimeCapabilities === 'function') {
       this.runtimeCapabilities = runtimeFactory.runtimeCapabilities(this.storageManager);
     } else {
-      console.info('Check your RuntimeFactory because it need the Runtime Capabilities implementation');
+      console.info('Check your RuntimeFactory because it needs the Runtime Capabilities implementation');
     }
 
   }
@@ -126,8 +132,10 @@ class RuntimeUA {
         let getCapabilities = this.runtimeCapabilities.getRuntimeCapabilities();
         let getRuntimeURL = this.storageManager.get('runtime:URL');
         let getStoredDataObjects = this.storageManager.get('syncherManager:ObjectURLs');
+        let getHypertyStorageObjects = this.storageManager.get('hypertyResources');
+        let getP2PHandlerURL = this.storageManager.get('p2pHandler:URL');
 
-        Promise.all([getRuntimeURL, getCapabilities, getStoredDataObjects]).then((results) => {
+        Promise.all([getRuntimeURL, getCapabilities, getStoredDataObjects, getHypertyStorageObjects, getP2PHandlerURL]).then((results) => {
 
           this.runtimeURL = results[0] ? results[0].runtimeURL : results[0];
           if (!this.runtimeURL) {
@@ -135,13 +143,27 @@ class RuntimeUA {
             this.storageManager.set('runtime:URL', 1, {runtimeURL: this.runtimeURL});
           }
 
+
           this.capabilities = results[1];
           Object.assign(runtimeUtils.runtimeCapabilities.constraints, results[1]);
 
           this._dataObjectsStorage = new DataObjectsStorage(this.storageManager, results[2] || {});
 
+          this._hypertyResources = results[3] || {};
+
+          this.p2pHandlerURL = results[4] ? results[4].p2pHandlerURL : results[4];
+          if (!this.p2pHandlerURL) {
+            this.p2pHandlerURL = this.runtimeURL + '/p2phandler/' + generateGUID();
+            console.info('[RuntimeUA - init] P2PHandlerURL: ', this.p2pHandlerURL);
+
+            this.storageManager.set('p2pHandler:URL', 1, {p2pHandlerURL: this.p2pHandlerURL});
+          }
+
           return this._loadComponents();
+
         }).then((status) => {
+
+          this._hypertyResourcesStorage = new HypertyResourcesStorage(this.runtimeURL, this.messageBus, this.storageManager, this._hypertyResources);
 
           if (this.p2p) {
             console.info('[RuntimeUA - init] load p2pHandler: ', status);
@@ -150,8 +172,8 @@ class RuntimeUA {
             console.info('[RuntimeUA - init] P2P not supported');
             return ('P2P Not Supported');
           }
-        })
-        .then((result) => {
+
+        }).then((result) => {
           console.info('[runtime ua - init] - status: ', result);
           resolve(true);
         }, (reason) => {
@@ -233,7 +255,7 @@ class RuntimeUA {
         this.loader = new Loader(this.runtimeURL, this.runtimeConfiguration, this.descriptorInstance);
 
         // Instantiate the identity Module
-        this.identityModule = new IdentityModule(this.runtimeURL, this.runtimeCapabilities, this.storageManager, this.runtimeFactory);
+        this.identityModule = new IdentityModule(this.runtimeURL, this.runtimeCapabilities, this.storageManager, this._dataObjectsStorage);
 
         // Use the sandbox factory to create an AppSandbox;
         // In the future can be decided by policyEngine if we need
@@ -241,7 +263,7 @@ class RuntimeUA {
         let appSandbox = this.runtimeFactory.createAppSandbox();
 
         // Instantiate the Registry Module
-        this.registry = new Registry(this.runtimeURL, appSandbox, this.identityModule, this.runtimeCatalogue, this.runtimeCapabilities, this.storageManager);
+        this.registry = new Registry(this.runtimeURL, appSandbox, this.identityModule, this.runtimeCatalogue, this.runtimeCapabilities, this.storageManager, this.p2pHandlerURL);
 
         // Set the loader to load Hyperties, Stubs and IdpProxies
         this.registry.loader = this.loader;
@@ -253,7 +275,7 @@ class RuntimeUA {
         this.addressAllocation = new AddressAllocation(this.runtimeURL, this.messageBus, this.registry);
 
         // Instantiate the Policy Engine
-        this.policyEngine = new PEP(new RuntimeCoreCtx(this.identityModule, this.registry, this.storageManager, this.runtimeCapabilities));
+        this.policyEngine = new PEP(new RuntimeCoreCtx(this.runtimeURL, this.identityModule, this.registry, this.storageManager, this.runtimeCapabilities));
 
         this.messageBus.pipeline.handlers = [
 
@@ -269,6 +291,12 @@ class RuntimeUA {
           }
         ];
 
+        // Instantiate the Graph Connector
+        this.graphConnector = process.env.MODE !== 'light' ? new GraphConnector(this.runtimeURL, this.messageBus, this.storageManager) : null;
+
+        // Instantiate Discovery
+        this.coreDiscovery = new CoreDiscovery(this.runtimeURL, this.messageBus, this.graphConnector, this.runtimeFactory, this.registry);
+
         // Add to App Sandbox the listener;
         appSandbox.addListener('*', (msg) => {
           this.messageBus.postMessage(msg);
@@ -277,15 +305,25 @@ class RuntimeUA {
         // Register messageBus on Registry
         this.registry.messageBus = this.messageBus;
 
+        // Policy Engine
+        this.policyEngine.messageBus = this.messageBus;
+
+        // Register messageBus on IDM
+        this.identityModule.messageBus = this.messageBus;
+
         // Register registry on IdentityModule
         this.identityModule.registry = this.registry;
+
+        // Register coreDiscovery on IdentityModule
+        this.identityModule.coreDiscovery = this.coreDiscovery;
 
         // Use sandbox factory to use specific methods
         // and set the message bus to the factory
         this.runtimeFactory.messageBus = this.messageBus;
 
         // Instanciate the SyncherManager;
-        this.syncherManager = new SyncherManager(this.runtimeURL, this.messageBus, this.registry, this.runtimeCatalogue, this.storageManager, null, this._dataObjectsStorage);
+        this.syncherManager = new SyncherManager(this.runtimeURL, this.messageBus, this.registry, this.runtimeCatalogue, this.storageManager, null, this._dataObjectsStorage, this.identityModule);
+
 
         // Set into loader the needed components;
         this.loader.runtimeURL = this.runtimeURL;
@@ -294,9 +332,37 @@ class RuntimeUA {
         this.loader.runtimeCatalogue = this.runtimeCatalogue;
         this.loader.runtimeFactory = this.runtimeFactory;
 
-        // Instantiate the Graph Connector
-        // _this.graphConnector = new GraphConnector(_this.runtimeURL, _this.messageBus);
-        resolve(true);
+        //Instantiate Discovery Lib for notification testing
+        // this.discovery = new Discovery("hyperty://localhost/test", this.runtimeURL, this.messageBus);
+        // this.loadStub("localhost");
+        // setTimeout(() => {
+        //   this.discovery.discoverHypertiesDO("user://google.com/openidtest20@gmail.com")
+        //   .then(hyperties => {
+        //     hyperties.forEach(hyperty =>{
+        //       hyperty.onLive(() => console.log(`Notification from ${hyperty.data.hypertyID} changed to live`));
+        //       hyperty.onDisconnected(() => console.log(`Notification from ${hyperty.data.hypertyID} changed to disconnected`));
+        //     });
+        //   });
+        // }, 2000);
+
+        // Instanciate the SubscriptionManager;
+        this.subscriptionManager = new SubscriptionManager(this.runtimeURL, this.messageBus, this.storageManager);
+
+        // this.subscriptionManager.init().then(()=>{
+        //   resolve(true);
+        // });
+
+        const prepareComponents = [];
+        prepareComponents.push(this.subscriptionManager.init());
+        prepareComponents.push(this.identityModule.loadIdentities());
+
+        Promise.all(prepareComponents).then((result) => {
+          if (result.length === 2) {
+            resolve(true);
+          }
+        }).catch((reason) => {
+          throw Error(reason);
+        });
 
       } catch (e) {
         reject(e);

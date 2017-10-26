@@ -4,7 +4,7 @@ var path = require('path');
 function PrependText(options) {
   this.opts = options;
 
-  if (!this.opts.bundleDir) this.opts.bundleDir = './dist/';
+  if (!this.opts.bundleDir) this.opts.bundleDir = path.join(__dirname, '..', 'dist');
   if (!this.opts.data) this.opts.data = '';
 
 }

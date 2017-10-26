@@ -89,12 +89,13 @@ class Loader {
    *
    * @param {URL.HypertyCatalogueURL} hypertyCatalogueURL - The Catalogue URL used to identify descriptors in the Catalogue.
    * @param {boolean|URL.HypertyURL} [reuseURL=false] reuseURL - reuseURL is used to reuse the hypertyURL previously registred, by default the reuse is disabled;
-   * @param {URL} appURL - the app url address; // TODO: improve this description;
+   * @param {URL} appURL - the app url origin address;
+   * @param {object} IdpConstraint - constraints to be used when selecting the identity to be associated with the Hyperty including origin, idp, and idHint.
    * @returns {Promise<Boolean, Error>} this is Promise and returns true if all components are loaded with success or an error if someone fails.
    *
    * @memberOf Loader
    */
-  loadHyperty(hypertyCatalogueURL, reuseURL = false, appURL) {
+  loadHyperty(hypertyCatalogueURL, reuseURL = false, IdpConstraint, appURL) {
 
     if (!this._readyToUse()) return false;
     if (!hypertyCatalogueURL) throw new   Error('[Runtime.Loader] Hyperty descriptor url parameter is needed');
@@ -236,14 +237,14 @@ class Loader {
         console.info('[Runtime.Loader] 6: return the addresses for the hyperty', addresses);
 
         // Register hyperty
-        return this.registry.registerHyperty(_hypertySandbox, hypertyCatalogueURL, _hypertyDescriptor, addresses);
+        return this.registry.registerHyperty(_hypertySandbox, hypertyCatalogueURL, _hypertyDescriptor, addresses, IdpConstraint);
       }, handleError)
-      .then((hypertyURL) => {
+      .then((registrationResult) => {
         if (haveError) return false;
-        console.info('[Runtime.Loader] 7: Hyperty url, after register hyperty', hypertyURL);
+        console.info('[Runtime.Loader] 7: registration result', registrationResult);
 
         // we have completed step 16 of https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
-        _hypertyURL = hypertyURL;
+        _hypertyURL = registrationResult.url;
 
         // Extend original hyperty configuration;
         let configuration = {};
@@ -255,6 +256,12 @@ class Loader {
           }
         }
         configuration.runtimeURL = this._runtimeURL;
+
+        if (registrationResult.p2pHandler) {
+          configuration.p2pHandler = registrationResult.p2pHandler;
+          configuration.p2pRequester = registrationResult.p2pRequester;
+        }
+
 
         // We will deploy the component - step 17 of https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
 
@@ -282,6 +289,7 @@ class Loader {
           status: deployComponentStatus
         };
 
+        console.info('[Runtime.Loader] Hyperty: ', hyperty);
         resolve(hyperty);
 
         // we have completed step 21 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
@@ -293,7 +301,7 @@ class Loader {
 
   /**
   * Deploy Stub from Catalogue URL or domain url
-  * @param  {URL.URL}     domain          domain
+  * @param  {URL.URL}     protostubURL    Catalogue URL for the ProtoStub to be loaded or the domain to be target by the protostub
   * @param  {Object}      p2pConfig       configuration of p2p
   */
   loadStub(protostubURL, p2pConfig) {
@@ -484,23 +492,24 @@ class Loader {
 
           // step 24 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
           try {
+            // step 26 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+            console.info('[Runtime.Loader.loadStub] 8: adding sandbox listener to protostubURL : ', _runtimeProtoStubURL);
+
+            // step 27 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+            // Add the message bus listener
+            this.messageBus.addListener(_runtimeProtoStubURL, (msg) => {
+              _stubSandbox.postMessage(msg);
+            });
+
             return _stubSandbox.deployComponent(_stubSourcePackage.sourceCode, _runtimeProtoStubURL, configuration);
           } catch (e) {
             console.    Error('[Runtime.Loader.loadStub] Error on deploy component:', e);
             reject(e);
           }
         }, handleError)
-        .then((deployComponentStatus) => {
+        .then(() => {
           if (haveError) return false;
 
-          // step 26 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-          console.info('[Runtime.Loader.loadStub] 8: return deploy component for sandbox status: ', deployComponentStatus);
-
-          // step 27 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-          // Add the message bus listener
-          this.messageBus.addListener(_runtimeProtoStubURL, (msg) => {
-            _stubSandbox.postMessage(msg);
-          });
 
           // step 28 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
           let stub;
@@ -674,22 +683,22 @@ class Loader {
 
           // Deploy Component step xxx
           try {
+            // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
+
+            // Add the message bus listener
+            this.messageBus.addListener(_runtimeIdpProxyURL, (msg) => {
+              _proxySandbox.postMessage(msg);
+            });
+
             return _proxySandbox.deployComponent(_proxySourcePackage.sourceCode, runtimeIdpProxyURL, configuration);
           } catch (e) {
             console.  Error('[Runtime.Loader] Error on deploy component:', e);
             reject(e);
           }
         }, handleError)
-        .then((deployComponentStatus) => {
+        .then(() => {
           if (haveError) return false;
-          console.info('[Runtime.Loader] 8: return deploy component for sandbox status: ', deployComponentStatus);
 
-          // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-
-          // Add the message bus listener
-          this.messageBus.addListener(_runtimeIdpProxyURL, (msg) => {
-            _proxySandbox.postMessage(msg);
-          });
 
           // we have completed step xxx https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
@@ -699,13 +708,13 @@ class Loader {
           //   status: deployComponentStatus
           // };
 
-          this.registry.idpProxyList[domain].status = 'deployed';
+          //this.registry.idpProxyList[domain].status = 'deployed';
           let idpProxy = this.registry.idpProxyList[domain];
 
-          console.log('Deployed: ', idpProxy);
+          console.log('[Runtime.Loader.loadIdpProxy] 8: loaded: ', idpProxy);
 
           resolve(idpProxy);
-          console.info('[Runtime.Loader] ------------------- END ---------------------------\n');
+          console.info('[Runtime.Loader.loadIdpProxy] ------------------- END ---------------------------\n');
 
         }, handleError)
         .catch(errorReason);

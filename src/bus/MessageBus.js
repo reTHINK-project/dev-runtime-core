@@ -152,8 +152,9 @@ class MessageBus extends Bus {
      let _this = this;
 
      //resolve external protostub...
-     _this._registry.resolve(msg.to).then((route) => {
-       _this.forward(route, msg);
+     _this._registry.resolve(msg).then((route, msg2route) => {
+       if (msg2route) _this.forward(route, msg2route);
+       else _this.forward(route, msg);
      }).catch(function(e) {
        console.log('RESOLVE-ERROR: ', e);
      });

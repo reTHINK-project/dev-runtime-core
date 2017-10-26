@@ -40,13 +40,13 @@ describe('SyncherManager', function() {
         //reporter subscribe
         expect(msg).to.contain.all.keys({
           id: 2, type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.h1.domain/sm',
-          body: { subscribe: [objURL + '/children/children1', objURL + '/children/children2'], source: hyperURL1 }
+          body: { resources: [objURL + '/children/children1', objURL + '/children/children2'], source: hyperURL1 }
         });
       } else {
         //observer subscribe
         expect(msg).to.contain.all.keys({
           id: 5, type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.obj1/sm',
-          body: { subscribe: [objURL + '/changes', objURL + '/children/children1', objURL + '/children/children2'], source: hyperURL2 }
+          body: { resources: [objURL + '/changes', objURL + '/children/children1', objURL + '/children/children2'], source: hyperURL2 }
         });
       }
 
@@ -68,8 +68,8 @@ describe('SyncherManager', function() {
   };
 
   let registry = {
-    registerDataObject: (identifier, dataObjectschema, dataObjectUrl, dataObjectReporter) => {
-      console.log('REGISTRY-OBJECT: ', identifier, dataObjectschema, dataObjectUrl, dataObjectReporter);
+    registerDataObject: (objectRegistration) => {
+      console.log('REGISTRY-OBJECT: ', objectRegistration);
       return new Promise((resolve) => {
         resolve('ok');
       });
@@ -78,10 +78,13 @@ describe('SyncherManager', function() {
     isInterworkingProtoStub: (url) => {
       console.log('isInterworkingProtoStub: ', url);
       return false;
-    }
-  };
+    },
 
-  let runtimeRegistry = {
+    unregisterDataObject: (url) => {
+      console.log('Unregister Data Object:', url);
+      return true;
+    },
+
     getPreAuthSubscribers: () => {
       return ['hyperty://domain/hyperty-instance'];
     },
@@ -89,15 +92,11 @@ describe('SyncherManager', function() {
       return 'HypertyChat';
     },
     isDataObjectURL: (dataObjectURL) => {
-      let splitURL = dataObjectURL.split('://');
+      let splitURL = dataObjectURL.split.skip('://');
       return splitURL[0] === 'comm';
     },
     registerSubscribedDataObject: () => {},
     registerSubscriber: () => {},
-    isInterworkingProtoStub: (url) => {
-      console.log('isInterworkingProtoStub: ', url);
-      return false;
-    },
     isLocal: (url) => {
       console.log('isLocal: ', url);
       return false;
@@ -141,13 +140,21 @@ describe('SyncherManager', function() {
     }
   };
 
-  let policyEngine = new PEP(new RuntimeCoreCtx(identityModule, runtimeRegistry, storageManager, runtimeFactory.runtimeCapabilities()));
+  let runtimeCoreCtx = new RuntimeCoreCtx(runtimeURL, identityModule, registry, storageManager, runtimeFactory.runtimeCapabilities());
+  let policyEngine = new PEP(runtimeCoreCtx);
 
   let handlers = [
 
     // Policy message authorise
     function(ctx) {
       policyEngine.authorise(ctx.msg).then(function(changedMgs) {
+
+        changedMgs.body.identity = {
+          userProfile: {
+            userURL: 'user://user@domain.pt'
+          }
+        };
+
         ctx.msg = changedMgs;
         ctx.next();
       }).catch(function(reason) {
@@ -159,12 +166,13 @@ describe('SyncherManager', function() {
 
   it('reporter read', function(done) {
     let bus = new MessageBus();
+
     bus._onPostMessage = (msg) => {
       console.log('_onPostMessage: ', msg);
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
@@ -177,7 +185,7 @@ describe('SyncherManager', function() {
 
       sync2.read(dor.url).then((data) => {
         console.log('on-read-reply', data);
-        expect(data).to.contain.all.keys({ communication: { name: 'chat-x' }, x: 10, y: 10 });
+        expect(data.data).to.contain.all.keys({ communication: { name: 'chat-x' }, x: 10, y: 10 });
         done();
       });
     });
@@ -185,12 +193,15 @@ describe('SyncherManager', function() {
 
   it('reporter observer integration', function(done) {
     let bus = new MessageBus();
+    bus.pipeline.handlers = handlers;
+
     bus._onPostMessage = (msg) => {
-      console.log('_onPostMessage: ', msg);
+      console.log('[reporter observer integration - onPostMessage]: ', msg);
+
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
@@ -215,8 +226,13 @@ describe('SyncherManager', function() {
       console.log('on-create-reply', dor);
       dor.inviteObservers([hyperURL2]);
 
+      dor.onRead((event) => {
+        console.log('on-read');
+        event.accept();
+      });
+
       dor.onSubscription((subscribeEvent) => {
-        console.log('on-subscribe: ', subscribeEvent);
+        console.log('on-resources: ', subscribeEvent);
 
         //we may have some problems in the time sequence here.
         //change-msg can reach the observer first
@@ -244,13 +260,52 @@ describe('SyncherManager', function() {
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
+
+    let a;
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
-    sync2.resumeObservers({}).then((doo) => {
-      console.log('on-subscribe-resume-reply', doo);
-      expect(doo.data).to.contain.all.keys({ communication: { name: 'chat-x' }, x: 10, y: 10, reporter: hyperURL1});
+    sync2.resumeObservers({}).then((doos) => {
+
+      console.log('on-subscribe-resume-reply', doos);
+
+      Object.values(doos).forEach((doo) => {
+        console.log('on-subscribe-resume-reply DataObjectObserver: ', doo);
+
+        expect(doo.data).to.contain.all.keys({ communication: { name: 'chat-x' }, x: 10, y: 10, test: ['a', 'b', 'c']});
+
+        // doo.onChange('*', (changeEvent) => {
+        //   console.log('on-subscribe-resume on-change: ', JSON.stringify(changeEvent), doo.data);
+        //   expect(changeEvent).to.contain.all.keys({ cType: 'add', oType: 'object', field: 'test', data: ['a', 'b', 'c'] });
+        // });
+
+        done();
+      });
+
+      a.data.test = ['a', 'b', 'c'];
+
+    }).catch((error) => {
+      expect(error).to.be.equal('No data objects observers to be resumed')
       done();
+    });
+
+    let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
+    sync1.create(schemaURL, [], initialData).then((dor) => {
+      console.log('on-create-resume-reply', dor);
+      a = dor;
+      dor.inviteObservers([hyperURL2]);
+
+      dor.onRead((readEvent) => {
+        readEvent.accept();
+      });
+
+      dor.onSubscription((subscribeEvent) => {
+        console.log('on-resume-resources: ', subscribeEvent);
+
+        //we may have some problems in the time sequence here.
+        //change-msg can reach the observer first
+        subscribeEvent.accept();
+      });
     });
 
   });
@@ -258,23 +313,32 @@ describe('SyncherManager', function() {
   it('should resume reporters', function(done) {
 
     let bus = new MessageBus();
-    bus._onMessage((a) => {
-      console.log('AQUI:', a);
-    });
 
     bus._onPostMessage = (msg) => {
       console.log('_onPostMessage: ', msg);
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
 
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
+    sync1.resumeReporters({}).then((dors) => {
 
-    sync1.resumeReporters({}).then((dor) => {
-      dor.data.newTest = ['a', 'b', 'c'];
-      console.log('AQUI:', dor.data);
-      expect(dor.data).to.contain.all.keys({ communication: { name: 'chat-x' }, x: 10, y: 10, test: ['a', 'b', 'c'], newTest: ['a', 'b', 'c'] });
+      console.log('on-subscribe-resume-reply', dors);
+
+      Object.values(dors).forEach((dor) => {
+
+        console.log('on-create-resume-reply DataObjectReporter: ', dor);
+
+        dor.data.newTest = ['a', 'b', 'c'];
+        expect(dor.data).to.contain.all.keys({ communication: { name: 'chat-x' }, x: 10, y: 10, test: ['a', 'b', 'c'], newTest: ['a', 'b', 'c'] });
+        done();
+
+      });
+
+    }).catch((error) => {
+      console.log('AQUI:', error);
+      expect(error).to.be.equal('No data objects reporters to be resumed')
       done();
     });
 
@@ -291,6 +355,7 @@ describe('SyncherManager', function() {
     let bus = {
       postMessage: (msg, replyCallback) => {
         seq++;
+        console.log('replyCallback:', replyCallback);
         console.log('3-postMessage: (seq === ' + seq + ')', JSON.stringify(msg));
 
         if (seq === 1) {
@@ -405,13 +470,6 @@ describe('SyncherManager', function() {
         }
 
         if (seq === 10) {
-          expect(msg).to.deep.equal({
-            type: 'update', from: objURL, to: objURLChanges,
-            body: { version: 10, source: hyperURL1, attributeType: 'array', attribute: '1.arr.length', value: 4 }
-          });
-        }
-
-        if (seq === 11) {
 
           expect(msg).to.deep.equal({
             type: 'update', from: objURL, to: objURLChanges,
@@ -421,6 +479,15 @@ describe('SyncherManager', function() {
           //apply changes...
           data['1'].arr.splice(1, 2, 10, 11, 12);
           data['1'].arr[5].x = 10;
+        }
+
+        if (seq === 11) {
+          expect(msg).to.deep.equal({
+            type: 'update', from: objURL, to: objURLChanges,
+            body: { version: 11, source: 'hyperty://h1.domain/h1', attribute: '1.arr.4.x', value: 10 }
+          });
+
+          // done();
         }
 
         if (seq === 12) {
@@ -458,13 +525,33 @@ describe('SyncherManager', function() {
       },
 
       addListener: (url, callback) => {
-        console.log('3-addListener', url);
+        console.log('3-addListener', url, callback);
       }
     };
 
     //BEGIN: skip message system (already tested in previous units) and manually create a reporter and subscription, this should not be done in real code.
     let sync = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
-    let reporter = new DataObjectReporter(sync, objURL, schemaURL, 'on', {}, []);
+
+        /*
+        input.syncher ? _this._syncher = input.syncher : throwMandatoryParmMissingError('syncher');
+    input.url ?  _this._url = input.url : throwMandatoryParmMissingError('url');
+    input.created ? _this._created = input.created : throwMandatoryParmMissingError('created');
+    input.reporter ? _this._reporter = input.reporter : throwMandatoryParmMissingError('reporter');
+    input.runtime ? _this._runtime = input.runtime : throwMandatoryParmMissingError('runtime');
+    input.schema ? _this._schema = input.schema : throwMandatoryParmMissingError('schema');
+    input.name ? _this._name = input.name : throwMandatoryParmMissingError('name');
+    */
+    let dataObjectReporter = {
+      syncher: sync,
+      url: objURL,
+      created: new Date().toUTCString(),
+      reporter: hyperURL1,
+      schema: schemaURL,
+      runtime: runtimeURL,
+      name: 'test1'
+    };
+
+    let reporter = new DataObjectReporter(dataObjectReporter);
     reporter.subscriptions[hyperURL2] = { status: 'on' };
     sync.reporters[objURL] = reporter;
 
@@ -499,8 +586,21 @@ describe('SyncherManager', function() {
     let compacted = false;
 
     let sync = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
-    let observer = new DataObjectObserver(sync, objURL, schemaURL, 'on', { data: {}, childrens: {} }, [], 0);
+
+    let dataObjectObserver = {
+      syncher: sync,
+      url: objURL,
+      created: new Date().toUTCString(),
+      reporter: hyperURL1,
+      schema: schemaURL,
+      runtime: runtimeURL,
+      name: 'test1'
+    };
+
+    let observer = new DataObjectObserver(dataObjectObserver);
     sync.observers[objURL] = observer;
+
+    // let observer = new DataObjectObserver(sync, objURL, schemaURL, 'on', { data: {}, childrens: {} }, [], 0);
 
     observer.onChange('*', (event) => {
       seq++;
@@ -714,7 +814,7 @@ describe('SyncherManager', function() {
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
 
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
     sync1.create(schemaURL, [], initialData).then((dor) => {
@@ -728,14 +828,16 @@ describe('SyncherManager', function() {
 
   it('observer addChild', function(done) {
     let bus = new MessageBus();
+
     bus._onPostMessage = (msg) => {
       console.log('6-_onPostMessage: ', msg);
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
+
     sync2.onNotification((notifyEvent) => {
       console.log('on-create-notify: ', notifyEvent);
       notifyEvent.ack();
@@ -743,13 +845,14 @@ describe('SyncherManager', function() {
       sync2.subscribe(schemaURL, notifyEvent.url).then((doo) => {
         console.log('on-subscribe-reply');
         doo.addChild('children1', { message: 'Hello World!' }).then((doc) => {
-          console.log('on-local-addChild');
+          console.log('on-local-addChild', doc);
+
           doc.onResponse((event) => {
             console.log('on-remote-addChild-reply', event);
             expect(event).to.contain.all.keys({ type: 'response', url: hyperURL1, code: 200 });
-            done();
           });
         });
+
       });
     });
 
@@ -759,13 +862,21 @@ describe('SyncherManager', function() {
       dor.onSubscription((subscribeEvent) => {
         dor.onAddChild((event) => {
           console.log('on-remote-addChild', event);
-          expect(event).to.contain.all.keys({ type: 'create', from: hyperURL2, url: 'resource://obj1/children/children1', childId: hyperURL2 + '#1', value: { message: 'Hello World!' } });
+          delete event.identity;
+          expect(event).to.contain.all.keys({
+            type: 'create',
+            from: hyperURL2,
+            url: 'resource://obj1/children/children1',
+            childId: hyperURL2 + '#1',
+            value: { message: 'Hello World!'}
+          });
+          done();
         });
-
-        console.log('on-subscribe: ', subscribeEvent);
+        console.log('on-resources: ', subscribeEvent);
         subscribeEvent.accept();
       });
     });
+
   });
 
   it('children deltas generate and process', function(done) {
@@ -777,7 +888,7 @@ describe('SyncherManager', function() {
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
@@ -794,7 +905,10 @@ describe('SyncherManager', function() {
     sync1.create(schemaURL, [hyperURL2], initialData).then((dor) => {
       dor.onSubscription((subscribeEvent) => {
         dor.onAddChild((event) => {
-          let children1 = dor.childrens[event.childId];
+          let children1 = event.child; //dor.childrens[event.childId];
+
+          console.log('Children 1: ', dor, children1, event);
+
           children1.onChange((changeEvent) => {
             console.log('onChange: ', changeEvent);
             expect(changeEvent).to.contain.all.keys({ cType: 'update', oType: 'object', field: 'message', data: 'Hello Luis!' });
@@ -834,7 +948,7 @@ describe('SyncherManager', function() {
       }
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
@@ -842,7 +956,7 @@ describe('SyncherManager', function() {
       if (notifyEvent.type === 'create') {
         notifyEvent.ack(100);
         sync2.subscribe(schemaURL, notifyEvent.url).then((doo) => {
-          console.log('subscribe: ', doo.url);
+          console.log('resources: ', doo.url);
         });
       } else if (notifyEvent.type === 'delete') {
         notifyEvent.ack(100);
@@ -862,7 +976,7 @@ describe('SyncherManager', function() {
           expect(sync1.reporters[dor.url]).to.eql(dor);
           dor.delete();
           delete sync1.reporters[dor.url];
-          expect(sync1.reporters[dor.url]).to.be.empty;
+          expect(sync1.reporters[dor.url]).to.be.undefined;
           console.log('reporter-deleted');
         }, 100);
 
@@ -890,13 +1004,13 @@ describe('SyncherManager', function() {
       }
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
       console.log('onNotification: ', notifyEvent);
       sync2.subscribe(schemaURL, notifyEvent.url).then((doo) => {
-        console.log('subscribe: ', doo.url);
+        console.log('resources: ', doo.url);
         doo.unsubscribe();
       });
     });
@@ -904,9 +1018,14 @@ describe('SyncherManager', function() {
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
     sync1.create(schemaURL, [hyperURL2], initialData).then((dor) => {
       console.log('create: ', dor.url);
+
       dor.onSubscription((subscribeEvent) => {
-        console.log('onSubscription: ', subscribeEvent);
-        subscribeEvent.accept();
+
+        if (subscribeEvent.accept instanceof Function) {
+          console.log('onSubscription: ', subscribeEvent);
+          subscribeEvent.accept();
+        }
+
       });
     });
   });
@@ -956,7 +1075,7 @@ describe('SyncherManager', function() {
         }
       };
 
-      new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage);
+      new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
 
       let hypertyURL3 = 'hyperty://h1.domain/' + guid();
       hyperties.h3 = hypertyURL3;
@@ -964,7 +1083,7 @@ describe('SyncherManager', function() {
       sync3.onNotification((notifyEvent) => {
         sync3.subscribe(schemaURL, notifyEvent.url).then((doo) => {
           //sync3DataObjectObserver = doo;
-          console.log('sync3 subscribe: ', doo.url);
+          console.log('sync3 resources: ', doo.url);
           done();
         });
       });
@@ -975,7 +1094,7 @@ describe('SyncherManager', function() {
       sync2.onNotification((notifyEvent) => {
         sync2.subscribe(schemaURL, notifyEvent.url).then((doo) => {
           //sync2DataObjectObserver = doo;
-          console.log('sync2 subscribe:', doo.url);
+          console.log('sync2 resources:', doo.url);
         });
       });
 
@@ -1024,7 +1143,7 @@ describe('SyncherManager', function() {
         }
       };
 
-      new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage);
+      new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
 
       let sync3 = new Syncher(hyperties.h3, bus, { runtimeURL: runtimeURL });
       sync3.onNotification((notifyEvent) => {
@@ -1032,7 +1151,7 @@ describe('SyncherManager', function() {
           doo.onChange('*', function(changes) {
             console.log('Sync 3: ', changes);
           });
-          console.log('sync3 subscribe: ', doo.url);
+          console.log('sync3 resources: ', doo.url);
         });
       });
 
@@ -1042,7 +1161,7 @@ describe('SyncherManager', function() {
           doo.onChange('*', function(changes) {
             console.log('Sync 2: ', changes);
           });
-          console.log('sync2 subscribe:', doo.url);
+          console.log('sync2 resources:', doo.url);
         });
       });
 

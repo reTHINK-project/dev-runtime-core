@@ -17,7 +17,7 @@ describe('dataObjectsStorage', function() {
   let syncherManagerURL = runtimeURL + '/sm';
 
   let owner = 'hyperty://<domain>/id-owner';
-  let resource = 'resource://obj1';
+  let url = 'resource://obj1';
   let userURL = 'user://<domain>/<my-name>';
   let schema = 'schema://fake-schema-url';
   let schemaList = ['schema://fake-schema-url/Communication', 'schema://fake-schema-url/Context', 'schema://fake-schema-url/Connection'];
@@ -31,39 +31,70 @@ describe('dataObjectsStorage', function() {
 
   it('should set dataObject information to be saved on storage', (done) => {
 
-    let status = 'on';
-    let isReporter = true;
+    let metadata = {};
+
+    metadata.status = 'live';
+    metadata.isReporter = true;
     let data = {
       x: 1,
-      y: 2,
-      name: 'WebRTC'
+      y: 2
     };
-    let owner = 'hyperty://<domain>/id-3';
-    let subscription = 'hyperty://<domain>/id-2';
+    metadata.schema = schema;
+    metadata.url = url;
+    metadata.name = 'WebRTC';
+    metadata.subscriberUsers = [];
+    metadata.subscriptions = [];
+    metadata.version = 0;
+    metadata.reporter = 'hyperty://<domain>/id-3';
+    let subscriberHyperty = 'hyperty://<domain>/id-2';
+    let childrenObjects = {};
+    childrenObjects[metadata.reporter + '#1'] = { message: 'message 1' };
+    childrenObjects[subscriberHyperty + '#1'] = { message: 'message 2' };
+    childrenObjects[metadata.reporter + '#2'] = { message: 'message 3' };
 
-    expect(dataObjectsStorage.set(resource, isReporter, schema, status, owner))
-    .to.have.keys('isReporter', 'owner', 'resource', 'schema', 'status', 'subscriptions', 'subscriberUsers');
+    expect(dataObjectsStorage.set(metadata))
+    .to.have.keys('url', 'isReporter', 'subscriberUsers', 'subscriptions', 'version', 'schema', 'status', 'reporter', 'name', 'childrenObjects', 'data');
 
-    expect(dataObjectsStorage.saveData(true, resource, null, data)).to.be.deep.equal({
-      isReporter: isReporter,
-      resource: resource,
+    expect(dataObjectsStorage.saveData(true, url, null, data)).to.be.deep.equal({
+      url: metadata.url,
+      isReporter: metadata.isReporter,
       subscriptions: [],
-      schema: schema,
-      status: status,
-      owner: owner,
       subscriberUsers: [],
-      data: data
+      data: data,
+      version: 0,
+      schema: metadata.schema,
+      status: metadata.status,
+      reporter: metadata.reporter,
+      childrenObjects: {},
+      name: metadata.name
     });
 
-    expect(dataObjectsStorage.update(isReporter, resource, 'subscriptions', subscription)).to.be.deep.equal({
-      isReporter: isReporter,
-      resource: resource,
-      subscriptions: [subscription],
-      schema: schema,
-      status: status,
-      owner: owner,
+    expect(dataObjectsStorage.saveChildrens(true, metadata.url, null, childrenObjects)).to.deep.equal({
+      url: metadata.url,
+      isReporter: metadata.isReporter,
+      subscriptions: [],
       subscriberUsers: [],
-      data: data
+      schema: metadata.schema,
+      status: metadata.status,
+      reporter: metadata.reporter,
+      data: data,
+      childrenObjects: childrenObjects,
+      version: 0,
+      name: metadata.name
+    });
+
+    expect(dataObjectsStorage.update(metadata.isReporter, metadata.url, 'subscriptions', subscriberHyperty)).to.be.deep.equal({
+      url: metadata.url,
+      isReporter: metadata.isReporter,
+      subscriptions: [subscriberHyperty],
+      subscriberUsers: [],
+      schema: schema,
+      status: metadata.status,
+      reporter: metadata.reporter,
+      data: data,
+      childrenObjects: childrenObjects,
+      version: 0,
+      name: metadata.name
     });
 
     done();
@@ -76,38 +107,76 @@ describe('dataObjectsStorage', function() {
 
     for (let i = 0; i < num; i++) {
 
-      let status = 'on';
-      let isReporter = true;
-      let data = {x: 1, y: 2};
-      let resource = '<scheme>://<domain>/id-' + i;
-      let rand = Math.round(Math.random() * 2);
-      let randomSchema = schemaList[rand];
-      let owner = 'hyperty://<domain>/id-' + (num - i);
-      let subscription = 'hyperty://<domain>/id-' + ((num - i) * 2);
+      let metadata = {};
 
-      let type = isReporter ? 'reporters' : 'observers';
+      metadata.status = 'live';
+      metadata.version = 0;
+      metadata.isReporter = true;
+      metadata.url = '<scheme>://<domain>/id-' + i;
+      let rand = Math.round(Math.random() * 2);
+      metadata.schema = schemaList[rand];
+      metadata.reporter = 'hyperty://<domain>/id-' + (num - i);
+      let subscriberHyperty = 'hyperty://<domain>/id-' + ((num - i) * 2);
 
       // resource, isReporter, schema, status, data, subscription, children, childrenResources, subscriberUser
-      expect(dataObjectsStorage.set(resource, isReporter, randomSchema, status, owner)).to.be.deep.equal({
-        resource: resource,
-        isReporter: isReporter,
+      expect(dataObjectsStorage.set(metadata)).to.be.deep.equal({
+        url: metadata.url,
+        isReporter: metadata.isReporter,
         subscriptions: [],
         subscriberUsers: [],
-        schema: randomSchema,
-        status: 'on',
-        owner: owner
+        childrenObjects: {},
+        data: {},
+        version: 0,
+        schema: metadata.schema,
+        status: metadata.status,
+        reporter: metadata.reporter
       });
 
-      dataObjectsStorage.saveData(isReporter, resource, 'participants.1', {name: 'vitor', last: 'silva'});
-
-      expect(dataObjectsStorage.update(isReporter, resource, 'subscriptions', subscription)).to.be.deep.equal({
-        resource: resource,
-        isReporter: isReporter,
-        subscriptions: [subscription],
+      expect(dataObjectsStorage.update(metadata.isReporter, metadata.url, 'store', true)).to.be.deep.equal({
+        url: metadata.url,
+        isReporter: metadata.isReporter,
+        subscriptions: [],
         subscriberUsers: [],
-        schema: randomSchema,
-        status: 'on',
-        owner: owner,
+        childrenObjects: {},
+        data: {},
+        version: 0,
+        schema: metadata.schema,
+        status: metadata.status,
+        reporter: metadata.reporter,
+        store: true
+      });
+
+      expect(dataObjectsStorage.saveData(metadata.isReporter, metadata.url, 'participants.1', {name: 'vitor', last: 'silva'})).to.be.deep.equal({
+        url: metadata.url,
+        isReporter: metadata.isReporter,
+        subscriptions: [],
+        subscriberUsers: [],
+        childrenObjects: {},
+        version: 0,
+        schema: metadata.schema,
+        status: metadata.status,
+        reporter: metadata.reporter,
+        store: true,
+        data: {
+          participants: {
+            1: {
+              name: 'vitor', last: 'silva'
+            }
+          }
+        }
+      });
+
+      expect(dataObjectsStorage.update(metadata.isReporter, metadata.url, 'subscriptions', subscriberHyperty)).to.be.deep.equal({
+        url: metadata.url,
+        isReporter: metadata.isReporter,
+        subscriptions: [subscriberHyperty],
+        subscriberUsers: [],
+        childrenObjects: {},
+        version: 0,
+        schema: metadata.schema,
+        status: metadata.status,
+        reporter: metadata.reporter,
+        store: true,
         data: {
           participants: {
             1: {
@@ -132,25 +201,29 @@ describe('dataObjectsStorage', function() {
 
     for (let i = 0; i < num; i++) {
 
-      let status = 'on';
-      let isReporter = false;
-      let data = {x: 1, y: 2};
-      let resource = '<scheme>://<domain>/id-' + letters[i];
-      let rand = Math.round(Math.random() * 2);
-      let randomSchema = schemaList[rand];
-      let subscription = 'hyperty://<domain>/id-' + letters[(num - i)];
+      let metadata = {};
 
-      let type = isReporter ? 'reporters' : 'observers';
+      metadata.status = 'live';
+      metadata.version = 0;
+      metadata.isReporter = false;
+      metadata.url = '<scheme>://<domain>/id-' + letters[i];
+      let rand = Math.round(Math.random() * 2);
+      metadata.schema = schemaList[rand];
+      metadata.reporter = 'hyperty://<domain>/id-' + (num - i);
+      let subscriberHyperty = 'hyperty://<domain>/id-' + letters[(num - i)];
 
       // resource, isReporter, schema, status, data, subscription, children, childrenResources, subscriberUser
-      expect(dataObjectsStorage.set(resource, isReporter, randomSchema, status, owner, subscription)).to.be.deep.equal({
-        resource: resource,
-        isReporter: isReporter,
-        subscriptions: [subscription],
+      expect(dataObjectsStorage.set(metadata)).to.be.deep.equal({
+        url: metadata.url,
+        isReporter: metadata.isReporter,
+        subscriptions: [],
         subscriberUsers: [],
-        schema: randomSchema,
-        status: 'on',
-        owner: owner
+        childrenObjects: {},
+        data: {},
+        version: 0,
+        schema: metadata.schema,
+        status: metadata.status,
+        reporter: metadata.reporter
       });
 
       if (i === num - 1) {
@@ -160,13 +233,12 @@ describe('dataObjectsStorage', function() {
 
   });
 
-  it('should update a resource with new Subscription', (done) => {
-    let resource = '<scheme>://<domain>/id-2';
-    let subscriptions = ['hyperty://<domain>/id-3', 'hyperty://<domain>/id-2'];
+  it('should update a resource with new Hyperty Subscribers', (done) => {
+    let url = '<scheme>://<domain>/id-2';
+    let hypertySubscribers = ['hyperty://<domain>/id-3', 'hyperty://<domain>/id-2'];
     let isReporter = true;
-    let type = isReporter ? 'reporters' : 'observers';
 
-    expect(dataObjectsStorage.update(isReporter, resource, 'subscriptions', subscriptions[0]).subscriptions).to.contains(subscriptions[0], subscriptions[1]);
+    expect(dataObjectsStorage.update(isReporter, url, 'hypertySubscribers', hypertySubscribers[0]).hypertySubscribers).to.contains(hypertySubscribers[0], hypertySubscribers[1]);
 
     // .to.have.deep.property('subscriptions', ['hyperty://<domain>/id-4', 'hyperty://<domain>/id-3']);
 
@@ -177,7 +249,6 @@ describe('dataObjectsStorage', function() {
   it('should update a resource with new Subscriber Users', (done) => {
     let resource = '<scheme>://<domain>/id-2';
     let isReporter = true;
-    let type = isReporter ? 'reporters' : 'observers';
 
     expect(dataObjectsStorage.update(isReporter, resource, 'subscriberUsers', userURL).subscriberUsers).to.contains(userURL);
     done();
@@ -242,7 +313,7 @@ describe('dataObjectsStorage', function() {
 
     expect(dataObjectsStorage.getResourcesByCriteria(msg, true))
     .to.be.fulfilled
-    .and.eventually.to.include.keys(resource)
+    .and.eventually.to.include.keys(url)
     .and.notify(done);
 
   });
@@ -263,7 +334,7 @@ describe('dataObjectsStorage', function() {
 
     expect(dataObjectsStorage.getResourcesByCriteria(msg, true))
     .to.be.fulfilled
-    .and.eventually.to.include.keys(resource)
+    .and.eventually.to.include.keys(url)
     .and.notify(done);
 
   });
@@ -271,7 +342,7 @@ describe('dataObjectsStorage', function() {
   it('should delete a specific value from specific resource', (done) => {
     let resource = '<scheme>://<domain>/id-3';
     let subscription = 'hyperty://<domain>/id-1';
-    dataObjectsStorage.delete(resource, 'subscriptions', subscription)
+    dataObjectsStorage.delete(resource, 'subscriptions', subscription);
 
     done();
   });

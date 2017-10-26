@@ -22,6 +22,86 @@ class PEP {
   }
 
   /**
+  * return the messageBus in this Registry
+  * @param {MessageBus}           messageBus
+  */
+  get messageBus() {
+    let _this = this;
+    return _this.context.messageBus;
+  }
+
+  /**
+  * Set the messageBus in this Registry
+  * @param {MessageBus}           messageBus
+  */
+  set messageBus(messageBus) {
+    let _this = this;
+    _this.context.messageBus = messageBus;
+    _this.addGUIListeners();
+  }
+
+  addGUIListeners() {
+    let _this = this;
+
+    _this.context.messageBus.addListener(_this.context.pepURL, (msg) => {
+      let funcName = msg.body.method;
+
+      let returnedValue;
+      if (funcName === 'addToGroup') {
+        let groupName = msg.body.params.groupName;
+        let userEmail = msg.body.params.userEmail;
+        returnedValue = _this.context.addToGroup(groupName, userEmail);
+      } else if (funcName === 'createGroup') {
+        let groupName = msg.body.params.groupName;
+        returnedValue = _this.context.createGroup(groupName);
+      } else if (funcName === 'addPolicy') {
+        let source = msg.body.params.source;
+        let key = msg.body.params.key;
+        let policy = msg.body.params.policy;
+        let combiningAlgorithm = msg.body.params.combiningAlgorithm;
+        returnedValue = _this.addPolicy(source, key, policy, combiningAlgorithm);
+      } else if(funcName === 'deleteGroup') {
+        let groupName = msg.body.params.groupName;
+        returnedValue = _this.context.deleteGroup(groupName);
+      } else if(funcName === 'removePolicy') {
+        let source = msg.body.params.source;
+        let key = msg.body.params.key;
+        returnedValue = _this.removePolicy(source, key);
+      } else if(funcName === 'savePolicies') {
+        let source = msg.body.params.source;
+        returnedValue = _this.context.savePolicies(source);
+      } else if(funcName === 'userPolicies') {
+        returnedValue = _this.context.userPolicies;
+      } else if(funcName === 'activeUserPolicy') {
+        let userPolicy = msg.body.params.userPolicy;
+        if (userPolicy) { _this.context.activeUserPolicy = userPolicy; }
+        returnedValue = _this.context.activeUserPolicy;
+      } else if(funcName === 'userPolicy') {
+        let key = msg.body.params.key;
+        returnedValue = _this.context.userPolicies[key];
+      } else if(funcName === 'saveActivePolicy') {
+        returnedValue = _this.context.saveActivePolicy();
+      } else if(funcName === 'getMyEmails') {
+        returnedValue = _this.context.getMyEmails();
+      } else if(funcName === 'getMyHyperties') {
+        returnedValue = _this.context.getMyHyperties();
+      } else if(funcName === 'groups') {
+        returnedValue = _this.context.groups;
+      } else if(funcName === 'getGroupsNames') {
+        returnedValue = _this.context.getGroupsNames();
+      } if (funcName === 'removeFromGroup') {
+        let groupName = msg.body.params.groupName;
+        let userEmail = msg.body.params.userEmail;
+        returnedValue = _this.context.removeFromGroup(groupName, userEmail);
+      }
+
+      let value = {type: 'execute', value: returnedValue, code: 200};
+      let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
+      _this.context.messageBus.postMessage(replyMsg);
+    });
+  }
+
+  /**
   * Adds a policy to the Policy Enforcement Point (PEP). The policy can be created by the service
   * provider or by the user.
   * @param    {String}    source
