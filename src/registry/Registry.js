@@ -29,7 +29,7 @@ import HypertyInstance from './HypertyInstance';
 import P2PConnectionResolve from './P2PConnectionResolve';
 
 import {MessageFactory} from 'service-framework/dist/MessageFactory';
-import {divideURL, isHypertyURL, isURL, isUserURL, generateGUID, getUserIdentityDomain, isBackendServiceURL, deepClone, postMessageWhileTimeout} from '../utils/utils.js';
+import {divideURL, isHypertyURL, isURL, isUserURL, generateGUID, getUserIdentityDomain, isBackendServiceURL, deepClone} from '../utils/utils.js';
 
 import 'proxy-observe';
 import { WatchingYou } from 'service-framework/dist/Utils';
@@ -55,7 +55,7 @@ class Registry {
   * @param  {DomainURL}           remoteRegistry        remoteRegistry
   * @param  {storageManager}      storageManager
   */
-  constructor(runtimeURL, appSandbox, identityModule, runtimeCatalogue, runtimeCapabilities, storageManager, p2pHandlerURL, remoteRegistry ) {
+  constructor(runtimeURL, appSandbox, identityModule, runtimeCatalogue, runtimeCapabilities, storageManager, p2pHandlerURL, remoteRegistry) {
 
     // how some functions receive the parameters for example:
     // new Registry('hyperty-runtime://sp1/123', appSandbox, idModule, remoteRegistry);
@@ -144,7 +144,7 @@ class Registry {
 
     _this._messageBus.addListener(_this.registryURL, function(msg) {
 
-      console.log('[Registry listener] ', msg);
+      // console.log('[Registry listener] ', msg);
 
       let isHyperty = isHypertyURL(msg.from);
       let hasCriteria = msg.body.hasOwnProperty('criteria');
@@ -184,7 +184,7 @@ class Registry {
     // Install AddressAllocation
     let addressAllocation = AddressAllocation.instance;
     _this.addressAllocation = addressAllocation;
-    console.log('[Registry - AddressAllocation] - ', addressAllocation);
+    // console.log('[Registry - AddressAllocation] - ', addressAllocation);
   }
 
 
@@ -193,6 +193,7 @@ class Registry {
 
     for (let hyperty in _this.hypertiesList) {
       let value = _this.hypertiesList[hyperty];
+
       if (value._hypertyURL === hypertyURL) {
         switch (type) {
           case 'username':
@@ -235,6 +236,7 @@ class Registry {
 
     for (let index in _this.hypertiesList) {
       let hyperty = _this.hypertiesList[index];
+
       if (hyperty.hypertyURL === hypertyURL) {
         userURL = hyperty.user.userURL;
       }
@@ -440,7 +442,7 @@ class Registry {
       body: { resource: resource, value: value}};
 
     _this._messageBus.post.postMessage(message, (reply) => {
-      console.log('[Registry] Updated hyperty reply', reply);
+      // console.log('[Registry] Updated hyperty reply', reply);
     });
   }
 
@@ -454,7 +456,8 @@ class Registry {
     let dataObject = _this.dataObjectList[dataObjectURL];
 
     if (dataObject) {
-      if (!dataObject.subscribers) { dataObject.subscribers = []; }
+
+      if (!dataObject.subscribers) dataObject.subscribers = [];
 
       dataObject.subscribers.push(subscriberURL);
       _this.dataObjectList[dataObjectURL] = dataObject;
@@ -475,6 +478,7 @@ class Registry {
     } else {
       throw 'No dataObject was found';
     }
+
   }
 
   /**
@@ -572,7 +576,7 @@ class Registry {
 
           try {
             _this._messageBus.postMessageWithRetries(message, _this._registrationRetries, (reply) => {
-              console.log('[Registry.registerDataObject] ===> registerDataObject Reply: ', reply);
+              // console.log('[Registry.registerDataObject] ===> registerDataObject Reply: ', reply);
               if (reply.body.code === 200) {
                 resolve(registration);
               } else {
@@ -604,12 +608,12 @@ class Registry {
             };
 
             _this._messageBus.postMessage(message, (reply) => {
-              console.log('[Registry.registerDataObject] KeepAlive Reply: ', reply);
+              // console.log('[Registry.registerDataObject] KeepAlive Reply: ', reply);
             });
           }, (((registration.expires / 1.1) / 2) * 1000));
 
         }).catch(function(reason) {
-          console.log('[Registry registerHyperty] Error: ', reason);
+          console.error('[Registry registerHyperty] Error: ', reason);
           reject(reason);
         });
       });
@@ -651,8 +655,8 @@ class Registry {
           filteredDataSchemas.push(dataSchema.sourcePackage.sourceCode.properties.scheme.constant);
         }
 
-        console.log('[Registry] Hyperty Schemas', filteredDataSchemas);
-        console.log('[Registry] Hyperty resources', resources);
+        // console.log('[Registry] Hyperty Schemas', filteredDataSchemas);
+        // console.log('[Registry] Hyperty resources', resources);
 
         resolve({resources: resources, dataSchema: filteredDataSchemas, name: objName});
       });
@@ -700,10 +704,10 @@ class Registry {
         if (objectType === 'registry:HypertyURLs') {
           _this._getResourcesAndSchemes(info).then((value) => {
             if (urlsList[value.resources + value.dataSchema + value.name]) {
-              console.log('[Registry] reusage of hyperty URL');
+              // console.log('[Registry] reusage of hyperty URL');
               return resolve(urlsList[value.resources + value.dataSchema + value.name]);
             } else {
-              console.log('[Registry] no hyperty URL was previously registered ');
+              // console.log('[Registry] no hyperty URL was previously registered ');
               return resolve(undefined);
             }
           });
@@ -712,10 +716,10 @@ class Registry {
           let characteristics = info.name + info.schema + info.resources + info.reporter;
 
           if (urlsList[characteristics]) {
-            console.log('[Registry] reusage of dataObject URL');
+            // console.log('[Registry] reusage of dataObject URL');
             return resolve(urlsList[characteristics]);
           } else {
-            console.log('[Registry] no dataObject URL was previously registered');
+            // console.log('[Registry] no dataObject URL was previously registered');
             return resolve(undefined);
           }
         }
@@ -751,7 +755,7 @@ class Registry {
       _this.idModule.getIdentityAssertion(IdpConstraint).then(function(result) {
 
         let userProfile = result.userProfile;
-        console.log('[Registry registerHyperty] userProfile', userProfile);
+        // console.log('[Registry registerHyperty] userProfile', userProfile);
         let emailURL = userProfile.userURL;
 
         if (_this._messageBus === undefined) {
@@ -759,11 +763,11 @@ class Registry {
         } else {
           //call check if the protostub exist: to be removed
           /*  _this.resolve(domainUrl).then(function(a) {
-            console.log('[Registry registerHyperty] stub to domain registry- ', a);*/
+            // console.log('[Registry registerHyperty] stub to domain registry- ', a);*/
 
           _this.storageManager.get('registry:HypertyURLs').then((urlsList) => {
 
-            console.log('[Registry registerHyperty] storageManager] - ', urlsList);
+            // console.log('[Registry registerHyperty] storageManager] - ', urlsList);
 
             _this._getResourcesAndSchemes(descriptor).then((value) => {
 
@@ -812,7 +816,7 @@ class Registry {
                 if (descriptor.configuration && descriptor.configuration.expires) registrationExpires = descriptor.configuration.expires;
 
                 if (addressURL.newAddress) {
-                  console.log('[Registry registerHyperty] registering new Hyperty URL', addressURL.address[0]);
+                  // console.log('[Registry registerHyperty] registering new Hyperty URL', addressURL.address[0]);
 
                   messageValue = {
                     user: emailURL,
@@ -832,12 +836,12 @@ class Registry {
                     messageValue.p2pRequester = p2pRequester;
                   }
 
-                  console.log('[Registry registerHyperty] registering new Hyperty at domain registry ', messageValue);
+                  // console.log('[Registry registerHyperty] registering new Hyperty at domain registry ', messageValue);
 
                   message = {type: 'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain, body: {value: messageValue, policy: 'policy'}};
 
                 } else {
-                  console.log('[Registry registerHyperty] registering previously registered Hyperty URL', addressURL.address[0]);
+                  // console.log('[Registry registerHyperty] registering previously registered Hyperty URL', addressURL.address[0]);
 
                   message = {
                     type: 'update',
@@ -852,11 +856,11 @@ class Registry {
                   }
                 }
 
-                console.log('[Registry registerHyperty] Hyperty registration at domain registry  - ', message);
+                // console.log('[Registry registerHyperty] Hyperty registration at domain registry  - ', message);
 
                 try {
                   _this._messageBus.postMessageWithRetries(message, _this.registrationRetries, (reply) => {
-                    console.log('[Registry registerHyperty] Hyperty registration response: ', reply);
+                    // console.log('[Registry registerHyperty] Hyperty registration response: ', reply);
 
                     if (reply.body.code === 200) {
                       let result = { url: addressURL.address[0]};
@@ -867,7 +871,7 @@ class Registry {
 
                       resolve(result);
                     } else if (reply.body.code === 404) {
-                      console.log('[Registry registerHyperty] The update was not possible. Registering new Hyperty at domain registry');
+                      // console.log('[Registry registerHyperty] The update was not possible. Registering new Hyperty at domain registry');
 
                       messageValue = {
                         user: emailURL,
@@ -889,7 +893,7 @@ class Registry {
 
                       try {
                         _this._messageBus.postMessageWithRetries(message, _this.registrationRetries, (reply) =>{
-                          console.log('[Registry registerHyperty] Hyperty registration update response: ', reply);
+                          // console.log('[Registry registerHyperty] Hyperty registration update response: ', reply);
 
                           if (reply.body.code === 200) {
                             let result = { url: addressURL.address[0]};
@@ -900,7 +904,9 @@ class Registry {
 
                             resolve(result);
 
-                          } else throw new Error('Failed to register an Hyperty: ' + reply);
+                          } else {
+                            throw new Error('Failed to register an Hyperty: ' + reply);
+                          }
 
                         });
                       } catch (e) {
@@ -934,12 +940,12 @@ class Registry {
                     body: { resource: addressURL.address[0], value: {status: 'live'}, method: 'refresh' }};
 
                   _this._messageBus.postMessage(message, (reply) => {
-                    console.log('[Registry registerHyperty] KeepAlive Reply: ', reply);
+                    // console.log('[Registry registerHyperty] KeepAlive Reply: ', reply);
                   });
                 }, (((registrationExpires / 1.1) / 2) * 1000));
 
               }).catch(function(reason) {
-                console.log('[Registry registerHyperty] Error: ', reason);
+                // console.log('[Registry registerHyperty] Error: ', reason);
                 reject(reason);
               });
             });
@@ -1118,7 +1124,7 @@ class Registry {
           };
 
           _this._messageBus.postMessage(msg, (reply) => {
-            console.log('[Registry - register Stub] p2pRequester path setup: ', reply);
+            // console.log('[Registry - register Stub] p2pRequester path setup: ', reply);
           });
 
           resolve(_this.p2pRequesterStub[stubID]);
@@ -1166,7 +1172,7 @@ class Registry {
 
     let _this = this;
 
-    console.log('[Registry onProtostubStatusEvent]: ', msg);
+    // console.log('[Registry onProtostubStatusEvent]: ', msg);
 
     let runtimeProtoStubURL = msg.from;
 
@@ -1184,7 +1190,7 @@ class Registry {
         return _this.protostubsList[key].url === runtimeProtoStubURL;
       }).map((key) => {
         _this.protostubsList[key].status = msg.body.value;
-        console.log('[Registry - onProtostubStatusEvent] - Protostub status: ', _this.protostubsList[key]);
+        // console.log('[Registry - onProtostubStatusEvent] - Protostub status: ', _this.protostubsList[key]);
       });
     } else { // process status events from p2p connections
 
@@ -1204,12 +1210,12 @@ class Registry {
           _this.p2pConnectionList[remoteRuntimeURL] =  p2pConnection;
         }
 
-        console.log('[Registry - onProtostubStatusEvent] - P2PConnection status: ', _this.p2pConnectionList[remoteRuntimeURL]);
+        // console.log('[Registry - onProtostubStatusEvent] - P2PConnection status: ', _this.p2pConnectionList[remoteRuntimeURL]);
 
         // Update P2P Requester protostub if it is coming from there
         if (runtimeProtoStubURL.includes('/p2prequester/')) {
           _this.p2pRequesterStub[remoteRuntimeURL].status = msg.body.value;
-          console.log('[Registry - onProtostubStatusEvent] - P2P Requester status: ', _this.p2pRequesterStub[remoteRuntimeURL]);
+          // console.log('[Registry - onProtostubStatusEvent] - P2P Requester status: ', _this.p2pRequesterStub[remoteRuntimeURL]);
         } else {
           // if from P2PHandler with status disconencted, lets remove from p2pConnectionList
           if (msg.body.value === 'disconnected') delete _this.p2pConnectionList[remoteRuntimeURL];
@@ -1223,7 +1229,7 @@ class Registry {
         } else {
           // It is an event from P2P Handler
           _this.p2pHandlerStub[_this.runtimeURL].status = msg.body.value;
-          console.log('[Registry - onProtostubStatusEvent] - P2PHandler Stub status: ', _this.p2pHandlerStub[_this.runtimeURL]);
+          // console.log('[Registry - onProtostubStatusEvent] - P2PHandler Stub status: ', _this.p2pHandlerStub[_this.runtimeURL]);
         }
       }
 
@@ -1298,7 +1304,7 @@ class Registry {
 
     let _this = this;
 
-    console.log('[Registry onIdpProxyStatusEvent]: ', msg);
+    // console.log('[Registry onIdpProxyStatusEvent]: ', msg);
 
     let idpProxyURL = msg.from;
 
@@ -1311,7 +1317,7 @@ class Registry {
       return _this.idpProxyList[key].url === idpProxyURL;
     }).map((key) => {
       _this.idpProxyList[key].status = msg.body.value;
-      console.log('[Registry - onIdpProxyStatusEvent] - Idp Proxy status: ', _this.idpProxyList[key]);
+      // console.log('[Registry - onIdpProxyStatusEvent] - Idp Proxy status: ', _this.idpProxyList[key]);
     });
 
   }
@@ -1386,7 +1392,7 @@ class Registry {
   */
   getSandbox(url, constraints) {
     if (!url) throw new Error('Parameter url needed');
-    console.log('[Registry getSandbox] getSandbox for: ', url, ' and capabilities: ', constraints);
+    // console.log('[Registry getSandbox] getSandbox for: ', url, ' and capabilities: ', constraints);
 
     let _this = this;
     return new Promise(function(resolve, reject) {
@@ -1417,7 +1423,7 @@ class Registry {
               const current = _this.sandboxesList.sandbox[sandbox];
               const match = Object.keys(constraints).filter(constraint => {
                 return (constraint === 'browser' && current.type === SandboxType.NORMAL) ||
-                      (constraint === 'windowSanbox' && current.type === SandboxType.WINDOW)
+                      (constraint === 'windowSanbox' && current.type === SandboxType.WINDOW);
 
               }).length > 0 ? true : false;
 
@@ -1438,7 +1444,7 @@ class Registry {
   }
 
   resolveNormalStub(url) {
-    console.log('resolveNormalStub ' + url);
+    // console.log('resolveNormalStub ' + url);
     let _this = this;
 
     return new Promise((resolve, reject) => {
@@ -1497,7 +1503,7 @@ class Registry {
 
             _this.watchingYou.observe('idpProxyList', (change) => {
 
-              console.log('[Registry - resolveNormalStub] idpProxyList changed ' + _this.idpProxyList);
+              // console.log('[Registry - resolveNormalStub] idpProxyList changed ' + _this.idpProxyList);
 
               let keypath = change.keypath;
 
@@ -1505,7 +1511,7 @@ class Registry {
                 keypath = keypath.replace('.status', '');
 
               if (keypath === domainUrl && change.name === 'status' && change.newValue === STATUS.CREATED) {
-                console.log('[Registry - resolveNormalStub] idpProxyList is live ' + _this.idpProxyList[domainUrl]);
+                // console.log('[Registry - resolveNormalStub] idpProxyList is live ' + _this.idpProxyList[domainUrl]);
                 resolve(_this.idpProxyList[domainUrl].url);
               }
             });
@@ -1531,7 +1537,7 @@ class Registry {
 
             _this.watchingYou.observe('protostubsList', (change) => {
 
-              console.log('[Registry - resolveNormalStub] protostubsList changed ' + _this.protostubsList);
+              // console.log('[Registry - resolveNormalStub] protostubsList changed ' + _this.protostubsList);
 
               let keypath = change.keypath;
 
@@ -1539,7 +1545,7 @@ class Registry {
                 keypath = keypath.replace('.status', '');
 
               if (keypath === domainUrl && change.name === 'status' && change.newValue === STATUS.CREATED) {
-                console.log('[Registry - resolve] protostub is live ' + _this.protostubsList[domainUrl]);
+                // console.log('[Registry - resolve] protostub is live ' + _this.protostubsList[domainUrl]);
                 resolve(_this.protostubsList[domainUrl].url);
               }
             });
@@ -1549,7 +1555,7 @@ class Registry {
               console.info('[Registry.resolve] trigger new ProtocolStub: ', domainUrl);
               _this.loader.loadStub(domainUrl).then(() => {
 
-                console.log('[Registry - resolveNormalStub] Stub deployed: ', _this.protostubsList[domainUrl]);
+                // console.log('[Registry - resolveNormalStub] Stub deployed: ', _this.protostubsList[domainUrl]);
               }).catch((reason) => {
                 console.error('[Registry.resolveNormalStub] Error resolving Load ProtocolStub: ', reason);
                 reject(reason);
@@ -1575,7 +1581,7 @@ class Registry {
   * @return {Promise<URL.URL>}                 Promise <URL.URL>
   */
   resolve(msg) {
-    console.log('[Registry - Resolve] -  ', msg);
+    console.info('[Registry - Resolve] -  ', msg);
     let _this = this;
 
     return new Promise((resolve, reject) => {
@@ -1584,28 +1590,28 @@ class Registry {
 
       let p2p = (msg.body && msg.body.p2p) ? msg.body.p2p : false;
 
-      console.log('P2P: ', p2p, url);
-      console.log('P2P - p2pHandlerStub: ', !_this.p2pHandlerStub[_this.runtimeURL], _this.p2pHandlerStub, _this.runtimeURL);
-      console.log('P2P - isBackendServiceURL: ', isBackendServiceURL(url), isBackendServiceURL, url);
-      console.log('P2P - includes runtimeURL: ', url.includes(_this.runtimeURL));
-      console.log('P2P - includes p2phandler: ', url.includes('/p2phandler/'));
-      console.log('P2P - includes p2prequester: ', url.includes('/p2prequester/'));
+      // console.log('P2P: ', p2p, url);
+      // console.log('P2P - p2pHandlerStub: ', !_this.p2pHandlerStub[_this.runtimeURL], _this.p2pHandlerStub, _this.runtimeURL);
+      // console.log('P2P - isBackendServiceURL: ', isBackendServiceURL(url), isBackendServiceURL, url);
+      // console.log('P2P - includes runtimeURL: ', url.includes(_this.runtimeURL));
+      // console.log('P2P - includes p2phandler: ', url.includes('/p2phandler/'));
+      // console.log('P2P - includes p2prequester: ', url.includes('/p2prequester/'));
 
       // Skip p2p procedure when not supported by the Runtime or for backend services
 
       if (!_this.p2pHandlerStub[_this.runtimeURL] || isBackendServiceURL(url) || url.includes(_this.runtimeURL) || url.includes('/p2phandler/') || url.includes('/p2prequester/')) {
 
-        console.log('[Registry - resolve] - Resolve normal stub: ', _this.p2pHandlerStub, _this.runtimeURL, isBackendServiceURL(url), p2p, url);
+        console.info('[Registry - resolve] - Resolve normal stub: ', _this.p2pHandlerStub, _this.runtimeURL, isBackendServiceURL(url), p2p, url);
         _this.resolveNormalStub(url).then((returnURL) => {
           resolve(returnURL);
         });
 
       } else {
 
-        console.log('[Registry - resolve] - checkP2P: ', p2p, url, _this._p2pConnectionResolve);
+        console.info('[Registry - resolve] - checkP2P: ', p2p, url, _this._p2pConnectionResolve);
         _this._p2pConnectionResolve.checkP2P(msg).then((registeredP2P) => {
 
-          console.log('[Registry - resolve] found registered P2P: ', registeredP2P);
+          // console.log('[Registry - resolve] found registered P2P: ', registeredP2P);
 
           let p2pConnection = _this.p2pConnectionList[registeredP2P.runtime];
 
@@ -1628,7 +1634,7 @@ class Registry {
             case STATUS.DISCONNECTED: // p2p connection stub was disconnected, let's ask to connect again
               console.info('[Registry - Resolve] - p2pConnection is disconnected lets try to reconnect');
               _this._p2pConnectionResolve.reconnectP2PRequester(p2pConnection).then((returnURL) => {
-                console.info('[Registry - Resolve] - was reconnected with p2pRequesterStubt: ', returnURL);
+                // console.log('[Registry - Resolve] - was reconnected with p2pRequesterStubt: ', returnURL);
                 resolve(returnURL);
               }, (reason) => {
                 console.info('[Registry - Resolve] - Reason: ', reason);
@@ -1640,7 +1646,7 @@ class Registry {
               break;
             default:
 
-              console.log('p2p: ', p2p);
+              console.info('[Registry - resolve] - P2P: ', p2p);
               if (!p2p) { // no p2p connection exists and the message sender does not ask one. Lets use the MN Stub
                 _this.resolveNormalStub(url).then((returnURL) => {
                   resolve(returnURL);
@@ -1706,8 +1712,6 @@ class Registry {
     });
   }
 
-
-
   /**
   * To verify if url is for a legacy service.
   * @param  {URL.URL}  url      url
@@ -1738,7 +1742,7 @@ class Registry {
       if (url.split('@').length > 1) {
         let domain = urlDivided.domain;
 
-        console.log('[Registry] [Registry.Registry.isLegacy] domain: ', domain);
+        // console.log('[Registry] [Registry.Registry.isLegacy] domain: ', domain);
         if (_this.idpLegacyProxyList.hasOwnProperty(domain)) {
 
           let result = _this.idpLegacyProxyList[domain];
@@ -1752,7 +1756,7 @@ class Registry {
 
         _this._loader.descriptors.getIdpProxyDescriptor(domain).then((result) => {
 
-          console.log('[Registry] [Registry.Registry.isLegacy] Legacy stub descriptor: ', result);
+          // console.log('[Registry] [Registry.Registry.isLegacy] Legacy stub descriptor: ', result);
 
           if (result.interworking) {
             _this.idpLegacyProxyList[domain] = result;

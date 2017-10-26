@@ -113,7 +113,7 @@ class CoreDiscovery {
     let resources = [];
     let dataSchemes = [];
 
-    console.log('[CoreDiscovery.discoveryManager] received: ', msg);
+    // console.log('[CoreDiscovery.discoveryManager] received: ', msg);
 
     if(msg.body.criteria){
       if(msg.body.criteria.resources)
@@ -297,7 +297,7 @@ class CoreDiscovery {
             return reject('No hyperties were found');
           }
 
-          console.log('Hyperties : ', hyperties);
+          // console.log('Hyperties : ', hyperties);
           resolve(hyperties);
         });
 
@@ -345,7 +345,7 @@ class CoreDiscovery {
             return reject('No dataObjects were found');
           }
 
-          console.log('DataObjects : ', dataObjects);
+          // console.log('DataObjects : ', dataObjects);
           resolve(dataObjects);
         });
 
@@ -395,11 +395,11 @@ class CoreDiscovery {
     }
 
     return new Promise(function(resolve, reject) {
-      console.log("[CoreDiscovery.discoverHyperties] sending msg ", msg);
+      // console.log("[CoreDiscovery.discoverHyperties] sending msg ", msg);
 
         _this.messageBus.postMessage(msg, (reply) => {
 
-          console.log("[CoreDiscovery.discoverHyperties] rcved reply ", reply);
+          // console.log("[CoreDiscovery.discoverHyperties] rcved reply ", reply);
 
           if (reply.body.code === 200 || reply.body.code === 500) {
             let hyperties = reply.body.value;
@@ -408,7 +408,7 @@ class CoreDiscovery {
             for (var key in hyperties) finalHyperties.push(hyperties[key]);
 
             if (finalHyperties.length > 0) {
-              console.log("[CoreDiscovery.discoverHyperties] Hyperties Found: ", finalHyperties);
+              // console.log("[CoreDiscovery.discoverHyperties] Hyperties Found: ", finalHyperties);
               resolve(finalHyperties);
             } else return reject('No Hyperty was found');
           } else return reject('No Hyperty was found');
@@ -472,7 +472,7 @@ class CoreDiscovery {
             return reject('No dataObjects were found');
           }
 
-          console.log('DataObjects Found: ', finalDataObjects);
+          // console.log('DataObjects Found: ', finalDataObjects);
           resolve(finalDataObjects);
         });
 
@@ -515,7 +515,7 @@ class CoreDiscovery {
         let hyperty = reply.body.value;
 
         if (hyperty) {
-          console.log('Hyperty found: ', hyperty);
+          // console.log('Hyperty found: ', hyperty);
           resolve(hyperty);
         } else {
           return reject('No Hyperty was found');
@@ -553,7 +553,7 @@ class CoreDiscovery {
         let dataObject = reply.body.value;
 
         if (dataObject) {
-          console.log('DataObject found: ', dataObject);
+          // console.log('DataObject found: ', dataObject);
           resolve(dataObject);
         } else {
           return reject('DataObject not found');
@@ -605,7 +605,7 @@ class CoreDiscovery {
         for (var key in dataObjects) finalDataObjects.push(dataObjects[key]);
 
         if (finalDataObjects.length > 0) {
-          console.log("DataObjects Found: ", finalDataObjects);
+          // console.log("DataObjects Found: ", finalDataObjects);
           resolve(finalDataObjects);
         } else {
           return reject('No DataObject was found');
@@ -656,7 +656,7 @@ class CoreDiscovery {
         for (var key in dataObjects) finalDataObjects.push(dataObjects[key]);
 
         if (finalDataObjects.length > 0) {
-          console.log("DataObjects Found: ", finalDataObjects);
+          // console.log("DataObjects Found: ", finalDataObjects);
           resolve(finalDataObjects);
         } else {
           return reject('No DataObject was found');
@@ -675,12 +675,12 @@ class CoreDiscovery {
 
     return new Promise(function(resolve, reject) {
 
-      console.log("GO graphConnector:", guid);
+      // console.log("GO graphConnector:", guid);
 
       _this.graphConnector.queryGlobalRegistry(guid)
       .then(function(graphConnectorContactData){
 
-        console.log('Information returned from Global Registry: ', graphConnectorContactData);
+        // console.log('Information returned from Global Registry: ', graphConnectorContactData);
 
         if (typeof graphConnectorContactData === 'string' || !graphConnectorContactData){
           return reject('Unsuccessful discover userIDs by GUID');
@@ -716,7 +716,7 @@ class CoreDiscovery {
       let lookupURLDiscoveryService = "https://rethink.tlabscloud.com/discovery/rest/discover/lookup?searchquery=";
       _this.httpRequest.get(lookupURLDiscoveryService + userIdentifier)
       .then(function(json) {
-        console.log('discover GUID by user identifier', json);
+        // console.log('discover GUID by user identifier', json);
 
         let response = JSON.parse(json);
         let filteredGuid = response.results.filter(function(x) {
@@ -732,7 +732,7 @@ class CoreDiscovery {
 
       })
       .catch(function(err) {
-        console.log("HTTP Request error: ", err);
+        // console.log("HTTP Request error: ", err);
         return reject(err);
       });
     });

@@ -105,8 +105,9 @@ rules:
   eol-last: error
   dot-notation: error
   curly:
-    - error
+    - warn
     - multi-line
+    - consistent
   keyword-spacing:
     - error
     - {}

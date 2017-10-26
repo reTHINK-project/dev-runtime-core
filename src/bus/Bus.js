@@ -246,7 +246,7 @@ class Bus {
         _this.postMessage(msg, (reply) => {
           if (reply.body.code === 408 || reply.body.code === 500) reject();
           else {
-            console.log('[Bus.postMessageWithRetries] msg delivered: ', msg);
+            console.info('[Bus.postMessageWithRetries] msg delivered: ', msg);
             callback(reply);
             resolve();
           }

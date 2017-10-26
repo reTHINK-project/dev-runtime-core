@@ -68,14 +68,14 @@ class Descriptors {
         }
       }
 
-      console.log('Load ProtocolStub for domain, ' + domain + ' : ', protoStubURL);
+      // console.log('Load ProtocolStub for domain, ' + domain + ' : ', protoStubURL);
       return this.catalogue.getStubDescriptor(protoStubURL, true, this.constraints).then((result) => {
 
         resolve(result);
 
       }).catch((error) => {
 
-        console.log('Error: ', error);
+        // console.log('Error: ', error);
 
         protostub = domain;
         domain = originDomain;
@@ -83,7 +83,7 @@ class Descriptors {
         let resource = getConfigurationResources(this.runtimeConfiguration, 'catalogueURLs', 'protocolstub');
         protoStubURL = resource.prefix + domain + resource.suffix + protostub;
 
-        console.log('Fallback -> Load Protocolstub for domain, ' + domain + ' : ', protostub);
+        // console.log('Fallback -> Load Protocolstub for domain, ' + domain + ' : ', protostub);
         return this.catalogue.getStubDescriptor(protoStubURL, true, this.constraints);
       }).then((result) => {
         resolve(result);
@@ -122,7 +122,7 @@ class Descriptors {
       let resource = getConfigurationResources(this.runtimeConfiguration, 'catalogueURLs', 'idpProxy');
 
       idpProxyURL = resource.prefix + domain + resource.suffix + idpproxy;
-      console.log('Load Idp Proxy for domain, ' + domain + ' : ', idpProxyURL);
+      // console.log('Load Idp Proxy for domain, ' + domain + ' : ', idpProxyURL);
       return this.catalogue.getIdpProxyDescriptor(idpProxyURL, true, this.constraints).then((result) => {
 
         resolve(result);
@@ -134,7 +134,7 @@ class Descriptors {
 
         idpProxyURL = buildURL(this.runtimeConfiguration, 'catalogueURLs', 'idpProxy', idpproxy);
 
-        console.log('Load Idp Proxy for domain, ' + domain + ' : ', idpProxyURL);
+        // console.log('Load Idp Proxy for domain, ' + domain + ' : ', idpProxyURL);
         return this.catalogue.getIdpProxyDescriptor(idpProxyURL, true, this.constraints);
       }).then((result) => {
         resolve(result);

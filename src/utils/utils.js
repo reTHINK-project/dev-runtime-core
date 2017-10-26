@@ -420,12 +420,14 @@ export function parseAttributes(path) {
 
 }
 
+export function isEmpty(obj) {
+  for (var prop in obj) {
 
-function isEmpty(obj) {
-    for(var prop in obj) {
-        if(obj.hasOwnProperty(prop))
-            return false;
+    if (obj.hasOwnProperty(prop)) {
+      return false;
     }
 
-    return JSON.stringify(obj) === JSON.stringify({});
+  }
+
+  return JSON.stringify(obj) === JSON.stringify({});
 }

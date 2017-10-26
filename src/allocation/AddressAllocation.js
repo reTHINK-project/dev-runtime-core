@@ -85,7 +85,7 @@ class AddressAllocation {
    */
   create(domain, number, info, scheme, reuseURL) {
 
-    console.log('typeof(reuseURL)', typeof(reuseURL), reuseURL);
+    // // console.log('typeof(reuseURL)', typeof(reuseURL), reuseURL);
 
     if (reuseURL) {
 
@@ -176,15 +176,14 @@ class AddressAllocation {
   delete(domain, addresses) {
     let _this = this;
 
-    let message = {
-      type: 'delete', from: _this._url, to: 'domain://msg-node.' + domain + '/address-allocation',
-      body: {childrenResources: addresses}
-    };
-
     return new Promise((resolve, reject) => {
 
+      let message = {
+        type: 'delete', from: _this._url, to: 'domain://msg-node.' + domain + '/address-allocation',
+        body: {childrenResources: addresses}
+      };
+
       _this._bus.postMessage(message, (reply) => {
-        console.log('reply', reply);
         if (reply.body.code === 200) {
           resolve(reply.body.code);
         } else {
