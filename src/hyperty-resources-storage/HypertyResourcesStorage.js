@@ -160,9 +160,14 @@ class HypertyResourcesStorage {
 
     let _this = this;
 
-    if (!message.body || message.body.resource) throw new Error('[HypertyResourcesStorage._onDelete] mandatory message body resource missing: ', message);
+    if (!message.body ) throw new Error('[HypertyResourcesStorage._onDelete] mandatory message body missing: ', message);
 
-    delete _this._hypertyResources[message.body.resource];
+    if (message.body.resource) delete _this._hypertyResources[message.body.resource];
+    else if (message.body.resources) {
+      message.body.resources.forEach((resource) => {
+        delete _this._hypertyResources[resource];
+      });
+    } else throw new Error('[HypertyResourcesStorage._onDelete] mandatory resource missing: ', message);
 
     _this._storageManager.set('hypertyResources', 1, _this._hypertyResources).then(() => {
       let response = {
