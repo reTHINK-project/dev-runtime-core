@@ -46,12 +46,14 @@ function getModeConfig() {
     plugins.push(new webpack.optimize.UglifyJsPlugin({
       beautify: false,
 
+      ecma: 6,
+
       mangle: {
         screw_ie8: true,
         keep_fnames: true
       },
 
-      // Eliminate comments
+      // Eliminate commentsecma: 6,
       comments: true,
 
       compress: {
@@ -68,6 +70,26 @@ function getModeConfig() {
       }
     }));
 
+  } else {
+    plugins.push(new webpack.optimize.UglifyJsPlugin({
+      beautify: true,
+      ecma: 6,
+
+      mangle: {
+        screw_ie8: true,
+        keep_fnames: true
+      },
+
+      // Eliminate comments
+      comments: false,
+
+      compress: {
+        screw_ie8: true,
+
+        //  remove unreachable code
+        dead_code: true
+      }
+    }));
   }
 
   return plugins;

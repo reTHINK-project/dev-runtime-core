@@ -21,7 +21,12 @@
 * limitations under the License.
 **/
 
-import {divideURL, convertToUserURL} from '../utils/utils';
+// Log System
+import * as logger from 'loglevel';
+let log = logger.getLogger('CoreDiscovery');
+
+
+import {divideURL} from '../utils/utils';
 
 /**
 * Core Discovery interface
@@ -49,32 +54,32 @@ class CoreDiscovery {
 
     _this.messageBus.addListener(_this.discoveryURL, (msg) => {
 
-        _this.discoveryManager(msg).then(result =>{
+      _this.discoveryManager(msg).then(result =>{
 
-          //FLOW-OUT: message response
-          _this.messageBus.postMessage({
-            id: msg.id,
-            type: 'response',
-            from: msg.to,
-            to: msg.from,
-            body: {
-              code: 200,
-              value: result
-            }
-          });
-        })
+        //FLOW-OUT: message response
+        _this.messageBus.postMessage({
+          id: msg.id,
+          type: 'response',
+          from: msg.to,
+          to: msg.from,
+          body: {
+            code: 200,
+            value: result
+          }
+        });
+      })
         .catch(function(err) {
           let description;
           let code;
 
-          if(err === 'GraphConnector') {
+          if (err === 'GraphConnector') {
             description = 'This search is not available at the moment. Try later.';
             code = 500;
-          }
-          else {
+          } else {
             description = 'Not Found';
             code = 404;
           }
+
           //FLOW-OUT: error message response
           _this.messageBus.postMessage({
             id: msg.id,
@@ -106,34 +111,27 @@ class CoreDiscovery {
   }
 
   /* function to decide what discovery method to call and later return the response msg  */
-  discoveryManager(msg){
+  discoveryManager(msg) {
     let _this = this;
     let domain = divideURL(msg.from).domain;
     let atributes = msg.body.resource.split('/').filter(Boolean);
     let resources = [];
     let dataSchemes = [];
 
-    // console.log('[CoreDiscovery.discoveryManager] received: ', msg);
+    log.log('[CoreDiscovery.discoveryManager] received: ', msg);
 
-    if(msg.body.criteria){
-      if(msg.body.criteria.resources)
-        resources = msg.body.criteria.resources;
-      if(msg.body.criteria.dataSchemes)
-        dataSchemes = msg.body.criteria.dataSchemes;
+    if (msg.body.criteria) {
+      if (msg.body.criteria.resources) { resources = msg.body.criteria.resources; }
+      if (msg.body.criteria.dataSchemes) { dataSchemes = msg.body.criteria.dataSchemes; }
     }
 
     switch (atributes[1]) {
       case 'user':
-        if(atributes[0] == 'hyperty')
-          return _this.discoverHyperties(msg.body.resource.split('user/')[1], dataSchemes, resources, msg.body.criteria.domain);
-        else
-          return _this.discoverDataObjects(msg.body.resource.split('user/')[1], dataSchemes, resources, msg.body.criteria.domain);
+        if (atributes[0] == 'hyperty') { return _this.discoverHyperties(msg.body.resource.split('user/')[1], dataSchemes, resources, msg.body.criteria.domain); } else { return _this.discoverDataObjects(msg.body.resource.split('user/')[1], dataSchemes, resources, msg.body.criteria.domain); }
         break;
+
       case 'url':
-        if(atributes[0] == 'hyperty')
-          return _this.discoverHypertyPerURL(msg.body.resource.split('url/')[1], msg.body.criteria.domain);
-        else
-          return _this.discoverDataObjectPerURL(msg.body.resource.split('url/')[1], msg.body.criteria.domain);
+        if (atributes[0] == 'hyperty') { return _this.discoverHypertyPerURL(msg.body.resource.split('url/')[1], msg.body.criteria.domain); } else { return _this.discoverDataObjectPerURL(msg.body.resource.split('url/')[1], msg.body.criteria.domain); }
         break;
       case 'name':
         return _this.discoverDataObjectsPerName(msg.body.resource.split('name/')[1], dataSchemes, resources, msg.body.criteria.domain);
@@ -142,26 +140,18 @@ class CoreDiscovery {
         return _this.discoverDataObjectsPerReporter(msg.body.resource.split('reporter/')[1], dataSchemes, resources, msg.body.criteria.domain);
         break;
       case 'guid':
-        if(typeof _this.graphConnector !== 'undefined' &&  _this.graphConnector !== null) {
-          if(atributes[0] == 'hyperty')
-            return _this.discoverHypertiesPerGUID(msg.body.resource.split('user-guid://')[1], dataSchemes, resources);
-          else
-            return _this.discoverDataObjectsPerGUID(msg.body.resource.split('user-guid://')[1], dataSchemes, resources);
+        if (typeof _this.graphConnector !== 'undefined' &&  _this.graphConnector !== null) {
+          if (atributes[0] == 'hyperty') { return _this.discoverHypertiesPerGUID(msg.body.resource.split('user-guid://')[1], dataSchemes, resources); } else { return _this.discoverDataObjectsPerGUID(msg.body.resource.split('user-guid://')[1], dataSchemes, resources); }
           break;
-        }
-        else {
+        } else {
           return Promise.reject('GraphConnector');
           break;
         }
       case 'userprofile':
-        if(typeof _this.graphConnector !== 'undefined' &&  _this.graphConnector !== null) {
-          if(atributes[0] == 'hyperty')
-            return _this.discoverHypertiesPerUserProfileData(msg.body.resource.split('userprofile/')[1], dataSchemes, resources);
-          else
-            return _this.discoverDataObjectsPerUserProfileData(msg.body.resource.split('userprofile/')[1], dataSchemes, resources);
+        if (typeof _this.graphConnector !== 'undefined' &&  _this.graphConnector !== null) {
+          if (atributes[0] == 'hyperty') { return _this.discoverHypertiesPerUserProfileData(msg.body.resource.split('userprofile/')[1], dataSchemes, resources); } else { return _this.discoverDataObjectsPerUserProfileData(msg.body.resource.split('userprofile/')[1], dataSchemes, resources); }
           break;
-        }
-        else {
+        } else {
           return Promise.reject('GraphConnector');
           break;
         }
@@ -180,37 +170,37 @@ class CoreDiscovery {
     return new Promise(function(resolve, reject) {
 
       //translate user identifier (e.g. email, name...) into the associated GUIDs
-       _this.discoverGUIDPerUserIdentifier(userIdentifier)
-       .then(function(guids){
+      _this.discoverGUIDPerUserIdentifier(userIdentifier)
+        .then(function(guids) {
 
-         let hypertiesPromises = guids.map(function(guid) {
+          let hypertiesPromises = guids.map(function(guid) {
 
-         return new Promise(function(resolve, reject) {
-             _this.discoverHypertiesPerGUID(guid, dataSchemes, resources)
-             .then(function(hyperties){
-               resolve(hyperties);
-             })
-             .catch(function(err){
-               resolve([]);
-             });
+            return new Promise(function(resolve, reject) {
+              _this.discoverHypertiesPerGUID(guid, dataSchemes, resources)
+                .then(function(hyperties) {
+                  resolve(hyperties);
+                })
+                .catch(function(err) {
+                  resolve([]);
+                });
+            });
           });
+
+          Promise.all(hypertiesPromises)
+            .then(function(hypertiesResult) {
+
+              let hyperties = [].concat.apply([], hypertiesResult);
+
+              if (hyperties.length === 0) {
+                return reject('No hyperties were found');
+              }
+
+              resolve(hyperties);
+            });
+        })
+        .catch(function(err) {
+          return reject(err);
         });
-
-        Promise.all(hypertiesPromises)
-        .then(function(hypertiesResult) {
-
-          let hyperties = [].concat.apply([], hypertiesResult);
-
-          if(hyperties.length === 0) {
-            return reject('No hyperties were found');
-          }
-
-          resolve(hyperties);
-        });
-      })
-      .catch(function(err) {
-        return reject(err);
-      });
     });
   }
 
@@ -226,37 +216,37 @@ class CoreDiscovery {
     return new Promise(function(resolve, reject) {
 
       //translate user identifier (e.g. email, name...) into the associated GUIDs
-       _this.discoverGUIDPerUserIdentifier(userIdentifier)
-       .then(function(guids){
+      _this.discoverGUIDPerUserIdentifier(userIdentifier)
+        .then(function(guids) {
 
-         let dataObjectsPromises = guids.map(function(guid) {
+          let dataObjectsPromises = guids.map(function(guid) {
 
-         return new Promise(function(resolve, reject) {
-             _this.discoverDataObjectsPerGUID(guid, dataSchemes, resources)
-             .then(function(dataObjects){
-               resolve(dataObjects);
-             })
-             .catch(function(err){
-               resolve([]);
-             });
+            return new Promise(function(resolve, reject) {
+              _this.discoverDataObjectsPerGUID(guid, dataSchemes, resources)
+                .then(function(dataObjects) {
+                  resolve(dataObjects);
+                })
+                .catch(function(err) {
+                  resolve([]);
+                });
+            });
           });
+
+          Promise.all(dataObjectsPromises)
+            .then(function(dataObjectsResult) {
+
+              let dataObjects = [].concat.apply([], dataObjectsResult);
+
+              if (dataObjects.length === 0) {
+                return reject('No dataObjects were found');
+              }
+
+              resolve(dataObjects);
+            });
+        })
+        .catch(function(err) {
+          return reject(err);
         });
-
-        Promise.all(dataObjectsPromises)
-        .then(function(dataObjectsResult) {
-
-          let dataObjects = [].concat.apply([], dataObjectsResult);
-
-          if(dataObjects.length === 0) {
-            return reject('No dataObjects were found');
-          }
-
-          resolve(dataObjects);
-        });
-      })
-      .catch(function(err) {
-        return reject(err);
-      });
     });
   }
 
@@ -273,38 +263,38 @@ class CoreDiscovery {
 
       //translate GUID into the user IDs to query the domain registry
       _this.discoverUserIdsPerGUID(guid)
-      .then(function(uids){
+        .then(function(uids) {
 
         //translate user IDs into the associated hyperties registered in some domain
-        let hypertiesPromises = uids.map(function(uid) {
-          return new Promise(function(resolve, reject) {
-            _this.discoverHyperties(uid.uID, dataSchemes, resources, uid.domain)
-            .then(function(hyperties){
-              resolve(hyperties);
-            })
-            .catch(function(err){
-              resolve([]);
+          let hypertiesPromises = uids.map(function(uid) {
+            return new Promise(function(resolve, reject) {
+              _this.discoverHyperties(uid.uID, dataSchemes, resources, uid.domain)
+                .then(function(hyperties) {
+                  resolve(hyperties);
+                })
+                .catch(function(err) {
+                  resolve([]);
+                });
             });
           });
+
+          Promise.all(hypertiesPromises)
+            .then(function(hypertiesResult) {
+
+              let hyperties = [].concat.apply([], hypertiesResult);
+
+              if (hyperties.length === 0) {
+                return reject('No hyperties were found');
+              }
+
+              // log.log('Hyperties : ', hyperties);
+              resolve(hyperties);
+            });
+
+        })
+        .catch(function(err) {
+          return reject(err);
         });
-
-        Promise.all(hypertiesPromises)
-        .then(function(hypertiesResult) {
-
-          let hyperties = [].concat.apply([], hypertiesResult);
-
-          if(hyperties.length === 0) {
-            return reject('No hyperties were found');
-          }
-
-          // console.log('Hyperties : ', hyperties);
-          resolve(hyperties);
-        });
-
-      })
-      .catch(function(err){
-        return reject(err);
-      });
     });
   }
 
@@ -321,38 +311,38 @@ class CoreDiscovery {
 
       //translate GUID into the user IDs to query the domain registry
       _this.discoverUserIdsPerGUID(guid)
-      .then(function(uids){
+        .then(function(uids) {
 
         //translate user IDs into the associated dataObjects registered in some domain
-        let dataObjectPromises = uids.map(function(uid) {
-          return new Promise(function(resolve, reject) {
-            _this.discoverDataObjects(uid.uID, dataSchemes, resources, uid.domain)
-            .then(function(dataObjects){
-              resolve(dataObjects);
-            })
-            .catch(function(err){
-              resolve([]);
+          let dataObjectPromises = uids.map(function(uid) {
+            return new Promise(function(resolve, reject) {
+              _this.discoverDataObjects(uid.uID, dataSchemes, resources, uid.domain)
+                .then(function(dataObjects) {
+                  resolve(dataObjects);
+                })
+                .catch(function(err) {
+                  resolve([]);
+                });
             });
           });
+
+          Promise.all(dataObjectPromises)
+            .then(function(dataObjectsResult) {
+
+              let dataObjects = [].concat.apply([], dataObjectsResult);
+
+              if (dataObjects.length === 0) {
+                return reject('No dataObjects were found');
+              }
+
+              // log.log('DataObjects : ', dataObjects);
+              resolve(dataObjects);
+            });
+
+        })
+        .catch(function(err) {
+          return reject(err);
         });
-
-        Promise.all(dataObjectPromises)
-        .then(function(dataObjectsResult) {
-
-         let dataObjects = [].concat.apply([], dataObjectsResult);
-
-          if(dataObjects.length === 0) {
-            return reject('No dataObjects were found');
-          }
-
-          // console.log('DataObjects : ', dataObjects);
-          resolve(dataObjects);
-        });
-
-      })
-      .catch(function(err){
-        return reject(err);
-      });
     });
   }
 
@@ -377,43 +367,38 @@ class CoreDiscovery {
       }
     };
 
-    if(user.indexOf("user://") > -1)
-      msg.body.resource = user;
-    else
-      msg.body.resource = '/hyperty/idp-identifier/' + user;
+    if (user.indexOf('user://') > -1) { msg.body.resource = user; } else { msg.body.resource = '/hyperty/idp-identifier/' + user; }
 
-    if(dataSchemes.length > 0){
-      if(!msg.body.criteria)
-        msg.body.criteria = {};
+    if (dataSchemes.length > 0) {
+      if (!msg.body.criteria) { msg.body.criteria = {}; }
       msg.body.criteria.dataSchemes = dataSchemes;
     }
 
-    if(resources.length > 0){
-      if(!msg.body.criteria)
-        msg.body.criteria = {};
+    if (resources.length > 0) {
+      if (!msg.body.criteria) { msg.body.criteria = {}; }
       msg.body.criteria.resources = resources;
     }
 
     return new Promise(function(resolve, reject) {
-      // console.log("[CoreDiscovery.discoverHyperties] sending msg ", msg);
+      // log.log("[CoreDiscovery.discoverHyperties] sending msg ", msg);
 
-        _this.messageBus.postMessage(msg, (reply) => {
+      _this.messageBus.postMessage(msg, (reply) => {
 
-          // console.log("[CoreDiscovery.discoverHyperties] rcved reply ", reply);
+        // log.log("[CoreDiscovery.discoverHyperties] rcved reply ", reply);
 
-          if (reply.body.code === 200 || reply.body.code === 500) {
-            let hyperties = reply.body.value;
+        if (reply.body.code === 200 || reply.body.code === 500) {
+          let hyperties = reply.body.value;
 
-            let finalHyperties = [];
-            for (var key in hyperties) finalHyperties.push(hyperties[key]);
+          let finalHyperties = [];
+          for (var key in hyperties) finalHyperties.push(hyperties[key]);
 
-            if (finalHyperties.length > 0) {
-              // console.log("[CoreDiscovery.discoverHyperties] Hyperties Found: ", finalHyperties);
-              resolve(finalHyperties);
-            } else return reject('No Hyperty was found');
-          } else return reject('No Hyperty was found');
+          if (finalHyperties.length > 0) {
+            // log.log("[CoreDiscovery.discoverHyperties] Hyperties Found: ", finalHyperties);
+            resolve(finalHyperties);
+          } else { return reject('No Hyperty was found'); }
+        } else { return reject('No Hyperty was found'); }
 
-          /*_this.registry.isLegacy(user).then((legacy) => {
+        /*_this.registry.isLegacy(user).then((legacy) => {
               if (legacy) resolve([{hypertyID: user }])
               else return reject('No Hyperty was found');
           });*/
@@ -427,7 +412,7 @@ class CoreDiscovery {
   * @param  {Array<string>}    resources (Optional)  types of dataObjects resources
   * @param  {String}           domain (Optional)     domain of the registry to search
   */
-  discoverDataObjects(user, dataSchemes, resources, domain){
+  discoverDataObjects(user, dataSchemes, resources, domain) {
     let _this = this;
     let activeDomain;
     let dataObjectsArray = [];
@@ -438,48 +423,48 @@ class CoreDiscovery {
 
       //translate user identifier (e.g. email, name...) into the associated hyperties
       _this.discoverHyperties(user, [], [], activeDomain)
-      .then(function(hyperties){
+        .then(function(hyperties) {
 
-        let finalHyperties = [];
-        for (var key in hyperties) finalHyperties.push(hyperties[key]);
+          let finalHyperties = [];
+          for (var key in hyperties) finalHyperties.push(hyperties[key]);
 
-        //translate hyperties URLs into the associated dataObjects registered in some domain
-        let dataObjectsPromises = finalHyperties.map(function(hyperty) {
-          return new Promise(function(resolve, reject) {
-            _this.discoverDataObjectsPerReporter(hyperty.hypertyID, dataSchemes, resources, activeDomain)
-            .then(function(dataObject){
-              resolve(dataObject);
-            })
-            .catch(function(err){
-              resolve([]);
+          //translate hyperties URLs into the associated dataObjects registered in some domain
+          let dataObjectsPromises = finalHyperties.map(function(hyperty) {
+            return new Promise(function(resolve, reject) {
+              _this.discoverDataObjectsPerReporter(hyperty.hypertyID, dataSchemes, resources, activeDomain)
+                .then(function(dataObject) {
+                  resolve(dataObject);
+                })
+                .catch(function(err) {
+                  resolve([]);
+                });
             });
           });
+
+          Promise.all(dataObjectsPromises)
+            .then(function(dataObjectsResult) {
+
+              let dataObjects = [].concat.apply([], dataObjectsResult);
+
+              dataObjects.forEach(function(dataObject) {
+                dataObjectsArray.push(dataObject);
+              });
+
+              let finalDataObjects = [];
+              for (var key in dataObjectsArray) finalDataObjects.push(dataObjectsArray[key]);
+
+              if (finalDataObjects.length === 0) {
+                return reject('No dataObjects were found');
+              }
+
+              // log.log('DataObjects Found: ', finalDataObjects);
+              resolve(finalDataObjects);
+            });
+
+        })
+        .catch(function(err) {
+          return reject(err);
         });
-
-        Promise.all(dataObjectsPromises)
-        .then(function(dataObjectsResult) {
-
-          let dataObjects = [].concat.apply([], dataObjectsResult);
-
-          dataObjects.forEach(function(dataObject) {
-            dataObjectsArray.push(dataObject);
-          });
-
-          let finalDataObjects = [];
-          for (var key in dataObjectsArray) finalDataObjects.push(dataObjectsArray[key]);
-
-          if(finalDataObjects.length === 0) {
-            return reject('No dataObjects were found');
-          }
-
-          // console.log('DataObjects Found: ', finalDataObjects);
-          resolve(finalDataObjects);
-        });
-
-      })
-      .catch(function(err){
-        return reject(err);
-      });
     });
   }
 
@@ -509,13 +494,12 @@ class CoreDiscovery {
 
       _this.messageBus.postMessage(msg, (reply) => {
 
-        if(reply.body.code !== 200 && reply.body.code !== 500)
-          return reject('No Hyperty was found');
+        if (reply.body.code !== 200 && reply.body.code !== 500) { return reject('No Hyperty was found'); }
 
         let hyperty = reply.body.value;
 
         if (hyperty) {
-          // console.log('Hyperty found: ', hyperty);
+          // log.log('Hyperty found: ', hyperty);
           resolve(hyperty);
         } else {
           return reject('No Hyperty was found');
@@ -553,7 +537,7 @@ class CoreDiscovery {
         let dataObject = reply.body.value;
 
         if (dataObject) {
-          // console.log('DataObject found: ', dataObject);
+          // log.log('DataObject found: ', dataObject);
           resolve(dataObject);
         } else {
           return reject('DataObject not found');
@@ -579,19 +563,17 @@ class CoreDiscovery {
       from: _this.discoveryURL,
       to: 'domain://registry.' + activeDomain,
       body: {
-        resource: name,
+        resource: name
       }
     };
 
-    if(dataSchemes.length > 0){
-      if(!msg.body.criteria)
-        msg.body.criteria = {};
+    if (dataSchemes.length > 0) {
+      if (!msg.body.criteria) { msg.body.criteria = {}; }
       msg.body.criteria.dataSchemes = dataSchemes;
     }
 
-    if(resources.length > 0){
-      if(!msg.body.criteria)
-        msg.body.criteria = {};
+    if (resources.length > 0) {
+      if (!msg.body.criteria) { msg.body.criteria = {}; }
       msg.body.criteria.resources = resources;
     }
 
@@ -605,7 +587,7 @@ class CoreDiscovery {
         for (var key in dataObjects) finalDataObjects.push(dataObjects[key]);
 
         if (finalDataObjects.length > 0) {
-          // console.log("DataObjects Found: ", finalDataObjects);
+          // log.log("DataObjects Found: ", finalDataObjects);
           resolve(finalDataObjects);
         } else {
           return reject('No DataObject was found');
@@ -633,18 +615,16 @@ class CoreDiscovery {
       from: _this.discoveryURL,
       to: 'domain://registry.' + activeDomain,
       body: {
-        resource: "/comm",
+        resource: '/comm',
         criteria: {
           reporter: reporter
         }
       }
     };
 
-    if(dataSchemes.length > 0)
-      msg.body.criteria.dataSchemes = dataSchemes;
+    if (dataSchemes.length > 0) { msg.body.criteria.dataSchemes = dataSchemes; }
 
-    if(resources.length > 0)
-      msg.body.criteria.resources = resources;
+    if (resources.length > 0) { msg.body.criteria.resources = resources; }
 
     return new Promise(function(resolve, reject) {
 
@@ -656,7 +636,7 @@ class CoreDiscovery {
         for (var key in dataObjects) finalDataObjects.push(dataObjects[key]);
 
         if (finalDataObjects.length > 0) {
-          // console.log("DataObjects Found: ", finalDataObjects);
+          // log.log("DataObjects Found: ", finalDataObjects);
           resolve(finalDataObjects);
         } else {
           return reject('No DataObject was found');
@@ -675,30 +655,28 @@ class CoreDiscovery {
 
     return new Promise(function(resolve, reject) {
 
-      // console.log("GO graphConnector:", guid);
+      // log.log("GO graphConnector:", guid);
 
       _this.graphConnector.queryGlobalRegistry(guid)
-      .then(function(graphConnectorContactData){
+        .then(function(graphConnectorContactData) {
 
-        // console.log('Information returned from Global Registry: ', graphConnectorContactData);
+        // log.log('Information returned from Global Registry: ', graphConnectorContactData);
 
-        if (typeof graphConnectorContactData === 'string' || !graphConnectorContactData){
-          return reject('Unsuccessful discover userIDs by GUID');
-        }
-        else{
+          if (typeof graphConnectorContactData === 'string' || !graphConnectorContactData) {
+            return reject('Unsuccessful discover userIDs by GUID');
+          } else {
 
-          let userids = graphConnectorContactData.userIDs;
+            let userids = graphConnectorContactData.userIDs;
 
-          if(userids.length === 0)
-            return reject('UserIDs not available');
+            if (userids.length === 0) { return reject('UserIDs not available'); }
 
-          resolve(userids);
-        }
+            resolve(userids);
+          }
 
-      })
-      .catch(function(err){
-        return reject(err);
-      });
+        })
+        .catch(function(err) {
+          return reject(err);
+        });
 
     });
   }
@@ -713,28 +691,27 @@ class CoreDiscovery {
 
     return new Promise(function(resolve, reject) {
 
-      let lookupURLDiscoveryService = "https://rethink.tlabscloud.com/discovery/rest/discover/lookup?searchquery=";
+      let lookupURLDiscoveryService = 'https://rethink.tlabscloud.com/discovery/rest/discover/lookup?searchquery=';
       _this.httpRequest.get(lookupURLDiscoveryService + userIdentifier)
-      .then(function(json) {
-        // console.log('discover GUID by user identifier', json);
+        .then(function(json) {
+        // log.log('discover GUID by user identifier', json);
 
-        let response = JSON.parse(json);
-        let filteredGuid = response.results.filter(function(x) {
-               return x["rethinkID"] != undefined
+          let response = JSON.parse(json);
+          let filteredGuid = response.results.filter(function(x) {
+            return x.rethinkID != undefined;
+          });
+
+          if (filteredGuid.length === 0) { return reject('Unsuccessful discover GUID by user identifier'); }
+
+          let guids = filteredGuid.map(function(x) { return x.rethinkID; });
+
+          return resolve(guids);
+
+        })
+        .catch(function(err) {
+        // log.log("HTTP Request error: ", err);
+          return reject(err);
         });
-
-        if (filteredGuid.length === 0)
-          return reject('Unsuccessful discover GUID by user identifier');
-
-        let guids = filteredGuid.map(function(x){ return x["rethinkID"]; });
-
-        return resolve(guids);
-
-      })
-      .catch(function(err) {
-        // console.log("HTTP Request error: ", err);
-        return reject(err);
-      });
     });
   }
 }

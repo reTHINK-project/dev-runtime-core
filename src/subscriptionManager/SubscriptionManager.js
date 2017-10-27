@@ -20,6 +20,11 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 **/
+
+// Log System
+import * as logger from 'loglevel';
+let log = logger.getLogger('SubscriptionManager');
+
 import { divideURL } from '../utils/utils';
 import Subscription from './Subscription';
 
@@ -52,7 +57,7 @@ class SubscriptionManager {
     _this._domain = divideURL(runtimeURL).domain;
 
     bus.addListener(_this._url, (msg) => {
-      console.log('[SubscriptionManager] RCV: ', msg);
+      log.info('[SubscriptionManager] RCV: ', msg);
       switch (msg.type) {
         case 'subscribe': _this._onSubscribe(msg); break;
         case 'unsubscribe': _this._onUnSubscribe(msg); break;
@@ -65,10 +70,10 @@ class SubscriptionManager {
   init() {
     let _this = this;
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
 
       _this._storage.get('subscriptions').then((subscriptions) => {
-        console.log('[SubscriptionManager.init] resume subscriptions: ', subscriptions);
+        log.log('[SubscriptionManager.init] resume subscriptions: ', subscriptions);
         if (subscriptions) {
 
           _this._subscriptionsStorage = subscriptions;
@@ -110,30 +115,30 @@ class SubscriptionManager {
       reply.body = msg.body;
       reply.body.code = 200;
 
-      console.log('[SubscriptionManager] - craeteSubscription: ', msg, reply, subscriber);
+      log.log('[SubscriptionManager] - craeteSubscription: ', msg, reply, subscriber);
 
       _this._bus.postMessage(reply);
 
 
-        if (!_this._subscriptionsStorage[subscriber]) {
+      if (!_this._subscriptionsStorage[subscriber]) {
 
 
-          _this._subscriptionsStorage[subscriber] = {
-            domain: domain,
-            resources: resources,
-            subscriber: subscriber,
-            identity: identity
-          };
+        _this._subscriptionsStorage[subscriber] = {
+          domain: domain,
+          resources: resources,
+          subscriber: subscriber,
+          identity: identity
+        };
 
-        } else {
-          resources.forEach((resource) => {
-            if (!(_this._subscriptionsStorage[subscriber].resources.includes(resource))) {
-              _this._subscriptionsStorage[subscriber].resources.push(resource);
-            }
-          });
-        }
+      } else {
+        resources.forEach((resource) => {
+          if (!(_this._subscriptionsStorage[subscriber].resources.includes(resource))) {
+            _this._subscriptionsStorage[subscriber].resources.push(resource);
+          }
+        });
+      }
 
-        _this._storage.set('subscriptions', 1, _this._subscriptionsStorage);
+      _this._storage.set('subscriptions', 1, _this._subscriptionsStorage);
     });
   }
 
@@ -141,7 +146,7 @@ class SubscriptionManager {
 
     let _this = this;
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       //FLOW-OUT: subscribe message to the msg-node, registering listeners on the broker
 
       let nodeSubscribeMsg = {
@@ -151,14 +156,14 @@ class SubscriptionManager {
 
       //subscribe in msg-node
       _this._bus.postMessage(nodeSubscribeMsg, (reply) => {
-        console.log('[SubscriptionManager] node-subscribe-response: ', reply);
+        log.log('[SubscriptionManager] node-subscribe-response: ', reply);
 
         //if (reply.body.code === 200) {//TODO: uncomment when  MN replies with correct response body code
 
         //TODO: support multiple routes for multiple resources
 
         let subscription = _this._subscriptions[subscriber];
-        console.log('[SubscriptionManager] - ',  _this._subscriptions, resources, _this._subscriptions.hasOwnProperty(subscriber));
+        log.log('[SubscriptionManager] - ',  _this._subscriptions, resources, _this._subscriptions.hasOwnProperty(subscriber));
         if (!subscription) {
           _this._subscriptions[subscriber] = {};
         }
@@ -219,7 +224,7 @@ class SubscriptionManager {
     let listenerAddress = msg.body.resource;
     let reply;
 
-    console.log('[SubscriptionManager] - request to read Subscriptions: ', msg );
+    log.log('[SubscriptionManager] - request to read Subscriptions: ', msg);
 
     _this._storage.get('subscriptions').then((subscriptions)=>{
       if (subscriptions && subscriptions[listenerAddress]) {

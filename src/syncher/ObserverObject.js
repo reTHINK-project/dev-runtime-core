@@ -1,3 +1,7 @@
+// Log System
+import * as logger from 'loglevel';
+let log = logger.getLogger('ObserverObject');
+
 import { divideURL, splitObjectURL } from '../utils/utils';
 import Subscription from './Subscription';
 
@@ -21,11 +25,11 @@ class ObserverObject {
     let changeURL = _this._url + '/changes';
     _this._changeListener = _this._bus.addListener(changeURL, (msg) => {
 
-      console.log('[SyncherManager.ObserverObject ] SyncherManager-' + changeURL + '-RCV: ', msg);
+      log.log('[SyncherManager.ObserverObject ] SyncherManager-' + changeURL + '-RCV: ', msg);
 
       //TODO: what todo here? Save changes?
       if (this._isToSaveData && msg.body.attribute) {
-        console.log('[SyncherManager.ObserverObject ] SyncherManager - save data: ', msg);
+        log.log('[SyncherManager.ObserverObject ] SyncherManager - save data: ', msg);
         _this._parent._dataObjectsStorage.update(false, _this._url, 'version', msg.body.version);
         _this._parent._dataObjectsStorage.update(false, _this._url, 'lastModified', msg.body.lastModified);
         _this._parent._dataObjectsStorage.saveData(false, _this._url, msg.body.attribute, msg.body.value);
@@ -42,7 +46,7 @@ class ObserverObject {
     let _this = this;
 
     let subscription = _this._subscriptions[hyperty];
-    console.log('[Observer Object - new subscription] - ',  _this._subscriptions, hyperty, _this._subscriptions.hasOwnProperty(hyperty));
+    log.log('[Observer Object - new subscription] - ',  _this._subscriptions, hyperty, _this._subscriptions.hasOwnProperty(hyperty));
     if (!subscription) {
       _this._subscriptions[hyperty] = new Subscription(_this._bus, hyperty, _this._url, _this._childrens, false);
     }
@@ -63,13 +67,13 @@ class ObserverObject {
       }
 
       let childBaseURL = _this._url + '/children/';
-      console.log('[SyncherManager.ObserverObject - addChildrens] - childrens: ', childrens, childBaseURL);
+      log.log('[SyncherManager.ObserverObject - addChildrens] - childrens: ', childrens, childBaseURL);
 
       childrens.forEach((child) => {
 
         let childListener = _this._bus.addListener(childBaseURL + child, (msg) => {
           //TODO: what todo here? Save childrens?
-          console.log('[SyncherManager.ObserverObject received]', msg);
+          log.log('[SyncherManager.ObserverObject received]', msg);
 
           if (msg.type === 'create' && msg.to.includes('children') && this._isToSaveData) {
             let splitedReporterURL = splitObjectURL(msg.to);
@@ -79,14 +83,14 @@ class ObserverObject {
             //remove false when mutualAuthentication is enabled
             if (!(typeof msg.body.value === 'string')) {
 
-              console.log('[SyncherManager.ObserverObject] encrypting received data ', msg.body.value);
+              log.log('[SyncherManager.ObserverObject] encrypting received data ', msg.body.value);
 
               _this._parent._identityModule.encryptDataObject(msg.body.value, url).then((encryptedValue)=>{
-                console.log('[SyncherManager.ObserverObject] encrypted data ',  encryptedValue);
+                log.log('[SyncherManager.ObserverObject] encrypted data ',  encryptedValue);
 
                 _this._storeChildObject(msg, JSON.stringify(encryptedValue));
               }).catch((reason) => {
-                console.warn('[SyncherManager.ObserverObject._encryptChild] failed, storing unencrypted ', reason);
+                log.warn('[SyncherManager.ObserverObject._encryptChild] failed, storing unencrypted ', reason);
                 _this._storeChildObject(msg, msg.body.value);
               });
             } else {
@@ -94,7 +98,7 @@ class ObserverObject {
             }
           }
 
-          console.log('[SyncherManager.ObserverObject children Listeners]', _this._childrenListeners, childListener);
+          log.log('[SyncherManager.ObserverObject children Listeners]', _this._childrenListeners, childListener);
           if (_this._childrenListeners.indexOf(childListener) === -1) {
             _this._childrenListeners.push(childListener);
           }
@@ -126,7 +130,7 @@ class ObserverObject {
 
     if (objectURLResource) attribute += '.' + objectURLResource;
 
-    console.log('[SyncherManager.ObserverObject._storeChildObject] : ', url, attribute, value);
+    log.log('[SyncherManager.ObserverObject._storeChildObject] : ', url, attribute, value);
 
     _this._parent._dataObjectsStorage.saveChildrens(false, url, attribute, value);
   }

@@ -1,3 +1,8 @@
+// Log System
+import * as logger from 'loglevel';
+let log = logger.getLogger('HypertyResourcesStorage');
+
+
 import { generateGUID, deepClone } from '../utils/utils';
 
 class HypertyResourcesStorage {
@@ -19,7 +24,7 @@ class HypertyResourcesStorage {
     _this._hypertyResources = hypertyResources;
 
     bus.addListener(_this._url, (msg) => {
-      console.info('[HypertyResourcesStorage] Message RCV: ', msg);
+      log.info('[HypertyResourcesStorage] Message RCV: ', msg);
       switch (msg.type) {
         case 'create': _this._onCreate(msg); break;
         case 'read': _this._onRead(msg); break;
@@ -52,7 +57,7 @@ class HypertyResourcesStorage {
     // we should control this;
     let resourceFind = Object.keys(_this._hypertyResources).find(item => _this._hypertyResources[item].url === resourceURL);
 
-    // // console.log('Resource Find: ', resourceFind);
+    // // log.log('Resource Find: ', resourceFind);
     if (resourceFind) {
       return;
     }
@@ -133,7 +138,7 @@ class HypertyResourcesStorage {
 
     reader.onload = function(theFile) {
 
-      console.info('[FileHypertyResource.init] file loaded ', theFile);
+      log.info('[FileHypertyResource.init] file loaded ', theFile);
 
       response.body.code = 200;
       response.body.p2p = true;

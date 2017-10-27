@@ -1,3 +1,7 @@
+// Log System
+import * as logger from 'loglevel';
+let log = logger.getLogger('IdentityModule');
+
 import {divideURL, getUserEmailFromURL, isDataObjectURL, getUserIdentityDomain, isLegacy } from '../utils/utils.js';
 import Identity from './Identity';
 import Crypto from './Crypto';
@@ -251,7 +255,7 @@ class IdentityModule {
       //if it is browser, then create a fake identity
 
       _this.runtimeCapabilities.isAvailable('browser').then((result) => {
-        // // console.log('runtime browser identity acquisition ', result);
+        log.log('runtime browser identity acquisition ', result);
 
         if (!result) return;
 
@@ -265,12 +269,12 @@ class IdentityModule {
           let idHint = identityBundle.hasOwnProperty('idHint') ? identityBundle.idHint : '';
 
           _this.selectIdentityForHyperty(origin, idp, idHint).then((assertion) => {
-            // // console.log('[IdentityModule] Identity selected by hyperty.');
+            log.log('[IdentityModule] Identity selected by hyperty.');
             return resolve(assertion);
           }, (err) => { // if it got an error then just select identity from GUI
-            // console.error('[IdentityModule] Could not select identity from hyperty.');
+            // log.error('[IdentityModule] Could not select identity from hyperty.');
             _this.selectIdentityFromGUI().then((newAssertion) => {
-              // // console.log('[IdentityModule] Identity selected by hyperty.');
+              log.log('[IdentityModule] Identity selected by hyperty.');
               return resolve(newAssertion);
             }, (err) => {
               return reject(err);
@@ -283,7 +287,7 @@ class IdentityModule {
           } else {
             _this.selectIdentityFromGUI().then((assertion) => {
 
-              // // console.log('[IdentityModule] Identity selected from GUI.');
+              log.log('[IdentityModule] Identity selected from GUI.');
 
               if (assertion.hasOwnProperty('messageInfo')) {
                 _this.defaultIdentity = assertion.messageInfo;
@@ -298,12 +302,12 @@ class IdentityModule {
           }
         }
       }).catch(error => {
-        console.error('Error on identity acquisition ', error);
+        log.error('Error on identity acquisition ', error);
         return reject(error);
       });
 
       _this.runtimeCapabilities.isAvailable('node').then((result) => {
-        // // console.log('node identity acquisition ', result);
+        log.log('node identity acquisition ', result);
 
         if (!result) return;
 
@@ -312,7 +316,7 @@ class IdentityModule {
           // should be needed to make further requests, to obtain a valid token
           return resolve(_this.currentIdentity);
         } else {
-          // // console.log('getIdentityAssertion for nodejs');
+          log.log('getIdentityAssertion for nodejs');
 
           //let randomNumber = Math.floor((Math.random() * 10000) + 1);
           let nodejsUser = 'nodejs-conference';
@@ -344,7 +348,7 @@ class IdentityModule {
         }
 
       }).catch(error => {
-        console.error('Error on identity acquisition ', error);
+        log.error('Error on identity acquisition ', error);
         reject(error);
       });
     });
@@ -437,7 +441,7 @@ class IdentityModule {
           if (msg.body.code === 200) {
             let selectedIdentity = msg.body;
 
-            // // console.log('selectedIdentity: ', selectedIdentity.value);
+            log.log('selectedIdentity: ', selectedIdentity.value);
             resolve(selectedIdentity);
           } else {
             reject('error on requesting an identity to the GUI');
@@ -475,7 +479,7 @@ class IdentityModule {
           reject('Error on obtaining Identity');
         }
       }).catch(function(err) {
-        console.error(err);
+        log.error(err);
         reject(err);
       });
     });
@@ -504,8 +508,8 @@ class IdentityModule {
               return reject(err);
             });
           } else { // you should never get here, if you do then the IdP Proxy is not well implemented
-            // console.error('GenerateAssertion returned invalid response.');
-            // // console.log('Proceeding by logging in.');
+            // log.error('GenerateAssertion returned invalid response.');
+            log.log('Proceeding by logging in.');
             _this.generateSelectedIdentity(publicKey, origin, idp, keyPair).then((value) => {
               return resolve(value);
             }, (err) => {
@@ -674,7 +678,7 @@ class IdentityModule {
       _this.callIdentityModuleFunc('openPopup', {urlreceived: loginUrl}).then((idCode) => {
         return idCode;
       }, (err) => {
-        console.error('Error while logging in for the selected identity.');
+        log.error('Error while logging in for the selected identity.');
         return reject(err);
       }).then((idCode) => {
         _this.sendGenerateMessage(publicKey, origin, idCode, idp).then((newResponse) => {
@@ -683,7 +687,7 @@ class IdentityModule {
               resolve('Login was successfull');
             }).catch(err => { reject('Login has failed:' + err); });
           } else {
-            console.error('Error while logging in for the selected identity.');
+            log.error('Error while logging in for the selected identity.');
             return reject('Could not generate a valid assertion for selected identity.');
           }
         }).catch(err => { reject('On loginSelectedIdentity from method sendGenerateMessage error:  ' + err); });
@@ -707,7 +711,7 @@ class IdentityModule {
           return reject('Error on obtaining Identity');
         }
       }).catch(function(err) {
-        console.error(err);
+        log.error(err);
         return reject(err);
       });
     });
@@ -737,17 +741,17 @@ class IdentityModule {
 
   //******************* ENCRYPTION METHODS *******************
   encryptMessage(message) {
-    console.info('encryptMessage:message', message);
+    log.info('encryptMessage:message', message);
     let _this = this;
 
-    // // console.log('encrypt message ');
+    log.log('encrypt message ');
 
     return new Promise(function(resolve, reject) {
       let isHandShakeType = message.type === 'handshake';
 
       //if is not to apply encryption, then returns resolve
       if (!_this.isToUseEncryption && !isHandShakeType) {
-        console.info('encryption disabled');
+        log.info('encryption disabled');
         return resolve(message);
       }
 
@@ -773,7 +777,7 @@ class IdentityModule {
           if (!chatKeys) {
             chatKeys = _this._newChatCrypto(message, userURL);
 
-            // // console.log('createChatKey encrypt', message.from + message.to);
+            log.log('createChatKey encrypt', message.from + message.to);
             _this.chatKeys[message.from + '<->' + message.to] = chatKeys;
             message.body.handshakePhase = 'startHandShake';
           }
@@ -786,7 +790,7 @@ class IdentityModule {
               let filteredMessage = _this._filterMessageToHash(message, message.body.value + iv, chatKeys.hypertyFrom.messageInfo);
 
               _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, filteredMessage).then(hash => {
-                // console.log('result of hash ', hash);
+                // log.log('result of hash ', hash);
                 let value = {iv: _this.crypto.encode(iv), value: _this.crypto.encode(encryptedValue), hash: _this.crypto.encode(hash)};
                 message.body.value = JSON.stringify(value);
 
@@ -814,8 +818,8 @@ class IdentityModule {
       //if from hyperty to a dataObjectURL
       } else if (isFromHyperty && isToDataObject) {
 
-        // // console.log('dataObject value to encrypt: ', message.body.value);
-        // // console.log('IdentityModule - encrypt from hyperty to dataobject ', message);
+        log.log('dataObject value to encrypt: ', message.body.value);
+        log.log('IdentityModule - encrypt from hyperty to dataobject ', message);
 
         _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
           let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
@@ -849,7 +853,7 @@ class IdentityModule {
                   let filteredMessage = _this._filterMessageToHash(message, message.body.value + iv, dataObjectKey.sessionKey);
 
                   _this.crypto.hashHMAC(dataObjectKey.sessionKey, filteredMessage).then(hash => {
-                    // console.log('hash ', hash);
+                    // log.log('hash ', hash);
 
                     let newValue = {value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv), hash: _this.crypto.encode(hash)};
 
@@ -877,7 +881,7 @@ class IdentityModule {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
-      console.info('dataObject value to encrypt: ', dataObject);
+      log.info('dataObject value to encrypt: ', dataObject);
 
       let dataObjectURL = _this._parseMessageURL(sender);
 
@@ -894,13 +898,13 @@ class IdentityModule {
             _this.crypto.encryptAES(dataObjectKey.sessionKey, _this.crypto.encode(JSON.stringify(dataObject)), iv).then(encryptedValue => {
               let newValue = { value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv) };
 
-              // // console.log('encrypted dataObject', newValue);
+              log.log('encrypted dataObject', newValue);
               return resolve(newValue);
             }).catch(err => { reject('On encryptDataObject from method encryptAES error: ' + err); });
 
           // if not, just send the message
           } else {
-            console.info('The dataObject is not encrypted');
+            log.info('The dataObject is not encrypted');
             return resolve(dataObject);
           }
 
@@ -915,14 +919,14 @@ class IdentityModule {
   decryptMessage(message) {
     let _this = this;
 
-    console.info('decryptMessage:message', message);
+    log.info('decryptMessage:message', message);
 
     return new Promise(function(resolve, reject) {
       let isHandShakeType = message.type === 'handshake';
 
       //if is not to apply encryption, then returns resolve
       if (!_this.isToUseEncryption && !isHandShakeType) {
-        // console.log('decryption disabled');
+        // log.log('decryption disabled');
         return resolve(message);
       }
 
@@ -938,7 +942,7 @@ class IdentityModule {
 
       //is is hyperty to hyperty communication
       if (isFromHyperty && isToHyperty) {
-        // console.log('decrypt hyperty to hyperty');
+        // log.log('decrypt hyperty to hyperty');
         let userURL = _this._registry.getHypertyOwner(message.to);
         if (userURL) {
 
@@ -954,13 +958,13 @@ class IdentityModule {
             let data = _this.crypto.decode(value.value);
             let hash = _this.crypto.decode(value.hash);
             _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, data, iv).then(decryptedData => {
-              // console.log('decrypted value ', decryptedData);
+              // log.log('decrypted value ', decryptedData);
               message.body.value = decryptedData;
 
               let filteredMessage = _this._filterMessageToHash(message, decryptedData + iv);
 
               _this.crypto.verifyHMAC(chatKeys.keys.hypertyToHashKey, filteredMessage, hash).then(result => {
-                // console.log('result of hash verification! ', result);
+                // log.log('result of hash verification! ', result);
                 message.body.assertedIdentity = true;
                 resolve(message);
               });
@@ -989,7 +993,7 @@ class IdentityModule {
 
         //if from hyperty to a dataObjectURL
       } else if (isFromHyperty && isToDataObject) {
-        // console.log('dataObject value to decrypt: ', message.body);
+        // log.log('dataObject value to decrypt: ', message.body);
 
         _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
           let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
@@ -1005,13 +1009,14 @@ class IdentityModule {
 
               _this.crypto.decryptAES(dataObjectKey.sessionKey, encryptedValue, iv).then(decryptedValue => {
                 let parsedValue = JSON.parse(atob(decryptedValue));
-                // console.log('decrypted Value,', parsedValue);
+
+                // log.log('decrypted Value,', parsedValue);
                 message.body.value = parsedValue;
 
                 let filteredMessage = _this._filterMessageToHash(message, parsedValue + iv);
 
                 _this.crypto.verifyHMAC(dataObjectKey.sessionKey, filteredMessage, hash).then(result => {
-                  // console.log('result of hash verification! ', result);
+                  // log.log('result of hash verification! ', result);
 
                   message.body.assertedIdentity = true;
                   resolve(message);
@@ -1045,13 +1050,13 @@ class IdentityModule {
     return new Promise(function(resolve, reject) {
       //if is not to apply encryption, then returns resolve
       if (!_this.isToUseEncryption) {
-        // console.log('decryption disabled');
+        // log.log('decryption disabled');
         return resolve(dataObject);
       }
 
       let dataObjectURL = _this._parseMessageURL(sender);
 
-      // console.log('dataObject value to decrypt: ', dataObject);
+      // log.log('dataObject value to decrypt: ', dataObject);
 
       _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
         let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
@@ -1066,13 +1071,15 @@ class IdentityModule {
             _this.crypto.decryptAES(dataObjectKey.sessionKey, encryptedValue, iv).then(decryptedValue => {
               let parsedValue = JSON.parse(atob(decryptedValue));
               let newValue = { value: parsedValue, iv: _this.crypto.encode(iv) };
-              // console.log('decrypted dataObject,', newValue);
+
+              // log.log('decrypted dataObject,', newValue);
+
               return resolve(newValue);
             }).catch(err => { reject('On decryptDataObject from method encryptAES error: ' + err); });
 
           //if not, just return the dataObject
           } else {
-            // console.log('The dataObject is not encrypted');
+            // log.log('The dataObject is not encrypted');
             return resolve(dataObject);
           }
 
@@ -1084,8 +1091,8 @@ class IdentityModule {
   }
 
   doMutualAuthentication(sender, receiver) {
-    console.info('doMutualAuthentication:sender ', sender);
-    console.info('doMutualAuthentication:receiver ', receiver);
+    log.info('doMutualAuthentication:sender ', sender);
+    log.info('doMutualAuthentication:receiver ', receiver);
     let _this = this;
 
     return new Promise(function(resolve, reject) {
@@ -1118,7 +1125,7 @@ class IdentityModule {
         if (!chatKeys) {
           // callback to resolve when finish the mutual authentication
           let resolved = function(value) {
-            // console.log('callback value:', value);
+            // log.log('callback value:', value);
             resolve(value);
           };
           msg.callback = resolved;
@@ -1161,13 +1168,13 @@ class IdentityModule {
   getToken(fromURL, toUrl) {
     let _this = this;
     return new Promise(function(resolve, reject) {
-      // console.log('[Identity.IdentityModule.getToken] from->', fromURL, '  to->', toUrl);
+      // log.log('[Identity.IdentityModule.getToken] from->', fromURL, '  to->', toUrl);
 
       if (toUrl) {
 
-        // // console.log('toUrl', toUrl);
+        log.log('toUrl', toUrl);
         _this.registry.isLegacy(toUrl).then(function(result) {
-          // console.log('[Identity.IdentityModule.getToken] isLEGACY: ', result);
+          // log.log('[Identity.IdentityModule.getToken] isLEGACY: ', result);
           if (result) {
 
             // TODO: check if in the future other legacy hyperties have expiration times
@@ -1183,7 +1190,7 @@ class IdentityModule {
 
               _this.watchingYou.observe('identitiesList', (change) => {
 
-                // console.log('[Identity.IdentityModule.getToken]  identitiesList changed ' + _this.identitiesList);
+                // log.log('[Identity.IdentityModule.getToken]  identitiesList changed ' + _this.identitiesList);
 
                 let keypath = change.keypath;
 
@@ -1192,7 +1199,7 @@ class IdentityModule {
                 }
 
                 if (keypath === domain && change.name === 'status' && change.newValue === 'created') {
-                  // console.log('[Identity.IdentityModule.getToken] token is created ' + _this.identitiesList[domain]);
+                  // log.log('[Identity.IdentityModule.getToken] token is created ' + _this.identitiesList[domain]);
                   return resolve(_this.getAccessToken(toUrl));
                 }
               });
@@ -1202,9 +1209,9 @@ class IdentityModule {
                 status: 'in-progress'
               };
 
-              // console.log('[Identity.IdentityModule.getToken] for-> ', domain);
+              // log.log('[Identity.IdentityModule.getToken] for-> ', domain);
               _this.callGenerateMethods(domain).then((value) => {
-                // console.log('[Identity.IdentityModule.getToken] CallGeneratemethods', value);
+                // log.log('[Identity.IdentityModule.getToken] CallGeneratemethods', value);
                 let token = _this.getAccessToken(toUrl);
                 if (token) {
                   return resolve(token);
@@ -1212,7 +1219,7 @@ class IdentityModule {
                   return reject('No Access token found');
                 }
               }, (err) => {
-                console.error('[Identity.IdentityModule.getToken] error CallGeneratemethods');
+                log.error('[Identity.IdentityModule.getToken] error CallGeneratemethods');
                 return reject(err);
               });
             }
@@ -1237,7 +1244,7 @@ class IdentityModule {
   * @return {JSON}    token    Id token to be added to the message
   */
   getIdToken(hypertyURL) {
-    console.info('getIdToken:hypertyURL ', hypertyURL);
+    log.info('getIdToken:hypertyURL ', hypertyURL);
     let _this = this;
     return new Promise(function(resolve, reject) {
       let splitURL = hypertyURL.split('://');
@@ -1259,7 +1266,7 @@ class IdentityModule {
             return reject('no identity was found ');
           }
         }).catch((reason) => {
-          console.error('no identity was found: ', reason);
+          log.error('no identity was found: ', reason);
           reject(reason);
         });
       } else {
@@ -1310,8 +1317,9 @@ class IdentityModule {
         // check if there is expiration time
         if (identity.hasOwnProperty('info') && identity.info.hasOwnProperty('expires')) {
           expiration_date = identity.info.expires;
-          // console.log('[Identity.IdentityModule.getAccessToken] Token expires in', expiration_date);
-          // console.log('[Identity.IdentityModule.getAccessToken] time now:', time_now);
+
+          // log.log('[Identity.IdentityModule.getAccessToken] Token expires in', expiration_date);
+          // log.log('[Identity.IdentityModule.getAccessToken] time now:', time_now);
 
           // TODO: this should not be verified in this way
           // we should contact the IDP to verify this instead of using the local clock
@@ -1346,7 +1354,7 @@ class IdentityModule {
       let message;
       let assertion = _this.getIdentity(oldIdentity.userProfile.userURL);
 
-      console.info('sendRefreshMessage:oldIdentity', oldIdentity);
+      log.info('sendRefreshMessage:oldIdentity', oldIdentity);
 
       message = {type: 'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'refreshAssertion', params: {identity: assertion}}};
 
@@ -1394,7 +1402,7 @@ class IdentityModule {
   generateAssertion(contents, origin, usernameHint, keyPair, idpDomain) {
     let _this = this;
 
-    // console.log('generateAssertion');
+    // log.log('generateAssertion');
 
     return new Promise(function(resolve, reject) {
 
@@ -1478,7 +1486,7 @@ class IdentityModule {
           try {
             _this._messageBus.postMessage(replyMsg);
           } catch (err) {
-            console.error('On addGUIListeners from if generateRSAKeyPair method postMessage error: ' + err);
+            log.error('On addGUIListeners from if generateRSAKeyPair method postMessage error: ' + err);
           }
         });
         return;
@@ -1494,7 +1502,7 @@ class IdentityModule {
           try {
             _this._messageBus.postMessage(replyMsg);
           } catch (err) {
-            console.error('On addGUIListeners from if sendGenerateMessage method postMessage error: ' + err);
+            log.error('On addGUIListeners from if sendGenerateMessage method postMessage error: ' + err);
           }
 
         });
@@ -1509,7 +1517,7 @@ class IdentityModule {
           try {
             _this._messageBus.postMessage(replyMsg);
           } catch (err) {
-            console.error('On addGUIListeners from if storeIdentity method postMessage error: ' + err);
+            log.error('On addGUIListeners from if storeIdentity method postMessage error: ' + err);
           }
 
         });
@@ -1529,7 +1537,7 @@ class IdentityModule {
       try {
         _this._messageBus.postMessage(replyMsg);
       } catch (err) {
-        console.error('On addGUIListeners from if storeIdentity method postMessage error: ' + err);
+        log.error('On addGUIListeners from if storeIdentity method postMessage error: ' + err);
       }
 
     });
@@ -1548,12 +1556,12 @@ class IdentityModule {
    * @return {Promise}
    */
   _getValidToken(hypertyURL) {
-    console.info('_getValidToken:hypertyURL', hypertyURL);
+    log.info('_getValidToken:hypertyURL', hypertyURL);
     let _this = this;
     return new Promise((resolve, reject) => {
       _this.getIdToken(hypertyURL).then(function(identity) {
 
-        // // console.log('[Identity.IdentityModule.getValidToken] Token', identity);
+        log.log('[Identity.IdentityModule.getValidToken] Token', identity);
 
         let time_now = _this._seconds_since_epoch();
         let complete_id = _this.getIdentity(identity.userProfile.userURL);
@@ -1566,18 +1574,18 @@ class IdentityModule {
             expiration_date = complete_id.info.tokenIDJSON.exp;
           } else {
             // throw 'The ID Token does not have an expiration time';
-            console.info('The ID Token does not have an expiration time');
+            log.info('The ID Token does not have an expiration time');
             resolve(identity);
           }
         } else if (complete_id.hasOwnProperty('infoToken') && complete_id.infoToken.hasOwnProperty('exp')) {
           expiration_date = complete_id.infoToken.exp;
         } else {
           // throw 'The ID Token does not have an expiration time';
-          console.info('The ID Token does not have an expiration time');
+          log.info('The ID Token does not have an expiration time');
           resolve(identity);
         }
 
-        // console.log('[Identity.IdentityModule.getValidToken] Token expires in: ', expiration_date,  ' | time now: ', time_now);
+        // log.log('[Identity.IdentityModule.getValidToken] Token expires in: ', expiration_date,  ' | time now: ', time_now);
 
         if (time_now >= expiration_date) {
           if (identity.idp === 'google.com') {
@@ -1586,7 +1594,7 @@ class IdentityModule {
               _this.storeIdentity(newIdentity.body.params.identity, newIdentity.body.params.identity.keyPair).then((value) => {
                 resolve(value);
               }, (err) => {
-                console.error('[Identity.IdentityModule.getToken] error on getToken', err);
+                log.error('[Identity.IdentityModule.getToken] error on getToken', err);
                 reject(err);
               });
             });
@@ -1603,7 +1611,7 @@ class IdentityModule {
           resolve(identity);
         }
       }).catch(function(error) {
-        console.error('[Identity.IdentityModule.getToken] error on getToken', error);
+        log.error('[Identity.IdentityModule.getToken] error on getToken', error);
         reject(error);
       });
     });
@@ -1615,7 +1623,7 @@ class IdentityModule {
   * @return   {String}  reporter              dataObject url reporter
   */
   _getHypertyFromDataObject(dataObjectURL) {
-    console.info('_getHypertyFromDataObject:dataObjectURL', dataObjectURL);
+    log.info('_getHypertyFromDataObject:dataObjectURL', dataObjectURL);
     let _this = this;
 
     return new Promise(function(resolve, reject) {
@@ -1626,21 +1634,21 @@ class IdentityModule {
 
       // check if is the creator of the hyperty
       let reporterURL = _this.registry.getReporterURLSynchonous(finalURL);
-      console.info('_getHypertyFromDataObject:reporterURL', reporterURL);
+      log.info('_getHypertyFromDataObject:reporterURL', reporterURL);
 
       if (reporterURL) {
         resolve(reporterURL);
       } else {
         // check if there is already an association from an hypertyURL to the dataObject
         let storedReporterURL = _this.dataObjectsIdentity[finalURL];
-        console.info('_getHypertyFromDataObject:storedReporterURL', storedReporterURL);
+        log.info('_getHypertyFromDataObject:storedReporterURL', storedReporterURL);
 
         if (storedReporterURL) {
           resolve(storedReporterURL);
         } else {
           // check if there is any hyperty that subscribed the dataObjectURL
           let subscriberHyperty = _this.registry.getDataObjectSubscriberHyperty(dataObjectURL);
-          console.info('_getHypertyFromDataObject:subscriberHyperty', subscriberHyperty);
+          log.info('_getHypertyFromDataObject:subscriberHyperty', subscriberHyperty);
 
           if (subscriberHyperty) {
             resolve(subscriberHyperty);
@@ -1648,9 +1656,9 @@ class IdentityModule {
             // search in domain registry for the hyperty associated to the dataObject
             // search in case is a subscriber who wants to know the reporter
             _this._coreDiscovery.discoverDataObjectPerURL(finalURL, domain).then(dataObject => {
-              console.info('_getHypertyFromDataObject:dataObject', dataObject);
+              log.info('_getHypertyFromDataObject:dataObject', dataObject);
               _this.dataObjectsIdentity[finalURL] = dataObject.reporter;
-              console.info('_getHypertyFromDataObject:dataObject.reporter', dataObject.reporter);
+              log.info('_getHypertyFromDataObject:dataObject.reporter', dataObject.reporter);
               resolve(dataObject.reporter);
             }, err => {
               reject(err);
@@ -1744,7 +1752,7 @@ class IdentityModule {
       let value = {};
       let filteredMessage;
 
-      console.info('handshake phase: ', handshakeType);
+      log.info('handshake phase: ', handshakeType);
 
       switch (handshakeType) {
 
@@ -1777,7 +1785,7 @@ class IdentityModule {
         }
         case 'senderHello': {
 
-          // // console.log('senderHello');
+          log.log('senderHello');
           chatKeys.handshakeHistory.senderHello = _this._filterMessageToHash(message);
           chatKeys.keys.fromRandom = _this.crypto.decode(message.body.value);
           chatKeys.keys.toRandom = _this.crypto.generateRandom();
@@ -1798,7 +1806,7 @@ class IdentityModule {
         }
         case 'receiverHello': {
 
-          // // console.log('receiverHello');
+          log.log('receiverHello');
           chatKeys.handshakeHistory.receiverHello = _this._filterMessageToHash(message);
 
           _this.validateAssertion(message.body.identity.assertion, undefined, message.body.identity.idp).then((value) => {
@@ -1897,7 +1905,7 @@ class IdentityModule {
         }
         case 'senderCertificate': {
 
-          // // console.log('senderCertificate');
+          log.log('senderCertificate');
           let receivedValue = JSON.parse(atob(message.body.value));
 
           _this.validateAssertion(message.body.identity.assertion, undefined, message.body.identity.idp).then((value) => {
@@ -1914,7 +1922,7 @@ class IdentityModule {
             return _this.crypto.decryptRSA(chatKeys.hypertyFrom.privateKey, encryptedPMS);
 
           }, (error) => {
-            // console.log(error);
+            // log.log(error);
             reject('Error during authentication of identity');
 
             //obtain the PremasterKey using the private key
@@ -1931,7 +1939,7 @@ class IdentityModule {
             // validates the signature received
           }).then(signValidationResult => {
 
-            // // console.log('signature validation result ', signValidationResult);
+            log.log('signature validation result ', signValidationResult);
             let concatKey = _this.crypto.concatPMSwithRandoms(chatKeys.keys.premasterKey, chatKeys.keys.toRandom, chatKeys.keys.fromRandom);
 
             return _this.crypto.generateMasterSecret(concatKey, 'messageHistoric' + chatKeys.keys.toRandom + chatKeys.keys.fromRandom);
@@ -1954,7 +1962,7 @@ class IdentityModule {
             return _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, data, iv);
 
           }).then(decryptedData => {
-            // console.log('decryptedData', decryptedData);
+            // log.log('decryptedData', decryptedData);
 
             chatKeys.handshakeHistory.senderCertificate = _this._filterMessageToHash(message, decryptedData + iv);
 
@@ -1966,7 +1974,7 @@ class IdentityModule {
 
           }).then(verifiedHash  => {
 
-            // console.log('result of hash verification ', verifiedHash);
+            // log.log('result of hash verification ', verifiedHash);
             let receiverFinishedMessage = {
               type: 'handshake',
               to: message.from,
@@ -2009,7 +2017,7 @@ class IdentityModule {
         }
         case 'receiverFinishedMessage': {
 
-          // console.log('receiverFinishedMessage');
+          // log.log('receiverFinishedMessage');
           chatKeys.authenticated = true;
 
           value = JSON.parse(atob(message.body.value));
@@ -2019,12 +2027,12 @@ class IdentityModule {
           hash = _this.crypto.decode(value.hash);
 
           _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, data, iv).then(decryptedData => {
-            // console.log('decryptedData', decryptedData);
+            // log.log('decryptedData', decryptedData);
             chatKeys.handshakeHistory.receiverFinishedMessage = _this._filterMessageToHash(message, decryptedData + iv);
 
             let filteredMessage = _this._filterMessageToHash(message, data + iv);
             _this.crypto.verifyHMAC(chatKeys.keys.hypertyToHashKey, filteredMessage, hash).then(result => {
-              // console.log('hash result', result);
+              // log.log('hash result', result);
 
               // check if there was an initial message that was blocked and send it
               if (chatKeys.initialMessage) {
@@ -2065,7 +2073,7 @@ class IdentityModule {
           let dataObjectURL;
           let receiverAcknowledgeMsg;
 
-          // // console.log('[IdentityModule reporterSessionKey] - decryptAES: ', chatKeys.keys.hypertyToSessionKey, encryptedValue, iv);
+          log.log('[IdentityModule reporterSessionKey] - decryptAES: ', chatKeys.keys.hypertyToSessionKey, encryptedValue, iv);
 
           _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, encryptedValue, iv).then(decryptedValue => {
 
@@ -2079,7 +2087,7 @@ class IdentityModule {
 
           }).then(hashResult => {
 
-            // console.log('hash successfully validated ', hashResult);
+            // log.log('hash successfully validated ', hashResult);
 
             _this.dataObjectSessionKeys[dataObjectURL] =  {sessionKey: sessionKey, isToEncrypt: true};
 
@@ -2118,7 +2126,7 @@ class IdentityModule {
 
         case 'receiverAcknowledge': {
 
-          // // console.log('receiverAcknowledge');
+          log.log('receiverAcknowledge');
 
           let receivedvalueIVandHash = JSON.parse(atob(message.body.value));
           let receivedHash = _this.crypto.decode(receivedvalueIVandHash.hash);
@@ -2130,7 +2138,7 @@ class IdentityModule {
             let filteredMessage = _this._filterMessageToHash(message, decryptedValue + iv);
             return _this.crypto.verifyHMAC(chatKeys.keys.hypertyToHashKey, filteredMessage, receivedHash);
           }).then(hashResult => {
-            // console.log('hashResult ', hashResult);
+            // log.log('hashResult ', hashResult);
 
             let callback = chatKeys.callback;
 
