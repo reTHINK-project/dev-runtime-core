@@ -1,4 +1,5 @@
 import {encodeUTF8, decodeUTF8} from './utf8.js';
+//var WebCrypto = require("node-webcrypto-ossl");
 
 /**
 * Class with the cryptographic functions for the authentication protocol

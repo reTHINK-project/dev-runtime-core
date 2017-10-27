@@ -38,7 +38,7 @@ class IdentityModule {
   /**
   * This is the constructor to initialise the Identity Module it does not require any input.
   */
-  constructor(runtimeURL, runtimeCapabilities, storageManager, dataObjectsStorage) {
+  constructor(runtimeURL, runtimeCapabilities, storageManager, dataObjectsStorage, runtimeFactory) {
     let _this = this;
 
     if (!runtimeURL) throw new Error('runtimeURL is missing.');
@@ -51,6 +51,7 @@ class IdentityModule {
     _this._idmURL = _this._runtimeURL + '/idm';
     _this._guiURL = _this._runtimeURL + '/identity-gui';
     _this.runtimeCapabilities = runtimeCapabilities;
+    _this.runtimeFactory = runtimeFactory;
 
     _this._domain = divideURL(_this._runtimeURL).domain;
 
@@ -62,7 +63,10 @@ class IdentityModule {
     _this.emailsList = [];
     let newIdentity = new Identity('guid', 'HUMAN');
     _this.identity = newIdentity;
-    _this.crypto = new Crypto();
+    log('BEFORE CRYPTO');
+    log('RuntimeFactory.createWebcrypto:', runtimeFactory.createWebcrypto);
+    _this.crypto = new Crypto(_this.runtimeFactory);
+    log('AFTER CRYPTO');
     _this.currentIdentity;
     _this.defaultIdentity;
 
@@ -316,7 +320,7 @@ class IdentityModule {
           console.log('getIdentityAssertion for nodejs');
 
           let idp = {type: "idp", value: "google.com", code: 200, auth: false};
-          _this.callNodeJsGenerateMethods(idp.value, origin).then((value) => {
+          _this.callNodeJsGenerateMethods(idp.value, 'origin').then((value) => {
             resolve(value);
           }, (err) => {
             reject(err);
@@ -326,6 +330,7 @@ class IdentityModule {
       }).catch(error => {
         console.log('Error on identity acquisition ', error);
         reject(error);
+      });
     });
   }
 
