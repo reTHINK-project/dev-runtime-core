@@ -160,6 +160,10 @@ class PEP {
               message = messages[i];
               _this.context.prepareToForward(message, isIncoming, result).then(message => {
                 if (result) {
+                  if (isIncoming && message.body.identity) {
+                    delete message.body.identity.assertion;
+                    delete message.body.identity.expires;
+                  } 
                   message.body.auth = (message.body.auth === undefined) ? true : message.body.auth;
                   resolve(message);
                 } else {
