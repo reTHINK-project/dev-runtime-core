@@ -102,69 +102,89 @@ class SyncherManager {
     let from = msg.from;
     let to = msg.to;
 
-    if (!msg.body.hasOwnProperty('resume') || (msg.body.hasOwnProperty('resume') && !msg.body.resume)) {
+    // check if message is to save new childrenObjects in the local storage
+    // TODO: check if message is to store new child in the local storage and call storeChild. How to distinguish from others?
 
-      // check if this is an invitation message
-      if (msg.body.authorise) {
-        this._authorise(msg);
-        console.info('[SyncherManager.onCreate - invite observers]', msg);
-      } else { // this is to create a new data object
-          console.info('[SyncherManager.onCreate - Create New Object]', msg);
-          this._newCreate(msg);
-        }
+    if (msg.body.attribute) this._storeChildrens(msg);
+    else {
 
-    } else {
+      if (!msg.body.hasOwnProperty('resume') || (msg.body.hasOwnProperty('resume') && !msg.body.resume)) {
 
-      // If from the hyperty side, call the resumeReporter we will have resume = true'
-      // so we will create an resumed object and will try to resume the object previously saved;
-      this._dataObjectsStorage.getResourcesByCriteria(msg, true).then((result) => {
+        // check if this is an invitation message
+        if (msg.body.authorise) {
+          this._authorise(msg);
+          console.info('[SyncherManager.onCreate - invite observers]', msg);
+        } else { // this is to create a new data object
+            console.info('[SyncherManager.onCreate - Create New Object]', msg);
+            this._newCreate(msg);
+          }
 
-        console.info('[SyncherManager - Create Resumed] - ResourcesByCriteria | Message: ', msg, ' result: ', result);
+      } else {
 
-        if (result && Object.keys(result).length > 0) {
+        // If from the hyperty side, call the resumeReporter we will have resume = true'
+        // so we will create an resumed object and will try to resume the object previously saved;
+        this._dataObjectsStorage.getResourcesByCriteria(msg, true).then((result) => {
 
-          let listOfReporters = [];
+          console.info('[SyncherManager - Create Resumed] - ResourcesByCriteria | Message: ', msg, ' result: ', result);
 
-          Object.keys(result).forEach((objURL) => {
-            listOfReporters.push(this._resumeCreate(msg, result[objURL]));
-          });
+          if (result && Object.keys(result).length > 0) {
 
-          Promise.all(listOfReporters).then((resumedReporters) => {
-            console.log('[SyncherManager - Create Resumed]', resumedReporters);
+            let listOfReporters = [];
 
-            // TODO: shoud send the information if some object was fail;
-            let successfullyResumed = Object.values(resumedReporters).filter((reporter) => {
-              return reporter !== false;
+            Object.keys(result).forEach((objURL) => {
+              listOfReporters.push(this._resumeCreate(msg, result[objURL]));
             });
 
-            console.info('[SyncherManager.onCreate] returning resumed objects : ', successfullyResumed);
+            Promise.all(listOfReporters).then((resumedReporters) => {
+              console.log('[SyncherManager - Create Resumed]', resumedReporters);
 
-            //FLOW-OUT: message response to Syncher -> create resume
-            this._bus.postMessage({
-              id: msg.id, type: 'response', from: to, to: from,
-              body: { code: 200, value: successfullyResumed }
+              // TODO: shoud send the information if some object was fail;
+              let successfullyResumed = Object.values(resumedReporters).filter((reporter) => {
+                return reporter !== false;
+              });
+
+              console.info('[SyncherManager.onCreate] returning resumed objects : ', successfullyResumed);
+
+              //FLOW-OUT: message response to Syncher -> create resume
+              this._bus.postMessage({
+                id: msg.id, type: 'response', from: to, to: from,
+                body: { code: 200, value: successfullyResumed }
+              });
+
             });
 
-          });
+          } else {
+            //forward to hyperty:
+            let reply = {};
+            reply.id = msg.id;
+            reply.from = msg.to;
+            reply.to = msg.from;
+            reply.type = 'response';
+            reply.body = {
+              code: 404,
+              desc: 'No data objects reporters to be resumed'
+            };
+            this._bus.postMessage(reply);
+          }
 
-        } else {
-          //forward to hyperty:
-          let reply = {};
-          reply.id = msg.id;
-          reply.from = msg.to;
-          reply.to = msg.from;
-          reply.type = 'response';
-          reply.body = {
-            code: 404,
-            desc: 'No data objects reporters to be resumed'
-          };
-          this._bus.postMessage(reply);
-        }
-
-      });
+        });
+      }
     }
 
   }
+
+ _storeChildrens(msg) {
+   let _this = this;
+
+   let resource = msg.body.resource;
+   let attribute = msg.body.attribute;
+
+   if (attribute === 'childrenObjects')
+      _this._dataObjectsStorage.saveChildrens(false, resource, undefined, msg.body.value);
+   else
+    _this._dataObjectsStorage.saveChildrens(true, resource, attribute, msg.body.value);
+
+ }
 
   _newCreate(msg) {
     let _this = this;
@@ -485,6 +505,7 @@ class SyncherManager {
     let object = _this._reporters[objURL];
     if (object) {
       //TODO: is there any policy verification before delete?
+
       object.delete();
 
       this._dataObjectsStorage.deleteResource(objURL).then((result) => {
@@ -504,6 +525,7 @@ class SyncherManager {
 
     }
   }
+
 
   //FLOW-IN: message received from local Syncher -> subscribe
   _onLocalSubscribe(msg) {

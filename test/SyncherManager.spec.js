@@ -9,11 +9,13 @@ import RuntimeCoreCtx from '../src/policy/context/RuntimeCoreCtx';
 
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
+import sinonChai from 'sinon-chai';
 
 chai.config.truncateThreshold = 0;
 
 let expect = chai.expect;
 chai.use(chaiAsPromised);
+chai.use(sinonChai);
 
 describe('SyncherManager', function() {
   let storageManager = runtimeFactory.storageManager();
@@ -32,6 +34,11 @@ describe('SyncherManager', function() {
     communication: { name: 'chat-x' },
     x: 10, y: 10
   };
+
+  let responseCallbacks = [];
+
+  let bus;
+
 
   let msgNodeResponseFunc = (bus, msg) => {
 
@@ -55,6 +62,12 @@ describe('SyncherManager', function() {
         id: msg.id, type: 'response', from: msg.to, to: msg.from,
         body: { code: 200 }
       });
+    }
+    if (msg.type === 'response') {
+      debugger;
+      if (msg.id === 4 && responseCallbacks[msg.to + msg.id]) {
+        return responseCallbacks[msg.to + msg.id];
+      }
     }
   };
 
@@ -165,7 +178,16 @@ describe('SyncherManager', function() {
   ];
 
   it('reporter read', function(done) {
-    let bus = new MessageBus();
+
+    bus = new MessageBus();
+
+    sinon.stub(bus, 'addResponseListener').callsFake(function(url, id, replyCallback) {
+      responseCallbacks[url + id] = replyCallback;
+    });
+
+    sinon.stub(bus, 'removeResponseListener').callsFake(function(url, id) {
+      delete responseCallbacks[url + id];
+    });
 
     bus._onPostMessage = (msg) => {
       console.log('_onPostMessage: ', msg);
@@ -192,7 +214,7 @@ describe('SyncherManager', function() {
   });
 
   it('reporter observer integration', function(done) {
-    let bus = new MessageBus();
+    bus = new MessageBus();
     bus.pipeline.handlers = handlers;
 
     bus._onPostMessage = (msg) => {
@@ -250,7 +272,7 @@ describe('SyncherManager', function() {
 
   it('should resume observers', function(done) {
 
-    let bus = new MessageBus();
+    bus = new MessageBus();
     bus._onMessage((a) => {
       console.log('BUS:', a);
     });
@@ -312,7 +334,7 @@ describe('SyncherManager', function() {
 
   it('should resume reporters', function(done) {
 
-    let bus = new MessageBus();
+    bus = new MessageBus();
 
     bus._onPostMessage = (msg) => {
       console.log('_onPostMessage: ', msg);
@@ -808,7 +830,7 @@ describe('SyncherManager', function() {
   });
 
   it('reporter addChild', function(done) {
-    let bus = new MessageBus();
+    bus = new MessageBus();
     bus._onPostMessage = (msg) => {
       console.log('5-_onPostMessage: ', msg);
       msgNodeResponseFunc(bus, msg);
@@ -827,7 +849,7 @@ describe('SyncherManager', function() {
   });
 
   it('observer addChild', function(done) {
-    let bus = new MessageBus();
+    bus = new MessageBus();
 
     bus._onPostMessage = (msg) => {
       console.log('6-_onPostMessage: ', msg);
@@ -880,7 +902,7 @@ describe('SyncherManager', function() {
   });
 
   it('children deltas generate and process', function(done) {
-    let bus = new MessageBus();
+    bus = new MessageBus();
     bus.pipeline.handlers = handlers;
 
     bus._onPostMessage = (msg) => {
@@ -925,7 +947,7 @@ describe('SyncherManager', function() {
   it('create and delete', function(done) {
     let deleted = false;
 
-    let bus = new MessageBus();
+    bus = new MessageBus();
     bus.pipeline.handlers = handlers;
 
     bus._onPostMessage = (msg) => {
@@ -985,7 +1007,7 @@ describe('SyncherManager', function() {
   });
 
   it('subscribe and unsubscribe', function(done) {
-    let bus = new MessageBus();
+    bus = new MessageBus();
     bus.pipeline.handlers = handlers;
 
     bus._onPostMessage = (msg) => {
@@ -1040,7 +1062,7 @@ describe('SyncherManager', function() {
 
     it('should save the url on storageManager', function(done) {
 
-      let bus = new MessageBus();
+      bus = new MessageBus();
       bus.pipeline.handlers = handlers;
 
       bus._onPostMessage = function(msg)  {
@@ -1111,7 +1133,7 @@ describe('SyncherManager', function() {
 
     it('should resume the url stored on storageManager', (done) => {
 
-      let bus = new MessageBus();
+      bus = new MessageBus();
       bus.pipeline.handlers = handlers;
       bus._onPostMessage = (msg) => {
         console.log('10-_onPostMessage: ', msg);
