@@ -259,7 +259,12 @@ class ReporterObject {
 
     if (objectURLResource) attribute += '.' + objectURLResource;
 
-    log.log('[SyncherManager.ReporterObject._storeChildObject] : ', url, attribute, value);
+    // this identity data is not needed to be stored
+    delete value.identity.assertion;
+    delete value.identity.expires;
+
+
+    console.log('[SyncherManager.ReporterObject._storeChildObject] : ', url, attribute, value);
 
     _this._parent._dataObjectsStorage.saveChildrens(true, url, attribute, value);
   }

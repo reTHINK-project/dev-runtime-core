@@ -125,6 +125,10 @@ class ObserverObject {
       value: data
     };
 
+    // this identity data is not needed to be stored
+    delete value.identity.assertion;
+    delete value.identity.expires;
+
     let objectURLResource = msg.body.resource;
     let attribute = resource;
 

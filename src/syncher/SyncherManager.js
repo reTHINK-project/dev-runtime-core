@@ -505,6 +505,7 @@ class SyncherManager {
     let object = _this._reporters[objURL];
     if (object) {
       //TODO: is there any policy verification before delete?
+
       object.delete();
 
       this._dataObjectsStorage.deleteResource(objURL).then((result) => {
@@ -524,6 +525,7 @@ class SyncherManager {
 
     }
   }
+
 
   //FLOW-IN: message received from local Syncher -> subscribe
   _onLocalSubscribe(msg) {
