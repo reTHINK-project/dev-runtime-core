@@ -256,7 +256,7 @@ class IdentityModule {
       //if it is browser, then create a fake identity
 
       _this.runtimeCapabilities.isAvailable('browser').then((result) => {
-        console.log('runtime browser identity acquisition ', result);
+        console.log('runtime browser identity acquisition', result);
 
         if (!result) return;
 
@@ -308,7 +308,7 @@ class IdentityModule {
       });
 
       _this.runtimeCapabilities.isAvailable('node').then((result) => {
-        console.log('node identity acquisition ', result);
+        console.log('node identity acquisition', result);
 
         if (!result) return;
 
@@ -1910,7 +1910,7 @@ class IdentityModule {
             from: message.to,
             body: {
               handshakePhase: 'receiverHello',
-              value: _this.crypto.encode(JSON.stringify(chatKeys.keys.toRandom))
+              value: _this.crypto.encode(chatKeys.keys.toRandom)
             }
           };
           chatKeys.handshakeHistory.receiverHello = _this._filterMessageToHash(senderHelloMsg, undefined, chatKeys.hypertyFrom.messageInfo);
@@ -1970,7 +1970,7 @@ class IdentityModule {
 
             // hash the value and the iv
             filteredMessage = _this._filterMessageToHash(messageStructure, 'ok' + iv, chatKeys.hypertyFrom.messageInfo);
-            return _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, JSON.stringify(filteredMessage));
+            return _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, filteredMessage);
           }).then((hash) => {
             value.hash = _this.crypto.encode(hash);
 
@@ -2086,7 +2086,7 @@ class IdentityModule {
 
             filteredMessage = _this._filterMessageToHash(message, decryptedData + iv);
 
-            return _this.crypto.verifyHMAC(chatKeys.keys.hypertyToHashKey, JSON.stringify(filteredMessage), hashReceived);
+            return _this.crypto.verifyHMAC(chatKeys.keys.hypertyToHashKey, filteredMessage, hashReceived);
 
           }).then(verifiedHash  => {
 
@@ -2105,7 +2105,7 @@ class IdentityModule {
             filteredMessage = _this._filterMessageToHash(receiverFinishedMessage, 'ok!' + iv, chatKeys.hypertyFrom.messageInfo);
 
             //console.log('TIAGO: doHandShakePhase verifiedHash');
-            return _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, JSON.stringify(receiverFinishedMessage));
+            return _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, receiverFinishedMessage);
           }).then(hash => {
 
             value.hash = _this.crypto.encode(hash);
@@ -2148,7 +2148,7 @@ class IdentityModule {
             chatKeys.handshakeHistory.receiverFinishedMessage = _this._filterMessageToHash(message, decryptedData + iv);
 
             let filteredMessage = _this._filterMessageToHash(message, data + iv);
-            _this.crypto.verifyHMAC(chatKeys.keys.hypertyToHashKey, JSON.stringify(filteredMessage), hash).then(result => {
+            _this.crypto.verifyHMAC(chatKeys.keys.hypertyToHashKey, filteredMessage, hash).then(result => {
               console.log('hash result', result);
 
               // check if there was an initial message that was blocked and send it
@@ -2201,7 +2201,7 @@ class IdentityModule {
 
             let messageToHash = _this._filterMessageToHash(message, decryptedValue + iv);
 
-            return _this.crypto.verifyHMAC(chatKeys.keys.hypertyToHashKey, JSON.stringify(messageToHash), hash);
+            return _this.crypto.verifyHMAC(chatKeys.keys.hypertyToHashKey, messageToHash, hash);
 
           }).then(hashResult => {
 
@@ -2229,7 +2229,7 @@ class IdentityModule {
             value.value = _this.crypto.encode(encryptedValue);
             let messageToHash = _this._filterMessageToHash(receiverAcknowledgeMsg, 'ok!!' + iv, chatKeys.hypertyFrom.messageInfo);
 
-            return _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, JSON.stringify(messageToHash));
+            return _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, messageToHash);
           }).then(hashedMessage => {
             let finalValue = btoa(JSON.stringify({value: value.value, hash: _this.crypto.encode(hashedMessage), iv: value.iv}));
 
@@ -2254,7 +2254,7 @@ class IdentityModule {
           _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, receivedEncryptedValue, iv).then(decryptedValue => {
 
             let filteredMessage = _this._filterMessageToHash(message, decryptedValue + iv);
-            return _this.crypto.verifyHMAC(chatKeys.keys.hypertyToHashKey, JSON.stringify(filteredMessage), receivedHash);
+            return _this.crypto.verifyHMAC(chatKeys.keys.hypertyToHashKey, filteredMessage, receivedHash);
           }).then(hashResult => {
             //console.log('hashResult ', hashResult);
 

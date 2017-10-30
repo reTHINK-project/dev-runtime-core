@@ -9,14 +9,6 @@ class Crypto {
 
   constructor(runtimeFactory) {
     let _this = this;
-
-    _this.runtimeFactory = runtimeFactory;
-
-    /*if (typeof runtimeFactory.createWebcrypto === 'function') {
-      console.log('TIAGO: Webcrypto');
-    } else {
-      console.log('TIAGO: crypto');
-    }*/
     _this._crypto = typeof runtimeFactory.createWebcrypto === 'function' ? runtimeFactory.createWebcrypto() : crypto;
   }
 
@@ -35,14 +27,17 @@ class Crypto {
   * @return  {byteArray} decodedValue
   */
   decode(value) {
-    console.log('TIAGO before decoding', value);
-    //let decoded = new Uint8Array(JSON.parse(JSON.stringify('[' + atob(value) + ']')));
+//    console.log('Before dec val', value);
     let decoded = new Uint8Array(JSON.parse('[' + atob(value) + ']'));
-    console.log('TIAGO after decoding');
+//    console.log('After dec val TXT: ', atob(value));
+//    console.log('After dec val: ', decoded);
     return decoded;
   }
 
   encryptRSA(pubKey, data) {
+    console.log('encryptRSA:pubKey', pubKey);
+    console.log('encryptRSA:data', data);
+
     let _this = this;
 
     return new Promise(function(resolve, reject) {
@@ -72,6 +67,8 @@ class Crypto {
   }
 
   decryptRSA(privKey, data) {
+    console.log('decryptRSA:privKey', privKey);
+    console.log('decryptRSA:data', data);
     let _this = this;
 
     return new Promise(function(resolve, reject) {
@@ -160,6 +157,9 @@ class Crypto {
   }
 
   encryptAES(key, data, iv) {
+    console.log('encryptAES:key', key)
+    console.log('encryptAES:data', data)
+    console.log('encryptAES:iv', iv)
     let _this = this;
 
     return new Promise(function(resolve, reject) {
@@ -192,6 +192,9 @@ class Crypto {
   }
 
   decryptAES(key, data, iv) {
+    console.log('decryptAES:key', key)
+    console.log('decryptAES:data', data)
+    console.log('decryptAES:iv', iv)
     let _this = this;
 
     return new Promise(function(resolve, reject) {
@@ -689,13 +692,13 @@ class Crypto {
   }
 
   _utf8Encode(s) {
-    //return new TextEncoder('utf-8').encode(s);
-    return encodeUTF8(s);
+    return new TextEncoder('utf-8').encode(s);
+    //return encodeUTF8(s);
   }
 
   _utf8Decode(s) {
-    //return new TextDecoder('utf-8').decode(s);
-    return decodeUTF8(s);
+    return new TextDecoder('utf-8').decode(s);
+    //return decodeUTF8(s);
   }
 }
 
