@@ -21,6 +21,10 @@
 * limitations under the License.
 **/
 
+// Log system
+import * as logger from 'loglevel';
+let log = logger.getLogger('Bus');
+
 /**
 * @author micaelpedrosa@gmail.com
 * Minimal interface and implementation to send and receive messages. It can be reused in many type of components.
@@ -246,7 +250,7 @@ class Bus {
         _this.postMessage(msg, (reply) => {
           if (reply.body.code === 408 || reply.body.code === 500) reject();
           else {
-            console.log('[Bus.postMessageWithRetries] msg delivered: ', msg);
+            log.info('[Bus.postMessageWithRetries] msg delivered: ', msg);
             callback(reply);
             resolve();
           }
@@ -259,7 +263,7 @@ class Bus {
         //timeout = false;
         return;
       }, ()=>{
-        console.warn(`[Bus.postMessageWithRetries] Message Bounced (retry ${retry}): '`, msg);
+        log.warn(`[Bus.postMessageWithRetries] Message Bounced (retry ${retry}): '`, msg);
         if (retry++ < retries) {
           tryAgain();
           // setTimeout(() => { tryAgain(); }, 1000);

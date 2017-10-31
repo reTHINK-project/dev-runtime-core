@@ -109,7 +109,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
           resolve(message);
         }
       } else {
-        console.log('[Policy.RuntimeCoreCtx prepareForEvaluation]', message);
+        // log.log('[Policy.RuntimeCoreCtx prepareForEvaluation]', message);
         if (_this._isToSetID(message)) {
           _this._getIdentity(message).then(identity => {
             message.body.identity = identity;
@@ -159,7 +159,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
   prepareToForward(message, isIncoming, result) {
     let _this = this;
     return new Promise((resolve, reject) => {
-      console.log('[Policy.RuntimeCoreCtx.prepareToForward]', message);
+      // log.log('[Policy.RuntimeCoreCtx.prepareToForward]', message);
 
       // comment this to enable mutual authentication
       // return resolve(message);
@@ -167,7 +167,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
       // TODO remove this validation. When the Nodejs auth was completed this should work like browser;
       this.runtimeCapabilities.isAvailable('node').then((result) => {
 
-      console.log('[RuntimeCoreCtx - isAvailable - node] - ', result);
+      // log.log('[RuntimeCoreCtx - isAvailable - node] - ', result);
         if (result) {
           return resolve(message);
         } else {
@@ -306,7 +306,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
   _getIdentity(message) {
 
     let from = message.from;
-    console.log('[Policy.RuntimeCoreCtx.getIdentity] ', message);
+    // log.log('[Policy.RuntimeCoreCtx.getIdentity] ', message);
     let sourceURL = undefined;
     if (message.body.source !== undefined) {
       from = message.body.source;
@@ -327,7 +327,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
   *                     or if its type equals 'handshake'; false otherwise
   */
   _isToCypherModule(message) {
-    console.log('[Policy.RuntimeCoreCtx.istoChyperModule]', message);
+    // log.log('[Policy.RuntimeCoreCtx.istoChyperModule]', message);
     let isCreate = message.type === 'create';
     let isFromHyperty = divideURL(message.from).type === 'hyperty';
     let isToHyperty = divideURL(message.to).type === 'hyperty';

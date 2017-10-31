@@ -1,3 +1,7 @@
+// Log System
+import * as logger from 'loglevel';
+let log = logger.getLogger('SynSubscription');
+
 class Subscription {
 
   constructor(bus, owner, url, childrens, isReporter) {
@@ -8,7 +12,7 @@ class Subscription {
     //process delete message
     _this._deleteListener = bus.addListener(changeURL, (msg) => {
       if (msg.type === 'delete') {
-        console.log('Subscription-DELETE: ', msg);
+        log.log('Subscription-DELETE: ', msg);
 
         //FLOW-OUT: message sent to all subscribers
         let deleteMessageToHyperty = {
@@ -18,7 +22,7 @@ class Subscription {
 
         //send delete to hyperty
         bus.postMessage(deleteMessageToHyperty, (reply) => {
-          console.log('Subscription-DELETE-REPLY: ', reply);
+          log.log('Subscription-DELETE-REPLY: ', reply);
           if (reply.body.code === 200) {
             _this._releaseListeners();
           }
@@ -34,11 +38,11 @@ class Subscription {
     }
 
     _this._childrenListeners = [];
-    console.log('[Subscription] - childID', childrens);
+    log.log('[Subscription] - childID', childrens);
     childrens.forEach((child) => {
       let childId = childBaseURL + child;
 
-      console.log('[Subscription] - childID', childBaseURL, childId, child);
+      log.log('[Subscription] - childID', childBaseURL, childId, child);
 
       //add children publish address
       let childrenForward = bus.addPublish(childId);

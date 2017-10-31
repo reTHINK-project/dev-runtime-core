@@ -6,13 +6,14 @@ var WebpackMonitor = require('webpack-monitor');
 
 var plugins = getModeConfig();
 
-plugins.push(new WebpackMonitor({
-  capture: true, // -> default 'true'
-  target: '../monitor/myStatsStore.json', // default -> '../monitor/stats.json'
-  launch: true, // -> default 'false'
-  port: 3031 // default -> 8081
-}));
 
+console.log('Monitor:', process.env.MONITOR);
+if (process.env.MONITOR) {
+  plugins.push(new WebpackMonitor({
+    launch: true, // -> default 'false'
+    port: 3031 // default -> 8081
+  }));
+}
 
 module.exports = {
   entry: {
@@ -25,7 +26,7 @@ module.exports = {
     libraryTarget: 'umd',
     umdNamedDefine: true
   },
-  devtool: process.env.MODE === 'dev' ? 'inline-eval-cheap-source-map' : false,
+  devtool: process.env.MODE === 'dev' ? 'cheap-module-eval-source-map' : 'none',
   module: {
     rules: [
 

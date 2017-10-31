@@ -1,3 +1,7 @@
+// Log System
+import * as logger from 'loglevel';
+let log = logger.getLogger('PEP');
+
 import ActionsService from './ActionsService';
 import PDP from './PDP';
 import Policy from './Policy';
@@ -60,34 +64,34 @@ class PEP {
         let policy = msg.body.params.policy;
         let combiningAlgorithm = msg.body.params.combiningAlgorithm;
         returnedValue = _this.addPolicy(source, key, policy, combiningAlgorithm);
-      } else if(funcName === 'deleteGroup') {
+      } else if (funcName === 'deleteGroup') {
         let groupName = msg.body.params.groupName;
         returnedValue = _this.context.deleteGroup(groupName);
-      } else if(funcName === 'removePolicy') {
+      } else if (funcName === 'removePolicy') {
         let source = msg.body.params.source;
         let key = msg.body.params.key;
         returnedValue = _this.removePolicy(source, key);
-      } else if(funcName === 'savePolicies') {
+      } else if (funcName === 'savePolicies') {
         let source = msg.body.params.source;
         returnedValue = _this.context.savePolicies(source);
-      } else if(funcName === 'userPolicies') {
+      } else if (funcName === 'userPolicies') {
         returnedValue = _this.context.userPolicies;
-      } else if(funcName === 'activeUserPolicy') {
+      } else if (funcName === 'activeUserPolicy') {
         let userPolicy = msg.body.params.userPolicy;
         if (userPolicy) { _this.context.activeUserPolicy = userPolicy; }
         returnedValue = _this.context.activeUserPolicy;
-      } else if(funcName === 'userPolicy') {
+      } else if (funcName === 'userPolicy') {
         let key = msg.body.params.key;
         returnedValue = _this.context.userPolicies[key];
-      } else if(funcName === 'saveActivePolicy') {
+      } else if (funcName === 'saveActivePolicy') {
         returnedValue = _this.context.saveActivePolicy();
-      } else if(funcName === 'getMyEmails') {
+      } else if (funcName === 'getMyEmails') {
         returnedValue = _this.context.getMyEmails();
-      } else if(funcName === 'getMyHyperties') {
+      } else if (funcName === 'getMyHyperties') {
         returnedValue = _this.context.getMyHyperties();
-      } else if(funcName === 'groups') {
+      } else if (funcName === 'groups') {
         returnedValue = _this.context.groups;
-      } else if(funcName === 'getGroupsNames') {
+      } else if (funcName === 'getGroupsNames') {
         returnedValue = _this.context.getGroupsNames();
       } if (funcName === 'removeFromGroup') {
         let groupName = msg.body.params.groupName;
@@ -134,8 +138,8 @@ class PEP {
   }
 
   authorise(message) {
-    console.log('[Policy.PEP Authorise] ', message);
-    console.log(message);
+    // log.log('[Policy.PEP Authorise] ', message);
+    // log.log(message);
     if (!message) throw new Error('message is not defined');
     if (!message.from) throw new Error('message.from is not defined');
     if (!message.to) throw new Error('message.to is not defined');
@@ -227,27 +231,27 @@ class PEP {
     let from;
 
     if (message.type === 'forward') {
-      console.info('[PEP - isIncomingMessage] - message.type: ', message.type);
+      log.info('[PEP - isIncomingMessage] - message.type: ', message.type);
       from = message.body.from;
     } else if (message.body.hasOwnProperty('source') && message.body.source) {
-      console.info('[PEP - isIncomingMessage] - message.body.source: ', message.body.source);
+      log.info('[PEP - isIncomingMessage] - message.body.source: ', message.body.source);
       from = message.body.source;
     } else if (message.body.hasOwnProperty('subscriber') && message.body.subscriber) {
       //TODO: this subscriber validation should not exist, because is outdated
       //TODO: the syncher and syncher manager not following the correct spec;
-      console.info('[PEP - isIncomingMessage] - message.body.subscriber: ', message.body.subscriber);
+      log.info('[PEP - isIncomingMessage] - message.body.subscriber: ', message.body.subscriber);
       from = message.body.subscriber;
     }  else if (message.body.hasOwnProperty('reporter') && message.body.reporter) {
       //TODO: this subscriber validation should not exist, because is outdated
       //TODO: the syncher and syncher manager not following the correct spec;
-      console.info('[PEP - isIncomingMessage] - message.body.reporter: ', message.body.reporter);
+      log.info('[PEP - isIncomingMessage] - message.body.reporter: ', message.body.reporter);
       from = message.body.reporter;
     } else {
-      console.info('[PEP - isIncomingMessage] - message.from ', message.from);
+      log.info('[PEP - isIncomingMessage] - message.from ', message.from);
       from = message.from;
     }
 
-    console.info('[PEP - isIncomingMessage] - check if isLocal: ', from);
+    log.info('[PEP - isIncomingMessage] - check if isLocal: ', from);
     return !this.context.isLocal(from);
   }
 
