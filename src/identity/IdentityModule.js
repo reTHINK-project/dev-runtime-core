@@ -91,7 +91,7 @@ class IdentityModule {
 
   }
 
-  //******************* GET AND SET METHODS *******************
+//******************* GET AND SET METHODS *******************
 
   /**
   * return the messageBus in this Registry
@@ -148,7 +148,7 @@ class IdentityModule {
   }
 
 
-  //******************* IDENTITY RELEATED METHODS *******************
+ //******************* IDENTITY RELEATED METHODS *******************
   /**
   * gets all the information from a given userURL
   * @param  {String}  userURL     user url
@@ -205,6 +205,8 @@ class IdentityModule {
     return _this.currentIdentity;
   }
 
+  // to be used to initialise IDM with Identities used in previous session
+
   loadIdentities() {
     let _this = this;
     return new Promise((resolve) => {
@@ -236,6 +238,19 @@ class IdentityModule {
 
           });
         }
+        resolve();
+      });
+    });
+  }
+  // to be used to initialise IDM with SessionKeys used in previous session
+
+  loadSessionKeys() {
+    let _this = this;
+    return new Promise((resolve) => {
+
+      _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
+        if (sessionKeys) _this.dataObjectSessionKeys = sessionKeys;
+        else _this.dataObjectSessionKeys = {};
         resolve();
       });
     });
@@ -740,7 +755,7 @@ class IdentityModule {
   }
 
 
-  //******************* ENCRYPTION METHODS *******************
+//******************* ENCRYPTION METHODS *******************
   encryptMessage(message) {
     log.info('encryptMessage:message', message);
     let _this = this;

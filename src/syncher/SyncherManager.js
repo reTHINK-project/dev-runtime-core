@@ -428,19 +428,18 @@ class SyncherManager {
 
               log.log('[SyncherManager._decryptChildrens] createdBy ',  owner, ' object: ', child.value);
 
-              let decrypted = _this._identityModule.decryptDataObject(JSON.parse(child.value), storedObject.data.url);
+              let decrypted = _this._identityModule.decryptDataObject(JSON.parse(child.value), storedObject.url);
 
               listOfDecryptedObjects.push(decrypted);
             }
           });
-
 
           Promise.all(listOfDecryptedObjects).then((decryptedObjects) => {
 
             log.log('[SyncherManager._decryptChildrens] returning decrypted ', decryptedObjects);
 
             decryptedObjects.forEach((decryptedObject) => {
-              const childId = decryptedObject.url;
+              const childId = decryptedObject.value.url;
               storedObject.childrenObjects[children][childId].value = decryptedObject.value;
             });
 
