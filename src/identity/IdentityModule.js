@@ -448,31 +448,23 @@ class IdentityModule {
 
         publicKey = btoa(keyPair.public);
         userkeyPair = keyPair;
+        return _this.generateAssertion(publicKey, origin, '', userkeyPair, idp);
 
-        _this.fakeNodePopUp().then((url) => {
-          _this.sendGenerateMessage(publicKey, origin, url, idp).then((result) => {
-            console.log('TIAGO after idp proxy:', result);
+      }).then(function(url) {
+        _this.myHint = url;
+        return _this.generateAssertion(publicKey, origin, url, userkeyPair, idp);
 
-            /*if (result) {
-              _this.storeIdentity(result, keyPair).then((value) => {
-                resolve(value);
-              }, (err) => {
-                reject(err);
-              });
-
-            } else {
-              reject('error on obtaining identity information');
-            }*/
-          }).catch(function(err) {
-            console.log(err);
-            reject(err);
-          });
-
-        });
+      }).then(function(value) {
+        if (value) {
+          resolve(value);
+        } else {
+          reject('Error on obtaining Identity');
+        }
       }).catch(function(err) {
         console.log(err);
         reject(err);
       });
+
     });
   }
 
@@ -540,27 +532,6 @@ class IdentityModule {
     });
   }
 
-  generateSelectedIdentity(publicKey, origin, idp, keyPair) {
-    let _this = this;
-
-    return new Promise((resolve, reject) => {
-
-      _this.generateAssertion(publicKey, origin, '', keyPair, idp).then((loginUrl) => {
-        return loginUrl;
-      }).then(function(url) {
-        return _this.generateAssertion(publicKey, origin, url, keyPair, idp);
-      }).then(function(value) {
-        if (value) {
-          return resolve(value);
-        } else {
-          return reject('Error on obtaining Identity');
-        }
-      }).catch(function(err) {
-        log.error(err);
-        return reject(err);
-      });
-    });
-  }
 
   selectIdentityForHyperty(origin, idp, idHint) {
     let _this = this;
@@ -744,6 +715,28 @@ class IdentityModule {
         resolve(newIdentity);
       });
 
+    });
+  }
+
+  generateSelectedIdentity(publicKey, origin, idp, keyPair) {
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+
+      _this.generateAssertion(publicKey, origin, '', keyPair, idp).then((loginUrl) => {
+        return loginUrl;
+      }).then(function(url) {
+        return _this.generateAssertion(publicKey, origin, url, keyPair, idp);
+      }).then(function(value) {
+        if (value) {
+          return resolve(value);
+        } else {
+          return reject('Error on obtaining Identity');
+        }
+      }).catch(function(err) {
+        console.error(err);
+        return reject(err);
+      });
     });
   }
 
