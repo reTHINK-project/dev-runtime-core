@@ -721,6 +721,7 @@ class IdentityModule {
     let _this = this;
 
     return new Promise((resolve, reject) => {
+
       let message = { type: 'execute', to: _this._guiURL, from: _this._idmURL,
         body: { resource: 'identity', method: methodName, params: parameters } };
       let id = _this._messageBus.postMessage(message);
@@ -1366,7 +1367,9 @@ class IdentityModule {
       } catch (err) {
         reject('In sendRefreshMessage on postMessage error: ' + err);
       }
+
     });
+
   }
 
   sendGenerateMessage(contents, origin, usernameHint, idpDomain) {

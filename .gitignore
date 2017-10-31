@@ -11,6 +11,7 @@ CVS
 npm-debug.log
 vendor
 build
+monitor
 node_modules
 resources/bundle.js
 *.komodoproject

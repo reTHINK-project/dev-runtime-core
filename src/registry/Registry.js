@@ -32,8 +32,7 @@ import AddressAllocation from '../allocation/AddressAllocation';
 import HypertyInstance from './HypertyInstance';
 import P2PConnectionResolve from './P2PConnectionResolve';
 
-import {MessageFactory} from 'service-framework/dist/MessageFactory';
-import {divideURL, isHypertyURL, isURL, isUserURL, generateGUID, getUserIdentityDomain, isBackendServiceURL, deepClone} from '../utils/utils.js';
+import { divideURL, isHypertyURL, isURL, isUserURL, generateGUID, getUserIdentityDomain, isBackendServiceURL, deepClone } from '../utils/utils.js';
 
 import 'proxy-observe';
 import { WatchingYou } from 'service-framework/dist/Utils';
@@ -112,8 +111,6 @@ class Registry {
 
     _this._domain = divideURL(_this.registryURL).domain;
     _this.sandboxesList.appSandbox[runtimeURL] = appSandbox;
-    let msgFactory = new MessageFactory('false', '{}');
-    _this.messageFactory = msgFactory;
     let p2pConnectionResolve = new P2PConnectionResolve(_this);
 
     _this._p2pConnectionResolve = p2pConnectionResolve;
@@ -572,13 +569,6 @@ class Registry {
         // step to obtain the list of all URL registered to updated with the new one.
         _this.storageManager.set('registry:DataObjectURLs', 0, urlsList).then(() => {
 
-          /*let message = _this.messageFactory.createCreateMessageRequest(
-            _this.registryURL,
-            'domain://registry.' + _this.registryDomain,
-            messageValue,
-            'policy'
-          );*/
-
           try {
             _this._messageBus.postMessageWithRetries(message, _this._registrationRetries, (reply) => {
               // log.log('[Registry.registerDataObject] ===> registerDataObject Reply: ', reply);
@@ -597,13 +587,6 @@ class Registry {
           //timer to keep the registration alive
           // the time is defined by a little less than half of the expires time defined
           let keepAliveTimer = setInterval(function() {
-
-            /*let message = _this.messageFactory.createCreateMessageRequest(
-            _this.registryURL,
-            'domain://registry.' + _this.registryDomain + '/',
-            messageValue,
-            'policy'
-          );*/
 
             let message = {
               type: 'update',
@@ -931,13 +914,6 @@ class Registry {
                 //timer to keep the registration alive
                 // the time is defined by a little less than half of the expires time defined
                 let keepAliveTimer = setInterval(function() {
-
-                  /*let message = _this.messageFactory.createCreateMessageRequest(
-                    _this.registryURL,
-                    'domain://registry.' + _this.registryDomain,
-                    messageValue,
-                    'policy'
-                  );*/
 
                   let message = {
                     type: 'update',
