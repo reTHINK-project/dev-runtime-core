@@ -35,14 +35,14 @@ describe('SyncherManager', function() {
     x: 10, y: 10
   };
 
-  let responseCallbacks = [];
+  // let responseCallbacks = {};
 
   let bus;
 
 
   let msgNodeResponseFunc = (bus, msg) => {
-
     if (msg.type === 'subscribe') {
+
       if (msg.id === 2) {
         //reporter subscribe
         expect(msg).to.contain.all.keys({
@@ -63,10 +63,10 @@ describe('SyncherManager', function() {
         body: { code: 200 }
       });
     }
+
     if (msg.type === 'response') {
-      debugger;
-      if (msg.id === 4 && responseCallbacks[msg.to + msg.id]) {
-        return responseCallbacks[msg.to + msg.id];
+      if (msg.id === 4 && bus._responseCallbacks[msg.to + msg.id]) {
+        return bus._responseCallbacks[msg.to + msg.id];
       }
     }
   };
@@ -105,7 +105,7 @@ describe('SyncherManager', function() {
       return 'HypertyChat';
     },
     isDataObjectURL: (dataObjectURL) => {
-      let splitURL = dataObjectURL.split.skip('://');
+      let splitURL = dataObjectURL.split('://');
       return splitURL[0] === 'comm';
     },
     registerSubscribedDataObject: () => {},
@@ -180,14 +180,7 @@ describe('SyncherManager', function() {
   it('reporter read', function(done) {
 
     bus = new MessageBus();
-
-    sinon.stub(bus, 'addResponseListener').callsFake(function(url, id, replyCallback) {
-      responseCallbacks[url + id] = replyCallback;
-    });
-
-    sinon.stub(bus, 'removeResponseListener').callsFake(function(url, id) {
-      delete responseCallbacks[url + id];
-    });
+    bus.pipeline.handlers = handlers;
 
     bus._onPostMessage = (msg) => {
       console.log('_onPostMessage: ', msg);
@@ -211,6 +204,7 @@ describe('SyncherManager', function() {
         done();
       });
     });
+
   });
 
   it('reporter observer integration', function(done) {
@@ -914,18 +908,21 @@ describe('SyncherManager', function() {
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
-      notifyEvent.ack();
+      notifyEvent.ack(100);
 
       sync2.subscribe(schemaURL, notifyEvent.url).then((doo) => {
+
         doo.addChild('children1', { message: 'Hello Micael!' }).then((doc) => {
           doc.data.message = 'Hello Luis!';
         });
+
       });
     });
 
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
     sync1.create(schemaURL, [hyperURL2], initialData).then((dor) => {
       dor.onSubscription((subscribeEvent) => {
+
         dor.onAddChild((event) => {
           let children1 = event.child; //dor.childrens[event.childId];
 

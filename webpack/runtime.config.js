@@ -2,6 +2,18 @@ var path = require('path');
 var processSuffix = require('./shared.configs').processSuffix;
 var getModeConfig = require('./shared.configs').getModeConfig;
 
+var WebpackMonitor = require('webpack-monitor');
+
+var plugins = getModeConfig();
+
+plugins.push(new WebpackMonitor({
+  capture: true, // -> default 'true'
+  target: '../monitor/myStatsStore.json', // default -> '../monitor/stats.json'
+  launch: true, // -> default 'false'
+  port: 3031 // default -> 8081
+}));
+
+
 module.exports = {
   entry: {
     Runtime: ['babel-polyfill', './src/runtime/RuntimeUA.js']
@@ -36,5 +48,5 @@ module.exports = {
   },
 
   //resolve: { extensions: ['.js'] },
-  plugins: getModeConfig()
+  plugins: plugins
 };
