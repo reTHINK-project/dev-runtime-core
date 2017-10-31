@@ -844,7 +844,7 @@ class IdentityModule {
             //if no key exists, create a new one if is the reporter of dataObject
             if (!dataObjectKey) {
               // if the hyperty is the reporter of the dataObject then generates a session key
-              if (isHypertyReporter.owner && isHypertyReporter.owner === message.from) {
+              if (isHypertyReporter.reporter && isHypertyReporter.reporter === message.from) {
 
                 let sessionKey = _this.crypto.generateRandom();
                 _this.dataObjectSessionKeys[dataObjectURL] = {sessionKey: sessionKey, isToEncrypt: true};
