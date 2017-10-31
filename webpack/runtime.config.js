@@ -26,7 +26,7 @@ module.exports = {
     libraryTarget: 'umd',
     umdNamedDefine: true
   },
-  devtool: process.env.MODE === 'dev' ? 'inline-eval-cheap-source-map' : false,
+  devtool: process.env.MODE === 'dev' ? 'cheap-module-eval-source-map' : 'none',
   module: {
     rules: [
 

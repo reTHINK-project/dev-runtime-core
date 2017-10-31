@@ -21,6 +21,11 @@
 * limitations under the License.
 **/
 
+// Log system
+import * as logger from 'loglevel';
+let log = logger.getLogger('address-allocation');
+
+
 import {isURL} from '../utils/utils';
 
 // TODO: this could not be the best way to do a Singleton but at this moment it works;
@@ -84,7 +89,7 @@ class AddressAllocation {
    */
   create(domain, number, info, scheme, reuseURL) {
 
-    console.log('typeof(reuseURL)', typeof(reuseURL), reuseURL);
+    // // console.log('typeof(reuseURL)', typeof(reuseURL), reuseURL);
 
     if (reuseURL) {
 
@@ -103,7 +108,7 @@ class AddressAllocation {
       }
 
     } else {
-      console.info('[AddressAllocation] - new address will be allocated');
+      log.info('[AddressAllocation] - new address will be allocated');
 
       // if there is no URL saved request a new URL
       return this._allocateNewAddress(domain, scheme, number);
@@ -118,13 +123,13 @@ class AddressAllocation {
       this._registry.checkRegisteredURLs(info, reuseURL).then((urls) => {
 
         if (urls) {
-          console.info('[AddressAllocation - ' + scheme + '] - Reuse URL');
+          log.info('[AddressAllocation - ' + scheme + '] - Reuse URL');
           let value = {newAddress: false, address: urls};
           resolve(value);
         } else {
 
           if (typeof(reuseURL) === 'string') {
-            console.info('[AddressAllocation - reuseURL] - Object ' + reuseURL + ' not found');
+            log.info('[AddressAllocation - reuseURL] - Object ' + reuseURL + ' not found');
             reject('URL Not Found');
           } else if (typeof(reuseURL) === 'boolean') {
             this._allocateNewAddress(domain, scheme, number).then(resolve).catch(reject);
@@ -150,7 +155,7 @@ class AddressAllocation {
 
       if (scheme !== 'hyperty') msg.body.scheme = scheme;
 
-      console.info('[AddressAllocation - ' + scheme + '] - Request new URL');
+      log.info('[AddressAllocation - ' + scheme + '] - Request new URL');
 
       this._bus.postMessage(msg, (reply) => {
         if (reply.body.code === 200) {
@@ -174,15 +179,14 @@ class AddressAllocation {
   delete(domain, addresses) {
     let _this = this;
 
-    let message = {
-      type: 'delete', from: _this._url, to: 'domain://msg-node.' + domain + '/address-allocation',
-      body: {childrenResources: addresses}
-    };
-
     return new Promise((resolve, reject) => {
 
+      let message = {
+        type: 'delete', from: _this._url, to: 'domain://msg-node.' + domain + '/address-allocation',
+        body: {childrenResources: addresses}
+      };
+
       _this._bus.postMessage(message, (reply) => {
-        console.log('reply', reply);
         if (reply.body.code === 200) {
           resolve(reply.body.code);
         } else {
