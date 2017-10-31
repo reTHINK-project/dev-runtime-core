@@ -355,11 +355,12 @@ class RuntimeUA {
         const prepareComponents = [];
         prepareComponents.push(this.subscriptionManager.init());
         prepareComponents.push(this.identityModule.loadIdentities());
+        prepareComponents.push(this.identityModule.loadSessionKeys());
 
         Promise.all(prepareComponents).then((result) => {
-          if (result.length === 2) {
+          if (result.length === 3) {
             resolve(true);
-          }
+          } else reject('[RuntimeUA._loadComponents] Error ] ', result);
         }).catch((reason) => {
           throw Error(reason);
         });

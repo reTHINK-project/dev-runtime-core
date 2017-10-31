@@ -87,7 +87,7 @@ class IdentityModule {
     // _this.loadIdentities();
 
   }
-  
+
 //******************* GET AND SET METHODS *******************
 
   /**
@@ -144,7 +144,7 @@ class IdentityModule {
     _this._registry = registry;
   }
 
-  
+
  //******************* IDENTITY RELEATED METHODS *******************
   /**
   * gets all the information from a given userURL
@@ -200,7 +200,9 @@ class IdentityModule {
     let _this = this;
     return _this.currentIdentity;
   }
-  
+
+  // to be used to initialise IDM with Identities used in previous session
+
   loadIdentities() {
     let _this = this;
     return new Promise((resolve) => {
@@ -236,8 +238,21 @@ class IdentityModule {
       });
     });
   }
-  
-/**
+  // to be used to initialise IDM with SessionKeys used in previous session
+
+  loadSessionKeys() {
+    let _this = this;
+    return new Promise((resolve) => {
+
+      _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
+        if (sessionKeys) _this.dataObjectSessionKeys = sessionKeys;
+        else _this.dataObjectSessionKeys = {};
+        resolve();
+      });
+    });
+  }
+
+  /**
   * Function that fetch an identityAssertion from a user.
   *
   * @return {IdAssertion}              IdAssertion
@@ -816,7 +831,7 @@ class IdentityModule {
     });
   }
 
-  
+
 //******************* ENCRYPTION METHODS *******************
   encryptMessage(message) {
     log('encryptMessage:message', message);
@@ -832,7 +847,7 @@ class IdentityModule {
         console.log('encryption disabled');
         return resolve(message);
       }
-      
+
       let dataObjectURL = _this._parseMessageURL(message.to);
 
       let isToDataObject = isDataObjectURL(dataObjectURL);
@@ -991,7 +1006,7 @@ class IdentityModule {
 
   decryptMessage(message) {
     let _this = this;
-    
+
     log('decryptMessage:message', message);
 
     return new Promise(function(resolve, reject) {
@@ -1125,7 +1140,7 @@ class IdentityModule {
         console.log('decryption disabled');
         return resolve(dataObject);
       }
-      
+
       let dataObjectURL = _this._parseMessageURL(sender);
 
       console.log('dataObject value to decrypt: ', dataObject);
@@ -1227,8 +1242,8 @@ class IdentityModule {
 
   }
 
-  
-//******************* TOKEN METHODS *******************  
+
+//******************* TOKEN METHODS *******************
   /**
   * get a Token to be added to a message
   * @param  {String}  fromURL     origin of the message
@@ -1319,7 +1334,7 @@ class IdentityModule {
       if (splitURL[0] !== 'hyperty') {
 
         _this._getHypertyFromDataObject(hypertyURL).then((returnedHypertyURL) => {
-          
+
           let userURL = _this.registry.getHypertyOwner(returnedHypertyURL);
 
           if (userURL) {
@@ -1411,14 +1426,14 @@ class IdentityModule {
     return null;
   }
 
-  
-//******************* OTHER METHODS *******************   
+
+//******************* OTHER METHODS *******************
   sendRefreshMessage(oldIdentity) {
     let _this = this;
     let domain = _this._resolveDomain(oldIdentity.idp);
     let message;
     let assertion = _this.getIdentity(oldIdentity.userProfile.userURL);
-    
+
     log('sendRefreshMessage:oldIdentity', oldIdentity);
 
     return new Promise((resolve, reject) => {
@@ -1442,7 +1457,7 @@ class IdentityModule {
 
     return new Promise((resolve, reject) => {
       message = {type: 'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'generateAssertion', params: {contents: contents, origin: origin, usernameHint: usernameHint}}};
-      try{  
+      try{
        _this._messageBus.postMessage(message, (res) => {
           let result = res.body.value;
           resolve(result);
@@ -1822,7 +1837,7 @@ class IdentityModule {
   _doHandShakePhase(message, chatKeys) {
   // log('_doHandShakePhase:dataObject', message);
 	//	log('_doHandShakePhase:chatKeys', chatKeys);
-    
+
     let _this = this;
 
     console.log('handshake phase');
@@ -1860,9 +1875,9 @@ class IdentityModule {
             _this.chatKeys[message.from + '<->' + message.to] = chatKeys;
             _this._messageBus.postMessage(startHandShakeMsg);
           }
-          
+
           break;
-          
+
         }
         case 'senderHello': {
 
@@ -2323,11 +2338,11 @@ class IdentityModule {
 
     return newChatCrypto;
   }
-  
+
   _seconds_since_epoch() {
     return Math.floor( Date.now() / 1000 );
   }
-  
+
   _parseMessageURL(URL){
     let splitedToURL = URL.split('/');
     if (splitedToURL.length <= 6)
