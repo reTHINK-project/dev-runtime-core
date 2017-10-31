@@ -93,7 +93,7 @@ class IdentityModule {
 
   }
 
-//******************* GET AND SET METHODS *******************
+  //******************* GET AND SET METHODS *******************
 
   /**
   * return the messageBus in this Registry
@@ -150,7 +150,7 @@ class IdentityModule {
   }
 
 
- //******************* IDENTITY RELEATED METHODS *******************
+  //******************* IDENTITY RELEATED METHODS *******************
   /**
   * gets all the information from a given userURL
   * @param  {String}  userURL     user url
@@ -216,7 +216,7 @@ class IdentityModule {
           _this.identities = identities;
 
           identities.forEach((identity) => {
-            let timeNow = _this._seconds_since_epoch();
+            let timeNow = _this._secondsSinceEpoch();
             let expires = 0;
 
             if (identity.info && identity.info.expires) {
@@ -242,7 +242,7 @@ class IdentityModule {
     });
   }
 
-/**
+  /**
   * Function that fetch an identityAssertion from a user.
   *
   * @return {IdAssertion}              IdAssertion
@@ -283,7 +283,7 @@ class IdentityModule {
           });
         } else {
 
-          if (_this.defaultIdentity && _this.defaultIdentity.expires > _this._seconds_since_epoch()) {
+          if (_this.defaultIdentity && _this.defaultIdentity.expires > _this._secondsSinceEpoch()) {
             return resolve(_this.defaultIdentity);
           } else {
             _this.selectIdentityFromGUI().then((assertion) => {
@@ -319,7 +319,7 @@ class IdentityModule {
         } else {
           console.log('getIdentityAssertion for nodejs');
 
-          let idp = {type: "idp", value: "google.com", code: 200, auth: false};
+          let idp = {type: 'idp', value: 'google.com', code: 200, auth: false};
           _this.callNodeJsGenerateMethods(idp.value, 'origin').then((value) => {
             resolve(value);
           }, (err) => {
@@ -335,7 +335,7 @@ class IdentityModule {
   }
 
 
-    /**
+  /**
   * Function to return all the users URLs registered within a session
   * These users URLs are returned in an array of strings.
   * @param  {Boolean}  emailFormat (Optional)   boolean to indicate to return in email format
@@ -413,7 +413,7 @@ class IdentityModule {
       let id = _this._messageBus.postMessage(message);
 
       //add listener without timout
-      try{
+      try {
         _this._messageBus.addResponseListener(_this._idmURL, id, msg => {
           _this._messageBus.removeResponseListener(_this._idmURL, id);
 
@@ -429,45 +429,9 @@ class IdentityModule {
             reject('error on requesting an identity to the GUI');
           }
         });
-      }catch (err){
+      } catch (err) {
         reject('In method callIdentityModuleFunc error: ' + err);
       }
-    });
-  }
-
-  selectIdentityForHyperty(origin, idp, idHint) {
-    let _this = this;
-
-    return new Promise((resolve, reject) => {
-
-      //generates the RSA key pair
-      _this.crypto.generateRSAKeyPair().then(function(keyPair) {
-        let publicKey = btoa(keyPair.public);
-
-        _this.sendGenerateMessage(publicKey, origin, idHint, idp).then((response) => {
-          if (response.hasOwnProperty('assertion')) { // identity was logged in, just save it
-            _this.storeIdentity(response, keyPair).then((value) => {
-              return resolve(value);
-            }, (err) => {
-              return reject(err);
-            });
-          } else if (response.hasOwnProperty('loginUrl')) { // identity was not logged in
-            _this.loginSelectedIdentity(publicKey, origin, idp, keyPair, response.loginUrl).then((value) => {
-              return resolve(value);
-            }, (err) => {
-              return reject(err);
-            });
-          } else { // you should never get here, if you do then the IdP Proxy is not well implemented
-            console.error('GenerateAssertion returned invalid response.');
-            console.log('Proceeding by logging in.');
-            _this.generateSelectedIdentity(publicKey, origin, idp, keyPair).then((value) => {
-              return resolve(value);
-            }, (err) => {
-              return reject(err);
-            });
-          }
-        });
-      });
     });
   }
 
@@ -488,6 +452,7 @@ class IdentityModule {
         _this.fakeNodePopUp().then((url) => {
           _this.sendGenerateMessage(publicKey, origin, url, idp).then((result) => {
             console.log('TIAGO after idp proxy:', result);
+
             /*if (result) {
               _this.storeIdentity(result, keyPair).then((value) => {
                 resolve(value);
@@ -514,7 +479,7 @@ class IdentityModule {
   fakeNodePopUp() {
     return new Promise((resolve, reject) => {
 
-      let url = "https://localhost/#state=state&code=4/xWFnH5iLpxv4W4Bm58oVqDK6vwVessKKMoNs-LsSKNY&access_token=ya29.GlsVBM3VBlBR1YNREuXqOr4G_UzvoL_y64YtOGGKJJ-QlasBW-HrV0b1HsxR4uNB7r-N-pElCleW6kNYW4WIIr6mOSp1euVD09eoDXtVZZFHuU8LEzcGYmVV7QLh&token_type=Bearer&expires_in=3600&id_token=eyJhbGciOiJSUzI1NiIsImtpZCI6IjQ5N2Y2MGIxMjRhNjc1NDI2NDhlYjIzYjc0YmY4YTg2MDJkY2I4YTYifQ.eyJhenAiOiI4MDgzMjk1NjYwMTItdHFyOHFvaDExMTk0MmdkMmtnMDA3dDBzOGYyNzdyb2kuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiI4MDgzMjk1NjYwMTItdHFyOHFvaDExMTk0MmdkMmtnMDA3dDBzOGYyNzdyb2kuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMTE5MzQyMzM2MzI1MjAwNzc3NDMiLCJlbWFpbCI6Im9wZW5pZHRlc3QxMEBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiYXRfaGFzaCI6Im94X1Vva3FwRDNkMjBpZzRXeEd2WlEiLCJjX2hhc2giOiJFem9RYmNwdGJxQlhoa0NEZGVOUFNRIiwibm9uY2UiOiJORGdzTVRNd0xERXNNelFzTkRnc01UTXNOaXc1TERReUxERXpOQ3czTWl3eE16UXNNalEzTERFekxERXNNU3d4TERVc01Dd3pMREV6TUN3eExERTFMREFzTkRnc01UTXdMREVzTVRBc01pd3hNekFzTVN3eExEQXNNVGd4TERFeU9Dd3hNRGdzTVRnekxESTFNeXd5TlN3eU16WXNPVGdzT0RBc016a3NNakl4TERrekxESXhMRFV4TERFNUxERXlMRFEzTERFd0xESTFOU3d5Tnl3eU1qWXNNVFV4TERFNU55d3hNRGNzTVRRekxERTJOeXd4T1N3eE5EQXNNVGs1TERFNE9Dd3lNelFzTVRNMUxEVTFMREl3TlN3eU1Ua3NNVGdzT0RRc01qSXlMREV4TUN3eU1Ea3NNVFU1TERFNE5Td3lORFFzTWpRM0xERXhPQ3d4T0RBc01qQXhMREV6T1N3eE1pd3lNakFzTVRBNExERTROaXd6T1N3eU1qQXNPRFFzTVRVeExESTFNeXd6TlN3MU1Td3hPVEVzT0RFc01UYzBMREU0T1N3NExEa3dMREkxTWl3eU1EWXNNalFzTVRVekxERTRPQ3d5TlRJc01qUXhMRFV4TERFMU9TdzVMREU0TERFM05Dd3pNaXd4T0RNc01qSXpMREU1Tml3ME1Td3hOeklzTlRNc01qRXNNemNzTWpReUxERTNOeXd4T1Rjc05Dd3lOQ3d4Tnprc01UYzRMREUxTnl3eE1UWXNNakkyTERjd0xERXdPQ3d4TkRFc01UZzVMREU1TWl3eU16Z3NNVEE0TERFeU9Dd3hNelFzTkRBc01pd3hOemtzTmpjc01UQXhMRE01TERjM0xESXhPQ3cwT0N3eU5UQXNNVGsyTERjd0xEZzBMREUyTml3eE55d3hOVFlzTlRZc01UTTFMRFFzTkRNc01UYzRMREkxTkN3ME5Dd3lOeXd4Tnpjc01UYzRMREUwTlN3eE5ESXNNVFF3TERJMUxERTBOU3d4TnpNc05ERXNNVEl4TERJeU9Dd3lORGtzTkRrc01UVTJMREl5TUN3eE1ESXNNVGd4TERFeUxERXdMREl4TkN3eE1Ea3NOVFFzTVRrekxESTBNQ3d5TVRZc01qRTRMRGNzTVRBNUxEa3dMREl4Tnl3ek1Dd3lORGNzTVRReExERTFOeXcxT1N3eU1qWXNORFlzTVRVMUxEUTBMREUxTml3NU55dzBPQ3d4T0Rrc01USXpMREU0TWl3eE5qVXNNalF3TERFd05TdzNPQ3d4T1Rnc05Ua3NNalVzTVRreUxESXhNeXd4TlRVc09EUXNNVGtzT1Rnc09EZ3NPVGNzTVRFNExERTVNU3czT1N3eE1EZ3NNakl4TERFd05Dd3lNVElzTlRBc016QXNNVGt5TERFeE1TdzNNeXd4T0RFc01USTRMRGt5TERFME9Dd3lNVEFzTWpBMExESXlNQ3d5TXpjc01UTTRMREkwTml3eE9Ea3NNVGsyTERFNE55d3pOU3d5TVRnc01qVXpMRFUzTERNd0xEWTFMRFkyTERFd015d3lPQ3d4TlRBc01USXNNakEwTERRd0xEZzBMRFF5TERFd05DdzJOU3d4TmpRc01UUTJMREl5Tnl3NE1pdzJMREUyTERFMk55d3hNak1zTVRrc01qSXhMREV6TVN3eE5UUXNOREVzT1RZc05qZ3NNakVzTVRRd0xESTJMRGc0TERFeU5pdzJOaXczTnl3NE9TdzNNeXd4T1RNc01pd3pMREVzTUN3eCIsImlzcyI6ImFjY291bnRzLmdvb2dsZS5jb20iLCJpYXQiOjE0OTAxMjEwNDQsImV4cCI6MTQ5MDEyNDY0NH0.GRnWCUx5r5ll9xkCRlYwUjISxi7nQ0OtlayWeqVcmoSf9W0k9HcBH_9U1CA-LJDkJCntDtkSkQyuRF-Sh53S2QYa396fqRZONp1czj6zCIxjZX30--vOvBCGyAI8sC9vssoKciTHn1aQhzDvY7HD4C7gt0KGI3FbtYRGa_RNm6v2ngqwVq0GyqE0KuosgVw0IjxbjOShrwWSHD1UszkEMhf4dQuekrZlvfkEfZN9aWbhy4qQy0y1Eiz0jTP2b5Yp1F1KyUQcgh8ofU2mE19nWzqxsMw-CEnGOUuwjfEGPqTg6ej0TDOz6rkODMvmQ9q33tL6TMbbJWga7DxAOOXSRQ&authuser=0&session_state=68cc1dc43bf1d78f415cc69354e639bdc52fb45f..2f30&prompt=consent";
+      let url = 'https://localhost/#state=state&code=4/xWFnH5iLpxv4W4Bm58oVqDK6vwVessKKMoNs-LsSKNY&access_token=ya29.GlsVBM3VBlBR1YNREuXqOr4G_UzvoL_y64YtOGGKJJ-QlasBW-HrV0b1HsxR4uNB7r-N-pElCleW6kNYW4WIIr6mOSp1euVD09eoDXtVZZFHuU8LEzcGYmVV7QLh&token_type=Bearer&expires_in=3600&id_token=eyJhbGciOiJSUzI1NiIsImtpZCI6IjQ5N2Y2MGIxMjRhNjc1NDI2NDhlYjIzYjc0YmY4YTg2MDJkY2I4YTYifQ.eyJhenAiOiI4MDgzMjk1NjYwMTItdHFyOHFvaDExMTk0MmdkMmtnMDA3dDBzOGYyNzdyb2kuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiI4MDgzMjk1NjYwMTItdHFyOHFvaDExMTk0MmdkMmtnMDA3dDBzOGYyNzdyb2kuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMTE5MzQyMzM2MzI1MjAwNzc3NDMiLCJlbWFpbCI6Im9wZW5pZHRlc3QxMEBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiYXRfaGFzaCI6Im94X1Vva3FwRDNkMjBpZzRXeEd2WlEiLCJjX2hhc2giOiJFem9RYmNwdGJxQlhoa0NEZGVOUFNRIiwibm9uY2UiOiJORGdzTVRNd0xERXNNelFzTkRnc01UTXNOaXc1TERReUxERXpOQ3czTWl3eE16UXNNalEzTERFekxERXNNU3d4TERVc01Dd3pMREV6TUN3eExERTFMREFzTkRnc01UTXdMREVzTVRBc01pd3hNekFzTVN3eExEQXNNVGd4TERFeU9Dd3hNRGdzTVRnekxESTFNeXd5TlN3eU16WXNPVGdzT0RBc016a3NNakl4TERrekxESXhMRFV4TERFNUxERXlMRFEzTERFd0xESTFOU3d5Tnl3eU1qWXNNVFV4TERFNU55d3hNRGNzTVRRekxERTJOeXd4T1N3eE5EQXNNVGs1TERFNE9Dd3lNelFzTVRNMUxEVTFMREl3TlN3eU1Ua3NNVGdzT0RRc01qSXlMREV4TUN3eU1Ea3NNVFU1TERFNE5Td3lORFFzTWpRM0xERXhPQ3d4T0RBc01qQXhMREV6T1N3eE1pd3lNakFzTVRBNExERTROaXd6T1N3eU1qQXNPRFFzTVRVeExESTFNeXd6TlN3MU1Td3hPVEVzT0RFc01UYzBMREU0T1N3NExEa3dMREkxTWl3eU1EWXNNalFzTVRVekxERTRPQ3d5TlRJc01qUXhMRFV4TERFMU9TdzVMREU0TERFM05Dd3pNaXd4T0RNc01qSXpMREU1Tml3ME1Td3hOeklzTlRNc01qRXNNemNzTWpReUxERTNOeXd4T1Rjc05Dd3lOQ3d4Tnprc01UYzRMREUxTnl3eE1UWXNNakkyTERjd0xERXdPQ3d4TkRFc01UZzVMREU1TWl3eU16Z3NNVEE0TERFeU9Dd3hNelFzTkRBc01pd3hOemtzTmpjc01UQXhMRE01TERjM0xESXhPQ3cwT0N3eU5UQXNNVGsyTERjd0xEZzBMREUyTml3eE55d3hOVFlzTlRZc01UTTFMRFFzTkRNc01UYzRMREkxTkN3ME5Dd3lOeXd4Tnpjc01UYzRMREUwTlN3eE5ESXNNVFF3TERJMUxERTBOU3d4TnpNc05ERXNNVEl4TERJeU9Dd3lORGtzTkRrc01UVTJMREl5TUN3eE1ESXNNVGd4TERFeUxERXdMREl4TkN3eE1Ea3NOVFFzTVRrekxESTBNQ3d5TVRZc01qRTRMRGNzTVRBNUxEa3dMREl4Tnl3ek1Dd3lORGNzTVRReExERTFOeXcxT1N3eU1qWXNORFlzTVRVMUxEUTBMREUxTml3NU55dzBPQ3d4T0Rrc01USXpMREU0TWl3eE5qVXNNalF3TERFd05TdzNPQ3d4T1Rnc05Ua3NNalVzTVRreUxESXhNeXd4TlRVc09EUXNNVGtzT1Rnc09EZ3NPVGNzTVRFNExERTVNU3czT1N3eE1EZ3NNakl4TERFd05Dd3lNVElzTlRBc016QXNNVGt5TERFeE1TdzNNeXd4T0RFc01USTRMRGt5TERFME9Dd3lNVEFzTWpBMExESXlNQ3d5TXpjc01UTTRMREkwTml3eE9Ea3NNVGsyTERFNE55d3pOU3d5TVRnc01qVXpMRFUzTERNd0xEWTFMRFkyTERFd015d3lPQ3d4TlRBc01USXNNakEwTERRd0xEZzBMRFF5TERFd05DdzJOU3d4TmpRc01UUTJMREl5Tnl3NE1pdzJMREUyTERFMk55d3hNak1zTVRrc01qSXhMREV6TVN3eE5UUXNOREVzT1RZc05qZ3NNakVzTVRRd0xESTJMRGc0TERFeU5pdzJOaXczTnl3NE9TdzNNeXd4T1RNc01pd3pMREVzTUN3eCIsImlzcyI6ImFjY291bnRzLmdvb2dsZS5jb20iLCJpYXQiOjE0OTAxMjEwNDQsImV4cCI6MTQ5MDEyNDY0NH0.GRnWCUx5r5ll9xkCRlYwUjISxi7nQ0OtlayWeqVcmoSf9W0k9HcBH_9U1CA-LJDkJCntDtkSkQyuRF-Sh53S2QYa396fqRZONp1czj6zCIxjZX30--vOvBCGyAI8sC9vssoKciTHn1aQhzDvY7HD4C7gt0KGI3FbtYRGa_RNm6v2ngqwVq0GyqE0KuosgVw0IjxbjOShrwWSHD1UszkEMhf4dQuekrZlvfkEfZN9aWbhy4qQy0y1Eiz0jTP2b5Yp1F1KyUQcgh8ofU2mE19nWzqxsMw-CEnGOUuwjfEGPqTg6ej0TDOz6rkODMvmQ9q33tL6TMbbJWga7DxAOOXSRQ&authuser=0&session_state=68cc1dc43bf1d78f415cc69354e639bdc52fb45f..2f30&prompt=consent';
       resolve(url);
     });
   }
@@ -535,7 +500,6 @@ class IdentityModule {
         return _this.generateAssertion(publicKey, origin, '', userkeyPair, idp);
 
       }).then(function(url) {
-        console.log('TIAGO popup url', url);
         _this.myHint = url;
         return _this.generateAssertion(publicKey, origin, url, userkeyPair, idp);
 
@@ -546,7 +510,7 @@ class IdentityModule {
           reject('Error on obtaining Identity');
         }
       }).catch(function(err) {
-        console.log(err);
+        log.error(err);
         reject(err);
       });
     });
@@ -559,17 +523,19 @@ class IdentityModule {
       _this.callIdentityModuleFunc('openPopup', {urlreceived: loginUrl}).then((idCode) => {
         return idCode;
       }, (err) => {
-        console.error('Error while logging in for the selected identity.');
+        log.error('Error while logging in for the selected identity.');
         return reject(err);
       }).then((idCode) => {
         _this.sendGenerateMessage(publicKey, origin, idCode, idp).then((newResponse) => {
           if (newResponse.hasOwnProperty('assertion')) {
-            _this.storeIdentity(newResponse, keyPair);
+            _this.storeIdentity(newResponse, keyPair).then(result => {
+              resolve('Login was successfull');
+            }).catch(err => { reject('Login has failed:' + err); });
           } else {
-            console.error('Error while logging in for the selected identity.');
+            log.error('Error while logging in for the selected identity.');
             return reject('Could not generate a valid assertion for selected identity.');
           }
-        });
+        }).catch(err => { reject('On loginSelectedIdentity from method sendGenerateMessage error:  ' + err); });
       });
     });
   }
@@ -590,7 +556,7 @@ class IdentityModule {
           return reject('Error on obtaining Identity');
         }
       }).catch(function(err) {
-        console.error(err);
+        log.error(err);
         return reject(err);
       });
     });
@@ -619,16 +585,16 @@ class IdentityModule {
               return reject(err);
             });
           } else { // you should never get here, if you do then the IdP Proxy is not well implemented
-            console.error('GenerateAssertion returned invalid response.');
-            console.log('Proceeding by logging in.');
+            // log.error('GenerateAssertion returned invalid response.');
+            log.log('Proceeding by logging in.');
             _this.generateSelectedIdentity(publicKey, origin, idp, keyPair).then((value) => {
               return resolve(value);
             }, (err) => {
               return reject(err);
             });
           }
-        }).catch(err => {reject('On selectIdentityForHyperty from method sendGenerateMessage error:  ' + err)});
-      }).catch(err => {reject('On selectIdentityForHyperty from method generateRSAKeyPair error:  ' + err)});
+        }).catch(err => { reject('On selectIdentityForHyperty from method sendGenerateMessage error:  ' + err); });
+      }).catch(err => { reject('On selectIdentityForHyperty from method generateRSAKeyPair error:  ' + err); });
     });
   }
 
@@ -667,7 +633,7 @@ class IdentityModule {
         } else {
           return reject('error on GUI received message.');
         }
-      }).catch(err => {reject('On selectIdentityFromGUI from method requestIdentityToGUI error:  ' + err);});
+      }).catch(err => { reject('On selectIdentityFromGUI from method requestIdentityToGUI error:  ' + err); });
     });
   }
 
@@ -684,14 +650,14 @@ class IdentityModule {
       let assertionParsed;
 
       //verify if the token contains the 3 components, or just the assertion
-      try{
+      try {
         if (splitedAssertion[1]) {
           assertionParsed = JSON.parse(atob(splitedAssertion[1]));
         } else {
           assertionParsed = JSON.parse(atob(result.assertion));
         }
-      }catch(err){
-        return reject("In storeIdentity, error parsing assertion: " + err);
+      } catch (err) {
+        return reject('In storeIdentity, error parsing assertion: ' + err);
       }
       let idToken;
 
@@ -781,76 +747,30 @@ class IdentityModule {
     });
   }
 
-  loginSelectedIdentity(publicKey, origin, idp, keyPair, loginUrl) {
-    let _this = this;
-
-    return new Promise((resolve, reject) => {
-      _this.callIdentityModuleFunc('openPopup', {urlreceived: loginUrl}).then((idCode) => {
-        return idCode;
-      }, (err) => {
-        console.error('Error while logging in for the selected identity.');
-        return reject(err);
-      }).then((idCode) => {
-        _this.sendGenerateMessage(publicKey, origin, idCode, idp).then((newResponse) => {
-          if (newResponse.hasOwnProperty('assertion')) {
-            _this.storeIdentity(newResponse, keyPair).then(result => {
-              resolve('Login was successfull');
-            }).catch(err => {reject('Login has failed:' + err)})
-          } else {
-            console.error('Error while logging in for the selected identity.');
-            return reject('Could not generate a valid assertion for selected identity.');
-          }
-        }).catch(err => {reject('On loginSelectedIdentity from method sendGenerateMessage error:  ' + err);});
-      });
-    });
-  }
-
-  generateSelectedIdentity(publicKey, origin, idp, keyPair) {
-    let _this = this;
-
-    return new Promise((resolve, reject) => {
-
-      _this.generateAssertion(publicKey, origin, '', keyPair, idp).then((loginUrl) => {
-        return loginUrl;
-      }).then(function(url) {
-        return _this.generateAssertion(publicKey, origin, url, keyPair, idp);
-      }).then(function(value) {
-        if (value) {
-          return resolve(value);
-        } else {
-          return reject('Error on obtaining Identity');
-        }
-      }).catch(function(err) {
-        console.error(err);
-        return reject(err);
-      });
-    });
-  }
-
   callIdentityModuleFunc(methodName, parameters) {
     let _this = this;
     let message;
 
     return new Promise((resolve, reject) => {
       message = { type: 'execute', to: _this._guiURL, from: _this._idmURL,
-        body: { resource: 'identity', method: methodName, params: parameters }, };
+        body: { resource: 'identity', method: methodName, params: parameters }};
       let id = _this._messageBus.postMessage(message);
 
       //add listener without timout
-      try{
+      try {
         _this._messageBus.addResponseListener(_this._idmURL, id, msg => {
           _this._messageBus.removeResponseListener(_this._idmURL, id);
           let result = msg.body.value;
           resolve(result);
         });
-      }catch (err){
+      } catch (err) {
         reject('In method callIdentityModuleFunc error: ' + err);
       }
     });
   }
 
 
-//******************* ENCRYPTION METHODS *******************
+  //******************* ENCRYPTION METHODS *******************
   encryptMessage(message) {
     log('encryptMessage:message', message);
     let _this = this;
@@ -921,8 +841,9 @@ class IdentityModule {
               reject('encrypt handshake protocol phase ');
             });
           }
-        } else
-          reject("In encryptMessage: Hyperty owner URL was not found");
+        } else {
+          reject('In encryptMessage: Hyperty owner URL was not found');
+        }
 
       //if from hyperty to a dataObjectURL
       } else if (isFromHyperty && isToDataObject) {
@@ -943,7 +864,8 @@ class IdentityModule {
                 _this.dataObjectSessionKeys[dataObjectURL] = {sessionKey: sessionKey, isToEncrypt: true};
 
                 _this.storageManager.set('dataObjectSessionKeys', 0, _this.dataObjectSessionKeys).catch(err => {
-                  reject('On encryptMessage from method storageManager.set error: ' + err);});
+                  reject('On encryptMessage from method storageManager.set error: ' + err);
+                });
                 dataObjectKey = _this.dataObjectSessionKeys[dataObjectURL];
               }
             }
@@ -978,8 +900,8 @@ class IdentityModule {
             } else {
               reject('Data object key could not be defined: Failed to decrypt message ');
             }
-          }).catch(err => {reject('On encryptMessage from method dataObjectsStorage.getDataObject error: ' + err)});
-        }).catch(err => {reject('On encryptMessage from method storageManager.get error: ' + err)});
+          }).catch(err => { reject('On encryptMessage from method dataObjectsStorage.getDataObject error: ' + err); });
+        }).catch(err => { reject('On encryptMessage from method storageManager.get error: ' + err); });
       }
     });
   }
@@ -1006,7 +928,7 @@ class IdentityModule {
               let newValue = { value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv) };
               console.log('encrypted dataObject', newValue);
               return resolve(newValue);
-            }).catch(err => {reject('On encryptDataObject from method encryptAES error: ' + err)});
+            }).catch(err => { reject('On encryptDataObject from method encryptAES error: ' + err); });
 
           // if not, just send the message
           } else {
@@ -1018,7 +940,7 @@ class IdentityModule {
         } else {
           return reject('No dataObjectKey for this dataObjectURL:', dataObjectURL);
         }
-      }).catch(err => {reject('On encryptDataObject from method storageManager.get error: ' + err)});
+      }).catch(err => { reject('On encryptDataObject from method storageManager.get error: ' + err); });
     });
   }
 
@@ -1178,7 +1100,7 @@ class IdentityModule {
               let newValue = { value: parsedValue, iv: _this.crypto.encode(iv) };
               console.log('decrypted dataObject,', newValue);
               return resolve(newValue);
-            }).catch(err => {reject('On decryptDataObject from method encryptAES error: ' + err)});
+            }).catch(err => { reject('On decryptDataObject from method encryptAES error: ' + err); });
 
           //if not, just return the dataObject
           } else {
@@ -1249,7 +1171,7 @@ class IdentityModule {
 
             _this._messageBus.postMessage(value.message);
             resolve('exchange of chat sessionKey initiated');
-          }).catch(err => {reject('On doMutualAuthentication from method _sendReporterSessionKey error: ' + err)});
+          }).catch(err => { reject('On doMutualAuthentication from method _sendReporterSessionKey error: ' + err); });
         } else {
           _this._doHandShakePhase(msg, chatKeys);
         }
@@ -1261,7 +1183,7 @@ class IdentityModule {
   }
 
 
-//******************* TOKEN METHODS *******************
+  //******************* TOKEN METHODS *******************
   /**
   * get a Token to be added to a message
   * @param  {String}  fromURL     origin of the message
@@ -1274,7 +1196,7 @@ class IdentityModule {
       console.log('[Identity.IdentityModule.getToken] from->', fromURL, '  to->', toUrl);
 
       if (toUrl) {
-//        console.log('toUrl', toUrl);
+        //console.log('toUrl', toUrl);
         _this.registry.isLegacy(toUrl).then(function(result) {
           console.log('[Identity.IdentityModule.getToken] isLEGACY: ', result);
           if (result) {
@@ -1296,8 +1218,9 @@ class IdentityModule {
 
                 let keypath = change.keypath;
 
-                if (keypath.includes('status'))
+                if (keypath.includes('status')) {
                   keypath = keypath.replace('.status', '');
+                }
 
                 if (keypath === domain && change.name === 'status' && change.newValue === 'created') {
                   console.log('[Identity.IdentityModule.getToken] token is created ' + _this.identitiesList[domain]);
@@ -1328,9 +1251,9 @@ class IdentityModule {
           } else {
             _this._getValidToken(fromURL).then((identity) => {
               resolve(identity);
-            }).catch(err => {reject('On getToken from method _getValidToken error: ' + err)});
+            }).catch(err => { reject('On getToken from method _getValidToken error: ' + err); });
           }
-        }).catch(err => {reject('On getToken from method isLegacy error: ' + err)});
+        }).catch(err => { reject('On getToken from method isLegacy error: ' + err); });
       } else {
         _this._getValidToken(fromURL).then((identity) => {
           resolve(identity);
@@ -1400,7 +1323,7 @@ class IdentityModule {
   getAccessToken(url) {
     let _this = this;
 
-  /*  let urlSplit = url.split('.');
+    /*  let urlSplit = url.split('.');
     let length = urlSplit.length;*/
 
     let domainToCheck = divideURL(url).domain;
@@ -1410,21 +1333,21 @@ class IdentityModule {
     }
 
     let identityToReturn;
-    let expiration_date = undefined;
-    let time_now = _this._seconds_since_epoch();
+    let expirationDate = undefined;
+    let timeNow = _this._secondsSinceEpoch();
     for (let index in _this.identities) {
       let identity = _this.identities[index];
       if (identity.hasOwnProperty('interworking') && identity.interworking.domain === domainToCheck) {
         // check if there is expiration time
         if (identity.hasOwnProperty('info') && identity.info.hasOwnProperty('expires')) {
-          expiration_date = identity.info.expires;
-          console.log('[Identity.IdentityModule.getAccessToken] Token expires in', expiration_date);
-          console.log('[Identity.IdentityModule.getAccessToken] time now:', time_now);
+          expirationDate = identity.info.expires;
+          console.log('[Identity.IdentityModule.getAccessToken] Token expires in', expirationDate);
+          console.log('[Identity.IdentityModule.getAccessToken] time now:', timeNow);
 
           // TODO: this should not be verified in this way
           // we should contact the IDP to verify this instead of using the local clock
           // but this works for now...
-          if (time_now >= expiration_date) {
+          if (timeNow >= expirationDate) {
             // delete current identity
             //_this.deleteIdentity(identity.identity);
             return null; // the getToken function then generates a new token
@@ -1445,7 +1368,7 @@ class IdentityModule {
   }
 
 
-//******************* OTHER METHODS *******************
+  //******************* OTHER METHODS *******************
   sendRefreshMessage(oldIdentity) {
     let _this = this;
     let domain = _this._resolveDomain(oldIdentity.idp);
@@ -1456,14 +1379,14 @@ class IdentityModule {
 
     return new Promise((resolve, reject) => {
       message = {type: 'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'refreshAssertion', params: {identity: assertion}}};
-      try{
+      try {
         _this._messageBus.postMessage(message, (res) => {
           let result = res.body.value;
           console.log('TIAGO new assertion:', result);
           resolve(result);
         });
-      } catch (err){
-        reject("In sendRefreshMessage on postMessage error: " + err);d
+      } catch (err) {
+        reject('In sendRefreshMessage on postMessage error: ' + err);
       }
     });
   }
@@ -1475,13 +1398,13 @@ class IdentityModule {
 
     return new Promise((resolve, reject) => {
       message = {type: 'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'generateAssertion', params: {contents: contents, origin: origin, usernameHint: usernameHint}}};
-      try{
-       _this._messageBus.postMessage(message, (res) => {
+      try {
+        _this._messageBus.postMessage(message, (res) => {
           let result = res.body.value;
           resolve(result);
         });
-       } catch (err){
-        reject("In sendRefreshMessage on postMessage error: " + err);
+      } catch (err) {
+        reject('In sendRefreshMessage on postMessage error: ' + err);
       }
     });
   }
@@ -1523,7 +1446,7 @@ class IdentityModule {
           reject('error on obtaining identity information');
         }
 
-      }).catch(err => {reject('On generateAssertion from method sendGenerateMessage error: ' + err)});
+      }).catch(err => { reject('On generateAssertion from method sendGenerateMessage error: ' + err); });
     });
   }
 
@@ -1543,7 +1466,7 @@ class IdentityModule {
       params: {assertion: assertion, origin: origin}}};
 
     return new Promise(function(resolve, reject) {
-      try{
+      try {
         _this._messageBus.postMessage(message, (result) => {
           if (result.body.code === 200) {
             resolve(result.body.value);
@@ -1551,41 +1474,9 @@ class IdentityModule {
             reject('error', result.body.code);
           }
         });
-      } catch(err){
+      } catch (err) {
         reject('On validateAssertion from method postMessage error: ' + err);
       }
-    });
-  }
-
-  callGenerateMethods(idp, origin) {
-    let _this = this;
-
-    return new Promise((resolve, reject) => {
-
-      let publicKey;
-      let userkeyPair;
-
-      //generates the RSA key pair
-      _this.crypto.generateRSAKeyPair().then(function(keyPair) {
-
-        publicKey = btoa(keyPair.public);
-        userkeyPair = keyPair;
-        return _this.generateAssertion(publicKey, origin, '', userkeyPair, idp);
-
-      }).then(function(url) {
-        _this.myHint = url;
-        return _this.generateAssertion(publicKey, origin, url, userkeyPair, idp);
-
-      }).then(function(value) {
-        if (value) {
-          resolve(value);
-        } else {
-          reject('Error on obtaining Identity');
-        }
-      }).catch(function(err) {
-        console.log(err);
-        reject(err);
-      });
     });
   }
 
@@ -1609,9 +1500,9 @@ class IdentityModule {
         _this.crypto.generateRSAKeyPair().then((keyPair) => {
           let value = {type: 'execute', value: keyPair, code: 200};
           let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
-          try{
+          try {
             _this._messageBus.postMessage(replyMsg);
-          }catch (err){
+          } catch (err) {
             reject('On addGUIListeners from if generateRSAKeyPair method postMessage error: ' + err);
           }
         });
@@ -1624,9 +1515,9 @@ class IdentityModule {
         _this.sendGenerateMessage(contents, origin, usernameHint, idpDomain).then((returnedValue) => {
           let value = {type: 'execute', value: returnedValue, code: 200};
           let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
-          try{
+          try {
             _this._messageBus.postMessage(replyMsg);
-          }catch (err){
+          } catch (err) {
             reject('On addGUIListeners from if sendGenerateMessage method postMessage error: ' + err);
           }
         });
@@ -1637,9 +1528,9 @@ class IdentityModule {
         _this.storeIdentity(result, keyPair).then((returnedValue) => {
           let value = {type: 'execute', value: returnedValue, code: 200};
           let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
-          try{
+          try {
             _this._messageBus.postMessage(replyMsg);
-          }catch (err){
+          } catch (err) {
             reject('On addGUIListeners from if storeIdentity method postMessage error: ' + err);
           }
         });
@@ -1655,9 +1546,9 @@ class IdentityModule {
       // if the function requested is not a promise
       let value = {type: 'execute', value: returnedValue, code: 200};
       let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
-      try{
+      try {
         _this._messageBus.postMessage(replyMsg);
-      }catch (err){
+      } catch (err) {
         reject('On addGUIListeners from if storeIdentity method postMessage error: ' + err);
       }
     });
@@ -1668,7 +1559,7 @@ class IdentityModule {
     _this.guiDeployed = true;
   }
 
-//******************* PRIVATE METHODS *******************
+  //******************* PRIVATE METHODS *******************
   /**
    * GetValidToken is for non legacy hyperties and verifies if the Token is still valid
    * if the token is invalid it requests a new token
@@ -1681,35 +1572,35 @@ class IdentityModule {
     return new Promise((resolve, reject) => {
       _this.getIdToken(hypertyURL).then(function(identity) {
         console.log('[Identity.IdentityModule.getValidToken] Token', identity);
-        let time_now = _this._seconds_since_epoch();
-        let complete_id = _this.getIdentity(identity.userProfile.userURL);
-        let expiration_date = undefined;
+        let timeNow = _this._secondsSinceEpoch();
+        let completeId = _this.getIdentity(identity.userProfile.userURL);
+        let expirationDate = undefined;
 
-        if (complete_id.hasOwnProperty('info')) {
-          if (complete_id.info.hasOwnProperty('expires')) {
-            expiration_date = complete_id.info.expires;
-          } else if (complete_id.info.hasOwnProperty('tokenIDJSON')) {
-            expiration_date = complete_id.info.tokenIDJSON.exp;
+        if (completeId.hasOwnProperty('info')) {
+          if (completeId.info.hasOwnProperty('expires')) {
+            expirationDate = completeId.info.expires;
+          } else if (completeId.info.hasOwnProperty('tokenIDJSON')) {
+            expirationDate = completeId.info.tokenIDJSON.exp;
           } else {
             // throw 'The ID Token does not have an expiration time';
             console.log('The ID Token does not have an expiration time');
             resolve(identity);
           }
-        } else if (complete_id.hasOwnProperty("infoToken") && complete_id.infoToken.hasOwnProperty("exp")) {
-          expiration_date = complete_id.infoToken.exp;
+        } else if (completeId.hasOwnProperty('infoToken') && completeId.infoToken.hasOwnProperty('exp')) {
+          expirationDate = completeId.infoToken.exp;
         } else {
           // throw 'The ID Token does not have an expiration time';
           console.log('The ID Token does not have an expiration time');
           resolve(identity);
         }
 
-        console.log('[Identity.IdentityModule.getValidToken] Token expires in', expiration_date);
-        console.log('[Identity.IdentityModule.getValidToken] time now:', time_now);
+        console.log('[Identity.IdentityModule.getValidToken] Token expires in', expirationDate);
+        console.log('[Identity.IdentityModule.getValidToken] time now:', timeNow);
 
-        if (time_now >= expiration_date) {
+        if (timeNow >= expirationDate) {
           if (identity.idp === 'google.com') {
             _this.sendRefreshMessage(identity).then((newIdentity) => {
-              _this.deleteIdentity(complete_id.identity);
+              _this.deleteIdentity(completeId.identity);
               _this.storeIdentity(newIdentity.body.params.identity, newIdentity.body.params.identity.keyPair).then((value) => {
                 resolve(value);
               }, (err) => {
@@ -1718,11 +1609,12 @@ class IdentityModule {
               });
             });
           } else { // microsoft.com
-            _this.deleteIdentity(complete_id.identity);
+            _this.deleteIdentity(completeId.identity);
+
             // generate new idToken
             _this.callGenerateMethods(identity.idp).then((value) => {
               resolve(value);
-            }).catch(err => {reject('On addGUIListeners from if storeIdentity method postMessage error: ' + err)});
+            }).catch(err => { reject('On addGUIListeners from if storeIdentity method postMessage error: ' + err); });
           }
         } else {
           resolve(identity);
@@ -1734,7 +1626,7 @@ class IdentityModule {
     });
   }
 
-    /**
+  /**
   * returns the reporter associated to the dataObject URL
   * @param   {String}   dataObjectURL         dataObject url
   * @return   {String}  reporter              dataObject url reporter
@@ -1806,9 +1698,9 @@ class IdentityModule {
       } else {
         sessionKey = sessionKeyBundle.sessionKey;
       }
-      try{
+      try {
         valueToEncrypt = JSON.stringify({value: _this.crypto.encode(sessionKey), dataObjectURL: chatKeys.dataObjectURL});
-      } catch (err){
+      } catch (err) {
         return reject('On _sendReporterSessionKey from method storageManager.set error: ' + err);
       }
       iv = _this.crypto.generateIV();
@@ -1854,7 +1746,7 @@ class IdentityModule {
 
   _doHandShakePhase(message, chatKeys) {
   // log('_doHandShakePhase:dataObject', message);
-	//	log('_doHandShakePhase:chatKeys', chatKeys);
+  //	log('_doHandShakePhase:chatKeys', chatKeys);
 
     let _this = this;
 
@@ -2126,9 +2018,9 @@ class IdentityModule {
             chatKeys.handshakeHistory.receiverFinishedMessage = _this._filterMessageToHash(receiverFinishedMessage, 'ok!' + iv, chatKeys.hypertyFrom.messageInfo);
             chatKeys.authenticated = true;
             resolve({message: receiverFinishedMessage, chatKeys: chatKeys});
-          }).catch( err => {
+          }).catch(err => {
             reject('On _doHandShakePhase from senderCertificate error: ' + err);
-           });
+          });
 
           break;
         }
@@ -2168,9 +2060,9 @@ class IdentityModule {
               } else {
                 _this._sendReporterSessionKey(message, chatKeys).then(value => {
                   resolve(value);
-                }).catch( err => {
+                }).catch(err => {
                   reject('On _doHandShakePhase from receiverFinishedMessage error: ' + err);
-                 });
+                });
               }
             });
           });
@@ -2235,9 +2127,9 @@ class IdentityModule {
 
             receiverAcknowledgeMsg.body.value = finalValue;
             resolve({message: receiverAcknowledgeMsg, chatKeys: chatKeys});
-          }).catch( err => {
-              reject('On _doHandShakePhase from receiverFinishedMessage error: ' + err);
-            });
+          }).catch(err => {
+            reject('On _doHandShakePhase from receiverFinishedMessage error: ' + err);
+          });
 
           break;
         }
@@ -2264,9 +2156,9 @@ class IdentityModule {
               callback('handShakeEnd');
             }
             resolve('handShakeEnd');
-          }).catch( err => {
-              reject('On _doHandShakePhase from receiverAcknowledge error: ' + err);
-            });
+          }).catch(err => {
+            reject('On _doHandShakePhase from receiverAcknowledge error: ' + err);
+          });
 
           break;
         }
@@ -2363,22 +2255,23 @@ class IdentityModule {
     return newChatCrypto;
   }
 
-  _seconds_since_epoch() {
-    return Math.floor( Date.now() / 1000 );
+  _secondsSinceEpoch() {
+    return Math.floor(Date.now() / 1000);
   }
 
-  _parseMessageURL(URL){
+  _parseMessageURL(URL) {
     let splitedToURL = URL.split('/');
-    if (splitedToURL.length <= 6)
+    if (splitedToURL.length <= 6) {
       return splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3];
-    else
+    } else {
       return splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3] + '/' + splitedToURL[4];
+    }
   }
 
 }
 
-function log(f1, f2){
-	console.log(f1, JSON.stringify(util.inspect(f2)));
+function log(f1, f2) {
+  console.log(f1, JSON.stringify(util.inspect(f2)));
 }
 
 export default IdentityModule;
