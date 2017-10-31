@@ -25,8 +25,6 @@
  * Base class to implement internal deploy manager of components.
  */
 
-// import MessageFactory from '../../resources/MessageFactory';
-
 /**
  * @author micaelpedrosa@gmail.com
  * Internal component registry of all sandboxes.
@@ -42,10 +40,6 @@ class SandboxRegistry {
 
     _this._bus = bus;
     _this._components = {};
-
-    // Add Message Factory
-    // let messageFactory = new MessageFactory();
-    // _this.messageFactory = messageFactory;
 
     bus.addListener(SandboxRegistry.InternalDeployAddress, (msg) => {
       //console.log('SandboxRegistry-RCV: ', msg);
@@ -109,7 +103,6 @@ class SandboxRegistry {
       responseDesc = 'Instance ' + componentURL + ' already exist!';
     }
 
-    // Create response message with MessageFactory
     let responseMsg = _this._responseMsg(msg, responseCode, responseDesc);
     _this._bus.postMessage(responseMsg);
   }
