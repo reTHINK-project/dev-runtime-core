@@ -20,7 +20,6 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 **/
-// import MessageFactory from '../../resources/MessageFactory';
 
 import {isURL} from '../utils/utils';
 
@@ -153,7 +152,6 @@ class AddressAllocation {
 
       console.info('[AddressAllocation - ' + scheme + '] - Request new URL');
 
-      // TODO: change this response Message using the MessageFactory
       this._bus.postMessage(msg, (reply) => {
         if (reply.body.code === 200) {
           let result = {newAddress: true, address: reply.body.value.allocated};

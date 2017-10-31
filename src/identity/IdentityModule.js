@@ -87,8 +87,8 @@ class IdentityModule {
     // _this.loadIdentities();
 
   }
-  
-//******************* GET AND SET METHODS *******************
+
+  //******************* GET AND SET METHODS *******************
 
   /**
   * return the messageBus in this Registry
@@ -144,8 +144,8 @@ class IdentityModule {
     _this._registry = registry;
   }
 
-  
- //******************* IDENTITY RELEATED METHODS *******************
+
+  //******************* IDENTITY RELEATED METHODS *******************
   /**
   * gets all the information from a given userURL
   * @param  {String}  userURL     user url
@@ -200,7 +200,7 @@ class IdentityModule {
     let _this = this;
     return _this.currentIdentity;
   }
-  
+
   loadIdentities() {
     let _this = this;
     return new Promise((resolve) => {
@@ -236,8 +236,8 @@ class IdentityModule {
       });
     });
   }
-  
-/**
+
+  /**
   * Function that fetch an identityAssertion from a user.
   *
   * @return {IdAssertion}              IdAssertion
@@ -351,7 +351,7 @@ class IdentityModule {
   }
 
 
-    /**
+  /**
   * Function to return all the users URLs registered within a session
   * These users URLs are returned in an array of strings.
   * @param  {Boolean}  emailFormat (Optional)   boolean to indicate to return in email format
@@ -429,7 +429,7 @@ class IdentityModule {
       let id = _this._messageBus.postMessage(message);
 
       //add listener without timout
-      try{
+      try {
         _this._messageBus.addResponseListener(_this._idmURL, id, msg => {
           _this._messageBus.removeResponseListener(_this._idmURL, id);
 
@@ -445,45 +445,9 @@ class IdentityModule {
             reject('error on requesting an identity to the GUI');
           }
         });
-      }catch (err){
+      } catch (err) {
         reject('In method callIdentityModuleFunc error: ' + err);
       }
-    });
-  }
-
-  selectIdentityForHyperty(origin, idp, idHint) {
-    let _this = this;
-
-    return new Promise((resolve, reject) => {
-
-      //generates the RSA key pair
-      _this.crypto.generateRSAKeyPair().then(function(keyPair) {
-        let publicKey = btoa(keyPair.public);
-
-        _this.sendGenerateMessage(publicKey, origin, idHint, idp).then((response) => {
-          if (response.hasOwnProperty('assertion')) { // identity was logged in, just save it
-            _this.storeIdentity(response, keyPair).then((value) => {
-              return resolve(value);
-            }, (err) => {
-              return reject(err);
-            });
-          } else if (response.hasOwnProperty('loginUrl')) { // identity was not logged in
-            _this.loginSelectedIdentity(publicKey, origin, idp, keyPair, response.loginUrl).then((value) => {
-              return resolve(value);
-            }, (err) => {
-              return reject(err);
-            });
-          } else { // you should never get here, if you do then the IdP Proxy is not well implemented
-            console.error('GenerateAssertion returned invalid response.');
-            console.log('Proceeding by logging in.');
-            _this.generateSelectedIdentity(publicKey, origin, idp, keyPair).then((value) => {
-              return resolve(value);
-            }, (err) => {
-              return reject(err);
-            });
-          }
-        });
-      });
     });
   }
 
@@ -515,28 +479,6 @@ class IdentityModule {
       }).catch(function(err) {
         console.log(err);
         reject(err);
-      });
-    });
-  }
-
-  loginSelectedIdentity(publicKey, origin, idp, keyPair, loginUrl) {
-    let _this = this;
-
-    return new Promise((resolve, reject) => {
-      _this.callIdentityModuleFunc('openPopup', {urlreceived: loginUrl}).then((idCode) => {
-        return idCode;
-      }, (err) => {
-        console.error('Error while logging in for the selected identity.');
-        return reject(err);
-      }).then((idCode) => {
-        _this.sendGenerateMessage(publicKey, origin, idCode, idp).then((newResponse) => {
-          if (newResponse.hasOwnProperty('assertion')) {
-            _this.storeIdentity(newResponse, keyPair);
-          } else {
-            console.error('Error while logging in for the selected identity.');
-            return reject('Could not generate a valid assertion for selected identity.');
-          }
-        });
       });
     });
   }
@@ -594,8 +536,8 @@ class IdentityModule {
               return reject(err);
             });
           }
-        }).catch(err => {reject('On selectIdentityForHyperty from method sendGenerateMessage error:  ' + err)});
-      }).catch(err => {reject('On selectIdentityForHyperty from method generateRSAKeyPair error:  ' + err)});
+        }).catch(err => { reject('On selectIdentityForHyperty from method sendGenerateMessage error:  ' + err); });
+      }).catch(err => { reject('On selectIdentityForHyperty from method generateRSAKeyPair error:  ' + err); });
     });
   }
 
@@ -634,7 +576,7 @@ class IdentityModule {
         } else {
           return reject('error on GUI received message.');
         }
-      }).catch(err => {reject('On selectIdentityFromGUI from method requestIdentityToGUI error:  ' + err);});
+      }).catch(err => { reject('On selectIdentityFromGUI from method requestIdentityToGUI error:  ' + err); });
     });
   }
 
@@ -651,14 +593,14 @@ class IdentityModule {
       let assertionParsed;
 
       //verify if the token contains the 3 components, or just the assertion
-      try{
+      try {
         if (splitedAssertion[1]) {
           assertionParsed = JSON.parse(atob(splitedAssertion[1]));
         } else {
           assertionParsed = JSON.parse(atob(result.assertion));
         }
-      }catch(err){
-        return reject("In storeIdentity, error parsing assertion: " + err);
+      } catch (err) {
+        return reject('In storeIdentity, error parsing assertion: ' + err);
       }
       let idToken;
 
@@ -762,34 +704,12 @@ class IdentityModule {
           if (newResponse.hasOwnProperty('assertion')) {
             _this.storeIdentity(newResponse, keyPair).then(result => {
               resolve('Login was successfull');
-            }).catch(err => {reject('Login has failed:' + err)})
+            }).catch(err => { reject('Login has failed:' + err); });
           } else {
             console.error('Error while logging in for the selected identity.');
             return reject('Could not generate a valid assertion for selected identity.');
           }
-        }).catch(err => {reject('On loginSelectedIdentity from method sendGenerateMessage error:  ' + err);});
-      });
-    });
-  }
-
-  generateSelectedIdentity(publicKey, origin, idp, keyPair) {
-    let _this = this;
-
-    return new Promise((resolve, reject) => {
-
-      _this.generateAssertion(publicKey, origin, '', keyPair, idp).then((loginUrl) => {
-        return loginUrl;
-      }).then(function(url) {
-        return _this.generateAssertion(publicKey, origin, url, keyPair, idp);
-      }).then(function(value) {
-        if (value) {
-          return resolve(value);
-        } else {
-          return reject('Error on obtaining Identity');
-        }
-      }).catch(function(err) {
-        console.error(err);
-        return reject(err);
+        }).catch(err => { reject('On loginSelectedIdentity from method sendGenerateMessage error:  ' + err); });
       });
     });
   }
@@ -800,24 +720,24 @@ class IdentityModule {
 
     return new Promise((resolve, reject) => {
       message = { type: 'execute', to: _this._guiURL, from: _this._idmURL,
-        body: { resource: 'identity', method: methodName, params: parameters }, };
+        body: { resource: 'identity', method: methodName, params: parameters } };
       let id = _this._messageBus.postMessage(message);
 
       //add listener without timout
-      try{
+      try {
         _this._messageBus.addResponseListener(_this._idmURL, id, msg => {
           _this._messageBus.removeResponseListener(_this._idmURL, id);
           let result = msg.body.value;
           resolve(result);
         });
-      }catch (err){
+      } catch (err) {
         reject('In method callIdentityModuleFunc error: ' + err);
       }
     });
   }
 
-  
-//******************* ENCRYPTION METHODS *******************
+
+  //******************* ENCRYPTION METHODS *******************
   encryptMessage(message) {
     log('encryptMessage:message', message);
     let _this = this;
@@ -832,7 +752,7 @@ class IdentityModule {
         console.log('encryption disabled');
         return resolve(message);
       }
-      
+
       let dataObjectURL = _this._parseMessageURL(message.to);
 
       let isToDataObject = isDataObjectURL(dataObjectURL);
@@ -888,8 +808,7 @@ class IdentityModule {
               reject('encrypt handshake protocol phase ');
             });
           }
-        } else
-          reject("In encryptMessage: Hyperty owner URL was not found");
+        } else { reject('In encryptMessage: Hyperty owner URL was not found'); }
 
       //if from hyperty to a dataObjectURL
       } else if (isFromHyperty && isToDataObject) {
@@ -910,7 +829,8 @@ class IdentityModule {
                 _this.dataObjectSessionKeys[dataObjectURL] = {sessionKey: sessionKey, isToEncrypt: true};
 
                 _this.storageManager.set('dataObjectSessionKeys', 0, _this.dataObjectSessionKeys).catch(err => {
-                  reject('On encryptMessage from method storageManager.set error: ' + err);});
+                  reject('On encryptMessage from method storageManager.set error: ' + err);
+                });
                 dataObjectKey = _this.dataObjectSessionKeys[dataObjectURL];
               }
             }
@@ -945,8 +865,8 @@ class IdentityModule {
             } else {
               reject('Data object key could not be defined: Failed to decrypt message ');
             }
-          }).catch(err => {reject('On encryptMessage from method dataObjectsStorage.getDataObject error: ' + err)});
-        }).catch(err => {reject('On encryptMessage from method storageManager.get error: ' + err)});
+          }).catch(err => { reject('On encryptMessage from method dataObjectsStorage.getDataObject error: ' + err); });
+        }).catch(err => { reject('On encryptMessage from method storageManager.get error: ' + err); });
       }
     });
   }
@@ -973,7 +893,7 @@ class IdentityModule {
               let newValue = { value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv) };
               console.log('encrypted dataObject', newValue);
               return resolve(newValue);
-            }).catch(err => {reject('On encryptDataObject from method encryptAES error: ' + err)});
+            }).catch(err => { reject('On encryptDataObject from method encryptAES error: ' + err); });
 
           // if not, just send the message
           } else {
@@ -985,13 +905,13 @@ class IdentityModule {
         } else {
           return reject('No dataObjectKey for this dataObjectURL:', dataObjectURL);
         }
-      }).catch(err => {reject('On encryptDataObject from method storageManager.get error: ' + err)});
+      }).catch(err => { reject('On encryptDataObject from method storageManager.get error: ' + err); });
     });
   }
 
   decryptMessage(message) {
     let _this = this;
-    
+
     log('decryptMessage:message', message);
 
     return new Promise(function(resolve, reject) {
@@ -1125,7 +1045,7 @@ class IdentityModule {
         console.log('decryption disabled');
         return resolve(dataObject);
       }
-      
+
       let dataObjectURL = _this._parseMessageURL(sender);
 
       console.log('dataObject value to decrypt: ', dataObject);
@@ -1145,7 +1065,7 @@ class IdentityModule {
               let newValue = { value: parsedValue, iv: _this.crypto.encode(iv) };
               console.log('decrypted dataObject,', newValue);
               return resolve(newValue);
-            }).catch(err => {reject('On decryptDataObject from method encryptAES error: ' + err)});
+            }).catch(err => { reject('On decryptDataObject from method encryptAES error: ' + err); });
 
           //if not, just return the dataObject
           } else {
@@ -1216,7 +1136,7 @@ class IdentityModule {
 
             _this._messageBus.postMessage(value.message);
             resolve('exchange of chat sessionKey initiated');
-          }).catch(err => {reject('On doMutualAuthentication from method _sendReporterSessionKey error: ' + err)});
+          }).catch(err => { reject('On doMutualAuthentication from method _sendReporterSessionKey error: ' + err); });
         } else {
           _this._doHandShakePhase(msg, chatKeys);
         }
@@ -1227,8 +1147,8 @@ class IdentityModule {
 
   }
 
-  
-//******************* TOKEN METHODS *******************  
+
+  //******************* TOKEN METHODS *******************
   /**
   * get a Token to be added to a message
   * @param  {String}  fromURL     origin of the message
@@ -1241,7 +1161,7 @@ class IdentityModule {
       console.log('[Identity.IdentityModule.getToken] from->', fromURL, '  to->', toUrl);
 
       if (toUrl) {
-//        console.log('toUrl', toUrl);
+        //        console.log('toUrl', toUrl);
         _this.registry.isLegacy(toUrl).then(function(result) {
           console.log('[Identity.IdentityModule.getToken] isLEGACY: ', result);
           if (result) {
@@ -1263,8 +1183,7 @@ class IdentityModule {
 
                 let keypath = change.keypath;
 
-                if (keypath.includes('status'))
-                  keypath = keypath.replace('.status', '');
+                if (keypath.includes('status')) { keypath = keypath.replace('.status', ''); }
 
                 if (keypath === domain && change.name === 'status' && change.newValue === 'created') {
                   console.log('[Identity.IdentityModule.getToken] token is created ' + _this.identitiesList[domain]);
@@ -1295,9 +1214,9 @@ class IdentityModule {
           } else {
             _this._getValidToken(fromURL).then((identity) => {
               resolve(identity);
-            }).catch(err => {reject('On getToken from method _getValidToken error: ' + err)});
+            }).catch(err => { reject('On getToken from method _getValidToken error: ' + err); });
           }
-        }).catch(err => {reject('On getToken from method isLegacy error: ' + err)});
+        }).catch(err => { reject('On getToken from method isLegacy error: ' + err); });
       } else {
         _this._getValidToken(fromURL).then((identity) => {
           resolve(identity);
@@ -1319,7 +1238,7 @@ class IdentityModule {
       if (splitURL[0] !== 'hyperty') {
 
         _this._getHypertyFromDataObject(hypertyURL).then((returnedHypertyURL) => {
-          
+
           let userURL = _this.registry.getHypertyOwner(returnedHypertyURL);
 
           if (userURL) {
@@ -1367,7 +1286,7 @@ class IdentityModule {
   getAccessToken(url) {
     let _this = this;
 
-  /*  let urlSplit = url.split('.');
+    /*  let urlSplit = url.split('.');
     let length = urlSplit.length;*/
 
     let domainToCheck = divideURL(url).domain;
@@ -1411,28 +1330,32 @@ class IdentityModule {
     return null;
   }
 
-  
-//******************* OTHER METHODS *******************   
+
+  //******************* OTHER METHODS *******************
   sendRefreshMessage(oldIdentity) {
     let _this = this;
     let domain = _this._resolveDomain(oldIdentity.idp);
     let message;
     let assertion = _this.getIdentity(oldIdentity.userProfile.userURL);
-    
+
     log('sendRefreshMessage:oldIdentity', oldIdentity);
 
     return new Promise((resolve, reject) => {
       message = {type: 'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'refreshAssertion', params: {identity: assertion}}};
-      try{
+
+      try {
         _this._messageBus.postMessage(message, (res) => {
           let result = res.body.value;
           console.log('TIAGO new assertion:', result);
           resolve(result);
         });
-      } catch (err){
-        reject("In sendRefreshMessage on postMessage error: " + err);d
+
+      } catch (err) {
+        reject('In sendRefreshMessage on postMessage error: ' + err);
       }
+
     });
+
   }
 
   sendGenerateMessage(contents, origin, usernameHint, idpDomain) {
@@ -1442,13 +1365,13 @@ class IdentityModule {
 
     return new Promise((resolve, reject) => {
       message = {type: 'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'generateAssertion', params: {contents: contents, origin: origin, usernameHint: usernameHint}}};
-      try{  
-       _this._messageBus.postMessage(message, (res) => {
+      try {
+        _this._messageBus.postMessage(message, (res) => {
           let result = res.body.value;
           resolve(result);
         });
-       } catch (err){
-        reject("In sendRefreshMessage on postMessage error: " + err);
+      } catch (err) {
+        reject('In sendRefreshMessage on postMessage error: ' + err);
       }
     });
   }
@@ -1490,7 +1413,7 @@ class IdentityModule {
           reject('error on obtaining identity information');
         }
 
-      }).catch(err => {reject('On generateAssertion from method sendGenerateMessage error: ' + err)});
+      }).catch(err => { reject('On generateAssertion from method sendGenerateMessage error: ' + err); });
     });
   }
 
@@ -1510,7 +1433,7 @@ class IdentityModule {
       params: {assertion: assertion, origin: origin}}};
 
     return new Promise(function(resolve, reject) {
-      try{
+      try {
         _this._messageBus.postMessage(message, (result) => {
           if (result.body.code === 200) {
             resolve(result.body.value);
@@ -1518,7 +1441,7 @@ class IdentityModule {
             reject('error', result.body.code);
           }
         });
-      } catch(err){
+      } catch (err) {
         reject('On validateAssertion from method postMessage error: ' + err);
       }
     });
@@ -1576,9 +1499,9 @@ class IdentityModule {
         _this.crypto.generateRSAKeyPair().then((keyPair) => {
           let value = {type: 'execute', value: keyPair, code: 200};
           let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
-          try{
+          try {
             _this._messageBus.postMessage(replyMsg);
-          }catch (err){
+          } catch (err) {
             reject('On addGUIListeners from if generateRSAKeyPair method postMessage error: ' + err);
           }
         });
@@ -1591,9 +1514,9 @@ class IdentityModule {
         _this.sendGenerateMessage(contents, origin, usernameHint, idpDomain).then((returnedValue) => {
           let value = {type: 'execute', value: returnedValue, code: 200};
           let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
-          try{
+          try {
             _this._messageBus.postMessage(replyMsg);
-          }catch (err){
+          } catch (err) {
             reject('On addGUIListeners from if sendGenerateMessage method postMessage error: ' + err);
           }
         });
@@ -1604,9 +1527,9 @@ class IdentityModule {
         _this.storeIdentity(result, keyPair).then((returnedValue) => {
           let value = {type: 'execute', value: returnedValue, code: 200};
           let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
-          try{
+          try {
             _this._messageBus.postMessage(replyMsg);
-          }catch (err){
+          } catch (err) {
             reject('On addGUIListeners from if storeIdentity method postMessage error: ' + err);
           }
         });
@@ -1622,9 +1545,9 @@ class IdentityModule {
       // if the function requested is not a promise
       let value = {type: 'execute', value: returnedValue, code: 200};
       let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
-      try{
+      try {
         _this._messageBus.postMessage(replyMsg);
-      }catch (err){
+      } catch (err) {
         reject('On addGUIListeners from if storeIdentity method postMessage error: ' + err);
       }
     });
@@ -1635,7 +1558,7 @@ class IdentityModule {
     _this.guiDeployed = true;
   }
 
-//******************* PRIVATE METHODS *******************
+  //******************* PRIVATE METHODS *******************
   /**
    * GetValidToken is for non legacy hyperties and verifies if the Token is still valid
    * if the token is invalid it requests a new token
@@ -1662,7 +1585,7 @@ class IdentityModule {
             console.log('The ID Token does not have an expiration time');
             resolve(identity);
           }
-        } else if (complete_id.hasOwnProperty("infoToken") && complete_id.infoToken.hasOwnProperty("exp")) {
+        } else if (complete_id.hasOwnProperty('infoToken') && complete_id.infoToken.hasOwnProperty('exp')) {
           expiration_date = complete_id.infoToken.exp;
         } else {
           // throw 'The ID Token does not have an expiration time';
@@ -1686,10 +1609,11 @@ class IdentityModule {
             });
           } else { // microsoft.com
             _this.deleteIdentity(complete_id.identity);
+
             // generate new idToken
             _this.callGenerateMethods(identity.idp).then((value) => {
               resolve(value);
-            }).catch(err => {reject('On addGUIListeners from if storeIdentity method postMessage error: ' + err)});
+            }).catch(err => { reject('On addGUIListeners from if storeIdentity method postMessage error: ' + err); });
           }
         } else {
           resolve(identity);
@@ -1701,7 +1625,7 @@ class IdentityModule {
     });
   }
 
-    /**
+  /**
   * returns the reporter associated to the dataObject URL
   * @param   {String}   dataObjectURL         dataObject url
   * @return   {String}  reporter              dataObject url reporter
@@ -1773,9 +1697,9 @@ class IdentityModule {
       } else {
         sessionKey = sessionKeyBundle.sessionKey;
       }
-      try{
+      try {
         valueToEncrypt = JSON.stringify({value: _this.crypto.encode(sessionKey), dataObjectURL: chatKeys.dataObjectURL});
-      } catch (err){
+      } catch (err) {
         return reject('On _sendReporterSessionKey from method storageManager.set error: ' + err);
       }
       iv = _this.crypto.generateIV();
@@ -1821,8 +1745,8 @@ class IdentityModule {
 
   _doHandShakePhase(message, chatKeys) {
   // log('_doHandShakePhase:dataObject', message);
-	//	log('_doHandShakePhase:chatKeys', chatKeys);
-    
+    //	log('_doHandShakePhase:chatKeys', chatKeys);
+
     let _this = this;
 
     console.log('handshake phase');
@@ -1860,9 +1784,9 @@ class IdentityModule {
             _this.chatKeys[message.from + '<->' + message.to] = chatKeys;
             _this._messageBus.postMessage(startHandShakeMsg);
           }
-          
+
           break;
-          
+
         }
         case 'senderHello': {
 
@@ -2090,9 +2014,9 @@ class IdentityModule {
             chatKeys.handshakeHistory.receiverFinishedMessage = _this._filterMessageToHash(receiverFinishedMessage, 'ok!' + iv, chatKeys.hypertyFrom.messageInfo);
             chatKeys.authenticated = true;
             resolve({message: receiverFinishedMessage, chatKeys: chatKeys});
-          }).catch( err => {
+          }).catch(err => {
             reject('On _doHandShakePhase from senderCertificate error: ' + err);
-           });
+          });
 
           break;
         }
@@ -2132,9 +2056,9 @@ class IdentityModule {
               } else {
                 _this._sendReporterSessionKey(message, chatKeys).then(value => {
                   resolve(value);
-                }).catch( err => {
+                }).catch(err => {
                   reject('On _doHandShakePhase from receiverFinishedMessage error: ' + err);
-                 });
+                });
               }
             });
           });
@@ -2199,9 +2123,9 @@ class IdentityModule {
 
             receiverAcknowledgeMsg.body.value = finalValue;
             resolve({message: receiverAcknowledgeMsg, chatKeys: chatKeys});
-          }).catch( err => {
-              reject('On _doHandShakePhase from receiverFinishedMessage error: ' + err);
-            });
+          }).catch(err => {
+            reject('On _doHandShakePhase from receiverFinishedMessage error: ' + err);
+          });
 
           break;
         }
@@ -2228,9 +2152,9 @@ class IdentityModule {
               callback('handShakeEnd');
             }
             resolve('handShakeEnd');
-          }).catch( err => {
-              reject('On _doHandShakePhase from receiverAcknowledge error: ' + err);
-            });
+          }).catch(err => {
+            reject('On _doHandShakePhase from receiverAcknowledge error: ' + err);
+          });
 
           break;
         }
@@ -2323,23 +2247,20 @@ class IdentityModule {
 
     return newChatCrypto;
   }
-  
+
   _seconds_since_epoch() {
-    return Math.floor( Date.now() / 1000 );
+    return Math.floor(Date.now() / 1000);
   }
-  
-  _parseMessageURL(URL){
+
+  _parseMessageURL(URL) {
     let splitedToURL = URL.split('/');
-    if (splitedToURL.length <= 6)
-      return splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3];
-    else
-      return splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3] + '/' + splitedToURL[4];
+    if (splitedToURL.length <= 6) { return splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3]; } else { return splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3] + '/' + splitedToURL[4]; }
   }
 
 }
 
-function log(f1, f2){
-	console.log(f1, JSON.stringify(util.inspect(f2)));
+function log(f1, f2) {
+  console.log(f1, JSON.stringify(util.inspect(f2)));
 }
 
 export default IdentityModule;

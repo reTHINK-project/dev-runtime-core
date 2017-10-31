@@ -27,8 +27,6 @@ import AddressAllocation from '../allocation/AddressAllocation';
 import ReporterObject from './ReporterObject';
 import ObserverObject from './ObserverObject';
 
-import {MessageFactory} from 'service-framework/dist/MessageFactory';
-
 /**
  * @author micaelpedrosa@gmail.com
  * Core Syncronization system.
@@ -71,8 +69,6 @@ class SyncherManager {
 
     //TODO: this should not be hardcoded!
     _this._domain = divideURL(runtimeURL).domain;
-
-    _this._mf = new MessageFactory(false, {});
 
     if (allocator) {
       _this._allocator = allocator;
