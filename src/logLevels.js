@@ -69,7 +69,7 @@ h.setLevel(0);
 i.setLevel(5);
 
 // Registry
-j.setLevel(5);
+j.setLevel(0);
 
 // RuntimeUA
 k.setLevel(5);

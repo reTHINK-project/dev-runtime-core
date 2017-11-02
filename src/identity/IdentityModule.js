@@ -1308,7 +1308,12 @@ class IdentityModule {
             if (identity.identity === userURL) {
               // TODO check this getIdToken when we run on nodejs environment;
               if (identity.hasOwnProperty('messageInfo')) {
-                return resolve(identity.messageInfo);
+                if (identity.messageInfo.hasOwnProperty('assertion'))
+                  return resolve(identity.messageInfo);
+                else { //hack while idm is not reestuctured
+                  identity.messageInfo.assertion = identity.assertion;
+                  return resolve(identity.messageInfo);
+                }
               } else {
                 return resolve(identity);
               }
