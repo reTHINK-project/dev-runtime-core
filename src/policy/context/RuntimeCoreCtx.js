@@ -168,7 +168,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
       this.runtimeCapabilities.isAvailable('node').then((result) => {
 
       // log.log('[RuntimeCoreCtx - isAvailable - node] - ', result);
-        if (result) {
+        if (result || (message.body && message.body.hasOwnProperty('mutual') && !message.body.mutual)) {
           return resolve(message);
         } else {
           if (isIncoming) {
@@ -333,8 +333,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
     let isToHyperty = divideURL(message.to).type === 'hyperty';
     let isToDataObject = isDataObjectURL(message.to);
 
-    //TODO: For Further Study
-    let doMutualAuthentication = message.body.hasOwnProperty('mutualAuthentication') ? message.body.mutualAuthentication : true;
+    let doMutualAuthentication = message.body.hasOwnProperty('mutual') ? message.body.mutual : true;
 
     // todo: return false for messages coming from interworking stubs.
     // Get descriptor from runtime catalogue and check interworking field.

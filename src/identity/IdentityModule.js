@@ -754,6 +754,20 @@ class IdentityModule {
     });
   }
 
+/*  updateIsToEncryptForDataObjectSessionKey(objectUrl, isToEncrypt) {
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+      if (_this.dataObjectSessionKeys[objectUrl]) {
+        _this.dataObjectSessionKeys[objectUrl].isToEncrypt = isToEncrypt;
+        _this.storageManager.set('dataObjectSessionKeys', 0, _this.dataObjectSessionKeys).then(()=>{
+          resolve();
+        }).catch(err => {
+          reject('[IdentityModule.updateIsToEncryptForDataObjectSessionKey] error on storageManager.set: ' + err);
+        });
+      }
+    });
+  }*/
 
 //******************* ENCRYPTION METHODS *******************
   encryptMessage(message) {

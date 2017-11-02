@@ -623,7 +623,7 @@ class SyncherManager {
           };
 
           //TODO: For Further Study
-          if (msg.body.hasOwnProperty('mutualAuthentication')) objSubscribeMsg.body.mutualAuthentication = msg.body.mutualAuthentication;
+          if (msg.body.hasOwnProperty('mutual')) objSubscribeMsg.body.mutual = msg.body.mutual;
           log.log('[SyncherManager._newSubscription]', objSubscribeMsg, msg);
 
           //subscribe to reporter SM
@@ -689,7 +689,7 @@ class SyncherManager {
               reply.body.resource = msg.body.resource;
 
               //TODO: For Further Study
-              if (msg.body.hasOwnProperty('mutualAuthentication')) reply.body.mutualAuthentication = msg.body.mutualAuthentication;
+              if (msg.body.hasOwnProperty('mutual')) reply.body.mutual = msg.body.mutual;
               log.log('[subscribe] - new subscription: ', msg, reply, observer);
 
               this._bus.postMessage(reply);

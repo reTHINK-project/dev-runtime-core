@@ -60,10 +60,10 @@ e.setLevel(5);
 f.setLevel(0);
 
 // IdentityModule
-g.setLevel(5);
+g.setLevel(0);
 
 // PEP
-h.setLevel(5);
+h.setLevel(0);
 
 // P2PConnectionResolve
 i.setLevel(5);
@@ -81,7 +81,7 @@ l.setLevel(5);
 m.setLevel(5);
 
 // DataObjectsStorage
-n.setLevel(5);
+n.setLevel(0);
 
 // Subscription
 o.setLevel(5);
@@ -93,10 +93,10 @@ p.setLevel(5);
 q.setLevel(3);
 
 // ReporterObject
-r.setLevel(3);
+r.setLevel(0);
 
 // SynSubscription
 s.setLevel(3);
 
 // SyncherManager
-t.setLevel(3);
+t.setLevel(0);

@@ -93,7 +93,11 @@ class DataObjectsStorage {
     }
 
     if (attribute) {
-      assign(storeDataObject[type][resource].data, attribute, deepClone(value));
+      let data;
+      if (typeof value === 'object') data = deepClone(value);
+      else data = value;
+
+      assign(storeDataObject[type][resource].data, attribute, data);
     } else {
       storeDataObject[type][resource].data = deepClone(value) || {};
     }
