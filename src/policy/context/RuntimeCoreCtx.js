@@ -339,7 +339,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
     let doMutualAuthentication = message.body.hasOwnProperty('mutual') ? message.body.mutual : true;
 
 
-    return ((isCreate && isFromHyperty && isToHyperty) || (isCreate && isFromHyperty && isToDataObject) || message.type === 'handshake' || (message.type === 'update' && doMutualAuthentication));
+    return ((isCreate && isFromHyperty && isToHyperty) || (isCreate && isFromHyperty && isToDataObject && doMutualAuthentication) || message.type === 'handshake' || (message.type === 'update' && doMutualAuthentication));
   }
 
   /**
