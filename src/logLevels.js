@@ -48,7 +48,7 @@ a.setLevel(5);
 b.setLevel(5);
 
 // MessageBus
-c.setLevel(0);
+c.setLevel(5);
 
 // CoreDiscovery
 d.setLevel(5);
@@ -57,19 +57,19 @@ d.setLevel(5);
 e.setLevel(5);
 
 // HypertyResourcesStorage
-f.setLevel(0);
+f.setLevel(5);
 
 // IdentityModule
 g.setLevel(0);
 
 // PEP
-h.setLevel(0);
+h.setLevel(5);
 
 // P2PConnectionResolve
 i.setLevel(5);
 
 // Registry
-j.setLevel(0);
+j.setLevel(5);
 
 // RuntimeUA
 k.setLevel(5);
@@ -81,7 +81,7 @@ l.setLevel(5);
 m.setLevel(5);
 
 // DataObjectsStorage
-n.setLevel(0);
+n.setLevel(5);
 
 // Subscription
 o.setLevel(5);
@@ -93,10 +93,10 @@ p.setLevel(5);
 q.setLevel(3);
 
 // ReporterObject
-r.setLevel(0);
+r.setLevel(3);
 
 // SynSubscription
 s.setLevel(3);
 
 // SyncherManager
-t.setLevel(0);
+t.setLevel(3);

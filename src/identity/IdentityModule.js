@@ -1628,7 +1628,7 @@ class IdentityModule {
           if (identity.idp === 'google.com') {
             _this.sendRefreshMessage(identity).then((newIdentity) => {
               _this.deleteIdentity(complete_id.identity);
-              _this.storeIdentity(newIdentity.body.params.identity, newIdentity.body.params.identity.keyPair).then((value) => {
+              _this.storeIdentity(newIdentity, complete_id.keyPair).then((value) => {
                 resolve(value);
               }, (err) => {
                 log.error('[Identity.IdentityModule.getToken] error on getToken', err);
