@@ -328,7 +328,7 @@ class ReporterObject {
       };
 
       //TODO: For Further Study
-      if (msg.body.hasOwnProperty('mutualAuthentication')) forwardMsg.body.mutualAuthentication = msg.body.mutualAuthentication;
+      if (msg.body.hasOwnProperty('mutual')) forwardMsg.body.mutual = msg.body.mutual;
 
       _this._bus.postMessage(forwardMsg, (reply) => {
         log.log('[SyncherManager.ReporterObject ]forward-reply: ', reply);
@@ -339,11 +339,19 @@ class ReporterObject {
           }
         }
 
+        //TODO: atualizar mutual no storage e tb na sessionKeys
+
         // Store for each reporter hyperty the dataObject
         let userURL;
         if (msg.body.identity && msg.body.identity.userProfile.userURL) {
           userURL = msg.body.identity.userProfile.userURL;
           _this._parent._dataObjectsStorage.update(true, _this._url, 'subscriberUsers', userURL);
+        }
+
+        if (msg.body.hasOwnProperty('mutual')) {
+//          _this._parent._identityModule.updateIsToEncryptForDataObjectSessionKey(_this._url, msg.body.mutual).then(()=>{
+            _this._parent._dataObjectsStorage.update(true, _this._url, 'mutual', msg.body.mutual);
+//          });
         }
 
         _this._parent._dataObjectsStorage.update(true, _this._url, 'subscriptions', hypertyURL);

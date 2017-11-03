@@ -754,6 +754,20 @@ class IdentityModule {
     });
   }
 
+/*  updateIsToEncryptForDataObjectSessionKey(objectUrl, isToEncrypt) {
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+      if (_this.dataObjectSessionKeys[objectUrl]) {
+        _this.dataObjectSessionKeys[objectUrl].isToEncrypt = isToEncrypt;
+        _this.storageManager.set('dataObjectSessionKeys', 0, _this.dataObjectSessionKeys).then(()=>{
+          resolve();
+        }).catch(err => {
+          reject('[IdentityModule.updateIsToEncryptForDataObjectSessionKey] error on storageManager.set: ' + err);
+        });
+      }
+    });
+  }*/
 
 //******************* ENCRYPTION METHODS *******************
   encryptMessage(message) {
@@ -1294,7 +1308,12 @@ class IdentityModule {
             if (identity.identity === userURL) {
               // TODO check this getIdToken when we run on nodejs environment;
               if (identity.hasOwnProperty('messageInfo')) {
-                return resolve(identity.messageInfo);
+                if (identity.messageInfo.hasOwnProperty('assertion'))
+                  return resolve(identity.messageInfo);
+                else { //hack while idm is not reestuctured
+                  identity.messageInfo.assertion = identity.assertion;
+                  return resolve(identity.messageInfo);
+                }
               } else {
                 return resolve(identity);
               }
