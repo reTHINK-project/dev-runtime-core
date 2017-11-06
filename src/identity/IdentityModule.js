@@ -1033,7 +1033,20 @@ class IdentityModule {
 
             //check if is to apply encryption
             if (dataObjectKey.isToEncrypt) {
-              let parsedValue = JSON.parse(message.body.value);
+              let parsedValue;
+
+              try {
+                parsedValue = JSON.parse(message.body.value);
+              } catch (e) {
+                // If the message is not authenticated or had mutual auth active should continue
+                parsedValue = message.body.value;
+              }
+
+              if (!parsedValue.hasOwnProperty('iv') && !parsedValue.hasOwnProperty('value') && !parsedValue.hasOwnProperty('hash')) {
+                message.body.assertedIdentity = true;
+                return resolve(message);
+              }
+
               let iv = _this.crypto.decode(parsedValue.iv);
               let encryptedValue = _this.crypto.decode(parsedValue.value);
               let hash = _this.crypto.decode(parsedValue.hash);

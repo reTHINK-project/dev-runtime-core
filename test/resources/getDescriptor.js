@@ -9,7 +9,7 @@ export const getDescriptor = function (url) {
     let dividedURL = divideURL(url);
     let identity = dividedURL.identity;
 
-    console.log('AQUI:', url, dividedURL.domain, url === dividedURL.domain);
+    console.log(url, dividedURL.domain, url === dividedURL.domain);
 
     if (!identity) {
       identity = 'default';
