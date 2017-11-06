@@ -484,6 +484,7 @@ class IdentityModule {
         return _this.generateAssertion(publicKey, origin, '', userkeyPair, idp);
 
       }).then(function(url) {
+        log.log([''])
         _this.myHint = url;
         return _this.generateAssertion(publicKey, origin, url, userkeyPair, idp);
 
@@ -1628,6 +1629,7 @@ class IdentityModule {
           if (identity.idp === 'google.com') {
             _this.sendRefreshMessage(identity).then((newIdentity) => {
               _this.deleteIdentity(complete_id.identity);
+
               _this.storeIdentity(newIdentity, complete_id.keyPair).then((value) => {
                 resolve(value);
               }, (err) => {

@@ -165,7 +165,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
       // log.log('[Policy.RuntimeCoreCtx.prepareToForward]', message);
 
       // comment this to enable mutual authentication
-      //return resolve(message);
+      return resolve(message);
 
       // TODO remove this validation. When the Nodejs auth was completed this should work like browser;
       this.runtimeCapabilities.isAvailable('node').then((result) => {
