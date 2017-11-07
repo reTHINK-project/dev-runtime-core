@@ -1,3 +1,7 @@
+// Log System
+import * as logger from 'loglevel';
+let log = logger.getLogger('ReporterObject');
+
 import { divideURL, splitObjectURL } from '../utils/utils';
 import Subscription from './Subscription';
 
@@ -31,7 +35,7 @@ class ReporterObject {
 
     //add subscription listener...
     _this._subscriptionListener = _this._bus.addListener(_this._objSubscriptorURL, (msg) => {
-      console.log('[SyncherManager.ReporterObject received ]', msg);
+      log.info('[SyncherManager.ReporterObject received ]', msg);
       switch (msg.type) {
         case 'subscribe': _this._onRemoteSubscribe(msg); break;
         case 'unsubscribe': _this._onRemoteUnSubscribe(msg); break;
@@ -42,11 +46,11 @@ class ReporterObject {
     let changeURL = _this._url + '/changes';
     _this._changeListener = _this._bus.addListener(changeURL, (msg) => {
 
-      console.log('[SyncherManager.ReporterObject ] SyncherManager-' + changeURL + '-RCV: ', msg);
+      log.info('[SyncherManager.ReporterObject ] SyncherManager-' + changeURL + '-RCV: ', msg);
 
       //TODO: what todo here? Save changes?
       if (this._isToSaveData && msg.body.attribute) {
-        console.log('[SyncherManager.ReporterObject ] SyncherManager - save data: ', msg);
+        log.log('[SyncherManager.ReporterObject ] SyncherManager - save data: ', msg);
         _this._parent._dataObjectsStorage.update(true, _this._url, 'version', msg.body.version);
         _this._parent._dataObjectsStorage.update(true, _this._url, 'lastModified', msg.body.lastModified);
         _this._parent._dataObjectsStorage.saveData(true, _this._url, msg.body.attribute, msg.body.value);
@@ -88,7 +92,7 @@ class ReporterObject {
     Object.keys(subscriptions).forEach((key) => {
       let hypertyURL = subscriptions[key];
 
-      console.log('[SyncherManager.ReporterObject] - resume subscriptions', _this, hypertyURL, _this._childrens);
+      log.log('[SyncherManager.ReporterObject] - resume subscriptions', _this, hypertyURL, _this._childrens);
 
       if (!_this._subscriptions[hypertyURL]) {
         _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, _this._childrens, true);
@@ -113,7 +117,7 @@ class ReporterObject {
 
     return new Promise((resolve, reject) => {
       _this._bus.postMessage(nodeSubscribeMsg, (reply) => {
-        console.log('[SyncherManager.ReporterObject ]forward-subscribe-response(reporter): ', reply);
+        log.log('[SyncherManager.ReporterObject ]forward-subscribe-response(reporter): ', reply);
         if (reply.body.code === 200) {
           let newForward = _this._bus.addForward(_this._url, _this._owner);
           _this._forwards[addresses[0]] = newForward;
@@ -159,7 +163,7 @@ class ReporterObject {
       }
 
       let childBaseURL = _this._url + '/children/';
-      console.log('[SyncherManager.ReporterObject - addChildrens] - childrens: ', childrens, childBaseURL);
+      log.log('[SyncherManager.ReporterObject - addChildrens] - childrens: ', childrens, childBaseURL);
 
       childrens.forEach((child) => {
         _this._childrens.push(child);
@@ -185,14 +189,14 @@ class ReporterObject {
       };
 
       _this._bus.postMessage(nodeSubscribeMsg, (reply) => {
-        console.log('[SyncherManager.ReporterObject ]node-subscribe-response(reporter):', reply);
+        log.log('[SyncherManager.ReporterObject ]node-subscribe-response(reporter):', reply);
         if (reply.body.code === 200) {
 
           //add children listeners on local ...
           subscriptions.forEach((childURL) => {
             let childListener = _this._bus.addListener(childURL, (msg) => {
               //TODO: what todo here? Save childrens?
-              console.log('[SyncherManager.ReporterObject received]', msg);
+              log.log('[SyncherManager.ReporterObject received]', msg);
 
               if (msg.type === 'create' && msg.to.includes('children') && this._isToSaveData) {
 
@@ -205,14 +209,14 @@ class ReporterObject {
                 //remove false when mutualAuthentication is enabled
                 if (!(typeof msg.body.value === 'string')) {
 
-                  console.log('[SyncherManager.ReporterObject] encrypting received data ', msg.body.value);
+                  log.log('[SyncherManager.ReporterObject] encrypting received data ', msg.body.value);
 
                   _this._parent._identityModule.encryptDataObject(msg.body.value, url).then((encryptedValue)=>{
-                    console.log('[SyncherManager.ReporterObject] encrypted data ',  encryptedValue);
+                    log.log('[SyncherManager.ReporterObject] encrypted data ',  encryptedValue);
 
                     _this._storeChildObject(msg, JSON.stringify(encryptedValue));
                   }).catch((reason) => {
-                    console.warn('[SyncherManager._decryptChildrens] failed : ', reason, ' Storing unencrypted');
+                    log.warn('[SyncherManager._decryptChildrens] failed : ', reason, ' Storing unencrypted');
                     _this._storeChildObject(msg, msg.body.value);
                   });
                 } else {
@@ -324,22 +328,30 @@ class ReporterObject {
       };
 
       //TODO: For Further Study
-      if (msg.body.hasOwnProperty('mutualAuthentication')) forwardMsg.body.mutualAuthentication = msg.body.mutualAuthentication;
+      if (msg.body.hasOwnProperty('mutual')) forwardMsg.body.mutual = msg.body.mutual;
 
       _this._bus.postMessage(forwardMsg, (reply) => {
-        console.log('[SyncherManager.ReporterObject ]forward-reply: ', reply);
+        log.log('[SyncherManager.ReporterObject ]forward-reply: ', reply);
         if (reply.body.code === 200) {
           if (!_this._subscriptions[hypertyURL]) {
-            console.log('[SyncherManager.ReporterObject] - _onRemoteSubscribe:', _this._childrens);
+            log.log('[SyncherManager.ReporterObject] - _onRemoteSubscribe:', _this._childrens);
             _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, _this._childrens, true);
           }
         }
+
+        //TODO: atualizar mutual no storage e tb na sessionKeys
 
         // Store for each reporter hyperty the dataObject
         let userURL;
         if (msg.body.identity && msg.body.identity.userProfile.userURL) {
           userURL = msg.body.identity.userProfile.userURL;
           _this._parent._dataObjectsStorage.update(true, _this._url, 'subscriberUsers', userURL);
+        }
+
+        if (msg.body.hasOwnProperty('mutual')) {
+//          _this._parent._identityModule.updateIsToEncryptForDataObjectSessionKey(_this._url, msg.body.mutual).then(()=>{
+            _this._parent._dataObjectsStorage.update(true, _this._url, 'mutual', msg.body.mutual);
+//          });
         }
 
         _this._parent._dataObjectsStorage.update(true, _this._url, 'subscriptions', hypertyURL);

@@ -1,3 +1,7 @@
+// Log System
+import * as logger from 'loglevel';
+let log = logger.getLogger('Subscription');
+
 class Subscription {
 
   constructor(bus, subscriber, resource) {
@@ -5,7 +9,7 @@ class Subscription {
     _this._subscriber = subscriber;
     _this.resource = resource;
 
-    console.log('[SubscriptionManager.Subscription] new: ', subscriber, resource)
+    log.log('[SubscriptionManager.Subscription] new: ', subscriber, resource)
 
     //add forward
     _this._listener = bus.addForward(resource, subscriber);

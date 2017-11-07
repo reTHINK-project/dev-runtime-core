@@ -11,6 +11,7 @@
     "test:lint": "eslint --config .eslintrc.yml ./src/",
     "build:doc": "./node_modules/.bin/esdoc -c esdoc.json",
     "build:dev": "cross-env MODE=dev webpack",
+    "build:dev:monitor": "cross-env MODE=dev cross-env MONITOR=true webpack",
     "build:prod": "cross-env MODE=prod webpack",
     "build:light": "cross-env MODE=light webpack",
     "build": "cross-env MODE=dev webpack && cross-env MODE=prod webpack && cross-env MODE=light webpack"
@@ -36,16 +37,19 @@
   },
   "homepage": "https://rethink-project.eu/",
   "dependencies": {
+    "loglevel": "^1.5.1",
     "service-framework": "github:rethink-project/dev-service-framework#develop"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-plugin-console-log": "0.0.3",
     "babel-plugin-transform-regenerator": "^6.26.0",
     "babel-plugin-transform-runtime": "^6.15.0",
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.6.0",
+    "babel-preset-es2015": "^6.24.1",
     "babel-runtime": "^6.26.0",
     "base64-url": "^1.3.3",
     "bip39": "^2.4.0",
@@ -80,6 +84,7 @@
     "sinon": "^2.4.1",
     "sinon-chai": "^2.14.0",
     "tv4": "^1.2.7",
-    "webpack": "^3.6.0"
+    "webpack": "^3.6.0",
+    "webpack-monitor": "^1.0.13"
   }
 }

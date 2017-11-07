@@ -66,11 +66,11 @@ class Crypto {
         )
         .then(function(encrypted) {
           //returns an ArrayBuffer containing the encrypted data
-          //console.log('crypto-encryptRSA', new Uint8Array(encrypted));
+          // console.log('crypto-encryptRSA', new Uint8Array(encrypted));
           resolve(new Uint8Array(encrypted));
 
         }).catch(function(err) {
-          console.log('crypto-encryptRSA', err);
+          // console.log('crypto-encryptRSA', err);
           reject(err);
         });
 
@@ -99,11 +99,11 @@ class Crypto {
 
           let decryptedData = new Uint8Array(decrypted);
 
-          //console.log('crypto-decryptRSA', decryptedData);
+          // console.log('crypto-decryptRSA', decryptedData);
           resolve(decryptedData);
 
         }).catch(function(err) {
-          console.log('crypto-decryptRSA', err);
+          // console.log('crypto-decryptRSA', err);
           reject(err);
         });
       });
@@ -127,11 +127,11 @@ class Crypto {
         )
         .then(function(signature) {
           //returns an ArrayBuffer containing the signature
-          //console.log('crypto-signRSA', new Uint8Array(signature));
+          // console.log('crypto-signRSA', new Uint8Array(signature));
           resolve(new Uint8Array(signature));
 
         }).catch(function(err) {
-          console.log('crypto-signRSA', err);
+          // console.log('crypto-signRSA', err);
           reject(err);
         });
 
@@ -157,11 +157,11 @@ class Crypto {
         )
         .then(function(isvalid) {
           //returns a boolean on whether the signature is true or not
-          //console.log('crypto-verifyRSA', isvalid);
+          // console.log('crypto-verifyRSA', isvalid);
           resolve(isvalid);
 
         }).catch(function(err) {
-          console.log('crypto-verifyRSA', err);
+          // console.log('crypto-verifyRSA', err);
           reject(err);
         });
 
@@ -192,11 +192,11 @@ class Crypto {
         )
         .then(function(encrypted) {
           //returns an ArrayBuffer containing the encrypted data
-          //console.log('crypto-encryptAES', new Uint8Array(encrypted));
+          // console.log('crypto-encryptAES', new Uint8Array(encrypted));
           resolve(new Uint8Array(encrypted));
 
         }).catch(function(err) {
-          console.log('crypto-encryptAES', err);
+          // console.log('crypto-encryptAES', err);
           reject(err);
         });
 
@@ -225,11 +225,11 @@ class Crypto {
         .then(function(decrypted) {
 
           let decodedData = _this._utf8Decode(new Uint8Array(decrypted));
-          //console.log('crypto-decryptAES', decodedData);
+          // console.log('crypto-decryptAES', decodedData);
           resolve(decodedData);
 
         }).catch(function(err) {
-          console.log('crypto-decryptAES', err);
+          // console.log('crypto-decryptAES', err);
           reject(err);
         });
 
@@ -259,13 +259,13 @@ class Crypto {
         _this._utf8Encode(data) //ArrayBuffer of data you want to sign
         )
         .then(function(signature) {
-          //console.log('crypto-hashHMAC', signature);
+          // console.log('crypto-hashHMAC', signature);
 
           //returns an ArrayBuffer containing the signature
           resolve(new Uint8Array(signature));
 
         }).catch(function(err) {
-          console.log('crypto-hashHMAC', err);
+          // console.log('crypto-hashHMAC', err);
           reject(err);
         });
       });
@@ -297,7 +297,7 @@ class Crypto {
         )
         .then(function(isvalid) {
           //returns a boolean on whether the signature is true or not
-          //console.log('crypto-verifyHMAC', isvalid);
+          // console.log('crypto-verifyHMAC', isvalid);
           (isvalid) ? resolve(isvalid) : reject(isvalid);
 
         }).catch(function(err) {
@@ -330,7 +330,7 @@ class Crypto {
 
       ).then(function(key) {
         //returns a keypair object
-        //console.log(key);
+        // console.log(key);
 
         _this._crypto.subtle.exportKey(
           'spki', //can be 'jwk' (public or private), 'spki' (public only), or 'pkcs8' (private only)
@@ -344,7 +344,7 @@ class Crypto {
           );
         }).then(function(privateKey) {
           keyPair.private  = new Uint8Array(privateKey);
-          //console.log('crypto-generateRSAKeyPair', keyPair);
+          // console.log('crypto-generateRSAKeyPair', keyPair);
 
           resolve(keyPair);
 
@@ -433,11 +433,11 @@ class Crypto {
 
           //copy the first 16 bytes to the key remaining 16 bytes
           for (let i = 0; i < 16; i++) { key[i + 32] = keypart1[i]; }
-          //console.log('crypto-generateMasterSecret', key);
+          // console.log('crypto-generateMasterSecret', key);
           resolve(key);
 
         }).catch(function(err) {
-          console.log('crypto-generateMasterSecret', err);
+          // console.log('crypto-generateMasterSecret', err);
           reject(err);
         });
       });
@@ -476,15 +476,15 @@ class Crypto {
       }).then(function(keypart3) {
         key.push(keypart3);
 
-        //console.log('crypto-generateKeys', key);
+        // console.log('crypto-generateKeys', key);
         resolve(key);
 
       }).catch(function(err) {
-        //console.log('crypto-generateKeys', err);
+        // console.log('crypto-generateKeys', err);
         reject(err);
       });
 
-      //console.log(hmacKey, data);
+      // console.log(hmacKey, data);
     });
   }
 
@@ -504,7 +504,7 @@ class Crypto {
       )
       .then(function(privateKey) {
         //returns a publicKey (or privateKey if you are importing a private key)
-        //console.log('crypto-_importRSAsignKey', privateKey);
+        // console.log('crypto-_importRSAsignKey', privateKey);
         resolve(privateKey);
 
       }).catch(function(err) {
@@ -530,7 +530,7 @@ class Crypto {
       )
       .then(function(publicKey) {
         //returns a publicKey (or privateKey if you are importing a private key)
-        //console.log('crypto-_importRSAverifyKey', publicKey);
+        // console.log('crypto-_importRSAverifyKey', publicKey);
         resolve(publicKey);
 
       }).catch(function(err) {
@@ -557,7 +557,7 @@ class Crypto {
       )
       .then(function(publicKey) {
         //returns a publicKey (or privateKey if you are importing a private key)
-        //console.log('crypto-_importRSAencryptKey', publicKey);
+        // console.log('crypto-_importRSAencryptKey', publicKey);
         resolve(publicKey);
 
       }).catch(function(err) {
@@ -584,7 +584,7 @@ class Crypto {
       )
       .then(function(privateKey) {
         //returns a publicKey (or privateKey if you are importing a private key)
-        //console.log('crypto-_importRSAdecryptKey', privateKey);
+        // console.log('crypto-_importRSAdecryptKey', privateKey);
         resolve(privateKey);
 
       }).catch(function(err) {
@@ -648,7 +648,7 @@ class Crypto {
         ['sign', 'verify'] //can be any combination of 'sign' and 'verify'
         ).then(function(key) {
           //returns the symmetric key
-          //console.log('crypto-_importHMACkey', key);
+          // console.log('crypto-_importHMACkey', key);
           resolve(key);
         })
         .catch(function(err) {
@@ -670,7 +670,7 @@ class Crypto {
       )
       .then(function(hash) {
         //returns the hash as an ArrayBuffer
-        //console.log('crypto-digest', new Uint8Array(hash));
+        // console.log('crypto-digest', new Uint8Array(hash));
         resolve(new Uint8Array(hash));
       })
       .catch(function(err) {
@@ -695,7 +695,7 @@ class Crypto {
       )
       .then(function(key) {
         //returns the symmetric key
-        //console.log('crypto-importAESkey', key);
+        // console.log('crypto-importAESkey', key);
         resolve(key);
       })
       .catch(function(err) {

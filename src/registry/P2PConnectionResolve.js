@@ -21,6 +21,10 @@
 * limitations under the License.
 **/
 
+// Log System
+import * as logger from 'loglevel';
+let log = logger.getLogger('P2PConnectionResolve');
+
 /**
 *   To process address resolution for p2p connections
 */
@@ -94,7 +98,7 @@ class P2PConnectionResolve  {
       else if (p2p.runtime) resolve(p2p); // use provided p2p if available in the message body
       else if (p2p.p2p) { // otherwise look on Domain Registry
 
-        console.log('[Registry - checkP2PEntity] - search in Domain Registry: ', url);
+        log.log('[Registry - checkP2PEntity] - search in Domain Registry: ', url);
 
         let message = {
           type: 'read',
@@ -106,7 +110,7 @@ class P2PConnectionResolve  {
         };
 
         _this._registry._messageBus.postMessage(message, (reply) => {
-          console.log('[Registry - checkP2PEntity] Domain Registry reply', reply);
+          log.log('[Registry - checkP2PEntity] Domain Registry reply', reply);
           if ('value' in reply.body) {
 
             //todo: store retrieved entity
@@ -168,7 +172,7 @@ class P2PConnectionResolve  {
       for (let i in _this._registry.remoteHypertyList) {
         hyperty = _this._registry.remoteHypertyList[i];
 
-        console.log('[Registry - checkP2PHyperty] - for each Hyperty: ', hyperty);
+        log.log('[Registry - checkP2PHyperty] - for each Hyperty: ', hyperty);
 
         // todo: change to "hyperty.url" to be aligned with hyperty instance data model spec
 
@@ -186,7 +190,7 @@ class P2PConnectionResolve  {
       if (!hyperty && p2p.runtime) resolve(p2p); // use provided p2p if available in the message body
       else if (!hyperty && p2p.p2p) { // otherwise look on Domain Registry
 
-        console.log('[Registry - checkP2PHyperty] - search in Domain Registry: ', hyperty);
+        log.log('[Registry - checkP2PHyperty] - search in Domain Registry: ', hyperty);
 
         let message = {
           type: 'read',
@@ -198,7 +202,7 @@ class P2PConnectionResolve  {
         };
 
         _this._registry._messageBus.postMessage(message, (reply) => {
-          console.log('[Registry - checkP2PHyperty] Domain Registry reply', reply);
+          log.log('[Registry - checkP2PHyperty] Domain Registry reply', reply);
           if ('value' in reply.body) {
 
             //todo: store retrieved hyperty
@@ -256,7 +260,7 @@ class P2PConnectionResolve  {
         };
 
         _this._registry._messageBus.postMessage(message, (reply) => {
-          console.log('discover data object per url reply', reply);
+          log.log('discover data object per url reply', reply);
           if ('value' in reply.body) {
 
             //todo: store retrieved hyperty
@@ -289,7 +293,7 @@ class P2PConnectionResolve  {
   reconnectP2PRequester(p2pRequester) {
     let _this = this;
 
-    console.log('[P2PConenctionResolve.reconnectP2PRequester] lets try to reconnect P2P Requester Stub: ', p2pRequester);
+    log.log('[P2PConenctionResolve.reconnectP2PRequester] lets try to reconnect P2P Requester Stub: ', p2pRequester);
 
     return new Promise((resolve, reject) => {
 
@@ -309,16 +313,16 @@ class P2PConnectionResolve  {
 
       _this._registry.watchingYou.observe('p2pRequesterStub', (change) => {
 
-        console.log('[P2PConenctionResolve.reconnectP2PRequester] p2pRequesterStubs changed ' + _this._registry.p2pRequesterStub);
+        log.log('[P2PConenctionResolve.reconnectP2PRequester] p2pRequesterStubs changed ' + _this._registry.p2pRequesterStub);
 
         if (change.keypath.split('.')[0] === remoteRuntime && change.name === 'status') {
           switch (change.newValue) {
             case 'live':
-              console.log('[P2PConenctionResolve.reconnectP2PRequester] p2pRequester is live ' + _this._registry.p2pRequesterStub[remoteRuntime]);
+              log.log('[P2PConenctionResolve.reconnectP2PRequester] p2pRequester is live ' + _this._registry.p2pRequesterStub[remoteRuntime]);
               resolve(_this._registry.p2pRequesterStub[remoteRuntime].url);
               break;
             case 'failed':
-              console.log('[P2PConenctionResolve.reconnectP2PRequester] p2pRequester reconnect failed ' + _this._registry.p2pRequesterStub[remoteRuntime]);
+              log.log('[P2PConenctionResolve.reconnectP2PRequester] p2pRequester reconnect failed ' + _this._registry.p2pRequesterStub[remoteRuntime]);
               reject('P2P Requester reconnect failed');
               break;
             default:
@@ -328,7 +332,7 @@ class P2PConnectionResolve  {
 
       //  stub load
       _this._registry._messageBus.postMessage(message, (reply) => {
-        console.log('[P2PConenctionResolve.reconnectP2PRequester] reconnect request reply', reply);
+        log.log('[P2PConenctionResolve.reconnectP2PRequester] reconnect request reply', reply);
       });
     });
   }

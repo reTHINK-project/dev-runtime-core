@@ -1,3 +1,7 @@
+// Log System
+import * as logger from 'loglevel';
+let log = logger.getLogger('DataObjectsStorage');
+
 import { assign, deepClone } from '../utils/utils';
 
 class DataObjectsStorage {
@@ -78,18 +82,22 @@ class DataObjectsStorage {
     let type = this._getTypeOfObject(isReporter);
 
     if (!storeDataObject || !storeDataObject[type] || !storeDataObject[type][resource]) {
-      console.log('[StoreDataObjects - save data] - not saved');
+      log.log('[StoreDataObjects - save data] - not saved');
       return;
     }
 
-    console.log('[StoreDataObjects - saveData] - ', isReporter, type, resource, attribute, value);
+    log.log('[StoreDataObjects - saveData] - ', isReporter, type, resource, attribute, value);
 
     if (!storeDataObject[type][resource].hasOwnProperty('data')) {
       storeDataObject[type][resource].data = {};
     }
 
     if (attribute) {
-      assign(storeDataObject[type][resource].data, attribute, deepClone(value));
+      let data;
+      if (typeof value === 'object') data = deepClone(value);
+      else data = value;
+
+      assign(storeDataObject[type][resource].data, attribute, data);
     } else {
       storeDataObject[type][resource].data = deepClone(value) || {};
     }
@@ -104,7 +112,7 @@ class DataObjectsStorage {
     let type = this._getTypeOfObject(isReporter);
 
     if (!storeDataObject || !storeDataObject[type] || !storeDataObject[type][resource]) {
-      console.log('[StoreDataObjects - save childrens] - not saved');
+      log.log('[StoreDataObjects - save childrens] - not saved');
       return;
     }
 
@@ -137,11 +145,11 @@ class DataObjectsStorage {
     let type = this._getTypeOfObject(isReporter);
 
     if (!storeDataObject || !storeDataObject[type] || !storeDataObject[type][resource]) {
-      console.log('[StoreDataObjects - update] - not saved');
+      log.log('[StoreDataObjects - update] - not saved');
       return;
     }
 
-    console.log('[StoreDataObjects - update] - ', isReporter, type, resource, attribute, value);
+    log.log('[StoreDataObjects - update] - ', isReporter, type, resource, attribute, value);
 
     if (storeDataObject[type] && storeDataObject[type][resource] && resource && attribute && value) {
 
@@ -178,7 +186,7 @@ class DataObjectsStorage {
     let type = this._getTypeOfObject(isReporter);
 
     if (!storeDataObject || !storeDataObject[type] || !storeDataObject[type][resource]) {
-      console.log('[StoreDataObjects - delete] - not saved');
+      log.log('[StoreDataObjects - delete] - not saved');
       return;
     }
 
@@ -263,10 +271,10 @@ class DataObjectsStorage {
         if (currentObserver) { dataObject = storedDataObject.observers[currentObserver]; }
         if (currentReporter) { dataObject = storedDataObject.reporters[currentReporter]; }
 
-        console.info('[StoreDataObjects - getDataObject] - for observer: ', currentObserver);
-        console.info('[StoreDataObjects - getDataObject] - for reporters: ', currentReporter);
+        log.info('[StoreDataObjects - getDataObject] - for observer: ', currentObserver);
+        log.info('[StoreDataObjects - getDataObject] - for reporters: ', currentReporter);
 
-        console.info('[StoreDataObjects - getDataObject] - resolve: ', dataObject);
+        log.info('[StoreDataObjects - getDataObject] - resolve: ', dataObject);
         return dataObject ? resolve(dataObject) : reject('No dataObject was found');
 
       });
@@ -292,7 +300,7 @@ class DataObjectsStorage {
       this.getAll().then((storedDataObjects) => {
 
         if (!storedDataObjects) {
-          console.log('[DataObjectsStorage.getResourcesByCriteria] don\'t have stored data objects');
+          log.log('[DataObjectsStorage.getResourcesByCriteria] don\'t have stored data objects');
           return resolve(null);
         }
 
@@ -306,7 +314,7 @@ class DataObjectsStorage {
         let hasSubscription = this._hasSubscription(storedDataObjects[type], msg.from);
         let isOwner = this._searchOwner(storedDataObjects[type], msg.from);
 
-        console.log('[StoredDataObjects - getResourcesByCriteria]:', storedDataObjects, msg, hasSubscription, isOwner);
+        log.log('[StoredDataObjects - getResourcesByCriteria]:', storedDataObjects, msg, hasSubscription, isOwner);
         if (msg.hasOwnProperty('from') && hasSubscription || isOwner) {
           let resource;
 
@@ -348,7 +356,7 @@ class DataObjectsStorage {
           return init;
         });
 
-        console.log('[Store Data Objects] - ', init);
+        log.log('[Store Data Objects] - ', init);
 
         resolve(init);
       });
@@ -495,7 +503,7 @@ class DataObjectsStorage {
     }).filter((value, index, self) => {
       return self.indexOf(value) === index;
     });
-    console.log('DataObjectsStorage._intersection] Result an unique array of strings: ', result);
+    log.log('DataObjectsStorage._intersection] Result an unique array of strings: ', result);
     return result;
   }
 
@@ -504,7 +512,7 @@ class DataObjectsStorage {
    * @todo documentation
    */
   _updateToArray(storeDataObject, resource, key, value) {
-    console.log('[DataObjectsStorage] - _updateToArray: ', storeDataObject, resource, key, value);
+    log.log('[DataObjectsStorage] - _updateToArray: ', storeDataObject, resource, key, value);
     if (storeDataObject[resource][key].indexOf(value) === -1) storeDataObject[resource][key].push(value);
   }
 

@@ -23,8 +23,6 @@
 import SandboxRegistry from '../sandbox/SandboxRegistry';
 import MiniBus from '../bus/MiniBus';
 
-// import MessageFactory from '../../resources/MessageFactory';
-
 export let SandboxType = {APP: 'app', NORMAL: 'normal', WINDOW: 'window'};
 
 /**
@@ -41,9 +39,6 @@ class Sandbox extends MiniBus {
 
     if (capabilities)      { _this.capabilities = capabilities; }
 
-    // Add Message Factory
-    // let messageFactory = new MessageFactory();
-    // _this.messageFactory = messageFactory;
   }
 
   /**

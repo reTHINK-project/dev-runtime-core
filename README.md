@@ -92,6 +92,28 @@ if you have some trouble with the environment, you can open an issue [here](http
 
 JavaScript code should be written in ES6. There are direct dependencies from nodejs and npm, these can be installed separately or in conjunction with [nvm](https://github.com/creationix/nvm)
 
+### Logging System
+
+To improve the "spam" of log in the console we are using a [log system](https://github.com/pimterry/loglevel#documentation) with allow us define by each module one level of log;
+You can access this configuration [here](https://github.com/reTHINK-project/dev-runtime-core/blob/develop/src/logLevels.js) and update it;
+
+A little explanation about the log level; We have the same as console, but instead of console we should use:
+
+  - `log.trace(msg)` - 0
+  - `log.debug(msg)` or `log.log(msg)` - 1
+  - `log.info(msg)` - 2
+  - `log.warn(msg)` - 3
+  - `log.error(msg)` - 4
+
+`log.setLevel(level, [persist])` method.
+
+This disables all logging below the given level, so that after a `log.setLevel("warn")` call `log.warn("something")` or `log.error("something")` will output messages, but `log.info("something")` will not.
+
+the `level`  could be:
+ - As a string, like 'error' (case-insensitive) ← for a reasonable practical balance
+ - As a numeric index from 0 (trace) to 5 (silent) ← deliciously terse, and more easily programmable (...although, why?)
+
+
 #### Dependencies
 
 -  nodejs
