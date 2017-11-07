@@ -44,8 +44,15 @@ class Crypto {
 //    console.log('After dec val: ', decoded);
   }
 
-  decodeToUint8Array(value) {//TODO: Add some verification to atob
-    return new Uint8Array(JSON.parse('[' + atob(value) + ']'));
+  decodeToUint8Array(value) { //TODO: Add some verification to atob
+
+    let receivedArrayObject = JSON.parse(atob(value));
+    let receivedArray = Object.keys(receivedArrayObject).map((key) => {
+      return receivedArrayObject[key];
+    });
+
+    let unsigned8Array = new Uint8Array(receivedArray);
+    return unsigned8Array;
   }
 
   encryptRSA(pubKey, data) {
@@ -706,16 +713,16 @@ class Crypto {
   }
 
   _utf8Encode(s) {
-    return this.cryptoUTF8Encoder(s);
+    //return this.cryptoUTF8Encoder(s);
 
-    //return new TextEncoder('utf-8').encode(s);
+    return new TextEncoder('utf-8').encode(s);
     //return encodeUTF8(s);
   }
 
   _utf8Decode(s) {
-    return this.cryptoUTF8Encoder(s);
+    //return this.cryptoUTF8Encoder(s);
 
-    //return new TextDecoder('utf-8').decode(s);
+    return new TextDecoder('utf-8').decode(s);
     //return decodeUTF8(s);
   }
 }
