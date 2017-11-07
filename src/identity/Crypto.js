@@ -1,5 +1,4 @@
 import {encodeUTF8, decodeUTF8} from './utf8.js';
-//var WebCrypto = require("node-webcrypto-ossl");
 
 /**
 * Class with the cryptographic functions for the authentication protocol
@@ -9,8 +8,20 @@ class Crypto {
 
   constructor(runtimeFactory) {
     let _this = this;
-    _this._crypto = typeof runtimeFactory.createWebcrypto === 'function' ? runtimeFactory.createWebcrypto() : crypto;
+    if (typeof runtimeFactory.createWebcrypto === 'function') {
+      _this._crypto = runtimeFactory.createWebcrypto();
+      //_this.cryptoUTF8Encoder = encodeUTF8;
+      //_this.cryptoUTF8Decoder = decodeUTF8;
+
+    } else {
+      _this._crypto = crypto;
+      //_this.cryptoUTF8Encoder = (data) => { return new TextDecoder('utf-8').encode(data); };
+      //_this.cryptoUTF8Decoder = (data) => { return new TextDecoder('utf-8').decode(data); };
+    }
+    _this.cryptoUTF8Encoder = encodeUTF8;
+    _this.cryptoUTF8Decoder = decodeUTF8;
   }
+
 
   /**
   * encode a byteArray value in base 64 encode
@@ -18,7 +29,7 @@ class Crypto {
   * @return  {string}   encoded value
   */
   encode(value) {
-    return btoa(value);
+    return btoa(JSON.stringify(value));
   }
 
   /**
@@ -28,10 +39,13 @@ class Crypto {
   */
   decode(value) {
 //    console.log('Before dec val', value);
-    let decoded = new Uint8Array(JSON.parse('[' + atob(value) + ']'));
+    return JSON.parse(atob(value));
 //    console.log('After dec val TXT: ', atob(value));
 //    console.log('After dec val: ', decoded);
-    return decoded;
+  }
+
+  decodeToUint8Array(value) {//TODO: Add some verification to atob
+    return new Uint8Array(JSON.parse('[' + atob(value) + ']'));
   }
 
   encryptRSA(pubKey, data) {
@@ -692,12 +706,16 @@ class Crypto {
   }
 
   _utf8Encode(s) {
-    return new TextEncoder('utf-8').encode(s);
+    return this.cryptoUTF8Encoder(s);
+
+    //return new TextEncoder('utf-8').encode(s);
     //return encodeUTF8(s);
   }
 
   _utf8Decode(s) {
-    return new TextDecoder('utf-8').decode(s);
+    return this.cryptoUTF8Encoder(s);
+
+    //return new TextDecoder('utf-8').decode(s);
     //return decodeUTF8(s);
   }
 }
