@@ -23,8 +23,6 @@
 
 // import 'babel-polyfill';
 
-import '../logLevels';
-
 // Log System
 import * as logger from 'loglevel';
 let log = logger.getLogger('RuntimeUA');

@@ -1827,8 +1827,6 @@ class IdentityModule {
 
     let _this = this;
 
-    let _this = this;
-
     return new Promise(function(resolve, reject) {
 
       let handshakeType = message.body.handshakePhase;
