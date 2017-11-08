@@ -23,7 +23,11 @@
 
 /**
  * The Graph Connector contains the contact list/address book.
+ * @abstract
+ * @experimental
  * @author beierle@tu-berlin.de
+ *
+ *
  */
 class GraphConnector {
 

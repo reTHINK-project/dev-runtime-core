@@ -23,6 +23,12 @@
 
 // import 'babel-polyfill';
 
+import '../logLevels';
+
+// Log System
+import * as logger from 'loglevel';
+let log = logger.getLogger('RuntimeUA');
+
 //Main dependecies
 import Registry from '../registry/Registry';
 import IdentityModule from '../identity/IdentityModule';
@@ -42,6 +48,7 @@ import GraphConnector from '../graphconnector/GraphConnector';
 import CoreDiscovery from '../discovery/CoreDiscovery';
 
 import DataObjectsStorage from '../store-objects/DataObjectsStorage';
+import HypertyResourcesStorage from '../hyperty-resources-storage/HypertyResourcesStorage';
 import SyncherManager from '../syncher/SyncherManager';
 import SubscriptionManager from '../subscriptionManager/SubscriptionManager';
 import RuntimeCoreCtx from '../policy/context/RuntimeCoreCtx';
@@ -79,6 +86,8 @@ class RuntimeUA {
     this.runtimeFactory = runtimeFactory;
     this.runtimeCatalogue = runtimeFactory.createRuntimeCatalogue();
 
+    this.log = log;
+
     if (runtimeDescriptor.p2pHandlerStub && typeof runtimeDescriptor.p2pHandlerStub  === 'string' && runtimeDescriptor.p2pHandlerStub.includes('://')) {
       this.p2p = true;
     } else {
@@ -109,7 +118,7 @@ class RuntimeUA {
     if (typeof runtimeFactory.runtimeCapabilities === 'function') {
       this.runtimeCapabilities = runtimeFactory.runtimeCapabilities(this.storageManager);
     } else {
-      console.info('Check your RuntimeFactory because it needs the Runtime Capabilities implementation');
+      log.info('Check your RuntimeFactory because it needs the Runtime Capabilities implementation');
     }
 
   }
@@ -131,8 +140,10 @@ class RuntimeUA {
         let getCapabilities = this.runtimeCapabilities.getRuntimeCapabilities();
         let getRuntimeURL = this.storageManager.get('runtime:URL');
         let getStoredDataObjects = this.storageManager.get('syncherManager:ObjectURLs');
+        let getHypertyStorageObjects = this.storageManager.get('hypertyResources');
+        let getP2PHandlerURL = this.storageManager.get('p2pHandler:URL');
 
-        Promise.all([getRuntimeURL, getCapabilities, getStoredDataObjects]).then((results) => {
+        Promise.all([getRuntimeURL, getCapabilities, getStoredDataObjects, getHypertyStorageObjects, getP2PHandlerURL]).then((results) => {
 
           this.runtimeURL = results[0] ? results[0].runtimeURL : results[0];
           if (!this.runtimeURL) {
@@ -140,27 +151,41 @@ class RuntimeUA {
             this.storageManager.set('runtime:URL', 1, {runtimeURL: this.runtimeURL});
           }
 
+
           this.capabilities = results[1];
           Object.assign(runtimeUtils.runtimeCapabilities.constraints, results[1]);
 
           this._dataObjectsStorage = new DataObjectsStorage(this.storageManager, results[2] || {});
 
+          this._hypertyResources = results[3] || {};
+
+          this.p2pHandlerURL = results[4] ? results[4].p2pHandlerURL : results[4];
+          if (!this.p2pHandlerURL) {
+            this.p2pHandlerURL = this.runtimeURL + '/p2phandler/' + generateGUID();
+            log.info('[RuntimeUA - init] P2PHandlerURL: ', this.p2pHandlerURL);
+
+            this.storageManager.set('p2pHandler:URL', 1, {p2pHandlerURL: this.p2pHandlerURL});
+          }
+
           return this._loadComponents();
+
         }).then((status) => {
 
+          this._hypertyResourcesStorage = new HypertyResourcesStorage(this.runtimeURL, this.messageBus, this.storageManager, this._hypertyResources);
+
           if (this.p2p) {
-            console.info('[RuntimeUA - init] load p2pHandler: ', status);
+            log.info('[RuntimeUA - init] load p2pHandler: ', status);
             return this._loadP2PHandler();
           } else {
-            console.info('[RuntimeUA - init] P2P not supported');
+            log.info('[RuntimeUA - init] P2P not supported');
             return ('P2P Not Supported');
           }
 
         }).then((result) => {
-          console.info('[runtime ua - init] - status: ', result);
+          log.info('[runtime ua - init] - status: ', result);
           resolve(true);
         }, (reason) => {
-          console.error('ERROR: ', reason);
+          log.error('ERROR: ', reason);
           resolve(true);
         });
 
@@ -184,7 +209,7 @@ class RuntimeUA {
         runtimeURL: this.runtimeURL
       };
 
-      console.log('[RuntimeUA loadP2PHandler] P2PStubHandler: ', p2pStubHandler);
+      log.log('[RuntimeUA loadP2PHandler] P2PStubHandler: ', p2pStubHandler);
 
       this.loader.loadStub(p2pStubHandler, p2pConfig).then((result) => {
 
@@ -200,17 +225,17 @@ class RuntimeUA {
         };
 
         this.messageBus.addListener(runtimeUAURL, (msg) => {
-          console.log('[runtime ua - listener] - receive msg: ', msg);
+          log.log('[runtime ua - listener] - receive msg: ', msg);
         });
 
         this.messageBus.postMessage(msg, (reply) => {
-          console.log('[runtime ua - postMessage] - reply: ', reply);
+          log.log('[runtime ua - postMessage] - reply: ', reply);
         });
 
-        console.info('[runtime ua - p2p installation] - success: ', result);
+        log.info('[runtime ua - p2p installation] - success: ', result);
         resolve(true);
       }).catch((reason) => {
-        console.info('[runtime ua - p2p installation] - fail: ', reason);
+        log.info('[runtime ua - p2p installation] - fail: ', reason);
         resolve(false);
       });
 
@@ -246,7 +271,7 @@ class RuntimeUA {
         let appSandbox = this.runtimeFactory.createAppSandbox();
 
         // Instantiate the Registry Module
-        this.registry = new Registry(this.runtimeURL, appSandbox, this.identityModule, this.runtimeCatalogue, this.runtimeCapabilities, this.storageManager);
+        this.registry = new Registry(this.runtimeURL, appSandbox, this.identityModule, this.runtimeCatalogue, this.runtimeCapabilities, this.storageManager, this.p2pHandlerURL);
 
         // Set the loader to load Hyperties, Stubs and IdpProxies
         this.registry.loader = this.loader;
@@ -268,7 +293,7 @@ class RuntimeUA {
               ctx.msg = changedMgs;
               ctx.next();
             }).catch((reason) => {
-              console.error(reason);
+              log.error(reason);
               ctx.fail(reason);
             });
           }
@@ -322,8 +347,8 @@ class RuntimeUA {
         //   this.discovery.discoverHypertiesDO("user://google.com/openidtest20@gmail.com")
         //   .then(hyperties => {
         //     hyperties.forEach(hyperty =>{
-        //       hyperty.onLive(() => console.log(`Notification from ${hyperty.data.hypertyID} changed to live`));
-        //       hyperty.onDisconnected(() => console.log(`Notification from ${hyperty.data.hypertyID} changed to disconnected`));
+        //       hyperty.onLive(() => log.log(`Notification from ${hyperty.data.hypertyID} changed to live`));
+        //       hyperty.onDisconnected(() => log.log(`Notification from ${hyperty.data.hypertyID} changed to disconnected`));
         //     });
         //   });
         // }, 2000);
@@ -331,9 +356,23 @@ class RuntimeUA {
         // Instanciate the SubscriptionManager;
         this.subscriptionManager = new SubscriptionManager(this.runtimeURL, this.messageBus, this.storageManager);
 
-        this.subscriptionManager.init().then(()=>{
-          resolve(true);
+        // this.subscriptionManager.init().then(()=>{
+        //   resolve(true);
+        // });
+
+        const prepareComponents = [];
+        prepareComponents.push(this.subscriptionManager.init());
+        prepareComponents.push(this.identityModule.loadIdentities());
+        prepareComponents.push(this.identityModule.loadSessionKeys());
+
+        Promise.all(prepareComponents).then((result) => {
+          if (result.length === 3) {
+            resolve(true);
+          } else reject('[RuntimeUA._loadComponents] Error ] ', result);
+        }).catch((reason) => {
+          throw Error(reason);
         });
+
       } catch (e) {
         reject(e);
       }
@@ -389,14 +428,14 @@ class RuntimeUA {
   close() {
     let _this = this;
 
-    console.info('Unregister all hyperties');
+    log.info('Unregister all hyperties');
     return new Promise(function(resolve, reject) {
 
       _this.registry.unregisterAllHyperties().then(function(result) {
-        console.info('All the hyperties are unregisted with Success:', result);
+        log.info('All the hyperties are unregisted with Success:', result);
         resolve(true);
       }).catch(function(reason) {
-        console.error('Failed to unregister the hyperties', reason);
+        log.error('Failed to unregister the hyperties', reason);
         reject(false);
       });
 

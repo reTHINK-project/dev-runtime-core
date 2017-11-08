@@ -8,7 +8,7 @@ chai.use(chaiAsPromised);
 
 // dependencies
 import BloomFilter from '../src/graphconnector/BloomFilter';
-import GraphConnector from '../src/graphconnector/GraphConnector';
+import GraphConnector from '../src/graphconnector/GraphConnectorBase';
 import GraphConnectorContactData from '../src/graphconnector/GraphConnectorContactData';
 import bip39 from 'bip39';
 import jsrsasign from 'jsrsasign';

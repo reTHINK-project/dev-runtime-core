@@ -44,7 +44,7 @@ class GuiFake {
           _this._messageBus.postMessage(replyMsg);
         }
       } else {
-        console.log('Ignoring messages not intended to FakeGUI.', msg );
+        // console.log('Ignoring messages not intended to FakeGUI.', msg );
       }
     });
   }

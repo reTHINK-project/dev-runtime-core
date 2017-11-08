@@ -1,14 +1,22 @@
-let GraphConnector;
-if (process.env.MODE !== 'light') {
-  GraphConnector = require('./GraphConnectorBase');
-  console.log('GraphConnector Base:', GraphConnector.hasOwnProperty('default'));
-  if (GraphConnector && GraphConnector.hasOwnProperty('default')) GraphConnector = GraphConnector.default;
-} else {
-  GraphConnector = require('./GraphConnectorLight');
-  console.log('GraphConnector Light:', GraphConnector.hasOwnProperty('default'));
-  if (GraphConnector &&  GraphConnector.hasOwnProperty('default')) GraphConnector = GraphConnector.default;
-}
+// let GraphConnector;
+// if (process.env.MODE !== 'light') {
+//   GraphConnector = require('./GraphConnectorBase');
+//   if (GraphConnector && GraphConnector.hasOwnProperty('default')) GraphConnector = GraphConnector.default;
+// } else {
+//   GraphConnector = require('./GraphConnectorLight');
+//   if (GraphConnector &&  GraphConnector.hasOwnProperty('default')) GraphConnector = GraphConnector.default;
+// }
 
-console.log('AQUI:', GraphConnector);
+/**
+ * The GraphConnectorBase have some problems with the size;
+ * @deprecated Due to some problems increase a lot the file size
+ */
+// import GraphConnector from './GraphConnectorBase';
+
+/**
+ *
+ * @experimental used instead of GraphConnectorBase;
+ */
+import GraphConnector from './GraphConnectorLight';
 
 export default GraphConnector;

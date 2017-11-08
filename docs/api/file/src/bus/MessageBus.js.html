@@ -63,6 +63,11 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 **/
+
+// Log system
+import * as logger from &apos;loglevel&apos;;
+let log = logger.getLogger(&apos;MessageBus&apos;);
+
 import Bus from &apos;./Bus&apos;;
 import Pipeline from &apos;./Pipeline&apos;;
 
@@ -89,7 +94,7 @@ class MessageBus extends Bus {
     this._forwards = {};
 
     this._pipeline = new Pipeline((error) =&gt; {
-      console.log(&apos;PIPELINE-ERROR: &apos;, JSON.stringify(error));
+      log.error(&apos;PIPELINE-ERROR: &apos;, JSON.stringify(error));
     });
   }
 
@@ -103,7 +108,7 @@ class MessageBus extends Bus {
    * @return {number}                  the Message id
    */
   postMessage(inMsg, responseCallback) {
-    console.log(&apos;onPOSTMessage: &apos;, inMsg);
+    log.info(&apos;onPOSTMessage: &apos;, inMsg);
     let _this = this;
 
     _this._genId(inMsg);
@@ -139,7 +144,7 @@ class MessageBus extends Bus {
     let refCount = _this._forwards[from];
     if (!refCount) {
       let forwardListener = _this.addListener(from, (msg) =&gt; {
-        console.log(&apos;MB-PUBLISH: ( &apos; + from + &apos; )&apos;);
+        log.info(&apos;MB-PUBLISH: ( &apos; + from + &apos; )&apos;);
         _this._onPostMessage(msg);
       });
 
@@ -171,7 +176,7 @@ class MessageBus extends Bus {
      let _this = this;
 
      return _this.addListener(from, (msg) =&gt; {
-       console.log(&apos;MB-FORWARD: ( &apos; + from + &apos; to &apos; + to + &apos; )&apos;);
+       log.info(&apos;MB-FORWARD: ( &apos; + from + &apos; to &apos; + to + &apos; )&apos;);
        _this.forward(to, msg);
      });
    }
@@ -195,10 +200,11 @@ class MessageBus extends Bus {
      let _this = this;
 
      //resolve external protostub...
-     _this._registry.resolve(msg.to).then((route) =&gt; {
-       _this.forward(route, msg);
+     _this._registry.resolve(msg).then((route, msg2route) =&gt; {
+       if (msg2route) _this.forward(route, msg2route);
+       else _this.forward(route, msg);
      }).catch(function(e) {
-       console.log(&apos;RESOLVE-ERROR: &apos;, e);
+       log.error(&apos;RESOLVE-ERROR: &apos;, e);
      });
    }
 }

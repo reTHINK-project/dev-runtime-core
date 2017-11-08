@@ -20,6 +20,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  **/
+
+// Log System
+import * as logger from 'loglevel';
+let log = logger.getLogger('GraphConnector');
+
 import GraphConnectorContactData from './GraphConnectorContactData';
 import BloomFilter from './BloomFilter';
 import GlobalRegistryRecord from './GlobalRegistryRecord';
@@ -33,7 +38,13 @@ import Buffer from 'buffer';
 
 /**
  * The Graph Connector contains the contact list/address book.
+ *
+ * The GraphConnectorBase have some problems with the size due third party module;
+ *
  * @author beierle@tu-berlin.de
+ *
+ * @deprecated Due to some problems increase a lot the file size
+ *
  */
 class GraphConnector {
 
@@ -172,7 +183,7 @@ class GraphConnector {
 
           _this.messageBus.postMessage(msg, (reply) => {
 
-              console.log(reply);
+              log.log(reply);
 
               // reply should be the JSON returned from the Global Registry REST-interface
               let jwt = reply.body.Value;
@@ -446,14 +457,14 @@ class GraphConnector {
 
           _this.messageBus.postMessage(msg, (reply) => {
 
-              console.log(reply);
+              // // log.log(reply);
 
               // reply should be the JSON returned from the Global Registry REST-interface
               let jwt = reply.body.Value;
               if (typeof jwt !== 'undefined') {
 
                 if (reply.body.Code == 200) {
-                  console.log('verify JWT');
+                  // // log.log('verify JWT');
                   let unwrappedJWT = jsrsasign.KJUR.jws.JWS.parse(reply.body.Value);
                   let dataEncoded = unwrappedJWT.payloadObj.data;
                   let dataDecoded = base64url.decode(dataEncoded);
@@ -466,10 +477,10 @@ class GraphConnector {
                   sig.updateString(encodedString);
                   let isValid = sig.verify(sigValueHex);
                   if (!isValid) {
-                    console.log('invalid JWT');
+                    log.error('invalid JWT');
                     reject('Retrieved Record not valid!');
                   } else {
-                    console.log('valid JWT');
+                    // // log.log('valid JWT');
                     let queriedContact = new GraphConnectorContactData(dataJSON.guid, '', '');
                     if (typeof dataJSON.userIDs != 'undefined' && dataJSON.userIDs != null) {
                       queriedContact.userIDs = dataJSON.userIDs;
@@ -494,11 +505,11 @@ class GraphConnector {
                     resolve(queriedContact);
                   }
                 } else {
-                  console.log('Response code is not 200');
+                  // // log.log('Response code is not 200');
                   resolve(reply.body.Description);
                 }
               } else {
-                console.log(' undefined Response');
+                // // log.log(' undefined Response');
                 resolve('undefined');
               }
             });
@@ -661,15 +672,15 @@ class GraphConnector {
 
             _this.messageBus.postMessage(msg, (reply) => {
 
-                console.log(reply);
+                // // log.log(reply);
 
                 // reply should be the JSON returned from the Global Registry REST-interface
                 let jwt = reply.body.Value;
                 if (typeof jwt !== 'undefined') {
 
                   if (reply.body.Code == 200) {
-                    console.log('Response code is 200');
-                    console.log('verify JWT');
+                    // // log.log('Response code is 200');
+                    // // log.log('verify JWT');
                     let unwrappedJWT = jsrsasign.KJUR.jws.JWS.parse(reply.body.Value);
                     let dataEncoded = unwrappedJWT.payloadObj.data;
                     let dataDecoded = base64url.decode(dataEncoded);
@@ -682,10 +693,10 @@ class GraphConnector {
                     sig.updateString(encodedString);
                     let isValid = sig.verify(sigValueHex);
                     if (!isValid) {
-                      console.log('invalid JWT');
+                      log.error('invalid JWT');
                       resolve(false);
                     } else {
-                      console.log('valid JWT');
+                      // // log.log('valid JWT');
                       let queriedContact = new GraphConnectorContactData(dataJSON.guid, firstName, lastName);
                       if (typeof dataJSON.userIDs != 'undefined' && dataJSON.userIDs != null) {
                         queriedContact.userIDs = dataJSON.userIDs;
@@ -701,7 +712,7 @@ class GraphConnector {
                       resolve(true);
                     }
                   } else {
-                    console.log('Response code is not 200');
+                    // // log.log('Response code is not 200');
                     let queriedContact = new GraphConnectorContactData(guid, firstName, lastName);
                     _this.contacts.push(queriedContact);
                     _this.storageManager.set('graphConnector:contacts', 0, _this.contacts);
@@ -709,7 +720,7 @@ class GraphConnector {
                     resolve(true);
                   }
                 } else {
-                  console.log(' undefined Response');
+                  // // log.log(' undefined Response');
                   resolve(false);
                 }
               });
@@ -753,15 +764,15 @@ class GraphConnector {
 
             _this.messageBus.postMessage(msg, (reply) => {
 
-                console.log(reply);
+                // // log.log(reply);
 
                 // reply should be the JSON returned from the Global Registry REST-interface
                 let jwt = reply.body.Value;
                 if (typeof jwt !== 'undefined') {
 
                   if (reply.body.Code == 200) {
-                    console.log('Response code is 200');
-                    console.log('verify JWT');
+                    // // log.log('Response code is 200');
+                    // // log.log('verify JWT');
                     let unwrappedJWT = jsrsasign.KJUR.jws.JWS.parse(reply.body.Value);
                     let dataEncoded = unwrappedJWT.payloadObj.data;
                     let dataDecoded = base64url.decode(dataEncoded);
@@ -774,10 +785,10 @@ class GraphConnector {
                     sig.updateString(encodedString);
                     let isValid = sig.verify(sigValueHex);
                     if (!isValid) {
-                      console.log('invalid JWT');
+                      // // log.log('invalid JWT');
                       resolve(false);
                     } else {
-                      console.log('valid JWT');
+                      // // log.log('valid JWT');
 
                       for (let i = 0; i < _this.contacts.length; i++) {
 
@@ -799,7 +810,7 @@ class GraphConnector {
                     }
                   }
                 } else {
-                  console.log(' undefined Response');
+                  // // log.log(' undefined Response');
                   resolve(false);
                 }
               });
@@ -1289,7 +1300,7 @@ class GraphConnector {
 
         _this.storageManager.get('graphConnector:firstName').then((firstName) => {
             if (firstName) {
-              console.info('graphConnector:firstName:', firstName);
+              log.info('graphConnector:firstName:', firstName);
               _this.firstName = firstName;
             }
             resolve();
@@ -1297,7 +1308,7 @@ class GraphConnector {
 
         _this.storageManager.get('graphConnector:lastName').then((lastName) => {
             if (lastName) {
-              console.info('graphConnector:lastName:', lastName);
+              log.info('graphConnector:lastName:', lastName);
               _this.lastName = lastName;
             }
             resolve();
@@ -1305,7 +1316,7 @@ class GraphConnector {
 
         _this.storageManager.get('graphConnector:lastCalculationBloomFilter1Hop').then((lastCalculationBloomFilter1Hop) => {
             if (lastCalculationBloomFilter1Hop) {
-              console.info('graphConnector:lastName:', lastCalculationBloomFilter1Hop);
+              log.info('graphConnector:lastName:', lastCalculationBloomFilter1Hop);
               _this.lastCalculationBloomFilter1Hop = lastCalculationBloomFilter1Hop;
             }
             resolve();
@@ -1313,7 +1324,7 @@ class GraphConnector {
 
         _this.storageManager.get('graphConnector:residenceLocation').then((residenceLocation) => {
             if (residenceLocation) {
-              console.info('graphConnector:lastName:', residenceLocation);
+              log.info('graphConnector:lastName:', residenceLocation);
               _this.residenceLocation = residenceLocation;
             }
             resolve();

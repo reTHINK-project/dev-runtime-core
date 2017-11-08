@@ -110,6 +110,24 @@ npm install</code>
 <p>if you have some trouble with the environment, you can open an issue <a href="https://github.com/reTHINK-project/dev-runtime-core/issues">here</a>;</p>
 <h3 id="javascript-environment">Javascript Environment</h3>
 <p>JavaScript code should be written in ES6. There are direct dependencies from nodejs and npm, these can be installed separately or in conjunction with <a href="https://github.com/creationix/nvm">nvm</a></p>
+<h3 id="logging-system">Logging System</h3>
+<p>To improve the &quot;spam&quot; of log in the console we are using a <a href="https://github.com/pimterry/loglevel#documentation">log system</a> with allow us define by each module one level of log;
+You can access this configuration <a href="https://github.com/reTHINK-project/dev-runtime-core/blob/develop/src/logLevels.js">here</a> and update it;</p>
+<p>A little explanation about the log level; We have the same as console, but instead of console we should use:</p>
+<ul>
+<li><code>log.trace(msg)</code> - 0</li>
+<li><code>log.debug(msg)</code> or <code>log.log(msg)</code> - 1</li>
+<li><code>log.info(msg)</code> - 2</li>
+<li><code>log.warn(msg)</code> - 3</li>
+<li><code>log.error(msg)</code> - 4</li>
+</ul>
+<p><code>log.setLevel(level, [persist])</code> method.</p>
+<p>This disables all logging below the given level, so that after a <code>log.setLevel(&quot;warn&quot;)</code> call <code>log.warn(&quot;something&quot;)</code> or <code>log.error(&quot;something&quot;)</code> will output messages, but <code>log.info(&quot;something&quot;)</code> will not.</p>
+<p>the <code>level</code>  could be:</p>
+<ul>
+<li>As a string, like &apos;error&apos; (case-insensitive) &#x2190; for a reasonable practical balance</li>
+<li>As a numeric index from 0 (trace) to 5 (silent) &#x2190; deliciously terse, and more easily programmable (...although, why?)</li>
+</ul>
 <h4 id="dependencies">Dependencies</h4>
 <ul>
 <li><p>nodejs</p>

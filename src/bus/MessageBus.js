@@ -20,6 +20,11 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 **/
+
+// Log system
+import * as logger from 'loglevel';
+let log = logger.getLogger('MessageBus');
+
 import Bus from './Bus';
 import Pipeline from './Pipeline';
 
@@ -46,7 +51,7 @@ class MessageBus extends Bus {
     this._forwards = {};
 
     this._pipeline = new Pipeline((error) => {
-      console.log('PIPELINE-ERROR: ', JSON.stringify(error));
+      log.error('PIPELINE-ERROR: ', JSON.stringify(error));
     });
   }
 
@@ -60,7 +65,7 @@ class MessageBus extends Bus {
    * @return {number}                  the Message id
    */
   postMessage(inMsg, responseCallback) {
-    console.log('onPOSTMessage: ', inMsg);
+    log.info('onPOSTMessage: ', inMsg);
     let _this = this;
 
     _this._genId(inMsg);
@@ -96,7 +101,7 @@ class MessageBus extends Bus {
     let refCount = _this._forwards[from];
     if (!refCount) {
       let forwardListener = _this.addListener(from, (msg) => {
-        console.log('MB-PUBLISH: ( ' + from + ' )');
+        log.info('MB-PUBLISH: ( ' + from + ' )');
         _this._onPostMessage(msg);
       });
 
@@ -128,7 +133,7 @@ class MessageBus extends Bus {
      let _this = this;
 
      return _this.addListener(from, (msg) => {
-       console.log('MB-FORWARD: ( ' + from + ' to ' + to + ' )');
+       log.info('MB-FORWARD: ( ' + from + ' to ' + to + ' )');
        _this.forward(to, msg);
      });
    }
@@ -152,10 +157,11 @@ class MessageBus extends Bus {
      let _this = this;
 
      //resolve external protostub...
-     _this._registry.resolve(msg.to).then((route) => {
-       _this.forward(route, msg);
+     _this._registry.resolve(msg).then((route, msg2route) => {
+       if (msg2route) _this.forward(route, msg2route);
+       else _this.forward(route, msg);
      }).catch(function(e) {
-       console.log('RESOLVE-ERROR: ', e);
+       log.error('RESOLVE-ERROR: ', e);
      });
    }
 }

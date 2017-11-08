@@ -16,20 +16,21 @@ import MessageBus from '../src/bus/MessageBus';
 import Loader from '../src/runtime/Loader';
 import Descriptors from '../src/runtime/Descriptors';
 
-import { descriptors } from './resources/descriptors.js';
 import { getDescriptor } from './resources/getDescriptor.js';
 
-import {divideURL} from '../src/utils/utils';
+import { generateGUID } from '../src/utils/utils';
 import { runtimeFactory } from './resources/runtimeFactory';
 
 import AddressAllocation from '../src/allocation/AddressAllocation';
 
 // Testing Registry
-let runtimeURL = 'hyperty-runtime://ua.pt/123';
+let runtimeURL = 'runtime://ua.pt';
+let p2pHandlerURL;
 
 let sandboxDummyCapabilities = {browser: true};
 let storageManager = runtimeFactory.storageManager();
 let appSandbox = runtimeFactory.createAppSandbox();
+appSandbox.type = 'app';
 
 // let sandboxDummy = {sandbox: 'sandbox', type: 'normal', capabilities: sandboxDummyCapabilities};
 let protostubURL;
@@ -77,7 +78,10 @@ describe('Registry', function() {
 
     new AddressAllocation(runtimeURL, msgbus);
 
-    registry = new Registry(runtimeURL, appSandbox, identityModule, runtimeCatalogue, 'runtimeCapabilities', storageManager);
+    p2pHandlerURL = runtimeURL + '/p2phandler/' + generateGUID();
+    let remoteRegistry = '';
+
+    registry = new Registry(runtimeURL, appSandbox, identityModule, runtimeCatalogue, 'runtimeCapabilities', storageManager, p2pHandlerURL, remoteRegistry);
 
     // Prepare the on instance to handle with the fallbacks and runtimeCatalogue;
     let descriptorInstance = new Descriptors(runtimeURL, runtimeCatalogue, {});
@@ -114,16 +118,16 @@ describe('Registry', function() {
     });
 
     console.log('registry ', descriptorInstance);
-    sinon.stub(descriptorInstance, 'getHypertyDescriptor', (hypertyURL) => {
+    sinon.stub(descriptorInstance, 'getHypertyDescriptor').callsFake((hypertyURL) => {
       return getDescriptor(hypertyURL);
     });
 
-    sinon.stub(descriptorInstance, 'getStubDescriptor', (stubURL) => {
+    sinon.stub(descriptorInstance, 'getStubDescriptor').callsFake((stubURL) => {
       //console.log('get descriptor for:', stubURL);
       return getDescriptor('https://catalogue.ua.pt/.well-known/protocolstub/' + stubURL);
     });
 
-    sinon.stub(descriptorInstance, 'getIdpProxyDescriptor', (idpProxyURL) => {
+    sinon.stub(descriptorInstance, 'getIdpProxyDescriptor').callsFake((idpProxyURL) => {
       return getDescriptor('https://catalogue.ua.pt/.well-known/idp-proxy/' + idpProxyURL);
     });
 
@@ -245,45 +249,28 @@ describe('Registry', function() {
         dataObjects: ['url'],
         hypertyType: ['comm']
       };
-      let addressURL = {newAddress: true, address: ['hyperty://ua.pt/1']};
-      expect(registry.registerHyperty(sandboxDummy, descriptorURL, descriptor, addressURL)).to.be.fulfilled.and.eventually.equal('hyperty://ua.pt/1').and.notify(done);
+
+      let addressURL = {
+        newAddress: true,
+        address: ['hyperty://ua.pt/1']
+      };
+
+      expect(registry.registerHyperty(sandboxDummy, descriptorURL, descriptor, addressURL))
+        .to.be.fulfilled
+        .and.eventually.to.deep.equal({
+          url: 'hyperty://ua.pt/1',
+          p2pHandler: p2pHandlerURL,
+          p2pRequester: undefined
+        }).and.notify(done);
 
     });
   });
 
-  describe('getSandbox(url)', function() {
-
-    it('should get a sandbox from a domain', function(done) {
-      let domain = 'ua.pt';
-
-      console.log('Get Sandbox:', sandboxDummy);
-
-      expect(registry.getSandbox(domain).then(function(response) {
-        return response;
-      })).to.be.fulfilled.and.eventually.to.be.eql(sandboxDummy).and.notify(done);
-
-    });
-
-    it('should get a sandbox from a specific hypertyIstance', function(done) {
-      let hypertyInstance = 'hyperty://ua.pt/1';
-
-      expect(registry.getSandbox(hypertyInstance).then(function(response) {
-        return response;
-      })).to.be.fulfilled.and.eventually.to.be.eql(sandboxDummy).and.notify(done);
-    });
-
-    it('should get a sandbox from a specific protostubURL', function(done) {
-
-    //  let protostubURL = 'runtime://ua.pt/protostub/123';
-
-      expect(registry.getSandbox(protostubURL, sandboxDummyCapabilities))
-      .to.be.fulfilled
-      .and.eventually.to.be.eql(sandboxDummy)
-      .and.notify(done);
-    });
+  describe('getSandbox(url, constraints)', function() {
 
     // let anotherSandbox = { sandbox: sandbox1, type: 'normal', capabilities: sandboxDummyCapabilities};
     let sandbox1 = new Sandbox(sandboxDummyCapabilities);
+    sandbox1.type = 'normal';
 
     it('should register a anotherdomain protoStub URL', function(done) {
       let domainURL = 'anotherDomain.pt';
@@ -297,12 +284,43 @@ describe('Registry', function() {
     it('should get a sandbox from another domain', function(done) {
       let domainURL = 'anotherDomain.pt';
 
-      expect(registry.getSandbox(domainURL, sandboxDummyCapabilities).then(function(response) {
-        return response;
-      })).to.be.fulfilled.and.eventually.to.be.equal(sandbox1).and.notify(done);
+      expect(registry.getSandbox(domainURL, sandboxDummyCapabilities))
+        .to.be.fulfilled
+        .and.eventually.to.be.equal(sandbox1)
+        .and.notify(done);
     });
 
-  //  });
+
+    it('should get a sandbox from a domain', function(done) {
+      let domain = 'ua.pt';
+
+      console.log('Get Sandbox:', sandboxDummy, registry);
+
+      expect(registry.getSandbox(domain, sandboxDummyCapabilities))
+        .to.be.fulfilled
+        .and.eventually.to.be.eql(sandboxDummy)
+        .and.notify(done);
+
+    });
+
+    it('should get a sandbox from a specific hypertyIstance', function(done) {
+      let hypertyInstance = 'hyperty://ua.pt/1';
+
+      expect(registry.getSandbox(hypertyInstance, sandboxDummyCapabilities))
+        .to.be.fulfilled
+        .and.eventually.to.be.eql(sandboxDummy)
+        .and.notify(done);
+    });
+
+    it('should get a sandbox from a specific protostubURL', function(done) {
+
+    //  let protostubURL = 'runtime://ua.pt/protostub/123';
+
+      expect(registry.getSandbox(protostubURL, sandboxDummyCapabilities))
+        .to.be.fulfilled
+        .and.eventually.to.be.eql(sandboxDummy)
+        .and.notify(done);
+    });
 
   });
 
@@ -312,8 +330,12 @@ describe('Registry', function() {
       let url = 'hyperty://ua.pt/123-dhsdhsg';
 
       expect(registry.resolve(url).then(function(response) {
+        console.log('response:', response);
         return response;
-      })).to.be.fulfilled.and.eventually.to.contain('runtime://ua.pt/protostub/').and.notify(done);
+      }).catch(console.error))
+        .to.be.fulfilled
+        .and.eventually.to.contain('runtime://ua.pt/protostub/')
+        .and.notify(done);
 
     });
   });
@@ -355,9 +377,22 @@ describe('Registry', function() {
       objectRegistration.authorise = ['user://gmail.com/user15'];
       objectRegistration.resources = ['fake'];
 
-      expect(registry.registerDataObject(objectRegistration).then(function(response) {
-        return response;
-      })).to.be.fulfilled.and.eventually.equal('ok').and.notify(done);
+      expect(registry.registerDataObject(objectRegistration))
+        .to.be.fulfilled
+        .and.eventually.to.deep.equal({
+          name: objectRegistration.name,
+          schema: objectRegistration.schema,
+          url: objectRegistration.url,
+          reporter: objectRegistration.reporter,
+          resources: objectRegistration.resources,
+          startingTime: undefined,
+          expires: 3600,
+          dataSchemes: ['comm'],
+          p2pHandler: p2pHandlerURL,
+          p2pRequester: undefined,
+          status: 'live'
+        })
+        .and.notify(done);
     });
   });
 

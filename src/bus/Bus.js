@@ -21,6 +21,10 @@
 * limitations under the License.
 **/
 
+// Log system
+import * as logger from 'loglevel';
+let log = logger.getLogger('Bus');
+
 /**
 * @author micaelpedrosa@gmail.com
 * Minimal interface and implementation to send and receive messages. It can be reused in many type of components.
@@ -42,7 +46,7 @@ class Bus {
     _this._msgId = 0;
     _this._subscriptions = {};
 
-    _this._responseTimeOut = 5000; //default to 3s
+    _this._responseTimeOut = 15000; //default to 3s
     _this._responseCallbacks = {};
 
     _this._registerExternalListener();
@@ -166,6 +170,7 @@ class Bus {
     }
   }
 
+//TODO: provisional responses should reset timeout
   _onResponse(msg) {
     let _this = this;
 
@@ -173,8 +178,7 @@ class Bus {
       let responseId = msg.to + msg.id;
       let responseFun = _this._responseCallbacks[responseId];
 
-      //if it's a provisional response, don't delete response listener
-      if (msg.body.code >= 200) {
+      if (msg.body.code >= 200) { //if it's a provisional response, don't delete response listener
         delete _this._responseCallbacks[responseId];
       }
 
@@ -182,6 +186,8 @@ class Bus {
         responseFun(msg);
         return true;
       }
+
+
     }
 
     return false;
@@ -244,7 +250,7 @@ class Bus {
         _this.postMessage(msg, (reply) => {
           if (reply.body.code === 408 || reply.body.code === 500) reject();
           else {
-            console.log('[Bus.postMessageWithRetries] msg delivered: ', msg);
+            log.info('[Bus.postMessageWithRetries] msg delivered: ', msg);
             callback(reply);
             resolve();
           }
@@ -257,9 +263,10 @@ class Bus {
         //timeout = false;
         return;
       }, ()=>{
-        console.warn(`[Bus.postMessageWithRetries] Message Bounced (retry ${retry}): '`, msg);
+        log.warn(`[Bus.postMessageWithRetries] Message Bounced (retry ${retry}): '`, msg);
         if (retry++ < retries) {
-          setTimeout(() => { tryAgain(); }, 1000);
+          tryAgain();
+          // setTimeout(() => { tryAgain(); }, 1000);
         } else {
           const error = `[Error] Message Bounced (delivery attempts ${retries}): '`;
           throw new Error(error + msg);

@@ -1,3 +1,6 @@
+import * as logger from 'loglevel';
+let log = logger.getLogger('PEP');
+
 import AllowOverrides from '../combiningAlgorithms/AllowOverrides';
 import BlockOverrides from '../combiningAlgorithms/BlockOverrides';
 import {divideURL, getUserEmailFromURL, isDataObjectURL} from '../../utils/utils';
@@ -109,7 +112,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
           resolve(message);
         }
       } else {
-        console.log('[Policy.RuntimeCoreCtx prepareForEvaluation]', message);
+        // log.log('[Policy.RuntimeCoreCtx prepareForEvaluation]', message);
         if (_this._isToSetID(message)) {
           _this._getIdentity(message).then(identity => {
             message.body.identity = identity;
@@ -159,16 +162,16 @@ class RuntimeCoreCtx extends ReThinkCtx {
   prepareToForward(message, isIncoming, result) {
     let _this = this;
     return new Promise((resolve, reject) => {
-      console.log('[Policy.RuntimeCoreCtx.prepareToForward]', message);
+      // log.log('[Policy.RuntimeCoreCtx.prepareToForward]', message);
 
-      // uncomment this to enable mutual authentication
-      return resolve(message);
+      // comment this to enable mutual authentication
+      //return resolve(message);
 
       // TODO remove this validation. When the Nodejs auth was completed this should work like browser;
       this.runtimeCapabilities.isAvailable('node').then((result) => {
 
-      console.log('[RuntimeCoreCtx - isAvailable - node] - ', result);
-        if (result) {
+      // log.log('[RuntimeCoreCtx - isAvailable - node] - ', result);
+        if (result || (message.body && message.body.hasOwnProperty('mutual') && !message.body.mutual)) {
           return resolve(message);
         } else {
           if (isIncoming) {
@@ -306,7 +309,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
   _getIdentity(message) {
 
     let from = message.from;
-    console.log('[Policy.RuntimeCoreCtx.getIdentity] ', message);
+    // log.log('[Policy.RuntimeCoreCtx.getIdentity] ', message);
     let sourceURL = undefined;
     if (message.body.source !== undefined) {
       from = message.body.source;
@@ -327,19 +330,16 @@ class RuntimeCoreCtx extends ReThinkCtx {
   *                     or if its type equals 'handshake'; false otherwise
   */
   _isToCypherModule(message) {
-    console.log('[Policy.RuntimeCoreCtx.istoChyperModule]', message);
+    log.log('[Policy.RuntimeCoreCtx.istoChyperModule]', message);
     let isCreate = message.type === 'create';
     let isFromHyperty = divideURL(message.from).type === 'hyperty';
     let isToHyperty = divideURL(message.to).type === 'hyperty';
     let isToDataObject = isDataObjectURL(message.to);
 
-    //TODO: For Further Study
-    let doMutualAuthentication = message.body.hasOwnProperty('mutualAuthentication') ? message.body.mutualAuthentication : true;
+    let doMutualAuthentication = message.body.hasOwnProperty('mutual') ? message.body.mutual : true;
 
-    // todo: return false for messages coming from interworking stubs.
-    // Get descriptor from runtime catalogue and check interworking field.
 
-    return ((isCreate && isFromHyperty && isToHyperty) || (isCreate && isFromHyperty && isToDataObject) || message.type === 'handshake' || message.type === 'update') && doMutualAuthentication;
+    return ((isCreate && isFromHyperty && isToHyperty) || (isCreate && isFromHyperty && isToDataObject && doMutualAuthentication) || message.type === 'handshake' || (message.type === 'update' && doMutualAuthentication));
   }
 
   /**

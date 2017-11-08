@@ -276,10 +276,10 @@ export function isBackendServiceURL(url) {
   let subDomain;
 
   if (splitedDomain.length > 1) {
-    subDomain = splitedDomain[0];
+    subDomain = splitedDomain.filter(item => backendSubDomains.indexOf(item) !== -1)[0];
   }
 
-  if (subDomain && backendSubDomains.indexOf(subDomain)) {
+  if (subDomain && backendSubDomains.indexOf(subDomain) !== -1) {
     return true;
   }
 
@@ -420,12 +420,14 @@ export function parseAttributes(path) {
 
 }
 
+export function isEmpty(obj) {
+  for (var prop in obj) {
 
-function isEmpty(obj) {
-    for(var prop in obj) {
-        if(obj.hasOwnProperty(prop))
-            return false;
+    if (obj.hasOwnProperty(prop)) {
+      return false;
     }
 
-    return JSON.stringify(obj) === JSON.stringify({});
+  }
+
+  return JSON.stringify(obj) === JSON.stringify({});
 }

@@ -53,6 +53,7 @@ chai.use(chaiAsPromised);
 chai.use(sinonChai);
 
 import { descriptors } from &apos;./resources/descriptors.js&apos;;
+import { getDescriptor } from &apos;./resources/getDescriptor.js&apos;;
 
 // Testing Module
 import RuntimeUA from  &apos;../src/runtime/RuntimeUA&apos;;
@@ -74,57 +75,11 @@ let domain = &apos;localhost&apos;;
 describe(&apos;RuntimeUA&apos;, function() {
 
   let runtime = new RuntimeUA(descriptors.Runtimes.Runtime, runtimeFactory, domain);
-  let getDescriptor;
 
   before(function() {
 
-    getDescriptor = (url) =&gt; {
+    runtime.graphConnector = function() {};
 
-      return new Promise(function(resolve, reject) {
-
-        let dividedURL = divideURL(url);
-        let identity = dividedURL.identity;
-
-        if (!identity) {
-          identity = &apos;default&apos;;
-        } else {
-          identity = identity.substring(identity.lastIndexOf(&apos;/&apos;) + 1);
-        }
-
-        let result;
-
-        if (url.includes(&apos;hyperty&apos;)) {
-          try {
-            result = descriptors.Hyperties[identity];
-          } catch (e) {
-            reject(e);
-          }
-
-        } else if (url.includes(&apos;protocolstub&apos;) || url === dividedURL.domain) {
-          try {
-            result = descriptors.ProtoStubs[identity];
-          } catch (e) {
-            reject(e);
-          }
-        } else if (url.includes(&apos;idp-proxy&apos;)) {
-          try {
-            result = descriptors.IdpProxies[identity];
-          } catch (e) {
-            reject(e);
-          }
-        } else if (url.includes(&apos;dataschema&apos;)) {
-          try {
-            result = descriptors.DataSchemas[identity];
-          } catch (e) {
-            reject(e);
-          }
-
-        }
-
-        resolve(result);
-
-      });
-    };
   });
 
   after(function() {
@@ -139,30 +94,35 @@ describe(&apos;RuntimeUA&apos;, function() {
 
       expect(runtime.init().then((result) =&gt; {
 
-        sinon.stub(runtime.messageBus, &apos;postMessage&apos;, function(msg, replyCallback) {
-          replyCallback({
-            id: 1, type: &apos;response&apos;, from: &apos;domain://msg-node.sp.domain/address-allocation&apos;, to: &apos;local://fake.url&apos;,
-            body: {code: 200, value: {allocated: msg.body.scheme + &apos;://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d&apos;}}
-          });
+        sinon.stub(runtime.messageBus, &apos;postMessage&apos;).callsFake(function(msg, replyCallback) {
+
+          if (replyCallback) {
+            replyCallback({
+              id: 1, type: &apos;response&apos;, from: &apos;domain://msg-node.sp.domain/address-allocation&apos;, to: &apos;local://fake.url&apos;,
+              body: {code: 200, value: {allocated: msg.body.scheme + &apos;://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d&apos;}}
+            });
+          }
+
         });
 
-        sinon.stub(runtime.descriptorInstance, &apos;getHypertyDescriptor&apos;, (hypertyURL) =&gt; {
+        sinon.stub(runtime.descriptorInstance, &apos;getHypertyDescriptor&apos;).callsFake(function(hypertyURL) {
           return getDescriptor(hypertyURL);
         });
 
-        sinon.stub(runtime.descriptorInstance, &apos;getStubDescriptor&apos;, (stubURL) =&gt; {
+        sinon.stub(runtime.descriptorInstance, &apos;getStubDescriptor&apos;).callsFake(function(stubURL) {
           return getDescriptor(stubURL);
         });
 
-        sinon.stub(runtime.descriptorInstance, &apos;getIdpProxyDescriptor&apos;, (idpProxyURL) =&gt; {
-          return getDescriptor(idpProxyURL);
+        sinon.stub(runtime.descriptorInstance, &apos;getIdpProxyDescriptor&apos;).callsFake(function(idpProxyURL) {
+          let url = &apos;https://localhost/.well-known/idp-proxy/&apos; +  idpProxyURL;
+          return getDescriptor(url);
         });
 
-        sinon.stub(runtime.runtimeCatalogue, &apos;getDataSchemaDescriptor&apos;, (dataSchemaURL) =&gt; {
+        sinon.stub(runtime.runtimeCatalogue, &apos;getDataSchemaDescriptor&apos;).callsFake(function(dataSchemaURL) {
           return getDescriptor(dataSchemaURL);
         });
 
-        sinon.stub(runtime.registry, &apos;registerHyperty&apos;, (sandbox, descriptorURL, descriptor, addressURL) =&gt; {
+        sinon.stub(runtime.registry, &apos;registerHyperty&apos;).callsFake(function(sandbox, descriptorURL, descriptor, addressURL) {
           return new Promise(function(resolve) {
             console.log(&apos;AQIO:&apos;, addressURL);
             if (addressURL.newAddress) {
@@ -174,7 +134,7 @@ describe(&apos;RuntimeUA&apos;, function() {
 
         });
 
-        sinon.stub(runtime.registry, &apos;checkRegisteredURLs&apos;, (info, reuseURL) =&gt; {
+        sinon.stub(runtime.registry, &apos;checkRegisteredURLs&apos;).callsFake(function(info, reuseURL) {
 
           return new Promise((resolve) =&gt; {
             console.log(&apos;checkRegisteredURLs:&apos;, typeof(reuseURL), reuseURL);
@@ -182,7 +142,7 @@ describe(&apos;RuntimeUA&apos;, function() {
               resolve(&apos;hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d&apos;);
             } else if (typeof(reuseURL) === &apos;string&apos;) {
               console.log(&apos;checkRegisteredURLs is string:&apos;, reuseURL);
-              resolve(reuseURL);
+              resolve({url: reuseURL });
             } else {
               resolve(&apos;hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d&apos;);
             }
@@ -259,8 +219,8 @@ describe(&apos;RuntimeUA&apos;, function() {
       let hypertyResolved = [&apos;runtimeHypertyURL&apos;, &apos;status&apos;];
 
       expect(loadHyperty).to.eventually.to.have.all.keys(hypertyResolved)
-      .and.to.be.fulfilled
-      .and.notify(done);
+        .and.to.be.fulfilled
+        .and.notify(done);
 
     });
 
@@ -271,8 +231,8 @@ describe(&apos;RuntimeUA&apos;, function() {
       let hypertyResolved = [&apos;runtimeHypertyURL&apos;, &apos;status&apos;];
 
       expect(loadHyperty).to.be.fulfilled
-      .and.eventually.to.have.all.keys(hypertyResolved)
-      .and.notify(done);
+        .and.eventually.to.have.all.keys(hypertyResolved)
+        .and.notify(done);
 
     });
 
@@ -286,8 +246,8 @@ describe(&apos;RuntimeUA&apos;, function() {
       };
 
       expect(loadHyperty).to.eventually.to.deep.equal(hypertyResolved)
-      .and.to.be.fulfilled
-      .and.notify(done);
+        .and.to.be.fulfilled
+        .and.notify(done);
 
     });
 

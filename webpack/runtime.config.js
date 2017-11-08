@@ -2,6 +2,19 @@ var path = require('path');
 var processSuffix = require('./shared.configs').processSuffix;
 var getModeConfig = require('./shared.configs').getModeConfig;
 
+var WebpackMonitor = require('webpack-monitor');
+
+var plugins = getModeConfig();
+
+
+console.log('Monitor:', process.env.MONITOR);
+if (process.env.MONITOR) {
+  plugins.push(new WebpackMonitor({
+    launch: true, // -> default 'false'
+    port: 3031 // default -> 8081
+  }));
+}
+
 module.exports = {
   entry: {
     Runtime: ['babel-polyfill', './src/runtime/RuntimeUA.js']
@@ -13,7 +26,7 @@ module.exports = {
     libraryTarget: 'umd',
     umdNamedDefine: true
   },
-  devtool: process.env.MODE === 'dev' ? 'inline-eval-cheap-source-map' : false,
+  devtool: process.env.MODE === 'dev' ? 'cheap-module-eval-source-map' : 'none',
   module: {
     rules: [
 
@@ -36,5 +49,5 @@ module.exports = {
   },
 
   //resolve: { extensions: ['.js'] },
-  plugins: getModeConfig()
+  plugins: plugins
 };

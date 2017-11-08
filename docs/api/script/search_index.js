@@ -25,14 +25,20 @@ window.esdocSearchIndex = [
   ],
   [
     "",
-    "test-file/test/PerformanceTests/HypertyRegistration.spec.js.html#lineNumber15",
+    "test-file/test/AddressAllocation.spec.js.html#lineNumber15",
     "AddressAllocation",
     "test"
   ],
   [
     "",
-    "test-file/test/AddressAllocation.spec.js.html#lineNumber15",
+    "test-file/test/PerformanceTests/AddressAllocation.spec.js.html#lineNumber15",
     "AddressAllocation",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PerformanceTests/AddressAllocation.spec.js.html#lineNumber79",
+    "AddressAllocation should create a new data Object address",
     "test"
   ],
   [
@@ -43,14 +49,26 @@ window.esdocSearchIndex = [
   ],
   [
     "",
+    "test-file/test/PerformanceTests/AddressAllocation.spec.js.html#lineNumber64",
+    "AddressAllocation should create a new hyperty address",
+    "test"
+  ],
+  [
+    "",
     "test-file/test/AddressAllocation.spec.js.html#lineNumber64",
     "AddressAllocation should create a new hyperty address",
     "test"
   ],
   [
     "",
-    "test-file/test/PerformanceTests/HypertyRegistration.spec.js.html#lineNumber64",
-    "AddressAllocation should register a new hyperty address",
+    "test-file/test/PerformanceTests/AddressAllocation.spec.js.html#lineNumber112",
+    "AddressAllocation should reuse a dataobject address ",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PerformanceTests/AddressAllocation.spec.js.html#lineNumber95",
+    "AddressAllocation should reuse an hyperty url address",
     "test"
   ],
   [
@@ -403,86 +421,194 @@ window.esdocSearchIndex = [
   ],
   [
     "",
-    "test-file/test/CoreDiscovery.spec.js.html#lineNumber115",
+    "test-file/test/CoreDiscovery.spec.js.html#lineNumber117",
     "CoreDiscovery construction",
     "test"
   ],
   [
     "",
-    "test-file/test/CoreDiscovery.spec.js.html#lineNumber116",
+    "test-file/test/CoreDiscovery.spec.js.html#lineNumber118",
     "CoreDiscovery construction should create a new CoreDiscovery without error",
     "test"
   ],
   [
     "",
-    "test-file/test/CoreDiscovery.spec.js.html#lineNumber148",
+    "test-file/test/CoreDiscovery.spec.js.html#lineNumber150",
     "CoreDiscovery discoverDataObjectPerURL()",
     "test"
   ],
   [
     "",
-    "test-file/test/CoreDiscovery.spec.js.html#lineNumber149",
+    "test-file/test/CoreDiscovery.spec.js.html#lineNumber151",
     "CoreDiscovery discoverDataObjectPerURL() should conclude the advanced search without error",
     "test"
   ],
   [
     "",
-    "test-file/test/CoreDiscovery.spec.js.html#lineNumber130",
+    "test-file/test/CoreDiscovery.spec.js.html#lineNumber132",
     "CoreDiscovery discoverDataObjects()",
     "test"
   ],
   [
     "",
-    "test-file/test/CoreDiscovery.spec.js.html#lineNumber131",
+    "test-file/test/CoreDiscovery.spec.js.html#lineNumber133",
     "CoreDiscovery discoverDataObjects() should conclude the advanced search without error",
     "test"
   ],
   [
     "",
-    "test-file/test/CoreDiscovery.spec.js.html#lineNumber157",
+    "test-file/test/CoreDiscovery.spec.js.html#lineNumber159",
     "CoreDiscovery discoverDataObjectsPerName()",
     "test"
   ],
   [
     "",
-    "test-file/test/CoreDiscovery.spec.js.html#lineNumber158",
+    "test-file/test/CoreDiscovery.spec.js.html#lineNumber160",
     "CoreDiscovery discoverDataObjectsPerName() should conclude the advanced search without error",
     "test"
   ],
   [
     "",
-    "test-file/test/CoreDiscovery.spec.js.html#lineNumber166",
+    "test-file/test/CoreDiscovery.spec.js.html#lineNumber168",
     "CoreDiscovery discoverDataObjectsPerReporter()",
     "test"
   ],
   [
     "",
-    "test-file/test/CoreDiscovery.spec.js.html#lineNumber167",
+    "test-file/test/CoreDiscovery.spec.js.html#lineNumber169",
     "CoreDiscovery discoverDataObjectsPerReporter() should conclude the advanced search without error",
     "test"
   ],
   [
     "",
-    "test-file/test/CoreDiscovery.spec.js.html#lineNumber121",
+    "test-file/test/CoreDiscovery.spec.js.html#lineNumber123",
     "CoreDiscovery discoverHyperties()",
     "test"
   ],
   [
     "",
-    "test-file/test/CoreDiscovery.spec.js.html#lineNumber122",
+    "test-file/test/CoreDiscovery.spec.js.html#lineNumber124",
     "CoreDiscovery discoverHyperties() should conclude the advanced search without error",
     "test"
   ],
   [
     "",
-    "test-file/test/CoreDiscovery.spec.js.html#lineNumber139",
+    "test-file/test/CoreDiscovery.spec.js.html#lineNumber141",
     "CoreDiscovery discoverHypertyPerURL()",
     "test"
   ],
   [
     "",
-    "test-file/test/CoreDiscovery.spec.js.html#lineNumber140",
+    "test-file/test/CoreDiscovery.spec.js.html#lineNumber142",
     "CoreDiscovery discoverHypertyPerURL() should conclude the advanced search without error",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber51",
+    "Crypto tests",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber60",
+    "Crypto tests Code and encode test",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber148",
+    "Crypto tests Test AES algorithm",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber104",
+    "Crypto tests Test concatPMSwithRandoms key",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber116",
+    "Crypto tests Test generateKeys",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber91",
+    "Crypto tests Test generateMasterSecret key",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber83",
+    "Crypto tests Test generatePMS key",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber67",
+    "Crypto tests Test generated IVs",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber75",
+    "Crypto tests Test generated random values",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber137",
+    "Crypto tests Test genereated keys pair with encrypt and decrypt data",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber162",
+    "Crypto tests Test genereated keys pair, signRSA and verifyRSA",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber174",
+    "Crypto tests Test hashHMAC and verifyHMAC",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PerformanceTests/DataSynchronisation.spec.js.html#lineNumber18",
+    "Data Synchronisation",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PerformanceTests/DataSynchronisation.spec.js.html#lineNumber187",
+    "Data Synchronisation Create Reporter and create dataObject",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PerformanceTests/DataSynchronisation.spec.js.html#lineNumber263",
+    "Data Synchronisation Data Objects created by Reporters are resumed",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PerformanceTests/DataSynchronisation.spec.js.html#lineNumber240",
+    "Data Synchronisation Data Objects subscribed by Observers are resumed",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PerformanceTests/DataSynchronisation.spec.js.html#lineNumber224",
+    "Data Synchronisation Update dataObjectReporter and Sync with Observer",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/PerformanceTests/DataSynchronisation.spec.js.html#lineNumber204",
+    "Data Synchronisation create observer and subscribe to dataObjectReporter",
     "test"
   ],
   [
@@ -500,7 +626,7 @@ window.esdocSearchIndex = [
   [
     "",
     "test-file/test/PerformanceTests/TradeMessages.spec.js.html#lineNumber7",
-    "Deliver Messages sending message ",
+    "Deliver Messages sending message among Hyperties in the same runtime",
     "test"
   ],
   [
@@ -763,32 +889,242 @@ window.esdocSearchIndex = [
   ],
   [
     "",
-    "test-file/test/IdentityModule.spec.js.html#lineNumber62",
-    "IdentityModule",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber187",
+    "Identity Module tests",
     "test"
   ],
   [
     "",
-    "test-file/test/IdentityModule.spec.js.html#lineNumber64",
-    "IdentityModule constructor()",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber235",
+    "Identity Module tests Check GUI deployment",
     "test"
   ],
   [
     "",
-    "test-file/test/IdentityModule.spec.js.html#lineNumber66",
-    "IdentityModule constructor() successfully instantiated",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber240",
+    "Identity Module tests Check Identities to Choose",
     "test"
   ],
   [
     "",
-    "test-file/test/IdentityModule.spec.js.html#lineNumber71",
-    "IdentityModule getIdentitiesToChoose()",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber251",
+    "Identity Module tests Check coreDiscovery",
     "test"
   ],
   [
     "",
-    "test-file/test/IdentityModule.spec.js.html#lineNumber82",
-    "IdentityModule getIdentitiesToChoose() should return a list of IdPs and a list of identities previously registered",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber246",
+    "Identity Module tests Check messageBus",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber256",
+    "Identity Module tests Check registry",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber260",
+    "Identity Module tests setCurrentIdentity/getCurrentIdentity",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber750",
+    "Identity Module tests test _doHandShakePhase - receiverFinishedMessage",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber681",
+    "Identity Module tests test _doHandShakePhase - receiverHello",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber790",
+    "Identity Module tests test _doHandShakePhase - reporterSessionKey",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber837",
+    "Identity Module tests test _doHandShakePhase - reporterSessionKey",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber698",
+    "Identity Module tests test _doHandShakePhase - senderCertificate",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber669",
+    "Identity Module tests test _doHandShakePhase - senderHello",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber655",
+    "Identity Module tests test _doHandShakePhase - startHandShake",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber544",
+    "Identity Module tests test _filterMessageToHash",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber511",
+    "Identity Module tests test _getValidToken",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber561",
+    "Identity Module tests test _newChatCrypto",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber538",
+    "Identity Module tests test _resolveDomain",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber579",
+    "Identity Module tests test _sendReporterSessionKey",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber418",
+    "Identity Module tests test callGenerateMethods",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber368",
+    "Identity Module tests test callIdentityModuleFunc",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber356",
+    "Identity Module tests test deleteIdentity",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber879",
+    "Identity Module tests test doMutualAuthentication",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber473",
+    "Identity Module tests test encryptDataObject/decryptDataObject",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber607",
+    "Identity Module tests test encryptMessage - startHandShake and update",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber387",
+    "Identity Module tests test generateAssertion",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber447",
+    "Identity Module tests test generateSelectedIdentity",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber498",
+    "Identity Module tests test getIdToken",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber307",
+    "Identity Module tests test getIdentities",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber335",
+    "Identity Module tests test getIdentity",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber491",
+    "Identity Module tests test getIdentityAssertion",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber524",
+    "Identity Module tests test getToken",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber438",
+    "Identity Module tests test loginSelectedIdentity",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber287",
+    "Identity Module tests test requestIdentityToGUI",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber462",
+    "Identity Module tests test selectIdentityForHyperty",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber456",
+    "Identity Module tests test selectIdentityFromGUI",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber265",
+    "Identity Module tests test sendGenerateMessage",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber317",
+    "Identity Module tests test storeIdentity",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber345",
+    "Identity Module tests test unregisterIdentity",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/IdentityModule.spec.js.html#lineNumber432",
+    "Identity Module tests test validateAssertion",
     "test"
   ],
   [
@@ -1291,511 +1627,463 @@ window.esdocSearchIndex = [
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber40",
+    "test-file/test/Registry.spec.js.html#lineNumber44",
     "Registry",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber406",
+    "test-file/test/Registry.spec.js.html#lineNumber399",
     "Registry checkRegisteredURLs(info)",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber434",
+    "test-file/test/Registry.spec.js.html#lineNumber427",
     "Registry checkRegisteredURLs(info) should return a previously registered Data Object URL",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber408",
+    "test-file/test/Registry.spec.js.html#lineNumber401",
     "Registry checkRegisteredURLs(info) should return a previously registered Hyperty URL",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber422",
+    "test-file/test/Registry.spec.js.html#lineNumber415",
     "Registry checkRegisteredURLs(info) should return a undefined value if the Hyperty is not previously registered",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber449",
+    "test-file/test/Registry.spec.js.html#lineNumber442",
     "Registry checkRegisteredURLs(info) should return a undefined value if the dataObjectURL is not previously registered",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber461",
+    "test-file/test/Registry.spec.js.html#lineNumber454",
     "Registry checkRegisteredURLs(info) should return an hyperty url based on given address",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber174",
+    "test-file/test/Registry.spec.js.html#lineNumber136",
     "Registry constructor()",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber176",
+    "test-file/test/Registry.spec.js.html#lineNumber138",
     "Registry constructor() depends of the MessageBus",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber235",
+    "test-file/test/Registry.spec.js.html#lineNumber197",
     "Registry discoverProtostub(url)",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber237",
+    "test-file/test/Registry.spec.js.html#lineNumber199",
     "Registry discoverProtostub(url) should discover a ProtocolStub",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber181",
+    "test-file/test/Registry.spec.js.html#lineNumber143",
     "Registry getAppSandbox()",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber182",
+    "test-file/test/Registry.spec.js.html#lineNumber144",
     "Registry getAppSandbox() return AppSandbox()",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber511",
+    "test-file/test/Registry.spec.js.html#lineNumber504",
     "Registry getDataObjectSubscribers(dataObjectURL)",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber512",
+    "test-file/test/Registry.spec.js.html#lineNumber505",
     "Registry getDataObjectSubscribers(dataObjectURL) should return the list of pre authorised users",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber382",
+    "test-file/test/Registry.spec.js.html#lineNumber362",
     "Registry getHypertyName(hypertyURL)",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber383",
+    "test-file/test/Registry.spec.js.html#lineNumber363",
     "Registry getHypertyName(hypertyURL) should return the hyperty Name from a given hypertyURL",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber375",
+    "test-file/test/Registry.spec.js.html#lineNumber355",
     "Registry getHypertyOwner(hypertyURL)",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber376",
+    "test-file/test/Registry.spec.js.html#lineNumber356",
     "Registry getHypertyOwner(hypertyURL) should return the user associated to the hyperty URL",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber500",
+    "test-file/test/Registry.spec.js.html#lineNumber493",
     "Registry getPreAuthSubscribers(dataObjectURL)",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber501",
+    "test-file/test/Registry.spec.js.html#lineNumber494",
     "Registry getPreAuthSubscribers(dataObjectURL) should return the list of pre authorised users",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber480",
+    "test-file/test/Registry.spec.js.html#lineNumber473",
     "Registry getReporterURL(dataObjectURL)",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber490",
+    "test-file/test/Registry.spec.js.html#lineNumber483",
     "Registry getReporterURL(dataObjectURL) should not found the reporter the reporterURL associated with the dataobject URL",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber482",
+    "test-file/test/Registry.spec.js.html#lineNumber475",
     "Registry getReporterURL(dataObjectURL) should return the reporterURL associated with the dataobject URL",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber296",
-    "Registry getSandbox(url)",
+    "test-file/test/Registry.spec.js.html#lineNumber269",
+    "Registry getSandbox(url, constraints)",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber298",
-    "Registry getSandbox(url) should get a sandbox from a domain",
+    "test-file/test/Registry.spec.js.html#lineNumber294",
+    "Registry getSandbox(url, constraints) should get a sandbox from a domain",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber309",
-    "Registry getSandbox(url) should get a sandbox from a specific hypertyIstance",
+    "test-file/test/Registry.spec.js.html#lineNumber306",
+    "Registry getSandbox(url, constraints) should get a sandbox from a specific hypertyIstance",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber317",
-    "Registry getSandbox(url) should get a sandbox from a specific protostubURL",
+    "test-file/test/Registry.spec.js.html#lineNumber315",
+    "Registry getSandbox(url, constraints) should get a sandbox from a specific protostubURL",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber339",
-    "Registry getSandbox(url) should get a sandbox from another domain",
+    "test-file/test/Registry.spec.js.html#lineNumber284",
+    "Registry getSandbox(url, constraints) should get a sandbox from another domain",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber330",
-    "Registry getSandbox(url) should register a anotherdomain protoStub URL",
+    "test-file/test/Registry.spec.js.html#lineNumber275",
+    "Registry getSandbox(url, constraints) should register a anotherdomain protoStub URL",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber532",
+    "test-file/test/Registry.spec.js.html#lineNumber525",
     "Registry isLegacy(url)",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber534",
+    "test-file/test/Registry.spec.js.html#lineNumber527",
     "Registry isLegacy(url) should return a protostub",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber390",
+    "test-file/test/Registry.spec.js.html#lineNumber370",
     "Registry registerDataObject(identifier, dataObjectschema, dataObjectUrl, dataObjectReporter, authorise)",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber391",
+    "test-file/test/Registry.spec.js.html#lineNumber371",
     "Registry registerDataObject(identifier, dataObjectschema, dataObjectUrl, dataObjectReporter, authorise) should register a new Data Object in the runtime registry",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber280",
+    "test-file/test/Registry.spec.js.html#lineNumber242",
     "Registry registerHyperty(sandbox, descriptorURL, descriptor)",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber282",
+    "test-file/test/Registry.spec.js.html#lineNumber244",
     "Registry registerHyperty(sandbox, descriptorURL, descriptor) should register an Hyperty",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber255",
+    "test-file/test/Registry.spec.js.html#lineNumber217",
     "Registry registerPEP(postMessage, hyperty)",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber257",
+    "test-file/test/Registry.spec.js.html#lineNumber219",
     "Registry registerPEP(postMessage, hyperty) should register PEP",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber188",
+    "test-file/test/Registry.spec.js.html#lineNumber150",
     "Registry registerStub(sandBox, domainURL)",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber227",
+    "test-file/test/Registry.spec.js.html#lineNumber189",
     "Registry registerStub(sandBox, domainURL) should discover P2PHandlerStub",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber201",
+    "test-file/test/Registry.spec.js.html#lineNumber163",
     "Registry registerStub(sandBox, domainURL) should register a P2P Handler Stub",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber212",
+    "test-file/test/Registry.spec.js.html#lineNumber174",
     "Registry registerStub(sandBox, domainURL) should register a P2P Requester Stub",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber192",
+    "test-file/test/Registry.spec.js.html#lineNumber154",
     "Registry registerStub(sandBox, domainURL) should register a stub",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber351",
+    "test-file/test/Registry.spec.js.html#lineNumber327",
     "Registry resolve(url)",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber353",
+    "test-file/test/Registry.spec.js.html#lineNumber329",
     "Registry resolve(url) should return a protostub url",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber522",
+    "test-file/test/Registry.spec.js.html#lineNumber515",
     "Registry unregisterHyperty(url)",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber523",
+    "test-file/test/Registry.spec.js.html#lineNumber516",
     "Registry unregisterHyperty(url) should unregister an Hyperty",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber268",
+    "test-file/test/Registry.spec.js.html#lineNumber230",
     "Registry unregisterPEP(HypertyRuntimeURL)",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber270",
+    "test-file/test/Registry.spec.js.html#lineNumber232",
     "Registry unregisterPEP(HypertyRuntimeURL) should unregister PEP",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber363",
+    "test-file/test/Registry.spec.js.html#lineNumber343",
     "Registry unregisterStub(url)",
     "test"
   ],
   [
     "",
-    "test-file/test/Registry.spec.js.html#lineNumber365",
+    "test-file/test/Registry.spec.js.html#lineNumber345",
     "Registry unregisterStub(url) should unregister a ProtocolStub",
     "test"
   ],
   [
     "",
-    "test-file/test/DataSynchronisation.spec.js.html#lineNumber21",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber32",
     "RuntimeUA",
     "test"
   ],
   [
     "",
-    "test-file/test/PerformanceTests/RuntimeStubIdpDeploy.spec.js.html#lineNumber31",
+    "test-file/test/PerformanceTests/RuntimeStubIdpDeploy.spec.js.html#lineNumber32",
     "RuntimeUA",
     "test"
   ],
   [
     "",
-    "test-file/test/RuntimeUA.spec.js.html#lineNumber31",
-    "RuntimeUA",
+    "test-file/test/PerformanceTests/RuntimeStubIdpDeploy.spec.js.html#lineNumber85",
+    "RuntimeUA IDP Proxy should be deployed",
     "test"
   ],
   [
     "",
-    "test-file/test/DataSynchronisation.spec.js.html#lineNumber362",
-    "RuntimeUA Data Synch",
+    "test-file/test/PerformanceTests/RuntimeStubIdpDeploy.spec.js.html#lineNumber75",
+    "RuntimeUA Stub should be deployed",
     "test"
   ],
   [
     "",
-    "test-file/test/RuntimeUA.spec.js.html#lineNumber93",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber48",
     "RuntimeUA constructor()",
     "test"
   ],
   [
     "",
-    "test-file/test/PerformanceTests/RuntimeStubIdpDeploy.spec.js.html#lineNumber78",
-    "RuntimeUA constructor()",
-    "test"
-  ],
-  [
-    "",
-    "test-file/test/RuntimeUA.spec.js.html#lineNumber163",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber123",
     "RuntimeUA constructor() depends of the Identity Module",
     "test"
   ],
   [
     "",
-    "test-file/test/RuntimeUA.spec.js.html#lineNumber171",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber131",
     "RuntimeUA constructor() depends of the MessageBus",
     "test"
   ],
   [
     "",
-    "test-file/test/RuntimeUA.spec.js.html#lineNumber167",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber127",
     "RuntimeUA constructor() depends of the Policy Engine",
     "test"
   ],
   [
     "",
-    "test-file/test/RuntimeUA.spec.js.html#lineNumber159",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber119",
     "RuntimeUA constructor() depends of the Registry",
     "test"
   ],
   [
     "",
-    "test-file/test/RuntimeUA.spec.js.html#lineNumber95",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber50",
     "RuntimeUA constructor() expects the runtime was ready",
     "test"
   ],
   [
     "",
-    "test-file/test/PerformanceTests/RuntimeStubIdpDeploy.spec.js.html#lineNumber80",
-    "RuntimeUA constructor() should load Runtime with success",
-    "test"
-  ],
-  [
-    "",
-    "test-file/test/RuntimeUA.spec.js.html#lineNumber175",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber135",
     "RuntimeUA constructor() should throw when given no arguments",
     "test"
   ],
   [
     "",
-    "test-file/test/RuntimeUA.spec.js.html#lineNumber189",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber149",
     "RuntimeUA loadHyperty(hypertyDescriptorURL)",
     "test"
   ],
   [
     "",
-    "test-file/test/RuntimeUA.spec.js.html#lineNumber200",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber160",
     "RuntimeUA loadHyperty(hypertyDescriptorURL) should be a Promise",
     "test"
   ],
   [
     "",
-    "test-file/test/RuntimeUA.spec.js.html#lineNumber212",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber172",
     "RuntimeUA loadHyperty(hypertyDescriptorURL) should be deployed",
     "test"
   ],
   [
     "",
-    "test-file/test/RuntimeUA.spec.js.html#lineNumber236",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber196",
     "RuntimeUA loadHyperty(hypertyDescriptorURL) should load an hyperty based on given reuse URL address",
     "test"
   ],
   [
     "",
-    "test-file/test/RuntimeUA.spec.js.html#lineNumber224",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber184",
     "RuntimeUA loadHyperty(hypertyDescriptorURL) should load an hyperty based on given true value for the reuse",
     "test"
   ],
   [
     "",
-    "test-file/test/RuntimeUA.spec.js.html#lineNumber191",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber151",
     "RuntimeUA loadHyperty(hypertyDescriptorURL) should throw when given no arguments",
     "test"
   ],
   [
     "",
-    "test-file/test/RuntimeUA.spec.js.html#lineNumber286",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber246",
     "RuntimeUA loadIdpProxy(google.com)",
     "test"
   ],
   [
     "",
-    "test-file/test/PerformanceTests/RuntimeStubIdpDeploy.spec.js.html#lineNumber122",
-    "RuntimeUA loadIdpProxy(google.com)",
-    "test"
-  ],
-  [
-    "",
-    "test-file/test/PerformanceTests/RuntimeStubIdpDeploy.spec.js.html#lineNumber124",
-    "RuntimeUA loadIdpProxy(google.com) IDP Proxy should be deployed",
-    "test"
-  ],
-  [
-    "",
-    "test-file/test/RuntimeUA.spec.js.html#lineNumber295",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber255",
     "RuntimeUA loadIdpProxy(google.com) should be a Promise",
     "test"
   ],
   [
     "",
-    "test-file/test/RuntimeUA.spec.js.html#lineNumber304",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber264",
     "RuntimeUA loadIdpProxy(google.com) should be deployed",
     "test"
   ],
   [
     "",
-    "test-file/test/RuntimeUA.spec.js.html#lineNumber288",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber248",
     "RuntimeUA loadIdpProxy(google.com) should throw when given no arguments",
     "test"
   ],
   [
     "",
-    "test-file/test/PerformanceTests/RuntimeStubIdpDeploy.spec.js.html#lineNumber108",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber214",
     "RuntimeUA loadStub(sp-domain)",
     "test"
   ],
   [
     "",
-    "test-file/test/RuntimeUA.spec.js.html#lineNumber254",
-    "RuntimeUA loadStub(sp-domain)",
-    "test"
-  ],
-  [
-    "",
-    "test-file/test/PerformanceTests/RuntimeStubIdpDeploy.spec.js.html#lineNumber110",
-    "RuntimeUA loadStub(sp-domain) Stub should be deployed",
-    "test"
-  ],
-  [
-    "",
-    "test-file/test/RuntimeUA.spec.js.html#lineNumber263",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber223",
     "RuntimeUA loadStub(sp-domain) should be a Promise",
     "test"
   ],
   [
     "",
-    "test-file/test/RuntimeUA.spec.js.html#lineNumber272",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber232",
     "RuntimeUA loadStub(sp-domain) should be deployed",
     "test"
   ],
   [
     "",
-    "test-file/test/RuntimeUA.spec.js.html#lineNumber256",
+    "test-file/test/RuntimeUA.spec.js.html#lineNumber216",
     "RuntimeUA loadStub(sp-domain) should throw when given no arguments",
     "test"
   ],
   [
     "",
-    "test-file/test/DataSynchronisation.spec.js.html#lineNumber312",
-    "RuntimeUA should create a new data Object address",
-    "test"
-  ],
-  [
-    "",
-    "test-file/test/DataSynchronisation.spec.js.html#lineNumber291",
-    "RuntimeUA should create a new hyperty address for Reporter",
-    "test"
-  ],
-  [
-    "",
-    "test-file/test/DataSynchronisation.spec.js.html#lineNumber203",
+    "test-file/test/PerformanceTests/RuntimeStubIdpDeploy.spec.js.html#lineNumber41",
     "RuntimeUA should load Runtime with success",
     "test"
   ],
@@ -1837,116 +2125,32 @@ window.esdocSearchIndex = [
   ],
   [
     "",
-    "test-file/test/Descriptors.spec.js.html#lineNumber97",
-    "Should get configuration and parse to Descriptors should get protocolstub",
-    "test"
-  ],
-  [
-    "",
     "test-file/test/Descriptors.spec.js.html#lineNumber87",
     "Should get configuration and parse to Descriptors should get protocolstub",
     "test"
   ],
   [
     "",
-    "test-file/test/SyncherManager.spec.js.html#lineNumber18",
+    "test-file/test/Descriptors.spec.js.html#lineNumber97",
+    "Should get configuration and parse to Descriptors should get protocolstub",
+    "test"
+  ],
+  [
+    "",
+    "test-file/test/SyncherManager.spec.js.html#lineNumber20",
     "SyncherManager",
     "test"
   ],
   [
     "",
-    "test-file/test/PerformanceTests/DataSynchronisation.spec.js.html#lineNumber18",
-    "SyncherManager",
-    "test"
-  ],
-  [
-    "",
-    "test-file/test/PerformanceTests/DataSynchronisation.spec.js.html#lineNumber167",
-    "SyncherManager Data Synchronisation between reporter and observer",
-    "test"
-  ],
-  [
-    "",
-    "test-file/test/SyncherManager.spec.js.html#lineNumber882",
+    "test-file/test/SyncherManager.spec.js.html#lineNumber904",
     "SyncherManager children deltas generate and process",
     "test"
   ],
   [
     "",
-    "test-file/test/SyncherManager.spec.js.html#lineNumber922",
-    "SyncherManager create and delete",
-    "test"
-  ],
-  [
-    "",
-    "test-file/test/SyncherManager.spec.js.html#lineNumber829",
-    "SyncherManager observer addChild",
-    "test"
-  ],
-  [
-    "",
-    "test-file/test/SyncherManager.spec.js.html#lineNumber810",
-    "SyncherManager reporter addChild",
-    "test"
-  ],
-  [
-    "",
-    "test-file/test/SyncherManager.spec.js.html#lineNumber194",
-    "SyncherManager reporter observer integration",
-    "test"
-  ],
-  [
-    "",
-    "test-file/test/SyncherManager.spec.js.html#lineNumber167",
-    "SyncherManager reporter read",
-    "test"
-  ],
-  [
-    "",
-    "test-file/test/SyncherManager.spec.js.html#lineNumber251",
-    "SyncherManager should resume observers",
-    "test"
-  ],
-  [
-    "",
-    "test-file/test/PerformanceTests/DataSynchronisation.spec.js.html#lineNumber224",
-    "SyncherManager should resume observers",
-    "test"
-  ],
-  [
-    "",
-    "test-file/test/PerformanceTests/DataSynchronisation.spec.js.html#lineNumber286",
-    "SyncherManager should resume reporters",
-    "test"
-  ],
-  [
-    "",
-    "test-file/test/SyncherManager.spec.js.html#lineNumber313",
-    "SyncherManager should resume reporters",
-    "test"
-  ],
-  [
-    "",
-    "test-file/test/SyncherManager.spec.js.html#lineNumber1030",
+    "test-file/test/SyncherManager.spec.js.html#lineNumber1058",
     "SyncherManager should use the storageManager",
-    "test"
-  ],
-  [
-    "",
-    "test-file/test/SyncherManager.spec.js.html#lineNumber1109",
-    "SyncherManager should use the storageManager should resume the url stored on storageManager",
-    "test"
-  ],
-  [
-    "",
-    "test-file/test/SyncherManager.spec.js.html#lineNumber1038",
-    "SyncherManager should use the storageManager should save the url on storageManager",
-    "test"
-  ],
-  [
-    "",
-    "test-file/test/SyncherManager.spec.js.html#lineNumber984",
-    "SyncherManager subscribe and unsubscribe",
     "test"
   ],
   [
@@ -2202,12 +2406,6 @@ window.esdocSearchIndex = [
     "testFile"
   ],
   [
-    "test/datasynchronisation.spec.js",
-    "test-file/test/DataSynchronisation.spec.js.html",
-    "test/DataSynchronisation.spec.js",
-    "testFile"
-  ],
-  [
     "test/descriptors.spec.js",
     "test-file/test/Descriptors.spec.js.html",
     "test/Descriptors.spec.js",
@@ -2238,15 +2436,15 @@ window.esdocSearchIndex = [
     "testFile"
   ],
   [
-    "test/performancetests/datasynchronisation.spec.js",
-    "test-file/test/PerformanceTests/DataSynchronisation.spec.js.html",
-    "test/PerformanceTests/DataSynchronisation.spec.js",
+    "test/performancetests/addressallocation.spec.js",
+    "test-file/test/PerformanceTests/AddressAllocation.spec.js.html",
+    "test/PerformanceTests/AddressAllocation.spec.js",
     "testFile"
   ],
   [
-    "test/performancetests/hypertyregistration.spec.js",
-    "test-file/test/PerformanceTests/HypertyRegistration.spec.js.html",
-    "test/PerformanceTests/HypertyRegistration.spec.js",
+    "test/performancetests/datasynchronisation.spec.js",
+    "test-file/test/PerformanceTests/DataSynchronisation.spec.js.html",
+    "test/PerformanceTests/DataSynchronisation.spec.js",
     "testFile"
   ],
   [
