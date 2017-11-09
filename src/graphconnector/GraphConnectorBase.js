@@ -38,7 +38,13 @@ import Buffer from 'buffer';
 
 /**
  * The Graph Connector contains the contact list/address book.
+ *
+ * The GraphConnectorBase have some problems with the size due third party module;
+ *
  * @author beierle@tu-berlin.de
+ *
+ * @deprecated Due to some problems increase a lot the file size
+ *
  */
 class GraphConnector {
 

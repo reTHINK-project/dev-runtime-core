@@ -193,7 +193,19 @@ class IdentityModule {
   getIdentitiesToChoose() {
     let _this = this;
     let identities = _this.emailsList;
-    let idps = [{domain: 'google.com', type: 'idToken'}, {domain: 'microsoft.com', type: 'idToken'}, {domain: 'orange.fr', type: 'idToken'}, {domain: 'slack.com', type: 'Legacy'}];
+
+    // let idps = [
+    //   { domain: 'google.com', type: 'idToken'},
+    //   { domain: 'microsoft.com', type: 'idToken'},
+    //   { domain: 'orange.fr', type: 'idToken'},
+    //   { domain: 'slack.com', type: 'Legacy'}
+    // ];
+
+    let idps = [
+      { domain: 'google.com', type: 'idToken'},
+      { domain: 'microsoft.com', type: 'idToken'},
+      { domain: 'slack.com', type: 'Legacy'}
+    ];
 
     return {identities: identities, idps: idps};
   }

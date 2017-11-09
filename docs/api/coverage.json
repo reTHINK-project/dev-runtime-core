@@ -7,15 +7,15 @@
       "expectCount": 9,
       "actualCount": 8,
       "undocumentLines": [
-        40
+        44
       ]
     },
     "src/bus/MessageBus.js": {
       "expectCount": 7,
       "actualCount": 5,
       "undocumentLines": [
-        43,
-        53
+        48,
+        58
       ]
     },
     "src/bus/MiniBus.js": {
