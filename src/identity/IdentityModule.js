@@ -526,7 +526,7 @@ class IdentityModule {
           reject('Error on obtaining Identity');
         }
       }).catch(function(err) {
-        console.error(err);
+        log.error(err);
         reject(err);
       });
     });
@@ -546,7 +546,7 @@ class IdentityModule {
       _this.callIdentityModuleFunc('openPopup', {urlreceived: loginUrl}).then((idCode) => {
         return idCode;
       }, (err) => {
-        console.error('Error while logging in for the selected identity.');
+        log.error('Error while logging in for the selected identity.');
         return reject(err);
       }).then((idCode) => {
         _this.sendGenerateMessage(publicKey, origin, idCode, idp).then((newResponse) => {
@@ -555,7 +555,7 @@ class IdentityModule {
               resolve('Login was successfull');
             }).catch(err => { reject('Login has failed:' + err); });
           } else {
-            console.error('Error while logging in for the selected identity.');
+            log.error('Error while logging in for the selected identity.');
             return reject('Could not generate a valid assertion for selected identity.');
           }
         }).catch(err => { reject('On loginSelectedIdentity from method sendGenerateMessage error:  ' + err); });
@@ -590,7 +590,7 @@ class IdentityModule {
               return reject(err);
             });
           } else { // you should never get here, if you do then the IdP Proxy is not well implemented
-            // console.error('GenerateAssertion returned invalid response.');
+            // log.error('GenerateAssertion returned invalid response.');
             log.log('Proceeding by logging in.');
             _this.generateSelectedIdentity(publicKey, origin, idp, keyPair).then((value) => {
               return resolve(value);
@@ -860,7 +860,7 @@ class IdentityModule {
 
               let filteredMessage = _this._filterMessageToHash(message, message.body.value + iv, chatKeys.hypertyFrom.messageInfo);
 
-              _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, _this.crypto.encode(filteredMessage)).then(hash => {
+              _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, filteredMessage).then(hash => {
                 //log.log('result of hash ', hash);
                 let value = {iv: _this.crypto.encode(iv), value: _this.crypto.encode(encryptedValue), hash: _this.crypto.encode(hash)};
                 message.body.value = _this.crypto.encode(value);
@@ -919,8 +919,9 @@ class IdentityModule {
                 let iv = _this.crypto.generateIV();
 
                 _this.crypto.encryptAES(dataObjectKey.sessionKey, _this.crypto.encode(message.body.value), iv).then(encryptedValue => {
-
-                  let filteredMessage = _this._filterMessageToHash(message, message.body.value + iv, dataObjectKey.sessionKey);
+                  delete message.body.identity.assertion; //TODO: Check why assertion is comming on the message!
+                  delete message.body.identity.expires; //TODO: Check why expires is comming on the message!
+                  let filteredMessage = _this._filterMessageToHash(message, message.body.value + iv);
 
                   _this.crypto.hashHMAC(dataObjectKey.sessionKey, filteredMessage).then(hash => {
                     // log.log('hash ', hash);
@@ -1033,7 +1034,7 @@ class IdentityModule {
 
               let filteredMessage = _this._filterMessageToHash(message, decryptedData + iv);
 
-              _this.crypto.verifyHMAC(chatKeys.keys.hypertyToHashKey, _this.crypto.encode(filteredMessage), hash).then(result => {
+              _this.crypto.verifyHMAC(chatKeys.keys.hypertyToHashKey, filteredMessage, hash).then(result => {
                 //log.log('result of hash verification! ', result);
                 message.body.assertedIdentity = true;
                 resolve(message);
@@ -1045,7 +1046,7 @@ class IdentityModule {
 
               //if it was started by doMutualAuthentication then ends the protocol
               if (value === 'handShakeEnd') {
-                reject('decrypt handshake protocol phase ');
+                reject('decrypt handshake protocol phase');
 
               // if was started by a message, then resend that message
               } else {
@@ -1079,7 +1080,8 @@ class IdentityModule {
 
               _this.crypto.decryptAES(dataObjectKey.sessionKey, encryptedValue, iv).then(decryptedValue => {
                 let parsedValue = _this.crypto.decode(decryptedValue);
-                log.log('decrypted Value,', parsedValue);
+
+                // log.log('decrypted Value,', parsedValue);
                 message.body.value = parsedValue;
 
                 let filteredMessage = _this._filterMessageToHash(message, parsedValue + iv);
@@ -2074,7 +2076,7 @@ class IdentityModule {
             filteredMessage = _this._filterMessageToHash(receiverFinishedMessage, 'ok!' + iv, chatKeys.hypertyFrom.messageInfo);
 
             //log.log('TIAGO: doHandShakePhase verifiedHash');
-            return _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, receiverFinishedMessage);
+            return _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, filteredMessage);
           }).then(hash => {
 
             value.hash = _this.crypto.encode(hash);
@@ -2116,7 +2118,7 @@ class IdentityModule {
             // log.log('decryptedData', decryptedData);
             chatKeys.handshakeHistory.receiverFinishedMessage = _this._filterMessageToHash(message, decryptedData + iv);
 
-            let filteredMessage = _this._filterMessageToHash(message, data + iv);
+            let filteredMessage = _this._filterMessageToHash(message, decryptedData + iv);
             _this.crypto.verifyHMAC(chatKeys.keys.hypertyToHashKey, filteredMessage, hash).then(result => {
               // log.log('hash result', result);
 
