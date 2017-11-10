@@ -179,9 +179,10 @@ class RuntimeCoreCtx extends ReThinkCtx {
             let isFromRemoteSM = _this.isFromRemoteSM(message.from);
 
             if (isSubscription & isFromRemoteSM) {
+
               // TODO: should verify why the mutualAuthentication is not working
               // TODO: this should uncommented
-             _this.doMutualAuthentication(message).then(() => {
+              _this.doMutualAuthentication(message).then(() => {
                 resolve(message);
               }, (error) => {
                 reject(error);
@@ -285,6 +286,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
     let schemasToIgnore = ['domain-idp', 'runtime', 'domain'];
     let splitFrom = (message.from).split('://');
     let fromSchema = splitFrom[0];
+    let isLocal = this.runtimeRegistry.isLocal(message.to);
 
     let _from = message.from;
 
@@ -293,8 +295,11 @@ class RuntimeCoreCtx extends ReThinkCtx {
     }
 
     // Signalling Messages between P2P Stubs don't have Identities. FFS
-
     if (_from.includes('/p2prequester/') || _from.includes('/p2phandler/')) {
+      return false;
+    }
+
+    if (isLocal) {
       return false;
     }
 
@@ -309,6 +314,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
   _getIdentity(message) {
 
     let from = message.from;
+
     // log.log('[Policy.RuntimeCoreCtx.getIdentity] ', message);
     let sourceURL = undefined;
     if (message.body.source !== undefined) {
