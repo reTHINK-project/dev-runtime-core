@@ -47,26 +47,25 @@ class HypertyResourcesStorage {
 
     if (!message.body || !message.body.value) throw new Error('[HypertyResourcesStorage._onCreate] mandatory message body value missing: ', message);
 
-    let contentUrl = _this._url + '/' + generateGUID();
-
     let content = message.body.value;
-    let resourceURL = message.body.value.url;
+    let contentURL = content.contentURL;
+    let resourceURL = '';
 
-    // TODO: should verify if the current ressource already exists;
-    // because when we, in the app, and did read to a resource a new create was sended;
-    // we should control this;
-    let resourceFind = Object.keys(_this._hypertyResources).find(item => _this._hypertyResources[item].url === resourceURL);
+    if (!contentURL) {
 
-    // // log.log('Resource Find: ', resourceFind);
-    if (resourceFind) {
-      return;
+      contentURL = [];
+      resourceURL = _this._url + '/' + generateGUID();
+
+    } else {
+      const currentURL = contentURL[0];
+      const resource = currentURL.substr(currentURL.lastIndexOf('/') + 1);
+      resourceURL = _this._url + '/' + resource;
     }
 
-    if (!content.contentURL) content.contentURL = [];
+    contentURL.push(resourceURL);
+    content.contentURL = contentURL;
 
-    content.contentURL.push(contentUrl);
-
-    _this._hypertyResources[contentUrl] = content;
+    _this._hypertyResources[resourceURL] = content;
 
     _this._storageManager.set('hypertyResources', 1, _this._hypertyResources).then(() => {
       let response = {
@@ -74,7 +73,7 @@ class HypertyResourcesStorage {
         to: message.from,
         id: message.id,
         type: 'response',
-        body: { value: contentUrl, code: 200 }
+        body: { value: resourceURL, code: 200 }
       };
 
       _this._bus.postMessage(response);
@@ -151,7 +150,15 @@ class HypertyResourcesStorage {
       reader.readAsText(resource.content);
     } else {
       const current = resource.content;
-      reader.readAsArrayBuffer(current);
+
+      let blob;
+      if (Array.isArray(current)) {
+        blob = new Blob(current, { type: resource.mimetype});
+      } else {
+        blob = new Blob([current], { type: resource.mimetype});
+      }
+
+      reader.readAsArrayBuffer(blob);
     }
   }
 

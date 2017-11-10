@@ -23,7 +23,7 @@
 
 // import 'babel-polyfill';
 
-import '../logLevels';
+import { log as logLevels } from '../logLevels';
 
 // Log System
 import * as logger from 'loglevel';
@@ -87,6 +87,7 @@ class RuntimeUA {
     this.runtimeCatalogue = runtimeFactory.createRuntimeCatalogue();
 
     this.log = log;
+    this.logLevels = logLevels;
 
     if (runtimeDescriptor.p2pHandlerStub && typeof runtimeDescriptor.p2pHandlerStub  === 'string' && runtimeDescriptor.p2pHandlerStub.includes('://')) {
       this.p2p = true;
