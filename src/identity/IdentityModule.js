@@ -455,25 +455,25 @@ class IdentityModule {
       let message = {type: 'create', to: _this._guiURL, from: _this._idmURL,
         body: {value: {identities: identities, idps: idps}}};
 
-      let id = _this._messageBus.postMessage(message);
+      let callback = msg => {
+        _this._messageBus.removeResponseListener(_this._idmURL, msg.id);
 
-      //add listener without timout
+
+        // todo: to return the user URL and not the email or identifier
+
+        if (msg.body.code === 200) {
+          let selectedIdentity = msg.body;
+
+          log.log('selectedIdentity: ', selectedIdentity.value);
+          resolve(selectedIdentity);
+        } else {
+          reject('error on requesting an identity to the GUI');
+        }
+      };
+
+      //postMessage with callback but without timeout
       try {
-        _this._messageBus.addResponseListener(_this._idmURL, id, msg => {
-          _this._messageBus.removeResponseListener(_this._idmURL, id);
-
-
-          // todo: to return the user URL and not the email or identifier
-
-          if (msg.body.code === 200) {
-            let selectedIdentity = msg.body;
-
-            log.log('selectedIdentity: ', selectedIdentity.value);
-            resolve(selectedIdentity);
-          } else {
-            reject('error on requesting an identity to the GUI');
-          }
-        });
+        _this._messageBus.postMessage(message, callback, false);
       } catch (err) {
         reject('In method callIdentityModuleFunc error: ' + err);
       }
@@ -752,15 +752,17 @@ class IdentityModule {
 
       let message = { type: 'execute', to: _this._guiURL, from: _this._idmURL,
         body: { resource: 'identity', method: methodName, params: parameters } };
-      let id = _this._messageBus.postMessage(message);
 
-      //add listener without timout
-      try {
-        _this._messageBus.addResponseListener(_this._idmURL, id, msg => {
-          _this._messageBus.removeResponseListener(_this._idmURL, id);
+        //post msg with callback but without timout
+        let callback = msg => {
+          _this._messageBus.removeResponseListener(_this._idmURL, msg.id);
           let result = msg.body.value;
           resolve(result);
-        });
+        };
+        try {
+
+      _this._messageBus.postMessage(message, callback, false);
+
       } catch (err) {
         reject('In method callIdentityModuleFunc error: ' + err);
       }

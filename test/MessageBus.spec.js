@@ -4,7 +4,7 @@ import MessageBus from '../src/bus/MessageBus';
 let expect = chai.expect;
 
 describe('MessageBus', function() {
-  it('sending message', function(done) {
+  it.('sending message', function(done) {
     let msgResult;
 
     let mockRegistry = {
@@ -36,7 +36,7 @@ describe('MessageBus', function() {
     });
   });
 
-  it('pipeline msg change', function(done) {
+  it.('pipeline msg change', function(done) {
     let mBus = new MessageBus();
     mBus.pipeline.handlers = [
       function(ctx) {
@@ -53,7 +53,7 @@ describe('MessageBus', function() {
     mBus.postMessage({ type: 'ping', from: 'hyper-1', to: 'hyper-2' });
   });
 
-  it('sending using external system', function(done) {
+  it.('sending using external system', function(done) {
     let msgResult;
 
     let mockRegistry = {
@@ -86,7 +86,7 @@ describe('MessageBus', function() {
 
   });
 
-  it('publish unique messages', function(done) {
+  it.('publish unique messages', function(done) {
     let result = { obj1: 0, obj2: 0 };
 
     let msgBus = new MessageBus();
@@ -109,5 +109,31 @@ describe('MessageBus', function() {
         done();
       });
     });
+  });
+  it('sending without callback and without pipeline processing', function(done) {
+    let mockRegistry = {
+      resolve() {
+        return new Promise((resolve) => {
+          //resolve to default
+          resolve('error');
+        });
+      }
+    };
+
+    let mBus = new MessageBus(mockRegistry);
+
+    let msg = { type: 'create', from: 'runtime://local/123/idm', to: 'runtime://local/123/identity-gui' };
+
+    mBus.addListener('runtime://local/123/identity-gui', (msg) => {
+
+      mBus.postMessage({type: 'response', id: msg.id, from: msg.to, to: msg.from, body: {code: 200}});
+    });
+
+    mBus.postMessage(msg, (reply) => {
+       console.log('[MessageBus.test sending without callback and without pipeline processing] reply:', reply);
+       mBus.removeResponseListener(msg.to, reply.id);
+      expect(reply).to.eql({ id: 1, type: 'response', from: 'runtime://local/123/identity-gui', to: 'runtime://local/123/idm' , body: {code: 200}});
+      done();
+    }, false);
   });
 });

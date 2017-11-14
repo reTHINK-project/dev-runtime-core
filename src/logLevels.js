@@ -60,13 +60,13 @@ d.setLevel(5);
 e.setLevel(5);
 
 // HypertyResourcesStorage
-f.setLevel(0);
+f.setLevel(5);
 
 // IdentityModule
 g.setLevel(0);
 
 // PEP
-h.setLevel(5);
+h.setLevel(0);
 
 // P2PConnectionResolve
 i.setLevel(0);
@@ -81,7 +81,7 @@ k.setLevel(0);
 l.setLevel(0);
 
 // Descriptors
-m.setLevel(0);
+m.setLevel(5);
 
 // DataObjectsStorage
 n.setLevel(5);
@@ -93,10 +93,10 @@ o.setLevel(5);
 p.setLevel(5);
 
 // ObserverObject
-q.setLevel(3);
+q.setLevel(5);
 
 // ReporterObject
-r.setLevel(3);
+r.setLevel(5);
 
 // SynSubscription
 s.setLevel(3);

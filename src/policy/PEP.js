@@ -257,6 +257,7 @@ class PEP {
 
   /**
   * Identifies the messages to be verified by the Policy Engine
+  * @deprecated
   * @param    {Message}   message
   * @returns  {boolean}   returns true if the message requires encryption/decryption
   *                       or if its type equals 'handshake'; false otherwise

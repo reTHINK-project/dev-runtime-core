@@ -286,19 +286,20 @@ class RuntimeUA {
         // Instantiate the Policy Engine
         this.policyEngine = new PEP(new RuntimeCoreCtx(this.runtimeURL, this.identityModule, this.registry, this.storageManager, this.runtimeCapabilities));
 
-        this.messageBus.pipeline.handlers = [
+        // Policy message authorise
+        let pepHandler = (ctx) => {
+                    this.policyEngine.authorise(ctx.msg).then((changedMgs) => {
+                      ctx.msg = changedMgs;
+                      ctx.next();
+                    }).catch((reason) => {
+                      log.error(reason);
+                      ctx.fail(reason);
+                    });
+                  };
 
-          // Policy message authorise
-          (ctx) => {
-            this.policyEngine.authorise(ctx.msg).then((changedMgs) => {
-              ctx.msg = changedMgs;
-              ctx.next();
-            }).catch((reason) => {
-              log.error(reason);
-              ctx.fail(reason);
-            });
-          }
-        ];
+
+        this.messageBus.pipelineIn.handlers = [pepHandler];
+        this.messageBus.pipelineOut.handlers = [pepHandler];
 
         // Instantiate the Graph Connector
         this.graphConnector = process.env.MODE !== 'light' ? new GraphConnector(this.runtimeURL, this.messageBus, this.storageManager) : null;
