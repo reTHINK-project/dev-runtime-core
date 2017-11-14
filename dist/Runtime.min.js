@@ -1,5 +1,63 @@
 // version: 0.10.0
+// date: Tue Nov 14 2017 15:13:16 GMT+0000 (GMT Standard Time)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.10.0
+// date: Tue Nov 14 2017 15:13:16 GMT+0000 (GMT Standard Time)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.10.0
+<<<<<<< HEAD
 // date: Tue Nov 14 2017 13:53:44 GMT+0000 (GMT Standard Time)
+=======
+// date: Tue Nov 14 2017 15:01:27 GMT+0000 (WET)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -26,7 +84,11 @@
 
 
 // version: 0.10.0
+<<<<<<< HEAD
 // date: Tue Nov 14 2017 13:53:45 GMT+0000 (GMT Standard Time)
+=======
+// date: Tue Nov 14 2017 15:01:27 GMT+0000 (WET)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -53,7 +115,11 @@
 
 
 // version: 0.10.0
+<<<<<<< HEAD
 // date: Tue Nov 14 2017 13:06:47 GMT+0000 (GMT Standard Time)
+=======
+// date: Tue Nov 14 2017 10:07:50 GMT+0000 (WET)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -80,7 +146,11 @@
 
 
 // version: 0.10.0
+<<<<<<< HEAD
 // date: Tue Nov 14 2017 13:06:47 GMT+0000 (GMT Standard Time)
+=======
+// date: Tue Nov 14 2017 10:07:50 GMT+0000 (WET)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -107,7 +177,11 @@
 
 
 // version: 0.10.0
+<<<<<<< HEAD
 // date: Tue Nov 14 2017 13:02:45 GMT+0000 (GMT Standard Time)
+=======
+// date: Mon Nov 13 2017 12:58:45 GMT+0000 (WET)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -134,7 +208,11 @@
 
 
 // version: 0.10.0
+<<<<<<< HEAD
 // date: Tue Nov 14 2017 13:02:45 GMT+0000 (GMT Standard Time)
+=======
+// date: Mon Nov 13 2017 12:58:45 GMT+0000 (WET)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -161,7 +239,11 @@
 
 
 // version: 0.10.0
+<<<<<<< HEAD
 // date: Tue Nov 14 2017 12:55:28 GMT+0000 (GMT Standard Time)
+=======
+// date: Mon Nov 13 2017 12:57:41 GMT+0000 (WET)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -188,7 +270,11 @@
 
 
 // version: 0.10.0
+<<<<<<< HEAD
 // date: Tue Nov 14 2017 12:55:28 GMT+0000 (GMT Standard Time)
+=======
+// date: Mon Nov 13 2017 12:57:41 GMT+0000 (WET)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -215,7 +301,11 @@
 
 
 // version: 0.10.0
+<<<<<<< HEAD
 // date: Tue Nov 14 2017 10:16:14 GMT+0000 (GMT Standard Time)
+=======
+// date: Mon Nov 13 2017 12:51:44 GMT+0000 (WET)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -242,7 +332,11 @@
 
 
 // version: 0.10.0
+<<<<<<< HEAD
 // date: Tue Nov 14 2017 10:16:14 GMT+0000 (GMT Standard Time)
+=======
+// date: Mon Nov 13 2017 12:51:44 GMT+0000 (WET)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -269,7 +363,11 @@
 
 
 // version: 0.10.0
+<<<<<<< HEAD
 // date: Tue Nov 14 2017 09:38:33 GMT+0000 (GMT Standard Time)
+=======
+// date: Mon Nov 13 2017 12:42:58 GMT+0000 (WET)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -296,7 +394,11 @@
 
 
 // version: 0.10.0
+<<<<<<< HEAD
 // date: Tue Nov 14 2017 09:38:33 GMT+0000 (GMT Standard Time)
+=======
+// date: Mon Nov 13 2017 12:42:58 GMT+0000 (WET)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -323,7 +425,11 @@
 
 
 // version: 0.10.0
+<<<<<<< HEAD
 // date: Mon Nov 13 2017 21:37:47 GMT+0000 (GMT Standard Time)
+=======
+// date: Mon Nov 13 2017 12:37:04 GMT+0000 (WET)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -350,7 +456,11 @@
 
 
 // version: 0.10.0
+<<<<<<< HEAD
 // date: Mon Nov 13 2017 21:37:47 GMT+0000 (GMT Standard Time)
+=======
+// date: Mon Nov 13 2017 12:37:04 GMT+0000 (WET)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -377,7 +487,11 @@
 
 
 // version: 0.10.0
+<<<<<<< HEAD
 // date: Mon Nov 13 2017 21:33:53 GMT+0000 (GMT Standard Time)
+=======
+// date: Mon Nov 13 2017 12:22:36 GMT+0000 (WET)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -404,7 +518,11 @@
 
 
 // version: 0.10.0
+<<<<<<< HEAD
 // date: Mon Nov 13 2017 21:33:53 GMT+0000 (GMT Standard Time)
+=======
+// date: Mon Nov 13 2017 12:22:36 GMT+0000 (WET)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -431,7 +549,11 @@
 
 
 // version: 0.10.0
+<<<<<<< HEAD
 // date: Mon Nov 13 2017 21:32:46 GMT+0000 (GMT Standard Time)
+=======
+// date: Mon Nov 13 2017 12:18:36 GMT+0000 (WET)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -458,7 +580,11 @@
 
 
 // version: 0.10.0
+<<<<<<< HEAD
 // date: Mon Nov 13 2017 21:32:46 GMT+0000 (GMT Standard Time)
+=======
+// date: Mon Nov 13 2017 12:18:36 GMT+0000 (WET)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -485,7 +611,11 @@
 
 
 // version: 0.10.0
+<<<<<<< HEAD
 // date: Mon Nov 13 2017 21:28:19 GMT+0000 (GMT Standard Time)
+=======
+// date: Mon Nov 13 2017 12:13:22 GMT+0000 (WET)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -512,7 +642,11 @@
 
 
 // version: 0.10.0
+<<<<<<< HEAD
 // date: Mon Nov 13 2017 21:28:19 GMT+0000 (GMT Standard Time)
+=======
+// date: Mon Nov 13 2017 12:13:22 GMT+0000 (WET)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -539,7 +673,11 @@
 
 
 // version: 0.10.0
+<<<<<<< HEAD
 // date: Mon Nov 13 2017 21:25:43 GMT+0000 (GMT Standard Time)
+=======
+// date: Mon Nov 13 2017 11:19:06 GMT+0000 (WET)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -566,7 +704,11 @@
 
 
 // version: 0.10.0
+<<<<<<< HEAD
 // date: Mon Nov 13 2017 21:25:43 GMT+0000 (GMT Standard Time)
+=======
+// date: Mon Nov 13 2017 11:19:06 GMT+0000 (WET)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -593,7 +735,11 @@
 
 
 // version: 0.10.0
+<<<<<<< HEAD
 // date: Mon Nov 13 2017 19:35:57 GMT+0000 (GMT Standard Time)
+=======
+// date: Mon Nov 13 2017 11:05:28 GMT+0000 (WET)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -620,7 +766,65 @@
 
 
 // version: 0.10.0
+<<<<<<< HEAD
 // date: Mon Nov 13 2017 19:35:57 GMT+0000 (GMT Standard Time)
+=======
+// date: Mon Nov 13 2017 11:05:28 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.10.0
+// date: Mon Nov 13 2017 10:58:27 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.10.0
+// date: Mon Nov 13 2017 10:58:27 GMT+0000 (WET)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA

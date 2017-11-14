@@ -287,6 +287,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
     let splitFrom = (message.from).split('://');
     let fromSchema = splitFrom[0];
     let isLocal = this.runtimeRegistry.isLocal(message.to);
+    let isToIgnore = schemasToIgnore.indexOf(fromSchema) === -1;
 
     let _from = message.from;
 
@@ -299,11 +300,11 @@ class RuntimeCoreCtx extends ReThinkCtx {
       return false;
     }
 
-    if (isLocal) {
-      return false;
-    }
+    // if (isLocal) {
+    //   return false;
+    // }
 
-    return schemasToIgnore.indexOf(fromSchema) === -1;
+    return isToIgnore;
   }
 
   getURL(url) {
