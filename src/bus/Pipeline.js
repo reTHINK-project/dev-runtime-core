@@ -26,6 +26,9 @@
 * Sequencial processor of methods. Similar to how Sequential Promise's work, but better fit for message processing.
 * Normal use for this, is to intercept all messages with configured handlers, and act accordingly.
 */
+
+import {isDataObjectURL} from '../utils/utils';
+
 class Pipeline {
   /* public
     handlers: ((PipeContext) => void)[]
@@ -125,6 +128,47 @@ class PipeContext {
         _this._pipeline.onFail(error);
       }
     }
+  }
+
+  isToSetID(message) {
+    let schemasToIgnore = ['domain-idp', 'runtime', 'domain'];
+    let splitFrom = (message.from).split('://');
+    let fromSchema = splitFrom[0];
+    let isToIgnore = schemasToIgnore.indexOf(fromSchema) === -1;
+
+    let _from = message.from;
+
+    if (message.body && message.body.hasOwnProperty('source')) {
+      _from = message.body.source;
+    }
+
+    // Signalling Messages between P2P Stubs don't have Identities. FFS
+    if (_from.includes('/p2prequester/') || _from.includes('/p2phandler/')) {
+      return false;
+    }
+
+    return isToIgnore;
+  }
+
+  /**
+  * Identifies the messages to be forwarded to the Identity Module for
+  * encryption/decryption and integrity validation.
+  * @param {Message}    message
+  * @returns {boolean}  returns true if the message requires encryption/decryption
+  *                     or if its type equals 'handshake'; false otherwise
+  */
+
+  isToCypherModule(message) {
+    log.log('[Policy.RuntimeCoreCtx.istoChyperModule]', message);
+    let isCreate = message.type === 'create';
+    let isFromHyperty = message.from.includes('hyperty://');
+    let isToHyperty = message.to.includes('hyperty://');
+    let isToDataObject = isDataObjectURL(message.to);
+
+    let doMutualAuthentication = message.body.hasOwnProperty('mutual') ? message.body.mutual : true;
+
+
+    return ((isCreate && isFromHyperty && isToHyperty) || (isCreate && isFromHyperty && isToDataObject && doMutualAuthentication) || message.type === 'handshake' || (message.type === 'update' && doMutualAuthentication));
   }
 }
 

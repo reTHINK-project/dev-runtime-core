@@ -20,6 +20,7 @@ const q = log.getLogger('ObserverObject');
 const r = log.getLogger('ReporterObject');
 const s = log.getLogger('SynSubscription');
 const t = log.getLogger('SyncherManager');
+const u = log.getLogger('IdentityManager');
 
 
 export { log };
@@ -103,3 +104,6 @@ s.setLevel(3);
 
 // SyncherManager
 t.setLevel(3);
+
+// IdentityManager
+t.setLevel(0);

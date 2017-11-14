@@ -282,6 +282,8 @@ class RuntimeCoreCtx extends ReThinkCtx {
     return this.runtimeRegistry.isInterworkingProtoStub(url);
   }
 
+  // @deprecated
+
   _isToSetID(message) {
     let schemasToIgnore = ['domain-idp', 'runtime', 'domain'];
     let splitFrom = (message.from).split('://');

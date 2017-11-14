@@ -127,6 +127,9 @@ class MessageBus extends Bus {
       return false;
     }
 
+    if (this._registry.isLocal(from) && this._registry.isLocal(message.to))
+      return false;
+
     if (message.from === fromSchema || message.to === toSchema || message.type === 'read' || message.type === 'response' || (message.from.includes('hyperty://') && message.type === 'delete')) {
       return false;
     } else {
@@ -138,27 +141,27 @@ class MessageBus extends Bus {
     let from;
 
     if (message.type === 'forward') {
-      log.info('[PEP - isIncomingMessage] - message.type: ', message.type);
+      log.info('[MessageBus - isIncomingMessage] - message.type: ', message.type);
       from = message.body.from;
-    } else if (message.body.hasOwnProperty('source') && message.body.source) {
-      log.info('[PEP - isIncomingMessage] - message.body.source: ', message.body.source);
+    } else if (message.hasOwnProperty('body') && message.body.hasOwnProperty('source') && message.body.source) {
+      log.info('[MessageBus - isIncomingMessage] - message.body.source: ', message.body.source);
       from = message.body.source;
-    } else if (message.body.hasOwnProperty('subscriber') && message.body.subscriber) {
+    } else if (message.hasOwnProperty('body') && message.body.hasOwnProperty('subscriber') && message.body.subscriber) {
       //TODO: this subscriber validation should not exist, because is outdated
       //TODO: the syncher and syncher manager not following the correct spec;
-      log.info('[PEP - isIncomingMessage] - message.body.subscriber: ', message.body.subscriber);
+      log.info('[MessageBus - isIncomingMessage] - message.body.subscriber: ', message.body.subscriber);
       from = message.body.subscriber;
-    }  else if (message.body.hasOwnProperty('reporter') && message.body.reporter) {
+    }  else if (message.hasOwnProperty('body') && message.body.hasOwnProperty('reporter') && message.body.reporter) {
       //TODO: this subscriber validation should not exist, because is outdated
       //TODO: the syncher and syncher manager not following the correct spec;
-      log.info('[PEP - isIncomingMessage] - message.body.reporter: ', message.body.reporter);
+      log.info('[MessageBus - isIncomingMessage] - message.body.reporter: ', message.body.reporter);
       from = message.body.reporter;
     } else {
-      log.info('[PEP - isIncomingMessage] - message.from ', message.from);
+      log.info('[MessageBus - isIncomingMessage] - message.from ', message.from);
       from = message.from;
     }
 
-    log.info('[PEP - isIncomingMessage] - check if isLocal: ', from);
+    log.info('[MessageBus - isIncomingMessage] - check if isLocal: ', from);
     return !this._registry.isLocal(from);
   }
 

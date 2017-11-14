@@ -32,6 +32,7 @@ let log = logger.getLogger('RuntimeUA');
 //Main dependecies
 import Registry from '../registry/Registry';
 import IdentityModule from '../identity/IdentityModule';
+import IdentityManager from '../identity/IdentityManager';
 import PEP from '../policy/PEP';
 import MessageBus from '../bus/MessageBus';
 import { generateGUID } from '../utils/utils';
@@ -286,20 +287,33 @@ class RuntimeUA {
         // Instantiate the Policy Engine
         this.policyEngine = new PEP(new RuntimeCoreCtx(this.runtimeURL, this.identityModule, this.registry, this.storageManager, this.runtimeCapabilities));
 
+        // Instantiate the IdentityManager
+        this.identityManager = new IdentityManager( this.identityModule);
+
         // Policy message authorise
         let pepHandler = (ctx) => {
-                    this.policyEngine.authorise(ctx.msg).then((changedMgs) => {
-                      ctx.msg = changedMgs;
-                      ctx.next();
-                    }).catch((reason) => {
-                      log.error(reason);
-                      ctx.fail(reason);
-                    });
-                  };
+          this.policyEngine.authorise(ctx.msg).then((changedMgs) => {
+            ctx.msg = changedMgs;
+            ctx.next();
+          }).catch((reason) => {
+            log.error(reason);
+            ctx.fail(reason);
+          });
+        };
 
+        let idmHandler = (ctx) => {
+          if (ctx.isToSetID) {
+            this.identityManager.processMessage(ctx.msg).then((changedMgs) => {
+              ctx.msg = changedMgs;
+              ctx.next();
+            }).catch((reason) => {
+              log.error(reason);
+              ctx.fail(reason);
+            });
+          }
+        };
 
-        this.messageBus.pipelineIn.handlers = [pepHandler];
-        this.messageBus.pipelineOut.handlers = [pepHandler];
+        this.messageBus.pipelineOut.handlers = [idmHandler];
 
         // Instantiate the Graph Connector
         this.graphConnector = process.env.MODE !== 'light' ? new GraphConnector(this.runtimeURL, this.messageBus, this.storageManager) : null;
