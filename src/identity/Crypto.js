@@ -37,21 +37,39 @@ class Crypto {
   * @return  {byteArray} decodedValue
   */
   decode(value) {
-//    CLog('Before dec val', value);
-    return JSON.parse(atob(value));
-//    CLog('After dec val TXT: ', atob(value));
-//    CLog('After dec val: ', decoded);
+    //    CLog('Before dec val', value);
+    try {
+      return JSON.parse(atob(value));
+    } catch (err) {
+      console.log('decode:' + err);
+      throw err;
+    }
   }
 
-  decodeToUint8Array(value) { //TODO: Add some verification to atob
+  decodeToUint8Array(value) {
+    try {
 
-    let receivedArrayObject = JSON.parse(atob(value));
-    let receivedArray = Object.keys(receivedArrayObject).map((key) => {
-      return receivedArrayObject[key];
-    });
+      let receivedArray  = undefined;
 
-    let unsigned8Array = new Uint8Array(receivedArray);
-    return unsigned8Array;
+      //TODO: The verification if the string contains the \" mutch be checked since it might fail
+      if (atob(value).indexOf('"') > -1) {
+        const receivedArrayObject = JSON.parse(atob(value));
+        receivedArray = Object.keys(receivedArrayObject).map((key) => {
+          return receivedArrayObject[key];
+        });
+      } else {
+        receivedArray = JSON.parse('[' + atob(value) + ']');
+      }
+
+
+      let unsigned8Array = new Uint8Array(receivedArray);
+      return unsigned8Array;
+
+    } catch (err) {
+      console.log('decodeToUint8Array:err' + err);
+      throw err;
+    }
+
   }
 
   encryptRSA(pubKey, data) {
@@ -304,8 +322,7 @@ class Crypto {
 
         if (typeof data != 'string') {
           data = JSON.stringify(data);
-          CLog('Converting verifyHMAC inputed DATA');
-          CLog('VVerifyHMAC:', data);
+          CLog('Converting verifyHMAC inputed DATA:', data);
         }
 
         //CLog('TIAGO: verifyHMAC data', data);
@@ -320,6 +337,7 @@ class Crypto {
         .then(function(isvalid) {
           //returns a boolean on whether the signature is true or not
           // CLog('crypto-verifyHMAC', isvalid);
+          console.log('verifyHMAC result', isvalid);
           (isvalid) ? resolve(isvalid) : reject(isvalid);
 
         }).catch(function(err) {
@@ -742,7 +760,7 @@ class Crypto {
 }
 
 function CLog(a1, a2) {
-  //console.log(a1, a2);
+  console.log(a1, a2);
 }
 
 
