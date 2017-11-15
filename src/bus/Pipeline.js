@@ -132,9 +132,6 @@ class PipeContext {
 
   isToSetID(message) {
     let schemasToIgnore = ['domain-idp', 'runtime', 'domain'];
-    let splitFrom = (message.from).split('://');
-    let fromSchema = splitFrom[0];
-    let isToIgnore = schemasToIgnore.indexOf(fromSchema) === -1;
 
     let _from = message.from;
 
@@ -142,10 +139,18 @@ class PipeContext {
       _from = message.body.source;
     }
 
+    if (message.body && message.body.hasOwnProperty('subscriber')) {
+      _from = message.body.subscriber;
+    }
+
     // Signalling Messages between P2P Stubs don't have Identities. FFS
     if (_from.includes('/p2prequester/') || _from.includes('/p2phandler/')) {
       return false;
     }
+
+    let splitFrom = (_from).split('://');
+    let fromSchema = splitFrom[0];
+    let isToIgnore = schemasToIgnore.indexOf(fromSchema) === -1;
 
     return isToIgnore;
   }

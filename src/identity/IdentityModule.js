@@ -4,7 +4,7 @@ let log = logger.getLogger('IdentityModule');
 
 import {divideURL, getUserEmailFromURL, isDataObjectURL, getUserIdentityDomain, isLegacy } from '../utils/utils.js';
 import Identity from './Identity';
-import Crypto from './Crypto';
+import Crypto from '../cryptoManager/Crypto';
 import GuiFake from './GuiFake';
 import { WatchingYou } from 'service-framework/dist/Utils';
 

@@ -37,6 +37,7 @@ import PEP from '../policy/PEP';
 import MessageBus from '../bus/MessageBus';
 import { generateGUID } from '../utils/utils';
 import AddressAllocation from '../allocation/AddressAllocation';
+import * as cryptoManager from '../cryptoManager/CryptoManager';
 
 import Loader from './Loader';
 import Descriptors from './Descriptors';
@@ -287,8 +288,16 @@ class RuntimeUA {
         // Instantiate the Policy Engine
         this.policyEngine = new PEP(new RuntimeCoreCtx(this.runtimeURL, this.identityModule, this.registry, this.storageManager, this.runtimeCapabilities));
 
+        // Instantiate Discovery
+        this.coreDiscovery = new CoreDiscovery(this.runtimeURL, this.messageBus, this.graphConnector, this.runtimeFactory, this.registry);
+
         // Instantiate the IdentityManager
         this.identityManager = new IdentityManager( this.identityModule);
+
+        // initialise the CryptoManager
+        cryptoManager.default.init(this.runtimeURL, this.runtimeCapabilities, this.storageManager, this._dataObjectsStorage, this.registry, this.coreDiscovery);
+
+
 
         // TODO: move msg bus definition to a separate busHandlers.js file
 
@@ -318,7 +327,7 @@ class RuntimeUA {
 
         // Add Identity info to messages
         let idmHandler = (ctx) => {
-          if (ctx.isToSetID) {
+          if (ctx.isToSetID(ctx.msg)) {
             this.identityManager.processMessage(ctx.msg).then((changedMgs) => {
               ctx.msg = changedMgs;
               ctx.next();
@@ -329,19 +338,43 @@ class RuntimeUA {
           }
         };
 
+        // encrypt messages
+        let encryptHandler = (ctx) => {
+          if (ctx.isToCypherModule(ctx.msg)) {
+            cryptoManager.default.encryptMessage(ctx.msg).then((changedMgs) => {
+              ctx.msg = changedMgs;
+              ctx.next();
+            }).catch((reason) => {
+              log.error(reason);
+              ctx.fail(reason);
+            });
+          }
+        };
+
+        // decrypt messages
+        let decryptHandler = (ctx) => {
+            cryptoManager.default.decryptMessage(ctx.msg).then((changedMgs) => {
+              ctx.msg = changedMgs;
+              ctx.next();
+            }).catch((reason) => {
+              log.error(reason);
+              ctx.fail(reason);
+            });
+        };
+
         this.messageBus.pipelineOut.handlers = [idmHandler, pepOutHandler];
         this.messageBus.pipelineIn.handlers = [pepInHandler];
 
         // Instantiate the Graph Connector
         this.graphConnector = process.env.MODE !== 'light' ? new GraphConnector(this.runtimeURL, this.messageBus, this.storageManager) : null;
 
-        // Instantiate Discovery
-        this.coreDiscovery = new CoreDiscovery(this.runtimeURL, this.messageBus, this.graphConnector, this.runtimeFactory, this.registry);
 
         // Add to App Sandbox the listener;
         appSandbox.addListener('*', (msg) => {
           this.messageBus.postMessage(msg);
         });
+
+        cryptoManager.messageBus = this.messageBus;
 
         // Register messageBus on Registry
         this.registry.messageBus = this.messageBus;

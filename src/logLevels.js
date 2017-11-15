@@ -21,6 +21,7 @@ const r = log.getLogger('ReporterObject');
 const s = log.getLogger('SynSubscription');
 const t = log.getLogger('SyncherManager');
 const u = log.getLogger('IdentityManager');
+const v = log.getLogger('CryptoManager');
 
 
 export { log };
@@ -106,4 +107,7 @@ s.setLevel(3);
 t.setLevel(3);
 
 // IdentityManager
-t.setLevel(0);
+u.setLevel(0);
+
+// CryptoManager
+v.setLevel(0);
