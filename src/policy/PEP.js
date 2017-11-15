@@ -137,7 +137,7 @@ class PEP {
     }
   }
 
-  authorise(message) {
+  authorise(message, isIncoming) {
     // log.log('[Policy.PEP Authorise] ', message);
     // log.log(message);
     if (!message) throw new Error('message is not defined');
@@ -150,11 +150,11 @@ class PEP {
 
       message.body = message.body || {};
       let _this = this;
-      let result;
-      if (_this._isToVerify(message)) {
+/*      if (_this._isToVerify(message)) {
         let isIncoming = _this._isIncomingMessage(message);
-        _this.context.prepareForEvaluation(message, isIncoming).then(message => {
-          result = _this.pdp.evaluatePolicies(message, isIncoming);
+        _this.context.prepareForEvaluation(message, isIncoming).then(message => {*/
+
+          let result = _this.pdp.evaluatePolicies(message, isIncoming);
           if (result === 'Not Applicable') {
             result = _this.context.defaultBehaviour;
             message.body.auth = false;
@@ -162,7 +162,7 @@ class PEP {
           _this.actionsService.enforcePolicies(message, isIncoming).then(messages => {
             for (let i in messages) {
               message = messages[i];
-              _this.context.prepareToForward(message, isIncoming, result).then(message => {
+//              _this.context.prepareToForward(message, isIncoming, result).then(message => {
                 if (result) {
                 /*  if (isIncoming && message.body.identity) {
                     delete message.body.identity.assertion;
@@ -174,14 +174,14 @@ class PEP {
                   let errorMessage = { body: { code: 403, description: 'Blocked by policy' }, from: message.to, to: message.from, type: 'response' };
                   reject(errorMessage);
                 }
-              }, (error) => {
+/*              }, (error) => {
                 reject(error);
-              });
+              });*/
             }
           }, (error) => {
             reject(error);
           });
-        }, (error) => {
+    /*    }, (error) => {
           reject(error);
         });
       } else {
@@ -193,7 +193,7 @@ class PEP {
           let errorMessage = { body: { code: 403, description: 'Blocked by policy' }, from: message.to, to: message.from, type: 'response' };
           reject(errorMessage);
         }
-      }
+      }*/
     });
   }
 

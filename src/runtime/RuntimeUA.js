@@ -290,9 +290,12 @@ class RuntimeUA {
         // Instantiate the IdentityManager
         this.identityManager = new IdentityManager( this.identityModule);
 
-        // Policy message authorise
-        let pepHandler = (ctx) => {
-          this.policyEngine.authorise(ctx.msg).then((changedMgs) => {
+        // TODO: move msg bus definition to a separate busHandlers.js file
+
+        // Policy based access control for incoming messages
+        let pepInHandler = (ctx) => {
+          let isIncoming =
+          this.policyEngine.authorise(ctx.msg, true).then((changedMgs) => {
             ctx.msg = changedMgs;
             ctx.next();
           }).catch((reason) => {
@@ -301,6 +304,19 @@ class RuntimeUA {
           });
         };
 
+        // Policy based access control for outgoing messages
+        let pepOutHandler = (ctx) => {
+          let isIncoming =
+          this.policyEngine.authorise(ctx.msg, false).then((changedMgs) => {
+            ctx.msg = changedMgs;
+            ctx.next();
+          }).catch((reason) => {
+            log.error(reason);
+            ctx.fail(reason);
+          });
+        };
+
+        // Add Identity info to messages
         let idmHandler = (ctx) => {
           if (ctx.isToSetID) {
             this.identityManager.processMessage(ctx.msg).then((changedMgs) => {
@@ -313,7 +329,8 @@ class RuntimeUA {
           }
         };
 
-        this.messageBus.pipelineOut.handlers = [idmHandler];
+        this.messageBus.pipelineOut.handlers = [idmHandler, pepOutHandler];
+        this.messageBus.pipelineIn.handlers = [pepInHandler];
 
         // Instantiate the Graph Connector
         this.graphConnector = process.env.MODE !== 'light' ? new GraphConnector(this.runtimeURL, this.messageBus, this.storageManager) : null;
