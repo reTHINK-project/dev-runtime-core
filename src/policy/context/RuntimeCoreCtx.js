@@ -89,25 +89,25 @@ class RuntimeCoreCtx extends ReThinkCtx {
     });
   }
 
-  prepareForEvaluation(message, isIncoming) {
+/*  prepareForEvaluation(message, isIncoming) {
     return new Promise((resolve, reject) => {
 
       let _this = this;
       if (isIncoming) {
         if (_this._isToCypherModule(message)) {
-          _this.idModule.decryptMessage(message).then(function(message) {
+          _this.idModule.decryptMessage(message).then(function(message) {*/
             /*if (message.type === 'update') {
               _this._isValidUpdate(message).then(message => {*/
-            resolve(message);
+/*            resolve(message);
           }, (error) => {
             reject(error);
-
+*/
             /*});
             } else {
               resolve(message);
             }*/
 
-          });
+  /*        });
         } else {
           resolve(message);
         }
@@ -126,7 +126,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
       }
 
     });
-  }
+  }*/
 
   getPolicies(message, isIncomingMessage) {
     let policies = {};
@@ -159,7 +159,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
     });
   }
 
-  prepareToForward(message, isIncoming, result) {
+/*  prepareToForward(message, isIncoming, result) {
     let _this = this;
     return new Promise((resolve, reject) => {
       // log.log('[Policy.RuntimeCoreCtx.prepareToForward]', message);
@@ -229,7 +229,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
         });
       }
     });
-  }
+  }*/
 
 
   getMyEmails() {
@@ -269,7 +269,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
     }
     return policy;
   }
-
+/*
   isFromRemoteSM(from) {
     let splitFrom = from.split('://');
     return splitFrom[0] === 'runtime' && from !== this.runtimeRegistry.runtimeURL + '/sm';
@@ -308,13 +308,13 @@ class RuntimeCoreCtx extends ReThinkCtx {
     // }
 
     return isToIgnore;
-  }
+  }*/
 
   getURL(url) {
     let splitURL = url.split('/');
     return splitURL[0] + '//' + splitURL[2] + '/' + splitURL[3];
   }
-
+/*
   _getIdentity(message) {
 
     let from = message.from;
@@ -330,7 +330,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
     }
 
     return this.idModule.getToken(from, message.to);
-  }
+  }*/
 
   /**
   * Identifies the messages to be forwarded to the Identity Module for
@@ -339,7 +339,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
   * @returns {boolean}  returns true if the message requires encryption/decryption
   *                     or if its type equals 'handshake'; false otherwise
   */
-  _isToCypherModule(message) {
+/*  _isToCypherModule(message) {
     log.log('[Policy.RuntimeCoreCtx.istoChyperModule]', message);
     let isCreate = message.type === 'create';
     let isFromHyperty = divideURL(message.from).type === 'hyperty';
@@ -350,7 +350,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
 
 
     return ((isCreate && isFromHyperty && isToHyperty) || (isCreate && isFromHyperty && isToDataObject && doMutualAuthentication) || message.type === 'handshake' || (message.type === 'update' && doMutualAuthentication));
-  }
+  }*/
 
   /**
   * Creates a group with the given name.

@@ -196,8 +196,8 @@ class PEP {
       }*/
     });
   }
-
-  authoriseSync(message) {
+/*
+  authoriseSync(message, isIncoming) {
     let result;
     message.body = message.body || {};
     if (this._isToVerify(message)) {
@@ -253,7 +253,7 @@ class PEP {
 
     log.info('[PEP - isIncomingMessage] - check if isLocal: ', from);
     return !this.context.isLocal(from);
-  }
+  }*/
 
   /**
   * Identifies the messages to be verified by the Policy Engine
@@ -262,7 +262,7 @@ class PEP {
   * @returns  {boolean}   returns true if the message requires encryption/decryption
   *                       or if its type equals 'handshake'; false otherwise
   */
-  _isToVerify(message) {
+/*  _isToVerify(message) {
     let schemasToIgnore = ['domain', 'domain-idp', 'global', 'hyperty-runtime', 'runtime'];
     let splitFrom = (message.from).split('://');
     let fromSchema = splitFrom[0];
@@ -296,7 +296,7 @@ class PEP {
     } else {
       return schemasToIgnore.indexOf(fromSchema) === -1 || schemasToIgnore.indexOf(toSchema) === -1;
     }
-  }
+  }*/
 
   removePolicy(source, key) {
     if (!source) throw new Error('source is not defined');
