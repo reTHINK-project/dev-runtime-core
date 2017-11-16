@@ -21,6 +21,9 @@ const r = log.getLogger('ReporterObject');
 const s = log.getLogger('SynSubscription');
 const t = log.getLogger('SyncherManager');
 
+
+export { log };
+
 /**
   5 actual logging methods, ordered and available as:
 
@@ -45,10 +48,10 @@ const t = log.getLogger('SyncherManager');
 a.setLevel(5);
 
 // Bus
-b.setLevel(5);
+b.setLevel(0);
 
 // MessageBus
-c.setLevel(5);
+c.setLevel(0);
 
 // CoreDiscovery
 d.setLevel(5);
@@ -57,7 +60,7 @@ d.setLevel(5);
 e.setLevel(5);
 
 // HypertyResourcesStorage
-f.setLevel(5);
+f.setLevel(0);
 
 // IdentityModule
 g.setLevel(0);
@@ -66,10 +69,10 @@ g.setLevel(0);
 h.setLevel(5);
 
 // P2PConnectionResolve
-i.setLevel(5);
+i.setLevel(0);
 
 // Registry
-j.setLevel(5);
+j.setLevel(0);
 
 // RuntimeUA
 k.setLevel(0);
