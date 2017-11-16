@@ -113,10 +113,24 @@ describe('Data Synchronisation', function() {
         console.log('isLocal: ', url);
         return false;
       },
+      isLocal: () => {
+        return false;
+      },
+      getHypertyOwner: () => {
+          return 'user://user@domain.pt';
+      },
       runtimeURL: 'runtime://localhost/7601'
     };
 
     identityModule = {
+      getToken: () => {
+        return new Promise((resolve) => {
+          resolve({ userProfile: {username: 'user@domain' } });
+        });
+      }
+    };
+
+    /*cryptoManager = {
       decryptMessage: (message) => {
         return new Promise((resolve) => {
           resolve(message);
@@ -126,13 +140,9 @@ describe('Data Synchronisation', function() {
         return new Promise((resolve) => {
           resolve(message);
         });
-      },
-      getToken: () => {
-        return new Promise((resolve) => {
-          resolve({ userProfile: {username: 'user@domain' } });
-        });
       }
-    };
+    };*/
+
 
     catalog = {
       getDataSchemaDescriptor: (schema) => {
@@ -152,15 +162,17 @@ describe('Data Synchronisation', function() {
       }
     };
 
-    runtimeCoreCtx = new RuntimeCoreCtx(runtimeURL, identityModule, registry, storageManager, runtimeFactory.runtimeCapabilities());
-    policyEngine = new PEP(runtimeCoreCtx);
+/*    runtimeCoreCtx = new RuntimeCoreCtx(runtimeURL, identityModule, registry, storageManager, runtimeFactory.runtimeCapabilities());
+    policyEngine = new PEP(runtimeCoreCtx);*/
 
-    bus = new MessageBus();
-    bus.pipeline.handlers =  [
+    bus = new MessageBus(registry);
+    bus.pipelineOut.handlers =  [
 
       // Policy message authorise
       function(ctx) {
-        policyEngine.authorise(ctx.msg).then(function(changedMgs) {
+        (() => {
+
+          let changedMgs = ctx.msg;
 
           changedMgs.body.identity = {
             userProfile: {

@@ -4,7 +4,7 @@ import MessageBus from '../src/bus/MessageBus';
 let expect = chai.expect;
 
 describe('MessageBus', function() {
-  it.('sending message', function(done) {
+  it('sending message', function(done) {
     let msgResult;
 
     let mockRegistry = {
@@ -13,6 +13,9 @@ describe('MessageBus', function() {
           //resolve to the same URL
           resolve(url);
         });
+      },
+      isLocal() {
+        return true;
       }
     };
 
@@ -36,24 +39,32 @@ describe('MessageBus', function() {
     });
   });
 
-  it.('pipeline msg change', function(done) {
-    let mBus = new MessageBus();
-    mBus.pipeline.handlers = [
+  it('pipeline msg change', function(done) {
+
+    let mockRegistry = {
+      isLocal() {
+        return false;
+      }
+    };
+
+    let mBus = new MessageBus(mockRegistry);
+    mBus.pipelineIn.handlers = [
       function(ctx) {
         ctx.msg.token = '12345678';
         ctx.next();
       }
     ];
 
-    mBus.addListener('hyper-2', (msg) => {
-      expect(msg).to.eql({ id: 1, type: 'ping', token: '12345678', from: 'hyper-1', to: 'hyper-2' });
+    mBus.addListener('hyperty://456', (msg) => {
+      console.log('[MessageBus Test] pipeline msg change: ',msg);
+      expect(msg).to.eql({ id: 1, type: 'ping', token: '12345678', from: 'hyperty://123', to: 'hyperty://456' });
       done();
     });
 
-    mBus.postMessage({ type: 'ping', from: 'hyper-1', to: 'hyper-2' });
+    mBus.postMessage({ type: 'ping', from: 'hyperty://123', to: 'hyperty://456' });
   });
 
-  it.('sending using external system', function(done) {
+  it('sending using external system', function(done) {
     let msgResult;
 
     let mockRegistry = {
@@ -62,6 +73,9 @@ describe('MessageBus', function() {
           //resolve to default
           resolve('protostub');
         });
+      },
+      isLocal() {
+        return false;
       }
     };
 
@@ -86,10 +100,16 @@ describe('MessageBus', function() {
 
   });
 
-  it.('publish unique messages', function(done) {
+  it('publish unique messages', function(done) {
     let result = { obj1: 0, obj2: 0 };
 
-    let msgBus = new MessageBus();
+    let mockRegistry = {
+      isLocal() {
+        return true;
+      }
+    };
+
+    let msgBus = new MessageBus(mockRegistry);
     msgBus._onPostMessage = (msg) => {
       console.log(msg);
       result[msg.to]++;
@@ -117,6 +137,9 @@ describe('MessageBus', function() {
           //resolve to default
           resolve('error');
         });
+      },
+      isLocal() {
+        return true;
       }
     };
 

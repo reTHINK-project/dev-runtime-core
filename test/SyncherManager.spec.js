@@ -186,7 +186,7 @@ describe('SyncherManager', function() {
   it.skip('reporter read', function(done) {
 
     bus = new MessageBus();
-    bus.pipeline.handlers = handlers;
+    bus.pipelineOut.handlers = handlers;
 
     bus._onPostMessage = (msg) => {
       console.log('_onPostMessage: ', msg);
@@ -215,7 +215,7 @@ describe('SyncherManager', function() {
 
   it.skip('reporter observer integration', function(done) {
     bus = new MessageBus();
-    bus.pipeline.handlers = handlers;
+    bus.pipelineOut.handlers = handlers;
 
     bus._onPostMessage = (msg) => {
       console.log('[reporter observer integration - onPostMessage]: ', msg);
@@ -903,7 +903,7 @@ describe('SyncherManager', function() {
 
   it('children deltas generate and process', function(done) {
     bus = new MessageBus();
-    bus.pipeline.handlers = handlers;
+    bus.pipelineOut.handlers = handlers;
 
     bus._onPostMessage = (msg) => {
       console.log('7-_onPostMessage: ', msg);
@@ -951,7 +951,7 @@ describe('SyncherManager', function() {
     let deleted = false;
 
     bus = new MessageBus();
-    bus.pipeline.handlers = handlers;
+    bus.pipelineOut.handlers = handlers;
 
     bus._onPostMessage = (msg) => {
       console.log('8-_onPostMessage: ', msg);
@@ -1011,7 +1011,7 @@ describe('SyncherManager', function() {
 
   it.skip('subscribe and unsubscribe', function(done) {
     bus = new MessageBus();
-    bus.pipeline.handlers = handlers;
+    bus.pipelineOut.handlers = handlers;
 
     bus._onPostMessage = (msg) => {
       console.log('8-_onPostMessage: ', msg);
@@ -1066,7 +1066,7 @@ describe('SyncherManager', function() {
     it.skip('should save the url on storageManager', function(done) {
 
       bus = new MessageBus();
-      bus.pipeline.handlers = handlers;
+      bus.pipelineOut.handlers = handlers;
 
       bus._onPostMessage = function(msg)  {
         console.log('8-_onPostMessage: ', msg);
@@ -1137,7 +1137,7 @@ describe('SyncherManager', function() {
     it.skip('should resume the url stored on storageManager', (done) => {
 
       bus = new MessageBus();
-      bus.pipeline.handlers = handlers;
+      bus.pipelineOut.handlers = handlers;
       bus._onPostMessage = (msg) => {
         console.log('10-_onPostMessage: ', msg);
 
