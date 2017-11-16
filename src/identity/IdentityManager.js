@@ -14,10 +14,40 @@ class IdentityManager {
 
   }
 
+  _isToSetID(message) {
+    let schemasToIgnore = ['domain-idp', 'runtime', 'domain'];
+
+    let _from = message.from;
+
+    if (message.body && message.body.hasOwnProperty('source')) {
+      _from = message.body.source;
+    }
+
+    if (message.body && message.body.hasOwnProperty('subscriber')) {
+      _from = message.body.subscriber;
+    }
+
+    // Signalling Messages between P2P Stubs don't have Identities. FFS
+    if (_from.includes('/p2prequester/') || _from.includes('/p2phandler/')) {
+      return false;
+    }
+
+    let splitFrom = (_from).split('://');
+    let fromSchema = splitFrom[0];
+    let isToIgnore = schemasToIgnore.indexOf(fromSchema) === -1;
+
+    return isToIgnore;
+  }
+
   processMessage(message) {
     log.log('[IdentityManager.processMessage] ', message);
 
     return new Promise((resolve,reject) => {
+
+      // skip messages that don't need identity tokens in the body
+
+      if (!this._isToSetID(message)) return resolve(message);
+
       let from = message.from;
       let sourceURL = undefined;
       if ( message.hasOwnProperty('body') && message.body.hasOwnProperty('source')) {

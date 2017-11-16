@@ -295,7 +295,7 @@ class RuntimeUA {
         this.identityManager = new IdentityManager( this.identityModule);
 
         // initialise the CryptoManager
-        cryptoManager.default.init(this.runtimeURL, this.runtimeCapabilities, this.storageManager, this._dataObjectsStorage, this.registry, this.coreDiscovery);
+        cryptoManager.default.init(this.runtimeURL, this.runtimeCapabilities, this.storageManager, this._dataObjectsStorage, this.registry, this.coreDiscovery, this.identityModule);
 
 
 
@@ -327,7 +327,6 @@ class RuntimeUA {
 
         // Add Identity info to messages
         let idmHandler = (ctx) => {
-          if (ctx.isToSetID(ctx.msg)) {
             this.identityManager.processMessage(ctx.msg).then((changedMgs) => {
               ctx.msg = changedMgs;
               ctx.next();
@@ -335,12 +334,10 @@ class RuntimeUA {
               log.error(reason);
               ctx.fail(reason);
             });
-          }
         };
 
         // encrypt messages
         let encryptHandler = (ctx) => {
-          if (ctx.isToCypherModule(ctx.msg)) {
             cryptoManager.default.encryptMessage(ctx.msg).then((changedMgs) => {
               ctx.msg = changedMgs;
               ctx.next();
@@ -348,7 +345,6 @@ class RuntimeUA {
               log.error(reason);
               ctx.fail(reason);
             });
-          }
         };
 
         // decrypt messages
@@ -357,13 +353,13 @@ class RuntimeUA {
               ctx.msg = changedMgs;
               ctx.next();
             }).catch((reason) => {
-              log.error(reason);
+              log.warn(reason);
               ctx.fail(reason);
             });
         };
 
-        this.messageBus.pipelineOut.handlers = [idmHandler, pepOutHandler];
-        this.messageBus.pipelineIn.handlers = [pepInHandler];
+        this.messageBus.pipelineOut.handlers = [idmHandler, pepOutHandler, encryptHandler];
+        this.messageBus.pipelineIn.handlers = [decryptHandler, pepInHandler];
 
         // Instantiate the Graph Connector
         this.graphConnector = process.env.MODE !== 'light' ? new GraphConnector(this.runtimeURL, this.messageBus, this.storageManager) : null;
@@ -374,7 +370,7 @@ class RuntimeUA {
           this.messageBus.postMessage(msg);
         });
 
-        cryptoManager.messageBus = this.messageBus;
+        cryptoManager.default.messageBus = this.messageBus;
 
         // Register messageBus on Registry
         this.registry.messageBus = this.messageBus;

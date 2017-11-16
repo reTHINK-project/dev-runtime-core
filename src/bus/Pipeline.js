@@ -20,6 +20,8 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 **/
+import * as logger from 'loglevel';
+let log = logger.getLogger('Pipeline');
 
 /**
 * @author micaelpedrosa@gmail.com
@@ -130,51 +132,9 @@ class PipeContext {
     }
   }
 
-  isToSetID(message) {
-    let schemasToIgnore = ['domain-idp', 'runtime', 'domain'];
-
-    let _from = message.from;
-
-    if (message.body && message.body.hasOwnProperty('source')) {
-      _from = message.body.source;
-    }
-
-    if (message.body && message.body.hasOwnProperty('subscriber')) {
-      _from = message.body.subscriber;
-    }
-
-    // Signalling Messages between P2P Stubs don't have Identities. FFS
-    if (_from.includes('/p2prequester/') || _from.includes('/p2phandler/')) {
-      return false;
-    }
-
-    let splitFrom = (_from).split('://');
-    let fromSchema = splitFrom[0];
-    let isToIgnore = schemasToIgnore.indexOf(fromSchema) === -1;
-
-    return isToIgnore;
-  }
-
-  /**
-  * Identifies the messages to be forwarded to the Identity Module for
-  * encryption/decryption and integrity validation.
-  * @param {Message}    message
-  * @returns {boolean}  returns true if the message requires encryption/decryption
-  *                     or if its type equals 'handshake'; false otherwise
-  */
-
-  isToCypherModule(message) {
-    log.log('[Policy.RuntimeCoreCtx.istoChyperModule]', message);
-    let isCreate = message.type === 'create';
-    let isFromHyperty = message.from.includes('hyperty://');
-    let isToHyperty = message.to.includes('hyperty://');
-    let isToDataObject = isDataObjectURL(message.to);
-
-    let doMutualAuthentication = message.body.hasOwnProperty('mutual') ? message.body.mutual : true;
 
 
-    return ((isCreate && isFromHyperty && isToHyperty) || (isCreate && isFromHyperty && isToDataObject && doMutualAuthentication) || message.type === 'handshake' || (message.type === 'update' && doMutualAuthentication));
-  }
+
 }
 
 class Iterator {

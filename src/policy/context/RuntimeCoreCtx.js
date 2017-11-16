@@ -231,6 +231,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
     });
   }
 
+
   getMyEmails() {
     let identities = this.idModule.getIdentities();
     let emails = [];

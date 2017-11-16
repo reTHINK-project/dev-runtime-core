@@ -62,9 +62,9 @@ class P2PConnectionResolve  {
 
     let p2p = {};
 
-    if (msg.body.p2p) p2p.p2p = msg.body.p2p;
+    if (msg.body && msg.body.p2p) p2p.p2p = msg.body.p2p;
 
-    if (msg.body.p2pHandler && msg.body.p2pRequester) {
+    if (msg.body && msg.body.p2pHandler && msg.body.p2pRequester) {
       p2p.p2pHandler = msg.body.p2pHandler;
       p2p.p2pRequester = msg.body.p2pRequester;
       p2p.runtime = msg.body.p2pHandler.split('/p2phandler/')[0];

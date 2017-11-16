@@ -22,6 +22,7 @@ const s = log.getLogger('SynSubscription');
 const t = log.getLogger('SyncherManager');
 const u = log.getLogger('IdentityManager');
 const v = log.getLogger('CryptoManager');
+const x = log.getLogger('Pipeline');
 
 
 export { log };
@@ -95,19 +96,22 @@ o.setLevel(5);
 p.setLevel(5);
 
 // ObserverObject
-q.setLevel(5);
+q.setLevel(0);
 
 // ReporterObject
-r.setLevel(5);
+r.setLevel(0);
 
 // SynSubscription
 s.setLevel(3);
 
 // SyncherManager
-t.setLevel(3);
+t.setLevel(0);
 
 // IdentityManager
 u.setLevel(0);
 
 // CryptoManager
 v.setLevel(0);
+
+// Pipeline
+x.setLevel(0);
