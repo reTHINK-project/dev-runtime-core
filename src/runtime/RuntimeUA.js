@@ -43,6 +43,7 @@ import Loader from './Loader';
 import Descriptors from './Descriptors';
 
 import { runtimeConfiguration } from './runtimeConfiguration';
+import MsgBusHandlers from './MsgBusHandlers';
 import { runtimeUtils } from './runtimeUtils';
 
 import GraphConnector from '../graphconnector/GraphConnector';
@@ -297,73 +298,13 @@ class RuntimeUA {
         // initialise the CryptoManager
         cryptoManager.default.init(this.runtimeURL, this.runtimeCapabilities, this.storageManager, this._dataObjectsStorage, this.registry, this.coreDiscovery, this.identityModule);
 
-
-
-        // TODO: move msg bus definition to a separate busHandlers.js file
-
-        // Policy based access control for incoming messages
-        let pepInHandler = (ctx) => {
-          let isIncoming =
-          this.policyEngine.authorise(ctx.msg, true).then((changedMgs) => {
-            ctx.msg = changedMgs;
-            ctx.next();
-          }).catch((reason) => {
-            log.error(reason);
-            ctx.fail(reason);
-          });
-        };
-
-        // Policy based access control for outgoing messages
-        let pepOutHandler = (ctx) => {
-          let isIncoming =
-          this.policyEngine.authorise(ctx.msg, false).then((changedMgs) => {
-            ctx.msg = changedMgs;
-            ctx.next();
-          }).catch((reason) => {
-            log.error(reason);
-            ctx.fail(reason);
-          });
-        };
-
-        // Add Identity info to messages
-        let idmHandler = (ctx) => {
-            this.identityManager.processMessage(ctx.msg).then((changedMgs) => {
-              ctx.msg = changedMgs;
-              ctx.next();
-            }).catch((reason) => {
-              log.error(reason);
-              ctx.fail(reason);
-            });
-        };
-
-        // encrypt messages
-        let encryptHandler = (ctx) => {
-            cryptoManager.default.encryptMessage(ctx.msg).then((changedMgs) => {
-              ctx.msg = changedMgs;
-              ctx.next();
-            }).catch((reason) => {
-              log.error(reason);
-              ctx.fail(reason);
-            });
-        };
-
-        // decrypt messages
-        let decryptHandler = (ctx) => {
-            cryptoManager.default.decryptMessage(ctx.msg).then((changedMgs) => {
-              ctx.msg = changedMgs;
-              ctx.next();
-            }).catch((reason) => {
-              log.warn(reason);
-              ctx.fail(reason);
-            });
-        };
-
-        this.messageBus.pipelineOut.handlers = [idmHandler, pepOutHandler, encryptHandler];
-        this.messageBus.pipelineIn.handlers = [decryptHandler, pepInHandler];
-
         // Instantiate the Graph Connector
         this.graphConnector = process.env.MODE !== 'light' ? new GraphConnector(this.runtimeURL, this.messageBus, this.storageManager) : null;
 
+        this.handlers = new MsgBusHandlers(this.policyEngine, this.identityManager, cryptoManager);
+
+        this.messageBus.pipelineOut.handlers = [this.handlers.idmHandler, this.handlers.pepOutHandler, this.handlers.encryptHandler];
+        this.messageBus.pipelineIn.handlers = [this.handlers.decryptHandler, this.handlers.pepInHandler];
 
         // Add to App Sandbox the listener;
         appSandbox.addListener('*', (msg) => {
