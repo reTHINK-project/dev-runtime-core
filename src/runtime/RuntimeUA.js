@@ -414,6 +414,7 @@ class RuntimeUA {
   * @param  {URL.URL}     domain          domain
   */
   loadIdpProxy(ipdProxyCatalogueURL) {
+    console.log('ipdProxyCatalogueURL', ipdProxyCatalogueURL);
 
     if (!ipdProxyCatalogueURL) throw new Error('The IDP Proxy URL is a needed parameter, could be a DOMAIN or a URL');
     return this.loader.loadIdpProxy(ipdProxyCatalogueURL);
