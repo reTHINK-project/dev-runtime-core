@@ -8,6 +8,7 @@ import DataObjectsStorage from '../src/store-objects/DataObjectsStorage';
 import PEP from '../src/policy/PEP';
 import RuntimeCoreCtx from '../src/policy/context/RuntimeCoreCtx';
 import Crypto from '../src/cryptoManager/Crypto';
+import * as cryptoManager from '../src/cryptoManager/cryptoManager';
 
 chai.config.truncateThreshold = 0;
 chai.use(chaiAsPromised);
@@ -216,7 +217,7 @@ describe('Identity Module tests', function() {
 	});
 
 	beforeEach('Init structures before each test', function(){
-		bus = new MessageBus();
+		bus = new MessageBus(registryPopulate);
     bus.pipelineOut.handlers = handlersPopulate;
     bus._onPostMessage = (msg => {
       msgNodeResponseFunc(bus, msg);
@@ -224,6 +225,7 @@ describe('Identity Module tests', function() {
 
 		let dataObjectsStorage = new DataObjectsStorage(storageManager, {});
 		identityModule = new IdentityModule(runtimeURL, runtimeCapabilities, storageManager, dataObjectsStorage);
+		cryptoManager.default.init(runtimeURL, runtimeCapabilities, storageManager, dataObjectsStorage, registryPopulate, coreDiscovery, identityModule);
 		identityModule.messageBus = bus;
 		identityModule.registry = registryPopulate;;
 		identityModule.coreDiscovery = coreDiscovery;
@@ -477,9 +479,9 @@ describe('Identity Module tests', function() {
 		dataObjectSessionKeys[sender] =  {sessionKey: sessionKey, isToEncrypt: true};
 		storageManager.set('dataObjectSessionKeys', 0, dataObjectSessionKeys);
 
-		identityModule.encryptDataObject(dataObjectPopulate, sender).then( encryDataObject => {
+		cryptoManager.default.encryptDataObject(dataObjectPopulate, sender).then( encryDataObject => {
       log('GUA GUA')
-			identityModule.decryptDataObject(encryDataObject, sender).then( decryDataObject => {
+			cryptoManager.default.decryptDataObject(encryDataObject, sender).then( decryDataObject => {
 				let value = decryDataObject.value.data.content === dataObjectPopulate.data.content &&
 										encryDataObject.hasOwnProperty('value') &&
 										encryDataObject.hasOwnProperty('iv');
@@ -545,7 +547,7 @@ describe('Identity Module tests', function() {
     let message = messageToBeHashedPopulate;
     let decryptedValue = 'decryptedValue';
     let identity = hyperURL1;
-    let receivedHash = identityModule._filterMessageToHash(message, decryptedValue, identity);
+    let receivedHash = cryptoManager.default._filterMessageToHash(message, decryptedValue, identity);
 
     let valueVerificationResult =
         receivedHash.type === messageToBeHashedPopulate.type &&
@@ -564,7 +566,7 @@ describe('Identity Module tests', function() {
 
 		crypto.generateRSAKeyPair().then( keyPair => {
 			identityModule.storeIdentity(returnedAssertionValuePopulate, keyPair).then( result =>{
-				let newChatCrypto = identityModule._newChatCrypto(message, userURL, receiver);
+				let newChatCrypto = cryptoManager.default._newChatCrypto(message, userURL, receiver);
 				let valueVerificationResult =
 					newChatCrypto.hypertyFrom.userID === userEmail &&
 					newChatCrypto.hypertyFrom.messageInfo.assertion === returnedAssertionValuePopulate.assertion &&
@@ -586,7 +588,7 @@ describe('Identity Module tests', function() {
 										 }
 									 };
 
-		identityModule._sendReporterSessionKey(message, chatKeys).then(result =>{
+		cryptoManager.default._sendReporterSessionKey(message, chatKeys).then(result =>{
 			let assertFields = result.hasOwnProperty('message') &&
 					result.message.type === 'handshake' &&
 					result.message.to === hyperURL1 &&
@@ -617,8 +619,8 @@ describe('Identity Module tests', function() {
     chatKeys.keys.hypertyToSessionKey = chatKeys.keys.hypertyFromSessionKey;
     chatKeys.keys.hypertyToHashKey = chatKeys.keys.hypertyFromHashKey;
 		identityModule.registry.getHypertyOwner = getHypertyOwnerPopulate;
-    identityModule.chatKeys[encryptMessagePopulate.from + '<->' + encryptMessagePopulate.to] = chatKeys;
-    identityModule.chatKeys[encryptMessagePopulate.to + '<->' + encryptMessagePopulate.from] = chatKeys;
+    cryptoManager.default.chatKeys[encryptMessagePopulate.from + '<->' + encryptMessagePopulate.to] = chatKeys;
+    cryptoManager.default.chatKeys[encryptMessagePopulate.to + '<->' + encryptMessagePopulate.from] = chatKeys;
 
     log('WTF');
     log(encryptMessagePopulate.type);
@@ -626,19 +628,19 @@ describe('Identity Module tests', function() {
 		identityModule.storeIdentity(returnedAssertionValuePopulate, keyPair).then( result1 =>{
 			helloMessage.body.handshakePhase = 'startHandShake';
 
-			identityModule._doHandShakePhase(helloMessage, chatKeys).then(result2 => {
+			cryptoManager.default._doHandShakePhase(helloMessage, chatKeys).then(result2 => {
 
-				identityModule.encryptMessage(encryptMessagePopulate).then(resolvedMessage => {
+				cryptoManager.default.encryptMessage(encryptMessagePopulate).then(resolvedMessage => {
 					assert.equal(encryptMessagePopulate, resolvedMessage, 'Messages should be the same');
 					encryptMessagePopulate.type = 'update';
 
-					identityModule.encryptMessage(encryptMessagePopulate).then(updateMessage => {
+					cryptoManager.default.encryptMessage(encryptMessagePopulate).then(updateMessage => {
 						assert.equal(encryptMessagePopulate, updateMessage, 'Messages should be the same');
 						encryptMessagePopulate.type = 'encrypt';//Don't know the correct keyword but this works for now
 
-            identityModule.encryptMessage(encryptMessagePopulate).then(encryptedMessage => {
+            cryptoManager.default.encryptMessage(encryptMessagePopulate).then(encryptedMessage => {
 
-              identityModule.decryptMessage(encryptedMessage).then(decryptedMessage => {
+              cryptoManager.default.decryptMessage(encryptedMessage).then(decryptedMessage => {
                 assert.equal(decryptedMessage.body.value, encryptMessagePopulate.body.value, 'Encryption failed');
 						  }).then(done, done);
             });
@@ -656,7 +658,7 @@ describe('Identity Module tests', function() {
 		let message = messageForNewChatCrypto
 		message.body.handshakePhase = 'startHandShake';
 		let chatKeys = chatKeysPopulate;
-			identityModule._doHandShakePhase(message, chatKeys).then(result => {
+			cryptoManager.default._doHandShakePhase(message, chatKeys).then(result => {
 				let assertFields = result.message.type === 'handshake' &&
 													 result.message.body.handshakePhase === 'senderHello' &&
 													 result.hasOwnProperty('chatKeys') &&
@@ -669,7 +671,7 @@ describe('Identity Module tests', function() {
 	it('test _doHandShakePhase - senderHello', function(done){
 		let message = senderHelloMessagePopulate;
 		let chatKeys = chatKeysPopulate;
-			identityModule._doHandShakePhase(message, chatKeys).then(resultMessage => {
+			cryptoManager.default._doHandShakePhase(message, chatKeys).then(resultMessage => {
 				let assertFields = resultMessage.message.type === 'handshake' &&
 													 resultMessage.message.body.handshakePhase === 'receiverHello' &&
 													 resultMessage.hasOwnProperty('chatKeys') &&
@@ -685,7 +687,7 @@ describe('Identity Module tests', function() {
 		crypto.generateRSAKeyPair().then(keyPair => {
 			chatKeys.hypertyFrom.privateKey = keyPair.private
 		  chatKeys.hypertyFrom.publicKey = keyPair.public
-			identityModule._doHandShakePhase(message, chatKeys).then(resultMessage => {
+			cryptoManager.default._doHandShakePhase(message, chatKeys).then(resultMessage => {
 				let assertFields = resultMessage.message.type === 'handshake' &&
 													 resultMessage.message.body.handshakePhase === 'senderCertificate' &&
 													 resultMessage.hasOwnProperty('chatKeys') &&
@@ -731,7 +733,7 @@ describe('Identity Module tests', function() {
 
 								receivedValue.iv = crypto.encode(receivedValue.iv);
 									message.body.value = btoa(JSON.stringify(receivedValue));
-									identityModule._doHandShakePhase(message, chatKeys).then(resultMessage => {
+									cryptoManager.default._doHandShakePhase(message, chatKeys).then(resultMessage => {
 										let assertFields = resultMessage.chatKeys.hypertyFrom.userID === userEmail &&
 											 resultMessage.message.body.handshakePhase === 'receiverFinishedMessage' &&
 											 resultMessage.hasOwnProperty('chatKeys') &&
@@ -773,7 +775,7 @@ describe('Identity Module tests', function() {
             receivedValue.iv = crypto.encode(receivedValue.iv);
             message.body.value = btoa(JSON.stringify(receivedValue));
 
-            identityModule._doHandShakePhase(message, chatKeys).then(resultMessage => {
+            cryptoManager.default._doHandShakePhase(message, chatKeys).then(resultMessage => {
               let assertFields = resultMessage.chatKeys.hypertyFrom.userID === userEmail &&
                  resultMessage.message.type === 'create' &&
                  resultMessage.message.body.value === chatKeysPopulate.initialMessage.body.value &&
@@ -819,7 +821,7 @@ describe('Identity Module tests', function() {
             receivedValue.iv = crypto.encode(receivedValue.iv);
             message.body.value = btoa(JSON.stringify(receivedValue));
 
-            identityModule._doHandShakePhase(message, chatKeys).then(resultMessage => {
+            cryptoManager.default._doHandShakePhase(message, chatKeys).then(resultMessage => {
               let assertFields = resultMessage.chatKeys.hypertyFrom.userID === userEmail &&
                  resultMessage.message.type === 'handshake' &&
                  resultMessage.message.body.handshakePhase === 'receiverAcknowledge' &&
@@ -886,9 +888,9 @@ describe('Identity Module tests', function() {
     chatKeys.keys.hypertyFromSessionKey = crypto.generateRandom();
     chatKeys.keys.hypertyFromHashKey = crypto.generateRandom();
     dataObjectURL: 'comm://localhost/5f8d87fd-c56b-47fc-ad47-28d55f01e23a',
-    identityModule.chatKeys[sender + '<->' + receiver] = chatKeys;
+    cryptoManager.default.chatKeys[sender + '<->' + receiver] = chatKeys;
 
-    identityModule.doMutualAuthentication(sender, receiver).then(resultMessage => {
+    cryptoManager.default._doMutualAuthenticationPhase1(sender, receiver).then(resultMessage => {
       assert.equal(resultMessage, 'exchange of chat sessionKey initiated', 'Message is not the expected one');
     }).then(done,done);
   });
