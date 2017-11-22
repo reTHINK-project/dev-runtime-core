@@ -261,7 +261,7 @@ class IdentityModule {
   * @return {IdAssertion}              IdAssertion
   */
   getIdentityAssertion(identityBundle) {
-    console.log('[getIdentityAssertion:identityBundle]', identityBundle);
+    log.log('[getIdentityAssertion:identityBundle]', identityBundle);
     let _this = this;
 
     return new Promise(function(resolve, reject) {
@@ -270,7 +270,7 @@ class IdentityModule {
       //if it is browser, then create a fake identity
 
       _this.runtimeCapabilities.isAvailable('browser').then((result) => {
-        console.log('runtime browser identity acquisition', result);
+        log.log('runtime browser identity acquisition', result);
 
         if (!result) return;
 
@@ -284,12 +284,12 @@ class IdentityModule {
           let idHint = identityBundle.hasOwnProperty('idHint') ? identityBundle.idHint : '';
 
           _this.selectIdentityForHyperty(origin, idp, idHint).then((assertion) => {
-            console.log('[IdentityModule] Identity selected by hyperty.');
+            log.log('[IdentityModule] Identity selected by hyperty.');
             return resolve(assertion);
           }, (err) => { // if it got an error then just select identity from GUI
             // console.error('[IdentityModule] Could not select identity from hyperty.');
             _this.selectIdentityFromGUI().then((newAssertion) => {
-              console.log('[IdentityModule] Identity selected by hyperty.');
+              log.log('[IdentityModule] Identity selected by hyperty.');
               return resolve(newAssertion);
             }, (err) => {
               return reject(err);
@@ -302,7 +302,7 @@ class IdentityModule {
           } else {
             _this.selectIdentityFromGUI().then((assertion) => {
 
-              console.log('[IdentityModule] Identity selected from GUI.');
+              log.log('[IdentityModule] Identity selected from GUI.');
 
               if (assertion.hasOwnProperty('messageInfo')) {
                 _this.defaultIdentity = assertion.messageInfo;
@@ -322,7 +322,7 @@ class IdentityModule {
       });
 
       _this.runtimeCapabilities.isAvailable('node').then((result) => {
-        console.log('node identity acquisition', result);
+        log.log('node identity acquisition', result);
 
         if (!result) return;
 
@@ -331,7 +331,7 @@ class IdentityModule {
           // should be needed to make further requests, to obtain a valid token
           return resolve(_this.currentIdentity);
         } else {
-          console.log('getIdentityAssertion for nodejs');
+          log.log('getIdentityAssertion for nodejs');
 
           let idp = {type: 'idp', value: 'nodejs-idp', code: 200, auth: false};
           _this.callNodeJsGenerateMethods(idp.value, 'origin').then((value) => {
@@ -356,8 +356,8 @@ class IdentityModule {
   * @return {Array<String>}         users
   */
   getUsersIDs(emailFormat) {
-    console.log('[getUsersIDs:emailFormat]', emailFormat);
-    console.log('getUsersIDs:emailFormat', emailFormat);
+    log.log('[getUsersIDs:emailFormat]', emailFormat);
+    log.log('getUsersIDs:emailFormat', emailFormat);
     let _this = this;
     let users = [];
 
@@ -410,8 +410,8 @@ class IdentityModule {
   * @return {Promise}         returns a chosen identity or idp
   */
   requestIdentityToGUI(identities, idps) {
-    console.log('[requestIdentityToGUI:identities]', identities);
-    console.log('[requestIdentityToGUI:idps]', idps);
+    log.log('[requestIdentityToGUI:identities]', identities);
+    log.log('[requestIdentityToGUI:idps]', idps);
 
     let _this = this;
     return new Promise(function(resolve, reject) {
@@ -440,7 +440,7 @@ class IdentityModule {
           if (msg.body.code === 200) {
             let selectedIdentity = msg.body;
 
-            console.log('selectedIdentity: ', selectedIdentity.value);
+            log.log('selectedIdentity: ', selectedIdentity.value);
             resolve(selectedIdentity);
           } else {
             reject('error on requesting an identity to the GUI');
@@ -453,8 +453,8 @@ class IdentityModule {
   }
 
   callNodeJsGenerateMethods(idp, origin) {
-    console.log('[callNodeJsGenerateMethods:idp]', idp);
-    console.log('[callNodeJsGenerateMethods:origin]', origin);
+    log.log('[callNodeJsGenerateMethods:idp]', idp);
+    log.log('[callNodeJsGenerateMethods:origin]', origin);
     let _this = this;
 
     return new Promise((resolve, reject) => {
@@ -465,17 +465,17 @@ class IdentityModule {
       //generates the RSA key pair
       _this.crypto.generateRSAKeyPair().then(function(keyPair) {
 
-        console.log('[callNodeJsGenerateMethods:keyPair.public]', keyPair.public);
+        log.log('[callNodeJsGenerateMethods:keyPair.public]', keyPair.public);
 
 
         publicKey = _this.crypto.encode(keyPair.public);
         userkeyPair = keyPair;
 
-        //console.log('[callNodeJsGenerateMethods:generateSelectedIdentity] NO_URL');
+        //log.log('[callNodeJsGenerateMethods:generateSelectedIdentity] NO_URL');
         //    return _this.generateAssertion(publicKey, origin, '', userkeyPair, idp);
         //}).then(function(url) {
 
-        console.log('[callNodeJsGenerateMethods:generateSelectedIdentity] NO_URL');
+        log.log('[callNodeJsGenerateMethods:generateSelectedIdentity] NO_URL');
 
         let url = 'https://localhost/#state=state&code=4/-mlGUZDkPUC79MzA9sd4Sk5vMJLihmmxFvewM8yJrbs&access_token=ya29.Glv3BKDuB09-tnIKKu5WT_Zextcd7ysgWKvZbvGv-RYI0HaQ76qwIvsTF3sVuJfh2e-cztojXy0ZsjHSfa1cMfnqNKYtjg8Z2qm0POvZkJODsNVUdO2-oz7dHhvr&token_type=Bearer&expires_in=3600&id_token=eyJhbGciOiJSUzI1NiIsImtpZCI6ImI3NjcxOTI2M2NlYWFkZTkyZGI5YTMxMzI4YWRhNDRiNzE5MjA3ZjcifQ.eyJhenAiOiI4MDgzMjk1NjYwMTItdHFyOHFvaDExMTk0MmdkMmtnMDA3dDBzOGYyNzdyb2kuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiI4MDgzMjk1NjYwMTItdHFyOHFvaDExMTk0MmdkMmtnMDA3dDBzOGYyNzdyb2kuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMTc5NTkxMDUyOTU3NjE2ODc4ODkiLCJlbWFpbCI6InRlc3RhbmR0aGluazEyM0BnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiYXRfaGFzaCI6Ikl6NnZJNXRremZlelY2VDVadGVtdEEiLCJjX2hhc2giOiI1ZGV6Z1FrTTFyZ25FVTJFanpTUFVBIiwibm9uY2UiOiJORGdzTVRNd0xERXNNelFzTkRnc01UTXNOaXc1TERReUxERXpOQ3czTWl3eE16UXNNalEzTERFekxERXNNU3d4TERVc01Dd3pMREV6TUN3eExERTFMREFzTkRnc01UTXdMREVzTVRBc01pd3hNekFzTVN3eExEQXNNVGd3TERFME1pd3lNekFzTWpJeUxESXpMREU1T0N3eU9Td3hOVFlzTVRFeUxESXpOaXd4TWpZc01qSXlMREkwTml3ME15dzROaXc0TUN3eE9Ea3NNVFE0TERZNExERTVOaXd4TmpJc09USXNOakVzTWpZc01qUTRMRE15TERJeE5TdzROU3d4T1RJc01UVXhMRGs0TERRM0xESTBNaXd4TVN3eE56UXNNVGNzTWpJeUxERXhNeXd5TkRrc09EVXNNVE0xTERFeU9Dd3lOVFFzTVRJMUxERTNOQ3d5TURBc01UYzRMRGd4TERZMkxEazRMRFUwTERFMU1Td3hNelFzTVRJMUxETTFMREl5TVN3eE9UZ3NNeklzTVRBNUxETTJMRGNzTnpJc01UVTVMRFUyTERZekxEWXlMRGMwTERFNU1Td3hNellzTVRVc016WXNNVGd3TERFM09Td3hOVGdzTlRFc01UZ3NNVGt5TERFM01pd3lNamtzTWpVMUxERXhPU3cxTnl3eU16QXNNakFzTWpReUxESXdNaXd4T0RBc01URXdMREUyTnl3NE15d3lORGNzTVRVekxERTVPU3c1TVN3eE1qVXNNVGt5TERJeE9Dd3hNeXd4TlRrc01qRTNMREV5Tnl3eE1EUXNNakUwTERRNExEVXNNVEl4TERJeU9Dd3pNeXd4TWpZc09UUXNNVEU0TERneExERTJNaXd4TURJc01URXdMRGMxTERrNExETXhMREl3TWl3ek5Td3hOemtzTVRRc016Y3NNVElzTWpFMkxEWTFMREkwTlN3Mk5Td3hNRFVzTWpNM0xESTBOU3d4TkRBc01UZzBMRFU0TERJeU15dzNOeXd4TXpVc01qVXlMRElzTkRjc01UQTBMRFU1TERJMU5Td3lNVFlzTVRNM0xERTFNeXd5Tnl3eE56SXNNakl3TERFMU9Td3hPVFVzTWpFeUxESTVMREV4Tml3eE1EVXNNVEUyTERJeE1pd3lORGdzTnl3MU1pd3lPQ3d4TlRBc016QXNNamNzTWpFc01UY3NNVEkzTERnNExEVTBMREUzTkN3eE15dzBPU3d5TWpJc01UY3lMREl4TXl3eE1EZ3NNVFl5TERRM0xERTROaXd4TXpBc01qSTJMRFFzTVRjc01UZzVMRGcxTERFNE5Dd3lNVGNzTVRnMUxERTFNaXd4TVRrc01UQTBMREU1TXl3MU5Dd3lNVEVzTVRZeExERTVNU3d6TVN3ek9Dd3hNamtzTVRFM0xESXdOU3d4TURRc05pd3hOelVzTWpFNUxERXhOQ3czTERnMkxERTJNeXd4TWpZc01qVXpMREl4TXl3ek5pd3hNamtzTVRJc01UWTBMREV5Tnl3eU1qY3NNakF6TERnMUxEWTJMREl6TERVM0xERTBMREU1Tnl3eU9Dd3lOVElzTWpJeExEUXNNelFzTWpVd0xERTNOU3d5TVRnc01UZzFMREV4T1N3M01Dd3lORFlzTVRNMkxEZzVMREl3TERjd0xERXlNaXd4TURjc01qSXdMRGMxTERJd01Td3hOekFzTkRNc01qTXdMREl6Tml3ME55d3hNQ3d5TURjc01URTFMREkyTERFek1Td3lMRE1zTVN3d0xERT0iLCJpc3MiOiJhY2NvdW50cy5nb29nbGUuY29tIiwianRpIjoiNDU0MTM3NGVjMmY1OWExMWMwNWE0NDFjMTRmMTJkNTllY2UxYzVmYiIsImlhdCI6MTUwOTY0MDA0OSwiZXhwIjoxNTA5NjQzNjQ5fQ.vlWWkWcz333hA4lY0onl2jeat5eHCKvyMD_m-KieMtGqcLhtknMl3HbYTABL2k3HEdqbnNlD1G6OyRG-nDWt6qWCgI-gGJ6ZeU9Xrd5fPlFyRPj-FOAhA514uaYss10GYgt5XoArV7oXrR1-FNVZVNhyioggqJjJ4xtnZ6_j0isUxE7uZTlJLX8ixL44eoPVujmXKIJaXRYp0xf3626rnBz8znmGTt1G1jTwMNZmhZc8LxSauVFMLLoRjmLgNKgsGJNKN3ND7H6rsD0Vw5t24tlBwT_fsYIPauJJVZeqpmzy6L-pCEPUc0oJ7OqML84MB2W2zTq4uv6bMh4nQ_mdrA&authuser=0&session_state=44077304f5ec024da73af13a720afad0e4cb945d..2df8&prompt=consent';
         _this.myHint = url;
@@ -489,7 +489,7 @@ class IdentityModule {
           reject('Error on obtaining Identity');
         }
       }).catch(function(err) {
-        console.log(err);
+        log.log(err);
         reject(err);
       });
 
@@ -497,7 +497,7 @@ class IdentityModule {
   }
 
   fakeNodePopUp() {
-    console.log('[fakeNodePopUp]');
+    log.log('[fakeNodePopUp]');
     return new Promise((resolve, reject) => {
 
       let url = 'https://localhost/#state=state&code=4/xWFnH5iLpxv4W4Bm58oVqDK6vwVessKKMoNs-LsSKNY&access_token=ya29.GlsVBM3VBlBR1YNREuXqOr4G_UzvoL_y64YtOGGKJJ-QlasBW-HrV0b1HsxR4uNB7r-N-pElCleW6kNYW4WIIr6mOSp1euVD09eoDXtVZZFHuU8LEzcGYmVV7QLh&token_type=Bearer&expires_in=3600&id_token=eyJhbGciOiJSUzI1NiIsImtpZCI6IjQ5N2Y2MGIxMjRhNjc1NDI2NDhlYjIzYjc0YmY4YTg2MDJkY2I4YTYifQ.eyJhenAiOiI4MDgzMjk1NjYwMTItdHFyOHFvaDExMTk0MmdkMmtnMDA3dDBzOGYyNzdyb2kuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiI4MDgzMjk1NjYwMTItdHFyOHFvaDExMTk0MmdkMmtnMDA3dDBzOGYyNzdyb2kuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMTE5MzQyMzM2MzI1MjAwNzc3NDMiLCJlbWFpbCI6Im9wZW5pZHRlc3QxMEBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiYXRfaGFzaCI6Im94X1Vva3FwRDNkMjBpZzRXeEd2WlEiLCJjX2hhc2giOiJFem9RYmNwdGJxQlhoa0NEZGVOUFNRIiwibm9uY2UiOiJORGdzTVRNd0xERXNNelFzTkRnc01UTXNOaXc1TERReUxERXpOQ3czTWl3eE16UXNNalEzTERFekxERXNNU3d4TERVc01Dd3pMREV6TUN3eExERTFMREFzTkRnc01UTXdMREVzTVRBc01pd3hNekFzTVN3eExEQXNNVGd4TERFeU9Dd3hNRGdzTVRnekxESTFNeXd5TlN3eU16WXNPVGdzT0RBc016a3NNakl4TERrekxESXhMRFV4TERFNUxERXlMRFEzTERFd0xESTFOU3d5Tnl3eU1qWXNNVFV4TERFNU55d3hNRGNzTVRRekxERTJOeXd4T1N3eE5EQXNNVGs1TERFNE9Dd3lNelFzTVRNMUxEVTFMREl3TlN3eU1Ua3NNVGdzT0RRc01qSXlMREV4TUN3eU1Ea3NNVFU1TERFNE5Td3lORFFzTWpRM0xERXhPQ3d4T0RBc01qQXhMREV6T1N3eE1pd3lNakFzTVRBNExERTROaXd6T1N3eU1qQXNPRFFzTVRVeExESTFNeXd6TlN3MU1Td3hPVEVzT0RFc01UYzBMREU0T1N3NExEa3dMREkxTWl3eU1EWXNNalFzTVRVekxERTRPQ3d5TlRJc01qUXhMRFV4TERFMU9TdzVMREU0TERFM05Dd3pNaXd4T0RNc01qSXpMREU1Tml3ME1Td3hOeklzTlRNc01qRXNNemNzTWpReUxERTNOeXd4T1Rjc05Dd3lOQ3d4Tnprc01UYzRMREUxTnl3eE1UWXNNakkyTERjd0xERXdPQ3d4TkRFc01UZzVMREU1TWl3eU16Z3NNVEE0TERFeU9Dd3hNelFzTkRBc01pd3hOemtzTmpjc01UQXhMRE01TERjM0xESXhPQ3cwT0N3eU5UQXNNVGsyTERjd0xEZzBMREUyTml3eE55d3hOVFlzTlRZc01UTTFMRFFzTkRNc01UYzRMREkxTkN3ME5Dd3lOeXd4Tnpjc01UYzRMREUwTlN3eE5ESXNNVFF3TERJMUxERTBOU3d4TnpNc05ERXNNVEl4TERJeU9Dd3lORGtzTkRrc01UVTJMREl5TUN3eE1ESXNNVGd4TERFeUxERXdMREl4TkN3eE1Ea3NOVFFzTVRrekxESTBNQ3d5TVRZc01qRTRMRGNzTVRBNUxEa3dMREl4Tnl3ek1Dd3lORGNzTVRReExERTFOeXcxT1N3eU1qWXNORFlzTVRVMUxEUTBMREUxTml3NU55dzBPQ3d4T0Rrc01USXpMREU0TWl3eE5qVXNNalF3TERFd05TdzNPQ3d4T1Rnc05Ua3NNalVzTVRreUxESXhNeXd4TlRVc09EUXNNVGtzT1Rnc09EZ3NPVGNzTVRFNExERTVNU3czT1N3eE1EZ3NNakl4TERFd05Dd3lNVElzTlRBc016QXNNVGt5TERFeE1TdzNNeXd4T0RFc01USTRMRGt5TERFME9Dd3lNVEFzTWpBMExESXlNQ3d5TXpjc01UTTRMREkwTml3eE9Ea3NNVGsyTERFNE55d3pOU3d5TVRnc01qVXpMRFUzTERNd0xEWTFMRFkyTERFd015d3lPQ3d4TlRBc01USXNNakEwTERRd0xEZzBMRFF5TERFd05DdzJOU3d4TmpRc01UUTJMREl5Tnl3NE1pdzJMREUyTERFMk55d3hNak1zTVRrc01qSXhMREV6TVN3eE5UUXNOREVzT1RZc05qZ3NNakVzTVRRd0xESTJMRGc0TERFeU5pdzJOaXczTnl3NE9TdzNNeXd4T1RNc01pd3pMREVzTUN3eCIsImlzcyI6ImFjY291bnRzLmdvb2dsZS5jb20iLCJpYXQiOjE0OTAxMjEwNDQsImV4cCI6MTQ5MDEyNDY0NH0.GRnWCUx5r5ll9xkCRlYwUjISxi7nQ0OtlayWeqVcmoSf9W0k9HcBH_9U1CA-LJDkJCntDtkSkQyuRF-Sh53S2QYa396fqRZONp1czj6zCIxjZX30--vOvBCGyAI8sC9vssoKciTHn1aQhzDvY7HD4C7gt0KGI3FbtYRGa_RNm6v2ngqwVq0GyqE0KuosgVw0IjxbjOShrwWSHD1UszkEMhf4dQuekrZlvfkEfZN9aWbhy4qQy0y1Eiz0jTP2b5Yp1F1KyUQcgh8ofU2mE19nWzqxsMw-CEnGOUuwjfEGPqTg6ej0TDOz6rkODMvmQ9q33tL6TMbbJWga7DxAOOXSRQ&authuser=0&session_state=68cc1dc43bf1d78f415cc69354e639bdc52fb45f..2f30&prompt=consent';
@@ -506,8 +506,8 @@ class IdentityModule {
   }
 
   callGenerateMethods(idp, origin) {
-    console.log('[callGenerateMethods:idp]', idp);
-    console.log('[callGenerateMethods:origin]', origin);
+    log.log('[callGenerateMethods:idp]', idp);
+    log.log('[callGenerateMethods:origin]', origin);
     let _this = this;
 
     return new Promise((resolve, reject) => {
@@ -518,18 +518,18 @@ class IdentityModule {
       //generates the RSA key pair
       _this.crypto.generateRSAKeyPair().then(function(keyPair) {
 
-        console.log('[callNodeJsGenerateMethods:keyPair.public]', keyPair.public);
-        console.log('[callNodeJsGenerateMethods:keyPair.private]', keyPair.private);
+        log.log('[callNodeJsGenerateMethods:keyPair.public]', keyPair.public);
+        log.log('[callNodeJsGenerateMethods:keyPair.private]', keyPair.private);
 
         publicKey = _this.crypto.encode(keyPair.public);
         userkeyPair = keyPair;
-        console.log('generateAssertion:no_hint');
+        log.log('generateAssertion:no_hint');
         return _this.generateAssertion(publicKey, origin, '', userkeyPair, idp);
 
       }).then(function(url) {
-        console.log(['']);
+        log.log(['']);
         _this.myHint = url;
-        console.log('generateAssertion:hint');
+        log.log('generateAssertion:hint');
         return _this.generateAssertion(publicKey, origin, url, userkeyPair, idp);
 
       }).then(function(value) {
@@ -547,15 +547,15 @@ class IdentityModule {
 
 
   loginSelectedIdentity(publicKey, origin, idp, keyPair, loginUrl) {
-    console.log('[loginSelectedIdentity:publicKey]', publicKey);
-    console.log('[loginSelectedIdentity:origin]', origin);
-    console.log('[loginSelectedIdentity:idp]', idp);
-    console.log('[loginSelectedIdentity:keyPair]', keyPair);
-    console.log('[loginSelectedIdentity:loginUrl]', loginUrl);
+    log.log('[loginSelectedIdentity:publicKey]', publicKey);
+    log.log('[loginSelectedIdentity:origin]', origin);
+    log.log('[loginSelectedIdentity:idp]', idp);
+    log.log('[loginSelectedIdentity:keyPair]', keyPair);
+    log.log('[loginSelectedIdentity:loginUrl]', loginUrl);
     let _this = this;
 
     return new Promise((resolve, reject) => {
-      console.log('[IdentityModule:generateSelectedIdentity] openPopup');
+      log.log('[IdentityModule:generateSelectedIdentity] openPopup');
       _this.callIdentityModuleFunc('openPopup', {urlreceived: loginUrl}).then((idCode) => {
         return idCode;
       }, (err) => {
@@ -578,9 +578,9 @@ class IdentityModule {
 
 
   selectIdentityForHyperty(origin, idp, idHint) {
-    console.log('[selectIdentityForHyperty:origin]', origin);
-    console.log('[selectIdentityForHyperty:idp]', idp);
-    console.log('[selectIdentityForHyperty:idHint]', idHint);
+    log.log('[selectIdentityForHyperty:origin]', origin);
+    log.log('[selectIdentityForHyperty:idp]', idp);
+    log.log('[selectIdentityForHyperty:idHint]', idHint);
     let _this = this;
 
     return new Promise((resolve, reject) => {
@@ -604,7 +604,7 @@ class IdentityModule {
             });
           } else { // you should never get here, if you do then the IdP Proxy is not well implemented
             // console.error('GenerateAssertion returned invalid response.');
-            console.log('Proceeding by logging in.');
+            log.log('Proceeding by logging in.');
             _this.generateSelectedIdentity(publicKey, origin, idp, keyPair).then((value) => {
               return resolve(value);
             }, (err) => {
@@ -617,7 +617,7 @@ class IdentityModule {
   }
 
   selectIdentityFromGUI(origin) {
-    console.log('[selectIdentityFromGUI:origin]', origin);
+    log.log('[selectIdentityFromGUI:origin]', origin);
     let _this = this;
 
     return new Promise((resolve, reject) => {
@@ -657,8 +657,8 @@ class IdentityModule {
   }
 
   storeIdentity(result, keyPair) {
-    console.log('[storeIdentity:result]', result);
-    console.log('[storeIdentity:keyPair]', keyPair);
+    log.log('[storeIdentity:result]', result);
+    log.log('[storeIdentity:keyPair]', keyPair);
     let _this = this;
 
     return new Promise((resolve, reject) => {
@@ -772,19 +772,19 @@ class IdentityModule {
   }
 
   generateSelectedIdentity(publicKey, origin, idp, keyPair) {
-    console.log('[generateSelectedIdentity:publicKey]', publicKey);
-    console.log('[generateSelectedIdentity:origin]', origin);
-    console.log('[generateSelectedIdentity:idp]', idp);
-    console.log('[generateSelectedIdentity:keyPair]', keyPair);
+    log.log('[generateSelectedIdentity:publicKey]', publicKey);
+    log.log('[generateSelectedIdentity:origin]', origin);
+    log.log('[generateSelectedIdentity:idp]', idp);
+    log.log('[generateSelectedIdentity:keyPair]', keyPair);
 
     let _this = this;
 
     return new Promise((resolve, reject) => {
-      console.log('[IdentityModule:generateSelectedIdentity] NO_URL');
+      log.log('[IdentityModule:generateSelectedIdentity] NO_URL');
       _this.generateAssertion(publicKey, origin, '', keyPair, idp).then((loginUrl) => {
         return loginUrl;
       }).then(function(url) {
-        console.log('[IdentityModule:generateSelectedIdentity] URL');
+        log.log('[IdentityModule:generateSelectedIdentity] URL');
         return _this.generateAssertion(publicKey, origin, url, keyPair, idp);
       }).then(function(value) {
         if (value) {
@@ -800,8 +800,8 @@ class IdentityModule {
   }
 
   callIdentityModuleFunc(methodName, parameters) {
-    console.log('[callIdentityModuleFunc:methodName]', methodName);
-    console.log('[callIdentityModuleFunc:parameters]', parameters);
+    log.log('[callIdentityModuleFunc:methodName]', methodName);
+    log.log('[callIdentityModuleFunc:parameters]', parameters);
     let _this = this;
 
     return new Promise((resolve, reject) => {
@@ -828,7 +828,7 @@ class IdentityModule {
     //console.info('encryptMessage:message', message);
     let _this = this;
 
-    console.log('encrypt message ');
+    log.log('encrypt message ');
 
     return new Promise(function(resolve, reject) {
       let isHandShakeType = message.type === 'handshake';
@@ -847,7 +847,7 @@ class IdentityModule {
       let isToHyperty = divideURL(message.to).type === 'hyperty';
 
       if (message.type === 'update') {
-        console.log('encrypt message ');
+        log.log('encrypt message: message type update');
         return resolve(message);
       }
 
@@ -862,7 +862,7 @@ class IdentityModule {
           if (!chatKeys) {
             chatKeys = _this._newChatCrypto(message, userURL);
 
-            //console.log('createChatKey encrypt', message.from + message.to);
+            //log.log('createChatKey encrypt', message.from + message.to);
             _this.chatKeys[message.from + '<->' + message.to] = chatKeys;
             message.body.handshakePhase = 'startHandShake';
           }
@@ -875,7 +875,7 @@ class IdentityModule {
               let filteredMessage = _this._filterMessageToHash(message, message.body.value + iv, chatKeys.hypertyFrom.messageInfo);
 
               _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, filteredMessage).then(hash => {
-                //console.log('result of hash ', hash);
+                //log.log('result of hash ', hash);
                 let value = {iv: _this.crypto.encode(iv), value: _this.crypto.encode(encryptedValue), hash: _this.crypto.encode(hash)};
                 message.body.value = _this.crypto.encode(value);
 
@@ -903,8 +903,8 @@ class IdentityModule {
       //if from hyperty to a dataObjectURL
       } else if (isFromHyperty && isToDataObject) {
 
-        //console.log('dataObject value to encrypt: ', message.body.value);
-        //console.log('IdentityModule - encrypt from hyperty to dataobject ', message);
+        //log.log('dataObject value to encrypt: ', message.body.value);
+        //log.log('IdentityModule - encrypt from hyperty to dataobject ', message);
 
         _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
           sessionKeys = _chatkeysToArrayCloner(dataObjectURL, sessionKeys);
@@ -941,7 +941,7 @@ class IdentityModule {
                   let filteredMessage = _this._filterMessageToHash(message, message.body.value + iv);
 
                   _this.crypto.hashHMAC(dataObjectKey.sessionKey, filteredMessage).then(hash => {
-                    // console.log('hash ', hash);
+                    // log.log('hash ', hash);
 
                     let newValue = {value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv), hash: _this.crypto.encode(hash)};
 
@@ -987,7 +987,7 @@ class IdentityModule {
             _this.crypto.encryptAES(dataObjectKey.sessionKey, _this.crypto.encode(dataObject), iv).then(encryptedValue => {
               let newValue = { value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv) };
 
-              //console.log('encrypted dataObject', newValue);
+              //log.log('encrypted dataObject', newValue);
               return resolve(newValue);
             }).catch(err => { reject('On encryptDataObject from method encryptAES error: ' + err); });
 
@@ -1008,14 +1008,14 @@ class IdentityModule {
   decryptMessage(message) {
     let _this = this;
 
-    //  console.log('decryptMessage:message', message);
+    //  log.log('decryptMessage:message', message);
 
     return new Promise(function(resolve, reject) {
       let isHandShakeType = message.type === 'handshake';
 
       //if is not to apply encryption, then returns resolve
       if (!_this.isToUseEncryption && !isHandShakeType) {
-        // console.log('decryption disabled');
+        // log.log('decryption disabled');
         return resolve(message);
       }
 
@@ -1031,7 +1031,7 @@ class IdentityModule {
 
       //is is hyperty to hyperty communication
       if (isFromHyperty && isToHyperty) {
-        // console.log('decrypt hyperty to hyperty');
+        // log.log('decrypt hyperty to hyperty');
         let userURL = _this._registry.getHypertyOwner(message.to);
         if (userURL) {
 
@@ -1047,13 +1047,13 @@ class IdentityModule {
             let data = _this.crypto.decodeToUint8Array(value.value);
             let hash = _this.crypto.decodeToUint8Array(value.hash);
             _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, data, iv).then(decryptedData => {
-              // console.log('decrypted value ', decryptedData);
+              // log.log('decrypted value ', decryptedData);
               message.body.value = decryptedData;
 
               let filteredMessage = _this._filterMessageToHash(message, decryptedData + iv);
 
               _this.crypto.verifyHMAC(chatKeys.keys.hypertyToHashKey, filteredMessage, hash).then(result => {
-                //console.log('result of hash verification! ', result);
+                //log.log('result of hash verification! ', result);
                 message.body.assertedIdentity = true;
                 resolve(message);
               });
@@ -1083,7 +1083,7 @@ class IdentityModule {
 
         //if from hyperty to a dataObjectURL
       } else if (isFromHyperty && isToDataObject) {
-        // console.log('dataObject value to decrypt: ', message.body);
+        // log.log('dataObject value to decrypt: ', message.body);
 
         _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
           sessionKeys = _chatkeysToArrayCloner(dataObjectURL, sessionKeys);
@@ -1101,13 +1101,13 @@ class IdentityModule {
               _this.crypto.decryptAES(dataObjectKey.sessionKey, encryptedValue, iv).then(decryptedValue => {
                 let parsedValue = _this.crypto.decode(decryptedValue);
 
-                // console.log('decrypted Value,', parsedValue);
+                // log.log('decrypted Value,', parsedValue);
                 message.body.value = parsedValue;
 
                 let filteredMessage = _this._filterMessageToHash(message, parsedValue + iv);
 
                 _this.crypto.verifyHMAC(dataObjectKey.sessionKey, filteredMessage, hash).then(result => {
-                  // console.log('result of hash verification! ', result);
+                  // log.log('result of hash verification! ', result);
 
                   message.body.assertedIdentity = true;
                   resolve(message);
@@ -1141,13 +1141,13 @@ class IdentityModule {
     return new Promise(function(resolve, reject) {
       //if is not to apply encryption, then returns resolve
       if (!_this.isToUseEncryption) {
-        // console.log('decryption disabled');
+        // log.log('decryption disabled');
         return resolve(dataObject);
       }
 
       let dataObjectURL = _this._parseMessageURL(sender);
 
-      // console.log('dataObject value to decrypt: ', dataObject);
+      // log.log('dataObject value to decrypt: ', dataObject);
 
       _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
         sessionKeys = _chatkeysToArrayCloner(dataObjectURL, sessionKeys);
@@ -1164,14 +1164,14 @@ class IdentityModule {
               let parsedValue = _this.crypto.decode(decryptedValue);
               let newValue = { value: parsedValue, iv: _this.crypto.encode(iv) };
 
-              // console.log('decrypted dataObject,', newValue);
+              // log.log('decrypted dataObject,', newValue);
 
               return resolve(newValue);
             }).catch(err => { reject('On decryptDataObject from method encryptAES error: ' + err); });
 
           //if not, just return the dataObject
           } else {
-            // console.log('The dataObject is not encrypted');
+            // log.log('The dataObject is not encrypted');
             return resolve(dataObject);
           }
 
@@ -1217,7 +1217,7 @@ class IdentityModule {
         if (!chatKeys) {
           // callback to resolve when finish the mutual authentication
           let resolved = function(value) {
-            // console.log('callback value:', value);
+            // log.log('callback value:', value);
             resolve(value);
           };
           msg.callback = resolved;
@@ -1260,12 +1260,12 @@ class IdentityModule {
   getToken(fromURL, toUrl) {
     let _this = this;
     return new Promise(function(resolve, reject) {
-      // console.log('[Identity.IdentityModule.getToken] from->', fromURL, '  to->', toUrl);
+      // log.log('[Identity.IdentityModule.getToken] from->', fromURL, '  to->', toUrl);
 
       if (toUrl) {
-        //console.log('toUrl', toUrl);
+        //log.log('toUrl', toUrl);
         _this.registry.isLegacy(toUrl).then(function(result) {
-          // console.log('[Identity.IdentityModule.getToken] isLEGACY: ', result);
+          // log.log('[Identity.IdentityModule.getToken] isLEGACY: ', result);
           if (result) {
 
             // TODO: check if in the future other legacy hyperties have expiration times
@@ -1281,7 +1281,7 @@ class IdentityModule {
 
               _this.watchingYou.observe('identitiesList', (change) => {
 
-                // console.log('[Identity.IdentityModule.getToken]  identitiesList changed ' + _this.identitiesList);
+                // log.log('[Identity.IdentityModule.getToken]  identitiesList changed ' + _this.identitiesList);
 
                 let keypath = change.keypath;
 
@@ -1290,7 +1290,7 @@ class IdentityModule {
                 }
 
                 if (keypath === domain && change.name === 'status' && change.newValue === 'created') {
-                  // console.log('[Identity.IdentityModule.getToken] token is created ' + _this.identitiesList[domain]);
+                  // log.log('[Identity.IdentityModule.getToken] token is created ' + _this.identitiesList[domain]);
                   return resolve(_this.getAccessToken(toUrl));
                 }
               });
@@ -1300,9 +1300,9 @@ class IdentityModule {
                 status: 'in-progress'
               };
 
-              // console.log('[Identity.IdentityModule.getToken] for-> ', domain);
+              // log.log('[Identity.IdentityModule.getToken] for-> ', domain);
               _this.callGenerateMethods(domain).then((value) => {
-                // console.log('[Identity.IdentityModule.getToken] CallGeneratemethods', value);
+                // log.log('[Identity.IdentityModule.getToken] CallGeneratemethods', value);
                 let token = _this.getAccessToken(toUrl);
                 if (token) {
                   return resolve(token);
@@ -1411,8 +1411,8 @@ class IdentityModule {
         // check if there is expiration time
         if (identity.hasOwnProperty('info') && identity.info.hasOwnProperty('expires')) {
           expirationDate = identity.info.expires;
-          console.log('[Identity.IdentityModule.getAccessToken] Token expires in', expirationDate);
-          console.log('[Identity.IdentityModule.getAccessToken] time now:', timeNow);
+          log.log('[Identity.IdentityModule.getAccessToken] Token expires in', expirationDate);
+          log.log('[Identity.IdentityModule.getAccessToken] time now:', timeNow);
 
           // TODO: this should not be verified in this way
           // we should contact the IDP to verify this instead of using the local clock
@@ -1464,7 +1464,7 @@ class IdentityModule {
     let message;
     let assertion = _this.getIdentity(oldIdentity.userProfile.userURL);
 
-    console.log('sendRefreshMessage:oldIdentity', oldIdentity);
+    log.log('sendRefreshMessage:oldIdentity', oldIdentity);
 
     return new Promise((resolve, reject) => {
       let domain = _this._resolveDomain(oldIdentity.idp);
@@ -1488,11 +1488,11 @@ class IdentityModule {
   }
 
   sendGenerateMessage(contents, origin, usernameHint, idpDomain) {
-    console.log('[sendGenerateMessage:contents]', contents);
-    console.log('[sendGenerateMessage:origin]', origin);
-    console.log('[sendGenerateMessage:usernameHint]', usernameHint);
-    console.log('[sendGenerateMessage:idpDomain]', idpDomain);
-    console.log('sendGenerateMessage_hint');
+    log.log('[sendGenerateMessage:contents]', contents);
+    log.log('[sendGenerateMessage:origin]', origin);
+    log.log('[sendGenerateMessage:usernameHint]', usernameHint);
+    log.log('[sendGenerateMessage:idpDomain]', idpDomain);
+    log.log('sendGenerateMessage_hint');
     let _this = this;
 
     return new Promise((resolve, reject) => {
@@ -1522,21 +1522,21 @@ class IdentityModule {
   * @return {IdAssertion}              IdAssertion
   */
   generateAssertion(contents, origin, usernameHint, keyPair, idpDomain) {
-    console.log('[generateAssertion:contents]', contents);
-    console.log('[generateAssertion:origin]', origin);
-    console.log('[generateAssertion:usernameHint]', usernameHint);
-    console.log('[generateAssertion:keyPair]', keyPair);
-    console.log('[generateAssertion:idpDomain]', idpDomain);
+    log.log('[generateAssertion:contents]', contents);
+    log.log('[generateAssertion:origin]', origin);
+    log.log('[generateAssertion:usernameHint]', usernameHint);
+    log.log('[generateAssertion:keyPair]', keyPair);
+    log.log('[generateAssertion:idpDomain]', idpDomain);
     let _this = this;
 
     return new Promise(function(resolve, reject) {
-      console.log('[IdentityModule:generateSelectedIdentity:sendGenerateMessage]', usernameHint);
+      log.log('[IdentityModule:generateSelectedIdentity:sendGenerateMessage]', usernameHint);
       _this.sendGenerateMessage(contents, origin, usernameHint, idpDomain).then((result) => {
 
         if (result.loginUrl) {
 
           _this.callIdentityModuleFunc('openPopup', {urlreceived: result.loginUrl}).then((value) => {
-            console.log('[IdentityModule:generateSelectedIdentity:openPopup]', usernameHint);
+            log.log('[IdentityModule:generateSelectedIdentity:openPopup]', usernameHint);
 
             resolve(value);
           }, (err) => {
@@ -1566,9 +1566,9 @@ class IdentityModule {
   * @return {Promise}         Promise         promise with the result from the validation
   */
   validateAssertion(assertion, origin, idpDomain) {
-    console.log('[validateAssertion:assertion]', assertion);
-    console.log('[validateAssertion:origin]', origin);
-    console.log('[validateAssertion:idpDomain]', idpDomain);
+    log.log('[validateAssertion:assertion]', assertion);
+    log.log('[validateAssertion:origin]', origin);
+    log.log('[validateAssertion:idpDomain]', idpDomain);
     let _this = this;
 
     let domain = _this._resolveDomain(idpDomain);
@@ -1685,7 +1685,7 @@ class IdentityModule {
     let _this = this;
     return new Promise((resolve, reject) => {
       _this.getIdToken(hypertyURL).then(function(identity) {
-        //        console.log('[Identity.IdentityModule.getValidToken] Token', identity);
+        //        log.log('[Identity.IdentityModule.getValidToken] Token', identity);
         let timeNow = _this._secondsSinceEpoch();
         let completeId = _this.getIdentity(identity.userProfile.userURL);
         let expirationDate = undefined;
@@ -1708,8 +1708,8 @@ class IdentityModule {
           resolve(identity);
         }
 
-        console.log('[Identity.IdentityModule.getValidToken] Token expires in', expirationDate);
-        console.log('[Identity.IdentityModule.getValidToken] time now:', timeNow);
+        log.log('[Identity.IdentityModule.getValidToken] Token expires in', expirationDate);
+        log.log('[Identity.IdentityModule.getValidToken] time now:', timeNow);
 
         if (timeNow >= expirationDate) {
           if (identity.idp === 'google.com') {
@@ -1912,7 +1912,7 @@ class IdentityModule {
         }
         case 'senderHello': {
 
-          console.log('senderHello');
+          log.log('senderHello');
           chatKeys.handshakeHistory.senderHello = _this._filterMessageToHash(message);
           chatKeys.keys.fromRandom = _this.crypto.decodeToUint8Array(message.body.value);
           chatKeys.keys.toRandom = _this.crypto.generateRandom();
@@ -1933,7 +1933,7 @@ class IdentityModule {
         }
         case 'receiverHello': {
 
-          console.log('receiverHello');
+          log.log('receiverHello');
           chatKeys.handshakeHistory.receiverHello = _this._filterMessageToHash(message);
 
           _this.validateAssertion(message.body.identity.assertion, undefined, message.body.identity.idp).then((value) => {
@@ -2032,7 +2032,7 @@ class IdentityModule {
         }
         case 'senderCertificate': {
 
-          console.log('senderCertificate');
+          log.log('senderCertificate');
           let receivedValue = _this.crypto.decode(message.body.value);
 
           _this.validateAssertion(message.body.identity.assertion, undefined, message.body.identity.idp).then((value) => {
@@ -2049,7 +2049,7 @@ class IdentityModule {
             return _this.crypto.decryptRSA(chatKeys.hypertyFrom.privateKey, encryptedPMS);
 
           }, (error) => {
-            // console.log(error);
+            // log.log(error);
             reject('Error during authentication of identity');
 
             //obtain the PremasterKey using the private key
@@ -2066,7 +2066,7 @@ class IdentityModule {
             // validates the signature received
           }).then(signValidationResult => {
 
-            //console.log('SenderCertificate - signature validation result ', signValidationResult);
+            //log.log('SenderCertificate - signature validation result ', signValidationResult);
             let concatKey = _this.crypto.concatPMSwithRandoms(chatKeys.keys.premasterKey, chatKeys.keys.toRandom, chatKeys.keys.fromRandom);
 
             return _this.crypto.generateMasterSecret(concatKey, 'messageHistoric' + chatKeys.keys.toRandom + chatKeys.keys.fromRandom);
@@ -2089,7 +2089,7 @@ class IdentityModule {
             return _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, data, iv);
 
           }).then(decryptedData => {
-            // console.log('decryptedData', decryptedData);
+            // log.log('decryptedData', decryptedData);
 
             chatKeys.handshakeHistory.senderCertificate = _this._filterMessageToHash(message, decryptedData + iv);
 
@@ -2101,7 +2101,7 @@ class IdentityModule {
 
           }).then(verifiedHash  => {
 
-            // console.log('result of hash verification ', verifiedHash);
+            // log.log('result of hash verification ', verifiedHash);
             let receiverFinishedMessage = {
               type: 'handshake',
               to: message.from,
@@ -2115,7 +2115,7 @@ class IdentityModule {
 
             filteredMessage = _this._filterMessageToHash(receiverFinishedMessage, 'ok!' + iv, chatKeys.hypertyFrom.messageInfo);
 
-            //console.log('TIAGO: doHandShakePhase verifiedHash');
+            //log.log('TIAGO: doHandShakePhase verifiedHash');
             return _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, filteredMessage);
           }).then(hash => {
 
@@ -2154,7 +2154,7 @@ class IdentityModule {
           hash = _this.crypto.decodeToUint8Array(value.hash);
 
           _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, data, iv).then(decryptedData => {
-            // console.log('decryptedData', decryptedData);
+            // log.log('decryptedData', decryptedData);
             chatKeys.handshakeHistory.receiverFinishedMessage = _this._filterMessageToHash(message, decryptedData + iv);
 
             let filteredMessage = _this._filterMessageToHash(message, decryptedData + iv);
@@ -2191,7 +2191,7 @@ class IdentityModule {
 
         case 'reporterSessionKey': {
 
-          console.log('reporterSessionKey');
+          log.log('reporterSessionKey');
 
           let valueIVandHash = _this.crypto.decode(message.body.value);
           hash = _this.crypto.decodeToUint8Array(valueIVandHash.hash);
@@ -2202,7 +2202,7 @@ class IdentityModule {
           let dataObjectURL;
           let receiverAcknowledgeMsg;
 
-          //console.log('[IdentityModule reporterSessionKey] - decryptAES: ', chatKeys.keys.hypertyToSessionKey, encryptedValue, iv);
+          //log.log('[IdentityModule reporterSessionKey] - decryptAES: ', chatKeys.keys.hypertyToSessionKey, encryptedValue, iv);
 
           _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, encryptedValue, iv).then(decryptedValue => {
 
@@ -2217,7 +2217,7 @@ class IdentityModule {
           }).then(hashResult => {
 
 
-            // console.log('hash successfully validated ', hashResult);
+            // log.log('hash successfully validated ', hashResult);
 
             _this.dataObjectSessionKeys[dataObjectURL] =  {sessionKey: sessionKey, isToEncrypt: true};
             let dataObjectSessionKeysClone = _chatkeysToStringCloner(dataObjectURL, _this.dataObjectSessionKeys)
@@ -2258,7 +2258,7 @@ class IdentityModule {
 
         case 'receiverAcknowledge': {
 
-          console.log('receiverAcknowledge');
+          log.log('receiverAcknowledge');
 
           let receivedvalueIVandHash = _this.crypto.decode(message.body.value);
           let receivedHash = _this.crypto.decodeToUint8Array(receivedvalueIVandHash.hash);
@@ -2270,7 +2270,7 @@ class IdentityModule {
             let filteredMessage = _this._filterMessageToHash(message, decryptedValue + iv);
             return _this.crypto.verifyHMAC(chatKeys.keys.hypertyToHashKey, filteredMessage, receivedHash);
           }).then(hashResult => {
-            // console.log('hashResult ', hashResult);
+            // log.log('hashResult ', hashResult);
 
             let callback = chatKeys.callback;
 
@@ -2391,31 +2391,31 @@ class IdentityModule {
 function _chatkeysToStringCloner(chatKeysURL, chatKeys) {
   let dataObjectSessionKeysClone = Object.assign({}, chatKeys);
   if (dataObjectSessionKeysClone[chatKeysURL].sessionKey) {
-    console.log('_chatkeysToStringCloner:keys', dataObjectSessionKeysClone[chatKeysURL].sessionKey);
+    log.log('_chatkeysToStringCloner:keys', dataObjectSessionKeysClone[chatKeysURL].sessionKey);
     try {
       dataObjectSessionKeysClone[chatKeysURL].sessionKey = dataObjectSessionKeysClone[chatKeysURL].sessionKey.toString();
     } catch (err) {
-      console.log('_chatkeysToStringCloner:err', err);
+      log.log('_chatkeysToStringCloner:err', err);
     }
   }
   return dataObjectSessionKeysClone;
 }
 
 function _chatkeysToArrayCloner(chatKeysURL, sessionKeys) {
-  console.log('_chatkeysToArrayCloner', chatKeysURL, sessionKeys);
+  log.log('_chatkeysToArrayCloner', chatKeysURL, sessionKeys);
   if (sessionKeys) {
-    console.log('_chatkeysToArrayCloner:insideIf', sessionKeys[chatKeysURL].sessionKey);
+    log.log('_chatkeysToArrayCloner:insideIf', sessionKeys[chatKeysURL].sessionKey);
     try {
       sessionKeys[chatKeysURL].sessionKey = new Uint8Array(JSON.parse('[' + sessionKeys[chatKeysURL].sessionKey + ']'));
     } catch (err) {
-      console.log('_chatkeysToArrayCloner:err', err);
+      log.log('_chatkeysToArrayCloner:err', err);
     }
   }
   return sessionKeys;
 }
 
 //function logS(f1, f2) {
-//  console.log(f1, JSON.stringify(util.inspect(f2)));
+//  log.log(f1, JSON.stringify(util.inspect(f2)));
 //}
 
 export default IdentityModule;
