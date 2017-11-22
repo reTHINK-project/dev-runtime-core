@@ -472,7 +472,7 @@ class IdentityModule {
         userkeyPair = keyPair;
 
         //console.log('[callNodeJsGenerateMethods:generateSelectedIdentity] NO_URL');
-      //    return _this.generateAssertion(publicKey, origin, '', userkeyPair, idp);
+        //    return _this.generateAssertion(publicKey, origin, '', userkeyPair, idp);
         //}).then(function(url) {
 
         console.log('[callNodeJsGenerateMethods:generateSelectedIdentity] NO_URL');
@@ -527,7 +527,7 @@ class IdentityModule {
         return _this.generateAssertion(publicKey, origin, '', userkeyPair, idp);
 
       }).then(function(url) {
-        console.log([''])
+        console.log(['']);
         _this.myHint = url;
         console.log('generateAssertion:hint');
         return _this.generateAssertion(publicKey, origin, url, userkeyPair, idp);
@@ -907,9 +907,7 @@ class IdentityModule {
         //console.log('IdentityModule - encrypt from hyperty to dataobject ', message);
 
         _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
-          if (sessionKeys) {
-            sessionKeys.sessionKey = new Uint8Array(JSON.parse('[' + sessionKeys.sessionKey + ']'));
-          }
+          sessionKeys = _chatkeysToArrayCloner(dataObjectURL, sessionKeys);
           let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
 
           _this.dataObjectsStorage.getDataObject(dataObjectURL).then((isHypertyReporter) => {
@@ -920,9 +918,9 @@ class IdentityModule {
 
                 let sessionKey = _this.crypto.generateRandom();
                 _this.dataObjectSessionKeys[dataObjectURL] = {sessionKey: sessionKey, isToEncrypt: true};
-                let dataObjectSessionKeysClone = Object.assign({}, _this.dataObjectSessionKeys);
-                if(dataObjectSessionKeysClone[chatKeys.dataObjectURL].sessionKey)
-                  dataObjectSessionKeysClone[chatKeys.dataObjectURL].sessionKey = dataObjectSessionKeysClone[chatKeys.dataObjectURL].sessionKey.toString();
+                let dataObjectSessionKeysClone = _chatkeysToStringCloner(dataObjectURL, _this.dataObjectSessionKeys);
+
+                //TODO: check if this does not need to be stored
                 _this.storageManager.set('dataObjectSessionKeys', 0, dataObjectSessionKeysClone).catch(err => {
                   reject('On encryptMessage from method storageManager.set error: ' + err);
                 });
@@ -976,9 +974,7 @@ class IdentityModule {
       let dataObjectURL = _this._parseMessageURL(sender);
 
       _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
-        if (sessionKeys) {
-          sessionKeys.sessionKey = new Uint8Array(JSON.parse('[' + sessionKeys.sessionKey + ']'));
-        }
+        sessionKeys = _chatkeysToArrayCloner(dataObjectURL, sessionKeys);
         let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
 
         //check if there is already a session key for the chat room
@@ -1012,7 +1008,7 @@ class IdentityModule {
   decryptMessage(message) {
     let _this = this;
 
-  //  console.log('decryptMessage:message', message);
+    //  console.log('decryptMessage:message', message);
 
     return new Promise(function(resolve, reject) {
       let isHandShakeType = message.type === 'handshake';
@@ -1074,6 +1070,7 @@ class IdentityModule {
               } else {
                 _this.chatKeys[message.to + '<->' + message.from] = value.chatKeys;
                 _this._messageBus.postMessage(value.message);
+
                 //reject('decrypt handshake protocol phase ');
               }
             });
@@ -1089,9 +1086,7 @@ class IdentityModule {
         // console.log('dataObject value to decrypt: ', message.body);
 
         _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
-          if (sessionKeys) {
-            sessionKeys.sessionKey = new Uint8Array(JSON.parse('[' + sessionKeys.sessionKey + ']'));
-          }
+          sessionKeys = _chatkeysToArrayCloner(dataObjectURL, sessionKeys);
           let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
 
           if (dataObjectKey) {
@@ -1155,9 +1150,7 @@ class IdentityModule {
       // console.log('dataObject value to decrypt: ', dataObject);
 
       _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
-        if (sessionKeys) {
-          sessionKeys.sessionKey = new Uint8Array(JSON.parse('[' + sessionKeys.sessionKey + ']'));
-        }
+        sessionKeys = _chatkeysToArrayCloner(dataObjectURL, sessionKeys);
         let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
 
         if (dataObjectKey) {
@@ -1376,9 +1369,7 @@ class IdentityModule {
             if (identity.identity === userURL) {
               // TODO check this getIdToken when we run on nodejs environment;
               if (identity.hasOwnProperty('messageInfo')) {
-                if (identity.messageInfo.hasOwnProperty('assertion'))
-                  return resolve(identity.messageInfo);
-                else { //hack while idm is not reestuctured
+                if (identity.messageInfo.hasOwnProperty('assertion')) { return resolve(identity.messageInfo); } else { //hack while idm is not reestuctured
                   identity.messageInfo.assertion = identity.assertion;
                   return resolve(identity.messageInfo);
                 }
@@ -1455,7 +1446,8 @@ class IdentityModule {
 
       _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
         if (sessionKeys) {
-          sessionKeys.sessionKey = new Uint8Array(JSON.parse('[' + sessionKeys.sessionKey + ']'));
+          //TODO: Check if this is needed and if it is, how can the key be recovered (the keyURL is stored were?)
+          //sessionKeys.sessionKey = new Uint8Array(JSON.parse('[' + sessionKeys.sessionKey + ']'));
           _this.dataObjectSessionKeys = sessionKeys;
         } else {
           _this.dataObjectSessionKeys = {};
@@ -1693,7 +1685,7 @@ class IdentityModule {
     let _this = this;
     return new Promise((resolve, reject) => {
       _this.getIdToken(hypertyURL).then(function(identity) {
-//        console.log('[Identity.IdentityModule.getValidToken] Token', identity);
+        //        console.log('[Identity.IdentityModule.getValidToken] Token', identity);
         let timeNow = _this._secondsSinceEpoch();
         let completeId = _this.getIdentity(identity.userProfile.userURL);
         let expirationDate = undefined;
@@ -1816,13 +1808,8 @@ class IdentityModule {
       if (!sessionKeyBundle) {
         sessionKey = _this.crypto.generateRandom();
         _this.dataObjectSessionKeys[chatKeys.dataObjectURL] = {sessionKey: sessionKey, isToEncrypt: true};
-        console.log('storageManager.set(dataObjectSessionKeys...1)', _this.dataObjectSessionKeys);
-        console.log('storageManager.set(dataObjectSessionKeys...2)', Object.assign({}, _this.dataObjectSessionKeys));
-        let dataObjectSessionKeysClone = Object.assign({}, _this.dataObjectSessionKeys);
 
-        if(dataObjectSessionKeysClone[chatKeys.dataObjectURL].sessionKey)
-          dataObjectSessionKeysClone[chatKeys.dataObjectURL].sessionKey = dataObjectSessionKeysClone[chatKeys.dataObjectURL].sessionKey.toString();
-        console.log('dataObjectSessionKeysClone.sessionKey.toString', dataObjectSessionKeysClone);
+        let dataObjectSessionKeysClone = _chatkeysToStringCloner(chatKeys.dataObjectURL, _this.dataObjectSessionKeys);
 
         _this.storageManager.set('dataObjectSessionKeys', 0, dataObjectSessionKeysClone).catch(err => {
           reject('On _sendReporterSessionKey from method storageManager.set(dataObjectSessionKeys...) error: ' + err);
@@ -2233,9 +2220,7 @@ class IdentityModule {
             // console.log('hash successfully validated ', hashResult);
 
             _this.dataObjectSessionKeys[dataObjectURL] =  {sessionKey: sessionKey, isToEncrypt: true};
-            let dataObjectSessionKeysClone = Object.assign({}, _this.dataObjectSessionKeys);
-            if(dataObjectSessionKeysClone[chatKeys.dataObjectURL].sessionKey)
-              dataObjectSessionKeysClone[chatKeys.dataObjectURL].sessionKey = dataObjectSessionKeysClone[chatKeys.dataObjectURL].sessionKey.toString();
+            let dataObjectSessionKeysClone = _chatkeysToStringCloner(dataObjectURL, _this.dataObjectSessionKeys)
             _this.storageManager.set('dataObjectSessionKeys', 0, dataObjectSessionKeysClone).catch(err => {
               reject('On _sendReporterSessionKey from method reporterSessionKey error: ' + err);
             });
@@ -2401,7 +2386,32 @@ class IdentityModule {
       return splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3] + '/' + splitedToURL[4];
     }
   }
+}
 
+function _chatkeysToStringCloner(chatKeysURL, chatKeys) {
+  let dataObjectSessionKeysClone = Object.assign({}, chatKeys);
+  if (dataObjectSessionKeysClone[chatKeysURL].sessionKey) {
+    console.log('_chatkeysToStringCloner:keys', dataObjectSessionKeysClone[chatKeysURL].sessionKey);
+    try {
+      dataObjectSessionKeysClone[chatKeysURL].sessionKey = dataObjectSessionKeysClone[chatKeysURL].sessionKey.toString();
+    } catch (err) {
+      console.log('_chatkeysToStringCloner:err', err);
+    }
+  }
+  return dataObjectSessionKeysClone;
+}
+
+function _chatkeysToArrayCloner(chatKeysURL, sessionKeys) {
+  console.log('_chatkeysToArrayCloner', chatKeysURL, sessionKeys);
+  if (sessionKeys) {
+    console.log('_chatkeysToArrayCloner:insideIf', sessionKeys[chatKeysURL].sessionKey);
+    try {
+      sessionKeys[chatKeysURL].sessionKey = new Uint8Array(JSON.parse('[' + sessionKeys[chatKeysURL].sessionKey + ']'));
+    } catch (err) {
+      console.log('_chatkeysToArrayCloner:err', err);
+    }
+  }
+  return sessionKeys;
 }
 
 //function logS(f1, f2) {
