@@ -79,6 +79,7 @@
     "karma-spec-reporter": "0.0.31",
     "karma-webpack": "^2.0.4",
     "mocha": "3.4.2",
+    "node-webcrypto-ossl": "^1.0.31",
     "proxy-observe": "^0.0.21",
     "sinon": "^2.4.1",
     "sinon-chai": "^2.14.0",

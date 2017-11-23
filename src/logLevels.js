@@ -63,7 +63,7 @@ e.setLevel(5);
 f.setLevel(0);
 
 // IdentityModule
-g.setLevel(0);
+g.setLevel(1);
 
 // PEP
 h.setLevel(5);
@@ -93,13 +93,13 @@ o.setLevel(5);
 p.setLevel(5);
 
 // ObserverObject
-q.setLevel(3);
+q.setLevel(1);
 
 // ReporterObject
-r.setLevel(3);
+r.setLevel(1);
 
 // SynSubscription
-s.setLevel(3);
+s.setLevel(1);
 
 // SyncherManager
-t.setLevel(3);
+t.setLevel(1);
