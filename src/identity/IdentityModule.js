@@ -762,7 +762,7 @@ class IdentityModule {
         if (_this.identitiesList[idToken.idp.domain]) {
           _this.identitiesList[idToken.idp.domain].status = 'created';
         }
-
+        log.log('storeIdentity:newID', newIdentity);
         resolve(newIdentity);
       }).catch(err => {
         reject('On _sendReporterSessionKey from method storeIdentity error: ' + err);
@@ -945,7 +945,7 @@ class IdentityModule {
 
                     let newValue = {value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv), hash: _this.crypto.encode(hash)};
 
-                    message.body.value = _this.crypto.encode(newValue);
+                    message.body.value = JSON.stringify(newValue);
                     resolve(message);
                   });
                 });
@@ -1093,7 +1093,7 @@ class IdentityModule {
 
             //check if is to apply encryption
             if (dataObjectKey.isToEncrypt) {
-              let parsedValue = _this.crypto.decode(message.body.value);
+              let parsedValue = JSON.parse(message.body.value);
               let iv = _this.crypto.decodeToUint8Array(parsedValue.iv);
               let encryptedValue = _this.crypto.decodeToUint8Array(parsedValue.value);
               let hash = _this.crypto.decodeToUint8Array(parsedValue.hash);
