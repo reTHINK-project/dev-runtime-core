@@ -1,12 +1,27 @@
+import {encodeUTF8, decodeUTF8} from './utf8.js';
+
 /**
 * Class with the cryptographic functions for the authentication protocol
 *
 */
 class Crypto {
 
-  constructor() {
+  constructor(runtimeFactory) {
     let _this = this;
+    if (typeof runtimeFactory.createWebcrypto === 'function') {
+      _this._crypto = runtimeFactory.createWebcrypto();
 
+      //_this.cryptoUTF8Encoder = encodeUTF8;
+      //_this.cryptoUTF8Decoder = decodeUTF8;
+
+    } else {
+      _this._crypto = crypto;
+
+      //_this.cryptoUTF8Encoder = (data) => { return new TextDecoder('utf-8').encode(data); };
+      //_this.cryptoUTF8Decoder = (data) => { return new TextDecoder('utf-8').decode(data); };
+    }
+    _this.cryptoUTF8Encoder = encodeUTF8;
+    _this.cryptoUTF8Decoder = decodeUTF8;
   }
 
   /**
@@ -15,7 +30,7 @@ class Crypto {
   * @return  {string}   encoded value
   */
   encode(value) {
-    return btoa(value);
+    return btoa(JSON.stringify(value));
   }
 
   /**
@@ -24,62 +39,96 @@ class Crypto {
   * @return  {byteArray} decodedValue
   */
   decode(value) {
-    return new Uint8Array(JSON.parse('[' + atob(value) + ']'));
+    //    CLog('Before dec val', value);
+    try {
+      return JSON.parse(atob(value));
+    } catch (err) {
+      console.log('decode:' + err);
+      throw err;
+    }
+  }
+
+  decodeToUint8Array(value) {
+    try {
+
+      let receivedArray  = undefined;
+
+      //TODO: The verification if the string contains the \" mutch be checked since it might fail
+      if (atob(value).indexOf('"') > -1) {
+        const receivedArrayObject = JSON.parse(atob(value));
+        receivedArray = Object.keys(receivedArrayObject).map((key) => {
+          return receivedArrayObject[key];
+        });
+      } else {
+        receivedArray = JSON.parse('[' + atob(value) + ']');
+      }
+
+
+      let unsigned8Array = new Uint8Array(receivedArray);
+      return unsigned8Array;
+
+    } catch (err) {
+      console.log('decodeToUint8Array:err' + err);
+      throw err;
+    }
+
   }
 
   encryptRSA(pubKey, data) {
+    CLog('encryptRSA:pubKey', pubKey);
+    CLog('encryptRSA:data', data);
+
     let _this = this;
 
     return new Promise(function(resolve, reject) {
       _this._importRSAencryptKey(new Uint8Array(pubKey)).then(function(publicKey) {
 
-        crypto.subtle.encrypt(
-            {
-              name: 'RSA-OAEP'
-            },
-            publicKey, //from generateKey or importKey above
-            data //ArrayBuffer of data you want to encrypt
+        _this._crypto.subtle.encrypt(
+          {
+            name: 'RSA-OAEP'
+          },
+          publicKey, //from generateKey or importKey above
+          data //ArrayBuffer of data you want to encrypt
         )
-        .then(function(encrypted) {
+          .then(function(encrypted) {
           //returns an ArrayBuffer containing the encrypted data
-          // console.log('crypto-encryptRSA', new Uint8Array(encrypted));
-          resolve(new Uint8Array(encrypted));
+          // CLog('crypto-encryptRSA', new Uint8Array(encrypted));
+            resolve(new Uint8Array(encrypted));
 
-        }).catch(function(err) {
-          // console.log('crypto-encryptRSA', err);
-          reject(err);
-        });
-
+          }).catch(function(err) {
+          // CLog('crypto-encryptRSA', err);
+            reject(err);
+          });
       });
-
     });
-
   }
 
   decryptRSA(privKey, data) {
+    CLog('decryptRSA:privKey', privKey);
+    CLog('decryptRSA:data', data);
     let _this = this;
 
     return new Promise(function(resolve, reject) {
       _this._importRSAdecryptKey(privKey).then(function(privateKey) {
 
-        crypto.subtle.decrypt(
-            {
-              name: 'RSA-OAEP'
-            },
-            privateKey, //from generateKey or importKey above
-            data //ArrayBuffer of the data
+        _this._crypto.subtle.decrypt(
+          {
+            name: 'RSA-OAEP'
+          },
+          privateKey, //from generateKey or importKey above
+          data //ArrayBuffer of the data
         )
-        .then(function(decrypted) {
+          .then(function(decrypted) {
 
-          let decryptedData = new Uint8Array(decrypted);
+            let decryptedData = new Uint8Array(decrypted);
 
-          // console.log('crypto-decryptRSA', decryptedData);
-          resolve(decryptedData);
+            // CLog('crypto-decryptRSA', decryptedData);
+            resolve(decryptedData);
 
-        }).catch(function(err) {
-          // console.log('crypto-decryptRSA', err);
-          reject(err);
-        });
+          }).catch(function(err) {
+          // CLog('crypto-decryptRSA', err);
+            reject(err);
+          });
       });
 
     });
@@ -91,22 +140,23 @@ class Crypto {
     return new Promise(function(resolve, reject) {
       _this._importRSAsignKey(privKey).then(function(privateKey) {
 
-        crypto.subtle.sign(
-            {
-              name: 'RSASSA-PKCS1-v1_5'
-            },
-            privateKey, //from generateKey or importKey above
-            _this._utf8Encode(data) //ArrayBuffer of data you want to sign
+        //CLog('TIAGO: signRSA data', data);
+        _this._crypto.subtle.sign(
+          {
+            name: 'RSASSA-PKCS1-v1_5'
+          },
+          privateKey, //from generateKey or importKey above
+          _this._utf8Encode(data) //ArrayBuffer of data you want to sign
         )
-        .then(function(signature) {
+          .then(function(signature) {
           //returns an ArrayBuffer containing the signature
-          // console.log('crypto-signRSA', new Uint8Array(signature));
-          resolve(new Uint8Array(signature));
+          // CLog('crypto-signRSA', new Uint8Array(signature));
+            resolve(new Uint8Array(signature));
 
-        }).catch(function(err) {
-          // console.log('crypto-signRSA', err);
-          reject(err);
-        });
+          }).catch(function(err) {
+          // CLog('crypto-signRSA', err);
+            reject(err);
+          });
 
       });
 
@@ -119,23 +169,24 @@ class Crypto {
     return new Promise(function(resolve, reject) {
       _this._importRSAverifyKey(pubKey).then(function(publicKey) {
 
-        crypto.subtle.verify(
-            {
-              name: 'RSASSA-PKCS1-v1_5'
-            },
-            publicKey, //from generateKey or importKey above
-            signature, //ArrayBuffer of the signature
-            _this._utf8Encode(data) //ArrayBuffer of the data
+        //CLog('TIAGO: verifyRSA data', data);
+        _this._crypto.subtle.verify(
+          {
+            name: 'RSASSA-PKCS1-v1_5'
+          },
+          publicKey, //from generateKey or importKey above
+          signature, //ArrayBuffer of the signature
+          _this._utf8Encode(data) //ArrayBuffer of the data
         )
-        .then(function(isvalid) {
+          .then(function(isvalid) {
           //returns a boolean on whether the signature is true or not
-          // console.log('crypto-verifyRSA', isvalid);
-          resolve(isvalid);
+          // CLog('crypto-verifyRSA', isvalid);
+            resolve(isvalid);
 
-        }).catch(function(err) {
-          // console.log('crypto-verifyRSA', err);
-          reject(err);
-        });
+          }).catch(function(err) {
+          // CLog('crypto-verifyRSA', err);
+            reject(err);
+          });
 
       });
 
@@ -143,30 +194,35 @@ class Crypto {
   }
 
   encryptAES(key, data, iv) {
+    CLog('encryptAES:key', key);
+    CLog('encryptAES:data', data);
+    CLog('encryptAES:iv', iv);
     let _this = this;
 
     return new Promise(function(resolve, reject) {
       _this._importAESkey(key).then(function(aesKey) {
 
-        crypto.subtle.encrypt(
-            {
-              name: 'AES-CBC',
-              //Don't re-use initialization vectors!
-              //Always generate a new iv every time your encrypt!
-              iv: iv
-            },
-            aesKey, //from generateKey or importKey above
-            _this._utf8Encode(data) //ArrayBuffer of data you want to encrypt
-        )
-        .then(function(encrypted) {
-          //returns an ArrayBuffer containing the encrypted data
-          // console.log('crypto-encryptAES', new Uint8Array(encrypted));
-          resolve(new Uint8Array(encrypted));
+        //CLog('TIAGO: encryptAES data', data);
+        _this._crypto.subtle.encrypt(
+          {
+            name: 'AES-CBC',
 
-        }).catch(function(err) {
-          // console.log('crypto-encryptAES', err);
-          reject(err);
-        });
+            //Don't re-use initialization vectors!
+            //Always generate a new iv every time your encrypt!
+            iv: iv
+          },
+          aesKey, //from generateKey or importKey above
+          _this._utf8Encode(data) //ArrayBuffer of data you want to encrypt
+        )
+          .then(function(encrypted) {
+          //returns an ArrayBuffer containing the encrypted data
+          // CLog('crypto-encryptAES', new Uint8Array(encrypted));
+            resolve(new Uint8Array(encrypted));
+
+          }).catch(function(err) {
+          // CLog('crypto-encryptAES', err);
+            reject(err);
+          });
 
       });
 
@@ -174,29 +230,32 @@ class Crypto {
   }
 
   decryptAES(key, data, iv) {
+    CLog('decryptAES:key', key);
+    CLog('decryptAES:data', data);
+    CLog('decryptAES:iv', iv);
     let _this = this;
 
     return new Promise(function(resolve, reject) {
       _this._importAESkey(key).then(function(aesKey) {
 
-        crypto.subtle.decrypt(
-            {
-              name: 'AES-CBC',
-              iv: iv
-            },
-            aesKey, //from generateKey or importKey above
-            data //ArrayBuffer of the data
+        _this._crypto.subtle.decrypt(
+          {
+            name: 'AES-CBC',
+            iv: iv
+          },
+          aesKey, //from generateKey or importKey above
+          data //ArrayBuffer of the data
         )
-        .then(function(decrypted) {
+          .then(function(decrypted) {
 
-          let decodedData = _this._utf8Decode(new Uint8Array(decrypted));
-          // console.log('crypto-decryptAES', decodedData);
-          resolve(decodedData);
+            let decodedData = _this._utf8Decode(new Uint8Array(decrypted));
+            CLog('crypto-decryptAES', decodedData);
+            resolve(decodedData);
 
-        }).catch(function(err) {
-          // console.log('crypto-decryptAES', err);
-          reject(err);
-        });
+          }).catch(function(err) {
+          // CLog('crypto-decryptAES', err);
+            reject(err);
+          });
 
       });
 
@@ -210,29 +269,39 @@ class Crypto {
   * @return  {byteArray}   signature  resulting hash
   */
   hashHMAC(key, data) {
+    CLog('hashHMAC:key', key);
+    CLog('hashHMAC:data', data);
     let _this = this;
 
-    return new Promise(function(resolve,reject) {
+    return new Promise(function(resolve, reject) {
+
+      if (typeof data != 'string') {
+        data = JSON.stringify(data);
+        CLog('Converting hashHMAC inpured DATA');
+        CLog('HHashHMAC:', data);
+      }
+
 
       _this._importHMACkey(key).then(function(hmacKey) {
 
-        crypto.subtle.sign(
-        {
-          name: 'HMAC'
-        },
-        hmacKey, //from generateKey or importKey above
-        _this._utf8Encode(data) //ArrayBuffer of data you want to sign
+        _this._crypto.subtle.sign(
+          {
+            name: 'HMAC'
+          },
+          hmacKey, //from generateKey or importKey above
+          _this._utf8Encode(data) //ArrayBuffer of data you want to sign
         )
-        .then(function(signature) {
-          // console.log('crypto-hashHMAC', signature);
+          .then(function(signature) {
+            CLog('HashHMAC signature:', new Uint8Array(signature));
 
-          //returns an ArrayBuffer containing the signature
-          resolve(new Uint8Array(signature));
+            // CLog('crypto-hashHMAC', signature);
+            //returns an ArrayBuffer containing the signature
+            resolve(new Uint8Array(signature));
 
-        }).catch(function(err) {
-          // console.log('crypto-hashHMAC', err);
-          reject(err);
-        });
+          }).catch(function(err) {
+            // CLog('crypto-hashHMAC', err);
+            reject(err);
+          });
       });
     });
   }
@@ -245,13 +314,22 @@ class Crypto {
   * @return  {boolean}   isvalid     boolean saying if the data corresponds to the hash received
   */
   verifyHMAC(key, data, signature) {
+    CLog('verifyHMAC:key', key);
+    CLog('verifyHMAC:data', data);
+    CLog('verifyHMAC:signature', signature);
     let _this = this;
 
-    return new Promise(function(resolve,reject) {
+    return new Promise(function(resolve, reject) {
 
       _this._importHMACkey(key).then(function(hmacKey) {
 
-        crypto.subtle.verify(
+        if (typeof data != 'string') {
+          data = JSON.stringify(data);
+          CLog('Converting verifyHMAC inputed DATA:', data);
+        }
+
+        //CLog('TIAGO: verifyHMAC data', data);
+        _this._crypto.subtle.verify(
           {
             name: 'HMAC'
           },
@@ -259,16 +337,16 @@ class Crypto {
           signature, //ArrayBuffer of the signature
           _this._utf8Encode(data) //ArrayBuffer of the data
         )
-        .then(function(isvalid) {
+          .then(function(isvalid) {
           //returns a boolean on whether the signature is true or not
-          // console.log('crypto-verifyHMAC', isvalid);
-          (isvalid) ? resolve(isvalid) : reject(isvalid);
+          // CLog('crypto-verifyHMAC', isvalid);
+            console.log('verifyHMAC result', isvalid);
+            (isvalid) ? resolve(isvalid) : reject(isvalid);
 
-        }).catch(function(err) {
-          console.error('crypto-verifyHMAC', err);
-          reject(err);
-        });
-
+          }).catch(function(err) {
+            console.error('crypto-verifyHMAC', err);
+            reject(err);
+          });
       });
     });
   }
@@ -282,34 +360,34 @@ class Crypto {
     let keyPair = {};
 
     return new Promise(function(resolve, reject) {
-      crypto.subtle.generateKey(
-      {
-        name: 'RSA-PSS',
-        modulusLength: 2048, //can be 1024, 2048, or 4096
-        publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
-        hash: {name: 'SHA-256'} //can be 'SHA-1', 'SHA-256', 'SHA-384', or 'SHA-512'
-      },
-      true, //whether the key is extractable (i.e. can be used in exportKey)
-      ['sign', 'verify'] //can be any combination of 'sign' and 'verify'
+      _this._crypto.subtle.generateKey(
+        {
+          name: 'RSA-PSS',
+          modulusLength: 2048, //can be 1024, 2048, or 4096
+          publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
+          hash: {name: 'SHA-256'} //can be 'SHA-1', 'SHA-256', 'SHA-384', or 'SHA-512'
+        },
+        true, //whether the key is extractable (i.e. can be used in exportKey)
+        ['sign', 'verify'] //can be any combination of 'sign' and 'verify'
 
       ).then(function(key) {
         //returns a keypair object
-        // console.log(key);
+        // CLog(key);
 
-        crypto.subtle.exportKey(
+        _this._crypto.subtle.exportKey(
           'spki', //can be 'jwk' (public or private), 'spki' (public only), or 'pkcs8' (private only)
           key.publicKey //can be a publicKey or privateKey, as long as extractable was true
         ).then(function(publicKey) {
           //returns the exported key data
           keyPair.public  = new Uint8Array(publicKey);
-          return crypto.subtle.exportKey(
+          return _this._crypto.subtle.exportKey(
             'pkcs8', //can be 'jwk' (public or private), 'spki' (public only), or 'pkcs8' (private only)
             key.privateKey //can be a publicKey or privateKey, as long as extractable was true
           );
         }).then(function(privateKey) {
           keyPair.private  = new Uint8Array(privateKey);
-          // console.log('crypto-generateRSAKeyPair', keyPair);
 
+          // CLog('crypto-generateRSAKeyPair', keyPair);
           resolve(keyPair);
 
         }).catch(function(err) {
@@ -332,7 +410,7 @@ class Crypto {
     let _this = this;
 
     let array = new  Uint8Array(16);
-    crypto.getRandomValues(array);
+    _this._crypto.getRandomValues(array);
 
     return array;
   }
@@ -346,10 +424,12 @@ class Crypto {
     let _this = this;
 
     let array = new  Uint8Array(32);
-    crypto.getRandomValues(array);
+    _this._crypto.getRandomValues(array);
 
     let date = Date.now();
-    let dateEncoded = _this._utf8Encode(date);
+
+    //CLog('TIAGO: generateRandom data', date.toString());
+    let dateEncoded = _this._utf8Encode(date.toString());
 
     //extract the least significant 4 bytes in the date
     let finalDate = dateEncoded.slice(dateEncoded.length - 4, dateEncoded.length);
@@ -367,7 +447,7 @@ class Crypto {
     let _this = this;
 
     let array = new Uint8Array(48);
-    crypto.getRandomValues(array);
+    _this._crypto.getRandomValues(array);
     return array;
   }
 
@@ -395,11 +475,12 @@ class Crypto {
 
           //copy the first 16 bytes to the key remaining 16 bytes
           for (let i = 0; i < 16; i++) { key[i + 32] = keypart1[i]; }
-          // console.log('crypto-generateMasterSecret', key);
+
+          // CLog('crypto-generateMasterSecret', key);
           resolve(key);
 
         }).catch(function(err) {
-          // console.log('crypto-generateMasterSecret', err);
+          // CLog('crypto-generateMasterSecret', err);
           reject(err);
         });
       });
@@ -438,15 +519,15 @@ class Crypto {
       }).then(function(keypart3) {
         key.push(keypart3);
 
-        // console.log('crypto-generateKeys', key);
+        // CLog('crypto-generateKeys', key);
         resolve(key);
 
       }).catch(function(err) {
-        // console.log('crypto-generateKeys', err);
+        // CLog('crypto-generateKeys', err);
         reject(err);
       });
 
-      // console.log(hmacKey, data);
+      // CLog(hmacKey, data);
     });
   }
 
@@ -454,25 +535,25 @@ class Crypto {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
-      crypto.subtle.importKey(
-          'pkcs8', //can be 'jwk' (public or private), 'spki' (public only), or 'pkcs8' (private only)
-          privKey,
-          {   //these are the algorithm options
-            name: 'RSASSA-PKCS1-v1_5',
-            hash: {name: 'SHA-256'} //can be 'SHA-1', 'SHA-256', 'SHA-384', or 'SHA-512'
-          },
-          true, //whether the key is extractable (i.e. can be used in exportKey)
-          ['sign'] //'verify' for public key import, 'sign' for private key imports
+      _this._crypto.subtle.importKey(
+        'pkcs8', //can be 'jwk' (public or private), 'spki' (public only), or 'pkcs8' (private only)
+        privKey,
+        {   //these are the algorithm options
+          name: 'RSASSA-PKCS1-v1_5',
+          hash: {name: 'SHA-256'} //can be 'SHA-1', 'SHA-256', 'SHA-384', or 'SHA-512'
+        },
+        true, //whether the key is extractable (i.e. can be used in exportKey)
+        ['sign'] //'verify' for public key import, 'sign' for private key imports
       )
-      .then(function(privateKey) {
+        .then(function(privateKey) {
         //returns a publicKey (or privateKey if you are importing a private key)
-        // console.log('crypto-_importRSAsignKey', privateKey);
-        resolve(privateKey);
+        // CLog('crypto-_importRSAsignKey', privateKey);
+          resolve(privateKey);
 
-      }).catch(function(err) {
-        console.error('crypto-_importRSAsignKey', err);
-        reject(err);
-      });
+        }).catch(function(err) {
+          console.error('crypto-_importRSAsignKey', err);
+          reject(err);
+        });
     });
   }
 
@@ -480,25 +561,25 @@ class Crypto {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
-      crypto.subtle.importKey(
-          'spki', //can be 'jwk' (public or private), 'spki' (public only), or 'pkcs8' (private only)
-          pubKey,
-          {   //these are the algorithm options
-            name: 'RSASSA-PKCS1-v1_5',
-            hash: {name: 'SHA-256'} //can be 'SHA-1', 'SHA-256', 'SHA-384', or 'SHA-512'
-          },
-          true, //whether the key is extractable (i.e. can be used in exportKey)
-          ['verify'] //'verify' for public key import, 'sign' for private key imports
+      _this._crypto.subtle.importKey(
+        'spki', //can be 'jwk' (public or private), 'spki' (public only), or 'pkcs8' (private only)
+        pubKey,
+        {   //these are the algorithm options
+          name: 'RSASSA-PKCS1-v1_5',
+          hash: {name: 'SHA-256'} //can be 'SHA-1', 'SHA-256', 'SHA-384', or 'SHA-512'
+        },
+        true, //whether the key is extractable (i.e. can be used in exportKey)
+        ['verify'] //'verify' for public key import, 'sign' for private key imports
       )
-      .then(function(publicKey) {
+        .then(function(publicKey) {
         //returns a publicKey (or privateKey if you are importing a private key)
-        // console.log('crypto-_importRSAverifyKey', publicKey);
-        resolve(publicKey);
+        // CLog('crypto-_importRSAverifyKey', publicKey);
+          resolve(publicKey);
 
-      }).catch(function(err) {
-        console.error('crypto-_importRSAverifyKey', err);
-        reject(err);
-      });
+        }).catch(function(err) {
+          console.error('crypto-_importRSAverifyKey', err);
+          reject(err);
+        });
     });
   }
 
@@ -506,26 +587,26 @@ class Crypto {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
-      crypto.subtle.importKey(
-          'spki', //can be 'jwk' (public or private), 'spki' (public only), or 'pkcs8' (private only)
-          pubKey,
-          {   //these are the algorithm options
-            name: 'RSA-OAEP',
-            hash: {name: 'SHA-256'} //can be 'SHA-1', 'SHA-256', 'SHA-384', or 'SHA-512'
-          },
-          true, //whether the key is extractable (i.e. can be used in exportKey)
-          ['encrypt'] //'encrypt' or 'wrapKey' for public key import or
-                      //'decrypt' or 'unwrapKey' for private key imports
+      _this._crypto.subtle.importKey(
+        'spki', //can be 'jwk' (public or private), 'spki' (public only), or 'pkcs8' (private only)
+        pubKey,
+        {   //these are the algorithm options
+          name: 'RSA-OAEP',
+          hash: {name: 'SHA-256'} //can be 'SHA-1', 'SHA-256', 'SHA-384', or 'SHA-512'
+        },
+        true, //whether the key is extractable (i.e. can be used in exportKey)
+        ['encrypt'] //'encrypt' or 'wrapKey' for public key import or
+        //'decrypt' or 'unwrapKey' for private key imports
       )
-      .then(function(publicKey) {
+        .then(function(publicKey) {
         //returns a publicKey (or privateKey if you are importing a private key)
-        // console.log('crypto-_importRSAencryptKey', publicKey);
-        resolve(publicKey);
+        // CLog('crypto-_importRSAencryptKey', publicKey);
+          resolve(publicKey);
 
-      }).catch(function(err) {
-        console.error('crypto-_importRSAencryptKey', err);
-        reject(err);
-      });
+        }).catch(function(err) {
+          console.error('crypto-_importRSAencryptKey', err.name);
+          reject(err);
+        });
     });
   }
 
@@ -533,31 +614,30 @@ class Crypto {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
-      crypto.subtle.importKey(
-          'pkcs8', //can be 'jwk' (public or private), 'spki' (public only), or 'pkcs8' (private only)
-          privKey,
-          {   //these are the algorithm options
-            name: 'RSA-OAEP',
-            hash: {name: 'SHA-256'} //can be 'SHA-1', 'SHA-256', 'SHA-384', or 'SHA-512'
-          },
-          true, //whether the key is extractable (i.e. can be used in exportKey)
-          ['decrypt'] //'encrypt' or 'wrapKey' for public key import or
-                      //'decrypt' or 'unwrapKey' for private key imports
+      _this._crypto.subtle.importKey(
+        'pkcs8', //can be 'jwk' (public or private), 'spki' (public only), or 'pkcs8' (private only)
+        privKey,
+        {   //these are the algorithm options
+          name: 'RSA-OAEP',
+          hash: {name: 'SHA-256'} //can be 'SHA-1', 'SHA-256', 'SHA-384', or 'SHA-512'
+        },
+        true, //whether the key is extractable (i.e. can be used in exportKey)
+        ['decrypt'] //'encrypt' or 'wrapKey' for public key import or
+        //'decrypt' or 'unwrapKey' for private key imports
       )
-      .then(function(privateKey) {
+        .then(function(privateKey) {
         //returns a publicKey (or privateKey if you are importing a private key)
-        // console.log('crypto-_importRSAdecryptKey', privateKey);
-        resolve(privateKey);
+        // CLog('crypto-_importRSAdecryptKey', privateKey);
+          resolve(privateKey);
 
-      }).catch(function(err) {
-        console.error('crypto-_importRSAdecryptKey', err);
-        reject(err);
-      });
+        }).catch(function(err) {
+          console.error('crypto-_importRSAdecryptKey', err);
+          reject(err);
+        });
     });
   }
 
   concatPMSwithRandoms(pms, toRandom, fromRandom) {
-    let _this = this;
 
     let finalKey = new Uint8Array(pms.length + toRandom.length + fromRandom.length);
 
@@ -580,8 +660,9 @@ class Crypto {
   }
 
   _generate256bitKey() {
+    let _this = this;
     let array = new  Uint8Array(32);
-    crypto.getRandomValues(array);
+    _this._crypto.getRandomValues(array);
 
     return array;
   }
@@ -598,24 +679,24 @@ class Crypto {
 
       _this._digest(arrayBuffer).then((key) => {
 
-        crypto.subtle.importKey(
-        'raw', //can be 'jwk' or 'raw'
-        key,
-        {   //this is the algorithm options
-          name: 'HMAC',
-          hash: {name: 'SHA-256'}, //can be 'SHA-1', 'SHA-256', 'SHA-384', or 'SHA-512'
-          length: 256 //optional, if you want your key length to differ from the hash function's block length
-        },
-        true, //whether the key is extractable (i.e. can be used in exportKey)
-        ['sign', 'verify'] //can be any combination of 'sign' and 'verify'
+        _this._crypto.subtle.importKey(
+          'raw', //can be 'jwk' or 'raw'
+          key,
+          {   //this is the algorithm options
+            name: 'HMAC',
+            hash: {name: 'SHA-256'}, //can be 'SHA-1', 'SHA-256', 'SHA-384', or 'SHA-512'
+            length: 256 //optional, if you want your key length to differ from the hash function's block length
+          },
+          true, //whether the key is extractable (i.e. can be used in exportKey)
+          ['sign', 'verify'] //can be any combination of 'sign' and 'verify'
         ).then(function(key) {
           //returns the symmetric key
-          // console.log('crypto-_importHMACkey', key);
+          // CLog('crypto-_importHMACkey', key);
           resolve(key);
         })
-        .catch(function(err) {
-          reject(err);
-        });
+          .catch(function(err) {
+            reject(err);
+          });
       });
     });
   }
@@ -624,55 +705,67 @@ class Crypto {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
-      crypto.subtle.digest(
-          {
-            name: 'SHA-256'
-          },
-          value //The data you want to hash as an ArrayBuffer
+      _this._crypto.subtle.digest(
+        {
+          name: 'SHA-256'
+        },
+        value //The data you want to hash as an ArrayBuffer
       )
-      .then(function(hash) {
+        .then(function(hash) {
         //returns the hash as an ArrayBuffer
-        // console.log('crypto-digest', new Uint8Array(hash));
-        resolve(new Uint8Array(hash));
-      })
-      .catch(function(err) {
-        console.error(err);
-        reject(err);
-      });
+        // CLog('crypto-digest', new Uint8Array(hash));
+          resolve(new Uint8Array(hash));
+        })
+        .catch(function(err) {
+          console.error(err);
+          reject(err);
+        });
 
     });
   }
 
   _importAESkey(arrayBuffer) {
+    let _this = this;
     return new Promise(function(resolve, reject) {
-      crypto.subtle.importKey(
-          'raw', //can be 'jwk' or 'raw'
-          arrayBuffer,
-          {   //this is the algorithm options
-            name: 'AES-CBC'
-          },
-          true, //whether the key is extractable (i.e. can be used in exportKey)
-          ['encrypt', 'decrypt'] //can be 'encrypt', 'decrypt', 'wrapKey', or 'unwrapKey'
+      _this._crypto.subtle.importKey(
+        'raw', //can be 'jwk' or 'raw'
+        arrayBuffer,
+        {   //this is the algorithm options
+          name: 'AES-CBC'
+        },
+        true, //whether the key is extractable (i.e. can be used in exportKey)
+        ['encrypt', 'decrypt'] //can be 'encrypt', 'decrypt', 'wrapKey', or 'unwrapKey'
       )
-      .then(function(key) {
+        .then(function(key) {
         //returns the symmetric key
         // console.log('crypto-importAESkey', key);
-        resolve(key);
-      })
-      .catch(function(err) {
-        console.error('crypto-importAESkey', err);
-        reject(err);
-      });
+          resolve(key);
+        })
+        .catch(function(err) {
+          console.error('crypto-importAESkey', err);
+          reject(err);
+        });
     });
   }
 
   _utf8Encode(s) {
-    return new TextEncoder('utf-8').encode(s);
+    return this.cryptoUTF8Encoder(s);
+
+    //return new TextEncoder('utf-8').encode(s);
+    //return encodeUTF8(s);
   }
 
   _utf8Decode(s) {
-    return new TextDecoder('utf-8').decode(s);
+    return this.cryptoUTF8Decoder(s);
+
+    //return new TextDecoder('utf-8').decode(s);
+    //return decodeUTF8(s);
   }
 }
+
+function CLog(a1, a2) {
+  console.log(a1, a2);
+}
+
 
 export default Crypto;

@@ -66,7 +66,7 @@ e.setLevel(5);
 f.setLevel(5);
 
 // IdentityModule
-g.setLevel(0);
+g.setLevel(1);
 
 // PEP
 h.setLevel(0);
@@ -102,7 +102,7 @@ q.setLevel(0);
 r.setLevel(0);
 
 // SynSubscription
-s.setLevel(3);
+s.setLevel(1);
 
 // SyncherManager
 t.setLevel(0);

@@ -6,6 +6,7 @@
 class GuiFake {
 
   constructor(url, messageBus) {
+    console.log('FakeGUI_deployed');
     let _this = this;
 
     _this._url = url;
@@ -44,7 +45,7 @@ class GuiFake {
           _this._messageBus.postMessage(replyMsg);
         }
       } else {
-        // console.log('Ignoring messages not intended to FakeGUI.', msg );
+        console.log('Ignoring messages not intended to FakeGUI.', msg);
       }
     });
   }

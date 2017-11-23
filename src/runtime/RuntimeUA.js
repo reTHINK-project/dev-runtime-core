@@ -267,7 +267,7 @@ class RuntimeUA {
         this.loader = new Loader(this.runtimeURL, this.runtimeConfiguration, this.descriptorInstance);
 
         // Instantiate the identity Module
-        this.identityModule = new IdentityModule(this.runtimeURL, this.runtimeCapabilities, this.storageManager, this._dataObjectsStorage);
+        this.identityModule = new IdentityModule(this.runtimeURL, this.runtimeCapabilities, this.storageManager, this._dataObjectsStorage, this.runtimeFactory);
 
         // Use the sandbox factory to create an AppSandbox;
         // In the future can be decided by policyEngine if we need
@@ -371,7 +371,9 @@ class RuntimeUA {
         Promise.all(prepareComponents).then((result) => {
           if (result.length === 3) {
             resolve(true);
-          } else reject('[RuntimeUA._loadComponents] Error ] ', result);
+          } else {
+            reject('[RuntimeUA._loadComponents] Error ] ', result);
+          }
         }).catch((reason) => {
           throw Error(reason);
         });
@@ -419,6 +421,7 @@ class RuntimeUA {
   * @param  {URL.URL}     domain          domain
   */
   loadIdpProxy(ipdProxyCatalogueURL) {
+    console.log('ipdProxyCatalogueURL', ipdProxyCatalogueURL);
 
     if (!ipdProxyCatalogueURL) throw new Error('The IDP Proxy URL is a needed parameter, could be a DOMAIN or a URL');
     return this.loader.loadIdpProxy(ipdProxyCatalogueURL);
