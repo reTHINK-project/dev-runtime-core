@@ -872,7 +872,7 @@ class IdentityModule {
             let iv = _this.crypto.generateIV();
             _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, message.body.value, iv).then(encryptedValue => {
 
-              let filteredMessage = _this._filterMessageToHash(message, message.body.value + iv, chatKeys.hypertyFrom.messageInfo);
+              let filteredMessage = _this._filterMessageToHash(message, JSON.stringify(message.body.value) + JSON.stringify(iv), chatKeys.hypertyFrom.messageInfo);
 
               _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, filteredMessage).then(hash => {
                 //log.log('result of hash ', hash);
@@ -938,7 +938,7 @@ class IdentityModule {
                 _this.crypto.encryptAES(dataObjectKey.sessionKey, _this.crypto.encode(message.body.value), iv).then(encryptedValue => {
                   delete message.body.identity.assertion; //TODO: Check why assertion is comming on the message!
                   delete message.body.identity.expires; //TODO: Check why expires is comming on the message!
-                  let filteredMessage = _this._filterMessageToHash(message, message.body.value + iv);
+                  let filteredMessage = _this._filterMessageToHash(message, JSON.stringify(message.body.value) + JSON.stringify(iv));
 
                   _this.crypto.hashHMAC(dataObjectKey.sessionKey, filteredMessage).then(hash => {
                     // log.log('hash ', hash);
@@ -1104,7 +1104,7 @@ class IdentityModule {
                 // log.log('decrypted Value,', parsedValue);
                 message.body.value = parsedValue;
 
-                let filteredMessage = _this._filterMessageToHash(message, parsedValue + iv);
+                let filteredMessage = _this._filterMessageToHash(message, JSON.stringify(parsedValue) + JSON.stringify(iv));
 
                 _this.crypto.verifyHMAC(dataObjectKey.sessionKey, filteredMessage, hash).then(result => {
                   // log.log('result of hash verification! ', result);
