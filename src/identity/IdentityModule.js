@@ -2,7 +2,7 @@
 import * as logger from 'loglevel';
 let log = logger.getLogger('IdentityModule');
 
-import {divideURL, getUserEmailFromURL, isDataObjectURL, getUserIdentityDomain, isLegacy, deepClone } from '../utils/utils.js';
+import {divideURL, getUserEmailFromURL, getUserIdentityDomain, parseMessageURL } from '../utils/utils.js';
 import Identity from './Identity';
 import Crypto from '../cryptoManager/Crypto';
 import GuiFake from './GuiFake';
@@ -1327,7 +1327,7 @@ class IdentityModule {
 
       let splitedURL = divideURL(dataObjectURL);
       let domain = splitedURL.domain;
-      let finalURL = _this._parseMessageURL(dataObjectURL);
+      let finalURL = parseMessageURL(dataObjectURL);
 
       // check if is the creator of the hyperty
       let reporterURL = _this.registry.getReporterURLSynchonous(finalURL);
@@ -1381,6 +1381,7 @@ class IdentityModule {
   _secondsSinceEpoch() {
     return Math.floor(Date.now() / 1000);
   }
+}
 
 
 
