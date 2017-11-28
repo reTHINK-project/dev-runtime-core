@@ -296,7 +296,7 @@ class RuntimeUA {
         this.identityManager = new IdentityManager( this.identityModule);
 
         // initialise the CryptoManager
-        cryptoManager.default.init(this.runtimeURL, this.runtimeCapabilities, this.storageManager, this._dataObjectsStorage, this.registry, this.coreDiscovery, this.identityModule);
+        cryptoManager.default.init(this.runtimeURL, this.runtimeCapabilities, this.storageManager, this._dataObjectsStorage, this.registry, this.coreDiscovery, this.identityModule, this.runtimeFactory);
 
         // Instantiate the Graph Connector
         this.graphConnector = process.env.MODE !== 'light' ? new GraphConnector(this.runtimeURL, this.messageBus, this.storageManager) : null;

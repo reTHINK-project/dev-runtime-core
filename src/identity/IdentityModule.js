@@ -2,7 +2,7 @@
 import * as logger from 'loglevel';
 let log = logger.getLogger('IdentityModule');
 
-import {divideURL, getUserEmailFromURL, isDataObjectURL, getUserIdentityDomain, isLegacy, deepClone } from '../utils/utils.js';
+import {divideURL, getUserEmailFromURL, getUserIdentityDomain, parseMessageURL } from '../utils/utils.js';
 import Identity from './Identity';
 import Crypto from '../cryptoManager/Crypto';
 import GuiFake from './GuiFake';
@@ -816,15 +816,13 @@ class IdentityModule {
         };
         try {
 
-      _this._messageBus.postMessage(message, callback, false);
+          _this._messageBus.postMessage(message, callback, false);
 
-      } catch (err) {
+        } catch (err) {
         reject('In method callIdentityModuleFunc error: ' + err);
       }
     });
   }
-
-
 
   //******************* TOKEN METHODS *******************
   /**
@@ -1329,7 +1327,7 @@ class IdentityModule {
 
       let splitedURL = divideURL(dataObjectURL);
       let domain = splitedURL.domain;
-      let finalURL = _this._parseMessageURL(dataObjectURL);
+      let finalURL = parseMessageURL(dataObjectURL);
 
       // check if is the creator of the hyperty
       let reporterURL = _this.registry.getReporterURLSynchonous(finalURL);
@@ -1380,45 +1378,12 @@ class IdentityModule {
     }
   }
 
-  _seconds_since_epoch() {
+  _secondsSinceEpoch() {
     return Math.floor(Date.now() / 1000);
   }
-
-  _parseMessageURL(URL) {
-    let splitedToURL = URL.split('/');
-    if (splitedToURL.length <= 6) {
-      return splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3];
-    } else {
-      return splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3] + '/' + splitedToURL[4];
-    }
-  }
 }
 
-function _chatkeysToStringCloner(chatKeysURL, chatKeys) {
-  let dataObjectSessionKeysClone = Object.assign({}, chatKeys);
-  if (dataObjectSessionKeysClone[chatKeysURL].sessionKey) {
-    log.log('_chatkeysToStringCloner:keys', dataObjectSessionKeysClone[chatKeysURL].sessionKey);
-    try {
-      dataObjectSessionKeysClone[chatKeysURL].sessionKey = dataObjectSessionKeysClone[chatKeysURL].sessionKey.toString();
-    } catch (err) {
-      log.log('_chatkeysToStringCloner:err', err);
-    }
-  }
-  return dataObjectSessionKeysClone;
-}
 
-function _chatkeysToArrayCloner(chatKeysURL, sessionKeys) {
-  log.log('_chatkeysToArrayCloner', chatKeysURL, sessionKeys);
-  if (sessionKeys) {
-    log.log('_chatkeysToArrayCloner:insideIf', sessionKeys[chatKeysURL].sessionKey);
-    try {
-      sessionKeys[chatKeysURL].sessionKey = new Uint8Array(JSON.parse('[' + sessionKeys[chatKeysURL].sessionKey + ']'));
-    } catch (err) {
-      log.log('_chatkeysToArrayCloner:err', err);
-    }
-  }
-  return sessionKeys;
-}
 
 //function logS(f1, f2) {
 //  log.log(f1, JSON.stringify(util.inspect(f2)));

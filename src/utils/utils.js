@@ -431,3 +431,38 @@ export function isEmpty(obj) {
 
   return JSON.stringify(obj) === JSON.stringify({});
 }
+
+export function chatkeysToStringCloner(chatKeysURL, chatKeys) {
+  let dataObjectSessionKeysClone = Object.assign({}, chatKeys);
+  if (dataObjectSessionKeysClone[chatKeysURL].sessionKey) {
+//    log.log('_chatkeysToStringCloner:keys', dataObjectSessionKeysClone[chatKeysURL].sessionKey);
+    try {
+      dataObjectSessionKeysClone[chatKeysURL].sessionKey = dataObjectSessionKeysClone[chatKeysURL].sessionKey.toString();
+    } catch (err) {
+//      log.log('_chatkeysToStringCloner:err', err);
+    }
+  }
+  return dataObjectSessionKeysClone;
+}
+
+export function chatkeysToArrayCloner(chatKeysURL, sessionKeys) {
+//  log.log('_chatkeysToArrayCloner', chatKeysURL, sessionKeys);
+  if (sessionKeys) {
+//    log.log('_chatkeysToArrayCloner:insideIf', sessionKeys[chatKeysURL].sessionKey);
+    try {
+      sessionKeys[chatKeysURL].sessionKey = new Uint8Array(JSON.parse('[' + sessionKeys[chatKeysURL].sessionKey + ']'));
+    } catch (err) {
+//      log.log('_chatkeysToArrayCloner:err', err);
+    }
+  }
+  return sessionKeys;
+}
+
+export function parseMessageURL(URL) {
+  let splitedToURL = URL.split('/');
+  if (splitedToURL.length <= 6) {
+    return splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3];
+  } else {
+    return splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3] + '/' + splitedToURL[4];
+  }
+}
