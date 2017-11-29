@@ -2220,7 +2220,7 @@ class IdentityModule {
             // log.log('hash successfully validated ', hashResult);
 
             _this.dataObjectSessionKeys[dataObjectURL] =  {sessionKey: sessionKey, isToEncrypt: true};
-            let dataObjectSessionKeysClone = _chatkeysToStringCloner(dataObjectURL, _this.dataObjectSessionKeys)
+            let dataObjectSessionKeysClone = _chatkeysToStringCloner(dataObjectURL, _this.dataObjectSessionKeys);
             _this.storageManager.set('dataObjectSessionKeys', 0, dataObjectSessionKeysClone).catch(err => {
               reject('On _sendReporterSessionKey from method reporterSessionKey error: ' + err);
             });
@@ -2388,6 +2388,46 @@ class IdentityModule {
   }
 }
 
+
+function _chatkeysToStringCloner(chatKeysURL, sessionKeys) {
+  let dataObjectSessionKeysClone = {};
+  let fields = Object.keys(sessionKeys);
+  if (fields) {
+    try {
+      for (let i = 0; i <  fields.length; i++) {
+        let field = fields[i];
+        dataObjectSessionKeysClone[field] = {};
+        dataObjectSessionKeysClone[field].sessionKey = sessionKeys[field].sessionKey.toString();
+        dataObjectSessionKeysClone[field].isToEncrypt = sessionKeys[field].isToEncrypt;
+      }
+    } catch (err) {
+      log.error('_chatkeysToStringCloner:err', err);
+    }
+  }
+  return dataObjectSessionKeysClone;
+}
+
+function _chatkeysToArrayCloner(chatKeysURL, sessionKeys) {
+  let dataObjectSessionKeysClone = {};
+  let fields = Object.keys(sessionKeys);
+  if (fields) {
+    try {
+      for (let i = 0; i <  fields.length; i++) {
+        let field = fields[i];
+        dataObjectSessionKeysClone[field] = {};
+        let arrayValues = JSON.parse('[' + sessionKeys[field].sessionKey + ']');
+        dataObjectSessionKeysClone[field].sessionKey = new Uint8Array(arrayValues);
+        dataObjectSessionKeysClone[field].isToEncrypt = sessionKeys[field].isToEncrypt;
+      }
+    } catch (err) {
+      log.error('_chatkeysToArrayCloner:err', err);
+    }
+  }
+  return dataObjectSessionKeysClone;
+}
+
+
+/*
 function _chatkeysToStringCloner(chatKeysURL, chatKeys) {
   let dataObjectSessionKeysClone = Object.assign({}, chatKeys);
   if (dataObjectSessionKeysClone[chatKeysURL].sessionKey) {
@@ -2413,6 +2453,8 @@ function _chatkeysToArrayCloner(chatKeysURL, sessionKeys) {
   }
   return sessionKeys;
 }
+*/
+
 
 //function logS(f1, f2) {
 //  log.log(f1, JSON.stringify(util.inspect(f2)));
