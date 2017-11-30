@@ -153,8 +153,8 @@ describe('RuntimeUA', function() {
       let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL);
 
       expect(loadHyperty)
-      .to.be.fulfilled
-      .and.notify(done);
+        .to.be.fulfilled
+        .and.notify(done);
     });
 
     it('should be a Promise', function(done) {
@@ -163,9 +163,9 @@ describe('RuntimeUA', function() {
       let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL);
 
       expect(loadHyperty)
-      .to.be.fulfilled
-      .and.to.be.instanceof(Promise)
-      .and.notify(done);
+        .to.be.fulfilled
+        .and.to.be.instanceof(Promise)
+        .and.notify(done);
 
     });
 

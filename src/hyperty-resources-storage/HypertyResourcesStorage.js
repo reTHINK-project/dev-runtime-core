@@ -32,6 +32,35 @@ class HypertyResourcesStorage {
       }
     });
 
+  }
+
+  /**
+   * check the available storage quota
+   *
+   * @memberof HypertyResourcesStorage
+   */
+  checkStorageQuota() {
+
+    return new Promise((resolve, reject) => {
+
+      if (navigator) {
+        navigator.storage.estimate().then((estimate) => {
+          try {
+            const available = (estimate.usage / estimate.quota).toFixed(2);
+
+            resolve({
+              quota: estimate.quota,
+              usage: estimate.usage,
+              available: available
+            })
+          } catch (error) {
+            
+          }
+
+        });
+      }
+
+    });
 
   }
 
