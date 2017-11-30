@@ -279,7 +279,7 @@ _isToEncrypt(message) {
         //log.log('IdentityModule - encrypt from hyperty to dataobject ', message);
 
         _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
-          sessionKeys = chatkeysToArrayCloner(dataObjectURL, sessionKeys);
+          sessionKeys = chatkeysToArrayCloner(sessionKeys);
           let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
 
           _this.dataObjectsStorage.getDataObject(dataObjectURL).then((isHypertyReporter) => {
@@ -290,7 +290,7 @@ _isToEncrypt(message) {
 
                 let sessionKey = _this.crypto.generateRandom();
                 _this.dataObjectSessionKeys[dataObjectURL] = {sessionKey: sessionKey, isToEncrypt: true};
-                let dataObjectSessionKeysClone = chatkeysToStringCloner(dataObjectURL, _this.dataObjectSessionKeys);
+                let dataObjectSessionKeysClone = chatkeysToStringCloner(_this.dataObjectSessionKeys);
 
                 //TODO: check if this does not need to be stored
                 _this.storageManager.set('dataObjectSessionKeys', 0, dataObjectSessionKeysClone).catch(err => {
@@ -346,7 +346,7 @@ _isToEncrypt(message) {
       let dataObjectURL = parseMessageURL(sender);
 
       _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
-        sessionKeys = chatkeysToArrayCloner(dataObjectURL, sessionKeys);
+        sessionKeys = chatkeysToArrayCloner(sessionKeys);
         let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
 
         //check if there is already a session key for the chat room
@@ -457,7 +457,7 @@ _isToEncrypt(message) {
           // log.log('dataObject value to decrypt: ', message.body);
 
           _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
-            sessionKeys = chatkeysToArrayCloner(dataObjectURL, sessionKeys);
+            sessionKeys = chatkeysToArrayCloner(sessionKeys);
             let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
 
             if (dataObjectKey) {
@@ -522,7 +522,7 @@ _isToEncrypt(message) {
       // log.log('dataObject value to decrypt: ', dataObject);
 
       _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
-        sessionKeys = chatkeysToArrayCloner(dataObjectURL, sessionKeys);
+        sessionKeys = chatkeysToArrayCloner(sessionKeys);
         let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
 
         if (dataObjectKey) {
@@ -708,7 +708,7 @@ _isToEncrypt(message) {
         sessionKey = _this.crypto.generateRandom();
         _this.dataObjectSessionKeys[chatKeys.dataObjectURL] = {sessionKey: sessionKey, isToEncrypt: true};
 
-        let dataObjectSessionKeysClone = chatkeysToStringCloner(chatKeys.dataObjectURL, _this.dataObjectSessionKeys);
+        let dataObjectSessionKeysClone = chatkeysToStringCloner(_this.dataObjectSessionKeys);
 
         _this.storageManager.set('dataObjectSessionKeys', 0, dataObjectSessionKeysClone).catch(err => {
           reject('On _sendReporterSessionKey from method storageManager.set(dataObjectSessionKeys...) error: ' + err);
@@ -1119,7 +1119,7 @@ _isToEncrypt(message) {
             // log.log('hash successfully validated ', hashResult);
 
             _this.dataObjectSessionKeys[dataObjectURL] =  {sessionKey: sessionKey, isToEncrypt: true};
-            let dataObjectSessionKeysClone = chatkeysToStringCloner(dataObjectURL, _this.dataObjectSessionKeys)
+            let dataObjectSessionKeysClone = chatkeysToStringCloner(_this.dataObjectSessionKeys)
             _this.storageManager.set('dataObjectSessionKeys', 0, dataObjectSessionKeysClone).catch(err => {
               reject('On _sendReporterSessionKey from method reporterSessionKey error: ' + err);
             });

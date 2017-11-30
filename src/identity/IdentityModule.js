@@ -809,16 +809,16 @@ class IdentityModule {
         body: { resource: 'identity', method: methodName, params: parameters } };
 
         //post msg with callback but without timout
-        let callback = msg => {
-          _this._messageBus.removeResponseListener(_this._idmURL, msg.id);
-          let result = msg.body.value;
-          resolve(result);
-        };
-        try {
+      let callback = msg => {
+        _this._messageBus.removeResponseListener(_this._idmURL, msg.id);
+        let result = msg.body.value;
+        resolve(result);
+      };
+      try {
 
-          _this._messageBus.postMessage(message, callback, false);
+        _this._messageBus.postMessage(message, callback, false);
 
-        } catch (err) {
+      } catch (err) {
         reject('In method callIdentityModuleFunc error: ' + err);
       }
     });
@@ -1289,7 +1289,7 @@ class IdentityModule {
           if (identity.idp === 'google.com') {
             _this.sendRefreshMessage(identity).then((newIdentity) => {
               _this.deleteIdentity(completeId.identity);
-              _this.storeIdentity(newIdentity.body.params.identity, newIdentity.body.params.identity.keyPair).then((value) => {
+              _this.storeIdentity(newIdentity, completeId.keyPair).then((value) => {
                 resolve(value);
               }, (err) => {
                 console.error('[Identity.IdentityModule.getToken] error on getToken', err);
@@ -1382,7 +1382,6 @@ class IdentityModule {
     return Math.floor(Date.now() / 1000);
   }
 }
-
 
 
 //function logS(f1, f2) {

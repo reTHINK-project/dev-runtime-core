@@ -432,30 +432,41 @@ export function isEmpty(obj) {
   return JSON.stringify(obj) === JSON.stringify({});
 }
 
-export function chatkeysToStringCloner(chatKeysURL, chatKeys) {
-  let dataObjectSessionKeysClone = Object.assign({}, chatKeys);
-  if (dataObjectSessionKeysClone[chatKeysURL].sessionKey) {
-//    log.log('_chatkeysToStringCloner:keys', dataObjectSessionKeysClone[chatKeysURL].sessionKey);
+export function chatkeysToStringCloner(sessionKeys) {
+  let dataObjectSessionKeysClone = {};
+  let fields = Object.keys(sessionKeys);
+  if (fields) {
     try {
-      dataObjectSessionKeysClone[chatKeysURL].sessionKey = dataObjectSessionKeysClone[chatKeysURL].sessionKey.toString();
+      for (let i = 0; i <  fields.length; i++) {
+        let field = fields[i];
+        dataObjectSessionKeysClone[field] = {};
+        dataObjectSessionKeysClone[field].sessionKey = sessionKeys[field].sessionKey.toString();
+        dataObjectSessionKeysClone[field].isToEncrypt = sessionKeys[field].isToEncrypt;
+      }
     } catch (err) {
-//      log.log('_chatkeysToStringCloner:err', err);
+      console.error('_chatkeysToStringCloner:err', err);
     }
   }
   return dataObjectSessionKeysClone;
 }
 
-export function chatkeysToArrayCloner(chatKeysURL, sessionKeys) {
-//  log.log('_chatkeysToArrayCloner', chatKeysURL, sessionKeys);
-  if (sessionKeys) {
-//    log.log('_chatkeysToArrayCloner:insideIf', sessionKeys[chatKeysURL].sessionKey);
+export function chatkeysToArrayCloner(sessionKeys) {
+  let dataObjectSessionKeysClone = {};
+  let fields = Object.keys(sessionKeys);
+  if (fields) {
     try {
-      sessionKeys[chatKeysURL].sessionKey = new Uint8Array(JSON.parse('[' + sessionKeys[chatKeysURL].sessionKey + ']'));
+      for (let i = 0; i <  fields.length; i++) {
+        let field = fields[i];
+        dataObjectSessionKeysClone[field] = {};
+        let arrayValues = JSON.parse('[' + sessionKeys[field].sessionKey + ']');
+        dataObjectSessionKeysClone[field].sessionKey = new Uint8Array(arrayValues);
+        dataObjectSessionKeysClone[field].isToEncrypt = sessionKeys[field].isToEncrypt;
+      }
     } catch (err) {
-//      log.log('_chatkeysToArrayCloner:err', err);
+      console.error('_chatkeysToArrayCloner:err', err);
     }
   }
-  return sessionKeys;
+  return dataObjectSessionKeysClone;
 }
 
 export function parseMessageURL(URL) {
