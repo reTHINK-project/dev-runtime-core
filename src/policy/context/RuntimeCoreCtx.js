@@ -170,10 +170,10 @@ class RuntimeCoreCtx extends ReThinkCtx {
       // TODO remove this validation. When the Nodejs auth was completed this should work like browser;
       this.runtimeCapabilities.isAvailable('node').then((result) => {
 
-      // log.log('[RuntimeCoreCtx - isAvailable - node] - ', result);
-        if (result || (message.body && message.body.hasOwnProperty('mutual') && !message.body.mutual)) {
-          return resolve(message);
-        } else {
+      console.log('[RuntimeCoreCtx - isAvailable - node] - ', result);
+      //  if (result) {
+      //    return resolve(message);
+      //  } else {
           if (isIncoming) {
             let isSubscription = message.type === 'subscribe';
             let isFromRemoteSM = _this.isFromRemoteSM(message.from);
@@ -205,7 +205,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
               resolve(message);
             }
           }
-        }
+//        }
       });
 
     });

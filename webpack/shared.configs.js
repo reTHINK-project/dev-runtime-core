@@ -1,7 +1,7 @@
 var path = require('path');
 var webpack = require('webpack');
 var packageFile = require('../package.json');
-
+var UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 var PrependText = require('./PrependText.js');
 
 var license = '/**\n' +
@@ -71,25 +71,7 @@ function getModeConfig() {
     }));
 
   } else {
-    plugins.push(new webpack.optimize.UglifyJsPlugin({
-      beautify: true,
-      ecma: 6,
-
-      mangle: {
-        screw_ie8: true,
-        keep_fnames: true
-      },
-
-      // Eliminate comments
-      comments: false,
-
-      compress: {
-        screw_ie8: true,
-
-        //  remove unreachable code
-        dead_code: true
-      }
-    }));
+    plugins.push(new UglifyJsPlugin());
   }
 
   return plugins;
