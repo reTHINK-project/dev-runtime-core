@@ -13,15 +13,15 @@
         <td colspan="3" title="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36">Browser: Chrome 62.0.3202 (Linux 0.0.0)</td>
       </tr>
       <tr class="overview">
-        <td colspan="3">Timestamp: 2017-11-30 18:36:20</td>
+        <td colspan="3">Timestamp: 2017-12-5 09:48:35</td>
       </tr>
       <tr>
         <td colspan="3">
-          1 tests / 
-          0 errors / 
-          0 failures / 
+          2 tests / 
+          1 errors / 
+          1 failures / 
           0 skipped / 
-          runtime: 0.006s
+          runtime: 2.001s
         </td>
       </tr>
       <tr class="header">
@@ -29,10 +29,45 @@
         <td>Spec</td>
         <td>Suite / Results</td>
       </tr>
-      <tr class="pass">
-        <td>Passed in 0.006s</td>
-        <td>check available space</td>
-        <td>Hyperty Resource Storage</td>
+      <tr class="fail">
+        <td>Failed</td>
+        <td>"before all" hook</td>
+        <td>
+          Hyperty Resource Storage
+          <br />Error: Timeout of 2000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves.
+
+        </td>
+      </tr>
+      <tr class="system-out">
+        <td colspan="3"><strong>System output:</strong><br />Chrome 62.0.3202 (Linux 0.0.0) WARN: 'Unhandled rejection: AbortError: Transaction aborted
+    at IDBTransaction.<anonymous> (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:17638:49)
+    at IDBTransaction.<anonymous> (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:16075:23)
+From previous: 
+    at new Transaction (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:17559:28)
+    at Dexie._createTransaction (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:16612:16)
+    at http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:16978:36
+    at usePSD (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:16117:16)
+    at newScope (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:16104:14)
+    at http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:16973:24
+    at callListener (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:15908:19)
+    at endMicroTickScope (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:15997:25)
+From previous: 
+    at Function.resolve (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:15724:16)
+    at enterTransactionScope (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:16972:29)
+    at http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:16666:17
+    at callListener (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:15908:19)
+    at endMicroTickScope (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:15997:25)
+    at IDBOpenDBRequest.<anonymous> (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:16083:30)
+From previous: 
+    at new Dexie (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:16289:26)
+    at Object.storageManager (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:12592:16)
+    at Suite.<anonymous> (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:3001:108)
+    at Object.create (http://localhost:9876/base/node_modules/mocha/mocha.js?0863072fa0d42c0f56c2c43e36b6f2bd01402ae2:931:19)
+    at context.describe.context.context (http://localhost:9876/base/node_modules/mocha/mocha.js?0863072fa0d42c0f56c2c43e36b6f2bd01402ae2:744:27)
+    at Object.<anonymous> (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:2999:1)
+    at __webpack_require__ (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:20:30)
+    at http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:63:18'
+</td>
       </tr>
     </table>
     <hr/>

@@ -17,6 +17,8 @@ class HypertyResourcesStorage {
 
     _this._bus = bus;
 
+    _this._storageLimit = 0.9; // the save storageLimit;
+
     _this._url = runtimeURL + '/storage';
 
     _this._storageManager = storageManager;
@@ -48,13 +50,19 @@ class HypertyResourcesStorage {
           try {
             const available = (estimate.usage / estimate.quota).toFixed(2);
 
+            console.log('available: ', available);
+
+            if (available > this._storageLimit) {
+              return reject('you reach the limit of available storage');
+            }
+
             resolve({
               quota: estimate.quota,
               usage: estimate.usage,
-              available: available
-            })
+              percent: Number(available)
+            });
           } catch (error) {
-            
+            reject(error);
           }
 
         });
@@ -100,16 +108,23 @@ class HypertyResourcesStorage {
 
     _this._hypertyResources[resourceURL] = content;
 
-    _this._storageManager.set('hypertyResources', 1, _this._hypertyResources).then(() => {
-      let response = {
-        from: message.to,
-        to: message.from,
-        id: message.id,
-        type: 'response',
-        body: { value: resourceURL, code: 200 }
-      };
+    this.checkStorageQuota().then((result) => {
+      console.log('RESULT:', result);
 
-      _this._bus.postMessage(response);
+      _this._storageManager.set('hypertyResources', 1, _this._hypertyResources).then(() => {
+        let response = {
+          from: message.to,
+          to: message.from,
+          id: message.id,
+          type: 'response',
+          body: { value: resourceURL, code: 200 }
+        };
+
+        _this._bus.postMessage(response);
+      }).catch((reason) => {
+        console.log('AQUI: ', reason);
+      });
+
     });
 
   }
