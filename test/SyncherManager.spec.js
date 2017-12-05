@@ -122,7 +122,7 @@ describe('SyncherManager', function() {
     registerSubscriber: () => {},
     isLocal: (url) => {
       console.log('isLocal: ', url);
-      return true;
+      return false;
     },
     runtimeURL: 'runtime://localhost/7601'
   };
@@ -191,7 +191,7 @@ describe('SyncherManager', function() {
 
   // let handlers = [
 
-  //   // Policy message authorise
+  //   // Policy message authorisereporter read
   //   function(ctx) {
   //     console.log('PEP:', ctx);
 
@@ -199,7 +199,7 @@ describe('SyncherManager', function() {
 
   //       console.log('PEP:', changedMgs);
 
-  //       changedMgs.body.identity = {
+  //       changedMgs.body.identity = {reporter read
   //         userProfile: {
   //           userURL: 'user://user@domain.pt'
   //         }
@@ -215,10 +215,10 @@ describe('SyncherManager', function() {
   //   }
   // ];
 
-  it.skip('reporter read', function(done) {
+  it('reporter read', function(done) {
 
     bus = new MessageBus(registry);
-    bus.pipelineOut.handlers = handlers;
+    bus.pipelineOut.handlers = [handlers.idmHandler];
 
     bus._onPostMessage = (msg) => {
       console.log('_onPostMessage: ', msg);
@@ -246,9 +246,9 @@ describe('SyncherManager', function() {
 
   });
 
-  it.skip('reporter observer integration', function(done) {
+  it('reporter observer integration', function(done) {
     bus = new MessageBus(registry);
-    bus.pipelineOut.handlers = handlers;
+    bus.pipelineOut.handlers = [handlers.idmHandler];
 
     bus._onPostMessage = (msg) => {
       console.log('[reporter observer integration - onPostMessage]: ', msg);
@@ -303,7 +303,7 @@ describe('SyncherManager', function() {
     });
   });
 
-  it.skip('should resume observers', function(done) {
+  it('should resume observers', function(done) {
 
     bus = new MessageBus(registry);
     bus._onMessage((a) => {
@@ -365,7 +365,7 @@ describe('SyncherManager', function() {
 
   });
 
-  it.skip('should resume reporters', function(done) {
+  it('should resume reporters', function(done) {
 
     bus = new MessageBus(registry);
 
@@ -796,14 +796,15 @@ describe('SyncherManager', function() {
         */
       }
 
-      /*
+      /*deleteMessageToHyperty
       if (seq === 11) {
         expect(event).to.contain.all.keys({ cType: 'remove', oType: 'array', field: '1.arr.1', data: 2 });
       }
 
       if (seq === 12) {
         expect(event).to.contain.all.keys({ cType: 'add', oType: 'array', field: '1.arr.1', data: [10, 11, 12] });
-      }
+      }+ service-framework@0.7.4
+
 
       if (seq === 13) {
         expect(event).to.contain.all.keys({ cType: 'update', oType: 'object', field: '1.arr.5.x', data: 10 });
@@ -824,7 +825,8 @@ describe('SyncherManager', function() {
 
         //verify changes...
         expect(data).to.contain.all.keys({
-          1: { name: 'Micael Pedrosa', birthdate: '28-02-1981', email: 'micael-xxx@gmail.com', phone: 911000000, obj1: { name: 'XPTO' }, arr: [1, 10, 11, 12, 3] }
+          1: { name: 'Micael Pedrosa', birthdate: '+ service-framework@0.7.4
+28-02-1981', email: 'micael-xxx@gmail.com', phone: 911000000, obj1: { name: 'XPTO' }, arr: [1, 10, 11, 12, 3] }
         });
 
         done();
@@ -862,7 +864,7 @@ describe('SyncherManager', function() {
     });
   });
 
-  it.skip('reporter addChild', function(done) {
+  it('reporter addChild', function(done) {
     bus = new MessageBus(registry);
     bus._onPostMessage = (msg) => {
       console.log('5-_onPostMessage: ', msg);
@@ -881,7 +883,7 @@ describe('SyncherManager', function() {
     });
   });
 
-  it.skip('observer addChild', function(done) {
+  it('observer addChild', function(done) {
     bus = new MessageBus(registry);
 
     bus._onPostMessage = (msg) => {
@@ -934,9 +936,9 @@ describe('SyncherManager', function() {
 
   });
 
-  it.skip('children deltas generate and process', function(done) {
+  it('children deltas generate and process', function(done) {
     bus = new MessageBus(registry);
-    bus.pipelineOut.handlers = handlers;
+    bus.pipelineOut.handlers = [handlers.idmHandler];
 
     bus._onPostMessage = (msg) => {
       console.log('7-_onPostMessage: ', msg);
@@ -980,11 +982,12 @@ describe('SyncherManager', function() {
     });
   });
 
-  it('create and delete', function(done) {
+  it.skip('create and delete', function(done) {
     let deleted = false;
 
     bus = new MessageBus(registry);
-    bus.pipelineOut.handlers = [handlers.idmHandler, handlers.pepOutHandler];
+    bus.pipelineOut.handlers = [handlers.idmHandler];
+  //  bus.pipelineIn.handlers = [handlers.decryptHandler, handlers.pepInHandler];
 
     // console.log(bus.pipelineIn.handlers);
 
@@ -1044,9 +1047,9 @@ describe('SyncherManager', function() {
     });
   });
 
-  it.skip('subscribe and unsubscribe', function(done) {
+  it('subscribe and unsubscribe', function(done) {
     bus = new MessageBus(registry);
-    bus.pipelineOut.handlers = handlers;
+    bus.pipelineOut.handlers = [handlers.idmHandler];
 
     bus._onPostMessage = (msg) => {
       console.log('8-_onPostMessage: ', msg);
@@ -1098,10 +1101,10 @@ describe('SyncherManager', function() {
     // let sync2DataObjectObserver;
     // let sync3DataObjectObserver;
 
-    it.skip('should save the url on storageManager', function(done) {
+    it('should save the url on storageManager', function(done) {
 
       bus = new MessageBus(registry);
-      bus.pipelineOut.handlers = handlers;
+      bus.pipelineOut.handlers = [handlers.idmHandler];
 
       bus._onPostMessage = function(msg)  {
         console.log('8-_onPostMessage: ', msg);
@@ -1169,10 +1172,10 @@ describe('SyncherManager', function() {
       });
     });
 
-    it.skip('should resume the url stored on storageManager', (done) => {
+    it('should resume the url stored on storageManager', (done) => {
 
       bus = new MessageBus(registry);
-      bus.pipelineOut.handlers = handlers;
+      bus.pipelineOut.handlers = [handlers.idmHandler];
       bus._onPostMessage = (msg) => {
         console.log('10-_onPostMessage: ', msg);
 
