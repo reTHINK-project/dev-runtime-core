@@ -7,7 +7,7 @@ let expect = chai.expect;
 
 chai.use(sinonChai);
 
-import {encodeUTF8, decodeUTF8} from '../src/identity/utf8.js';
+import {encodeUTF8, decodeUTF8} from '../src/cryptoManager/utf8.js';
 
 describe('encode decode function', function() {
 
@@ -17,4 +17,5 @@ describe('encode decode function', function() {
         let str = decodeUTF8(buf);
         expect(str).to.equal(string);
     });
+
 });

@@ -50,12 +50,18 @@ class MessageBus extends Bus {
     this._registry = registry;
     this._forwards = {};
 
-    this._pipeline = new Pipeline((error) => {
+    this._pipelineIn = new Pipeline((error) => {
+      log.error('PIPELINE-ERROR: ', JSON.stringify(error));
+    });
+
+    this._pipelineOut = new Pipeline((error) => {
       log.error('PIPELINE-ERROR: ', JSON.stringify(error));
     });
   }
 
-  get pipeline() { return this._pipeline; }
+  get pipelineIn() { return this._pipelineIn; }
+
+  get pipelineOut() { return this._pipelineOut; }
 
   /**
    * Post a message for routing. It will first search for a listener, if there is no one, it sends to a external routing using the _onPostMessage.
@@ -64,30 +70,101 @@ class MessageBus extends Bus {
    * @param  {Callback} responseCallback Optional callback if a response is expected from the request. A response will be always sent, even if it is a "Timeout".
    * @return {number}                  the Message id
    */
-  postMessage(inMsg, responseCallback) {
+  postMessage(inMsg, responseCallback, timeout) {
     log.info('onPOSTMessage: ', inMsg);
     let _this = this;
 
+    let deliver = (msg) => {
+
+          _this._responseCallback(inMsg, responseCallback, timeout);
+
+          if (!_this._onResponse(msg)) {
+            let itemList = _this._subscriptions[msg.to];
+            if (itemList) {
+              //do not publish on default address, because of loopback cycle
+              _this._publishOn(itemList, msg);
+            } else {
+              //if there is no listener, send to external interface
+              _this._onPostMessage(msg);
+            }
+          }
+    }
+
     _this._genId(inMsg);
 
-    _this._pipeline.process(inMsg, (msg) => {
+    if (_this._isToProcess(inMsg)) {
+      let isIncoming = _this._isIncomingMessage(inMsg);
 
-      _this._responseCallback(inMsg, responseCallback);
-
-      if (!_this._onResponse(msg)) {
-        let itemList = _this._subscriptions[msg.to];
-        if (itemList) {
-          //do not publish on default address, because of loopback cycle
-          _this._publishOn(itemList, msg);
-        } else {
-          //if there is no listener, send to external interface
-          _this._onPostMessage(msg);
-        }
-      }
-    });
+      if (isIncoming) _this._pipelineIn.process(inMsg, deliver);
+      else _this._pipelineOut.process(inMsg, deliver);
+    } else deliver(inMsg);
 
     return inMsg.id;
+
   }
+
+
+  _isToProcess(message) {
+    let schemasToIgnore = ['domain', 'domain-idp', 'global', 'hyperty-runtime', 'runtime'];
+    let splitFrom = (message.from).split('://');
+    let fromSchema = splitFrom[0];
+    let splitTo = (message.to).split('://');
+    let toSchema =  splitTo[0];
+    let from = message.from;
+    let to = message.to;
+
+    // Signalling messages between P2P Stubs don't have to be verified. FFS
+
+    if (message.body && message.body.source) {
+      from = message.body.source;
+    }
+
+    if (message.body && message.body.subscriber) {
+      from = message.body.subscriber;
+    }
+
+    if (from.indexOf('/p2phandler/') !== -1 || from.indexOf('/p2prequester/') !== -1 || to.indexOf('/p2phandler/') !== -1 || to.indexOf('/p2prequester/') !== -1) {
+      return false;
+    }
+
+    if (this._registry.isLocal(from) && this._registry.isLocal(message.to))
+      return false;
+
+    if (message.from === fromSchema || message.to === toSchema || message.type === 'read' || message.type === 'response' || (message.from.includes('hyperty://') && message.type === 'delete')) {
+      return false;
+    } else {
+      return schemasToIgnore.indexOf(fromSchema) === -1 || schemasToIgnore.indexOf(toSchema) === -1;
+    }
+  }
+
+  _isIncomingMessage(message) {
+    let from;
+
+    if (message.type === 'forward') {
+      log.info('[MessageBus - isIncomingMessage] - message.type: ', message.type);
+      from = message.body.from;
+    } else if (message.hasOwnProperty('body') && message.body.hasOwnProperty('source') && message.body.source) {
+      log.info('[MessageBus - isIncomingMessage] - message.body.source: ', message.body.source);
+      from = message.body.source;
+    } else if (message.hasOwnProperty('body') && message.body.hasOwnProperty('subscriber') && message.body.subscriber) {
+      //TODO: this subscriber validation should not exist, because is outdated
+      //TODO: the syncher and syncher manager not following the correct spec;
+      log.info('[MessageBus - isIncomingMessage] - message.body.subscriber: ', message.body.subscriber);
+      from = message.body.subscriber;
+    }  else if (message.hasOwnProperty('body') && message.body.hasOwnProperty('reporter') && message.body.reporter) {
+      //TODO: this subscriber validation should not exist, because is outdated
+      //TODO: the syncher and syncher manager not following the correct spec;
+      log.info('[MessageBus - isIncomingMessage] - message.body.reporter: ', message.body.reporter);
+      from = message.body.reporter;
+    } else {
+      log.info('[MessageBus - isIncomingMessage] - message.from ', message.from);
+      from = message.from;
+    }
+
+    log.info('[MessageBus - isIncomingMessage] - check if isLocal: ', from);
+    return !this._registry.isLocal(from);
+  }
+
 
   /**
    * Adds an external publish address listener. Every message for the address will be forwarded to the external routing by _onPostMessage.

@@ -38,7 +38,7 @@
   "homepage": "https://rethink-project.eu/",
   "dependencies": {
     "loglevel": "^1.5.1",
-    "service-framework": "github:rethink-project/dev-service-framework#v0.7.4"
+    "service-framework": "github:rethink-project/dev-service-framework#refactory"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
@@ -61,7 +61,7 @@
     "cross-env": "^5.1.1",
     "dexie": "^1.5.1",
     "esdoc": "^0.5.2",
-    "eslint": "^4.10.0",
+    "eslint": "^4.12.1",
     "eslint-plugin-import": "^2.7.0",
     "hex64": "^0.4.0",
     "jsrsasign": "^7.2.2",
@@ -80,12 +80,12 @@
     "karma-webpack": "^2.0.4",
     "mocha": "3.4.2",
     "node-webcrypto-ossl": "^1.0.31",
-    "uglifyjs-webpack-plugin": "^1.1.0",
     "proxy-observe": "^0.0.21",
     "sinon": "^2.4.1",
     "sinon-chai": "^2.14.0",
     "tv4": "^1.2.7",
-    "webpack": "^3.6.0",
-    "webpack-monitor": "^1.0.13"
+    "uglifyjs-webpack-plugin": "^1.1.0",
+    "webpack": "^3.10.0",
+    "webpack-monitor": "^1.0.14"
   }
 }

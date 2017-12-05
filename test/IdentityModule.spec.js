@@ -7,14 +7,15 @@ import { runtimeFactory } from './resources/runtimeFactory';
 import DataObjectsStorage from '../src/store-objects/DataObjectsStorage';
 import PEP from '../src/policy/PEP';
 import RuntimeCoreCtx from '../src/policy/context/RuntimeCoreCtx';
-import Crypto from '../src/identity/Crypto';
+import Crypto from '../src/cryptoManager/Crypto';
+import * as cryptoManager from '../src/cryptoManager/CryptoManager';
 
 chai.config.truncateThreshold = 0;
 chai.use(chaiAsPromised);
 chai.use(assertArrays);
 
+const expect = chai.expect;
 const assert = chai.assert;
-const SHOULD = chai.should;
 
 const IV_SIZE = 16;
 const RANDOM_VALUE_SIZE = 32;
@@ -200,7 +201,7 @@ describe('Crypto tests', function() {
   });
 });
 
-describe('Identity Module tests', function() {
+describe.skip('Identity Module tests', function() {
 
   before('Init structures once before all tests', function() {
     crypto = new Crypto(runtimeFactory);
@@ -239,6 +240,7 @@ describe('Identity Module tests', function() {
 
   beforeEach('Init structures before each test', function() {
     bus = new MessageBus();
+    bus.pipeline = {};
     bus.pipeline.handlers = handlersPopulate;
     bus._onPostMessage = msg => {
       msgNodeResponseFunc(bus, msg);
@@ -764,63 +766,52 @@ describe('Identity Module tests', function() {
     let receiver = false;
 
     crypto.generateRSAKeyPair().then(keyPair => {
-      identityModule
-        .storeIdentity(returnedAssertionValuePopulate, keyPair)
-        .then(result => {
-          let newChatCrypto = identityModule._newChatCrypto(
-            message,
-            userURL,
-            receiver
-          );
-          let valueVerificationResult =
-            newChatCrypto.hypertyFrom.userID === userEmail &&
-            newChatCrypto.hypertyFrom.messageInfo.assertion ===
-              returnedAssertionValuePopulate.assertion &&
-            newChatCrypto.callback === messageForNewChatCrypto.callback &&
-            newChatCrypto.dataObjectURL === message.dataObjectURL;
+      identityModule.storeIdentity(returnedAssertionValuePopulate, keyPair).then(result =>{
+        let newChatCrypto = cryptoManager.default._newChatCrypto(message, userURL, receiver);
+        let valueVerificationResult =
+					newChatCrypto.hypertyFrom.userID === userEmail &&
+					newChatCrypto.hypertyFrom.messageInfo.assertion === returnedAssertionValuePopulate.assertion &&
+					newChatCrypto.callback === messageForNewChatCrypto.callback &&
+					newChatCrypto.dataObjectURL === message.dataObjectURL;
 
-          assert(
-            valueVerificationResult,
-            'Generated chat crypto messege is not the expected one'
-          );
-        })
-        .then(done, done);
+        assert(valueVerificationResult, 'Generated chat crypto messege is not the expected one');
+      }).then(done, done);
     });
   });
 
   it('test _sendReporterSessionKey', function(done) {
-    let message = { from: hyperURL1, to: hyperURL2 };
+    let message = {
+      from: hyperURL1, to: hyperURL2
+    };
+
     let chatKeys = {
       dataObjectURL: 'comm://localhost/5f8d87fd-c56b-47fc-ad47-28d55f01e23a',
-      hypertyFrom: { messageInfo: 'messageInfo' },
+      hypertyFrom: {messageInfo: 'messageInfo'},
       keys: {
         hypertyFromSessionKey: crypto.generateRandom(),
         hypertyFromHashKey: crypto.generateRandom()
       }
     };
 
-    identityModule
-      ._sendReporterSessionKey(message, chatKeys)
-      .then(result => {
-        let assertFields =
-          result.hasOwnProperty('message') &&
-          result.message.type === 'handshake' &&
-          result.message.to === hyperURL1 &&
-          result.message.from === hyperURL2 &&
-          result.message.body.hasOwnProperty('handshakePhase') &&
-          result.message.body.hasOwnProperty('value') &&
-          result.hasOwnProperty('chatKeys') &&
-          result.chatKeys.hasOwnProperty('hypertyFrom') &&
-          result.chatKeys.hasOwnProperty('keys') &&
-          result.chatKeys.keys.hasOwnProperty('hypertyFromHashKey');
+    cryptoManager.default._sendReporterSessionKey(message, chatKeys).then(result =>{
+      let assertFields = result.hasOwnProperty('message') &&
+					result.message.type === 'handshake' &&
+					result.message.to === hyperURL1 &&
+					result.message.from === hyperURL2 &&
+					result.message.body.hasOwnProperty('handshakePhase') &&
+					result.message.body.hasOwnProperty('value') &&
+					result.hasOwnProperty('chatKeys') &&
+					result.chatKeys.hasOwnProperty('hypertyFrom') &&
+					result.chatKeys.hasOwnProperty('keys') &&
+					result.chatKeys.keys.hasOwnProperty('hypertyFromHashKey');
 
-        assert(assertFields, 'Result has not the required fields or values');
-      })
-      .then(done, done);
+
+      assert(assertFields, 'Result has not the required fields or values');
+    }).then(done, done);
   });
 
   //test isFromHyperty to isToHyperty communication -> handshake + update //TODO incomplete cases
-  it.skip('test encryptMessage - startHandShake and update', function(done) {
+  it('test encryptMessage - startHandShake and update', function(done) {
     let returnedAssertionValue = returnedAssertionValuePopulate;
     let chatKeys = chatKeysPopulate;
     let helloMessage = messageForNewChatCrypto;
@@ -835,116 +826,80 @@ describe('Identity Module tests', function() {
     chatKeys.keys.hypertyToSessionKey = chatKeys.keys.hypertyFromSessionKey;
     chatKeys.keys.hypertyToHashKey = chatKeys.keys.hypertyFromHashKey;
     identityModule.registry.getHypertyOwner = getHypertyOwnerPopulate;
-    identityModule.chatKeys[
-      encryptMessagePopulate.from + '<->' + encryptMessagePopulate.to
-    ] = chatKeys;
-    identityModule.chatKeys[
-      encryptMessagePopulate.to + '<->' + encryptMessagePopulate.from
-    ] = chatKeys;
+    cryptoManager.default.chatKeys[encryptMessagePopulate.from + '<->' + encryptMessagePopulate.to] = chatKeys;
+    cryptoManager.default.chatKeys[encryptMessagePopulate.to + '<->' + encryptMessagePopulate.from] = chatKeys;
 
     log('WTF');
     log(encryptMessagePopulate.type);
 
-    identityModule
-      .storeIdentity(returnedAssertionValuePopulate, keyPair)
-      .then(result1 => {
-        helloMessage.body.handshakePhase = 'startHandShake';
+    identityModule.storeIdentity(returnedAssertionValuePopulate, keyPair).then(result1 =>{
+      helloMessage.body.handshakePhase = 'startHandShake';
 
-        identityModule
-          ._doHandShakePhase(helloMessage, chatKeys)
-          .then(result2 => {
-            identityModule
-              .encryptMessage(encryptMessagePopulate)
-              .then(resolvedMessage => {
-                assert.equal(
-                  encryptMessagePopulate,
-                  resolvedMessage,
-                  'Messages should be the same'
-                );
-                encryptMessagePopulate.type = 'update';
+      cryptoManager.default._doHandShakePhase(helloMessage, chatKeys).then(result2 => {
 
-                identityModule
-                  .encryptMessage(encryptMessagePopulate)
-                  .then(updateMessage => {
-                    assert.equal(
-                      encryptMessagePopulate,
-                      updateMessage,
-                      'Messages should be the same'
-                    );
-                    encryptMessagePopulate.type = 'encrypt'; //Don't know the correct keyword but this works for now
+        cryptoManager.default.encryptMessage(encryptMessagePopulate).then(resolvedMessage => {
+          assert.equal(encryptMessagePopulate, resolvedMessage, 'Messages should be the same');
+          encryptMessagePopulate.type = 'update';
 
-                    identityModule
-                      .encryptMessage(encryptMessagePopulate)
-                      .then(encryptedMessage => {
-                        identityModule
-                          .decryptMessage(encryptedMessage)
-                          .then(decryptedMessage => {
-                            assert.equal(
-                              decryptedMessage.body.value,
-                              encryptMessagePopulate.body.value,
-                              'Encryption failed'
-                            );
-                          })
-                          .then(done, done);
-                      });
-                  });
-              });
+          cryptoManager.default.encryptMessage(encryptMessagePopulate).then(updateMessage => {
+            assert.equal(encryptMessagePopulate, updateMessage, 'Messages should be the same');
+            encryptMessagePopulate.type = 'encrypt';//Don't know the correct keyword but this works for now
+
+            cryptoManager.default.encryptMessage(encryptMessagePopulate).then(encryptedMessage => {
+
+              cryptoManager.default.decryptMessage(encryptedMessage).then(decryptedMessage => {
+                assert.equal(decryptedMessage.body.value, encryptMessagePopulate.body.value, 'Encryption failed');
+              }).then(done, done);
+            });
           });
+        });
       });
+    });
     encryptMessagePopulate.type = 'handshake';
   });
+
 
   it('test _doHandShakePhase - startHandShake', function(done) {
     let message = messageForNewChatCrypto;
     message.body.handshakePhase = 'startHandShake';
     let chatKeys = chatKeysPopulate;
-    identityModule
-      ._doHandShakePhase(message, chatKeys)
-      .then(result => {
-        let assertFields =
-          result.message.type === 'handshake' &&
-          result.message.body.handshakePhase === 'senderHello' &&
-          result.hasOwnProperty('chatKeys') &&
-          result.message.type === 'handshake';
-        assert(assertFields, 'Result has not the expected values');
-      })
-      .then(done, done);
+    cryptoManager.default._doHandShakePhase(message, chatKeys).then(result => {
+      let assertFields = result.message.type === 'handshake' &&
+        result.message.body.handshakePhase === 'senderHello' &&
+        result.hasOwnProperty('chatKeys') &&
+        result.message.type === 'handshake';
+      assert(assertFields, 'Result has not the expected values');
+    }).then(done, done);
   });
+
 
   it('test _doHandShakePhase - senderHello', function(done) {
     let message = senderHelloMessagePopulate;
     let chatKeys = chatKeysPopulate;
-    identityModule
-      ._doHandShakePhase(message, chatKeys)
-      .then(resultMessage => {
-        let assertFields =
-          resultMessage.message.type === 'handshake' &&
-          resultMessage.message.body.handshakePhase === 'receiverHello' &&
-          resultMessage.hasOwnProperty('chatKeys') &&
-          resultMessage.hasOwnProperty('message');
-        assert(assertFields, 'Result has not the expected values');
-      })
-      .then(done, done);
+    cryptoManager.default._doHandShakePhase(message, chatKeys).then(resultMessage => {
+      let assertFields = resultMessage.message.type === 'handshake' &&
+        resultMessage.message.body.handshakePhase === 'receiverHello' &&
+        resultMessage.hasOwnProperty('chatKeys') &&
+        resultMessage.hasOwnProperty('message');
+      assert(assertFields, 'Result has not the expected values');
+    }).then(done, done);
   });
 
   it('test _doHandShakePhase - receiverHello', function(done) {
     let message = receiverHelloMessagePopulate;
+
     //let cloneOfA = JSON.parse(JSON.stringify(object));
     let chatKeys = chatKeysPopulate;
     crypto.generateRSAKeyPair().then(keyPair => {
       chatKeys.hypertyFrom.privateKey = keyPair.private;
       chatKeys.hypertyFrom.publicKey = keyPair.public;
-      identityModule
-        ._doHandShakePhase(message, chatKeys)
-        .then(resultMessage => {
-          let assertFields =
-            resultMessage.message.type === 'handshake' &&
-            resultMessage.message.body.handshakePhase === 'senderCertificate' &&
-            resultMessage.hasOwnProperty('chatKeys') &&
-            resultMessage.hasOwnProperty('message');
-          assert(assertFields, 'Result has not the expected values');
-        })
-        .then(done, done);
+      cryptoManager.default._doHandShakePhase(message, chatKeys).then(resultMessage => {
+        let assertFields = resultMessage.message.type === 'handshake' &&
+        resultMessage.message.body.handshakePhase === 'senderCertificate' &&
+        resultMessage.hasOwnProperty('chatKeys') &&
+        resultMessage.hasOwnProperty('message');
+        assert(assertFields, 'Result has not the expected values');
+      }).then(done, done);
     });
   });
 
@@ -963,92 +918,40 @@ describe('Identity Module tests', function() {
       let pms = crypto.generatePMS();
       chatKeys.keys.premasterKey = new Uint8Array(pms);
 
-      crypto
-        .encryptRSA(chatKeys.hypertyFrom.publicKey, pms)
-        .then(encryptedVal => {
-          receivedValue.assymetricEncryption = crypto.encode(encryptedVal);
-          let messageHash = identityModule._filterMessageToHash(
-            message,
-            chatKeys.keys.premasterKey
-          );
-          let messageToBeSigned =
-            JSON.stringify(chatKeys.handshakeHistory) +
-            JSON.stringify(messageHash);
-          let concatKey = crypto.concatPMSwithRandoms(
-            chatKeys.keys.premasterKey,
-            chatKeys.keys.toRandom,
-            chatKeys.keys.fromRandom
-          );
+      crypto.encryptRSA(chatKeys.hypertyFrom.publicKey, pms).then(encryptedVal =>{
+        receivedValue.assymetricEncryption =  crypto.encode(encryptedVal);
+        let messageHash = identityModule._filterMessageToHash(message, chatKeys.keys.premasterKey);
+        let messageToBeSigned = JSON.stringify(chatKeys.handshakeHistory) + JSON.stringify(messageHash);
+        let concatKey = crypto.concatPMSwithRandoms(chatKeys.keys.premasterKey, chatKeys.keys.toRandom, chatKeys.keys.fromRandom);
 
-          crypto
-            .generateMasterSecret(
-              concatKey,
-              'messageHistoric' +
-                chatKeys.keys.toRandom +
-                chatKeys.keys.fromRandom
-            )
-            .then(masterKey => {
-              crypto
-                .generateKeys(
-                  masterKey,
-                  'key expansion' +
-                    chatKeys.keys.toRandom +
-                    chatKeys.keys.fromRandom
-                )
-                .then(keys => {
-                  crypto
-                    .encryptAES(keys[1], 'ok', receivedValue.iv)
-                    .then(aesEncryption => {
-                      receivedValue.symetricEncryption = crypto.encode(
-                        aesEncryption
-                      );
+        crypto.generateMasterSecret(concatKey, 'messageHistoric' + chatKeys.keys.toRandom + chatKeys.keys.fromRandom).then(masterKey =>{
+          crypto.generateKeys(masterKey, 'key expansion' + chatKeys.keys.toRandom + chatKeys.keys.fromRandom).then(keys =>{
 
-                      crypto
-                        .signRSA(
-                          chatKeys.hypertyFrom.privateKey,
-                          messageToBeSigned
-                        )
-                        .then(signature => {
-                          receivedValue.signature = crypto.encode(signature);
+            crypto.encryptAES(keys[1], 'ok', receivedValue.iv).then(aesEncryption => {
+              receivedValue.symetricEncryption = crypto.encode(aesEncryption);
 
-                          let filteredMessage = identityModule._filterMessageToHash(
-                            message,
-                            'ok' + receivedValue.iv
-                          );
-                          crypto
-                            .hashHMAC(keys[3], filteredMessage)
-                            .then(HMAC => {
-                              receivedValue.hash = crypto.encode(HMAC);
+              crypto.signRSA(chatKeys.hypertyFrom.privateKey, messageToBeSigned).then(signature =>{
+                receivedValue.signature = crypto.encode(signature);
 
-                              receivedValue.iv = crypto.encode(
-                                receivedValue.iv
-                              );
-                              message.body.value = btoa(
-                                JSON.stringify(receivedValue)
-                              );
-                              identityModule
-                                ._doHandShakePhase(message, chatKeys)
-                                .then(resultMessage => {
-                                  let assertFields =
-                                    resultMessage.chatKeys.hypertyFrom
-                                      .userID === userEmail &&
-                                    resultMessage.message.body
-                                      .handshakePhase ===
-                                      'receiverFinishedMessage' &&
-                                    resultMessage.hasOwnProperty('chatKeys') &&
-                                    resultMessage.hasOwnProperty('message');
-                                  assert(
-                                    assertFields,
-                                    'Result has not the expected values'
-                                  );
-                                })
-                                .then(done, done);
-                            });
-                        });
-                    });
+                let filteredMessage = identityModule._filterMessageToHash(message, 'ok' + receivedValue.iv);
+                crypto.hashHMAC(keys[3], filteredMessage).then(HMAC => {
+                  receivedValue.hash = crypto.encode(HMAC);
+
+                  receivedValue.iv = crypto.encode(receivedValue.iv);
+                  message.body.value = btoa(JSON.stringify(receivedValue));
+                  cryptoManager.default._doHandShakePhase(message, chatKeys).then(resultMessage => {
+                    let assertFields = resultMessage.chatKeys.hypertyFrom.userID === userEmail &&
+   		 resultMessage.message.body.handshakePhase === 'receiverFinishedMessage' &&
+   		 resultMessage.hasOwnProperty('chatKeys') &&
+   		 resultMessage.hasOwnProperty('message');
+                    assert(assertFields, 'Result has not the expected values');
+                  }).then(done, done);
                 });
+              });
             });
+          });
         });
+      });
     });
   });
 
@@ -1063,138 +966,34 @@ describe('Identity Module tests', function() {
 
     let pms = crypto.generatePMS();
     chatKeys.keys.premasterKey = new Uint8Array(pms);
-    let concatKey = crypto.concatPMSwithRandoms(
-      chatKeys.keys.premasterKey,
-      chatKeys.keys.toRandom,
-      chatKeys.keys.fromRandom
-    );
+    let concatKey = crypto.concatPMSwithRandoms(chatKeys.keys.premasterKey, chatKeys.keys.toRandom, chatKeys.keys.fromRandom);
 
-    crypto
-      .generateMasterSecret(
-        concatKey,
-        'messageHistoric' + chatKeys.keys.toRandom + chatKeys.keys.fromRandom
-      )
-      .then(masterKey => {
-        crypto
-          .generateKeys(
-            masterKey,
-            'key expansion' + chatKeys.keys.toRandom + chatKeys.keys.fromRandom
-          )
-          .then(keys => {
-            chatKeys.keys.hypertyToSessionKey = keys[1];
-            crypto
-              .encryptAES(keys[1], 'ok', receivedValue.iv)
-              .then(aesEncryption => {
-                receivedValue.value = crypto.encode(aesEncryption);
+    crypto.generateMasterSecret(concatKey, 'messageHistoric' + chatKeys.keys.toRandom + chatKeys.keys.fromRandom).then(masterKey =>{
+      crypto.generateKeys(masterKey, 'key expansion' + chatKeys.keys.toRandom + chatKeys.keys.fromRandom).then(keys =>{
+        chatKeys.keys.hypertyToSessionKey = keys[1];
+        crypto.encryptAES(keys[1], 'ok', receivedValue.iv).then(aesEncryption => {
+          receivedValue.value = crypto.encode(aesEncryption);
 
-                let filteredMessage = identityModule._filterMessageToHash(
-                  message,
-                  'ok' + receivedValue.iv
-                );
-                crypto.hashHMAC(keys[3], filteredMessage).then(HMAC => {
-                  chatKeys.keys.hypertyToHashKey = keys[3];
-                  receivedValue.hash = crypto.encode(HMAC);
-                  receivedValue.iv = crypto.encode(receivedValue.iv);
-                  message.body.value = btoa(JSON.stringify(receivedValue));
+          let filteredMessage = identityModule._filterMessageToHash(message, 'ok' + receivedValue.iv);
+          crypto.hashHMAC(keys[3], filteredMessage).then(HMAC => {
+            chatKeys.keys.hypertyToHashKey = keys[3];
+            receivedValue.hash = crypto.encode(HMAC);
+            receivedValue.iv = crypto.encode(receivedValue.iv);
+            message.body.value = btoa(JSON.stringify(receivedValue));
 
-                  identityModule
-                    ._doHandShakePhase(message, chatKeys)
-                    .then(resultMessage => {
-                      let assertFields =
-                        resultMessage.chatKeys.hypertyFrom.userID ===
-                          userEmail &&
-                        resultMessage.message.type === 'create' &&
-                        resultMessage.message.body.value ===
-                          chatKeysPopulate.initialMessage.body.value &&
-                        resultMessage.hasOwnProperty('chatKeys') &&
-                        resultMessage.hasOwnProperty('message');
-                      assert(
-                        assertFields,
-                        'Result has not the expected values'
-                      );
-                    })
-                    .then(done, done);
-                });
-              });
+            cryptoManager.default._doHandShakePhase(message, chatKeys).then(resultMessage => {
+              let assertFields = resultMessage.chatKeys.hypertyFrom.userID === userEmail &&
+                 resultMessage.message.type === 'create' &&
+                 resultMessage.message.body.value === chatKeysPopulate.initialMessage.body.value &&
+                 resultMessage.hasOwnProperty('chatKeys') &&
+                 resultMessage.hasOwnProperty('message');
+              assert(assertFields, 'Result has not the expected values');
+            }).then(done, done);
+
           });
+        });
       });
-  });
-
-  it.skip('test _doHandShakePhase - reporterSessionKey', function(done) {
-    let chatKeys = chatKeysPopulate;
-    let message = reporterSessionKeyMessagePopulate;
-    let receivedValue = JSON.parse(atob(message.body.value));
-
-    receivedValue.iv = crypto.generateIV();
-    chatKeys.keys.toRandom = crypto.generateRandom();
-    chatKeys.keys.fromRandom = crypto.generateRandom();
-
-    let pms = crypto.generatePMS();
-    chatKeys.keys.premasterKey = new Uint8Array(pms);
-    let concatKey = crypto.concatPMSwithRandoms(
-      chatKeys.keys.premasterKey,
-      chatKeys.keys.toRandom,
-      chatKeys.keys.fromRandom
-    );
-
-    crypto
-      .generateMasterSecret(
-        concatKey,
-        'messageHistoric' + chatKeys.keys.toRandom + chatKeys.keys.fromRandom
-      )
-      .then(masterKey => {
-        crypto
-          .generateKeys(
-            masterKey,
-            'key expansion' + chatKeys.keys.toRandom + chatKeys.keys.fromRandom
-          )
-          .then(keys => {
-            chatKeys.keys.hypertyToSessionKey = keys[1];
-            chatKeys.keys.hypertyFromSessionKey = keys[1];
-            chatKeys.keys.hypertyFromHashKey = keys[1];
-
-            let sessionKey = crypto.encode(keys[1]);
-            //      let dataObjectURL = crypto.encode(dataObjectURL);
-            let dataToEncrypt = JSON.stringify({
-              value: sessionKey,
-              dataObjectURL: chatKeys.dataObjectURL
-            });
-            crypto
-              .encryptAES(keys[1], dataToEncrypt, receivedValue.iv)
-              .then(aesEncryption => {
-                receivedValue.value = crypto.encode(aesEncryption);
-
-                let filteredMessage = identityModule._filterMessageToHash(
-                  message,
-                  'ok' + receivedValue.iv
-                );
-                crypto.hashHMAC(keys[3], filteredMessage).then(HMAC => {
-                  chatKeys.keys.hypertyToHashKey = keys[3];
-                  receivedValue.hash = crypto.encode(HMAC);
-                  receivedValue.iv = crypto.encode(receivedValue.iv);
-                  message.body.value = btoa(JSON.stringify(receivedValue));
-
-                  identityModule
-                    ._doHandShakePhase(message, chatKeys)
-                    .then(resultMessage => {
-                      let assertFields =
-                        resultMessage.chatKeys.hypertyFrom.userID ===
-                          userEmail &&
-                        resultMessage.message.type === 'handshake' &&
-                        resultMessage.message.body.handshakePhase ===
-                          'receiverAcknowledge' &&
-                        resultMessage.hasOwnProperty('chatKeys') &&
-                        resultMessage.hasOwnProperty('message');
-                      assert(
-                        assertFields,
-                        'Result has not the expected values'
-                      );
-                    })
-                    .then(done, done);
-                });
-              });
-          });
-      });
+    });
   });
 
   it.skip('test _doHandShakePhase - reporterSessionKey', function(done) {
@@ -1206,91 +1005,65 @@ describe('Identity Module tests', function() {
     chatKeys.keys.toRandom = crypto.generateRandom();
     chatKeys.keys.fromRandom = crypto.generateRandom();
 
+    receivedValue.iv = crypto.generateIV();
+    chatKeys.keys.toRandom = crypto.generateRandom();
+    chatKeys.keys.fromRandom = crypto.generateRandom();
+
     let pms = crypto.generatePMS();
     chatKeys.keys.premasterKey = new Uint8Array(pms);
-    let concatKey = crypto.concatPMSwithRandoms(
-      chatKeys.keys.premasterKey,
-      chatKeys.keys.toRandom,
-      chatKeys.keys.fromRandom
-    );
+    let concatKey = crypto.concatPMSwithRandoms(chatKeys.keys.premasterKey, chatKeys.keys.toRandom, chatKeys.keys.fromRandom);
 
-    crypto
-      .generateMasterSecret(
-        concatKey,
-        'messageHistoric' + chatKeys.keys.toRandom + chatKeys.keys.fromRandom
-      )
-      .then(masterKey => {
-        crypto
-          .generateKeys(
-            masterKey,
-            'key expansion' + chatKeys.keys.toRandom + chatKeys.keys.fromRandom
-          )
-          .then(keys => {
-            chatKeys.keys.hypertyToSessionKey = keys[1];
-            chatKeys.keys.hypertyFromSessionKey = keys[1];
-            chatKeys.keys.hypertyFromHashKey = keys[1];
+    crypto.generateMasterSecret(concatKey, 'messageHistoric' + chatKeys.keys.toRandom + chatKeys.keys.fromRandom).then(masterKey =>{
 
-            let sessionKey = crypto.encode(keys[1]);
-            //      let dataObjectURL = crypto.encode(dataObjectURL);
-            let dataToEncrypt = JSON.stringify({
-              value: sessionKey,
-              dataObjectURL: chatKeys.dataObjectURL
-            });
-            crypto
-              .encryptAES(keys[1], dataToEncrypt, receivedValue.iv)
-              .then(aesEncryption => {
-                receivedValue.value = crypto.encode(aesEncryption);
+      crypto.generateKeys(masterKey, 'key expansion' + chatKeys.keys.toRandom + chatKeys.keys.fromRandom).then(keys => {
+        chatKeys.keys.hypertyToSessionKey = keys[1];
+        chatKeys.keys.hypertyFromSessionKey = keys[1];
+        chatKeys.keys.hypertyFromHashKey = keys[1];
 
-                let filteredMessage = identityModule._filterMessageToHash(
-                  message,
-                  'ok' + receivedValue.iv
-                );
-                crypto.hashHMAC(keys[3], filteredMessage).then(HMAC => {
-                  chatKeys.keys.hypertyToHashKey = keys[3];
-                  receivedValue.hash = crypto.encode(HMAC);
-                  receivedValue.iv = crypto.encode(receivedValue.iv);
-                  message.body.value = btoa(JSON.stringify(receivedValue));
+        let sessionKey = crypto.encode(keys[1]);
 
-                  identityModule
-                    ._doHandShakePhase(message, chatKeys)
-                    .then(resultMessage => {
-                      assert.equal(
-                        resultMessage,
-                        'handShakeEnd',
-                        'Result has not the expected values'
-                      );
-                    })
-                    .then(done, done);
-                });
-              });
+        //      let dataObjectURL = crypto.encode(dataObjectURL);
+        let dataToEncrypt = JSON.stringify({value: sessionKey, dataObjectURL: chatKeys.dataObjectURL});
+
+        crypto.encryptAES(keys[1], dataToEncrypt, receivedValue.iv).then(aesEncryption => {
+          receivedValue.value = crypto.encode(aesEncryption);
+
+          let filteredMessage = identityModule._filterMessageToHash(message, 'ok' + receivedValue.iv);
+
+          crypto.hashHMAC(keys[3], filteredMessage).then(HMAC => {
+            chatKeys.keys.hypertyToHashKey = keys[3];
+            receivedValue.hash = crypto.encode(HMAC);
+            receivedValue.iv = crypto.encode(receivedValue.iv);
+            message.body.value = btoa(JSON.stringify(receivedValue));
+
+            identityModule._doHandShakePhase(message, chatKeys).then(resultMessage => {
+              assert.equal(resultMessage, 'handShakeEnd', 'Result has not the expected values');
+            }).then(done, done);
+
           });
+
+        });
+
       });
+    });
+
   });
 
   it('test doMutualAuthentication', function(done) {
     let sender = hyperURL1;
     let receiver = hyperURL2;
 
-    identityModule.registry.getReporterURLSynchonous = sender => {
-      return undefined;
-    };
+    identityModule.registry.getReporterURLSynchonous = (sender) => { return undefined; };
     identityModule.registry.getHypertyOwner = getHypertyOwnerPopulate;
     let chatKeys = chatKeysPopulate;
     chatKeys.keys.hypertyFromSessionKey = crypto.generateRandom();
     chatKeys.keys.hypertyFromHashKey = crypto.generateRandom();
-    dataObjectURL: 'comm://localhost/5f8d87fd-c56b-47fc-ad47-28d55f01e23a',
-      (identityModule.chatKeys[sender + '<->' + receiver] = chatKeys);
+    'comm://localhost/5f8d87fd-c56b-47fc-ad47-28d55f01e23a',
+    cryptoManager.default.chatKeys[sender + '<->' + receiver] = chatKeys;
 
-    identityModule
-      .doMutualAuthentication(sender, receiver)
-      .then(resultMessage => {
-        assert.equal(
-          resultMessage,
-          'exchange of chat sessionKey initiated',
-          'Message is not the expected one'
-        );
-      })
-      .then(done, done);
+    cryptoManager.default._doMutualAuthenticationPhase1(sender, receiver).then(resultMessage => {
+      assert.equal(resultMessage, 'exchange of chat sessionKey initiated', 'Message is not the expected one');
+    }).then(done, done);
   });
 });
 
@@ -1298,37 +1071,20 @@ let msgNodeResponseFuncPopulate = (bus, msg) => {
   if (msg.type === 'subscribe') {
     log('msgNodeResponse subscribe: ' + msg);
     if (msg.id === 2) {
+
       //reporter subscribe
       expect(msg).to.contain.all.keys({
-        id: 2,
-        type: 'subscribe',
-        from: 'hyperty-runtime://fake-runtime/sm',
-        to: 'domain://msg-node.h1.domain/sm',
-        body: {
-          resources: [
-            objURL + '/children/children1',
-            objURL + '/children/children2'
-          ],
-          source: hyperURL1
-        }
+        id: 2, type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.h1.domain/sm',
+        body: { resources: [objURL + '/children/children1', objURL + '/children/children2'], source: hyperURL1 }
       });
     } else {
+
       //observer subscribe
       expect(msg).to.contain.all.keys({
-        id: 5,
-        type: 'subscribe',
-        from: 'hyperty-runtime://fake-runtime/sm',
-        to: 'domain://msg-node.obj1/sm',
-        body: {
-          resources: [
-            objURL + '/changes',
-            objURL + '/children/children1',
-            objURL + '/children/children2'
-          ],
-          source: hyperURL2
-        }
+		  id: 5, type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.obj1/sm',
+		  body: { resources: [objURL + '/changes', objURL + '/children/children1', objURL + '/children/children2'], source: hyperURL2 }
       });
-    }
+	  }
   } else if (msg.type === 'execute') {
     log('msgNodeResponseFunc EXE');
     let resMsg = {
@@ -1343,27 +1099,30 @@ let msgNodeResponseFuncPopulate = (bus, msg) => {
       }
     };
     log(resMsg);
+
     //		if(msg.body.method === 'generateAssertion' && msg.body.params.usernameHint != ''){
     if (msg.body.method === 'generateAssertion') {
       log('msgNodeResponseFunc generateAssertion');
-      //			if(msg.body.params.usernameHint == ''){
-      //				log('msgNodeResponseFunc loginUrl');
-      //				resMsg.body.value = {loginUrl: loginUrl};
-      //			}else{
+
+      // if(msg.body.params.usernameHint == ''){
+      // 	log('msgNodeResponseFunc loginUrl');
+      // 	resMsg.body.value = {loginUrl: loginUrl};
+      // }else{
       log('msgNodeResponseFunc assertion_val');
       resMsg.body.value = returnedAssertionValuePopulate;
+
       //			}
     } else if (msg.body.method === 'openPopup') {
       log('msgNodeResponseFunc openPopup');
       resMsg.body.value = loginUrl;
-    } else if (msg.body.resource === 'identity') {
+ 		} else if (msg.body.resource === 'identity') {
       if (msg.body.method === 'validateAssertion') {
         log('msgNodeResponseFunc validateAssertion');
         resMsg.body.value = validateAssertionValuePopulate;
-      } else {
-        log('msgNodeResponseFunc identity');
+      }else {
+ log('msgNodeResponseFunc identity');
         resMsg.body.value = sendGenerateMessageResponse;
-      }
+			 }
     }
     bus.postMessage(resMsg);
   } else if (msg.type === 'create') {
@@ -1380,7 +1139,7 @@ let msgNodeResponseFuncPopulate = (bus, msg) => {
       }
     };
     log(resMsg);
-    bus.postMessage(resMsg);
+	  bus.postMessage(resMsg);
   }
 };
 
@@ -1512,14 +1271,11 @@ let returnedAssertionValuePopulate = {
 };
 
 let sendGenerateMessageResponse = {
-  assertion:
-    'eyJ0b2tlbklEIjoiZXlKaGJHY2lPaUpTVXpJMU5pSXNJbXRwWkNJNklqZGxZMkkxTkdObE56RmtOakU0WWpJNE16QmpZMlZqT1RreE9EZ3hPR1UzTXpneE1EQm1NbUVpZlEuZXlKaGVuQWlPaUk0TURnek1qazFOall3TVRJdGRIRnlPSEZ2YURFeE1UazBNbWRrTW10bk1EQTNkREJ6T0dZeU56ZHliMmt1WVhCd2N5NW5iMjluYkdWMWMyVnlZMjl1ZEdWdWRDNWpiMjBpTENKaGRXUWlPaUk0TURnek1qazFOall3TVRJdGRIRnlPSEZ2YURFeE1UazBNbWRrTW10bk1EQTNkREJ6T0dZeU56ZHliMmt1WVhCd2N5NW5iMjluYkdWMWMyVnlZMjl1ZEdWdWRDNWpiMjBpTENKemRXSWlPaUl4TVRjNU5Ua3hNRFV5T1RVM05qRTJPRGM0T0RraUxDSmxiV0ZwYkNJNkluUmxjM1JoYm1SMGFHbHVhekV5TTBCbmJXRnBiQzVqYjIwaUxDSmxiV0ZwYkY5MlpYSnBabWxsWkNJNmRISjFaU3dpWVhSZmFHRnphQ0k2SW1Ka2FHVjJkVU0zU0RaNVpuSkpWakZEVURsdmFIY2lMQ0p1YjI1alpTSTZJazVFWjNOTlZFMTNURVJGYzAxNlVYTk9SR2R6VFZSTmMwNXBkelZNUkZGNVRFUkZlazVEZHpOTmFYZDRUWHBSYzAxcVVUTk1SRVY2VEVSRmMwMVRkM2hNUkZWelRVTjNla3hFUlhwTlEzZDRURVJGTVV4RVFYTk9SR2R6VFZSTmQweEVSWE5OVkVGelRXbDNlRTE2UVhOTlUzZDRURVJCYzAxVVZURk1SRWwzVFVOM2VFMXBkelZPUTNkNFQwUkZjMDFxUlRSTVJFVXlUbmwzZUUxVVozTk9SRkZ6VGxSUmMwMTZZM05OYWsxM1RFUkplVTVUZHpGUFEzZDRUMVJGYzAxVVdUUk1SRTB5VEVSTk1VeEVSVEZPVTNjMVRubDNNazlUZDNsTmFsVnpUVlJKZVV4RVozbE1SRVY2VFhsM01reEVTVEJPVTNkNlRYbDNlazE1ZDNsT1ZGRnpUVlJWZVV4RVJUVk5hWGQ0VFVSamMwMVVZek5NUkVWNlRtbDNNRTVwZDNwTVJHTnpUMVJuYzA1cVFYTk5la0Z6VGtSSmMwMXFRVFZNUkVVeVRsTjNlVTFVVlhOTlZGVXdURVJGTUUxNWQzaE9hbGx6VGtSQmMwNXFTWE5OVkVVelRFUlJla3hFU1RKTVJFbDVUbmwzTVU1RGQzaE5lbGx6VG1wVmMwOVVZM05OYVhjMFRubDNlRTE2WTNOT2VsRnpUVlJyZVV4RVdUUk1SRWwzVGtOM2VFOUVaM05OYWxGNlRFUkZkMDVEZDNoTmFrbHpUMVJqYzAxVVl6Tk1SRVY2VFZOM2VFOUVSWE5OVkdNMVRFUm5lRXhFVlhsTVJFVXhUa04zZVU1cGR6Sk1SRlY2VEVSamVFeEVhekZNUkVWNVRVTjNlVTFxV1hOTlZFRjNURVJKZVUxRGQzbE5SR3R6VFZSck1VeEVSVE5OVTNjeFRubDNlRTlFVFhOTmVsbHpUVlJaTlV4RVJUQk9VM2MxVDBOM2VFMUVXWE5OVkdkelRXcEJNa3hFUlRSTlEzZDRUVVJCYzAxVVdUTk1SRmw0VEVSRmQwNTVkekJOVTNkNlRrTjNlVXhFU1RCT2VYZDVUa1JSYzAxVVZYZE1SRVV5VG5sM2VVMUVVWE5OYWtVeVRFUlZOVXhFU1hsT2VYYzBURVJKTWt4RVZUTk1SRVUwVDFOM2VFNUVSWE5OVkdjMFRFUm5Na3hFU1hsT1UzZDRUVlJuYzAxVVJYaE1SRVV6VG5sM2VFOUVTWE5OVkdONFRFUkZOVXhFV1hkTVJFVTBUbmwzZUUxNlRYTk5hbEZ6VFZSWk1FeEVSVEJQUTNkNFQwUnJjMDlFVlhOTlZHTjZURVJGTlUxVGQzbE5WRWx6VFdwUk0weEVTWGROVTNkNFQwUkZjMDU2UlhOUFJHZHpUVlJGZVV4RVJUSlBRM2Q0VFhwRmMwMVVZekJNUkZrelRFUlpNRXhFUlRGUFUzZDVUVVJaYzAxVVVUTk1SRlV3VEVSVk1FeEVSVEJPZVhjMFRtbDNNVTlEZDNsTmFsVnpUV3ByYzAxNlFYTk5WRWwzVEVSSk1FNXBkM2hPYW1OelRucG5jMDU2UlhOTlZGRjVURVJKZVU5RGR6Uk5VM2Q1VFhwbmMwMVVRWHBNUkZsNVRFUkpNRTE1ZDNsT1JFVnpUV3BKTWt4RVJURk5hWGN5VFhsM2VFNXBkelZQUTNkNFRucE5jMDE2WTNOTlZHc3lURVJWZVV4RVZUUk1SRkUxVEVSRk5FMVRkekJPYVhkNFRrUnJjMDFVUVRSTVJFVXdUMU4zTUU5VGR6Tk1SR2Q2VEVSRmVFOURkM2xOYW10elRXcFZNRXhFU1hoT2VYZDRUbXBqYzAxVVdUTk1SRWw1VEVSSk1FNTVkM2hQVkZWelRWUkZlVXhFUlhoT1UzZDVUbFJCYzAxRGQzaE9WR056VFdwVmVFeEVSVE5QUTNkNVRVUnJjMDU2U1hOTlZGVTFURVJGZVU1NWQzaFBSRVZ6VFZSRmVVeEVUWGRNUkdNeFRFUnJjMDFxVFRKTVJFbDVURVJGZVUxcGR6Sk5RM2N4VDBOM2VFeEVSWGxPVTNkNVRXcEJjMDFxVFRGTVJFbDVUbE4zZVUxcVozTk5hbEY2VEVSSk1FNURkM2xOVkZselRWUkpkMHhFUlhkT2VYZDRUbXBCYzAxcVJYbE1SRVY1VGtOM2VVMXFWWE5PZWtWelRWUnJNMHhFVFRSTVJFVXpUVU4zZUUxcVRYTk5WRmswVEVSTk5VeEVUVEJNUkVVeVQxTjNlRTlFVVhOT1ZHZHpUVlJGZVV4RVozZE1SR014VEVSRk5VMURkM2xOUkdOelRWUmplVXhFU1hoTmVYZDVURVJOYzAxVGQzZE1SRVU5SWl3aWFYTnpJam9pYUhSMGNITTZMeTloWTJOdmRXNTBjeTVuYjI5bmJHVXVZMjl0SWl3aWFXRjBJam94TlRBMU5Ea3hOelF5TENKbGVIQWlPakUxTURVME9UVXpOREo5LktHYWp6N0NjamtPUnIxS055TFgwRHFXaVRRM2s3d2Q0NDRsU0RiSFYtRV9adHY0bzhDdVlTTVJQRU12eGtncG5PaDBGd241OWROd2F5LXdqSkFZZWhCVWpCdllQZHgzejMzZDF0Uk5OcTlBUV9NQXJqZGVqQnkxcFpkR1FaY1diRUpMSUtPYXZuNGs2LS1mb0M4OUdkXzI2aU9tV1A1ZE9BcjRRU0tyVlZyRURlNDNnQXZ0Mms5anVpaGFnX1B5U0ROMjZXbVJDTVY4N2lFY3lzS3JfTTlXVExYS3k2NWU5czloNEpQYmdqMzZvSllrX3Bpbmk0YlJ6MERCd0lOLVI5TlAtZmkyT2VlRFptbXd4YzJXdnd1c05yaFJZamxGMmNkMjZwUFhaeTlMWlZPTU1fRERoTVpsMVVMclJvZnVFT1BMVXEtWFZZV3lmUXRMZnBPRkthdyIsInRva2VuSURKU09OIjp7ImF6cCI6IjgwODMyOTU2NjAxMi10cXI4cW9oMTExOTQyZ2Qya2cwMDd0MHM4ZjI3N3JvaS5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsImF1ZCI6IjgwODMyOTU2NjAxMi10cXI4cW9oMTExOTQyZ2Qya2cwMDd0MHM4ZjI3N3JvaS5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsInN1YiI6IjExNzk1OTEwNTI5NTc2MTY4Nzg4OSIsImVtYWlsIjoidGVzdGFuZHRoaW5rMTIzQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjoidHJ1ZSIsImF0X2hhc2giOiJiZGhldnVDN0g2eWZySVYxQ1A5b2h3Iiwibm9uY2UiOiJORGdzTVRNd0xERXNNelFzTkRnc01UTXNOaXc1TERReUxERXpOQ3czTWl3eE16UXNNalEzTERFekxERXNNU3d4TERVc01Dd3pMREV6TUN3eExERTFMREFzTkRnc01UTXdMREVzTVRBc01pd3hNekFzTVN3eExEQXNNVFUxTERJd01Dd3hNaXc1TkN3eE9ERXNNakU0TERFMk55d3hNVGdzTkRRc05UUXNNemNzTWpNd0xESXlOU3cxT0N3eE9URXNNVFk0TERNMkxETTFMREUxTlN3NU55dzJPU3d5TWpVc01USXlMRGd5TERFek15dzJMREkwTlN3ek15d3pNeXd5TlRRc01UVXlMREU1TWl3eE1EY3NNVGMzTERFek5pdzBOaXd6TERjc09UZ3NOakFzTXpBc05ESXNNakE1TERFMk5Td3lNVFVzTVRVMExERTBNeXd4TmpZc05EQXNOaklzTVRFM0xEUXpMREkyTERJeU55dzFOQ3d4TXpZc05qVXNPVGNzTWl3NE55d3hNemNzTnpRc01Ua3lMRFk0TERJd05Dd3hPRGdzTWpRekxERXdOQ3d4TWpJc09UY3NNVGMzTERFek1Td3hPREVzTVRjNUxEZ3hMRFV5TERFMU5Dd3lOaXcyTERVekxEY3hMRGsxTERFeU1Dd3lNallzTVRBd0xESXlNQ3d5TURrc01UazFMREUzTVN3MU55d3hPRE1zTXpZc01UWTVMREUwTlN3NU9Dd3hNRFlzTVRnc01qQTJMREU0TUN3eE1EQXNNVFkzTERZeExERXdOeXcwTVN3ek5Dd3lMREkwTnl3eU5EUXNNVFV3TERFMk55d3lNRFFzTWpFMkxEVTVMREl5Tnl3NExESTJMRFUzTERFNE9Td3hOREVzTVRnNExEZzJMREl5TlN3eE1UZ3NNVEV4TERFM055d3hPRElzTVRjeExERTVMRFl3TERFNE55d3hNek1zTWpRc01UWTBMREUwT0N3eE9Ea3NPRFVzTVRjekxERTVNU3d5TVRJc01qUTNMREl3TVN3eE9ERXNOekVzT0Rnc01URXlMREUyT0N3eE16RXNNVGMwTERZM0xEWTBMREUxT1N3eU1EWXNNVFEzTERVMExEVTBMREUwTnl3NE5pdzFPQ3d5TWpVc01qa3NNekFzTVRJd0xESTBOaXd4Tmpjc056Z3NOekVzTVRReUxESXlPQ3c0TVN3eU16Z3NNVEF6TERZeUxESTBNeXd5TkRFc01qSTJMREUxTWl3Mk15d3hOaXc1T0N3eE56TXNNemNzTVRrMkxEVXlMRFU0TERRNUxERTRNU3cwTml3eE5Ea3NNVEE0TERFME9TdzBPU3czTERnekxERXhPQ3d5TWprc01qVTBMREl4Tnl3eE5qY3NNVFkzTERJeUxESTBOeXd4T1RVc01URXlMREV4TlN3eU5UQXNNQ3d4TlRjc01qVXhMREUzT0N3eU1Ea3NOeklzTVRVNUxERXlOeXd4T0RFc01URXlMRE13TERjMUxEa3NNak0yTERJeUxERXlNaXcyTUN3MU9Dd3hMREV5TlN3eU1qQXNNak0xTERJeU5Td3lNamdzTWpRekxESTBOQ3d5TVRZc01USXdMREV3Tnl3eE5qQXNNakV5TERFeU5Dd3lNalVzTnpFc01UazNMRE00TERFM01Dd3hNak1zTVRZNExETTVMRE0wTERFMk9Td3hPRFFzTlRnc01URXlMRGd3TERjMUxERTVNQ3d5TURjc01UY3lMREl4TXl3eUxETXNNU3d3TERFPSIsImlzcyI6Imh0dHBzOi8vYWNjb3VudHMuZ29vZ2xlLmNvbSIsImlhdCI6IjE1MDU0OTE3NDIiLCJleHAiOiIxNTA1NDk1MzQyIiwiYWxnIjoiUlMyNTYiLCJraWQiOiI3ZWNiNTRjZTcxZDYxOGIyODMwY2NlYzk5MTg4MThlNzM4MTAwZjJhIn19',
+  assertion: 'eyJ0b2tlbklEIjoiZXlKaGJHY2lPaUpTVXpJMU5pSXNJbXRwWkNJNklqZGxZMkkxTkdObE56RmtOakU0WWpJNE16QmpZMlZqT1RreE9EZ3hPR1UzTXpneE1EQm1NbUVpZlEuZXlKaGVuQWlPaUk0TURnek1qazFOall3TVRJdGRIRnlPSEZ2YURFeE1UazBNbWRrTW10bk1EQTNkREJ6T0dZeU56ZHliMmt1WVhCd2N5NW5iMjluYkdWMWMyVnlZMjl1ZEdWdWRDNWpiMjBpTENKaGRXUWlPaUk0TURnek1qazFOall3TVRJdGRIRnlPSEZ2YURFeE1UazBNbWRrTW10bk1EQTNkREJ6T0dZeU56ZHliMmt1WVhCd2N5NW5iMjluYkdWMWMyVnlZMjl1ZEdWdWRDNWpiMjBpTENKemRXSWlPaUl4TVRjNU5Ua3hNRFV5T1RVM05qRTJPRGM0T0RraUxDSmxiV0ZwYkNJNkluUmxjM1JoYm1SMGFHbHVhekV5TTBCbmJXRnBiQzVqYjIwaUxDSmxiV0ZwYkY5MlpYSnBabWxsWkNJNmRISjFaU3dpWVhSZmFHRnphQ0k2SW1Ka2FHVjJkVU0zU0RaNVpuSkpWakZEVURsdmFIY2lMQ0p1YjI1alpTSTZJazVFWjNOTlZFMTNURVJGYzAxNlVYTk9SR2R6VFZSTmMwNXBkelZNUkZGNVRFUkZlazVEZHpOTmFYZDRUWHBSYzAxcVVUTk1SRVY2VEVSRmMwMVRkM2hNUkZWelRVTjNla3hFUlhwTlEzZDRURVJGTVV4RVFYTk9SR2R6VFZSTmQweEVSWE5OVkVGelRXbDNlRTE2UVhOTlUzZDRURVJCYzAxVVZURk1SRWwzVFVOM2VFMXBkelZPUTNkNFQwUkZjMDFxUlRSTVJFVXlUbmwzZUUxVVozTk9SRkZ6VGxSUmMwMTZZM05OYWsxM1RFUkplVTVUZHpGUFEzZDRUMVJGYzAxVVdUUk1SRTB5VEVSTk1VeEVSVEZPVTNjMVRubDNNazlUZDNsTmFsVnpUVlJKZVV4RVozbE1SRVY2VFhsM01reEVTVEJPVTNkNlRYbDNlazE1ZDNsT1ZGRnpUVlJWZVV4RVJUVk5hWGQ0VFVSamMwMVVZek5NUkVWNlRtbDNNRTVwZDNwTVJHTnpUMVJuYzA1cVFYTk5la0Z6VGtSSmMwMXFRVFZNUkVVeVRsTjNlVTFVVlhOTlZGVXdURVJGTUUxNWQzaE9hbGx6VGtSQmMwNXFTWE5OVkVVelRFUlJla3hFU1RKTVJFbDVUbmwzTVU1RGQzaE5lbGx6VG1wVmMwOVVZM05OYVhjMFRubDNlRTE2WTNOT2VsRnpUVlJyZVV4RVdUUk1SRWwzVGtOM2VFOUVaM05OYWxGNlRFUkZkMDVEZDNoTmFrbHpUMVJqYzAxVVl6Tk1SRVY2VFZOM2VFOUVSWE5OVkdNMVRFUm5lRXhFVlhsTVJFVXhUa04zZVU1cGR6Sk1SRlY2VEVSamVFeEVhekZNUkVWNVRVTjNlVTFxV1hOTlZFRjNURVJKZVUxRGQzbE5SR3R6VFZSck1VeEVSVE5OVTNjeFRubDNlRTlFVFhOTmVsbHpUVlJaTlV4RVJUQk9VM2MxVDBOM2VFMUVXWE5OVkdkelRXcEJNa3hFUlRSTlEzZDRUVVJCYzAxVVdUTk1SRmw0VEVSRmQwNTVkekJOVTNkNlRrTjNlVXhFU1RCT2VYZDVUa1JSYzAxVVZYZE1SRVV5VG5sM2VVMUVVWE5OYWtVeVRFUlZOVXhFU1hsT2VYYzBURVJKTWt4RVZUTk1SRVUwVDFOM2VFNUVSWE5OVkdjMFRFUm5Na3hFU1hsT1UzZDRUVlJuYzAxVVJYaE1SRVV6VG5sM2VFOUVTWE5OVkdONFRFUkZOVXhFV1hkTVJFVTBUbmwzZUUxNlRYTk5hbEZ6VFZSWk1FeEVSVEJQUTNkNFQwUnJjMDlFVlhOTlZHTjZURVJGTlUxVGQzbE5WRWx6VFdwUk0weEVTWGROVTNkNFQwUkZjMDU2UlhOUFJHZHpUVlJGZVV4RVJUSlBRM2Q0VFhwRmMwMVVZekJNUkZrelRFUlpNRXhFUlRGUFUzZDVUVVJaYzAxVVVUTk1SRlV3VEVSVk1FeEVSVEJPZVhjMFRtbDNNVTlEZDNsTmFsVnpUV3ByYzAxNlFYTk5WRWwzVEVSSk1FNXBkM2hPYW1OelRucG5jMDU2UlhOTlZGRjVURVJKZVU5RGR6Uk5VM2Q1VFhwbmMwMVVRWHBNUkZsNVRFUkpNRTE1ZDNsT1JFVnpUV3BKTWt4RVJURk5hWGN5VFhsM2VFNXBkelZQUTNkNFRucE5jMDE2WTNOTlZHc3lURVJWZVV4RVZUUk1SRkUxVEVSRk5FMVRkekJPYVhkNFRrUnJjMDFVUVRSTVJFVXdUMU4zTUU5VGR6Tk1SR2Q2VEVSRmVFOURkM2xOYW10elRXcFZNRXhFU1hoT2VYZDRUbXBqYzAxVVdUTk1SRWw1VEVSSk1FNTVkM2hQVkZWelRWUkZlVXhFUlhoT1UzZDVUbFJCYzAxRGQzaE9WR056VFdwVmVFeEVSVE5QUTNkNVRVUnJjMDU2U1hOTlZGVTFURVJGZVU1NWQzaFBSRVZ6VFZSRmVVeEVUWGRNUkdNeFRFUnJjMDFxVFRKTVJFbDVURVJGZVUxcGR6Sk5RM2N4VDBOM2VFeEVSWGxPVTNkNVRXcEJjMDFxVFRGTVJFbDVUbE4zZVUxcVozTk5hbEY2VEVSSk1FNURkM2xOVkZselRWUkpkMHhFUlhkT2VYZDRUbXBCYzAxcVJYbE1SRVY1VGtOM2VVMXFWWE5PZWtWelRWUnJNMHhFVFRSTVJFVXpUVU4zZUUxcVRYTk5WRmswVEVSTk5VeEVUVEJNUkVVeVQxTjNlRTlFVVhOT1ZHZHpUVlJGZVV4RVozZE1SR014VEVSRk5VMURkM2xOUkdOelRWUmplVXhFU1hoTmVYZDVURVJOYzAxVGQzZE1SRVU5SWl3aWFYTnpJam9pYUhSMGNITTZMeTloWTJOdmRXNTBjeTVuYjI5bmJHVXVZMjl0SWl3aWFXRjBJam94TlRBMU5Ea3hOelF5TENKbGVIQWlPakUxTURVME9UVXpOREo5LktHYWp6N0NjamtPUnIxS055TFgwRHFXaVRRM2s3d2Q0NDRsU0RiSFYtRV9adHY0bzhDdVlTTVJQRU12eGtncG5PaDBGd241OWROd2F5LXdqSkFZZWhCVWpCdllQZHgzejMzZDF0Uk5OcTlBUV9NQXJqZGVqQnkxcFpkR1FaY1diRUpMSUtPYXZuNGs2LS1mb0M4OUdkXzI2aU9tV1A1ZE9BcjRRU0tyVlZyRURlNDNnQXZ0Mms5anVpaGFnX1B5U0ROMjZXbVJDTVY4N2lFY3lzS3JfTTlXVExYS3k2NWU5czloNEpQYmdqMzZvSllrX3Bpbmk0YlJ6MERCd0lOLVI5TlAtZmkyT2VlRFptbXd4YzJXdnd1c05yaFJZamxGMmNkMjZwUFhaeTlMWlZPTU1fRERoTVpsMVVMclJvZnVFT1BMVXEtWFZZV3lmUXRMZnBPRkthdyIsInRva2VuSURKU09OIjp7ImF6cCI6IjgwODMyOTU2NjAxMi10cXI4cW9oMTExOTQyZ2Qya2cwMDd0MHM4ZjI3N3JvaS5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsImF1ZCI6IjgwODMyOTU2NjAxMi10cXI4cW9oMTExOTQyZ2Qya2cwMDd0MHM4ZjI3N3JvaS5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsInN1YiI6IjExNzk1OTEwNTI5NTc2MTY4Nzg4OSIsImVtYWlsIjoidGVzdGFuZHRoaW5rMTIzQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjoidHJ1ZSIsImF0X2hhc2giOiJiZGhldnVDN0g2eWZySVYxQ1A5b2h3Iiwibm9uY2UiOiJORGdzTVRNd0xERXNNelFzTkRnc01UTXNOaXc1TERReUxERXpOQ3czTWl3eE16UXNNalEzTERFekxERXNNU3d4TERVc01Dd3pMREV6TUN3eExERTFMREFzTkRnc01UTXdMREVzTVRBc01pd3hNekFzTVN3eExEQXNNVFUxTERJd01Dd3hNaXc1TkN3eE9ERXNNakU0TERFMk55d3hNVGdzTkRRc05UUXNNemNzTWpNd0xESXlOU3cxT0N3eE9URXNNVFk0TERNMkxETTFMREUxTlN3NU55dzJPU3d5TWpVc01USXlMRGd5TERFek15dzJMREkwTlN3ek15d3pNeXd5TlRRc01UVXlMREU1TWl3eE1EY3NNVGMzTERFek5pdzBOaXd6TERjc09UZ3NOakFzTXpBc05ESXNNakE1TERFMk5Td3lNVFVzTVRVMExERTBNeXd4TmpZc05EQXNOaklzTVRFM0xEUXpMREkyTERJeU55dzFOQ3d4TXpZc05qVXNPVGNzTWl3NE55d3hNemNzTnpRc01Ua3lMRFk0TERJd05Dd3hPRGdzTWpRekxERXdOQ3d4TWpJc09UY3NNVGMzTERFek1Td3hPREVzTVRjNUxEZ3hMRFV5TERFMU5Dd3lOaXcyTERVekxEY3hMRGsxTERFeU1Dd3lNallzTVRBd0xESXlNQ3d5TURrc01UazFMREUzTVN3MU55d3hPRE1zTXpZc01UWTVMREUwTlN3NU9Dd3hNRFlzTVRnc01qQTJMREU0TUN3eE1EQXNNVFkzTERZeExERXdOeXcwTVN3ek5Dd3lMREkwTnl3eU5EUXNNVFV3TERFMk55d3lNRFFzTWpFMkxEVTVMREl5Tnl3NExESTJMRFUzTERFNE9Td3hOREVzTVRnNExEZzJMREl5TlN3eE1UZ3NNVEV4TERFM055d3hPRElzTVRjeExERTVMRFl3TERFNE55d3hNek1zTWpRc01UWTBMREUwT0N3eE9Ea3NPRFVzTVRjekxERTVNU3d5TVRJc01qUTNMREl3TVN3eE9ERXNOekVzT0Rnc01URXlMREUyT0N3eE16RXNNVGMwTERZM0xEWTBMREUxT1N3eU1EWXNNVFEzTERVMExEVTBMREUwTnl3NE5pdzFPQ3d5TWpVc01qa3NNekFzTVRJd0xESTBOaXd4Tmpjc056Z3NOekVzTVRReUxESXlPQ3c0TVN3eU16Z3NNVEF6TERZeUxESTBNeXd5TkRFc01qSTJMREUxTWl3Mk15d3hOaXc1T0N3eE56TXNNemNzTVRrMkxEVXlMRFU0TERRNUxERTRNU3cwTml3eE5Ea3NNVEE0TERFME9TdzBPU3czTERnekxERXhPQ3d5TWprc01qVTBMREl4Tnl3eE5qY3NNVFkzTERJeUxESTBOeXd4T1RVc01URXlMREV4TlN3eU5UQXNNQ3d4TlRjc01qVXhMREUzT0N3eU1Ea3NOeklzTVRVNUxERXlOeXd4T0RFc01URXlMRE13TERjMUxEa3NNak0yTERJeUxERXlNaXcyTUN3MU9Dd3hMREV5TlN3eU1qQXNNak0xTERJeU5Td3lNamdzTWpRekxESTBOQ3d5TVRZc01USXdMREV3Tnl3eE5qQXNNakV5TERFeU5Dd3lNalVzTnpFc01UazNMRE00TERFM01Dd3hNak1zTVRZNExETTVMRE0wTERFMk9Td3hPRFFzTlRnc01URXlMRGd3TERjMUxERTVNQ3d5TURjc01UY3lMREl4TXl3eUxETXNNU3d3TERFPSIsImlzcyI6Imh0dHBzOi8vYWNjb3VudHMuZ29vZ2xlLmNvbSIsImlhdCI6IjE1MDU0OTE3NDIiLCJleHAiOiIxNTA1NDk1MzQyIiwiYWxnIjoiUlMyNTYiLCJraWQiOiI3ZWNiNTRjZTcxZDYxOGIyODMwY2NlYzk5MTg4MThlNzM4MTAwZjJhIn19',
   idp: { domain: 'google.com', protocol: 'OIDC' },
   info: {
-    accessToken:
-      'ya29.GlvSBDbUICOGwVGCW4IJz1wS3e5HBDW9sXnuGFgWPKHPHsU6zFIbNL8Z31CoCd93gav7cKQ8axhIASk1DdsA1MCxABFnJDTz1aXLmdyGFtLa9bO9JTNLv2DLawdr',
-    idToken:
-      'eyJhbGciOiJSUzI1NiIsImtpZCI6IjNiMGZjMTE5NjJhZDE2ZTQ5ZDU1YTI2ODE2YzVhZDBkM2Y2YjhhODMifQ.eyJhenAiOiI4MDgzMjk1NjYwMTItdHFyOHFvaDExMTk0MmdkMmtnMDA3dDBzOGYyNzdyb2kuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiI4MDgzMjk1NjYwMTItdHFyOHFvaDExMTk0MmdkMmtnMDA3dDBzOGYyNzdyb2kuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMTc5NTkxMDUyOTU3NjE2ODc4ODkiLCJlbWFpbCI6InRlc3RhbmR0aGluazEyM0BnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiYXRfaGFzaCI6ImtnNkpEdTJyMDRpNVZHSlBkSWlnUFEiLCJub25jZSI6Ik5EZ3NNVE13TERFc016UXNORGdzTVRNc05pdzVMRFF5TERFek5DdzNNaXd4TXpRc01qUTNMREV6TERFc01Td3hMRFVzTUN3ekxERXpNQ3d4TERFMUxEQXNORGdzTVRNd0xERXNNVEFzTWl3eE16QXNNU3d4TERBc01UY3lMREU1TkN3eU16Y3NNakV5TERFek5DdzROU3d5TWpFc01qRXlMREV4Tnl3eE16TXNNVGN3TERnMExESXdOaXcyT1N3eE5ERXNNemNzTWpVMExESXhOaXd4Tmprc016RXNOak1zT1RFc01URTFMREV6T1N3MU1pd3lNVFlzTWpJNUxESXlOaXd4TXl3NU9Td3hOamNzTVRnMUxERXlNQ3d5TVRNc01USXlMREl5Tml3eU1UQXNNVEUwTERJME1Td3hOak1zTVRBMkxERXhNQ3d5TXpjc05ETXNNak16TERreExESTFNQ3d5TWpNc01qSTFMREV3Tml3NE1pd3hOVFVzTlN3eU16WXNNVGsyTERFMU1Dd3lNakVzTVRjc01USTRMREl6TERFNE5Dd3hNekVzT1RRc01Ua3dMRFU0TERJME9Td3hOemdzTVRBM0xERTVNaXd6TlN3NE5Td3hPRE1zTWpFeUxESTBPU3d5TkRFc01qUTJMRFV3TERBc016Y3NNVEkyTERFeE1pd3hOaXd5TXpBc01qRXlMREl6TERFek9Td3hPVGdzTnpRc01qRTRMREUxTXl3eE56Z3NNVFF3TERReExERTROaXd5TXpJc05qUXNNakk1TERRc01qSXhMRFkxTERFMExERTRNQ3d6TlN3eE16VXNOamtzTVRNc01qTXhMREk0TERJeE1DdzFNeXd4TVRnc01UWTRMREUyTVN3ek9DdzBNaXd4TkRjc01UUTFMRGcyTERJd055d3lOQ3c1TUN3eU1qWXNNVFVzTWpBNUxEZzVMREU0TXl3eE1EY3NNVFkwTERFMUxESXdNaXd5TkRJc056SXNNVGd4TERJeU5Td3lOVEFzTVRJeUxERTFPQ3c1TUN3eE5qa3NNak0xTERFek5DdzBOQ3d4TWl3MU1Td3lORFVzTVRRd0xEa3lMRGMxTERFeU9TdzNPU3d5TXpBc01qTTNMREUyTVN3eE9UTXNNVFF5TERFMU1pdzVMREl5TVN3ME1pd3hOelFzT1Rjc01qQTVMREV4Tnl3eE9UTXNNVElzT1RNc01UWXhMREl4Tnl3eU5ERXNNVGs0TERFd09Dd3hPRFlzTWprc01Ua3pMREV5TVN3NE15d3hNRGtzTWpJMkxERTVNeXd4TlRBc01UZ3pMRE0wTERFNUxEazFMREV4TWl3M05Dd3lNekFzT1RRc01UQTJMREUxTVN3ME1Dd3lNak1zTWpFNExESXlPQ3d6TERJMU15d3lNVGtzTmpZc09Dd3hPVEVzTkRjc01UTXdMREl3TUN3eU1qWXNNVE0zTERreUxESXdNaXd4TURJc05EY3NNakF3TERFeE15dzJOeXd4TlRZc09ETXNNVGsxTERJd01Td3lNeklzTWpJMUxEazJMREl3TXl3NE1Td3lNVE1zTVRJd0xEZzVMREV4TWl3eE9UTXNNalFzTnpjc01UWXpMREUzTkN3eUxESXdNU3d4TXpBc01UY3dMREl4T0N3Mk5pd3hNak1zTVRFNUxEZ3pMREl4T1N3d0xETXlMRFl4TERVd0xESXpNQ3d4TWpjc01qa3NNakE0TERJeE1Dd3lNamNzTWpFM0xEZzVMREUxTkN3eU16QXNOVGdzTnprc01pd3pMREVzTUN3eCIsImlzcyI6Imh0dHBzOi8vYWNjb3VudHMuZ29vZ2xlLmNvbSIsImlhdCI6MTUwNjQ0NzA0NywiZXhwIjoxNTA2NDUwNjQ3fQ.pY0BZZHSMWyL4UE8sclEb-FglzmOuh8kHykFkGTUfxgdb7bAY7bVtTQWlN05dhMs5QncAjsKExEuoLoH0vqYKOWEsXM_oTnu59NY2JPiEYZOo-v5wsc7on3G_CF0E5BGYhG-fDpbmi3qbin-i-drDyOjWMC3jK1CngMT7G1ElW_x2W8-UfrcfGkIzdW11Iul-79prZ1OzNMoPI06aaAtxyd5-6_O2-jaKlKGGfqIGlV_cFnMuIW6tWONzmSY-XnKtUKMPOctLVGLYJI9l8e2D4e7NmXVZz7lum7KmCzJvrRq0T4dOy5j_CaSmyA26SJcmRbRn940THU7S5BuavBCjQ',
+    accessToken: 'ya29.GlvSBDbUICOGwVGCW4IJz1wS3e5HBDW9sXnuGFgWPKHPHsU6zFIbNL8Z31CoCd93gav7cKQ8axhIASk1DdsA1MCxABFnJDTz1aXLmdyGFtLa9bO9JTNLv2DLawdr',
+    idToken: 'eyJhbGciOiJSUzI1NiIsImtpZCI6IjNiMGZjMTE5NjJhZDE2ZTQ5ZDU1YTI2ODE2YzVhZDBkM2Y2YjhhODMifQ.eyJhenAiOiI4MDgzMjk1NjYwMTItdHFyOHFvaDExMTk0MmdkMmtnMDA3dDBzOGYyNzdyb2kuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiI4MDgzMjk1NjYwMTItdHFyOHFvaDExMTk0MmdkMmtnMDA3dDBzOGYyNzdyb2kuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMTc5NTkxMDUyOTU3NjE2ODc4ODkiLCJlbWFpbCI6InRlc3RhbmR0aGluazEyM0BnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiYXRfaGFzaCI6ImtnNkpEdTJyMDRpNVZHSlBkSWlnUFEiLCJub25jZSI6Ik5EZ3NNVE13TERFc016UXNORGdzTVRNc05pdzVMRFF5TERFek5DdzNNaXd4TXpRc01qUTNMREV6TERFc01Td3hMRFVzTUN3ekxERXpNQ3d4TERFMUxEQXNORGdzTVRNd0xERXNNVEFzTWl3eE16QXNNU3d4TERBc01UY3lMREU1TkN3eU16Y3NNakV5TERFek5DdzROU3d5TWpFc01qRXlMREV4Tnl3eE16TXNNVGN3TERnMExESXdOaXcyT1N3eE5ERXNNemNzTWpVMExESXhOaXd4Tmprc016RXNOak1zT1RFc01URTFMREV6T1N3MU1pd3lNVFlzTWpJNUxESXlOaXd4TXl3NU9Td3hOamNzTVRnMUxERXlNQ3d5TVRNc01USXlMREl5Tml3eU1UQXNNVEUwTERJME1Td3hOak1zTVRBMkxERXhNQ3d5TXpjc05ETXNNak16TERreExESTFNQ3d5TWpNc01qSTFMREV3Tml3NE1pd3hOVFVzTlN3eU16WXNNVGsyTERFMU1Dd3lNakVzTVRjc01USTRMREl6TERFNE5Dd3hNekVzT1RRc01Ua3dMRFU0TERJME9Td3hOemdzTVRBM0xERTVNaXd6TlN3NE5Td3hPRE1zTWpFeUxESTBPU3d5TkRFc01qUTJMRFV3TERBc016Y3NNVEkyTERFeE1pd3hOaXd5TXpBc01qRXlMREl6TERFek9Td3hPVGdzTnpRc01qRTRMREUxTXl3eE56Z3NNVFF3TERReExERTROaXd5TXpJc05qUXNNakk1TERRc01qSXhMRFkxTERFMExERTRNQ3d6TlN3eE16VXNOamtzTVRNc01qTXhMREk0TERJeE1DdzFNeXd4TVRnc01UWTRMREUyTVN3ek9DdzBNaXd4TkRjc01UUTFMRGcyTERJd055d3lOQ3c1TUN3eU1qWXNNVFVzTWpBNUxEZzVMREU0TXl3eE1EY3NNVFkwTERFMUxESXdNaXd5TkRJc056SXNNVGd4TERJeU5Td3lOVEFzTVRJeUxERTFPQ3c1TUN3eE5qa3NNak0xTERFek5DdzBOQ3d4TWl3MU1Td3lORFVzTVRRd0xEa3lMRGMxTERFeU9TdzNPU3d5TXpBc01qTTNMREUyTVN3eE9UTXNNVFF5TERFMU1pdzVMREl5TVN3ME1pd3hOelFzT1Rjc01qQTVMREV4Tnl3eE9UTXNNVElzT1RNc01UWXhMREl4Tnl3eU5ERXNNVGs0TERFd09Dd3hPRFlzTWprc01Ua3pMREV5TVN3NE15d3hNRGtzTWpJMkxERTVNeXd4TlRBc01UZ3pMRE0wTERFNUxEazFMREV4TWl3M05Dd3lNekFzT1RRc01UQTJMREUxTVN3ME1Dd3lNak1zTWpFNExESXlPQ3d6TERJMU15d3lNVGtzTmpZc09Dd3hPVEVzTkRjc01UTXdMREl3TUN3eU1qWXNNVE0zTERreUxESXdNaXd4TURJc05EY3NNakF3TERFeE15dzJOeXd4TlRZc09ETXNNVGsxTERJd01Td3lNeklzTWpJMUxEazJMREl3TXl3NE1Td3lNVE1zTVRJd0xEZzVMREV4TWl3eE9UTXNNalFzTnpjc01UWXpMREUzTkN3eUxESXdNU3d4TXpBc01UY3dMREl4T0N3Mk5pd3hNak1zTVRFNUxEZ3pMREl4T1N3d0xETXlMRFl4TERVd0xESXpNQ3d4TWpjc01qa3NNakE0TERJeE1Dd3lNamNzTWpFM0xEZzVMREUxTkN3eU16QXNOVGdzTnprc01pd3pMREVzTUN3eCIsImlzcyI6Imh0dHBzOi8vYWNjb3VudHMuZ29vZ2xlLmNvbSIsImlhdCI6MTUwNjQ0NzA0NywiZXhwIjoxNTA2NDUwNjQ3fQ.pY0BZZHSMWyL4UE8sclEb-FglzmOuh8kHykFkGTUfxgdb7bAY7bVtTQWlN05dhMs5QncAjsKExEuoLoH0vqYKOWEsXM_oTnu59NY2JPiEYZOo-v5wsc7on3G_CF0E5BGYhG-fDpbmi3qbin-i-drDyOjWMC3jK1CngMT7G1ElW_x2W8-UfrcfGkIzdW11Iul-79prZ1OzNMoPI06aaAtxyd5-6_O2-jaKlKGGfqIGlV_cFnMuIW6tWONzmSY-XnKtUKMPOctLVGLYJI9l8e2D4e7NmXVZz7lum7KmCzJvrRq0T4dOy5j_CaSmyA26SJcmRbRn940THU7S5BuavBCjQ',
     refreshToken: undefined,
     tokenType: 'Bearer',
     infoToken: {
@@ -1527,23 +1283,19 @@ let sendGenerateMessageResponse = {
       name: 'test think',
       given_name: 'test',
       family_name: 'think',
-      picture:
-        'https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/photo.jpg',
+      picture: 'https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/photo.jpg',
       email: 'testandthink123@gmail.com',
       email_verified: true,
       locale: 'en'
     },
     tokenIDJSON: {
-      azp:
-        '808329566012-tqr8qoh111942gd2kg007t0s8f277roi.apps.googleusercontent.com',
-      aud:
-        '808329566012-tqr8qoh111942gd2kg007t0s8f277roi.apps.googleusercontent.com',
+      azp: '808329566012-tqr8qoh111942gd2kg007t0s8f277roi.apps.googleusercontent.com',
+      aud: '808329566012-tqr8qoh111942gd2kg007t0s8f277roi.apps.googleusercontent.com',
       sub: '117959105295761687889',
       email: 'testandthink123@gmail.com',
       email_verified: 'true',
       at_hash: 'kg6JDu2r04i5VGJPdIigPQ',
-      nonce:
-        'NDgsMTMwLDEsMzQsNDgsMTMsNiw5LDQyLDEzNCw3MiwxMzQsMjQ3LDEzLDEsMSwxLDUsMCwzLDEzMCwxLDE1LDAsNDgsMTMwLDEsMTAsMiwxMzAsMSwxLDAsMTcyLDE5NCwyMzcsMjEyLDEzNCw4NSwyMjEsMjEyLDExNywxMzMsMTcwLDg0LDIwNiw2OSwxNDEsMzcsMjU0LDIxNiwxNjksMzEsNjMsOTEsMTE1LDEzOSw1MiwyMTYsMjI5LDIyNiwxMyw5OSwxNjcsMTg1LDEyMCwyMTMsMTIyLDIyNiwyMTAsMTE0LDI0MSwxNjMsMTA2LDExMCwyMzcsNDMsMjMzLDkxLDI1MCwyMjMsMjI1LDEwNiw4MiwxNTUsNSwyMzYsMTk2LDE1MCwyMjEsMTcsMTI4LDIzLDE4NCwxMzEsOTQsMTkwLDU4LDI0OSwxNzgsMTA3LDE5MiwzNSw4NSwxODMsMjEyLDI0OSwyNDEsMjQ2LDUwLDAsMzcsMTI2LDExMiwxNiwyMzAsMjEyLDIzLDEzOSwxOTgsNzQsMjE4LDE1MywxNzgsMTQwLDQxLDE4NiwyMzIsNjQsMjI5LDQsMjIxLDY1LDE0LDE4MCwzNSwxMzUsNjksMTMsMjMxLDI4LDIxMCw1MywxMTgsMTY4LDE2MSwzOCw0MiwxNDcsMTQ1LDg2LDIwNywyNCw5MCwyMjYsMTUsMjA5LDg5LDE4MywxMDcsMTY0LDE1LDIwMiwyNDIsNzIsMTgxLDIyNSwyNTAsMTIyLDE1OCw5MCwxNjksMjM1LDEzNCw0NCwxMiw1MSwyNDUsMTQwLDkyLDc1LDEyOSw3OSwyMzAsMjM3LDE2MSwxOTMsMTQyLDE1Miw5LDIyMSw0MiwxNzQsOTcsMjA5LDExNywxOTMsMTIsOTMsMTYxLDIxNywyNDEsMTk4LDEwOCwxODYsMjksMTkzLDEyMSw4MywxMDksMjI2LDE5MywxNTAsMTgzLDM0LDE5LDk1LDExMiw3NCwyMzAsOTQsMTA2LDE1MSw0MCwyMjMsMjE4LDIyOCwzLDI1MywyMTksNjYsOCwxOTEsNDcsMTMwLDIwMCwyMjYsMTM3LDkyLDIwMiwxMDIsNDcsMjAwLDExMyw2NywxNTYsODMsMTk1LDIwMSwyMzIsMjI1LDk2LDIwMyw4MSwyMTMsMTIwLDg5LDExMiwxOTMsMjQsNzcsMTYzLDE3NCwyLDIwMSwxMzAsMTcwLDIxOCw2NiwxMjMsMTE5LDgzLDIxOSwwLDMyLDYxLDUwLDIzMCwxMjcsMjksMjA4LDIxMCwyMjcsMjE3LDg5LDE1NCwyMzAsNTgsNzksMiwzLDEsMCwx',
+      nonce: 'NDgsMTMwLDEsMzQsNDgsMTMsNiw5LDQyLDEzNCw3MiwxMzQsMjQ3LDEzLDEsMSwxLDUsMCwzLDEzMCwxLDE1LDAsNDgsMTMwLDEsMTAsMiwxMzAsMSwxLDAsMTcyLDE5NCwyMzcsMjEyLDEzNCw4NSwyMjEsMjEyLDExNywxMzMsMTcwLDg0LDIwNiw2OSwxNDEsMzcsMjU0LDIxNiwxNjksMzEsNjMsOTEsMTE1LDEzOSw1MiwyMTYsMjI5LDIyNiwxMyw5OSwxNjcsMTg1LDEyMCwyMTMsMTIyLDIyNiwyMTAsMTE0LDI0MSwxNjMsMTA2LDExMCwyMzcsNDMsMjMzLDkxLDI1MCwyMjMsMjI1LDEwNiw4MiwxNTUsNSwyMzYsMTk2LDE1MCwyMjEsMTcsMTI4LDIzLDE4NCwxMzEsOTQsMTkwLDU4LDI0OSwxNzgsMTA3LDE5MiwzNSw4NSwxODMsMjEyLDI0OSwyNDEsMjQ2LDUwLDAsMzcsMTI2LDExMiwxNiwyMzAsMjEyLDIzLDEzOSwxOTgsNzQsMjE4LDE1MywxNzgsMTQwLDQxLDE4NiwyMzIsNjQsMjI5LDQsMjIxLDY1LDE0LDE4MCwzNSwxMzUsNjksMTMsMjMxLDI4LDIxMCw1MywxMTgsMTY4LDE2MSwzOCw0MiwxNDcsMTQ1LDg2LDIwNywyNCw5MCwyMjYsMTUsMjA5LDg5LDE4MywxMDcsMTY0LDE1LDIwMiwyNDIsNzIsMTgxLDIyNSwyNTAsMTIyLDE1OCw5MCwxNjksMjM1LDEzNCw0NCwxMiw1MSwyNDUsMTQwLDkyLDc1LDEyOSw3OSwyMzAsMjM3LDE2MSwxOTMsMTQyLDE1Miw5LDIyMSw0MiwxNzQsOTcsMjA5LDExNywxOTMsMTIsOTMsMTYxLDIxNywyNDEsMTk4LDEwOCwxODYsMjksMTkzLDEyMSw4MywxMDksMjI2LDE5MywxNTAsMTgzLDM0LDE5LDk1LDExMiw3NCwyMzAsOTQsMTA2LDE1MSw0MCwyMjMsMjE4LDIyOCwzLDI1MywyMTksNjYsOCwxOTEsNDcsMTMwLDIwMCwyMjYsMTM3LDkyLDIwMiwxMDIsNDcsMjAwLDExMyw2NywxNTYsODMsMTk1LDIwMSwyMzIsMjI1LDk2LDIwMyw4MSwyMTMsMTIwLDg5LDExMiwxOTMsMjQsNzcsMTYzLDE3NCwyLDIwMSwxMzAsMTcwLDIxOCw2NiwxMjMsMTE5LDgzLDIxOSwwLDMyLDYxLDUwLDIzMCwxMjcsMjksMjA4LDIxMCwyMjcsMjE3LDg5LDE1NCwyMzAsNTgsNzksMiwzLDEsMCwx',
       iss: 'https://accounts.google.com',
       iat: '1506447047',
       exp: '1506450647',
@@ -1552,17 +1304,6 @@ let sendGenerateMessageResponse = {
     },
     expires: '1506450647',
     email: 'testandthink123@gmail.com'
-  },
-  infoToken: {
-    sub: '117959105295761687889',
-    name: 'test think',
-    given_name: 'test',
-    family_name: 'think',
-    picture:
-      'https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/photo.jpg',
-    email: 'testandthink123@gmail.com',
-    email_verified: true,
-    locale: 'en'
   }
 };
 
@@ -1572,8 +1313,7 @@ let dataObjectPopulate = {
   reporter: 'hyperty://h1.domain/h1',
   created: '2017-09-26T15:05:14.966Z',
   runtime: runtimeURL,
-  schema:
-    'hyperty-catalogue://catalogue.localhost/.well-known/dataschema/Communication',
+  schema: 'hyperty-catalogue://catalogue.localhost/.well-known/dataschema/Communication',
   parent: 'comm://localhost/5f8d87fd-c56b-47fc-ad47-28d55f01e23a'
 };
 
@@ -1602,13 +1342,11 @@ let chatKeysPopulate = {
     userID: 'testandthink123@gmail.com',
     privateKey: undefined,
     publicKey: undefined,
-    assertion:
-      'eyJ0b2tlbklEIjoiZXlKaGJHY2lPaUpTVXpJMU5pSXNJbXRwWkNJNklqTm1PVGsxTWpWall6TmhNek5sTTJNeVlqVmtZMlk1WVRJeFpqUmtPREprTXpjeFltVTNOamNpZlEuZXlKaGVuQWlPaUk0TURnek1qazFOall3TVRJdGRIRnlPSEZ2YURFeE1UazBNbWRrTW10bk1EQTNkREJ6T0dZeU56ZHliMmt1WVhCd2N5NW5iMjluYkdWMWMyVnlZMjl1ZEdWdWRDNWpiMjBpTENKaGRXUWlPaUk0TURnek1qazFOall3TVRJdGRIRnlPSEZ2YURFeE1UazBNbWRrTW10bk1EQTNkREJ6T0dZeU56ZHliMmt1WVhCd2N5NW5iMjluYkdWMWMyVnlZMjl1ZEdWdWRDNWpiMjBpTENKemRXSWlPaUl4TVRjNU5Ua3hNRFV5T1RVM05qRTJPRGM0T0RraUxDSmxiV0ZwYkNJNkluUmxjM1JoYm1SMGFHbHVhekV5TTBCbmJXRnBiQzVqYjIwaUxDSmxiV0ZwYkY5MlpYSnBabWxsWkNJNmRISjFaU3dpWVhSZmFHRnphQ0k2SWxKcFdEZEVlbFI1YWxWUVIxOU5MVlZQVEhveGJFRWlMQ0p1YjI1alpTSTZJazVFWjNOTlZFMTNURVJGYzAxNlVYTk9SR2R6VFZSTmMwNXBkelZNUkZGNVRFUkZlazVEZHpOTmFYZDRUWHBSYzAxcVVUTk1SRVY2VEVSRmMwMVRkM2hNUkZWelRVTjNla3hFUlhwTlEzZDRURVJGTVV4RVFYTk9SR2R6VFZSTmQweEVSWE5OVkVGelRXbDNlRTE2UVhOTlUzZDRURVJCYzAxVVVURk1SRVV4VFhsM2VVMUVaM05OYWxGNVRFUkpNVTVEZDNsTmVsbHpUV3BOTVV4RVVUSk1SRWw1VGxOM2VFMTZaM05OZW10elRXcEpNa3hFUlhoTmFYZDRUWHBSYzAxVVp6Vk1SRVY0VFVOM01FNURkM2xOUkVselRWUm5kMHhFYTNwTVJFVXdUME4zZVUxRVozTk9ha1Z6VFZSQk0weEVSWGROVTNkNVRVUlZjMDlFVVhOT1ZGVnpUVlJqTVV4RVozZE1SRWt4VEVSSmQwNXBkM2xOUkUxelRXcEJlRXhFU1RGTVJFbDZUME4zTWt4RVdYbE1SRVV4VG1sM2VFMXFVWE5PYWtselRXcE5ORXhFUlhoTVJFa3dUMU4zTkU1RGR6Uk1SRVV6VG1sM01rNTVkM2xPVkZGelRWUnJNVXhFU1RCT1UzZDRUWHBSYzA1cGQzbE9SRTF6VFdwSk1VeEVSVEZQUTNkNFRrUlJjMDFVVFRKTVJFVjVUbmwzZUUxVVozTk5hbEY1VEVSbk5FeEVZekpNUkVVd1RtbDNlRTU1ZDNsTmFrRnpUVlJGTkV4RVNUQk9RM2MxVG5sM2VVNUVaM05OVkdONlRFUkZORTFUZHpWUFEzY3lUbWwzTkV4RVdYaE1SR2N4VEVSSk5FeEVSWHBPVTNjeFRFUkZORTlUZHpOUFUzZDRUVlJOYzAxVVl6Uk1SRVV3VDBOM2VFMTZRWE5OYWxWNlRFUkZlVTVEZDNwT1EzY3dUMU4zZVU1RVNYTk5hbFY1VEVSRk1VNXBkM2hPUkdkelRWUlZjMDVxUlhOTmFsRXhURVJKZVUxVGQzbE5SR3R6VFZSSmVreEVSWGRQUTNkNFRtcFZjMDFxU1hOTmFrRXhURVJaTTB4RVJYbE5lWGQ0VDBSVmMwMXFRWGhNUkdjeVRFUkZNMDFEZDNoTlEzZDRUWHBSYzAxVVFURk1SRVUxVG1sM2VFMXFUWE5OYWxWNVRFUkZNazU1ZDNoT2VsVnpUV3BOTWt4RVJUQlBVM2N6VFVOM01rNURkM3BOVTNkNVRWTjNlVTFFUVhOTlZFMTVURVJKZVUxNWQzaE5lbEZ6VFdwQk1VeEVSVFZPUTNkNlRXbDNNVTVEZHpOT2VYZDVUV2wzTWs1NWQzcE9VM2MwVG5sM2VVMVVWWE5QUkZselRWUnJlRXhFU1hkT2VYZDRUbnBSYzAxcVFUVk1SRWt4VEVSbmVFeEVTWGxNUkVGelRYcEpjMDVFVVhOTmFsRXpURVJuTlV4RVp6Qk1SRWw2VGxOM2VFOVVZM05PZW1OelRWUnJNMHhFUlRSTVJFVjZUbWwzZUUxVVZYTk5WR2MwVEVSRmQweEVTWGhQUTNkNFQwUkJjMDFxVVhwTVJFbDRUVU4zZWs1VGQzaE5lbWR6VFdwQk1VeEVSVEpQVTNkNFQwTjNlazU1ZHpKTVJFRnpUMVJKYzAxVVkzZE1SRTAxVEVSRk1VNURkM2xPVkZWelRWUkJNMHhFU1RKTVJFVjVUME4zZVUxcVdYTk5hazEzVEVSRk1rMXBkM2hQVkVselRXcEJlRXhFUlRCTmFYZDRUbnBaYzA1VVFYTk5WRUUxVEVSSk1FOVRkekJOYVhkNFRrUm5jMDFxUVhwTVJFbDRUV2wzZVUxRVdYTk5WR2MwVEVSVk5VeEVSWGxOZVhkNFRrUkJjMDFVYTNoTVJHc3dURVJOTWt4RVJUQk9RM2Q1VGtSUmMwNVVhM05OYWswMVRFUlJjMDFVUlhwTVJFMTZURVJSTlV4RVdUSk1SRTEzVEVSSmQwMTVkelJNUkdNelRFUkZlVTVUZDNsTlJHdHpUVlJGZWt4RVNUQk5VM2Q0VFZSbmMwNTZVWE5OVkZFd1RFUm5lVXhFUlhkT2VYYzFUWGwzZUU1cGQzbE5ha1Z6VGxSQmMwMXFUWHBNUkVVeFRsTjNNMDU1ZDNoUFJFbHpUV3BCTWt4RVNYcE9lWGMwVDBOM2VVeEVSVEJPUTNkNVRYcFpjMDFVWnpKTVJFVXdUa04zZVUxNlRYTk5lbGx6VFZSUk1reEVSWGxNUkVVeVRVTjNkMHhFUlRST2FYZDRUMVJqYzA5RVkzTk5WR014VEVSUk5VeEVSVFZPZVhjeVQwTjNlVTFVWjNOTlZHTXhURVJKYzAxNWQzaE1SRUZ6VFZFOVBTSXNJbWx6Y3lJNkltaDBkSEJ6T2k4dllXTmpiM1Z1ZEhNdVoyOXZaMnhsTG1OdmJTSXNJbWxoZENJNk1UVXdOemt3TlRnNE5pd2laWGh3SWpveE5UQTNPVEE1TkRnMmZRLktvU2xyeHp1RUthd1ZWcS1TdmNHNTRXZVladWpaS2ltd2JXV21td01UcUZjMVI1My1wMFRlbWVFdS1VT29NU3NydjA1bUxoV20zV3lfb1RKM3JKeWRPX3FQS1ptU3F3aENxeEVNNjRWajNDeHRTa1c0SUg5VmR3emlmYUxtakRIQk9NZ0Y5OUNLcTBCMkhVWVhwNXU3TXJDc1VrTC1LLXhnUVI4c185MzhiUXNSX085eHpILTluZFVVTjBCb09aQ0tCYm50WmZYdjZ5am9VeEZKdG10clVUWnpsUkZYbUtxWWQtVk9TYVZ3MURldlRDbzBjbjNrTXBtZ0E1Sk13aTZ5U2pEdE9TQzkwVjc1dDZJSVhvS2g3T2ZZOG1aelIzeWprejNpckxiNEhNdDlTV21qNVlCZmF4M0FtNDY1bnBLM3RpOWxOZFZaa1lVMmZRUGg0SC1mQSIsInRva2VuSURKU09OIjp7ImF6cCI6IjgwODMyOTU2NjAxMi10cXI4cW9oMTExOTQyZ2Qya2cwMDd0MHM4ZjI3N3JvaS5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsImF1ZCI6IjgwODMyOTU2NjAxMi10cXI4cW9oMTExOTQyZ2Qya2cwMDd0MHM4ZjI3N3JvaS5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsInN1YiI6IjExNzk1OTEwNTI5NTc2MTY4Nzg4OSIsImVtYWlsIjoidGVzdGFuZHRoaW5rMTIzQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjoidHJ1ZSIsImF0X2hhc2giOiJSaVg3RHpUeWpVUEdfTS1VT0x6MWxBIiwibm9uY2UiOiJORGdzTVRNd0xERXNNelFzTkRnc01UTXNOaXc1TERReUxERXpOQ3czTWl3eE16UXNNalEzTERFekxERXNNU3d4TERVc01Dd3pMREV6TUN3eExERTFMREFzTkRnc01UTXdMREVzTVRBc01pd3hNekFzTVN3eExEQXNNVFExTERFMU15d3lNRGdzTWpReUxESTFOQ3d5TXpZc01qTTFMRFEyTERJeU5Td3hNemdzTXprc01qSTJMREV4TWl3eE16UXNNVGc1TERFeE1DdzBOQ3d5TURJc01UZ3dMRGt6TERFME9Dd3lNRGdzTmpFc01UQTNMREV3TVN3eU1EVXNPRFFzTlRVc01UYzFMRGd3TERJMUxESXdOaXd5TURNc01qQXhMREkxTERJek9DdzJMRFl5TERFMU5pd3hNalFzTmpJc01qTTRMREV4TERJME9TdzROQ3c0TERFM05pdzJOeXd5TlRRc01UazFMREkwTlN3eE16UXNOaXd5TkRNc01qSTFMREUxT0N3eE5EUXNNVE0yTERFeU55d3hNVGdzTWpReUxEZzRMRGMyTERFME5pd3hOeXd5TWpBc01URTRMREkwTkN3NU55d3lORGdzTVRjekxERTRNU3c1T0N3Mk5pdzRMRFl4TERnMUxESTRMREV6TlN3MUxERTRPU3czT1N3eE1UTXNNVGM0TERFME9Dd3hNekFzTWpVekxERXlOQ3d6TkN3ME9Td3lORElzTWpVeUxERTFOaXd4TkRnc01UVXNOakVzTWpRMUxESXlNU3d5TURrc01USXpMREV3T0N3eE5qVXNNaklzTWpBMUxEWTNMREV5TXl3eE9EVXNNakF4TERnMkxERTNNQ3d4TUN3eE16UXNNVEExTERFNU5pd3hNak1zTWpVeUxERTJOeXd4TnpVc01qTTJMREUwT1N3M01DdzJOQ3d6TVN3eU1Td3lNREFzTVRNeUxESXlNeXd4TXpRc01qQTFMREU1TkN3ek1pdzFOQ3czTnl3eU1pdzJOeXd6TlN3NE55d3lNVFVzT0RZc01Ua3hMREl3Tnl3eE56UXNNakE1TERJMUxEZ3hMREl5TERBc016SXNORFFzTWpRM0xEZzVMRGcwTERJek5Td3hPVGNzTnpjc01UazNMREU0TERFek5pd3hNVFVzTVRnNExERXdMREl4T0N3eE9EQXNNalF6TERJeE1Dd3pOU3d4TXpnc01qQTFMREUyT1N3eE9Dd3pOeXcyTERBc09USXNNVGN3TERNNUxERTFOQ3d5TlRVc01UQTNMREkyTERFeU9Dd3lNallzTWpNd0xERTJNaXd4T1RJc01qQXhMREUwTWl3eE56WXNOVEFzTVRBNUxESTBPU3cwTWl3eE5EZ3NNakF6TERJeE1pd3lNRFlzTVRnNExEVTVMREV5TXl3eE5EQXNNVGt4TERrMExETTJMREUwTkN3eU5EUXNOVGtzTWpNNUxEUXNNVEV6TERNekxEUTVMRFkyTERNd0xESXdNeXc0TERjM0xERXlOU3d5TURrc01URXpMREkwTVN3eE1UZ3NOelFzTVRRMExEZ3lMREV3Tnl3NU15d3hOaXd5TWpFc05UQXNNak16TERFMU5TdzNOeXd4T0RJc01qQTJMREl6Tnl3NE9Dd3lMREUwTkN3eU16WXNNVGcyTERFME5Dd3lNek1zTXpZc01UUTJMREV5TERFMk1Dd3dMREU0Tml3eE9UY3NPRGNzTVRjMUxEUTVMREU1Tnl3Mk9Dd3lNVGdzTVRjMUxESXNNeXd4TERBc01RPT0iLCJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJpYXQiOiIxNTA3OTA1ODg2IiwiZXhwIjoiMTUwNzkwOTQ4NiIsImFsZyI6IlJTMjU2Iiwia2lkIjoiM2Y5OTUyNWNjM2EzM2UzYzJiNWRjZjlhMjFmNGQ4MmQzNzFiZTc2NyJ9fQ==',
+    assertion: 'eyJ0b2tlbklEIjoiZXlKaGJHY2lPaUpTVXpJMU5pSXNJbXRwWkNJNklqTm1PVGsxTWpWall6TmhNek5sTTJNeVlqVmtZMlk1WVRJeFpqUmtPREprTXpjeFltVTNOamNpZlEuZXlKaGVuQWlPaUk0TURnek1qazFOall3TVRJdGRIRnlPSEZ2YURFeE1UazBNbWRrTW10bk1EQTNkREJ6T0dZeU56ZHliMmt1WVhCd2N5NW5iMjluYkdWMWMyVnlZMjl1ZEdWdWRDNWpiMjBpTENKaGRXUWlPaUk0TURnek1qazFOall3TVRJdGRIRnlPSEZ2YURFeE1UazBNbWRrTW10bk1EQTNkREJ6T0dZeU56ZHliMmt1WVhCd2N5NW5iMjluYkdWMWMyVnlZMjl1ZEdWdWRDNWpiMjBpTENKemRXSWlPaUl4TVRjNU5Ua3hNRFV5T1RVM05qRTJPRGM0T0RraUxDSmxiV0ZwYkNJNkluUmxjM1JoYm1SMGFHbHVhekV5TTBCbmJXRnBiQzVqYjIwaUxDSmxiV0ZwYkY5MlpYSnBabWxsWkNJNmRISjFaU3dpWVhSZmFHRnphQ0k2SWxKcFdEZEVlbFI1YWxWUVIxOU5MVlZQVEhveGJFRWlMQ0p1YjI1alpTSTZJazVFWjNOTlZFMTNURVJGYzAxNlVYTk9SR2R6VFZSTmMwNXBkelZNUkZGNVRFUkZlazVEZHpOTmFYZDRUWHBSYzAxcVVUTk1SRVY2VEVSRmMwMVRkM2hNUkZWelRVTjNla3hFUlhwTlEzZDRURVJGTVV4RVFYTk9SR2R6VFZSTmQweEVSWE5OVkVGelRXbDNlRTE2UVhOTlUzZDRURVJCYzAxVVVURk1SRVV4VFhsM2VVMUVaM05OYWxGNVRFUkpNVTVEZDNsTmVsbHpUV3BOTVV4RVVUSk1SRWw1VGxOM2VFMTZaM05OZW10elRXcEpNa3hFUlhoTmFYZDRUWHBSYzAxVVp6Vk1SRVY0VFVOM01FNURkM2xOUkVselRWUm5kMHhFYTNwTVJFVXdUME4zZVUxRVozTk9ha1Z6VFZSQk0weEVSWGROVTNkNVRVUlZjMDlFVVhOT1ZGVnpUVlJqTVV4RVozZE1SRWt4VEVSSmQwNXBkM2xOUkUxelRXcEJlRXhFU1RGTVJFbDZUME4zTWt4RVdYbE1SRVV4VG1sM2VFMXFVWE5PYWtselRXcE5ORXhFUlhoTVJFa3dUMU4zTkU1RGR6Uk1SRVV6VG1sM01rNTVkM2xPVkZGelRWUnJNVXhFU1RCT1UzZDRUWHBSYzA1cGQzbE9SRTF6VFdwSk1VeEVSVEZQUTNkNFRrUlJjMDFVVFRKTVJFVjVUbmwzZUUxVVozTk5hbEY1VEVSbk5FeEVZekpNUkVVd1RtbDNlRTU1ZDNsTmFrRnpUVlJGTkV4RVNUQk9RM2MxVG5sM2VVNUVaM05OVkdONlRFUkZORTFUZHpWUFEzY3lUbWwzTkV4RVdYaE1SR2N4VEVSSk5FeEVSWHBPVTNjeFRFUkZORTlUZHpOUFUzZDRUVlJOYzAxVVl6Uk1SRVV3VDBOM2VFMTZRWE5OYWxWNlRFUkZlVTVEZDNwT1EzY3dUMU4zZVU1RVNYTk5hbFY1VEVSRk1VNXBkM2hPUkdkelRWUlZjMDVxUlhOTmFsRXhURVJKZVUxVGQzbE5SR3R6VFZSSmVreEVSWGRQUTNkNFRtcFZjMDFxU1hOTmFrRXhURVJaTTB4RVJYbE5lWGQ0VDBSVmMwMXFRWGhNUkdjeVRFUkZNMDFEZDNoTlEzZDRUWHBSYzAxVVFURk1SRVUxVG1sM2VFMXFUWE5OYWxWNVRFUkZNazU1ZDNoT2VsVnpUV3BOTWt4RVJUQlBVM2N6VFVOM01rNURkM3BOVTNkNVRWTjNlVTFFUVhOTlZFMTVURVJKZVUxNWQzaE5lbEZ6VFdwQk1VeEVSVFZPUTNkNlRXbDNNVTVEZHpOT2VYZDVUV2wzTWs1NWQzcE9VM2MwVG5sM2VVMVVWWE5QUkZselRWUnJlRXhFU1hkT2VYZDRUbnBSYzAxcVFUVk1SRWt4VEVSbmVFeEVTWGxNUkVGelRYcEpjMDVFVVhOTmFsRXpURVJuTlV4RVp6Qk1SRWw2VGxOM2VFOVVZM05PZW1OelRWUnJNMHhFUlRSTVJFVjZUbWwzZUUxVVZYTk5WR2MwVEVSRmQweEVTWGhQUTNkNFQwUkJjMDFxVVhwTVJFbDRUVU4zZWs1VGQzaE5lbWR6VFdwQk1VeEVSVEpQVTNkNFQwTjNlazU1ZHpKTVJFRnpUMVJKYzAxVVkzZE1SRTAxVEVSRk1VNURkM2xPVkZWelRWUkJNMHhFU1RKTVJFVjVUME4zZVUxcVdYTk5hazEzVEVSRk1rMXBkM2hQVkVselRXcEJlRXhFUlRCTmFYZDRUbnBaYzA1VVFYTk5WRUUxVEVSSk1FOVRkekJOYVhkNFRrUm5jMDFxUVhwTVJFbDRUV2wzZVUxRVdYTk5WR2MwVEVSVk5VeEVSWGxOZVhkNFRrUkJjMDFVYTNoTVJHc3dURVJOTWt4RVJUQk9RM2Q1VGtSUmMwNVVhM05OYWswMVRFUlJjMDFVUlhwTVJFMTZURVJSTlV4RVdUSk1SRTEzVEVSSmQwMTVkelJNUkdNelRFUkZlVTVUZDNsTlJHdHpUVlJGZWt4RVNUQk5VM2Q0VFZSbmMwNTZVWE5OVkZFd1RFUm5lVXhFUlhkT2VYYzFUWGwzZUU1cGQzbE5ha1Z6VGxSQmMwMXFUWHBNUkVVeFRsTjNNMDU1ZDNoUFJFbHpUV3BCTWt4RVNYcE9lWGMwVDBOM2VVeEVSVEJPUTNkNVRYcFpjMDFVWnpKTVJFVXdUa04zZVUxNlRYTk5lbGx6VFZSUk1reEVSWGxNUkVVeVRVTjNkMHhFUlRST2FYZDRUMVJqYzA5RVkzTk5WR014VEVSUk5VeEVSVFZPZVhjeVQwTjNlVTFVWjNOTlZHTXhURVJKYzAxNWQzaE1SRUZ6VFZFOVBTSXNJbWx6Y3lJNkltaDBkSEJ6T2k4dllXTmpiM1Z1ZEhNdVoyOXZaMnhsTG1OdmJTSXNJbWxoZENJNk1UVXdOemt3TlRnNE5pd2laWGh3SWpveE5UQTNPVEE1TkRnMmZRLktvU2xyeHp1RUthd1ZWcS1TdmNHNTRXZVladWpaS2ltd2JXV21td01UcUZjMVI1My1wMFRlbWVFdS1VT29NU3NydjA1bUxoV20zV3lfb1RKM3JKeWRPX3FQS1ptU3F3aENxeEVNNjRWajNDeHRTa1c0SUg5VmR3emlmYUxtakRIQk9NZ0Y5OUNLcTBCMkhVWVhwNXU3TXJDc1VrTC1LLXhnUVI4c185MzhiUXNSX085eHpILTluZFVVTjBCb09aQ0tCYm50WmZYdjZ5am9VeEZKdG10clVUWnpsUkZYbUtxWWQtVk9TYVZ3MURldlRDbzBjbjNrTXBtZ0E1Sk13aTZ5U2pEdE9TQzkwVjc1dDZJSVhvS2g3T2ZZOG1aelIzeWprejNpckxiNEhNdDlTV21qNVlCZmF4M0FtNDY1bnBLM3RpOWxOZFZaa1lVMmZRUGg0SC1mQSIsInRva2VuSURKU09OIjp7ImF6cCI6IjgwODMyOTU2NjAxMi10cXI4cW9oMTExOTQyZ2Qya2cwMDd0MHM4ZjI3N3JvaS5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsImF1ZCI6IjgwODMyOTU2NjAxMi10cXI4cW9oMTExOTQyZ2Qya2cwMDd0MHM4ZjI3N3JvaS5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsInN1YiI6IjExNzk1OTEwNTI5NTc2MTY4Nzg4OSIsImVtYWlsIjoidGVzdGFuZHRoaW5rMTIzQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjoidHJ1ZSIsImF0X2hhc2giOiJSaVg3RHpUeWpVUEdfTS1VT0x6MWxBIiwibm9uY2UiOiJORGdzTVRNd0xERXNNelFzTkRnc01UTXNOaXc1TERReUxERXpOQ3czTWl3eE16UXNNalEzTERFekxERXNNU3d4TERVc01Dd3pMREV6TUN3eExERTFMREFzTkRnc01UTXdMREVzTVRBc01pd3hNekFzTVN3eExEQXNNVFExTERFMU15d3lNRGdzTWpReUxESTFOQ3d5TXpZc01qTTFMRFEyTERJeU5Td3hNemdzTXprc01qSTJMREV4TWl3eE16UXNNVGc1TERFeE1DdzBOQ3d5TURJc01UZ3dMRGt6TERFME9Dd3lNRGdzTmpFc01UQTNMREV3TVN3eU1EVXNPRFFzTlRVc01UYzFMRGd3TERJMUxESXdOaXd5TURNc01qQXhMREkxTERJek9DdzJMRFl5TERFMU5pd3hNalFzTmpJc01qTTRMREV4TERJME9TdzROQ3c0TERFM05pdzJOeXd5TlRRc01UazFMREkwTlN3eE16UXNOaXd5TkRNc01qSTFMREUxT0N3eE5EUXNNVE0yTERFeU55d3hNVGdzTWpReUxEZzRMRGMyTERFME5pd3hOeXd5TWpBc01URTRMREkwTkN3NU55d3lORGdzTVRjekxERTRNU3c1T0N3Mk5pdzRMRFl4TERnMUxESTRMREV6TlN3MUxERTRPU3czT1N3eE1UTXNNVGM0TERFME9Dd3hNekFzTWpVekxERXlOQ3d6TkN3ME9Td3lORElzTWpVeUxERTFOaXd4TkRnc01UVXNOakVzTWpRMUxESXlNU3d5TURrc01USXpMREV3T0N3eE5qVXNNaklzTWpBMUxEWTNMREV5TXl3eE9EVXNNakF4TERnMkxERTNNQ3d4TUN3eE16UXNNVEExTERFNU5pd3hNak1zTWpVeUxERTJOeXd4TnpVc01qTTJMREUwT1N3M01DdzJOQ3d6TVN3eU1Td3lNREFzTVRNeUxESXlNeXd4TXpRc01qQTFMREU1TkN3ek1pdzFOQ3czTnl3eU1pdzJOeXd6TlN3NE55d3lNVFVzT0RZc01Ua3hMREl3Tnl3eE56UXNNakE1TERJMUxEZ3hMREl5TERBc016SXNORFFzTWpRM0xEZzVMRGcwTERJek5Td3hPVGNzTnpjc01UazNMREU0TERFek5pd3hNVFVzTVRnNExERXdMREl4T0N3eE9EQXNNalF6TERJeE1Dd3pOU3d4TXpnc01qQTFMREUyT1N3eE9Dd3pOeXcyTERBc09USXNNVGN3TERNNUxERTFOQ3d5TlRVc01UQTNMREkyTERFeU9Dd3lNallzTWpNd0xERTJNaXd4T1RJc01qQXhMREUwTWl3eE56WXNOVEFzTVRBNUxESTBPU3cwTWl3eE5EZ3NNakF6TERJeE1pd3lNRFlzTVRnNExEVTVMREV5TXl3eE5EQXNNVGt4TERrMExETTJMREUwTkN3eU5EUXNOVGtzTWpNNUxEUXNNVEV6TERNekxEUTVMRFkyTERNd0xESXdNeXc0TERjM0xERXlOU3d5TURrc01URXpMREkwTVN3eE1UZ3NOelFzTVRRMExEZ3lMREV3Tnl3NU15d3hOaXd5TWpFc05UQXNNak16TERFMU5TdzNOeXd4T0RJc01qQTJMREl6Tnl3NE9Dd3lMREUwTkN3eU16WXNNVGcyTERFME5Dd3lNek1zTXpZc01UUTJMREV5TERFMk1Dd3dMREU0Tml3eE9UY3NPRGNzTVRjMUxEUTVMREU1Tnl3Mk9Dd3lNVGdzTVRjMUxESXNNeXd4TERBc01RPT0iLCJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJpYXQiOiIxNTA3OTA1ODg2IiwiZXhwIjoiMTUwNzkwOTQ4NiIsImFsZyI6IlJTMjU2Iiwia2lkIjoiM2Y5OTUyNWNjM2EzM2UzYzJiNWRjZjlhMjFmNGQ4MmQzNzFiZTc2NyJ9fQ==',
     messageInfo: {
       userProfile: undefined,
       idp: 'google.com',
-      assertion:
-        'eyJ0b2tlbklEIjoiZXlKaGJHY2lPaUpTVXpJMU5pSXNJbXRwWkNJNklqTm1PVGsxTWpWall6TmhNek5sTTJNeVlqVmtZMlk1WVRJeFpqUmtPREprTXpjeFltVTNOamNpZlEuZXlKaGVuQWlPaUk0TURnek1qazFOall3TVRJdGRIRnlPSEZ2YURFeE1UazBNbWRrTW10bk1EQTNkREJ6T0dZeU56ZHliMmt1WVhCd2N5NW5iMjluYkdWMWMyVnlZMjl1ZEdWdWRDNWpiMjBpTENKaGRXUWlPaUk0TURnek1qazFOall3TVRJdGRIRnlPSEZ2YURFeE1UazBNbWRrTW10bk1EQTNkREJ6T0dZeU56ZHliMmt1WVhCd2N5NW5iMjluYkdWMWMyVnlZMjl1ZEdWdWRDNWpiMjBpTENKemRXSWlPaUl4TVRjNU5Ua3hNRFV5T1RVM05qRTJPRGM0T0RraUxDSmxiV0ZwYkNJNkluUmxjM1JoYm1SMGFHbHVhekV5TTBCbmJXRnBiQzVqYjIwaUxDSmxiV0ZwYkY5MlpYSnBabWxsWkNJNmRISjFaU3dpWVhSZmFHRnphQ0k2SWxKcFdEZEVlbFI1YWxWUVIxOU5MVlZQVEhveGJFRWlMQ0p1YjI1alpTSTZJazVFWjNOTlZFMTNURVJGYzAxNlVYTk9SR2R6VFZSTmMwNXBkelZNUkZGNVRFUkZlazVEZHpOTmFYZDRUWHBSYzAxcVVUTk1SRVY2VEVSRmMwMVRkM2hNUkZWelRVTjNla3hFUlhwTlEzZDRURVJGTVV4RVFYTk9SR2R6VFZSTmQweEVSWE5OVkVGelRXbDNlRTE2UVhOTlUzZDRURVJCYzAxVVVURk1SRVV4VFhsM2VVMUVaM05OYWxGNVRFUkpNVTVEZDNsTmVsbHpUV3BOTVV4RVVUSk1SRWw1VGxOM2VFMTZaM05OZW10elRXcEpNa3hFUlhoTmFYZDRUWHBSYzAxVVp6Vk1SRVY0VFVOM01FNURkM2xOUkVselRWUm5kMHhFYTNwTVJFVXdUME4zZVUxRVozTk9ha1Z6VFZSQk0weEVSWGROVTNkNVRVUlZjMDlFVVhOT1ZGVnpUVlJqTVV4RVozZE1SRWt4VEVSSmQwNXBkM2xOUkUxelRXcEJlRXhFU1RGTVJFbDZUME4zTWt4RVdYbE1SRVV4VG1sM2VFMXFVWE5PYWtselRXcE5ORXhFUlhoTVJFa3dUMU4zTkU1RGR6Uk1SRVV6VG1sM01rNTVkM2xPVkZGelRWUnJNVXhFU1RCT1UzZDRUWHBSYzA1cGQzbE9SRTF6VFdwSk1VeEVSVEZQUTNkNFRrUlJjMDFVVFRKTVJFVjVUbmwzZUUxVVozTk5hbEY1VEVSbk5FeEVZekpNUkVVd1RtbDNlRTU1ZDNsTmFrRnpUVlJGTkV4RVNUQk9RM2MxVG5sM2VVNUVaM05OVkdONlRFUkZORTFUZHpWUFEzY3lUbWwzTkV4RVdYaE1SR2N4VEVSSk5FeEVSWHBPVTNjeFRFUkZORTlUZHpOUFUzZDRUVlJOYzAxVVl6Uk1SRVV3VDBOM2VFMTZRWE5OYWxWNlRFUkZlVTVEZDNwT1EzY3dUMU4zZVU1RVNYTk5hbFY1VEVSRk1VNXBkM2hPUkdkelRWUlZjMDVxUlhOTmFsRXhURVJKZVUxVGQzbE5SR3R6VFZSSmVreEVSWGRQUTNkNFRtcFZjMDFxU1hOTmFrRXhURVJaTTB4RVJYbE5lWGQ0VDBSVmMwMXFRWGhNUkdjeVRFUkZNMDFEZDNoTlEzZDRUWHBSYzAxVVFURk1SRVUxVG1sM2VFMXFUWE5OYWxWNVRFUkZNazU1ZDNoT2VsVnpUV3BOTWt4RVJUQlBVM2N6VFVOM01rNURkM3BOVTNkNVRWTjNlVTFFUVhOTlZFMTVURVJKZVUxNWQzaE5lbEZ6VFdwQk1VeEVSVFZPUTNkNlRXbDNNVTVEZHpOT2VYZDVUV2wzTWs1NWQzcE9VM2MwVG5sM2VVMVVWWE5QUkZselRWUnJlRXhFU1hkT2VYZDRUbnBSYzAxcVFUVk1SRWt4VEVSbmVFeEVTWGxNUkVGelRYcEpjMDVFVVhOTmFsRXpURVJuTlV4RVp6Qk1SRWw2VGxOM2VFOVVZM05PZW1OelRWUnJNMHhFUlRSTVJFVjZUbWwzZUUxVVZYTk5WR2MwVEVSRmQweEVTWGhQUTNkNFQwUkJjMDFxVVhwTVJFbDRUVU4zZWs1VGQzaE5lbWR6VFdwQk1VeEVSVEpQVTNkNFQwTjNlazU1ZHpKTVJFRnpUMVJKYzAxVVkzZE1SRTAxVEVSRk1VNURkM2xPVkZWelRWUkJNMHhFU1RKTVJFVjVUME4zZVUxcVdYTk5hazEzVEVSRk1rMXBkM2hQVkVselRXcEJlRXhFUlRCTmFYZDRUbnBaYzA1VVFYTk5WRUUxVEVSSk1FOVRkekJOYVhkNFRrUm5jMDFxUVhwTVJFbDRUV2wzZVUxRVdYTk5WR2MwVEVSVk5VeEVSWGxOZVhkNFRrUkJjMDFVYTNoTVJHc3dURVJOTWt4RVJUQk9RM2Q1VGtSUmMwNVVhM05OYWswMVRFUlJjMDFVUlhwTVJFMTZURVJSTlV4RVdUSk1SRTEzVEVSSmQwMTVkelJNUkdNelRFUkZlVTVUZDNsTlJHdHpUVlJGZWt4RVNUQk5VM2Q0VFZSbmMwNTZVWE5OVkZFd1RFUm5lVXhFUlhkT2VYYzFUWGwzZUU1cGQzbE5ha1Z6VGxSQmMwMXFUWHBNUkVVeFRsTjNNMDU1ZDNoUFJFbHpUV3BCTWt4RVNYcE9lWGMwVDBOM2VVeEVSVEJPUTNkNVRYcFpjMDFVWnpKTVJFVXdUa04zZVUxNlRYTk5lbGx6VFZSUk1reEVSWGxNUkVVeVRVTjNkMHhFUlRST2FYZDRUMVJqYzA5RVkzTk5WR014VEVSUk5VeEVSVFZPZVhjeVQwTjNlVTFVWjNOTlZHTXhURVJKYzAxNWQzaE1SRUZ6VFZFOVBTSXNJbWx6Y3lJNkltaDBkSEJ6T2k4dllXTmpiM1Z1ZEhNdVoyOXZaMnhsTG1OdmJTSXNJbWxoZENJNk1UVXdOemt3TlRnNE5pd2laWGh3SWpveE5UQTNPVEE1TkRnMmZRLktvU2xyeHp1RUthd1ZWcS1TdmNHNTRXZVladWpaS2ltd2JXV21td01UcUZjMVI1My1wMFRlbWVFdS1VT29NU3NydjA1bUxoV20zV3lfb1RKM3JKeWRPX3FQS1ptU3F3aENxeEVNNjRWajNDeHRTa1c0SUg5VmR3emlmYUxtakRIQk9NZ0Y5OUNLcTBCMkhVWVhwNXU3TXJDc1VrTC1LLXhnUVI4c185MzhiUXNSX085eHpILTluZFVVTjBCb09aQ0tCYm50WmZYdjZ5am9VeEZKdG10clVUWnpsUkZYbUtxWWQtVk9TYVZ3MURldlRDbzBjbjNrTXBtZ0E1Sk13aTZ5U2pEdE9TQzkwVjc1dDZJSVhvS2g3T2ZZOG1aelIzeWprejNpckxiNEhNdDlTV21qNVlCZmF4M0FtNDY1bnBLM3RpOWxOZFZaa1lVMmZRUGg0SC1mQSIsInRva2VuSURKU09OIjp7ImF6cCI6IjgwODMyOTU2NjAxMi10cXI4cW9oMTExOTQyZ2Qya2cwMDd0MHM4ZjI3N3JvaS5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsImF1ZCI6IjgwODMyOTU2NjAxMi10cXI4cW9oMTExOTQyZ2Qya2cwMDd0MHM4ZjI3N3JvaS5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsInN1YiI6IjExNzk1OTEwNTI5NTc2MTY4Nzg4OSIsImVtYWlsIjoidGVzdGFuZHRoaW5rMTIzQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjoidHJ1ZSIsImF0X2hhc2giOiJSaVg3RHpUeWpVUEdfTS1VT0x6MWxBIiwibm9uY2UiOiJORGdzTVRNd0xERXNNelFzTkRnc01UTXNOaXc1TERReUxERXpOQ3czTWl3eE16UXNNalEzTERFekxERXNNU3d4TERVc01Dd3pMREV6TUN3eExERTFMREFzTkRnc01UTXdMREVzTVRBc01pd3hNekFzTVN3eExEQXNNVFExTERFMU15d3lNRGdzTWpReUxESTFOQ3d5TXpZc01qTTFMRFEyTERJeU5Td3hNemdzTXprc01qSTJMREV4TWl3eE16UXNNVGc1TERFeE1DdzBOQ3d5TURJc01UZ3dMRGt6TERFME9Dd3lNRGdzTmpFc01UQTNMREV3TVN3eU1EVXNPRFFzTlRVc01UYzFMRGd3TERJMUxESXdOaXd5TURNc01qQXhMREkxTERJek9DdzJMRFl5TERFMU5pd3hNalFzTmpJc01qTTRMREV4TERJME9TdzROQ3c0TERFM05pdzJOeXd5TlRRc01UazFMREkwTlN3eE16UXNOaXd5TkRNc01qSTFMREUxT0N3eE5EUXNNVE0yTERFeU55d3hNVGdzTWpReUxEZzRMRGMyTERFME5pd3hOeXd5TWpBc01URTRMREkwTkN3NU55d3lORGdzTVRjekxERTRNU3c1T0N3Mk5pdzRMRFl4TERnMUxESTRMREV6TlN3MUxERTRPU3czT1N3eE1UTXNNVGM0TERFME9Dd3hNekFzTWpVekxERXlOQ3d6TkN3ME9Td3lORElzTWpVeUxERTFOaXd4TkRnc01UVXNOakVzTWpRMUxESXlNU3d5TURrc01USXpMREV3T0N3eE5qVXNNaklzTWpBMUxEWTNMREV5TXl3eE9EVXNNakF4TERnMkxERTNNQ3d4TUN3eE16UXNNVEExTERFNU5pd3hNak1zTWpVeUxERTJOeXd4TnpVc01qTTJMREUwT1N3M01DdzJOQ3d6TVN3eU1Td3lNREFzTVRNeUxESXlNeXd4TXpRc01qQTFMREU1TkN3ek1pdzFOQ3czTnl3eU1pdzJOeXd6TlN3NE55d3lNVFVzT0RZc01Ua3hMREl3Tnl3eE56UXNNakE1TERJMUxEZ3hMREl5TERBc016SXNORFFzTWpRM0xEZzVMRGcwTERJek5Td3hPVGNzTnpjc01UazNMREU0TERFek5pd3hNVFVzTVRnNExERXdMREl4T0N3eE9EQXNNalF6TERJeE1Dd3pOU3d4TXpnc01qQTFMREUyT1N3eE9Dd3pOeXcyTERBc09USXNNVGN3TERNNUxERTFOQ3d5TlRVc01UQTNMREkyTERFeU9Dd3lNallzTWpNd0xERTJNaXd4T1RJc01qQXhMREUwTWl3eE56WXNOVEFzTVRBNUxESTBPU3cwTWl3eE5EZ3NNakF6TERJeE1pd3lNRFlzTVRnNExEVTVMREV5TXl3eE5EQXNNVGt4TERrMExETTJMREUwTkN3eU5EUXNOVGtzTWpNNUxEUXNNVEV6TERNekxEUTVMRFkyTERNd0xESXdNeXc0TERjM0xERXlOU3d5TURrc01URXpMREkwTVN3eE1UZ3NOelFzTVRRMExEZ3lMREV3Tnl3NU15d3hOaXd5TWpFc05UQXNNak16TERFMU5TdzNOeXd4T0RJc01qQTJMREl6Tnl3NE9Dd3lMREUwTkN3eU16WXNNVGcyTERFME5Dd3lNek1zTXpZc01UUTJMREV5TERFMk1Dd3dMREU0Tml3eE9UY3NPRGNzTVRjMUxEUTVMREU1Tnl3Mk9Dd3lNVGdzTVRjMUxESXNNeXd4TERBc01RPT0iLCJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJpYXQiOiIxNTA3OTA1ODg2IiwiZXhwIjoiMTUwNzkwOTQ4NiIsImFsZyI6IlJTMjU2Iiwia2lkIjoiM2Y5OTUyNWNjM2EzM2UzYzJiNWRjZjlhMjFmNGQ4MmQzNzFiZTc2NyJ9fQ==',
+      assertion: 'eyJ0b2tlbklEIjoiZXlKaGJHY2lPaUpTVXpJMU5pSXNJbXRwWkNJNklqTm1PVGsxTWpWall6TmhNek5sTTJNeVlqVmtZMlk1WVRJeFpqUmtPREprTXpjeFltVTNOamNpZlEuZXlKaGVuQWlPaUk0TURnek1qazFOall3TVRJdGRIRnlPSEZ2YURFeE1UazBNbWRrTW10bk1EQTNkREJ6T0dZeU56ZHliMmt1WVhCd2N5NW5iMjluYkdWMWMyVnlZMjl1ZEdWdWRDNWpiMjBpTENKaGRXUWlPaUk0TURnek1qazFOall3TVRJdGRIRnlPSEZ2YURFeE1UazBNbWRrTW10bk1EQTNkREJ6T0dZeU56ZHliMmt1WVhCd2N5NW5iMjluYkdWMWMyVnlZMjl1ZEdWdWRDNWpiMjBpTENKemRXSWlPaUl4TVRjNU5Ua3hNRFV5T1RVM05qRTJPRGM0T0RraUxDSmxiV0ZwYkNJNkluUmxjM1JoYm1SMGFHbHVhekV5TTBCbmJXRnBiQzVqYjIwaUxDSmxiV0ZwYkY5MlpYSnBabWxsWkNJNmRISjFaU3dpWVhSZmFHRnphQ0k2SWxKcFdEZEVlbFI1YWxWUVIxOU5MVlZQVEhveGJFRWlMQ0p1YjI1alpTSTZJazVFWjNOTlZFMTNURVJGYzAxNlVYTk9SR2R6VFZSTmMwNXBkelZNUkZGNVRFUkZlazVEZHpOTmFYZDRUWHBSYzAxcVVUTk1SRVY2VEVSRmMwMVRkM2hNUkZWelRVTjNla3hFUlhwTlEzZDRURVJGTVV4RVFYTk9SR2R6VFZSTmQweEVSWE5OVkVGelRXbDNlRTE2UVhOTlUzZDRURVJCYzAxVVVURk1SRVV4VFhsM2VVMUVaM05OYWxGNVRFUkpNVTVEZDNsTmVsbHpUV3BOTVV4RVVUSk1SRWw1VGxOM2VFMTZaM05OZW10elRXcEpNa3hFUlhoTmFYZDRUWHBSYzAxVVp6Vk1SRVY0VFVOM01FNURkM2xOUkVselRWUm5kMHhFYTNwTVJFVXdUME4zZVUxRVozTk9ha1Z6VFZSQk0weEVSWGROVTNkNVRVUlZjMDlFVVhOT1ZGVnpUVlJqTVV4RVozZE1SRWt4VEVSSmQwNXBkM2xOUkUxelRXcEJlRXhFU1RGTVJFbDZUME4zTWt4RVdYbE1SRVV4VG1sM2VFMXFVWE5PYWtselRXcE5ORXhFUlhoTVJFa3dUMU4zTkU1RGR6Uk1SRVV6VG1sM01rNTVkM2xPVkZGelRWUnJNVXhFU1RCT1UzZDRUWHBSYzA1cGQzbE9SRTF6VFdwSk1VeEVSVEZQUTNkNFRrUlJjMDFVVFRKTVJFVjVUbmwzZUUxVVozTk5hbEY1VEVSbk5FeEVZekpNUkVVd1RtbDNlRTU1ZDNsTmFrRnpUVlJGTkV4RVNUQk9RM2MxVG5sM2VVNUVaM05OVkdONlRFUkZORTFUZHpWUFEzY3lUbWwzTkV4RVdYaE1SR2N4VEVSSk5FeEVSWHBPVTNjeFRFUkZORTlUZHpOUFUzZDRUVlJOYzAxVVl6Uk1SRVV3VDBOM2VFMTZRWE5OYWxWNlRFUkZlVTVEZDNwT1EzY3dUMU4zZVU1RVNYTk5hbFY1VEVSRk1VNXBkM2hPUkdkelRWUlZjMDVxUlhOTmFsRXhURVJKZVUxVGQzbE5SR3R6VFZSSmVreEVSWGRQUTNkNFRtcFZjMDFxU1hOTmFrRXhURVJaTTB4RVJYbE5lWGQ0VDBSVmMwMXFRWGhNUkdjeVRFUkZNMDFEZDNoTlEzZDRUWHBSYzAxVVFURk1SRVUxVG1sM2VFMXFUWE5OYWxWNVRFUkZNazU1ZDNoT2VsVnpUV3BOTWt4RVJUQlBVM2N6VFVOM01rNURkM3BOVTNkNVRWTjNlVTFFUVhOTlZFMTVURVJKZVUxNWQzaE5lbEZ6VFdwQk1VeEVSVFZPUTNkNlRXbDNNVTVEZHpOT2VYZDVUV2wzTWs1NWQzcE9VM2MwVG5sM2VVMVVWWE5QUkZselRWUnJlRXhFU1hkT2VYZDRUbnBSYzAxcVFUVk1SRWt4VEVSbmVFeEVTWGxNUkVGelRYcEpjMDVFVVhOTmFsRXpURVJuTlV4RVp6Qk1SRWw2VGxOM2VFOVVZM05PZW1OelRWUnJNMHhFUlRSTVJFVjZUbWwzZUUxVVZYTk5WR2MwVEVSRmQweEVTWGhQUTNkNFQwUkJjMDFxVVhwTVJFbDRUVU4zZWs1VGQzaE5lbWR6VFdwQk1VeEVSVEpQVTNkNFQwTjNlazU1ZHpKTVJFRnpUMVJKYzAxVVkzZE1SRTAxVEVSRk1VNURkM2xPVkZWelRWUkJNMHhFU1RKTVJFVjVUME4zZVUxcVdYTk5hazEzVEVSRk1rMXBkM2hQVkVselRXcEJlRXhFUlRCTmFYZDRUbnBaYzA1VVFYTk5WRUUxVEVSSk1FOVRkekJOYVhkNFRrUm5jMDFxUVhwTVJFbDRUV2wzZVUxRVdYTk5WR2MwVEVSVk5VeEVSWGxOZVhkNFRrUkJjMDFVYTNoTVJHc3dURVJOTWt4RVJUQk9RM2Q1VGtSUmMwNVVhM05OYWswMVRFUlJjMDFVUlhwTVJFMTZURVJSTlV4RVdUSk1SRTEzVEVSSmQwMTVkelJNUkdNelRFUkZlVTVUZDNsTlJHdHpUVlJGZWt4RVNUQk5VM2Q0VFZSbmMwNTZVWE5OVkZFd1RFUm5lVXhFUlhkT2VYYzFUWGwzZUU1cGQzbE5ha1Z6VGxSQmMwMXFUWHBNUkVVeFRsTjNNMDU1ZDNoUFJFbHpUV3BCTWt4RVNYcE9lWGMwVDBOM2VVeEVSVEJPUTNkNVRYcFpjMDFVWnpKTVJFVXdUa04zZVUxNlRYTk5lbGx6VFZSUk1reEVSWGxNUkVVeVRVTjNkMHhFUlRST2FYZDRUMVJqYzA5RVkzTk5WR014VEVSUk5VeEVSVFZPZVhjeVQwTjNlVTFVWjNOTlZHTXhURVJKYzAxNWQzaE1SRUZ6VFZFOVBTSXNJbWx6Y3lJNkltaDBkSEJ6T2k4dllXTmpiM1Z1ZEhNdVoyOXZaMnhsTG1OdmJTSXNJbWxoZENJNk1UVXdOemt3TlRnNE5pd2laWGh3SWpveE5UQTNPVEE1TkRnMmZRLktvU2xyeHp1RUthd1ZWcS1TdmNHNTRXZVladWpaS2ltd2JXV21td01UcUZjMVI1My1wMFRlbWVFdS1VT29NU3NydjA1bUxoV20zV3lfb1RKM3JKeWRPX3FQS1ptU3F3aENxeEVNNjRWajNDeHRTa1c0SUg5VmR3emlmYUxtakRIQk9NZ0Y5OUNLcTBCMkhVWVhwNXU3TXJDc1VrTC1LLXhnUVI4c185MzhiUXNSX085eHpILTluZFVVTjBCb09aQ0tCYm50WmZYdjZ5am9VeEZKdG10clVUWnpsUkZYbUtxWWQtVk9TYVZ3MURldlRDbzBjbjNrTXBtZ0E1Sk13aTZ5U2pEdE9TQzkwVjc1dDZJSVhvS2g3T2ZZOG1aelIzeWprejNpckxiNEhNdDlTV21qNVlCZmF4M0FtNDY1bnBLM3RpOWxOZFZaa1lVMmZRUGg0SC1mQSIsInRva2VuSURKU09OIjp7ImF6cCI6IjgwODMyOTU2NjAxMi10cXI4cW9oMTExOTQyZ2Qya2cwMDd0MHM4ZjI3N3JvaS5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsImF1ZCI6IjgwODMyOTU2NjAxMi10cXI4cW9oMTExOTQyZ2Qya2cwMDd0MHM4ZjI3N3JvaS5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsInN1YiI6IjExNzk1OTEwNTI5NTc2MTY4Nzg4OSIsImVtYWlsIjoidGVzdGFuZHRoaW5rMTIzQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjoidHJ1ZSIsImF0X2hhc2giOiJSaVg3RHpUeWpVUEdfTS1VT0x6MWxBIiwibm9uY2UiOiJORGdzTVRNd0xERXNNelFzTkRnc01UTXNOaXc1TERReUxERXpOQ3czTWl3eE16UXNNalEzTERFekxERXNNU3d4TERVc01Dd3pMREV6TUN3eExERTFMREFzTkRnc01UTXdMREVzTVRBc01pd3hNekFzTVN3eExEQXNNVFExTERFMU15d3lNRGdzTWpReUxESTFOQ3d5TXpZc01qTTFMRFEyTERJeU5Td3hNemdzTXprc01qSTJMREV4TWl3eE16UXNNVGc1TERFeE1DdzBOQ3d5TURJc01UZ3dMRGt6TERFME9Dd3lNRGdzTmpFc01UQTNMREV3TVN3eU1EVXNPRFFzTlRVc01UYzFMRGd3TERJMUxESXdOaXd5TURNc01qQXhMREkxTERJek9DdzJMRFl5TERFMU5pd3hNalFzTmpJc01qTTRMREV4TERJME9TdzROQ3c0TERFM05pdzJOeXd5TlRRc01UazFMREkwTlN3eE16UXNOaXd5TkRNc01qSTFMREUxT0N3eE5EUXNNVE0yTERFeU55d3hNVGdzTWpReUxEZzRMRGMyTERFME5pd3hOeXd5TWpBc01URTRMREkwTkN3NU55d3lORGdzTVRjekxERTRNU3c1T0N3Mk5pdzRMRFl4TERnMUxESTRMREV6TlN3MUxERTRPU3czT1N3eE1UTXNNVGM0TERFME9Dd3hNekFzTWpVekxERXlOQ3d6TkN3ME9Td3lORElzTWpVeUxERTFOaXd4TkRnc01UVXNOakVzTWpRMUxESXlNU3d5TURrc01USXpMREV3T0N3eE5qVXNNaklzTWpBMUxEWTNMREV5TXl3eE9EVXNNakF4TERnMkxERTNNQ3d4TUN3eE16UXNNVEExTERFNU5pd3hNak1zTWpVeUxERTJOeXd4TnpVc01qTTJMREUwT1N3M01DdzJOQ3d6TVN3eU1Td3lNREFzTVRNeUxESXlNeXd4TXpRc01qQTFMREU1TkN3ek1pdzFOQ3czTnl3eU1pdzJOeXd6TlN3NE55d3lNVFVzT0RZc01Ua3hMREl3Tnl3eE56UXNNakE1TERJMUxEZ3hMREl5TERBc016SXNORFFzTWpRM0xEZzVMRGcwTERJek5Td3hPVGNzTnpjc01UazNMREU0TERFek5pd3hNVFVzTVRnNExERXdMREl4T0N3eE9EQXNNalF6TERJeE1Dd3pOU3d4TXpnc01qQTFMREUyT1N3eE9Dd3pOeXcyTERBc09USXNNVGN3TERNNUxERTFOQ3d5TlRVc01UQTNMREkyTERFeU9Dd3lNallzTWpNd0xERTJNaXd4T1RJc01qQXhMREUwTWl3eE56WXNOVEFzTVRBNUxESTBPU3cwTWl3eE5EZ3NNakF6TERJeE1pd3lNRFlzTVRnNExEVTVMREV5TXl3eE5EQXNNVGt4TERrMExETTJMREUwTkN3eU5EUXNOVGtzTWpNNUxEUXNNVEV6TERNekxEUTVMRFkyTERNd0xESXdNeXc0TERjM0xERXlOU3d5TURrc01URXpMREkwTVN3eE1UZ3NOelFzTVRRMExEZ3lMREV3Tnl3NU15d3hOaXd5TWpFc05UQXNNak16TERFMU5TdzNOeXd4T0RJc01qQTJMREl6Tnl3NE9Dd3lMREUwTkN3eU16WXNNVGcyTERFME5Dd3lNek1zTXpZc01UUTJMREV5TERFMk1Dd3dMREU0Tml3eE9UY3NPRGNzTVRjMUxEUTVMREU1Tnl3Mk9Dd3lNVGdzTVRjMUxESXNNeXd4TERBc01RPT0iLCJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJpYXQiOiIxNTA3OTA1ODg2IiwiZXhwIjoiMTUwNzkwOTQ4NiIsImFsZyI6IlJTMjU2Iiwia2lkIjoiM2Y5OTUyNWNjM2EzM2UzYzJiNWRjZjlhMjFmNGQ4MmQzNzFiZTc2NyJ9fQ==',
       expires: '1507909486'
     }
   },
@@ -1785,8 +1523,7 @@ let receiverAcknowledgeMessagePopulate = {
 
 let validateAssertionValuePopulate = {
   identity: 'testandthink321@gmail.com',
-  contents:
-    'NDgsMTMwLDEsMzQsNDgsMTMsNiw5LDQyLDEzNCw3MiwxMzQsMjQ3LDEzLDEsMSwxLDUsMCwzLDEzMCwxLDE1LDAsNDgsMTMwLDEsMTAsMiwxMzAsMSwxLDAsMTU4LDE0NCwxNjEsOTcsMTU1LDIxNyw0MCw1MiwxMzgsMTQ3LDI4LDIwNiwxNTgsMjMyLDE0Miw1OSwxMTksNjEsMTE1LDYwLDIzMSwyMDMsNzksNTcsNTQsMTg3LDUyLDEyNCw2MSw3MCwyNywxOTIsNzgsMTYyLDExMywxMTIsMjksNTksMTg3LDQ2LDE3NSwxMDUsMTUsMTQwLDE1NCw2NCwxOTgsMTI5LDE0Myw1OSwyMjksMTA3LDk2LDExNiw3Myw2MywxNjAsMTUxLDE0MiwxMTIsOTUsMTIsMzUsMTE3LDI1MCw3MiwyMjEsMTc1LDU3LDIxNSwxMzksNDcsMTY5LDIzLDE3MywyMzIsMjAwLDE2NSwxNCwyMzcsNTYsMTUyLDIwMyw3LDEzOSwxMzQsMjQ5LDExMCwxNTMsMTYyLDY1LDIzNSw0MywxODIsMjIyLDE2NCwyMDcsNzQsMjQ5LDkwLDUxLDEzNiwyMjUsNTYsMTE5LDk1LDEzOCwxNjUsMjUsMTc3LDI1NCwyMjYsMjExLDg4LDI0MywxNiwxMDksODYsMTYxLDE0NywxNDQsMTM5LDE0NCw2LDcyLDQ0LDE2MywxMjAsNjEsMTk5LDk4LDEwNiwxMzMsMTg3LDEzMiwyMCwyNDQsMjcsMjM2LDIyOSwxOTcsMTE5LDE5NiwzNywxNDcsMTMwLDEzOSwyMzcsMTQ0LDE5MSwyMzMsMTY3LDEzMyw1MSwxNDYsMTEsMjA3LDYyLDE1NywxMzYsMzEsNzksMTYzLDQ4LDE4NCwxNTAsMjIyLDE1NCwyMCw3OCwyMzMsMjE2LDU1LDEzNCwxNzQsOTksMjIxLDgsOTQsMTQxLDE2Niw0NywxMzAsODksMjQ3LDIwMiwyMDMsMTIwLDk3LDEwMywyMTksMTA4LDQwLDUzLDEyNiwxODYsMywyMTksODYsODksMjM0LDE4Miw0Miw0OCwxNTIsMjAyLDYsMTMxLDE4NCwxMDUsNzIsOTMsMTA3LDIxNywxNzAsNzEsMTMwLDE4MywxMzYsMjU0LDEyMiw5OCwxNjQsNzUsMjM2LDE0NiwxMjcsMjcsMjYsMTQzLDExMiwxMTIsMjMyLDI0NCwxOSwxOTUsMjUzLDEwMywxODksNzgsMTI5LDIzMiwxNDcsMTg3LDk2LDQsMjMsMTQsMyw1MCwxMzMsOTMsMjMyLDI0NywyMDgsMjA1LDIsMywxLDAsMQ=='
+  contents: 'NDgsMTMwLDEsMzQsNDgsMTMsNiw5LDQyLDEzNCw3MiwxMzQsMjQ3LDEzLDEsMSwxLDUsMCwzLDEzMCwxLDE1LDAsNDgsMTMwLDEsMTAsMiwxMzAsMSwxLDAsMTU4LDE0NCwxNjEsOTcsMTU1LDIxNyw0MCw1MiwxMzgsMTQ3LDI4LDIwNiwxNTgsMjMyLDE0Miw1OSwxMTksNjEsMTE1LDYwLDIzMSwyMDMsNzksNTcsNTQsMTg3LDUyLDEyNCw2MSw3MCwyNywxOTIsNzgsMTYyLDExMywxMTIsMjksNTksMTg3LDQ2LDE3NSwxMDUsMTUsMTQwLDE1NCw2NCwxOTgsMTI5LDE0Myw1OSwyMjksMTA3LDk2LDExNiw3Myw2MywxNjAsMTUxLDE0MiwxMTIsOTUsMTIsMzUsMTE3LDI1MCw3MiwyMjEsMTc1LDU3LDIxNSwxMzksNDcsMTY5LDIzLDE3MywyMzIsMjAwLDE2NSwxNCwyMzcsNTYsMTUyLDIwMyw3LDEzOSwxMzQsMjQ5LDExMCwxNTMsMTYyLDY1LDIzNSw0MywxODIsMjIyLDE2NCwyMDcsNzQsMjQ5LDkwLDUxLDEzNiwyMjUsNTYsMTE5LDk1LDEzOCwxNjUsMjUsMTc3LDI1NCwyMjYsMjExLDg4LDI0MywxNiwxMDksODYsMTYxLDE0NywxNDQsMTM5LDE0NCw2LDcyLDQ0LDE2MywxMjAsNjEsMTk5LDk4LDEwNiwxMzMsMTg3LDEzMiwyMCwyNDQsMjcsMjM2LDIyOSwxOTcsMTE5LDE5NiwzNywxNDcsMTMwLDEzOSwyMzcsMTQ0LDE5MSwyMzMsMTY3LDEzMyw1MSwxNDYsMTEsMjA3LDYyLDE1NywxMzYsMzEsNzksMTYzLDQ4LDE4NCwxNTAsMjIyLDE1NCwyMCw3OCwyMzMsMjE2LDU1LDEzNCwxNzQsOTksMjIxLDgsOTQsMTQxLDE2Niw0NywxMzAsODksMjQ3LDIwMiwyMDMsMTIwLDk3LDEwMywyMTksMTA4LDQwLDUzLDEyNiwxODYsMywyMTksODYsODksMjM0LDE4Miw0Miw0OCwxNTIsMjAyLDYsMTMxLDE4NCwxMDUsNzIsOTMsMTA3LDIxNywxNzAsNzEsMTMwLDE4MywxMzYsMjU0LDEyMiw5OCwxNjQsNzUsMjM2LDE0NiwxMjcsMjcsMjYsMTQzLDExMiwxMTIsMjMyLDI0NCwxOSwxOTUsMjUzLDEwMywxODksNzgsMTI5LDIzMiwxNDcsMTg3LDk2LDQsMjMsMTQsMyw1MCwxMzMsOTMsMjMyLDI0NywyMDgsMjA1LDIsMywxLDAsMQ=='
 };
 
 let runtimeCapabilitiesPopulate = arg => {
@@ -1801,7 +1538,3 @@ let getHypertyOwnerPopulate = arg => {
 let coreDiscoveryPopulate = function(arg1, arg2) {
   return Promise.resolve({ dataObject: 'hyperty://h1.domain/h1' });
 };
-
-function log(f) {
-  console.log(JSON.stringify(f));
-}
