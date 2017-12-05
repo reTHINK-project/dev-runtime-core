@@ -36,15 +36,15 @@ export const runtimeFactory = {
   },
 
   storageManager() {
-   // Using the implementation of Service Framework
-   // Dexie is the IndexDB Wrapper
-   const db = new Dexie('cache');
-   const storeName = 'objects';
+    // Using the implementation of Service Framework
+    // Dexie is the IndexDB Wrapper
+    const db = new Dexie('cache');
+    const storeName = 'objects';
 
-   return new StorageManager(db, storeName);
+    return new StorageManager(db, storeName);
 
-   // return new StorageManagerFake('a', 'b');
- },
+    // return new StorageManagerFake('a', 'b');
+  },
 
   runtimeCapabilities: (storageManager) => {
     return {
@@ -75,5 +75,4 @@ export const runtimeFactory = {
   removeSandbox() {
 
   }
-
 };

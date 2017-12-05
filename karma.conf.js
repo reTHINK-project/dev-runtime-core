@@ -3,7 +3,7 @@ module.exports = function(config) {
     basePath: '',
     frameworks: ['mocha', 'chai', 'sinon'],
     files: [
-      './test/IdentityModule.spec.js'
+      './test/SyncherManager.spec.js'
     ],
     exclude: [
       './test/PolicyEngine.spec.js'

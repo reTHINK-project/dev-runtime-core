@@ -57,7 +57,7 @@ class CryptoManager {
 
   }
 
-//******************* GET AND SET METHODS *******************
+  //******************* GET AND SET METHODS *******************
 
   /**
   * return the messageBus in this Registry
@@ -75,7 +75,8 @@ class CryptoManager {
   set messageBus(messageBus) {
     let _this = this;
     _this._messageBus = messageBus;
-//    _this.addGUIListeners();
+
+    // _this.addGUIListeners();
   }
 
   /**
@@ -133,38 +134,38 @@ class CryptoManager {
     return splitFrom[0] === 'runtime' && from !== this._runtimeURL + '/sm';
   }
 
-//******************* ENCRYPTION METHODS *******************
-/**
+  //******************* ENCRYPTION METHODS *******************
+  /**
 * Identifies the messages to be encrypted
 * @param {Message}    message
 * @returns {boolean}  returns true if the message requires encryption
 */
 
-_isToEncrypt(message) {
-  log.info('[CryptoManager.istoChyperModule]', message);
-  let isCreate = message.type === 'create';
-  let isFromHyperty = message.from.includes('hyperty://');
-  let isToHyperty = message.to.includes('hyperty://');
-  let isToDataObject = isDataObjectURL(message.to);
+  _isToEncrypt(message) {
+    log.info('[CryptoManager.istoChyperModule]', message);
+    let isCreate = message.type === 'create';
+    let isFromHyperty = message.from.includes('hyperty://');
+    let isToHyperty = message.to.includes('hyperty://');
+    let isToDataObject = isDataObjectURL(message.to);
 
-  let doMutualAuthentication = message.body.hasOwnProperty('mutual') ? message.body.mutual : true;
+    let doMutualAuthentication = message.body.hasOwnProperty('mutual') ? message.body.mutual : true;
 
-  if (!doMutualAuthentication) return false;
+    if (!doMutualAuthentication) return false;
 
-  //if is not to apply encryption, then returns resolve
-  if (!this.isToUseEncryption && !(message.type === 'handshake')) {
-    log.info('encryption disabled');
-    return false;
+    //if is not to apply encryption, then returns resolve
+    if (!this.isToUseEncryption && !(message.type === 'handshake')) {
+      log.info('encryption disabled');
+      return false;
+    }
+
+    if (message.type === 'update') {
+      return false;
+    }
+
+    if (isLegacy(message.to)) return false;
+
+    return ((isCreate && isFromHyperty && isToHyperty) || (isCreate && isFromHyperty && isToDataObject && doMutualAuthentication) || message.type === 'handshake' || (message.type === 'update' && doMutualAuthentication));
   }
-
-  if (message.type === 'update') {
-    return false;
-  }
-
-  if (isLegacy(message.to)) return false;
-
-  return ((isCreate && isFromHyperty && isToHyperty) || (isCreate && isFromHyperty && isToDataObject && doMutualAuthentication) || message.type === 'handshake' || (message.type === 'update' && doMutualAuthentication));
-}
 
 
   _isToDecrypt(message) {
@@ -560,14 +561,14 @@ _isToEncrypt(message) {
       let to = message.to.split('/');
       let subsIndex = to.indexOf('subscription');
       let isDataObjectSubscription = subsIndex !== -1;
-        to.pop();
-        let dataObjectURL = to[0] + '//' + to[2] + '/' + to[3];
-        _this._doMutualAuthenticationPhase2(dataObjectURL, message.body.subscriber).then(() => {
-          _this._registry.registerSubscriber(dataObjectURL, message.body.subscriber);
-          resolve();
-        }, (error) => {
-          reject(error);
-        });
+      to.pop();
+      let dataObjectURL = to[0] + '//' + to[2] + '/' + to[3];
+      _this._doMutualAuthenticationPhase2(dataObjectURL, message.body.subscriber).then(() => {
+        _this._registry.registerSubscriber(dataObjectURL, message.body.subscriber);
+        resolve();
+      }, (error) => {
+        reject(error);
+      });
     });
   }
 
@@ -644,7 +645,7 @@ _isToEncrypt(message) {
   * @param   {String}   dataObjectURL         dataObject url
   * @return   {String}  reporter              dataObject url reporter
   */
-/*  _getHypertyFromDataObject(dataObjectURL) {
+  /*  _getHypertyFromDataObject(dataObjectURL) {
     log.info('_getHypertyFromDataObject:dataObjectURL', dataObjectURL);
     let _this = this;
 
@@ -1119,7 +1120,7 @@ _isToEncrypt(message) {
             // log.log('hash successfully validated ', hashResult);
 
             _this.dataObjectSessionKeys[dataObjectURL] =  {sessionKey: sessionKey, isToEncrypt: true};
-            let dataObjectSessionKeysClone = chatkeysToStringCloner(_this.dataObjectSessionKeys)
+            let dataObjectSessionKeysClone = chatkeysToStringCloner(_this.dataObjectSessionKeys);
             _this.storageManager.set('dataObjectSessionKeys', 0, dataObjectSessionKeysClone).catch(err => {
               reject('On _sendReporterSessionKey from method reporterSessionKey error: ' + err);
             });
@@ -1272,6 +1273,7 @@ _isToEncrypt(message) {
 
     return newChatCrypto;
   }
+
 /*
   _seconds_since_epoch() {
     return Math.floor(Date.now() / 1000);

@@ -10,18 +10,18 @@
     <h2>reThink Project performance tests</h2>
     <table cellspacing="0" cellpadding="0" border="0">
       <tr class="overview">
-        <td colspan="3" title="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.79 Safari/537.36">Browser: Chrome 61.0.3163 (Linux 0.0.0)</td>
+        <td colspan="3" title="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36">Browser: Chrome 62.0.3202 (Linux 0.0.0)</td>
       </tr>
       <tr class="overview">
-        <td colspan="3">Timestamp: 2017-11-24 15:26:02</td>
+        <td colspan="3">Timestamp: 2017-12-5 15:44:29</td>
       </tr>
       <tr>
         <td colspan="3">
-          0 tests / 
+          13 tests / 
           1 errors / 
-          0 failures / 
-          0 skipped / 
-          runtime: 0s
+          1 failures / 
+          12 skipped / 
+          runtime: 2.002s
         </td>
       </tr>
       <tr class="header">
@@ -29,9 +29,222 @@
         <td>Spec</td>
         <td>Suite / Results</td>
       </tr>
-      <tr class="system-errors">
-        <td colspan="3"><strong>Errors:</strong><br />Uncaught Error: Cannot find module "../src/cryptoManager/cryptoManager"
-at webpack:///test/IdentityModule.spec.js:1:0 <- test/IdentityModule.spec.js:2321
+      <tr class="skip">
+        <td>Skipped</td>
+        <td>reporter read</td>
+        <td>SyncherManager</td>
+      </tr>
+      <tr class="skip">
+        <td>Skipped</td>
+        <td>reporter observer integration</td>
+        <td>SyncherManager</td>
+      </tr>
+      <tr class="skip">
+        <td>Skipped</td>
+        <td>should resume observers</td>
+        <td>SyncherManager</td>
+      </tr>
+      <tr class="skip">
+        <td>Skipped</td>
+        <td>should resume reporters</td>
+        <td>SyncherManager</td>
+      </tr>
+      <tr class="skip">
+        <td>Skipped</td>
+        <td>verify produced sync messages</td>
+        <td>SyncherManager</td>
+      </tr>
+      <tr class="skip">
+        <td>Skipped</td>
+        <td>verify consumed sync messages</td>
+        <td>SyncherManager</td>
+      </tr>
+      <tr class="skip">
+        <td>Skipped</td>
+        <td>reporter addChild</td>
+        <td>SyncherManager</td>
+      </tr>
+      <tr class="skip">
+        <td>Skipped</td>
+        <td>observer addChild</td>
+        <td>SyncherManager</td>
+      </tr>
+      <tr class="skip">
+        <td>Skipped</td>
+        <td>children deltas generate and process</td>
+        <td>SyncherManager</td>
+      </tr>
+      <tr class="fail">
+        <td>Failed</td>
+        <td>create and delete</td>
+        <td>
+          SyncherManager
+          <br />Error: Timeout of 2000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves.
+
+        </td>
+      </tr>
+      <tr class="skip">
+        <td>Skipped</td>
+        <td>subscribe and unsubscribe</td>
+        <td>SyncherManager</td>
+      </tr>
+      <tr class="skip">
+        <td>Skipped</td>
+        <td>should save the url on storageManager</td>
+        <td>SyncherManager &raquo; should use the storageManager</td>
+      </tr>
+      <tr class="skip">
+        <td>Skipped</td>
+        <td>should resume the url stored on storageManager</td>
+        <td>SyncherManager &raquo; should use the storageManager</td>
+      </tr>
+      <tr class="system-out">
+        <td colspan="3"><strong>System output:</strong><br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[SyncherManager - AddressAllocation] - ', Object{create: () => { ... }}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[syncher - create] - create Reporter - createInput: ', Object{p2p: false, store: false, schema: 'schema://fake-schema-url', authorise: ['hyperty://h2.domain/h2'], p2pHandler: undefined, p2pRequester: undefined, data: Object{communication: Object{name: ...}, x: 10, y: 10}, name: 'no name', reporter: 'hyperty://h1.domain/h1', resume: false, mutual: true}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[syncher._create]: ', Object{p2p: false, store: false, schema: 'schema://fake-schema-url', authorise: ['hyperty://h2.domain/h2'], p2pHandler: undefined, p2pRequester: undefined, data: Object{communication: Object{name: ...}, x: 10, y: 10}, name: 'no name', reporter: 'hyperty://h1.domain/h1', resume: false, mutual: true, created: '2017-12-05T15:44:29.914Z', runtime: 'hyperty-runtime://fake-runtime'}, Object{type: 'create', from: 'hyperty://h1.domain/h1', to: 'hyperty-runtime://fake-runtime/sm', body: Object{resume: false, value: Object{schema: ..., authorise: ..., data: ..., name: ..., reporter: ..., resume: ..., mutual: ..., created: ..., runtime: ...}, schema: 'schema://fake-schema-url'}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: 'onPOSTMessage: ', Object{type: 'create', from: 'hyperty://h1.domain/h1', to: 'hyperty-runtime://fake-runtime/sm', body: Object{resume: false, value: Object{schema: ..., authorise: ..., data: ..., name: ..., reporter: ..., resume: ..., mutual: ..., created: ..., runtime: ...}, schema: 'schema://fake-schema-url'}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'hyperty://h1.domain/h1'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'hyperty-runtime://fake-runtime/sm'
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: '[SyncherManager] RCV: ', Object{type: 'create', from: 'hyperty://h1.domain/h1', to: 'hyperty-runtime://fake-runtime/sm', body: Object{resume: false, value: Object{schema: ..., authorise: ..., data: ..., name: ..., reporter: ..., resume: ..., mutual: ..., created: ..., runtime: ...}, schema: 'schema://fake-schema-url'}, id: 1}
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: '[SyncherManager.onCreate - Create New Object]', Object{type: 'create', from: 'hyperty://h1.domain/h1', to: 'hyperty-runtime://fake-runtime/sm', body: Object{resume: false, value: Object{schema: ..., authorise: ..., data: ..., name: ..., reporter: ..., resume: ..., mutual: ..., created: ..., runtime: ...}, schema: 'schema://fake-schema-url'}, id: 1}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isInterworkingProtoStub: ', 'hyperty://h1.domain/h1'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'REQUEST-SCHEMA: ', 'schema://fake-schema-url'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'Scheme: ', 'resources'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'Running object validation...'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'Object validation succeeded'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[SyncherManager._newCreate] ALLOCATOR CREATE:', Object{address: ['resource://obj1']}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[SyncherManager._newCreate] Subscription URL', 'resource://obj1/subscription'
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: '[SyncherManager._newCreate] Register Object: ', Object{schema: 'schema://fake-schema-url', authorise: undefined, name: 'no name', reporter: 'hyperty://h1.domain/h1', resume: false, mutual: true, created: '2017-12-05T15:44:29.914Z', runtime: 'hyperty-runtime://fake-runtime', url: 'resource://obj1', childrens: ['children1', 'children2']}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'REGISTRY-OBJECT: ', Object{schema: 'schema://fake-schema-url', authorise: undefined, name: 'no name', reporter: 'hyperty://h1.domain/h1', resume: false, mutual: true, created: '2017-12-05T15:44:29.914Z', runtime: 'hyperty-runtime://fake-runtime', url: 'resource://obj1', childrens: ['children1', 'children2']}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[SyncherManager._newCreate] DataObject successfully registered', 'ok'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[SyncherManager - new Create] - ', Object{type: 'create', from: 'hyperty://h1.domain/h1', to: 'hyperty-runtime://fake-runtime/sm', body: Object{resume: false, value: Object{schema: ..., authorise: ..., data: ..., name: ..., reporter: ..., resume: ..., mutual: ..., created: ..., runtime: ...}, schema: 'schema://fake-schema-url'}, id: 1}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'Hyperty', 'hyperty://h1.domain/h1'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[DataObjectsStorage] - _updateToArray: ', Object{resource://obj1: Object{subscriptions: [], subscriberUsers: [], childrenObjects: Object{}, data: Object{}, schema: 'schema://fake-schema-url', name: 'no name', reporter: 'hyperty://h1.domain/h1', resume: false, mutual: true, created: '2017-12-05T15:44:29.914Z', runtime: 'hyperty-runtime://fake-runtime', url: 'resource://obj1', childrens: [..., ...], isReporter: true}}, 'resource://obj1', 'subscriberUsers', 'user@domain.com'
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: 'onPOSTMessage: ', Object{type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.obj1/sm', body: Object{resources: [..., ...], source: 'hyperty://h1.domain/h1'}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'hyperty://h1.domain/h1'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'domain://msg-node.obj1/sm'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '8-_onPostMessage: ', Object{type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.obj1/sm', body: Object{resources: [..., ...], source: 'hyperty://h1.domain/h1'}, id: 2}
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: 'onPOSTMessage: ', Object{id: 2, type: 'response', from: 'domain://msg-node.obj1/sm', to: 'hyperty-runtime://fake-runtime/sm', body: Object{code: 200}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'domain://msg-node.obj1/sm'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'hyperty-runtime://fake-runtime/sm'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[SyncherManager.ReporterObject ]forward-subscribe-response(reporter): ', Object{id: 2, type: 'response', from: 'domain://msg-node.obj1/sm', to: 'hyperty-runtime://fake-runtime/sm', body: Object{code: 200}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[SyncherManager.ReporterObject - addChildrens] - childrens: ', ['children1', 'children2'], 'resource://obj1/children/'
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: 'onPOSTMessage: ', Object{type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.obj1/sm', body: Object{resources: [..., ...], source: 'hyperty://h1.domain/h1'}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'hyperty://h1.domain/h1'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'domain://msg-node.obj1/sm'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '8-_onPostMessage: ', Object{type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.obj1/sm', body: Object{resources: [..., ...], source: 'hyperty://h1.domain/h1'}, id: 3}
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: 'onPOSTMessage: ', Object{id: 3, type: 'response', from: 'domain://msg-node.obj1/sm', to: 'hyperty-runtime://fake-runtime/sm', body: Object{code: 200}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'domain://msg-node.obj1/sm'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'hyperty-runtime://fake-runtime/sm'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[SyncherManager.ReporterObject ]node-subscribe-response(reporter):', Object{id: 3, type: 'response', from: 'domain://msg-node.obj1/sm', to: 'hyperty-runtime://fake-runtime/sm', body: Object{code: 200}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: 'onPOSTMessage: ', Object{id: 1, type: 'response', from: 'hyperty-runtime://fake-runtime/sm', to: 'hyperty://h1.domain/h1', body: Object{code: 200, resource: 'resource://obj1', childrenResources: [..., ...]}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'hyperty-runtime://fake-runtime/sm'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'hyperty://h1.domain/h1'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[syncher - create] - create-response: ', Object{id: 1, type: 'response', from: 'hyperty-runtime://fake-runtime/sm', to: 'hyperty://h1.domain/h1', body: Object{code: 200, resource: 'resource://obj1', childrenResources: [..., ...]}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[Data Object - AllocateListeners] - ', ['children1', 'children2']
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[Syncher.DataObjectReporter] InviteObservers ', ['hyperty://h2.domain/h2'], Object{p2p: false, store: false, schema: 'schema://fake-schema-url', p2pHandler: undefined, p2pRequester: undefined, name: 'no name', reporter: 'hyperty://h1.domain/h1', resume: false, mutual: true, created: '2017-12-05T15:44:29.914Z', runtime: 'hyperty-runtime://fake-runtime', url: 'resource://obj1', status: 'live', childrens: ['children1', 'children2'], lastModified: '2017-12-05T15:44:29.914Z'}
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: 'onPOSTMessage: ', Object{type: 'create', from: 'hyperty://h1.domain/h1', to: 'hyperty-runtime://fake-runtime/sm', body: Object{resume: false, resource: 'resource://obj1', schema: 'schema://fake-schema-url', value: Object{p2p: ..., store: ..., schema: ..., p2pHandler: ..., p2pRequester: ..., name: ..., reporter: ..., resume: ..., mutual: ..., created: ..., runtime: ..., url: ..., status: ..., childrens: ..., lastModified: ...}, authorise: [...], mutual: undefined}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'hyperty://h1.domain/h1'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'hyperty-runtime://fake-runtime/sm'
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: '[SyncherManager] RCV: ', Object{type: 'create', from: 'hyperty://h1.domain/h1', to: 'hyperty-runtime://fake-runtime/sm', body: Object{resume: false, resource: 'resource://obj1', schema: 'schema://fake-schema-url', value: Object{p2p: ..., store: ..., schema: ..., p2pHandler: ..., p2pRequester: ..., name: ..., reporter: ..., resume: ..., mutual: ..., created: ..., runtime: ..., url: ..., status: ..., childrens: ..., lastModified: ...}, authorise: [...], mutual: undefined}, id: 4}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[SyncherManager -  authorise] - ', Object{type: 'create', from: 'hyperty://h1.domain/h1', to: 'hyperty-runtime://fake-runtime/sm', body: Object{resume: false, resource: 'resource://obj1', schema: 'schema://fake-schema-url', value: Object{p2p: ..., store: ..., schema: ..., p2pHandler: ..., p2pRequester: ..., name: ..., reporter: ..., resume: ..., mutual: ..., created: ..., runtime: ..., url: ..., status: ..., childrens: ..., lastModified: ...}, authorise: [...], mutual: undefined}, id: 4}
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: 'onPOSTMessage: ', Object{type: 'create', from: 'resource://obj1/subscription', to: 'hyperty://h2.domain/h2', body: Object{p2p: false, identity: undefined, source: 'hyperty://h1.domain/h1', value: Object{p2p: ..., store: ..., schema: ..., p2pHandler: ..., p2pRequester: ..., name: ..., reporter: ..., resume: ..., mutual: ..., created: ..., runtime: ..., url: ..., status: ..., childrens: ..., lastModified: ...}, schema: 'schema://fake-schema-url'}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'hyperty://h1.domain/h1'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'hyperty://h2.domain/h2'
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: '[Syncher] Syncher-RCV: ', Object{type: 'create', from: 'resource://obj1/subscription', to: 'hyperty://h2.domain/h2', body: Object{p2p: false, identity: undefined, source: 'hyperty://h1.domain/h1', value: Object{p2p: ..., store: ..., schema: ..., p2pHandler: ..., p2pRequester: ..., name: ..., reporter: ..., resume: ..., mutual: ..., created: ..., runtime: ..., url: ..., status: ..., childrens: ..., lastModified: ...}, schema: 'schema://fake-schema-url'}, id: 5}, Syncher{_owner: 'hyperty://h2.domain/h2', _bus: MessageBus{_msgId: 5, _subscriptions: Object{hyperty-runtime://fake-runtime/sm: ..., hyperty://h2.domain/h2: ..., hyperty://h1.domain/h1: ..., resource://obj1/subscription: ..., resource://obj1/changes: ..., resource://obj1: ..., resource://obj1/children/children1: ..., resource://obj1/children/children2: ...}, _responseTimeOut: 15000, _responseCallbacks: Object{hyperty://h1.domain/h14: ..., resource://obj1/subscription5: ...}, _registry: Object{registerDataObject: ..., isInterworkingProtoStub: ..., unregisterDataObject: ..., getHypertyOwner: ..., getPreAuthSubscribers: ..., getHypertyName: ..., isDataObjectURL: ..., registerSubscribedDataObject: ..., registerSubscriber: ..., isLocal: ..., runtimeURL: ...}, _forwards: Object{}, _pipelineIn: Pipeline{handlers: ..., onFail: ...}, _pipelineOut: Pipeline{handlers: ..., onFail: ...}, _onPostMessage: (msg) => { ... }}, _subURL: 'hyperty-runtime://fake-runtime/sm', _runtimeUrl: 'hyperty-runtime://fake-runtime', _p2pHandler: undefined, _p2pRequester: undefined, _reporters: Object{}, _observers: Object{}, _provisionals: Object{}, _onNotificationHandler: (notifyEvent) => { ... }}
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: '[Syncher] NOTIFICATION-EVENT: ', Object{type: 'create', from: 'hyperty://h1.domain/h1', url: 'resource://obj1', domain: 'obj1', schema: 'schema://fake-schema-url', value: Object{p2p: false, store: false, schema: 'schema://fake-schema-url', p2pHandler: undefined, p2pRequester: undefined, name: 'no name', reporter: 'hyperty://h1.domain/h1', resume: false, mutual: true, created: '2017-12-05T15:44:29.914Z', runtime: 'hyperty-runtime://fake-runtime', url: 'resource://obj1', status: 'live', childrens: [..., ...], lastModified: '2017-12-05T15:44:29.914Z'}, identity: undefined, ack: function ack(type) { ... }}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'onNotification: ', Object{type: 'create', from: 'hyperty://h1.domain/h1', url: 'resource://obj1', domain: 'obj1', schema: 'schema://fake-schema-url', value: Object{p2p: false, store: false, schema: 'schema://fake-schema-url', p2pHandler: undefined, p2pRequester: undefined, name: 'no name', reporter: 'hyperty://h1.domain/h1', resume: false, mutual: true, created: '2017-12-05T15:44:29.914Z', runtime: 'hyperty-runtime://fake-runtime', url: 'resource://obj1', status: 'live', childrens: [..., ...], lastModified: '2017-12-05T15:44:29.914Z'}, identity: undefined, ack: function ack(type) { ... }}
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: 'onPOSTMessage: ', Object{id: 5, type: 'response', from: 'hyperty://h2.domain/h2', to: 'resource://obj1/subscription', body: Object{code: 100}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'hyperty://h2.domain/h2'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'resource://obj1/subscription'
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: 'onPOSTMessage: ', Object{from: 'hyperty-runtime://fake-runtime/sm', to: 'hyperty://h1.domain/h1', id: 4, type: 'response', body: Object{code: 100}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'hyperty-runtime://fake-runtime/sm'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'hyperty://h1.domain/h1'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[Syncher.DataObjectReporter] Invitation reply ', Object{from: 'hyperty-runtime://fake-runtime/sm', to: 'hyperty://h1.domain/h1', id: 4, type: 'response', body: Object{code: 100}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[syncher - subscribe] - subscribe criteria: ', Object{p2p: false, store: false, schema: 'schema://fake-schema-url', resource: 'resource://obj1', mutual: true}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[syncher_subscribe] - subscribe message: ', Object{p2p: false, store: false, schema: 'schema://fake-schema-url', resource: 'resource://obj1', mutual: true, resume: false}, Object{type: 'subscribe', from: 'hyperty://h2.domain/h2', to: 'hyperty-runtime://fake-runtime/sm', body: Object{p2p: false, store: false, schema: 'schema://fake-schema-url', resource: 'resource://obj1', resume: false, mutual: true}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: 'onPOSTMessage: ', Object{type: 'subscribe', from: 'hyperty://h2.domain/h2', to: 'hyperty-runtime://fake-runtime/sm', body: Object{p2p: false, store: false, schema: 'schema://fake-schema-url', resource: 'resource://obj1', resume: false, mutual: true}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'hyperty://h2.domain/h2'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'hyperty-runtime://fake-runtime/sm'
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: '[SyncherManager] RCV: ', Object{type: 'subscribe', from: 'hyperty://h2.domain/h2', to: 'hyperty-runtime://fake-runtime/sm', body: Object{p2p: false, store: false, schema: 'schema://fake-schema-url', resource: 'resource://obj1', resume: false, mutual: true}, id: 6}
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: '[SyncherManager.onCreate - invite observers]', Object{type: 'create', from: 'hyperty://h1.domain/h1', to: 'hyperty-runtime://fake-runtime/sm', body: Object{resume: false, resource: 'resource://obj1', schema: 'schema://fake-schema-url', value: Object{p2p: ..., store: ..., schema: ..., p2pHandler: ..., p2pRequester: ..., name: ..., reporter: ..., resume: ..., mutual: ..., created: ..., runtime: ..., url: ..., status: ..., childrens: ..., lastModified: ...}, authorise: [...], mutual: undefined}, id: 4}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'create: ', 'resource://obj1'
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: '[SyncherManager - Subscribe] - ResourcesByCriteria | Message: ', Object{type: 'subscribe', from: 'hyperty://h2.domain/h2', to: 'hyperty-runtime://fake-runtime/sm', body: Object{p2p: false, store: false, schema: 'schema://fake-schema-url', resource: 'resource://obj1', resume: false, mutual: true}, id: 6}, ' result: ', null
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[SyncherManager.onLocalSubscribe - new Subscribe] - ', 'schema://fake-schema-url', 'resource://obj1'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'REQUEST-SCHEMA: ', 'schema://fake-schema-url'
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: 'onPOSTMessage: ', Object{type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.obj1/sm', body: Object{identity: undefined, resources: [..., ..., ...], source: 'hyperty://h2.domain/h2'}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'hyperty://h2.domain/h2'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'domain://msg-node.obj1/sm'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '8-_onPostMessage: ', Object{type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'domain://msg-node.obj1/sm', body: Object{identity: undefined, resources: [..., ..., ...], source: 'hyperty://h2.domain/h2'}, id: 7}
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: 'onPOSTMessage: ', Object{id: 7, type: 'response', from: 'domain://msg-node.obj1/sm', to: 'hyperty-runtime://fake-runtime/sm', body: Object{code: 200}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'domain://msg-node.obj1/sm'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'hyperty-runtime://fake-runtime/sm'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'node-subscribe-response(observer): ', Object{id: 7, type: 'response', from: 'domain://msg-node.obj1/sm', to: 'hyperty-runtime://fake-runtime/sm', body: Object{code: 200}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: 'onPOSTMessage: ', Object{id: 6, type: 'response', from: 'hyperty-runtime://fake-runtime/sm', to: 'hyperty://h2.domain/h2', body: Object{code: 100, childrenResources: [..., ...], schema: 'schema://fake-schema-url', resource: 'resource://obj1'}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'hyperty-runtime://fake-runtime/sm'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'hyperty://h2.domain/h2'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[syncher] - subscribe-response: ', Object{id: 6, type: 'response', from: 'hyperty-runtime://fake-runtime/sm', to: 'hyperty://h2.domain/h2', body: Object{code: 100, childrenResources: [..., ...], schema: 'schema://fake-schema-url', resource: 'resource://obj1'}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[syncher] - new DataProvisional: ', ['children1', 'children2'], 'resource://obj1'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[SyncherManager._newSubscription]', Object{type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'resource://obj1/subscription', body: Object{identity: undefined, subscriber: 'hyperty://h2.domain/h2', mutual: true}}, Object{type: 'subscribe', from: 'hyperty://h2.domain/h2', to: 'hyperty-runtime://fake-runtime/sm', body: Object{p2p: false, store: false, schema: 'schema://fake-schema-url', resource: 'resource://obj1', resume: false, mutual: true}, id: 6}
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: 'onPOSTMessage: ', Object{type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'resource://obj1/subscription', body: Object{identity: undefined, subscriber: 'hyperty://h2.domain/h2', mutual: true}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'hyperty://h2.domain/h2'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'resource://obj1/subscription'
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: '[SyncherManager.ReporterObject received ]', Object{type: 'subscribe', from: 'hyperty-runtime://fake-runtime/sm', to: 'resource://obj1/subscription', body: Object{identity: undefined, subscriber: 'hyperty://h2.domain/h2', mutual: true}, id: 8}
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: 'onPOSTMessage: ', Object{type: 'forward', from: 'resource://obj1', to: 'hyperty://h1.domain/h1', body: Object{type: 'subscribe', from: 'hyperty://h2.domain/h2', to: 'resource://obj1', identity: undefined, mutual: true}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'resource://obj1'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'hyperty://h1.domain/h1'
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: '[Syncher] Syncher-RCV: ', Object{type: 'forward', from: 'resource://obj1', to: 'hyperty://h1.domain/h1', body: Object{type: 'subscribe', from: 'hyperty://h2.domain/h2', to: 'resource://obj1', identity: undefined, mutual: true}, id: 9}, Syncher{_owner: 'hyperty://h1.domain/h1', _bus: MessageBus{_msgId: 9, _subscriptions: Object{hyperty-runtime://fake-runtime/sm: ..., hyperty://h2.domain/h2: ..., hyperty://h1.domain/h1: ..., resource://obj1/subscription: ..., resource://obj1/changes: ..., resource://obj1: ..., resource://obj1/children/children1: ..., resource://obj1/children/children2: ...}, _responseTimeOut: 15000, _responseCallbacks: Object{hyperty://h1.domain/h14: ..., resource://obj1/subscription5: ..., hyperty://h2.domain/h26: ..., hyperty-runtime://fake-runtime/sm8: ..., resource://obj19: ...}, _registry: Object{registerDataObject: ..., isInterworkingProtoStub: ..., unregisterDataObject: ..., getHypertyOwner: ..., getPreAuthSubscribers: ..., getHypertyName: ..., isDataObjectURL: ..., registerSubscribedDataObject: ..., registerSubscriber: ..., isLocal: ..., runtimeURL: ...}, _forwards: Object{}, _pipelineIn: Pipeline{handlers: ..., onFail: ...}, _pipelineOut: Pipeline{handlers: ..., onFail: ...}, _onPostMessage: (msg) => { ... }}, _subURL: 'hyperty-runtime://fake-runtime/sm', _runtimeUrl: 'hyperty-runtime://fake-runtime', _p2pHandler: undefined, _p2pRequester: undefined, _reporters: Object{resource://obj1: DataObjectReporter{_syncher: ..., _url: ..., _created: ..., _reporter: ..., _runtime: ..., _schema: ..., _name: ..., _status: ..., _syncObj: ..., _childrens: ..., _mutual: ..., _version: ..., _childId: ..., _childrenListeners: ..., _resumed: ..., _owner: ..., _bus: ..., _metadata: ..., _hypertyResourceFactory: ..., _childrenObjects: ..., _sharedChilds: ..., _subscriptions: ..., _objectListener: ..., invitations: ..., _childrenSizeThreshold: ..., _onSubscriptionHandler: ...}}, _observers: Object{}, _provisionals: Object{}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'DataObjectReporter-RCV: ', Object{type: 'forward', from: 'resource://obj1', to: 'hyperty://h1.domain/h1', body: Object{type: 'subscribe', from: 'hyperty://h2.domain/h2', to: 'resource://obj1', identity: undefined, mutual: true}, id: 9}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[DataObjectReporter._onSubscribe]', Object{type: 'forward', from: 'resource://obj1', to: 'hyperty://h1.domain/h1', body: Object{type: 'subscribe', from: 'hyperty://h2.domain/h2', to: 'resource://obj1', identity: undefined, mutual: true}, id: 9}, 'h2.domain', Object{type: 'hyperty', domain: 'h2.domain', identity: '/h2'}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'SUBSCRIPTION-EVENT: ', Object{type: 'subscribe', url: 'hyperty://h2.domain/h2', domain: 'h2.domain', identity: undefined, nutual: true, accept: function accept() { ... }, reject: function reject(reason) { ... }}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'onSubscription: ', Object{type: 'subscribe', url: 'hyperty://h2.domain/h2', domain: 'h2.domain', identity: undefined, nutual: true, accept: function accept() { ... }, reject: function reject(reason) { ... }}
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: 'onPOSTMessage: ', Object{id: 9, type: 'response', from: 'hyperty://h1.domain/h1', to: 'resource://obj1', body: Object{code: 200, schema: 'schema://fake-schema-url', value: Object{p2p: ..., store: ..., schema: ..., name: ..., reporter: ..., resume: ..., mutual: ..., created: ..., runtime: ..., url: ..., status: ..., childrens: ..., lastModified: ..., data: ..., version: ...}}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'hyperty://h1.domain/h1'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'resource://obj1'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[SyncherManager.ReporterObject ]forward-reply: ', Object{id: 9, type: 'response', from: 'hyperty://h1.domain/h1', to: 'resource://obj1', body: Object{code: 200, schema: 'schema://fake-schema-url', value: Object{p2p: ..., store: ..., schema: ..., name: ..., reporter: ..., resume: ..., mutual: ..., created: ..., runtime: ..., url: ..., status: ..., childrens: ..., lastModified: ..., data: ..., version: ...}}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[SyncherManager.ReporterObject] - _onRemoteSubscribe:', ['children1', 'children2']
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[Subscription] - childID', ['children1', 'children2']
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[Subscription] - childID', 'resource://obj1/children/', 'resource://obj1/children/children1', 'children1'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[Subscription] - childID', 'resource://obj1/children/', 'resource://obj1/children/children2', 'children2'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[StoreDataObjects - update] - ', true, 'reporters', 'resource://obj1', 'mutual', true
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[StoreDataObjects - update] - ', true, 'reporters', 'resource://obj1', 'subscriptions', 'hyperty://h2.domain/h2'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[DataObjectsStorage] - _updateToArray: ', Object{resource://obj1: Object{subscriptions: [], subscriberUsers: [...], childrenObjects: Object{}, data: Object{}, schema: 'schema://fake-schema-url', name: 'no name', reporter: 'hyperty://h1.domain/h1', resume: false, mutual: true, created: '2017-12-05T15:44:29.914Z', runtime: 'hyperty-runtime://fake-runtime', url: 'resource://obj1', childrens: [..., ...], isReporter: true}}, 'resource://obj1', 'subscriptions', 'hyperty://h2.domain/h2'
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: 'onPOSTMessage: ', Object{id: 8, type: 'response', from: 'resource://obj1/subscription', to: 'hyperty-runtime://fake-runtime/sm', body: Object{code: 200, schema: 'schema://fake-schema-url', value: Object{p2p: ..., store: ..., schema: ..., name: ..., reporter: ..., resume: ..., mutual: ..., created: ..., runtime: ..., url: ..., status: ..., childrens: ..., lastModified: ..., data: ..., version: ...}, owner: 'hyperty://h1.domain/h1'}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'resource://obj1/subscription'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'hyperty-runtime://fake-runtime/sm'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'reporter-subscribe-response-new: ', Object{id: 8, type: 'response', from: 'resource://obj1/subscription', to: 'hyperty-runtime://fake-runtime/sm', body: Object{code: 200, schema: 'schema://fake-schema-url', value: Object{p2p: ..., store: ..., schema: ..., name: ..., reporter: ..., resume: ..., mutual: ..., created: ..., runtime: ..., url: ..., status: ..., childrens: ..., lastModified: ..., data: ..., version: ...}, owner: 'hyperty://h1.domain/h1'}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[SyncherManager._newSubscription] - observers: ', Object{}, 'resource://obj1', undefined
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[SyncherManager._newSubscription] - observers: create new ObserverObject: ', ObserverObject{_parent: SyncherManager{_bus: MessageBus{_msgId: ..., _subscriptions: ..., _responseTimeOut: ..., _responseCallbacks: ..., _registry: ..., _forwards: ..., _pipelineIn: ..., _pipelineOut: ..., _onPostMessage: ...}, _registry: Object{registerDataObject: ..., isInterworkingProtoStub: ..., unregisterDataObject: ..., getHypertyOwner: ..., getPreAuthSubscribers: ..., getHypertyName: ..., isDataObjectURL: ..., registerSubscribedDataObject: ..., registerSubscriber: ..., isLocal: ..., runtimeURL: ...}, _catalog: Object{getDataSchemaDescriptor: ...}, _storageManager: StorageManager{db: ..., storageName: ...}, _identityModule: Object{decryptMessage: ..., encryptMessage: ..., getToken: ...}, runtimeURL: 'hyperty-runtime://fake-runtime', _url: 'hyperty-runtime://fake-runtime/sm', _objectURL: 'hyperty-runtime://fake-runtime/object-allocation', _reporters: Object{resource://obj1: ...}, _observers: Object{}, _dataObjectsStorage: DataObjectsStorage{_storageManager: ..., _storeDataObject: ..., _cache: ...}, _domain: 'fake-runtime', _allocator: Object{create: ...}}, _url: 'resource://obj1', _childrens: ['children1', 'children2'], _bus: MessageBus{_msgId: 9, _subscriptions: Object{hyperty-runtime://fake-runtime/sm: ..., hyperty://h2.domain/h2: ..., hyperty://h1.domain/h1: ..., resource://obj1/subscription: ..., resource://obj1/changes: ..., resource://obj1: ..., resource://obj1/children/children1: ..., resource://obj1/children/children2: ...}, _responseTimeOut: 15000, _responseCallbacks: Object{hyperty://h1.domain/h14: ..., resource://obj1/subscription5: ..., hyperty://h2.domain/h26: ...}, _registry: Object{registerDataObject: ..., isInterworkingProtoStub: ..., unregisterDataObject: ..., getHypertyOwner: ..., getPreAuthSubscribers: ..., getHypertyName: ..., isDataObjectURL: ..., registerSubscribedDataObject: ..., registerSubscriber: ..., isLocal: ..., runtimeURL: ...}, _forwards: Object{resource://obj1/changes: ..., resource://obj1/children/children1: ..., resource://obj1/children/children2: ...}, _pipelineIn: Pipeline{handlers: ..., onFail: ...}, _pipelineOut: Pipeline{handlers: ..., onFail: ...}, _onPostMessage: (msg) => { ... }}, _subscriptions: Object{}, _storageSubscriptions: Object{}, _childrenListeners: [], _isToSaveData: false, _changeListener: MsgListener{_subscriptions: Object{hyperty-runtime://fake-runtime/sm: ..., hyperty://h2.domain/h2: ..., hyperty://h1.domain/h1: ..., resource://obj1/subscription: ..., resource://obj1/changes: ..., resource://obj1: ..., resource://obj1/children/children1: ..., resource://obj1/children/children2: ...}, _url: 'resource://obj1/changes', _callback: (msg) => { ... }}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[Observer Object - new subscription] - ', Object{}, 'hyperty://h2.domain/h2', false
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[Subscription] - childID', ['children1', 'children2']
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[Subscription] - childID', 'resource://obj1/children/', 'resource://obj1/children/children1', 'children1'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[Subscription] - childID', 'resource://obj1/children/', 'resource://obj1/children/children2', 'children2'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[SyncherManager.ObserverObject - addChildrens] - childrens: ', ['children1', 'children2'], 'resource://obj1/children/'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'Hyperty', 'hyperty://h2.domain/h2'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[DataObjectsStorage] - _updateToArray: ', Object{resource://obj1: Object{subscriptions: [], subscriberUsers: [], childrenObjects: Object{}, data: Object{}, p2p: false, store: false, schema: 'schema://fake-schema-url', name: 'no name', reporter: 'hyperty://h1.domain/h1', resume: false, mutual: true, created: '2017-12-05T15:44:29.914Z', runtime: 'hyperty-runtime://fake-runtime', url: 'resource://obj1', status: 'live', childrens: [..., ...], lastModified: '2017-12-05T15:44:29.914Z', version: 0, isReporter: false}}, 'resource://obj1', 'subscriptions', 'hyperty://h2.domain/h2'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[DataObjectsStorage] - _updateToArray: ', Object{resource://obj1: Object{subscriptions: [...], subscriberUsers: [], childrenObjects: Object{}, data: Object{}, p2p: false, store: false, schema: 'schema://fake-schema-url', name: 'no name', reporter: 'hyperty://h1.domain/h1', resume: false, mutual: true, created: '2017-12-05T15:44:29.914Z', runtime: 'hyperty-runtime://fake-runtime', url: 'resource://obj1', status: 'live', childrens: [..., ...], lastModified: '2017-12-05T15:44:29.914Z', version: 0, isReporter: false}}, 'resource://obj1', 'subscriberUsers', 'user@domain.com'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[subscribe] - new subscription: ', Object{type: 'subscribe', from: 'hyperty://h2.domain/h2', to: 'hyperty-runtime://fake-runtime/sm', body: Object{p2p: false, store: false, schema: 'schema://fake-schema-url', resource: 'resource://obj1', resume: false, mutual: true}, id: 6}, Object{id: 6, type: 'response', from: 'hyperty-runtime://fake-runtime/sm', to: 'hyperty://h2.domain/h2', body: Object{code: 200, schema: 'schema://fake-schema-url', value: Object{p2p: ..., store: ..., schema: ..., name: ..., reporter: ..., resume: ..., mutual: ..., created: ..., runtime: ..., url: ..., status: ..., childrens: ..., lastModified: ..., data: ..., version: ...}, owner: 'hyperty://h1.domain/h1', resource: 'resource://obj1', mutual: true}}, ObserverObject{_parent: SyncherManager{_bus: MessageBus{_msgId: ..., _subscriptions: ..., _responseTimeOut: ..., _responseCallbacks: ..., _registry: ..., _forwards: ..., _pipelineIn: ..., _pipelineOut: ..., _onPostMessage: ...}, _registry: Object{registerDataObject: ..., isInterworkingProtoStub: ..., unregisterDataObject: ..., getHypertyOwner: ..., getPreAuthSubscribers: ..., getHypertyName: ..., isDataObjectURL: ..., registerSubscribedDataObject: ..., registerSubscriber: ..., isLocal: ..., runtimeURL: ...}, _catalog: Object{getDataSchemaDescriptor: ...}, _storageManager: StorageManager{db: ..., storageName: ...}, _identityModule: Object{decryptMessage: ..., encryptMessage: ..., getToken: ...}, runtimeURL: 'hyperty-runtime://fake-runtime', _url: 'hyperty-runtime://fake-runtime/sm', _objectURL: 'hyperty-runtime://fake-runtime/object-allocation', _reporters: Object{resource://obj1: ...}, _observers: Object{resource://obj1: ...}, _dataObjectsStorage: DataObjectsStorage{_storageManager: ..., _storeDataObject: ..., _cache: ...}, _domain: 'fake-runtime', _allocator: Object{create: ...}}, _url: 'resource://obj1', _childrens: ['children1', 'children2'], _bus: MessageBus{_msgId: 9, _subscriptions: Object{hyperty-runtime://fake-runtime/sm: ..., hyperty://h2.domain/h2: ..., hyperty://h1.domain/h1: ..., resource://obj1/subscription: ..., resource://obj1/changes: ..., resource://obj1: ..., resource://obj1/children/children1: ..., resource://obj1/children/children2: ...}, _responseTimeOut: 15000, _responseCallbacks: Object{hyperty://h1.domain/h14: ..., resource://obj1/subscription5: ..., hyperty://h2.domain/h26: ...}, _registry: Object{registerDataObject: ..., isInterworkingProtoStub: ..., unregisterDataObject: ..., getHypertyOwner: ..., getPreAuthSubscribers: ..., getHypertyName: ..., isDataObjectURL: ..., registerSubscribedDataObject: ..., registerSubscriber: ..., isLocal: ..., runtimeURL: ...}, _forwards: Object{resource://obj1/changes: ..., resource://obj1/children/children1: ..., resource://obj1/children/children2: ...}, _pipelineIn: Pipeline{handlers: ..., onFail: ...}, _pipelineOut: Pipeline{handlers: ..., onFail: ...}, _onPostMessage: (msg) => { ... }}, _subscriptions: Object{hyperty://h2.domain/h2: Subscription{_deleteListener: ..., _changeListener: ..., _childrenListeners: ...}}, _storageSubscriptions: Object{}, _childrenListeners: [], _isToSaveData: false, _changeListener: MsgListener{_subscriptions: Object{hyperty-runtime://fake-runtime/sm: ..., hyperty://h2.domain/h2: ..., hyperty://h1.domain/h1: ..., resource://obj1/subscription: ..., resource://obj1/changes: ..., resource://obj1: ..., resource://obj1/children/children1: ..., resource://obj1/children/children2: ...}, _url: 'resource://obj1/changes', _callback: (msg) => { ... }}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: 'onPOSTMessage: ', Object{id: 6, type: 'response', from: 'hyperty-runtime://fake-runtime/sm', to: 'hyperty://h2.domain/h2', body: Object{code: 200, schema: 'schema://fake-schema-url', value: Object{p2p: ..., store: ..., schema: ..., name: ..., reporter: ..., resume: ..., mutual: ..., created: ..., runtime: ..., url: ..., status: ..., childrens: ..., lastModified: ..., data: ..., version: ...}, owner: 'hyperty://h1.domain/h1', resource: 'resource://obj1', mutual: true}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'hyperty-runtime://fake-runtime/sm'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'hyperty://h2.domain/h2'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[syncher] - subscribe-response: ', Object{id: 6, type: 'response', from: 'hyperty-runtime://fake-runtime/sm', to: 'hyperty://h2.domain/h2', body: Object{code: 200, schema: 'schema://fake-schema-url', value: Object{p2p: ..., store: ..., schema: ..., name: ..., reporter: ..., resume: ..., mutual: ..., created: ..., runtime: ..., url: ..., status: ..., childrens: ..., lastModified: ..., data: ..., version: ...}, owner: 'hyperty://h1.domain/h1', resource: 'resource://obj1', mutual: true}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[syncher] - new Data Object Observer: ', Object{id: 6, type: 'response', from: 'hyperty-runtime://fake-runtime/sm', to: 'hyperty://h2.domain/h2', body: Object{code: 200, schema: 'schema://fake-schema-url', value: Object{p2p: ..., store: ..., schema: ..., name: ..., reporter: ..., resume: ..., mutual: ..., created: ..., runtime: ..., url: ..., status: ..., childrens: ..., lastModified: ..., data: ..., version: ...}, owner: 'hyperty://h1.domain/h1', resource: 'resource://obj1', mutual: true}}, Object{}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[Data Object - AllocateListeners] - ', ['children1', 'children2']
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[syncher] - new Data Object Observer already exist: ', DataObjectObserver{_syncher: Syncher{_owner: 'hyperty://h2.domain/h2', _bus: MessageBus{_msgId: ..., _subscriptions: ..., _responseTimeOut: ..., _responseCallbacks: ..., _registry: ..., _forwards: ..., _pipelineIn: ..., _pipelineOut: ..., _onPostMessage: ...}, _subURL: 'hyperty-runtime://fake-runtime/sm', _runtimeUrl: 'hyperty-runtime://fake-runtime', _p2pHandler: undefined, _p2pRequester: undefined, _reporters: Object{}, _observers: Object{resource://obj1: ...}, _provisionals: Object{}, _onNotificationHandler: (notifyEvent) => { ... }}, _url: 'resource://obj1', _created: '2017-12-05T15:44:29.914Z', _reporter: 'hyperty://h1.domain/h1', _runtime: 'hyperty-runtime://fake-runtime', _schema: 'schema://fake-schema-url', _name: 'no name', _status: 'live', _syncObj: SyncObject{_observers: [...], _filters: Object{}, _data: Object{communication: ..., x: ..., y: ...}}, _childrens: ['children1', 'children2'], _mutual: true, _version: 0, _childId: 0, _childrenListeners: [MsgListener{_subscriptions: ..., _url: ..., _callback: ...}, MsgListener{_subscriptions: ..., _url: ..., _callback: ...}], _resumed: false, _owner: 'hyperty://h2.domain/h2', _bus: MessageBus{_msgId: 9, _subscriptions: Object{hyperty-runtime://fake-runtime/sm: ..., hyperty://h2.domain/h2: ..., hyperty://h1.domain/h1: ..., resource://obj1/subscription: ..., resource://obj1/changes: ..., resource://obj1: ..., resource://obj1/children/children1: ..., resource://obj1/children/children2: ...}, _responseTimeOut: 15000, _responseCallbacks: Object{hyperty://h1.domain/h14: ..., resource://obj1/subscription5: ...}, _registry: Object{registerDataObject: ..., isInterworkingProtoStub: ..., unregisterDataObject: ..., getHypertyOwner: ..., getPreAuthSubscribers: ..., getHypertyName: ..., isDataObjectURL: ..., registerSubscribedDataObject: ..., registerSubscriber: ..., isLocal: ..., runtimeURL: ...}, _forwards: Object{resource://obj1/changes: ..., resource://obj1/children/children1: ..., resource://obj1/children/children2: ...}, _pipelineIn: Pipeline{handlers: ..., onFail: ...}, _pipelineOut: Pipeline{handlers: ..., onFail: ...}, _onPostMessage: (msg) => { ... }}, _metadata: Object{p2p: false, store: false, schema: 'schema://fake-schema-url', name: 'no name', reporter: 'hyperty://h1.domain/h1', resume: false, mutual: true, created: '2017-12-05T15:44:29.914Z', runtime: 'hyperty-runtime://fake-runtime', url: 'resource://obj1', status: 'live', childrens: [..., ...], lastModified: '2017-12-05T15:44:29.914Z', version: 0, identity: undefined}, _hypertyResourceFactory: HypertyResourceFactory{}, _childrenObjects: Object{}, _sharedChilds: [], _filters: Object{}, _changeListener: MsgListener{_subscriptions: Object{hyperty-runtime://fake-runtime/sm: ..., hyperty://h2.domain/h2: ..., hyperty://h1.domain/h1: ..., resource://obj1/subscription: ..., resource://obj1/changes: ..., resource://obj1: ..., resource://obj1/children/children1: ..., resource://obj1/children/children2: ...}, _url: 'resource://obj1/changes', _callback: function (msg) { ... }}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'resources: ', 'resource://obj1'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[DataObject.deleteChildrens]', Object{}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[DataObject._deleteChildrens] promises ', []
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'reporter-deleted'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '[DataObject._deleteChildrens] nothing to delete'
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: 'onPOSTMessage: ', Object{type: 'delete', from: 'hyperty://h1.domain/h1', to: 'hyperty-runtime://fake-runtime/sm', body: Object{resource: 'resource://obj1'}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'hyperty://h1.domain/h1'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'hyperty-runtime://fake-runtime/sm'
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: '[SyncherManager] RCV: ', Object{type: 'delete', from: 'hyperty://h1.domain/h1', to: 'hyperty-runtime://fake-runtime/sm', body: Object{resource: 'resource://obj1'}, id: 10}
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: 'onPOSTMessage: ', Object{type: 'delete', from: 'resource://obj1/subscription', to: 'resource://obj1/changes'}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'resource://obj1/subscription'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'isLocal: ', 'resource://obj1/changes'
+<br />Chrome 62.0.3202 (Linux 0.0.0) INFO: '[SyncherManager.ReporterObject ] SyncherManager-resource://obj1/changes-RCV: ', Object{type: 'delete', from: 'resource://obj1/subscription', to: 'resource://obj1/changes', id: 11}
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'Subscription-DELETE: ', Object{type: 'delete', from: 'resource://obj1/subscription', to: 'resource://obj1/changes', id: 11}
 </td>
       </tr>
     </table>

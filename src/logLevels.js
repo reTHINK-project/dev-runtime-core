@@ -28,7 +28,7 @@ const x = log.getLogger('Pipeline');
 export { log };
 
 /**
-  5 actual logging methods, ordered and available as:
+  0 actual logging methods, ordered and available as:
 
       0 - log.trace(msg)
       1 - log.debug(msg)
@@ -48,7 +48,7 @@ export { log };
 
 
 // address-allocation
-a.setLevel(5);
+a.setLevel(0);
 
 // Bus
 b.setLevel(0);
@@ -57,16 +57,16 @@ b.setLevel(0);
 c.setLevel(0);
 
 // CoreDiscovery
-d.setLevel(5);
+d.setLevel(0);
 
 // GraphConnector
-e.setLevel(5);
+e.setLevel(0);
 
 // HypertyResourcesStorage
-f.setLevel(5);
+f.setLevel(0);
 
 // IdentityModule
-g.setLevel(1);
+g.setLevel(0);
 
 // PEP
 h.setLevel(0);
@@ -84,16 +84,16 @@ k.setLevel(0);
 l.setLevel(0);
 
 // Descriptors
-m.setLevel(5);
+m.setLevel(0);
 
 // DataObjectsStorage
-n.setLevel(5);
+n.setLevel(0);
 
 // Subscription
-o.setLevel(5);
+o.setLevel(0);
 
 // SubscriptionManager
-p.setLevel(5);
+p.setLevel(0);
 
 // ObserverObject
 q.setLevel(0);
@@ -102,7 +102,7 @@ q.setLevel(0);
 r.setLevel(0);
 
 // SynSubscription
-s.setLevel(1);
+s.setLevel(0);
 
 // SyncherManager
 t.setLevel(0);

@@ -293,7 +293,7 @@ class RuntimeUA {
         this.coreDiscovery = new CoreDiscovery(this.runtimeURL, this.messageBus, this.graphConnector, this.runtimeFactory, this.registry);
 
         // Instantiate the IdentityManager
-        this.identityManager = new IdentityManager( this.identityModule);
+        this.identityManager = new IdentityManager(this.identityModule);
 
         // initialise the CryptoManager
         cryptoManager.default.init(this.runtimeURL, this.runtimeCapabilities, this.storageManager, this._dataObjectsStorage, this.registry, this.coreDiscovery, this.identityModule, this.runtimeFactory);

@@ -2,11 +2,11 @@
  *  Class where message bus handlers are built. To be used by the RuntimeUA to initialise the runtime UA.
  */
 
- import { log as logLevels } from '../logLevels';
+import { log as logLevels } from '../logLevels';
 
- // Log System
- import * as logger from 'loglevel';
- let log = logger.getLogger('RuntimeUA');
+// Log System
+import * as logger from 'loglevel';
+let log = logger.getLogger('RuntimeUA');
 
 class MsgBusHandlers {
 
@@ -18,7 +18,6 @@ class MsgBusHandlers {
     this.policyEngine = pep;
     this.identityManager = idm;
     this.cryptoManager = crypto;
-
   }
 
   // Policy based access control for incoming messages
@@ -27,7 +26,6 @@ class MsgBusHandlers {
     let _this = this;
 
     return (ctx) => {
-      let isIncoming =
       _this.policyEngine.authorise(ctx.msg, true).then((changedMgs) => {
         ctx.msg = changedMgs;
         ctx.next();
@@ -43,7 +41,6 @@ class MsgBusHandlers {
   get pepOutHandler() {
     let _this = this;
     return (ctx) => {
-      let isIncoming =
       _this.policyEngine.authorise(ctx.msg, false).then((changedMgs) => {
         ctx.msg = changedMgs;
         ctx.next();
