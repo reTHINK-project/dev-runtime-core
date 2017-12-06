@@ -243,9 +243,10 @@ class CryptoManager {
           if (chatKeys.authenticated && !isHandShakeType) {
 
             let iv = _this.crypto.generateIV();
-            _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, message.body.value, iv).then(encryptedValue => {
+            _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, _this.crypto.stringify(message.body.value), iv).then(encryptedValue => {
 
-              let filteredMessage = _this._filterMessageToHash(message, JSON.stringify(message.body.value) + JSON.stringify(iv), chatKeys.hypertyFrom.messageInfo);
+              let filteredMessage = _this._filterMessageToHash(message, _this.crypto.stringify(message.body.value) +
+                                                                        _this.crypto.stringify(iv), chatKeys.hypertyFrom.messageInfo);
 
               _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, filteredMessage).then(hash => {
                 //log.log('result of hash ', hash);
@@ -307,18 +308,20 @@ class CryptoManager {
               // and if is to apply encryption, encrypt the messages
               if (dataObjectKey.isToEncrypt) {
                 let iv = _this.crypto.generateIV();
+                let stringifiedIV = _this.crypto.stringify(iv);
+                let stringifiedMessageBody = _this.crypto.stringify(message.body.value);
 
-                _this.crypto.encryptAES(dataObjectKey.sessionKey, _this.crypto.encode(message.body.value), iv).then(encryptedValue => {
+                _this.crypto.encryptAES(dataObjectKey.sessionKey, stringifiedMessageBody, iv).then(encryptedValue => {
                   delete message.body.identity.assertion; //TODO: Check why assertion is comming on the message!
                   delete message.body.identity.expires; //TODO: Check why expires is comming on the message!
-                  let filteredMessage = _this._filterMessageToHash(message, JSON.stringify(message.body.value) + JSON.stringify(iv));
+                  let filteredMessage = _this._filterMessageToHash(message, stringifiedMessageBody + stringifiedIV);
 
                   _this.crypto.hashHMAC(dataObjectKey.sessionKey, filteredMessage).then(hash => {
                     // log.log('hash ', hash);
 
                     let newValue = {value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv), hash: _this.crypto.encode(hash)};
 
-                    message.body.value = JSON.stringify(newValue);
+                    message.body.value = _this.crypto.stringify(newValue);
                     resolve(message);
                   });
                 });
@@ -357,7 +360,7 @@ class CryptoManager {
           if (dataObjectKey.isToEncrypt) {
             let iv = _this.crypto.generateIV();
 
-            _this.crypto.encryptAES(dataObjectKey.sessionKey, _this.crypto.encode(dataObject), iv).then(encryptedValue => {
+            _this.crypto.encryptAES(dataObjectKey.sessionKey, _this.crypto.stringify(dataObject), iv).then(encryptedValue => {
               let newValue = { value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv) };
 
               //log.log('encrypted dataObject', newValue);
@@ -465,25 +468,25 @@ class CryptoManager {
 
               //check if is to apply encryption
               if (dataObjectKey.isToEncrypt) {
-                let parsedValue = JSON.parse(message.body.value);
+                let parsedValue = _this.crypto.parse(message.body.value);
                 let iv = _this.crypto.decodeToUint8Array(parsedValue.iv);
                 let encryptedValue = _this.crypto.decodeToUint8Array(parsedValue.value);
                 let hash = _this.crypto.decodeToUint8Array(parsedValue.hash);
 
                 _this.crypto.decryptAES(dataObjectKey.sessionKey, encryptedValue, iv).then(decryptedValue => {
-                  let parsedValue = _this.crypto.decode(decryptedValue);
+                  let parsedValue = _this.crypto.parse(decryptedValue);
 
                   // log.log('decrypted Value,', parsedValue);
                   message.body.value = parsedValue;
 
-                  let filteredMessage = _this._filterMessageToHash(message, JSON.stringify(parsedValue) + JSON.stringify(iv));
+                  let filteredMessage = _this._filterMessageToHash(message, _this.crypto.stringify(parsedValue) + _this.crypto.stringify(iv));
 
                   _this.crypto.verifyHMAC(dataObjectKey.sessionKey, filteredMessage, hash).then(result => {
-                    // log.log('result of hash verification! ', result);
+                    log.log('Received message HMAC result', result);
 
                     message.body.assertedIdentity = true;
                     resolve(message);
-                  });
+                  }).catch(err => { reject('Message HMAC is invalid: ' + err); });
                 });
 
                 //if not, just return the message
@@ -534,7 +537,7 @@ class CryptoManager {
             let encryptedValue = _this.crypto.decodeToUint8Array(dataObject.value);
 
             _this.crypto.decryptAES(dataObjectKey.sessionKey, encryptedValue, iv).then(decryptedValue => {
-              let parsedValue = _this.crypto.decode(decryptedValue);
+              let parsedValue = _this.crypto.parse(decryptedValue);
               let newValue = { value: parsedValue, iv: _this.crypto.encode(iv) };
 
               // log.log('decrypted dataObject,', newValue);

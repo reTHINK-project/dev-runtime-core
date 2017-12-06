@@ -30,16 +30,21 @@ class Crypto {
   * @return  {string}   encoded value
   */
   encode(value) {
-    return btoa(JSON.stringify(value));
+    try {
+      let stringValue = this.stringify(value);
+      return btoa(stringValue);
+    } catch (err) {
+      console.err('encode: ' + err);
+      throw err;
+    }
   }
 
   /**
-  * decode a base64 value in a new Uint8Array
-  * @param   {string}    value    value encoded in base 64
-  * @return  {byteArray} decodedValue
-  */
+    * decode a base64 value in a new Uint8Array
+    * @param   {string}    value    value encoded in base 64
+    * @return  {byteArray} decodedValue
+    */
   decode(value) {
-    //    CLog('Before dec val', value);
     try {
       return JSON.parse(atob(value));
     } catch (err) {
@@ -50,28 +55,35 @@ class Crypto {
 
   decodeToUint8Array(value) {
     try {
-
-      let receivedArray  = undefined;
-
-      //TODO: The verification if the string contains the \" mutch be checked since it might fail
-      if (atob(value).indexOf('"') > -1) {
-        const receivedArrayObject = JSON.parse(atob(value));
-        receivedArray = Object.keys(receivedArrayObject).map((key) => {
-          return receivedArrayObject[key];
-        });
-      } else {
-        receivedArray = JSON.parse('[' + atob(value) + ']');
-      }
-
-
-      let unsigned8Array = new Uint8Array(receivedArray);
-      return unsigned8Array;
-
+      return new Uint8Array(this.decode(value));
     } catch (err) {
       console.log('decodeToUint8Array:err' + err);
       throw err;
     }
+  }
 
+  stringify(value) {
+    try {
+      let stringValue;
+      if (value.constructor === Uint8Array) {
+        stringValue = '[' + value.toString() + ']'; // the [] is for JSON.parse compatibility
+      } else {
+        stringValue = JSON.stringify(value);
+      }
+      return stringValue;
+    } catch (err) {
+      console.err('stringify: ' + err);
+      throw err;
+    }
+  }
+
+  parse(value) {
+    try {
+      return JSON.parse(value);
+    } catch (err) {
+      console.log('parse:err' + err);
+      throw err;
+    }
   }
 
   encryptRSA(pubKey, data) {
