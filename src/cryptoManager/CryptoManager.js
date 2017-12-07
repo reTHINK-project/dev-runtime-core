@@ -154,11 +154,12 @@ class CryptoManager {
 
     //if is not to apply encryption, then returns resolve
     if (!this.isToUseEncryption && !(message.type === 'handshake')) {
-      log.info('encryption disabled');
+      log.info('not handshake: encryption disabled');
       return false;
     }
 
     if (message.type === 'update') {
+      log.info('update:encryption disabled');
       return false;
     }
 
