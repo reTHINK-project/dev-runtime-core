@@ -468,7 +468,7 @@ class IdentityModule {
         log.log('[callNodeJsGenerateMethods:keyPair.public]', keyPair.public);
 
 
-        publicKey = _this.crypto.encode(keyPair.public);
+        publicKey = _this.crypto.stringify(keyPair.public);
         userkeyPair = keyPair;
 
         //log.log('[callNodeJsGenerateMethods:generateSelectedIdentity] NO_URL');
@@ -521,7 +521,7 @@ class IdentityModule {
         log.log('[callNodeJsGenerateMethods:keyPair.public]', keyPair.public);
         log.log('[callNodeJsGenerateMethods:keyPair.private]', keyPair.private);
 
-        publicKey = _this.crypto.encode(keyPair.public);
+        publicKey = _this.crypto.stringify(keyPair.public);
         userkeyPair = keyPair;
         log.log('generateAssertion:no_hint');
         return _this.generateAssertion(publicKey, origin, '', userkeyPair, idp);
@@ -587,7 +587,7 @@ class IdentityModule {
 
       //generates the RSA key pair
       _this.crypto.generateRSAKeyPair().then(function(keyPair) {
-        let publicKey = _this.crypto.encode(keyPair.public);
+        let publicKey = _this.crypto.stringify(keyPair.public);
 
         _this.sendGenerateMessage(publicKey, origin, idHint, idp).then((response) => {
           if (response.hasOwnProperty('assertion')) { // identity was logged in, just save it
@@ -657,7 +657,7 @@ class IdentityModule {
   }
 
   storeIdentity(result, keyPair) {
-    log.log('[storeIdentity:result]', result);
+    console.log('[storeIdentity:result]', result);
     log.log('[storeIdentity:keyPair]', keyPair);
     let _this = this;
 
