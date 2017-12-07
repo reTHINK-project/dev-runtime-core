@@ -2,9 +2,9 @@
 import * as logger from 'loglevel';
 let log = logger.getLogger('IdentityModule');
 
-import {divideURL, getUserEmailFromURL, isDataObjectURL, getUserIdentityDomain, isLegacy, deepClone } from '../utils/utils.js';
+import {divideURL, getUserEmailFromURL, getUserIdentityDomain, parseMessageURL } from '../utils/utils.js';
 import Identity from './Identity';
-import Crypto from './Crypto';
+import Crypto from '../cryptoManager/Crypto';
 import GuiFake from './GuiFake';
 import { WatchingYou } from 'service-framework/dist/Utils';
 
@@ -427,25 +427,25 @@ class IdentityModule {
       let message = {type: 'create', to: _this._guiURL, from: _this._idmURL,
         body: {value: {identities: identities, idps: idps}}};
 
-      let id = _this._messageBus.postMessage(message);
+      let callback = msg => {
+        _this._messageBus.removeResponseListener(_this._idmURL, msg.id);
 
-      //add listener without timout
+
+        // todo: to return the user URL and not the email or identifier
+
+        if (msg.body.code === 200) {
+          let selectedIdentity = msg.body;
+
+          log.log('selectedIdentity: ', selectedIdentity.value);
+          resolve(selectedIdentity);
+        } else {
+          reject('error on requesting an identity to the GUI');
+        }
+      };
+
+      //postMessage with callback but without timeout
       try {
-        _this._messageBus.addResponseListener(_this._idmURL, id, msg => {
-          _this._messageBus.removeResponseListener(_this._idmURL, id);
-
-
-          // todo: to return the user URL and not the email or identifier
-
-          if (msg.body.code === 200) {
-            let selectedIdentity = msg.body;
-
-            log.log('selectedIdentity: ', selectedIdentity.value);
-            resolve(selectedIdentity);
-          } else {
-            reject('error on requesting an identity to the GUI');
-          }
-        });
+        _this._messageBus.postMessage(message, callback, false);
       } catch (err) {
         reject('In method callIdentityModuleFunc error: ' + err);
       }
@@ -587,7 +587,7 @@ class IdentityModule {
 
       //generates the RSA key pair
       _this.crypto.generateRSAKeyPair().then(function(keyPair) {
-        publicKey = _this.crypto.encode(keyPair.public);
+        let publicKey = _this.crypto.encode(keyPair.public);
 
         _this.sendGenerateMessage(publicKey, origin, idHint, idp).then((response) => {
           if (response.hasOwnProperty('assertion')) { // identity was logged in, just save it
@@ -806,449 +806,23 @@ class IdentityModule {
 
     return new Promise((resolve, reject) => {
       let message = { type: 'execute', to: _this._guiURL, from: _this._idmURL,
-        body: { resource: 'identity', method: methodName, params: parameters }};
-      let id = _this._messageBus.postMessage(message);
+        body: { resource: 'identity', method: methodName, params: parameters } };
 
-      //add listener without timout
+        //post msg with callback but without timout
+      let callback = msg => {
+        _this._messageBus.removeResponseListener(_this._idmURL, msg.id);
+        let result = msg.body.value;
+        resolve(result);
+      };
       try {
-        _this._messageBus.addResponseListener(_this._idmURL, id, msg => {
-          _this._messageBus.removeResponseListener(_this._idmURL, id);
-          let result = msg.body.value;
-          resolve(result);
-        });
+
+        _this._messageBus.postMessage(message, callback, false);
+
       } catch (err) {
         reject('In method callIdentityModuleFunc error: ' + err);
       }
     });
   }
-
-
-  //******************* ENCRYPTION METHODS *******************
-  encryptMessage(message) {
-    //console.info('encryptMessage:message', message);
-    let _this = this;
-
-    log.log('encrypt message ');
-
-    return new Promise(function(resolve, reject) {
-      let isHandShakeType = message.type === 'handshake';
-
-      //if is not to apply encryption, then returns resolve
-      if (!_this.isToUseEncryption && !isHandShakeType) {
-        console.info('encryption disabled');
-        return resolve(message);
-      }
-
-      let dataObjectURL = _this._parseMessageURL(message.to);
-
-      let isToDataObject = isDataObjectURL(dataObjectURL);
-      let isToLegacyIdentity = isLegacy(message.to);
-      let isFromHyperty = divideURL(message.from).type === 'hyperty';
-      let isToHyperty = divideURL(message.to).type === 'hyperty';
-
-      if (message.type === 'update') {
-        log.log('encrypt message: message type update');
-        return resolve(message);
-      }
-
-      if (isToLegacyIdentity) {
-        resolve(message);
-      } else if (isFromHyperty && isToHyperty) {
-        let userURL = _this._registry.getHypertyOwner(message.from);
-        if (userURL) {
-
-          // check if exists any keys between two users
-          let chatKeys = _this.chatKeys[message.from + '<->' + message.to];
-          if (!chatKeys) {
-            chatKeys = _this._newChatCrypto(message, userURL);
-
-            //log.log('createChatKey encrypt', message.from + message.to);
-            _this.chatKeys[message.from + '<->' + message.to] = chatKeys;
-            message.body.handshakePhase = 'startHandShake';
-          }
-
-          if (chatKeys.authenticated && !isHandShakeType) {
-
-            let iv = _this.crypto.generateIV();
-            _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, message.body.value, iv).then(encryptedValue => {
-
-              let filteredMessage = _this._filterMessageToHash(message, JSON.stringify(message.body.value) + JSON.stringify(iv), chatKeys.hypertyFrom.messageInfo);
-
-              _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, filteredMessage).then(hash => {
-                //log.log('result of hash ', hash);
-                let value = {iv: _this.crypto.encode(iv), value: _this.crypto.encode(encryptedValue), hash: _this.crypto.encode(hash)};
-                message.body.value = _this.crypto.encode(value);
-
-                resolve(message);
-              });
-            });
-
-            // if is a handshake message, just resolve it
-          } else if (isHandShakeType) {
-            resolve(message);
-
-            // else, starts a new handshake protocol
-          } else {
-            _this._doHandShakePhase(message, chatKeys).then(function(value) {
-              _this.chatKeys[message.from + '<->' + message.to] = value.chatKeys;
-
-              _this._messageBus.postMessage(value.message);
-              reject('encrypt handshake protocol phase ');
-            });
-          }
-        } else {
-          reject('In encryptMessage: Hyperty owner URL was not found');
-        }
-
-      //if from hyperty to a dataObjectURL
-      } else if (isFromHyperty && isToDataObject) {
-
-        //log.log('dataObject value to encrypt: ', message.body.value);
-        //log.log('IdentityModule - encrypt from hyperty to dataobject ', message);
-
-        _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
-          sessionKeys = _chatkeysToArrayCloner(dataObjectURL, sessionKeys);
-          let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
-
-          _this.dataObjectsStorage.getDataObject(dataObjectURL).then((isHypertyReporter) => {
-            //if no key exists, create a new one if is the reporter of dataObject
-            if (!dataObjectKey) {
-              // if the hyperty is the reporter of the dataObject then generates a session key
-              if (isHypertyReporter.reporter && isHypertyReporter.reporter === message.from) {
-
-                let sessionKey = _this.crypto.generateRandom();
-                _this.dataObjectSessionKeys[dataObjectURL] = {sessionKey: sessionKey, isToEncrypt: true};
-                let dataObjectSessionKeysClone = _chatkeysToStringCloner(dataObjectURL, _this.dataObjectSessionKeys);
-
-                //TODO: check if this does not need to be stored
-                _this.storageManager.set('dataObjectSessionKeys', 0, dataObjectSessionKeysClone).catch(err => {
-                  reject('On encryptMessage from method storageManager.set error: ' + err);
-                });
-                dataObjectKey = _this.dataObjectSessionKeys[dataObjectURL];
-              }
-            }
-
-            //check if there is already a session key for the chat room
-            if (dataObjectKey) {
-
-              // and if is to apply encryption, encrypt the messages
-              if (dataObjectKey.isToEncrypt) {
-                let iv = _this.crypto.generateIV();
-
-                _this.crypto.encryptAES(dataObjectKey.sessionKey, _this.crypto.encode(message.body.value), iv).then(encryptedValue => {
-                  delete message.body.identity.assertion; //TODO: Check why assertion is comming on the message!
-                  delete message.body.identity.expires; //TODO: Check why expires is comming on the message!
-                  let filteredMessage = _this._filterMessageToHash(message, JSON.stringify(message.body.value) + JSON.stringify(iv));
-
-                  _this.crypto.hashHMAC(dataObjectKey.sessionKey, filteredMessage).then(hash => {
-                    // log.log('hash ', hash);
-
-                    let newValue = {value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv), hash: _this.crypto.encode(hash)};
-
-                    message.body.value = JSON.stringify(newValue);
-                    resolve(message);
-                  });
-                });
-
-              // if not, just send the message
-              } else {
-                resolve(message);
-              }
-
-              // start the generation of a new session Key
-            } else {
-              reject('Data object key could not be defined: Failed to decrypt message ');
-            }
-          }).catch(err => { reject('On encryptMessage from method dataObjectsStorage.getDataObject error: ' + err); });
-        }).catch(err => { reject('On encryptMessage from method storageManager.get error: ' + err); });
-      }
-    });
-  }
-
-  encryptDataObject(dataObject, sender) {
-    let _this = this;
-
-    return new Promise(function(resolve, reject) {
-      console.info('dataObject value to encrypt: ', dataObject);
-
-      let dataObjectURL = _this._parseMessageURL(sender);
-
-      _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
-        sessionKeys = _chatkeysToArrayCloner(dataObjectURL, sessionKeys);
-        let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
-
-        //check if there is already a session key for the chat room
-        if (dataObjectKey) {
-
-          // and if is to apply encryption, encrypt the messages
-          if (dataObjectKey.isToEncrypt) {
-            let iv = _this.crypto.generateIV();
-
-            _this.crypto.encryptAES(dataObjectKey.sessionKey, _this.crypto.encode(dataObject), iv).then(encryptedValue => {
-              let newValue = { value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv) };
-
-              //log.log('encrypted dataObject', newValue);
-              return resolve(newValue);
-            }).catch(err => { reject('On encryptDataObject from method encryptAES error: ' + err); });
-
-          // if not, just send the message
-          } else {
-            console.info('The dataObject is not encrypted');
-            return resolve(dataObject);
-          }
-
-          // start the generation of a new session Key
-        } else {
-          return reject('No dataObjectKey for this dataObjectURL:', dataObjectURL);
-        }
-      }).catch(err => { reject('On encryptDataObject from method storageManager.get error: ' + err); });
-    });
-  }
-
-  decryptMessage(message) {
-    let _this = this;
-
-    //  log.log('decryptMessage:message', message);
-
-    return new Promise(function(resolve, reject) {
-      let isHandShakeType = message.type === 'handshake';
-
-      //if is not to apply encryption, then returns resolve
-      if (!_this.isToUseEncryption && !isHandShakeType) {
-        // log.log('decryption disabled');
-        return resolve(message);
-      }
-
-      let dataObjectURL = _this._parseMessageURL(message.to);
-
-      let isToDataObject = isDataObjectURL(dataObjectURL);
-      let isFromHyperty = divideURL(message.from).type === 'hyperty';
-      let isToHyperty = divideURL(message.to).type === 'hyperty';
-
-      if (message.type === 'update') {
-        return resolve(message);
-      }
-
-      //is is hyperty to hyperty communication
-      if (isFromHyperty && isToHyperty) {
-        // log.log('decrypt hyperty to hyperty');
-        let userURL = _this._registry.getHypertyOwner(message.to);
-        if (userURL) {
-
-          let chatKeys = _this.chatKeys[message.to + '<->' + message.from];
-          if (!chatKeys) {
-            chatKeys = _this._newChatCrypto(message, userURL, 'decrypt');
-            _this.chatKeys[message.to + '<->' + message.from] = chatKeys;
-          }
-
-          if (chatKeys.authenticated && !isHandShakeType) {
-            let value = _this.crypto.decode(message.body.value);
-            let iv = _this.crypto.decodeToUint8Array(value.iv);
-            let data = _this.crypto.decodeToUint8Array(value.value);
-            let hash = _this.crypto.decodeToUint8Array(value.hash);
-            _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, data, iv).then(decryptedData => {
-              // log.log('decrypted value ', decryptedData);
-              message.body.value = decryptedData;
-
-              let filteredMessage = _this._filterMessageToHash(message, decryptedData + iv);
-
-              _this.crypto.verifyHMAC(chatKeys.keys.hypertyToHashKey, filteredMessage, hash).then(result => {
-                //log.log('result of hash verification! ', result);
-                message.body.assertedIdentity = true;
-                resolve(message);
-              });
-            });
-
-          } else if (isHandShakeType) {
-            _this._doHandShakePhase(message, chatKeys).then(function(value) {
-
-              //if it was started by doMutualAuthentication then ends the protocol
-              if (value === 'handShakeEnd') {
-                //reject('decrypt handshake protocol phase');
-
-              // if was started by a message, then resend that message
-              } else {
-                _this.chatKeys[message.to + '<->' + message.from] = value.chatKeys;
-                _this._messageBus.postMessage(value.message);
-
-                //reject('decrypt handshake protocol phase ');
-              }
-            });
-          } else {
-            reject('wrong message do decrypt');
-          }
-        } else {
-          reject('error on decrypt message');
-        }
-
-        //if from hyperty to a dataObjectURL
-      } else if (isFromHyperty && isToDataObject) {
-        // log.log('dataObject value to decrypt: ', message.body);
-
-        _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
-          sessionKeys = _chatkeysToArrayCloner(dataObjectURL, sessionKeys);
-          let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
-
-          if (dataObjectKey) {
-
-            //check if is to apply encryption
-            if (dataObjectKey.isToEncrypt) {
-              let parsedValue = JSON.parse(message.body.value);
-              let iv = _this.crypto.decodeToUint8Array(parsedValue.iv);
-              let encryptedValue = _this.crypto.decodeToUint8Array(parsedValue.value);
-              let hash = _this.crypto.decodeToUint8Array(parsedValue.hash);
-
-              _this.crypto.decryptAES(dataObjectKey.sessionKey, encryptedValue, iv).then(decryptedValue => {
-                let parsedValue = _this.crypto.decode(decryptedValue);
-
-                // log.log('decrypted Value,', parsedValue);
-                message.body.value = parsedValue;
-
-                let filteredMessage = _this._filterMessageToHash(message, JSON.stringify(parsedValue) + JSON.stringify(iv));
-
-                _this.crypto.verifyHMAC(dataObjectKey.sessionKey, filteredMessage, hash).then(result => {
-                  // log.log('result of hash verification! ', result);
-
-                  message.body.assertedIdentity = true;
-                  resolve(message);
-                });
-              });
-
-            //if not, just return the message
-            } else {
-              message.body.assertedIdentity = true;
-              resolve(message);
-            }
-
-          } else {
-            message.body.assertedIdentity = true;
-            resolve(message);
-
-            //reject('no sessionKey for chat room found');
-          }
-        });
-
-      } else {
-        reject('wrong message to decrypt');
-      }
-
-    });
-  }
-
-  decryptDataObject(dataObject, sender) {
-    let _this = this;
-
-    return new Promise(function(resolve, reject) {
-      //if is not to apply encryption, then returns resolve
-      if (!_this.isToUseEncryption) {
-        // log.log('decryption disabled');
-        return resolve(dataObject);
-      }
-
-      let dataObjectURL = _this._parseMessageURL(sender);
-
-      // log.log('dataObject value to decrypt: ', dataObject);
-
-      _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
-        sessionKeys = _chatkeysToArrayCloner(dataObjectURL, sessionKeys);
-        let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
-
-        if (dataObjectKey) {
-
-          //check if is to apply encryption
-          if (dataObjectKey.isToEncrypt) {
-            let iv = _this.crypto.decodeToUint8Array(dataObject.iv);
-            let encryptedValue = _this.crypto.decodeToUint8Array(dataObject.value);
-
-            _this.crypto.decryptAES(dataObjectKey.sessionKey, encryptedValue, iv).then(decryptedValue => {
-              let parsedValue = _this.crypto.decode(decryptedValue);
-              let newValue = { value: parsedValue, iv: _this.crypto.encode(iv) };
-
-              // log.log('decrypted dataObject,', newValue);
-
-              return resolve(newValue);
-            }).catch(err => { reject('On decryptDataObject from method encryptAES error: ' + err); });
-
-          //if not, just return the dataObject
-          } else {
-            // log.log('The dataObject is not encrypted');
-            return resolve(dataObject);
-          }
-
-        } else {
-          return reject('No dataObjectKey for this dataObjectURL:', dataObjectURL);
-        }
-      });
-    });
-  }
-
-  doMutualAuthentication(sender, receiver) {
-    console.info('doMutualAuthentication:sender ', sender);
-    console.info('doMutualAuthentication:receiver ', receiver);
-    let _this = this;
-
-    return new Promise(function(resolve, reject) {
-
-      let dataObjectURL;
-
-      // check if the sender is a dataObject and if so stores that value
-      let reporterURL = _this.registry.getReporterURLSynchonous(sender);
-      if (reporterURL) {
-        dataObjectURL = sender;
-        sender = reporterURL;
-      }
-
-      let msg = {
-        to: receiver,
-        from: sender,
-        callback: undefined,
-        body: {handshakePhase: 'startHandShake', ignore: 'ignoreMessage'}
-      };
-
-      if (!sender || !receiver) {
-        return reject('sender or receiver missing on doMutualAuthentication');
-      }
-
-      let chatKeys = _this.chatKeys[sender + '<->' + receiver];
-      let userURL = _this._registry.getHypertyOwner(sender);
-
-      if (userURL) {
-
-        if (!chatKeys) {
-          // callback to resolve when finish the mutual authentication
-          let resolved = function(value) {
-            // log.log('callback value:', value);
-            resolve(value);
-          };
-          msg.callback = resolved;
-          msg.dataObjectURL = dataObjectURL;
-
-          chatKeys = _this._newChatCrypto(msg, userURL);
-          _this.chatKeys[sender + '<->' + receiver] = chatKeys;
-        }
-
-        if (chatKeys.authenticated) {
-
-          let startSessionKeyExchange = {
-            to: sender,
-            from: receiver
-          };
-          chatKeys.dataObjectURL = dataObjectURL;
-          _this._sendReporterSessionKey(startSessionKeyExchange, chatKeys).then(value => {
-
-            _this._messageBus.postMessage(value.message);
-            resolve('exchange of chat sessionKey initiated');
-          }).catch(err => { reject('On doMutualAuthentication from method _sendReporterSessionKey error: ' + err); });
-        } else {
-          _this._doHandShakePhase(msg, chatKeys);
-        }
-      } else {
-        reject('Mutual authentication error: Hyperty owner could not be resolved');
-      }
-    });
-
-  }
-
 
   //******************* TOKEN METHODS *******************
   /**
@@ -1753,7 +1327,7 @@ class IdentityModule {
 
       let splitedURL = divideURL(dataObjectURL);
       let domain = splitedURL.domain;
-      let finalURL = _this._parseMessageURL(dataObjectURL);
+      let finalURL = parseMessageURL(dataObjectURL);
 
       // check if is the creator of the hyperty
       let reporterURL = _this.registry.getReporterURLSynchonous(finalURL);
@@ -1789,68 +1363,6 @@ class IdentityModule {
           }
         }
       }
-    });
-  }
-
-  _sendReporterSessionKey(message, chatKeys) {
-    let _this = this;
-
-    return new Promise(function(resolve, reject) {
-
-      let sessionKeyBundle = _this.dataObjectSessionKeys[chatKeys.dataObjectURL];
-      let reporterSessionKeyMsg;
-      let valueToEncrypt;
-      let sessionKey;
-      let iv;
-      let value = {};
-
-      //if there is not yet a session Key, generates a new one
-      if (!sessionKeyBundle) {
-        sessionKey = _this.crypto.generateRandom();
-        _this.dataObjectSessionKeys[chatKeys.dataObjectURL] = {sessionKey: sessionKey, isToEncrypt: true};
-
-        let dataObjectSessionKeysClone = _chatkeysToStringCloner(chatKeys.dataObjectURL, _this.dataObjectSessionKeys);
-
-        _this.storageManager.set('dataObjectSessionKeys', 0, dataObjectSessionKeysClone).catch(err => {
-          reject('On _sendReporterSessionKey from method storageManager.set(dataObjectSessionKeys...) error: ' + err);
-        });
-
-      } else {
-        sessionKey = sessionKeyBundle.sessionKey;
-      }
-
-      try {
-        valueToEncrypt = _this.crypto.encode({value: _this.crypto.encode(sessionKey), dataObjectURL: chatKeys.dataObjectURL});
-      } catch (err) {
-        return reject('On _sendReporterSessionKey from method storageManager.set error valueToEncrypt: ' + err);
-      }
-
-      iv = _this.crypto.generateIV();
-      value.iv = _this.crypto.encode(iv);
-      _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, valueToEncrypt, iv).then(encryptedValue => {
-
-        reporterSessionKeyMsg = {
-          type: 'handshake',
-          to: message.from,
-          from: message.to,
-          body: {
-            handshakePhase: 'reporterSessionKey',
-            value: _this.crypto.encode(encryptedValue)
-          }
-        };
-
-        let filteredMessage = _this._filterMessageToHash(reporterSessionKeyMsg, valueToEncrypt + iv, chatKeys.hypertyFrom.messageInfo);
-
-        return _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, filteredMessage);
-      }).then(hashedMessage => {
-        let valueWithHash = _this.crypto.encode({value: reporterSessionKeyMsg.body.value, hash: _this.crypto.encode(hashedMessage), iv: value.iv});
-
-        reporterSessionKeyMsg.body.value = valueWithHash;
-
-        resolve({message: reporterSessionKeyMsg, chatKeys: chatKeys});
-      }).catch(err => {
-        reject('On _sendReporterSessionKey from chained promises encryptAES error: ' + err);
-      });
     });
   }
 
@@ -2376,15 +1888,6 @@ class IdentityModule {
 
   _secondsSinceEpoch() {
     return Math.floor(Date.now() / 1000);
-  }
-
-  _parseMessageURL(URL) {
-    let splitedToURL = URL.split('/');
-    if (splitedToURL.length <= 6) {
-      return splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3];
-    } else {
-      return splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3] + '/' + splitedToURL[4];
-    }
   }
 }
 

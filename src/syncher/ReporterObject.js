@@ -4,6 +4,7 @@ let log = logger.getLogger('ReporterObject');
 
 import { divideURL, splitObjectURL } from '../utils/utils';
 import Subscription from './Subscription';
+import * as cryptoManager from '../cryptoManager/CryptoManager';
 
 class ReporterObject {
 
@@ -211,7 +212,7 @@ class ReporterObject {
 
                   log.log('[SyncherManager.ReporterObject] encrypting received data ', msg.body.value);
 
-                  _this._parent._identityModule.encryptDataObject(msg.body.value, url).then((encryptedValue)=>{
+                  cryptoManager.default.encryptDataObject(msg.body.value, url).then((encryptedValue)=>{
                     log.log('[SyncherManager.ReporterObject] encrypted data ',  encryptedValue);
 
                     _this._storeChildObject(msg, JSON.stringify(encryptedValue));

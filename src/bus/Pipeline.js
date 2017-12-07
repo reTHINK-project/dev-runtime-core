@@ -20,12 +20,17 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 **/
+import * as logger from 'loglevel';
+let log = logger.getLogger('Pipeline');
 
 /**
 * @author micaelpedrosa@gmail.com
 * Sequencial processor of methods. Similar to how Sequential Promise's work, but better fit for message processing.
 * Normal use for this, is to intercept all messages with configured handlers, and act accordingly.
 */
+
+import {isDataObjectURL} from '../utils/utils';
+
 class Pipeline {
   /* public
     handlers: ((PipeContext) => void)[]
@@ -126,6 +131,10 @@ class PipeContext {
       }
     }
   }
+
+
+
+
 }
 
 class Iterator {

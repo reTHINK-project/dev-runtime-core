@@ -89,44 +89,6 @@ class RuntimeCoreCtx extends ReThinkCtx {
     });
   }
 
-  prepareForEvaluation(message, isIncoming) {
-    return new Promise((resolve, reject) => {
-
-      let _this = this;
-      if (isIncoming) {
-        if (_this._isToCypherModule(message)) {
-          _this.idModule.decryptMessage(message).then(function(message) {
-            /*if (message.type === 'update') {
-              _this._isValidUpdate(message).then(message => {*/
-            resolve(message);
-          }, (error) => {
-            reject(error);
-
-            /*});
-            } else {
-              resolve(message);
-            }*/
-
-          });
-        } else {
-          resolve(message);
-        }
-      } else {
-        // log.log('[Policy.RuntimeCoreCtx prepareForEvaluation]', message);
-        if (_this._isToSetID(message)) {
-          _this._getIdentity(message).then(identity => {
-            message.body.identity = identity;
-            resolve(message);
-          }, (error) => {
-            reject(error);
-          });
-        } else {
-          resolve(message);
-        }
-      }
-
-    });
-  }
 
   getPolicies(message, isIncomingMessage) {
     let policies = {};
@@ -159,77 +121,7 @@ class RuntimeCoreCtx extends ReThinkCtx {
     });
   }
 
-  prepareToForward(message, isIncoming, result) {
-    let _this = this;
-    return new Promise((resolve, reject) => {
-      // log.log('[Policy.RuntimeCoreCtx.prepareToForward]', message);
 
-      // comment this to enable mutual authentication
-      //return resolve(message);
-
-      // TODO remove this validation. When the Nodejs auth was completed this should work like browser;
-      this.runtimeCapabilities.isAvailable('node').then((result) => {
-
-      console.log('[RuntimeCoreCtx - isAvailable - node] - ', result);
-      //  if (result) {
-      //    return resolve(message);
-      //  } else {
-          if (isIncoming) {
-            let isSubscription = message.type === 'subscribe';
-            let isFromRemoteSM = _this.isFromRemoteSM(message.from);
-
-            if (isSubscription & isFromRemoteSM) {
-
-              // TODO: should verify why the mutualAuthentication is not working
-              // TODO: this should uncommented
-              _this.doMutualAuthentication(message).then(() => {
-                resolve(message);
-              }, (error) => {
-                reject(error);
-              });
-
-            } else {
-              resolve(message);
-            }
-          } else {
-
-            // TODO: should verify why the mutualAuthentication is not working
-            // TODO: this should uncommented
-            if (_this._isToCypherModule(message)) {
-              _this.idModule.encryptMessage(message).then((message) => {
-                resolve(message);
-              }, (error) => {
-                reject(error);
-              });
-            } else {
-              resolve(message);
-            }
-          }
-//        }
-      });
-
-    });
-  }
-
-  doMutualAuthentication(message) {
-    let _this = this;
-    return new Promise(function(resolve, reject) {
-      let to = message.to.split('/');
-      let subsIndex = to.indexOf('subscription');
-      let isDataObjectSubscription = subsIndex !== -1;
-      let isFromRemoteSM = _this.isFromRemoteSM(message.from);
-      if (isDataObjectSubscription & isFromRemoteSM) {
-        to.pop();
-        let dataObjectURL = to[0] + '//' + to[2] + '/' + to[3];
-        _this.idModule.doMutualAuthentication(dataObjectURL, message.body.subscriber).then(() => {
-          _this.runtimeRegistry.registerSubscriber(dataObjectURL, message.body.subscriber);
-          resolve();
-        }, (error) => {
-          reject(error);
-        });
-      }
-    });
-  }
 
   getMyEmails() {
     let identities = this.idModule.getIdentities();
@@ -269,85 +161,12 @@ class RuntimeCoreCtx extends ReThinkCtx {
     return policy;
   }
 
-  isFromRemoteSM(from) {
-    let splitFrom = from.split('://');
-    return splitFrom[0] === 'runtime' && from !== this.runtimeRegistry.runtimeURL + '/sm';
-  }
-
-  isLocal(url) {
-    return this.runtimeRegistry.isLocal(url);
-  }
-
-  isInterworkingProtoStub(url) {
-    return this.runtimeRegistry.isInterworkingProtoStub(url);
-  }
-
-  _isToSetID(message) {
-    let schemasToIgnore = ['domain-idp', 'runtime', 'domain'];
-    let splitFrom = (message.from).split('://');
-    let fromSchema = splitFrom[0];
-    let isLocal = this.runtimeRegistry.isLocal(message.to);
-    let isToIgnore = schemasToIgnore.indexOf(fromSchema) === -1;
-
-    let _from = message.from;
-
-    if (message.body && message.body.hasOwnProperty('source')) {
-      _from = message.body.source;
-    }
-
-    // Signalling Messages between P2P Stubs don't have Identities. FFS
-    if (_from.includes('/p2prequester/') || _from.includes('/p2phandler/')) {
-      return false;
-    }
-
-    // if (isLocal) {
-    //   return false;
-    // }
-
-    return isToIgnore;
-  }
 
   getURL(url) {
     let splitURL = url.split('/');
     return splitURL[0] + '//' + splitURL[2] + '/' + splitURL[3];
   }
 
-  _getIdentity(message) {
-
-    let from = message.from;
-
-    // log.log('[Policy.RuntimeCoreCtx.getIdentity] ', message);
-    let sourceURL = undefined;
-    if (message.body.source !== undefined) {
-      from = message.body.source;
-    }
-
-    if (message.type === 'forward') {
-      from = message.body.from;
-    }
-
-    return this.idModule.getToken(from, message.to);
-  }
-
-  /**
-  * Identifies the messages to be forwarded to the Identity Module for
-  * encryption/decryption and integrity validation.
-  * @param {Message}    message
-  * @returns {boolean}  returns true if the message requires encryption/decryption
-  *                     or if its type equals 'handshake'; false otherwise
-  */
-  _isToCypherModule(message) {
-    log.log('[Policy.RuntimeCoreCtx.istoChyperModule]', message);
-    let isCreate = message.type === 'create';
-    let isFromHyperty = divideURL(message.from).type === 'hyperty';
-    let isToHyperty = divideURL(message.to).type === 'hyperty';
-    let isToDataObject = isDataObjectURL(message.to);
-
-    let doMutualAuthentication = message.body.hasOwnProperty('mutual') ? message.body.mutual : true;
-
-
-    return ((isCreate && isFromHyperty && isToHyperty) || (isCreate && isFromHyperty && isToDataObject && doMutualAuthentication) || message.type === 'handshake' || (message.type === 'update' && doMutualAuthentication));
-  }
 
   /**
   * Creates a group with the given name.

@@ -32,15 +32,18 @@ let log = logger.getLogger('RuntimeUA');
 //Main dependecies
 import Registry from '../registry/Registry';
 import IdentityModule from '../identity/IdentityModule';
+import IdentityManager from '../identity/IdentityManager';
 import PEP from '../policy/PEP';
 import MessageBus from '../bus/MessageBus';
 import { generateGUID } from '../utils/utils';
 import AddressAllocation from '../allocation/AddressAllocation';
+import * as cryptoManager from '../cryptoManager/CryptoManager';
 
 import Loader from './Loader';
 import Descriptors from './Descriptors';
 
 import { runtimeConfiguration } from './runtimeConfiguration';
+import MsgBusHandlers from './MsgBusHandlers';
 import { runtimeUtils } from './runtimeUtils';
 
 import GraphConnector from '../graphconnector/GraphConnector';
@@ -286,30 +289,29 @@ class RuntimeUA {
         // Instantiate the Policy Engine
         this.policyEngine = new PEP(new RuntimeCoreCtx(this.runtimeURL, this.identityModule, this.registry, this.storageManager, this.runtimeCapabilities));
 
-        this.messageBus.pipeline.handlers = [
+        // Instantiate Discovery
+        this.coreDiscovery = new CoreDiscovery(this.runtimeURL, this.messageBus, this.graphConnector, this.runtimeFactory, this.registry);
 
-          // Policy message authorise
-          (ctx) => {
-            this.policyEngine.authorise(ctx.msg).then((changedMgs) => {
-              ctx.msg = changedMgs;
-              ctx.next();
-            }).catch((reason) => {
-              log.error(reason);
-              ctx.fail(reason);
-            });
-          }
-        ];
+        // Instantiate the IdentityManager
+        this.identityManager = new IdentityManager(this.identityModule);
+
+        // initialise the CryptoManager
+        cryptoManager.default.init(this.runtimeURL, this.runtimeCapabilities, this.storageManager, this._dataObjectsStorage, this.registry, this.coreDiscovery, this.identityModule, this.runtimeFactory);
 
         // Instantiate the Graph Connector
         this.graphConnector = process.env.MODE !== 'light' ? new GraphConnector(this.runtimeURL, this.messageBus, this.storageManager) : null;
 
-        // Instantiate Discovery
-        this.coreDiscovery = new CoreDiscovery(this.runtimeURL, this.messageBus, this.graphConnector, this.runtimeFactory, this.registry);
+        this.handlers = new MsgBusHandlers(this.policyEngine, this.identityManager, cryptoManager);
+
+        this.messageBus.pipelineOut.handlers = [this.handlers.idmHandler, this.handlers.pepOutHandler, this.handlers.encryptHandler];
+        this.messageBus.pipelineIn.handlers = [this.handlers.decryptHandler, this.handlers.pepInHandler];
 
         // Add to App Sandbox the listener;
         appSandbox.addListener('*', (msg) => {
           this.messageBus.postMessage(msg);
         });
+
+        cryptoManager.default.messageBus = this.messageBus;
 
         // Register messageBus on Registry
         this.registry.messageBus = this.messageBus;

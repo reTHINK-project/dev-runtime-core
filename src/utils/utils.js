@@ -431,3 +431,49 @@ export function isEmpty(obj) {
 
   return JSON.stringify(obj) === JSON.stringify({});
 }
+
+export function chatkeysToStringCloner(sessionKeys) {
+  let dataObjectSessionKeysClone = {};
+  let fields = Object.keys(sessionKeys);
+  if (fields) {
+    try {
+      for (let i = 0; i <  fields.length; i++) {
+        let field = fields[i];
+        dataObjectSessionKeysClone[field] = {};
+        dataObjectSessionKeysClone[field].sessionKey = sessionKeys[field].sessionKey.toString();
+        dataObjectSessionKeysClone[field].isToEncrypt = sessionKeys[field].isToEncrypt;
+      }
+    } catch (err) {
+      console.error('_chatkeysToStringCloner:err', err);
+    }
+  }
+  return dataObjectSessionKeysClone;
+}
+
+export function chatkeysToArrayCloner(sessionKeys) {
+  let dataObjectSessionKeysClone = {};
+  let fields = Object.keys(sessionKeys);
+  if (fields) {
+    try {
+      for (let i = 0; i <  fields.length; i++) {
+        let field = fields[i];
+        dataObjectSessionKeysClone[field] = {};
+        let arrayValues = JSON.parse('[' + sessionKeys[field].sessionKey + ']');
+        dataObjectSessionKeysClone[field].sessionKey = new Uint8Array(arrayValues);
+        dataObjectSessionKeysClone[field].isToEncrypt = sessionKeys[field].isToEncrypt;
+      }
+    } catch (err) {
+      console.error('_chatkeysToArrayCloner:err', err);
+    }
+  }
+  return dataObjectSessionKeysClone;
+}
+
+export function parseMessageURL(URL) {
+  let splitedToURL = URL.split('/');
+  if (splitedToURL.length <= 6) {
+    return splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3];
+  } else {
+    return splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3] + '/' + splitedToURL[4];
+  }
+}
