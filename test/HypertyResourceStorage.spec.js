@@ -5,9 +5,10 @@ import { runtimeFactory } from './resources/runtimeFactory';
 
 import { generateGUID } from '../src/utils/utils';
 
-import { generateData } from './resources/generateData';
+import { generateData, buildResourceMessage } from './resources/generateData';
 
 import HypertyResourcesStorage from '../src/hyperty-resources-storage/HypertyResourcesStorage';
+
 import MessageBus from '../src/bus/MessageBus';
 
 chai.config.truncateThreshold = 0;
@@ -24,19 +25,22 @@ describe('Hyperty Resource Storage', function() {
   let hypertyResourcesStorage;
 
   before(function(done) {
-    bus = new MessageBus();
+
+    let registry = {
+      isLocal: function() {
+        return true;
+      }
+    };
+
+    bus = new MessageBus(registry);
 
     let hypertyResources;
 
-    storageManager.set('hypertyResources', 1, {}).then(function() {
+    storageManager.get('hypertyResources').then(function(result) {
+      hypertyResources = result || {};
 
-      storageManager.get('hypertyResources').then(function(result) {
-        hypertyResources = result || {};
-
-        hypertyResourcesStorage = new HypertyResourcesStorage(runtimeURL, bus, storageManager, hypertyResources);
-        done();
-
-      });
+      hypertyResourcesStorage = new HypertyResourcesStorage(runtimeURL, bus, storageManager, hypertyResources);
+      done();
 
     });
 
@@ -48,7 +52,6 @@ describe('Hyperty Resource Storage', function() {
 
       expect(result).to.have.all.keys('quota', 'usage', 'percent');
       expect(result).to.have.property('percent').to.be.a('number');
-      expect(result).to.have.property('percent').to.not.be.greaterThan(100, 'You don\'t have left space on the storage');
 
     })).to.be.fulfilled.and.notify(done);
 
@@ -56,58 +59,38 @@ describe('Hyperty Resource Storage', function() {
 
   it('should add resources', function(done) {
 
+
     const from = 'hyperty://localhost/' + generateGUID();
-    const p2pHandler = runtimeURL + 'p2phandler/' + generateGUID();
-    const dataObjectURL = 'comm://localhost/' + generateGUID();
+    const generatedData = generateData('50MB');
 
-    let msg = {
-      type: 'create',
-      from: from,
-      to: runtimeURL + '/storage',
-      body: {
-        auth: false,
-        identity: { userProfle: {} },
-        value: {
-          children: 'resources',
-          p2pHandler: p2pHandler,
-          parent: dataObjectURL,
-          runtime: runtimeURL,
-          schema: 'hyperty-catalogue://catalogue.localhost/.well-known/dataschema/Communication',
-          reporter: from
-        }
-      }
-    };
+    const msg = buildResourceMessage(from, runtimeURL, generatedData);
 
+    const id = bus.postMessage(msg);
 
-    for (let i = 0; i < 2; i++) {
-      const generatedData = generateData();
+    bus.addResponseListener(from, id, (reply) => {
+      bus.removeResponseListener(from, reply.id);
 
-      console.log(generatedData);
+      expect(reply.body.code).to.be.equal(200, 'the message code is different of 200');
+      done();
+    });
 
-      const resource = {
-        content: generatedData,
-        created: generatedData.lastModifiedDate,
-        lastModified: generatedData.lastModifiedDate,
-        mimetype: generatedData.type,
-        name: generatedData.name,
-        resourceType: 'file',
-        size: generatedData.size,
-        url: from + '#' + i
-      };
+  });
 
-      Object.assign(msg.body.value, resource);
-      const id = bus.postMessage(msg);
+  it('should add resources out of limit', function(done) {
 
-      console.log('msg:', msg);
+    const from = 'hyperty://localhost/' + generateGUID();
+    const generatedData = generateData('100MB');
 
-      bus.addResponseListener(from, id, (reply) => {
-        console.log('AQUI:', reply);
-        bus.removeResponseListener(from, reply.id);
+    const msg = buildResourceMessage(from, runtimeURL, generatedData);
 
-        done();
-      });
+    const id = bus.postMessage(msg);
 
-    }
+    bus.addResponseListener(from, id, (reply) => {
+      bus.removeResponseListener(from, reply.id);
+
+      expect(reply.body.code).to.be.equal(500, 'the message code is different of 500');
+      done();
+    });
 
   });
 

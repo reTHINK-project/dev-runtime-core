@@ -10,18 +10,18 @@
     <h2>reThink Project performance tests</h2>
     <table cellspacing="0" cellpadding="0" border="0">
       <tr class="overview">
-        <td colspan="3" title="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Safari/537.36">Browser: Chrome 60.0.3112 (Linux 0.0.0)</td>
+        <td colspan="3" title="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36">Browser: Chrome 62.0.3202 (Linux 0.0.0)</td>
       </tr>
       <tr class="overview">
-        <td colspan="3">Timestamp: 2017-12-5 09:48:35</td>
+        <td colspan="3">Timestamp: 2017-12-7 18:08:19</td>
       </tr>
       <tr>
         <td colspan="3">
-          2 tests / 
-          1 errors / 
+          3 tests / 
+          0 errors / 
           1 failures / 
           0 skipped / 
-          runtime: 2.001s
+          runtime: 2.499s
         </td>
       </tr>
       <tr class="header">
@@ -29,44 +29,94 @@
         <td>Spec</td>
         <td>Suite / Results</td>
       </tr>
+      <tr class="pass">
+        <td>Passed in 0.006s</td>
+        <td>check available space</td>
+        <td>Hyperty Resource Storage</td>
+      </tr>
       <tr class="fail">
         <td>Failed</td>
-        <td>"before all" hook</td>
+        <td>should add resources</td>
         <td>
           Hyperty Resource Storage
           <br />Error: Timeout of 2000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves.
 
         </td>
       </tr>
+      <tr class="pass">
+        <td>Passed in 0.492s</td>
+        <td>should add resources out of limit</td>
+        <td>Hyperty Resource Storage</td>
+      </tr>
       <tr class="system-out">
-        <td colspan="3"><strong>System output:</strong><br />Chrome 62.0.3202 (Linux 0.0.0) WARN: 'Unhandled rejection: AbortError: Transaction aborted
-    at IDBTransaction.<anonymous> (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:17638:49)
-    at IDBTransaction.<anonymous> (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:16075:23)
+        <td colspan="3"><strong>System output:</strong><br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '1.42', 0.9, true
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '1.42', 0.9, true
+<br />Chrome 62.0.3202 (Linux 0.0.0) WARN: 'The file you will save is bigger than the space you have'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'previous:', 'runtime://localhost/dd53858e-7c07-c58d-b93b-e4b344bc72a9/storage/3dd215d1-a082-2cf1-52e9-90f2bbc353ba'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'current:', 'runtime://localhost/dd53858e-7c07-c58d-b93b-e4b344bc72a9/storage/32c3f7c3-1381-939b-fb18-3ec77dba42eb'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'CURRENT:', 1512668949521, 1512668950218
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'previous:', undefined
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'current:', 'runtime://localhost/d81d5fe6-f7d5-6aba-3567-b865b0ed5407/storage/6e0cae96-eaaf-547e-a0f8-001055fa7fa3'
+<br />Chrome 62.0.3202 (Linux 0.0.0) WARN: DexieError{_e: Error{}, name: 'AbortError', message: 'Transaction aborted', inner: null, _promise: Promise{_listeners: [], onuncatched: function dbUncaught(err) { ... }, _lib: false, _PSD: Object{parent: ..., ref: ..., global: ..., finalize: ..., transless: ..., trans: ...}, _stackHolder: Error{}, _prev: Promise{_listeners: ..., onuncatched: ..., _lib: ..., _PSD: ..., _stackHolder: ..., _prev: ..., _numPrev: ..., _state: ..., _value: ...}, _numPrev: 1, _state: false, _value: DexieError{_e: ..., name: ..., message: ..., inner: ..., _promise: ...}}}
+<br />Chrome 62.0.3202 (Linux 0.0.0) WARN: 'Unhandled rejection: AbortError: Transaction aborted
+    at IDBTransaction.<anonymous> (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:16278:49)
+    at IDBTransaction.<anonymous> (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:14715:23)
 From previous: 
-    at new Transaction (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:17559:28)
-    at Dexie._createTransaction (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:16612:16)
-    at http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:16978:36
-    at usePSD (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:16117:16)
-    at newScope (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:16104:14)
-    at http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:16973:24
-    at callListener (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:15908:19)
-    at endMicroTickScope (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:15997:25)
+    at new Transaction (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:16199:28)
+    at Dexie._createTransaction (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:15252:16)
+    at http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:15618:36
+    at usePSD (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:14757:16)
+    at newScope (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:14744:14)
+    at http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:15613:24
+    at callListener (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:14548:19)
+    at endMicroTickScope (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:14637:25)
 From previous: 
-    at Function.resolve (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:15724:16)
-    at enterTransactionScope (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:16972:29)
-    at http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:16666:17
-    at callListener (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:15908:19)
-    at endMicroTickScope (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:15997:25)
-    at IDBOpenDBRequest.<anonymous> (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:16083:30)
+    at Function.resolve (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:14364:16)
+    at enterTransactionScope (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:15612:29)
+    at executePromiseTask (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:14449:9)
+    at new Promise (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:14248:5)
+    at Dexie._whenReady (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:15297:16)
+    at Dexie.transaction (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:15608:105)
+    at StorageManager.set (webpack-internal:///153:69:22)
+    at checkStorageQuota.then (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:18719:29)'
+<br />Chrome 62.0.3202 (Linux 0.0.0) WARN: 'Unhandled rejection: AssertionError: the message code is different of 200: expected 500 to equal 200
+    at bus.addResponseListener (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:3106:37)
+    at MessageBus._onResponse (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:2870:9)
+    at deliver (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:19002:22)
+    at MessageBus.postMessage (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:19021:12)
+    at _this._storageManager.set.then.catch (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:18742:20)
+    at callListener (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:14551:19)
+    at endMicroTickScope (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:14637:25)
+    at IDBTransaction.<anonymous> (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:14723:30)
 From previous: 
-    at new Dexie (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:16289:26)
-    at Object.storageManager (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:12592:16)
-    at Suite.<anonymous> (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:3001:108)
-    at Object.create (http://localhost:9876/base/node_modules/mocha/mocha.js?0863072fa0d42c0f56c2c43e36b6f2bd01402ae2:931:19)
-    at context.describe.context.context (http://localhost:9876/base/node_modules/mocha/mocha.js?0863072fa0d42c0f56c2c43e36b6f2bd01402ae2:744:27)
-    at Object.<anonymous> (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:2999:1)
-    at __webpack_require__ (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:20:30)
-    at http://localhost:9876/base/test/HypertyResourceStorage.spec.js?0094e776101c076df865eae28ce8de3ad065b078:63:18'
+    at Promise.then (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:14256:18)
+    at Promise.catch (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:14269:49)
+    at checkStorageQuota.then (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:18730:15)
+    at <anonymous>
+From previous: AbortError: Transaction aborted
+    at IDBTransaction.<anonymous> (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:16278:49)
+    at IDBTransaction.<anonymous> (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:14715:23)
+From previous: 
+    at Promise.then (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:14256:18)
+    at checkStorageQuota.then (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:18719:81)
+    at <anonymous>
+From previous: AbortError: Transaction aborted
+    at IDBTransaction.<anonymous> (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:16278:49)
+    at IDBTransaction.<anonymous> (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:14715:23)
+From previous: 
+    at Dexie._whenReady (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:15297:16)
+    at Dexie.transaction (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:15608:105)
+    at StorageManager.set (webpack-internal:///153:69:22)
+    at checkStorageQuota.then (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:18719:29)
+    at <anonymous>'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '1.42', 0.9, true
+<br />Chrome 62.0.3202 (Linux 0.0.0) WARN: 'The file you will save is bigger than the space you have'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'previous:', 'runtime://localhost/dd53858e-7c07-c58d-b93b-e4b344bc72a9/storage/3dd215d1-a082-2cf1-52e9-90f2bbc353ba'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'current:', 'runtime://localhost/dd53858e-7c07-c58d-b93b-e4b344bc72a9/storage/32c3f7c3-1381-939b-fb18-3ec77dba42eb'
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'CURRENT:', 1512668949521, 1512668950218
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'previous:', undefined
+<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'current:', 'runtime://localhost/d81d5fe6-f7d5-6aba-3567-b865b0ed5407/storage/6e0cae96-eaaf-547e-a0f8-001055fa7fa3'
+<br />Chrome 62.0.3202 (Linux 0.0.0) WARN: DexieError{_e: Error{}, name: 'AbortError', message: 'Transaction aborted', inner: null, _promise: Promise{_listeners: [], onuncatched: function dbUncaught(err) { ... }, _lib: false, _PSD: Object{parent: ..., ref: ..., global: ..., finalize: ..., transless: ..., trans: ...}, _stackHolder: Error{}, _prev: Promise{_listeners: ..., onuncatched: ..., _lib: ..., _PSD: ..., _stackHolder: ..., _prev: ..., _numPrev: ..., _state: ..., _value: ...}, _numPrev: 1, _state: false, _value: DexieError{_e: ..., name: ..., message: ..., inner: ..., _promise: ...}}}
 </td>
       </tr>
     </table>
