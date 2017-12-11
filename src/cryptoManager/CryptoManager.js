@@ -845,7 +845,7 @@ class CryptoManager {
             //TODO remove later this verification as soon as all the IdP proxy are updated in the example
             let encodedpublicKey = (typeof value.contents === 'string') ? value.contents : value.contents.nonce;
 
-            let receiverPublicKey = new Uint8Array(_this.crypto.parse(encodedpublicKey));
+            let receiverPublicKey = _this.crypto.parseToUint8Array(encodedpublicKey);
             let premasterSecret = _this.crypto.generatePMS();
             let toRandom = message.body.value;
             chatKeys.hypertyTo.assertion = message.body.identity.assertion;
@@ -945,7 +945,7 @@ class CryptoManager {
             //TODO remove later this verification as soon as all the IdP proxy are updated in the example
             let encodedpublicKey = (typeof value.contents === 'string') ? value.contents : value.contents.nonce;
 
-            let senderPublicKey = new Uint8Array(_this.crypto.parse(encodedpublicKey));
+            let senderPublicKey = _this.crypto.parseToUint8Array(encodedpublicKey);
             chatKeys.hypertyTo.assertion = message.body.identity.assertion;
             chatKeys.hypertyTo.publicKey = senderPublicKey;
             chatKeys.hypertyTo.userID    = value.contents.email;

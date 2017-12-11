@@ -6,27 +6,19 @@ import {encodeUTF8, decodeUTF8} from './utf8.js';
 */
 class Crypto {
 
+/**
+* Runtime factory is so it can be passed the cypto module wapper for nodeJS.
+*/
   constructor(runtimeFactory) {
     let _this = this;
-    if (typeof runtimeFactory.createWebcrypto === 'function') {
-      _this._crypto = runtimeFactory.createWebcrypto();
-
-      //_this.cryptoUTF8Encoder = encodeUTF8;
-      //_this.cryptoUTF8Decoder = decodeUTF8;
-
-    } else {
-      _this._crypto = crypto;
-
-      //_this.cryptoUTF8Encoder = (data) => { return new TextDecoder('utf-8').encode(data); };
-      //_this.cryptoUTF8Decoder = (data) => { return new TextDecoder('utf-8').decode(data); };
-    }
+    typeof runtimeFactory.createWebcrypto === 'function' ? _this._crypto = runtimeFactory.createWebcrypto() : _this._crypto = crypto;
     _this.cryptoUTF8Encoder = encodeUTF8;
     _this.cryptoUTF8Decoder = decodeUTF8;
   }
 
   /**
-  * encode a byteArray value in base 64 encode
-  * @param   {byteArray}    value    byteArray value
+  * Encodes a JS object to base 64 encode
+  * @param   {Object}    value    byteArray value
   * @return  {string}   encoded value
   */
   encode(value) {
@@ -34,34 +26,45 @@ class Crypto {
       let stringValue = this.stringify(value);
       return btoa(stringValue);
     } catch (err) {
-      console.err('encode: ' + err);
+      console.err('[Cypto.encode:err] ' + err);
       throw err;
     }
   }
 
   /**
-    * decode a base64 value in a new Uint8Array
-    * @param   {string}    value    value encoded in base 64
-    * @return  {byteArray} decodedValue
+    * Decode a base64 string to object
+    * @param   {string_b64}    value    value encoded in base 64
+    * @return  {Object} decodedValue
     */
   decode(value) {
     try {
       return JSON.parse(atob(value));
     } catch (err) {
-      console.log('decode:' + err);
+      console.log('[Cypto.decode:err] ' + err);
       throw err;
     }
   }
 
+  /**
+  * Decode a base64 string to Uint8Array
+  * @param   {string_b64}    value    byteArray value
+  * @return  {Uint8Array}   encoded value
+  */
   decodeToUint8Array(value) {
     try {
       return new Uint8Array(this.decode(value));
     } catch (err) {
-      console.log('decodeToUint8Array:err' + err);
+      console.err('[Cypto.decodeToUint8Array:err] ' + err);
       throw err;
     }
   }
 
+  /**
+  * Converts a JS object to string
+  * NOTE: Special conversion for Uint8Arrays
+  * @param   {Object}    value    byteArray value
+  * @return  {Uint8Array}   encoded value
+  */
   stringify(value) {
     try {
       let stringValue;
@@ -72,20 +75,46 @@ class Crypto {
       }
       return stringValue;
     } catch (err) {
-      console.err('stringify: ' + err);
+      console.err('[Cypto.stringify:err] ' + err);
       throw err;
     }
   }
 
+  /**
+  * Converts a stringified object to object
+  * @param   {String}    value    byteArray value
+  * @return  {Object}   encoded value
+  */
   parse(value) {
     try {
       return JSON.parse(value);
     } catch (err) {
-      console.log('parse:err' + err);
+      console.err('[Cypto.parse:err]' + err);
       throw err;
     }
   }
 
+  /**
+  * Converts a stringified object to object
+  * @param   {String}    value    byteArray value
+  * @return  {Uint8Array}   encoded value
+  */
+  parseToUint8Array(value) {
+    try {
+      return new Uint8Array(this.parse(value));
+    } catch (err) {
+      console.err('[Cypto.parseToUint8Array:err]' + err);
+      throw err;
+    }
+  }
+
+
+  /**
+  * Performs a RSA encryption
+  * @param   {ArrayBuffer}    value    the public key
+  * @param   {BufferSource}    value    data to be encryped
+  * @return  {Uint8Array}   encrypted data
+  */
   encryptRSA(pubKey, data) {
     CLog('encryptRSA:pubKey', pubKey);
     CLog('encryptRSA:data', data);
@@ -115,6 +144,12 @@ class Crypto {
     });
   }
 
+  /**
+  * Performs a RSA decryption
+  * @param   {ArrayBuffer}    value    the private key
+  * @param   {BufferSource}    value    data to be decrypted
+  * @return  {Uint8Array}   decrypted data
+  */
   decryptRSA(privKey, data) {
     CLog('decryptRSA:privKey', privKey);
     CLog('decryptRSA:data', data);
@@ -146,6 +181,12 @@ class Crypto {
     });
   }
 
+  /**
+  * Performs a RSA sign
+  * @param   {ArrayBuffer}    value    the private key
+  * @param   {BufferSource}    value    data to be signed
+  * @return  {Uint8Array}   data signature
+  */
   signRSA(privKey, data) {
     let _this = this;
 
@@ -175,6 +216,12 @@ class Crypto {
     });
   }
 
+  /**
+  * Performs a RSA signature verification
+  * @param   {ArrayBuffer}    value    the public key
+  * @param   {BufferSource}    value    data to be verified
+  * @return  {Boolean}   result of the signature verification
+  */
   verifyRSA(pubKey, data, signature) {
     let _this = this;
 
@@ -205,6 +252,12 @@ class Crypto {
     });
   }
 
+  /**
+  * Performs a RSA signature verification
+  * @param   {ArrayBuffer}    value    the public key
+  * @param   {BufferSource}    value    data to be verified
+  * @return  {Boolean}   result of the signature verification
+  */
   encryptAES(key, data, iv) {
     CLog('encryptAES:key', key);
     CLog('encryptAES:data', data);
