@@ -26,7 +26,7 @@ class Crypto {
       let stringValue = this.stringify(value);
       return btoa(stringValue);
     } catch (err) {
-      console.err('[Cypto.encode:err] ' + err);
+      console.error('[Cypto.encode:err] ' + err);
       throw err;
     }
   }
@@ -54,7 +54,7 @@ class Crypto {
     try {
       return new Uint8Array(this.decode(value));
     } catch (err) {
-      console.err('[Cypto.decodeToUint8Array:err] ' + err);
+      console.error('[Cypto.decodeToUint8Array:err] ' + err);
       throw err;
     }
   }
@@ -75,7 +75,7 @@ class Crypto {
       }
       return stringValue;
     } catch (err) {
-      console.err('[Cypto.stringify:err] ' + err);
+      console.error('[Cypto.stringify:err] ' + err);
       throw err;
     }
   }
@@ -86,10 +86,13 @@ class Crypto {
   * @return  {Object}   encoded value
   */
   parse(value) {
+    console.log('RRRR', value);
     try {
       return JSON.parse(value);
     } catch (err) {
-      console.err('[Cypto.parse:err]' + err);
+      console.error('[Cypto.parse:err]' + err);
+      console.trace();
+      console.error('That that cause the error:', value);
       throw err;
     }
   }
@@ -103,7 +106,7 @@ class Crypto {
     try {
       return new Uint8Array(this.parse(value));
     } catch (err) {
-      console.err('[Cypto.parseToUint8Array:err]' + err);
+      console.error('[Cypto.parseToUint8Array:err]' + err);
       throw err;
     }
   }
