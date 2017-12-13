@@ -1261,10 +1261,12 @@ class IdentityModule {
    * @return {Promise}
    */
   _getValidToken(hypertyURL) {
-  //  console.info('_getValidToken:hypertyURL', hypertyURL);
+    console.log('_getValidToken:hypertyURL', hypertyURL);
     let _this = this;
     return new Promise((resolve, reject) => {
       _this.getIdToken(hypertyURL).then(function(identity) {
+        console.log('_getValidToken:Promise', identity);
+        console.log('_getValidToken:identity.userProfile.userURL', identity.userProfile.userURL);
         //        log.log('[Identity.IdentityModule.getValidToken] Token', identity);
         let timeNow = _this._secondsSinceEpoch();
         let completeId = _this.getIdentity(identity.userProfile.userURL);

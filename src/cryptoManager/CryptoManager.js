@@ -179,6 +179,7 @@ class CryptoManager {
       let isFromRemoteSM = _this._isFromRemoteSM(message.from);
 
       if (isSubscription & isFromRemoteSM) {
+        console.log('_doMutualAuthenticationPhase1');
 
         _this._doMutualAuthenticationPhase1(message).then(() => {
           resolve(false);
@@ -187,12 +188,15 @@ class CryptoManager {
         });
 
       } else if (message.hasOwnProperty('body') && message.body.hasOwnProperty('value') && typeof message.body.value === 'string') {
+        console.log('_isToDecrypt:true');
         resolve(true);
-      } else resolve(false);
+      } else {
+        console.log('_isToDecrypt:false');
+        resolve(false);
+      }
 
     }).catch((error) => {
       log.error('[CryptoManager._isToDecrypt]', error);
-      resolve(false);
     });
 
   }
