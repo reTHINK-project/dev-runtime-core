@@ -59,7 +59,8 @@ module.exports = function(config) {
       mocha: {
         reporter: 'html'
       },
-      captureConsole: true
+      captureConsole: true,
+      useIframe: true
     },
 
     port: 9876,
@@ -76,6 +77,7 @@ module.exports = function(config) {
         base: 'Chrome',
         flags: [
           '--disable-web-security',
+          '--disable-popup',
           '--ignore-certificate-errors'
         ]
       }

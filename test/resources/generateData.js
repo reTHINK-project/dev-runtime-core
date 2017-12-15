@@ -44,7 +44,7 @@ export function generateData(size = '100MB') {
 
 
 let index = 0;
-export function buildResourceMessage(from, runtimeURL, data, type = 'create') {
+export function buildResourceMessage(from, to, runtimeURL, data, type = 'create') {
 
   index++;
 
@@ -54,7 +54,7 @@ export function buildResourceMessage(from, runtimeURL, data, type = 'create') {
   let msg = {
     type: type,
     from: from,
-    to: runtimeURL + '/storage',
+    to: to,
     body: {
       auth: false,
       identity: { userProfle: {} },

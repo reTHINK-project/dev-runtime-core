@@ -10,18 +10,35 @@
     <h2>reThink Project performance tests</h2>
     <table cellspacing="0" cellpadding="0" border="0">
       <tr class="overview">
-        <td colspan="3" title="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36">Browser: Chrome 62.0.3202 (Linux 0.0.0)</td>
+        <td colspan="3" title="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.108 Safari/537.36">Browser: Chrome 63.0.3239 (Linux 0.0.0)</td>
       </tr>
       <tr class="overview">
-        <td colspan="3">Timestamp: 2017-12-7 18:08:19</td>
+        <td colspan="3">Timestamp: 2017-12-15 18:56:33</td>
+      </tr>
+      <tr>
+        <td colspan="3"/>
+      </tr>
+      <tr class="header">
+        <td>Status</td>
+        <td>Spec</td>
+        <td>Suite / Results</td>
+      </tr>
+    </table>
+    <hr/>
+    <table cellspacing="0" cellpadding="0" border="0">
+      <tr class="overview">
+        <td colspan="3" title="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.108 Safari/537.36">Browser: Chrome 63.0.3239 (Linux 0.0.0)</td>
+      </tr>
+      <tr class="overview">
+        <td colspan="3">Timestamp: 2017-12-15 18:56:34</td>
       </tr>
       <tr>
         <td colspan="3">
-          3 tests / 
+          4 tests / 
           0 errors / 
-          1 failures / 
+          0 failures / 
           0 skipped / 
-          runtime: 2.499s
+          runtime: 2.104s
         </td>
       </tr>
       <tr class="header">
@@ -30,93 +47,51 @@
         <td>Suite / Results</td>
       </tr>
       <tr class="pass">
-        <td>Passed in 0.006s</td>
+        <td>Passed in 0.005s</td>
         <td>check available space</td>
         <td>Hyperty Resource Storage</td>
       </tr>
-      <tr class="fail">
-        <td>Failed</td>
+      <tr class="pass">
+        <td>Passed in 0.534s</td>
         <td>should add resources</td>
-        <td>
-          Hyperty Resource Storage
-          <br />Error: Timeout of 2000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves.
-
-        </td>
+        <td>Hyperty Resource Storage</td>
       </tr>
       <tr class="pass">
-        <td>Passed in 0.492s</td>
+        <td>Passed in 0s</td>
+        <td>should have one resource with 50Mb</td>
+        <td>Hyperty Resource Storage</td>
+      </tr>
+      <tr class="pass">
+        <td>Passed in 1.565s</td>
         <td>should add resources out of limit</td>
         <td>Hyperty Resource Storage</td>
       </tr>
       <tr class="system-out">
-        <td colspan="3"><strong>System output:</strong><br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '1.42', 0.9, true
-<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '1.42', 0.9, true
-<br />Chrome 62.0.3202 (Linux 0.0.0) WARN: 'The file you will save is bigger than the space you have'
-<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'previous:', 'runtime://localhost/dd53858e-7c07-c58d-b93b-e4b344bc72a9/storage/3dd215d1-a082-2cf1-52e9-90f2bbc353ba'
-<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'current:', 'runtime://localhost/dd53858e-7c07-c58d-b93b-e4b344bc72a9/storage/32c3f7c3-1381-939b-fb18-3ec77dba42eb'
-<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'CURRENT:', 1512668949521, 1512668950218
-<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'previous:', undefined
-<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'current:', 'runtime://localhost/d81d5fe6-f7d5-6aba-3567-b865b0ed5407/storage/6e0cae96-eaaf-547e-a0f8-001055fa7fa3'
-<br />Chrome 62.0.3202 (Linux 0.0.0) WARN: DexieError{_e: Error{}, name: 'AbortError', message: 'Transaction aborted', inner: null, _promise: Promise{_listeners: [], onuncatched: function dbUncaught(err) { ... }, _lib: false, _PSD: Object{parent: ..., ref: ..., global: ..., finalize: ..., transless: ..., trans: ...}, _stackHolder: Error{}, _prev: Promise{_listeners: ..., onuncatched: ..., _lib: ..., _PSD: ..., _stackHolder: ..., _prev: ..., _numPrev: ..., _state: ..., _value: ...}, _numPrev: 1, _state: false, _value: DexieError{_e: ..., name: ..., message: ..., inner: ..., _promise: ...}}}
-<br />Chrome 62.0.3202 (Linux 0.0.0) WARN: 'Unhandled rejection: AbortError: Transaction aborted
-    at IDBTransaction.<anonymous> (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:16278:49)
-    at IDBTransaction.<anonymous> (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:14715:23)
-From previous: 
-    at new Transaction (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:16199:28)
-    at Dexie._createTransaction (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:15252:16)
-    at http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:15618:36
-    at usePSD (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:14757:16)
-    at newScope (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:14744:14)
-    at http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:15613:24
-    at callListener (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:14548:19)
-    at endMicroTickScope (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:14637:25)
-From previous: 
-    at Function.resolve (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:14364:16)
-    at enterTransactionScope (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:15612:29)
-    at executePromiseTask (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:14449:9)
-    at new Promise (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:14248:5)
-    at Dexie._whenReady (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:15297:16)
-    at Dexie.transaction (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:15608:105)
-    at StorageManager.set (webpack-internal:///153:69:22)
-    at checkStorageQuota.then (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:18719:29)'
-<br />Chrome 62.0.3202 (Linux 0.0.0) WARN: 'Unhandled rejection: AssertionError: the message code is different of 200: expected 500 to equal 200
-    at bus.addResponseListener (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:3106:37)
-    at MessageBus._onResponse (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:2870:9)
-    at deliver (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:19002:22)
-    at MessageBus.postMessage (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:19021:12)
-    at _this._storageManager.set.then.catch (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:18742:20)
-    at callListener (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:14551:19)
-    at endMicroTickScope (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:14637:25)
-    at IDBTransaction.<anonymous> (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:14723:30)
-From previous: 
-    at Promise.then (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:14256:18)
-    at Promise.catch (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:14269:49)
-    at checkStorageQuota.then (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:18730:15)
-    at <anonymous>
-From previous: AbortError: Transaction aborted
-    at IDBTransaction.<anonymous> (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:16278:49)
-    at IDBTransaction.<anonymous> (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:14715:23)
-From previous: 
-    at Promise.then (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:14256:18)
-    at checkStorageQuota.then (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:18719:81)
-    at <anonymous>
-From previous: AbortError: Transaction aborted
-    at IDBTransaction.<anonymous> (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:16278:49)
-    at IDBTransaction.<anonymous> (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:14715:23)
-From previous: 
-    at Dexie._whenReady (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:15297:16)
-    at Dexie.transaction (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:15608:105)
-    at StorageManager.set (webpack-internal:///153:69:22)
-    at checkStorageQuota.then (http://localhost:9876/base/test/HypertyResourceStorage.spec.js?e675d38a8406f790c5129f4c663ec953b0082fcd:18719:29)
-    at <anonymous>'
-<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: '1.42', 0.9, true
-<br />Chrome 62.0.3202 (Linux 0.0.0) WARN: 'The file you will save is bigger than the space you have'
-<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'previous:', 'runtime://localhost/dd53858e-7c07-c58d-b93b-e4b344bc72a9/storage/3dd215d1-a082-2cf1-52e9-90f2bbc353ba'
-<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'current:', 'runtime://localhost/dd53858e-7c07-c58d-b93b-e4b344bc72a9/storage/32c3f7c3-1381-939b-fb18-3ec77dba42eb'
-<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'CURRENT:', 1512668949521, 1512668950218
-<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'previous:', undefined
-<br />Chrome 62.0.3202 (Linux 0.0.0) LOG: 'current:', 'runtime://localhost/d81d5fe6-f7d5-6aba-3567-b865b0ed5407/storage/6e0cae96-eaaf-547e-a0f8-001055fa7fa3'
-<br />Chrome 62.0.3202 (Linux 0.0.0) WARN: DexieError{_e: Error{}, name: 'AbortError', message: 'Transaction aborted', inner: null, _promise: Promise{_listeners: [], onuncatched: function dbUncaught(err) { ... }, _lib: false, _PSD: Object{parent: ..., ref: ..., global: ..., finalize: ..., transless: ..., trans: ...}, _stackHolder: Error{}, _prev: Promise{_listeners: ..., onuncatched: ..., _lib: ..., _PSD: ..., _stackHolder: ..., _prev: ..., _numPrev: ..., _state: ..., _value: ...}, _numPrev: 1, _state: false, _value: DexieError{_e: ..., name: ..., message: ..., inner: ..., _promise: ...}}}
+        <td colspan="3"><strong>System output:</strong><br />Chrome 63.0.3239 (Linux 0.0.0) LOG: Object{hypertyResources: Dexie{_dbSchema: Object{hypertyResources: ...}, version: function (versionNumber) { ... }, _allTables: Object{hypertyResources: ...}, _tableFactory: function createTable(mode, tableSchema) { ... }, _createTransaction: function (mode, storeNames, dbschema, parentTransaction) { ... }, _whenReady: function (fn) { ... }, verno: 1, open: function () { ... }, close: function () { ... }, delete: function () { ... }, backendDB: function () { ... }, isOpen: function () { ... }, hasFailed: function () { ... }, dynamicallyOpened: function () { ... }, name: 'hypertyResources', on: function (eventName, subscriber) { ... }, transaction: function (mode, tableInstances, scopeFunc) { ... }, table: function (tableName) { ... }, Collection: function Collection(whereClause, keyRangeGenerator) { ... }, Table: function Table(name, tableSchema, collClass) { ... }, Transaction: function Transaction(mode, storeNames, dbschema, parent) { ... }, Version: function Version(versionNumber) { ... }, WhereClause: function WhereClause(table, index, orCollection) { ... }, WriteableCollection: function WriteableCollection() { ... }, WriteableTable: function WriteableTable(name, tableSchema, collClass) { ... }, hypertyResources: WriteableTable{name: ..., schema: ..., hook: ..., _collClass: ...}}}, StorageManager{db: Dexie{_dbSchema: Object{hypertyResources: ...}, version: function (versionNumber) { ... }, _allTables: Object{hypertyResources: ...}, _tableFactory: function createTable(mode, tableSchema) { ... }, _createTransaction: function (mode, storeNames, dbschema, parentTransaction) { ... }, _whenReady: function (fn) { ... }, verno: 1, open: function () { ... }, close: function () { ... }, delete: function () { ... }, backendDB: function () { ... }, isOpen: function () { ... }, hasFailed: function () { ... }, dynamicallyOpened: function () { ... }, name: 'hypertyResources', on: function (eventName, subscriber) { ... }, transaction: function (mode, tableInstances, scopeFunc) { ... }, table: function (tableName) { ... }, Collection: function Collection(whereClause, keyRangeGenerator) { ... }, Table: function Table(name, tableSchema, collClass) { ... }, Transaction: function Transaction(mode, storeNames, dbschema, parent) { ... }, Version: function Version(versionNumber) { ... }, WhereClause: function WhereClause(table, index, orCollection) { ... }, WriteableCollection: function WriteableCollection() { ... }, WriteableTable: function WriteableTable(name, tableSchema, collClass) { ... }, hypertyResources: WriteableTable{name: ..., schema: ..., hook: ..., _collClass: ...}}, storageName: 'hypertyResources'}
+<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'RESULT:', undefined
+<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'Change: ', Object{name: 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage/8e641360-670b-53a0-675c-064960b3cb82', object: Object{runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage/8e641360-670b-53a0-675c-064960b3cb82: Object{status: ..., content: ..., message: ...}}, type: 'add', oldValue: undefined, newValue: Object{status: 'START', content: Object{url: ..., size: ...}, message: Object{id: ..., to: ..., from: ...}}, keypath: 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage/8e641360-670b-53a0-675c-064960b3cb82'}
+<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'Change: ', 'START'
+<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'HERE:', Object{status: 'START', content: Object{url: 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage/8e641360-670b-53a0-675c-064960b3cb82', size: 52428800}, message: Object{id: 1, to: 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage', from: 'hyperty://localhost/e7cff448-e249-5dbe-fd12-7f87984dde33'}}
+<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'Process resource: ', 0, Object{status: 'START', content: Object{url: 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage/8e641360-670b-53a0-675c-064960b3cb82', size: 52428800}, message: Object{id: 1, to: 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage', from: 'hyperty://localhost/e7cff448-e249-5dbe-fd12-7f87984dde33'}}
+<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'File Size: ', 52428800, ' usage Size: ', 705, ' Total Size: ', 52429505, ' Quota: ', 110564802
+<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'REsult', 'not clean'
+<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'HYPERTY RESOURCES: ', 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage/8e641360-670b-53a0-675c-064960b3cb82', Object{runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage/8e641360-670b-53a0-675c-064960b3cb82: Object{children: 'resources', p2pHandler: 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280p2phandler/e54690de-3e52-a964-c7cf-c4ea28ac8de4', parent: 'comm://localhost/3c370a35-57f8-1a0f-8e22-c7b742cfd17f', runtime: 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280', schema: 'hyperty-catalogue://catalogue.localhost/.well-known/dataschema/Communication', reporter: 'hyperty://localhost/e7cff448-e249-5dbe-fd12-7f87984dde33', content: Blob{lastModifiedDate: ..., name: ...}, created: Fri Dec 15 2017 18:56:35 GMT+0000 (WET), lastModified: Fri Dec 15 2017 18:56:35 GMT+0000 (WET), mimetype: 'text/plain', name: '198116.txt', resourceType: 'file', size: 52428800, url: 'hyperty://localhost/e7cff448-e249-5dbe-fd12-7f87984dde33#1', contentURL: [...]}}
+<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'r:', 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage/8e641360-670b-53a0-675c-064960b3cb82'
+<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: Object{runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage/8e641360-670b-53a0-675c-064960b3cb82: Object{children: 'resources', p2pHandler: 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280p2phandler/e54690de-3e52-a964-c7cf-c4ea28ac8de4', parent: 'comm://localhost/3c370a35-57f8-1a0f-8e22-c7b742cfd17f', runtime: 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280', schema: 'hyperty-catalogue://catalogue.localhost/.well-known/dataschema/Communication', reporter: 'hyperty://localhost/e7cff448-e249-5dbe-fd12-7f87984dde33', content: Blob{lastModifiedDate: ..., name: ...}, created: Fri Dec 15 2017 18:56:35 GMT+0000 (WET), lastModified: Fri Dec 15 2017 18:56:35 GMT+0000 (WET), mimetype: 'text/plain', name: '198116.txt', resourceType: 'file', size: 52428800, url: 'hyperty://localhost/e7cff448-e249-5dbe-fd12-7f87984dde33#1', contentURL: [...]}}
+<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'Change: ', Object{name: 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage/f7cb8a58-eb6a-8136-5919-e37feb330a21', object: Object{runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage/f7cb8a58-eb6a-8136-5919-e37feb330a21: Object{status: ..., content: ..., message: ...}}, type: 'add', oldValue: undefined, newValue: Object{status: 'START', content: Object{url: ..., size: ...}, message: Object{id: ..., to: ..., from: ...}}, keypath: 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage/f7cb8a58-eb6a-8136-5919-e37feb330a21'}
+<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'Change: ', 'START'
+<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'HERE:', Object{status: 'START', content: Object{url: 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage/f7cb8a58-eb6a-8136-5919-e37feb330a21', size: 524288000}, message: Object{id: 2, to: 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage', from: 'hyperty://localhost/737fa698-f7cf-7d0b-112f-55ade6903c42'}}
+<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'Process resource: ', 0, Object{status: 'START', content: Object{url: 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage/f7cb8a58-eb6a-8136-5919-e37feb330a21', size: 524288000}, message: Object{id: 2, to: 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage', from: 'hyperty://localhost/737fa698-f7cf-7d0b-112f-55ade6903c42'}}
+<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'File Size: ', 524288000, ' usage Size: ', 705, ' Total Size: ', 524288705, ' Quota: ', 110564802
+<br />Chrome 63.0.3239 (Linux 0.0.0) WARN: 'The file you will save is bigger than the space you have'
+<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'AQUI:', 524288000, 110564802
+<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'ERROR:', 'Nothing to clean. You don't have space on storage to save that file'
+<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'AQUI:', 'hypertyResources'
+<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'ERROR:', TypeError{}
+</td>
+      </tr>
+      <tr class="system-errors">
+        <td colspan="3"><strong>Errors:</strong><br />Disconnectedundefined
 </td>
       </tr>
     </table>

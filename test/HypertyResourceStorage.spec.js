@@ -18,11 +18,14 @@ chai.use(chaiAsPromised);
 
 describe('Hyperty Resource Storage', function() {
 
-  const storageManager = runtimeFactory.storageManager();
+  const runtimeURL = 'runtime://localhost/' + generateGUID();
+  const storageManager = runtimeFactory.storageManager('hypertyResources');
+  const from = 'hyperty://localhost/' + generateGUID();
+  const to = runtimeURL + '/storage';
 
-  let runtimeURL = 'runtime://localhost/' + generateGUID();
   let bus;
   let hypertyResourcesStorage;
+  let hypertyResources;
 
   before(function(done) {
 
@@ -34,13 +37,14 @@ describe('Hyperty Resource Storage', function() {
 
     bus = new MessageBus(registry);
 
-    let hypertyResources;
-
     storageManager.get('hypertyResources').then(function(result) {
+
+      console.log('RESULT:', result);
+
       hypertyResources = result || {};
 
       hypertyResourcesStorage = new HypertyResourcesStorage(runtimeURL, bus, storageManager, hypertyResources);
-      done();
+      hypertyResourcesStorage.checkStorageQuota().then(() => done());
 
     });
 
@@ -60,35 +64,46 @@ describe('Hyperty Resource Storage', function() {
   it('should add resources', function(done) {
 
 
-    const from = 'hyperty://localhost/' + generateGUID();
     const generatedData = generateData('50MB');
 
-    const msg = buildResourceMessage(from, runtimeURL, generatedData);
+    const msg = buildResourceMessage(from, to, runtimeURL, generatedData);
 
     const id = bus.postMessage(msg);
 
     bus.addResponseListener(from, id, (reply) => {
       bus.removeResponseListener(from, reply.id);
 
-      expect(reply.body.code).to.be.equal(200, 'the message code is different of 200');
+      expect(reply.body.code).to.be.equal(200, 'The message code should be 200');
       done();
     });
+
+  });
+
+
+  it('should have one resource with 50Mb', function(done) {
+
+    console.log(hypertyResources);
+
+    const b = Object.keys(hypertyResources)[0];
+    expect(hypertyResources[b].size).to.be.equal(52428800, 'The size of resource should be 50Mb');
+    done();
 
   });
 
   it('should add resources out of limit', function(done) {
 
     const from = 'hyperty://localhost/' + generateGUID();
-    const generatedData = generateData('100MB');
+    const generatedData = generateData('500MB');
 
-    const msg = buildResourceMessage(from, runtimeURL, generatedData);
+    const msg = buildResourceMessage(from, to, runtimeURL, generatedData);
 
     const id = bus.postMessage(msg);
 
-    bus.addResponseListener(from, id, (reply) => {
+    bus.addResponseListener(from, id, function(reply) {
+
       bus.removeResponseListener(from, reply.id);
 
-      expect(reply.body.code).to.be.equal(500, 'the message code is different of 500');
+      expect(reply.body.code).to.be.equal(500, 'The message code should be 500');
       done();
     });
 

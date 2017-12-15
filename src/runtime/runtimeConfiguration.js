@@ -1,5 +1,19 @@
 export const runtimeConfiguration = {
 
+  // TODO this should be changed with the definition used for indexeddb
+  // look at: https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore
+  // Now we are using the definition for Dexie; (http://dexie.org/docs/Version/Version.stores())
+  storageSchemas: {
+    runtime: 'key,version,value',
+    'registry:HypertyURLs': 'key,version,value',
+    'registry:DataObjectURLs': 'key,version,value',
+    p2pHandler: 'key,version,value',
+    catalogue: '&cguid, accessControlPolicy, constraints, dataObjects, hypertyType, objectName, sourcePackage, version',
+    identityModule: '&userURL,idp',
+    hypertyResources: '&resourceURL, name, contentUrl, content, created, reporter, resourceType',
+    syncerManager: 'key,version,value'
+  },
+
   runtimeURLS: {
     registry: {
       prefix: 'hyperty-runtime://',

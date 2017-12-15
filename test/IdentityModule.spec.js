@@ -102,7 +102,7 @@ describe('Crypto tests', function() {
           expect(key2).to.be.ofSize(PMS_SIZE);
           expect(key1).to.be.equalTo(key2);
         })
-        .then(done, done);
+        .then( function() { done() });
     });
   });
 
@@ -137,7 +137,7 @@ describe('Crypto tests', function() {
           expect(key2[3]).to.be.ofSize(RANDOM_VALUE_SIZE);
           expect(key1).not.to.be.equalTo(key2);
         })
-        .then(done, done);
+        .then( function() { done() });
     });
   });
 
@@ -150,7 +150,7 @@ describe('Crypto tests', function() {
           .then(decryptedData => {
             expect(data).to.be.equalTo(decryptedData);
           })
-          .then(done, done);
+          .then( function() { done() });
       });
     });
   });
@@ -167,7 +167,7 @@ describe('Crypto tests', function() {
         .then(decryptedData => {
           expect(data).to.equal(decryptedData);
         })
-        .then(done, done);
+        .then( function() { done() });
     });
   });
 
@@ -182,7 +182,7 @@ describe('Crypto tests', function() {
           .then(verificationResult => {
             assert.isTrue(verificationResult, 'The signitured is different');
           })
-          .then(done, done);
+          .then( function() { done() });
       });
     });
   });
@@ -196,7 +196,7 @@ describe('Crypto tests', function() {
         .then(verificationResult => {
           assert.isTrue(verificationResult, 'HMAC is different');
         })
-        .then(done, done);
+        .then( function() { done() });
     });
   });
 });
@@ -341,7 +341,7 @@ describe.skip('Identity Module tests', function() {
           'Received message is not OK'
         );
       })
-      .then(done, done);
+      .then( function() { done() });
   });
 
   it('test requestIdentityToGUI', function(done) {
@@ -365,7 +365,7 @@ describe.skip('Identity Module tests', function() {
       .then(resMsg => {
         assert.equal(resMsg.value, userEmail, 'Expected email was not found');
       })
-      .then(done, done);
+      .then( function() { done() });
   });
 
   it('test getIdentities', function(done) {
@@ -380,7 +380,7 @@ describe.skip('Identity Module tests', function() {
             'Identity was not found'
           );
         })
-        .then(done, done);
+        .then( function() { done() });
     });
   });
 
@@ -407,7 +407,7 @@ describe.skip('Identity Module tests', function() {
           );
           assert.equal(identityModule.emailsList, userEmail);
         })
-        .then(done, done);
+        .then( function() { done() });
     });
   });
 
@@ -424,7 +424,7 @@ describe.skip('Identity Module tests', function() {
             'Retrived ID is not the same'
           );
         })
-        .then(done, done);
+        .then( function() { done() });
     });
   });
 
@@ -438,7 +438,7 @@ describe.skip('Identity Module tests', function() {
           identityModule.unregisterIdentity(userEmail);
           assert.isEmpty(identityModule.emailsList, 'Identity was not removed');
         })
-        .then(done, done);
+        .then( function() { done() });
     });
   });
 
@@ -452,7 +452,7 @@ describe.skip('Identity Module tests', function() {
           identityModule.deleteIdentity(userURL);
           assert.isEmpty(identityModule.identities, 'Identity was not removed');
         })
-        .then(done, done);
+        .then( function() { done() });
     });
   });
 
@@ -478,7 +478,7 @@ describe.skip('Identity Module tests', function() {
       .then(resCode => {
         assert.equal(resCode, loginUrl, 'message content is not the exepected');
       })
-      .then(done, done);
+      .then( function() { done() });
   });
 
   it('test generateAssertion', function(done) {
@@ -517,7 +517,7 @@ describe.skip('Identity Module tests', function() {
             'Received data has not the requiered properties'
           );
         })
-        .then(done, done);
+        .then( function() { done() });
     });
   });
 
@@ -540,7 +540,7 @@ describe.skip('Identity Module tests', function() {
           'Received data has not the requiered properties'
         );
       })
-      .then(done, done);
+      .then( function() { done() });
   });
 
   it('test validateAssertion', function(done) {
@@ -553,7 +553,7 @@ describe.skip('Identity Module tests', function() {
           'Received data is not the expected'
         );
       })
-      .then(done, done);
+      .then( function() { done() });
   });
 
   it('test loginSelectedIdentity', function(done) {
@@ -569,7 +569,7 @@ describe.skip('Identity Module tests', function() {
         .then(result => {
           assert.equal(result, 'Login was successfull', 'Login failed');
         })
-        .then(done, done);
+        .then( function() { done() });
     });
   });
 
@@ -589,7 +589,7 @@ describe.skip('Identity Module tests', function() {
             'Result does not have the required fields'
           );
         })
-        .then(done, done);
+        .then( function() { done() });
     });
   });
 
@@ -602,7 +602,7 @@ describe.skip('Identity Module tests', function() {
           'result does not have the required fields'
         );
       })
-      .then(done, done);
+      .then( function() { done() });
   });
 
   it.skip('test selectIdentityForHyperty', function(done) {
@@ -658,7 +658,7 @@ describe.skip('Identity Module tests', function() {
           'Result does not contain the expected fields'
         );
       })
-      .then(done, done);
+      .then( function() { done() });
   });
 
   it('test getIdToken', function(done) {
@@ -676,7 +676,7 @@ describe.skip('Identity Module tests', function() {
                 'Result does not contain the expected fields'
               );
             })
-            .then(done, done);
+            .then( function() { done() });
         });
     });
   });
@@ -696,7 +696,7 @@ describe.skip('Identity Module tests', function() {
                 'Result does not contain the expected fields'
               );
             })
-            .then(done, done);
+            .then( function() { done() });
         });
     });
   });
@@ -719,7 +719,7 @@ describe.skip('Identity Module tests', function() {
                 'Result does not contain the expected fields'
               );
             })
-            .then(done, done);
+            .then( function() { done() });
         });
     });
   });
@@ -775,7 +775,7 @@ describe.skip('Identity Module tests', function() {
 					newChatCrypto.dataObjectURL === message.dataObjectURL;
 
         assert(valueVerificationResult, 'Generated chat crypto messege is not the expected one');
-      }).then(done, done);
+      }).then( function() { done() });
     });
   });
 
@@ -807,7 +807,7 @@ describe.skip('Identity Module tests', function() {
 
 
       assert(assertFields, 'Result has not the required fields or values');
-    }).then(done, done);
+    }).then( function() { done() });
   });
 
   //test isFromHyperty to isToHyperty communication -> handshake + update //TODO incomplete cases
@@ -849,7 +849,7 @@ describe.skip('Identity Module tests', function() {
 
               cryptoManager.default.decryptMessage(encryptedMessage).then(decryptedMessage => {
                 assert.equal(decryptedMessage.body.value, encryptMessagePopulate.body.value, 'Encryption failed');
-              }).then(done, done);
+              }).then( function() { done() });
             });
           });
         });
@@ -869,7 +869,7 @@ describe.skip('Identity Module tests', function() {
         result.hasOwnProperty('chatKeys') &&
         result.message.type === 'handshake';
       assert(assertFields, 'Result has not the expected values');
-    }).then(done, done);
+    }).then( function() { done() });
   });
 
 
@@ -882,7 +882,7 @@ describe.skip('Identity Module tests', function() {
         resultMessage.hasOwnProperty('chatKeys') &&
         resultMessage.hasOwnProperty('message');
       assert(assertFields, 'Result has not the expected values');
-    }).then(done, done);
+    }).then( function() { done() });
   });
 
   it('test _doHandShakePhase - receiverHello', function(done) {
@@ -899,7 +899,7 @@ describe.skip('Identity Module tests', function() {
         resultMessage.hasOwnProperty('chatKeys') &&
         resultMessage.hasOwnProperty('message');
         assert(assertFields, 'Result has not the expected values');
-      }).then(done, done);
+      }).then( function() { done() });
     });
   });
 
@@ -945,7 +945,7 @@ describe.skip('Identity Module tests', function() {
    		 resultMessage.hasOwnProperty('chatKeys') &&
    		 resultMessage.hasOwnProperty('message');
                     assert(assertFields, 'Result has not the expected values');
-                  }).then(done, done);
+                  }).then( function() { done() });
                 });
               });
             });
@@ -988,7 +988,7 @@ describe.skip('Identity Module tests', function() {
                  resultMessage.hasOwnProperty('chatKeys') &&
                  resultMessage.hasOwnProperty('message');
               assert(assertFields, 'Result has not the expected values');
-            }).then(done, done);
+            }).then( function() { done() });
 
           });
         });
@@ -1038,7 +1038,7 @@ describe.skip('Identity Module tests', function() {
 
             identityModule._doHandShakePhase(message, chatKeys).then(resultMessage => {
               assert.equal(resultMessage, 'handShakeEnd', 'Result has not the expected values');
-            }).then(done, done);
+            }).then( function() { done() });
 
           });
 
@@ -1063,7 +1063,7 @@ describe.skip('Identity Module tests', function() {
 
     cryptoManager.default._doMutualAuthenticationPhase1(sender, receiver).then(resultMessage => {
       assert.equal(resultMessage, 'exchange of chat sessionKey initiated', 'Message is not the expected one');
-    }).then(done, done);
+    }).then(function() { done(); });
   });
 });
 
