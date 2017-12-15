@@ -12,8 +12,6 @@ class Crypto {
   constructor(runtimeFactory) {
     let _this = this;
     typeof runtimeFactory.createWebcrypto === 'function' ? _this._crypto = runtimeFactory.createWebcrypto() : _this._crypto = crypto;
-    _this.cryptoUTF8Encoder = encodeUTF8;
-    _this.cryptoUTF8Decoder = decodeUTF8;
   }
 
   /**
@@ -40,7 +38,7 @@ class Crypto {
     try {
       return JSON.parse(atob(value));
     } catch (err) {
-      console.log('[Cypto.decode:err] ' + err);
+      CLog('[Cypto.decode:err] ' + err);
       throw err;
     }
   }
@@ -86,7 +84,7 @@ class Crypto {
   * @return  {Object}   encoded value
   */
   parse(value) {
-    console.log('RRRR', value);
+    CLog('RRRR', value);
     try {
       return JSON.parse(value);
     } catch (err) {
@@ -202,7 +200,7 @@ class Crypto {
             name: 'RSASSA-PKCS1-v1_5'
           },
           privateKey, //from generateKey or importKey above
-          _this._utf8Encode(data) //ArrayBuffer of data you want to sign
+          encodeUTF8(data) //ArrayBuffer of data you want to sign
         )
           .then(function(signature) {
           //returns an ArrayBuffer containing the signature
@@ -238,7 +236,7 @@ class Crypto {
           },
           publicKey, //from generateKey or importKey above
           signature, //ArrayBuffer of the signature
-          _this._utf8Encode(data) //ArrayBuffer of the data
+          encodeUTF8(data) //ArrayBuffer of the data
         )
           .then(function(isvalid) {
           //returns a boolean on whether the signature is true or not
@@ -280,7 +278,7 @@ class Crypto {
             iv: iv
           },
           aesKey, //from generateKey or importKey above
-          _this._utf8Encode(data) //ArrayBuffer of data you want to encrypt
+          encodeUTF8(data) //ArrayBuffer of data you want to encrypt
         )
           .then(function(encrypted) {
           //returns an ArrayBuffer containing the encrypted data
@@ -316,7 +314,7 @@ class Crypto {
         )
           .then(function(decrypted) {
 
-            let decodedData = _this._utf8Decode(new Uint8Array(decrypted));
+            let decodedData = decodeUTF8(new Uint8Array(decrypted));
             CLog('crypto-decryptAES', decodedData);
             resolve(decodedData);
 
@@ -357,7 +355,7 @@ class Crypto {
             name: 'HMAC'
           },
           hmacKey, //from generateKey or importKey above
-          _this._utf8Encode(data) //ArrayBuffer of data you want to sign
+          encodeUTF8(data) //ArrayBuffer of data you want to sign
         )
           .then(function(signature) {
             CLog('HashHMAC signature:', new Uint8Array(signature));
@@ -403,12 +401,12 @@ class Crypto {
           },
           hmacKey, //from generateKey or importKey above
           signature, //ArrayBuffer of the signature
-          _this._utf8Encode(data) //ArrayBuffer of the data
+          encodeUTF8(data) //ArrayBuffer of the data
         )
           .then(function(isvalid) {
           //returns a boolean on whether the signature is true or not
           // CLog('crypto-verifyHMAC', isvalid);
-            console.log('verifyHMAC result', isvalid);
+            CLog('verifyHMAC result', isvalid);
             (isvalid) ? resolve(isvalid) : reject(isvalid);
 
           }).catch(function(err) {
@@ -497,7 +495,7 @@ class Crypto {
     let date = Date.now();
 
     //CLog('TIAGO: generateRandom data', date.toString());
-    let dateEncoded = _this._utf8Encode(date.toString());
+    let dateEncoded = encodeUTF8(date.toString());
 
     //extract the least significant 4 bytes in the date
     let finalDate = dateEncoded.slice(dateEncoded.length - 4, dateEncoded.length);
@@ -806,7 +804,7 @@ class Crypto {
       )
         .then(function(key) {
         //returns the symmetric key
-        // console.log('crypto-importAESkey', key);
+        // CLog('crypto-importAESkey', key);
           resolve(key);
         })
         .catch(function(err) {
@@ -815,24 +813,10 @@ class Crypto {
         });
     });
   }
-
-  _utf8Encode(s) {
-    return this.cryptoUTF8Encoder(s);
-
-    //return new TextEncoder('utf-8').encode(s);
-    //return encodeUTF8(s);
-  }
-
-  _utf8Decode(s) {
-    return this.cryptoUTF8Decoder(s);
-
-    //return new TextDecoder('utf-8').decode(s);
-    //return decodeUTF8(s);
-  }
 }
 
 function CLog(a1, a2) {
-  console.log(a1, a2);
+  //console.log(a1, a2);
 }
 
 

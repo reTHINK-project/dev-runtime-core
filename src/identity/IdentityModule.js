@@ -469,10 +469,6 @@ class IdentityModule {
 
       log.log('[callNodeJsGenerateMethods:keyPair.public]', keyPair.public);
 
-
-      console.log('constructor:::')
-      console.log('constructor:::', keyPair.public)
-      console.log('constructor:::', keyPair.public.constructor)
       publicKey = _this.crypto.stringify(keyPair.public);
 
       userkeyPair = keyPair;
@@ -663,7 +659,7 @@ class IdentityModule {
   }
 
   storeIdentity(result, keyPair) {
-    console.log('[storeIdentity:result]', result);
+    log.log('[storeIdentity:result]', result);
     log.log('[storeIdentity:keyPair]', keyPair);
     let _this = this;
 
@@ -1261,12 +1257,12 @@ class IdentityModule {
    * @return {Promise}
    */
   _getValidToken(hypertyURL) {
-    console.log('_getValidToken:hypertyURL', hypertyURL);
+    log.log('_getValidToken:hypertyURL', hypertyURL);
     let _this = this;
     return new Promise((resolve, reject) => {
       _this.getIdToken(hypertyURL).then(function(identity) {
-        console.log('_getValidToken:Promise', identity);
-        console.log('_getValidToken:identity.userProfile.userURL', identity.userProfile.userURL);
+        log.log('_getValidToken:Promise', identity);
+        log.log('_getValidToken:identity.userProfile.userURL', identity.userProfile.userURL);
         //        log.log('[Identity.IdentityModule.getValidToken] Token', identity);
         let timeNow = _this._secondsSinceEpoch();
         let completeId = _this.getIdentity(identity.userProfile.userURL);
