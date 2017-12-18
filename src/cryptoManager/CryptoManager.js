@@ -3,7 +3,7 @@ import * as logger from 'loglevel';
 let log = logger.getLogger('CryptoManager');
 
 import {divideURL, isDataObjectURL, isLegacy, chatkeysToStringCloner, chatkeysToArrayCloner, parseMessageURL,
-        parse, stringify, encode, decode, decodeToUint8Array} from '../utils/utils.js';
+        parse, stringify, encode, decode, decodeToUint8Array, parseToUint8Array} from '../utils/utils.js';
 import Crypto from './Crypto';
 
 /**

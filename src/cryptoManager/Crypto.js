@@ -102,7 +102,6 @@ class Crypto {
     return new Promise(function(resolve, reject) {
       _this._importRSAsignKey(privKey).then(function(privateKey) {
 
-        //log.log('TIAGO: signRSA data', data);
         _this._crypto.subtle.sign(
           {
             name: 'RSASSA-PKCS1-v1_5'
@@ -137,7 +136,6 @@ class Crypto {
     return new Promise(function(resolve, reject) {
       _this._importRSAverifyKey(pubKey).then(function(publicKey) {
 
-        //log.log('TIAGO: verifyRSA data', data);
         _this._crypto.subtle.verify(
           {
             name: 'RSASSA-PKCS1-v1_5'
@@ -176,7 +174,6 @@ class Crypto {
     return new Promise(function(resolve, reject) {
       _this._importAESkey(key).then(function(aesKey) {
 
-        //log.log('TIAGO: encryptAES data', data);
         _this._crypto.subtle.encrypt(
           {
             name: 'AES-CBC',
@@ -302,7 +299,6 @@ class Crypto {
           log.log('Converting verifyHMAC inputed DATA:', data);
         }
 
-        //log.log('TIAGO: verifyHMAC data', data);
         _this._crypto.subtle.verify(
           {
             name: 'HMAC'
@@ -402,7 +398,6 @@ class Crypto {
 
     let date = Date.now();
 
-    //log.log('TIAGO: generateRandom data', date.toString());
     let dateEncoded = encodeUTF8(date.toString());
 
     //extract the least significant 4 bytes in the date

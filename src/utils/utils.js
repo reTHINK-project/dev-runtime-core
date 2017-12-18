@@ -485,7 +485,7 @@ export function parseMessageURL(URL) {
 */
 export function encode(value) {
   try {
-    let stringValue = this.stringify(value);
+    let stringValue = stringify(value);
     return btoa(stringValue);
   } catch (err) {
     console.error('[Utils.encode:err] ' + err);
@@ -514,7 +514,7 @@ export function decode(value) {
 */
 export function decodeToUint8Array(value) {
   try {
-    return new Uint8Array(this.decode(value));
+    return new Uint8Array(decode(value));
   } catch (err) {
     console.error('[Utils.decodeToUint8Array:err] ' + err);
     throw err;
@@ -565,7 +565,7 @@ export function parse(value) {
 */
 export function parseToUint8Array(value) {
   try {
-    return new Uint8Array(this.parse(value));
+    return new Uint8Array(parse(value));
   } catch (err) {
     console.error('[Utils.parseToUint8Array:err]' + err);
     throw err;
