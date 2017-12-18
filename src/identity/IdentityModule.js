@@ -2,7 +2,7 @@
 import * as logger from 'loglevel';
 let log = logger.getLogger('IdentityModule');
 
-import {divideURL, getUserEmailFromURL, getUserIdentityDomain, parseMessageURL } from '../utils/utils.js';
+import {divideURL, getUserEmailFromURL, getUserIdentityDomain, parseMessageURL, stringify, decode } from '../utils/utils.js';
 import Identity from './Identity';
 import Crypto from '../cryptoManager/Crypto';
 import GuiFake from './GuiFake';
@@ -290,7 +290,7 @@ class IdentityModule {
             log.log('[IdentityModule] Identity selected by hyperty.');
             return resolve(assertion);
           }, (err) => { // if it got an error then just select identity from GUI
-            // console.error('[IdentityModule] Could not select identity from hyperty.');
+            // log.error('[IdentityModule] Could not select identity from hyperty.');
             _this.selectIdentityFromGUI().then((newAssertion) => {
               log.log('[IdentityModule] Identity selected by hyperty.');
               return resolve(newAssertion);
@@ -320,7 +320,7 @@ class IdentityModule {
           }
         }
       }).catch(error => {
-        console.error('Error on identity acquisition ', error);
+        log.error('Error on identity acquisition ', error);
         return reject(error);
       });
 
@@ -345,7 +345,7 @@ class IdentityModule {
         }
 
       }).catch(error => {
-        console.error('Error on identity acquisition ', error);
+        log.error('Error on identity acquisition ', error);
         reject(error);
       });
     });
@@ -465,36 +465,36 @@ class IdentityModule {
       let publicKey;
       let userkeyPair;
 
+      //let keyPair = nodeJSKeyPairPopulate;
+
       //generates the RSA key pair
-      _this.crypto.generateRSAKeyPair().then(function(keyPair) {
+          _this.crypto.generateRSAKeyPair().then(function(keyPair) {
 
-        log.log('[callNodeJsGenerateMethods:keyPair.public]', keyPair.public);
+      log.log('[callNodeJsGenerateMethods:keyPair.public]', keyPair.public);
 
+      publicKey = stringify(keyPair.public);
 
-        publicKey = _this.crypto.encode(keyPair.public);
-        userkeyPair = keyPair;
+      userkeyPair = keyPair;
 
-        //log.log('[callNodeJsGenerateMethods:generateSelectedIdentity] NO_URL');
-        //    return _this.generateAssertion(publicKey, origin, '', userkeyPair, idp);
-        //}).then(function(url) {
+      //log.log('[callNodeJsGenerateMethods:generateSelectedIdentity] NO_URL');
+      //    return _this.generateAssertion(publicKey, origin, '', userkeyPair, idp);
+      //}).then(function(url) {
 
-        log.log('[callNodeJsGenerateMethods:generateSelectedIdentity] NO_URL');
+      log.log('[callNodeJsGenerateMethods:generateSelectedIdentity] NO_URL');
 
-        let url = 'https://localhost/#state=state&code=4/-mlGUZDkPUC79MzA9sd4Sk5vMJLihmmxFvewM8yJrbs&access_token=ya29.Glv3BKDuB09-tnIKKu5WT_Zextcd7ysgWKvZbvGv-RYI0HaQ76qwIvsTF3sVuJfh2e-cztojXy0ZsjHSfa1cMfnqNKYtjg8Z2qm0POvZkJODsNVUdO2-oz7dHhvr&token_type=Bearer&expires_in=3600&id_token=eyJhbGciOiJSUzI1NiIsImtpZCI6ImI3NjcxOTI2M2NlYWFkZTkyZGI5YTMxMzI4YWRhNDRiNzE5MjA3ZjcifQ.eyJhenAiOiI4MDgzMjk1NjYwMTItdHFyOHFvaDExMTk0MmdkMmtnMDA3dDBzOGYyNzdyb2kuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiI4MDgzMjk1NjYwMTItdHFyOHFvaDExMTk0MmdkMmtnMDA3dDBzOGYyNzdyb2kuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMTc5NTkxMDUyOTU3NjE2ODc4ODkiLCJlbWFpbCI6InRlc3RhbmR0aGluazEyM0BnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiYXRfaGFzaCI6Ikl6NnZJNXRremZlelY2VDVadGVtdEEiLCJjX2hhc2giOiI1ZGV6Z1FrTTFyZ25FVTJFanpTUFVBIiwibm9uY2UiOiJORGdzTVRNd0xERXNNelFzTkRnc01UTXNOaXc1TERReUxERXpOQ3czTWl3eE16UXNNalEzTERFekxERXNNU3d4TERVc01Dd3pMREV6TUN3eExERTFMREFzTkRnc01UTXdMREVzTVRBc01pd3hNekFzTVN3eExEQXNNVGd3TERFME1pd3lNekFzTWpJeUxESXpMREU1T0N3eU9Td3hOVFlzTVRFeUxESXpOaXd4TWpZc01qSXlMREkwTml3ME15dzROaXc0TUN3eE9Ea3NNVFE0TERZNExERTVOaXd4TmpJc09USXNOakVzTWpZc01qUTRMRE15TERJeE5TdzROU3d4T1RJc01UVXhMRGs0TERRM0xESTBNaXd4TVN3eE56UXNNVGNzTWpJeUxERXhNeXd5TkRrc09EVXNNVE0xTERFeU9Dd3lOVFFzTVRJMUxERTNOQ3d5TURBc01UYzRMRGd4TERZMkxEazRMRFUwTERFMU1Td3hNelFzTVRJMUxETTFMREl5TVN3eE9UZ3NNeklzTVRBNUxETTJMRGNzTnpJc01UVTVMRFUyTERZekxEWXlMRGMwTERFNU1Td3hNellzTVRVc016WXNNVGd3TERFM09Td3hOVGdzTlRFc01UZ3NNVGt5TERFM01pd3lNamtzTWpVMUxERXhPU3cxTnl3eU16QXNNakFzTWpReUxESXdNaXd4T0RBc01URXdMREUyTnl3NE15d3lORGNzTVRVekxERTVPU3c1TVN3eE1qVXNNVGt5TERJeE9Dd3hNeXd4TlRrc01qRTNMREV5Tnl3eE1EUXNNakUwTERRNExEVXNNVEl4TERJeU9Dd3pNeXd4TWpZc09UUXNNVEU0TERneExERTJNaXd4TURJc01URXdMRGMxTERrNExETXhMREl3TWl3ek5Td3hOemtzTVRRc016Y3NNVElzTWpFMkxEWTFMREkwTlN3Mk5Td3hNRFVzTWpNM0xESTBOU3d4TkRBc01UZzBMRFU0TERJeU15dzNOeXd4TXpVc01qVXlMRElzTkRjc01UQTBMRFU1TERJMU5Td3lNVFlzTVRNM0xERTFNeXd5Tnl3eE56SXNNakl3TERFMU9Td3hPVFVzTWpFeUxESTVMREV4Tml3eE1EVXNNVEUyTERJeE1pd3lORGdzTnl3MU1pd3lPQ3d4TlRBc016QXNNamNzTWpFc01UY3NNVEkzTERnNExEVTBMREUzTkN3eE15dzBPU3d5TWpJc01UY3lMREl4TXl3eE1EZ3NNVFl5TERRM0xERTROaXd4TXpBc01qSTJMRFFzTVRjc01UZzVMRGcxTERFNE5Dd3lNVGNzTVRnMUxERTFNaXd4TVRrc01UQTBMREU1TXl3MU5Dd3lNVEVzTVRZeExERTVNU3d6TVN3ek9Dd3hNamtzTVRFM0xESXdOU3d4TURRc05pd3hOelVzTWpFNUxERXhOQ3czTERnMkxERTJNeXd4TWpZc01qVXpMREl4TXl3ek5pd3hNamtzTVRJc01UWTBMREV5Tnl3eU1qY3NNakF6TERnMUxEWTJMREl6TERVM0xERTBMREU1Tnl3eU9Dd3lOVElzTWpJeExEUXNNelFzTWpVd0xERTNOU3d5TVRnc01UZzFMREV4T1N3M01Dd3lORFlzTVRNMkxEZzVMREl3TERjd0xERXlNaXd4TURjc01qSXdMRGMxTERJd01Td3hOekFzTkRNc01qTXdMREl6Tml3ME55d3hNQ3d5TURjc01URTFMREkyTERFek1Td3lMRE1zTVN3d0xERT0iLCJpc3MiOiJhY2NvdW50cy5nb29nbGUuY29tIiwianRpIjoiNDU0MTM3NGVjMmY1OWExMWMwNWE0NDFjMTRmMTJkNTllY2UxYzVmYiIsImlhdCI6MTUwOTY0MDA0OSwiZXhwIjoxNTA5NjQzNjQ5fQ.vlWWkWcz333hA4lY0onl2jeat5eHCKvyMD_m-KieMtGqcLhtknMl3HbYTABL2k3HEdqbnNlD1G6OyRG-nDWt6qWCgI-gGJ6ZeU9Xrd5fPlFyRPj-FOAhA514uaYss10GYgt5XoArV7oXrR1-FNVZVNhyioggqJjJ4xtnZ6_j0isUxE7uZTlJLX8ixL44eoPVujmXKIJaXRYp0xf3626rnBz8znmGTt1G1jTwMNZmhZc8LxSauVFMLLoRjmLgNKgsGJNKN3ND7H6rsD0Vw5t24tlBwT_fsYIPauJJVZeqpmzy6L-pCEPUc0oJ7OqML84MB2W2zTq4uv6bMh4nQ_mdrA&authuser=0&session_state=44077304f5ec024da73af13a720afad0e4cb945d..2df8&prompt=consent';
-        _this.myHint = url;
+      return _this.generateAssertion(publicKey, origin, 'url', userkeyPair, idp);
 
-        return _this.generateAssertion(publicKey, origin, url, userkeyPair, idp);
+    }).then(function(value) {
+      if (value) {
+        resolve(value);
+      } else {
+        reject('Error on obtaining Identity');
+      }
+    }).catch(function(err) {
+      log.log(err);
+      reject(err);
 
-      }).then(function(value) {
-        if (value) {
-          resolve(value);
-        } else {
-          reject('Error on obtaining Identity');
-        }
-      }).catch(function(err) {
-        log.log(err);
-        reject(err);
-      });
+            });
 
     });
   }
@@ -524,13 +524,12 @@ class IdentityModule {
         log.log('[callNodeJsGenerateMethods:keyPair.public]', keyPair.public);
         log.log('[callNodeJsGenerateMethods:keyPair.private]', keyPair.private);
 
-        publicKey = _this.crypto.encode(keyPair.public);
+        publicKey = stringify(keyPair.public);
         userkeyPair = keyPair;
         log.log('generateAssertion:no_hint');
         return _this.generateAssertion(publicKey, origin, '', userkeyPair, idp);
 
       }).then(function(url) {
-        log.log(['']);
         _this.myHint = url;
         log.log('generateAssertion:hint');
         return _this.generateAssertion(publicKey, origin, url, userkeyPair, idp);
@@ -542,7 +541,7 @@ class IdentityModule {
           reject('Error on obtaining Identity');
         }
       }).catch(function(err) {
-        console.error(err);
+        log.error(err);
         reject(err);
       });
     });
@@ -562,7 +561,7 @@ class IdentityModule {
       _this.callIdentityModuleFunc('openPopup', {urlreceived: loginUrl}).then((idCode) => {
         return idCode;
       }, (err) => {
-        console.error('Error while logging in for the selected identity.');
+        log.error('Error while logging in for the selected identity.');
         return reject(err);
       }).then((idCode) => {
         _this.sendGenerateMessage(publicKey, origin, idCode, idp).then((newResponse) => {
@@ -571,7 +570,7 @@ class IdentityModule {
               resolve('Login was successfull');
             }).catch(err => { reject('Login has failed:' + err); });
           } else {
-            console.error('Error while logging in for the selected identity.');
+            log.error('Error while logging in for the selected identity.');
             return reject('Could not generate a valid assertion for selected identity.');
           }
         }).catch(err => { reject('On loginSelectedIdentity from method sendGenerateMessage error:  ' + err); });
@@ -590,7 +589,7 @@ class IdentityModule {
 
       //generates the RSA key pair
       _this.crypto.generateRSAKeyPair().then(function(keyPair) {
-        let publicKey = _this.crypto.encode(keyPair.public);
+        let publicKey = stringify(keyPair.public);
 
         _this.sendGenerateMessage(publicKey, origin, idHint, idp).then((response) => {
           if (response.hasOwnProperty('assertion')) { // identity was logged in, just save it
@@ -606,7 +605,7 @@ class IdentityModule {
               return reject(err);
             });
           } else { // you should never get here, if you do then the IdP Proxy is not well implemented
-            // console.error('GenerateAssertion returned invalid response.');
+            // log.error('GenerateAssertion returned invalid response.');
             log.log('Proceeding by logging in.');
             _this.generateSelectedIdentity(publicKey, origin, idp, keyPair).then((value) => {
               return resolve(value);
@@ -676,9 +675,9 @@ class IdentityModule {
       //verify if the token contains the 3 components, or just the assertion
       try {
         if (splitedAssertion[1]) {
-          assertionParsed = _this.crypto.decode(splitedAssertion[1]);
+          assertionParsed = decode(splitedAssertion[1]);
         } else {
-          assertionParsed = _this.crypto.decode(result.assertion);
+          assertionParsed = decode(result.assertion);
         }
       } catch (err) {
         return reject('In storeIdentity, error parsing assertion: ' + err);
@@ -796,7 +795,7 @@ class IdentityModule {
           return reject('Error on obtaining Identity');
         }
       }).catch(function(err) {
-        console.error(err);
+        log.error(err);
         return reject(err);
       });
     });
@@ -887,7 +886,7 @@ class IdentityModule {
                   return reject('No Access token found');
                 }
               }, (err) => {
-                console.error('[Identity.IdentityModule.getToken] error CallGeneratemethods');
+                log.error('[Identity.IdentityModule.getToken] error CallGeneratemethods');
                 return reject(err);
               });
             }
@@ -912,7 +911,7 @@ class IdentityModule {
   * @return {JSON}    token    Id token to be added to the message
   */
   getIdToken(hypertyURL) {
-    console.info('getIdToken:hypertyURL ', hypertyURL);
+    log.info('getIdToken:hypertyURL ', hypertyURL);
     let _this = this;
     return new Promise(function(resolve, reject) {
       let splitURL = hypertyURL.split('://');
@@ -934,7 +933,7 @@ class IdentityModule {
             return reject('no identity was found ');
           }
         }).catch((reason) => {
-          console.error('no identity was found: ', reason);
+          log.error('no identity was found: ', reason);
           reject(reason);
         });
       } else {
@@ -1048,7 +1047,7 @@ class IdentityModule {
       let message;
       let assertion = _this.getIdentity(oldIdentity.userProfile.userURL);
 
-      console.info('sendRefreshMessage:oldIdentity', oldIdentity);
+      log.info('sendRefreshMessage:oldIdentity', oldIdentity);
 
       message = {type: 'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'refreshAssertion', params: {identity: assertion}}};
       try {
@@ -1258,10 +1257,12 @@ class IdentityModule {
    * @return {Promise}
    */
   _getValidToken(hypertyURL) {
-  //  console.info('_getValidToken:hypertyURL', hypertyURL);
+    log.log('_getValidToken:hypertyURL', hypertyURL);
     let _this = this;
     return new Promise((resolve, reject) => {
       _this.getIdToken(hypertyURL).then(function(identity) {
+        log.log('_getValidToken:Promise', identity);
+        log.log('_getValidToken:identity.userProfile.userURL', identity.userProfile.userURL);
         //        log.log('[Identity.IdentityModule.getValidToken] Token', identity);
         let timeNow = _this._secondsSinceEpoch();
         let completeId = _this.getIdentity(identity.userProfile.userURL);
@@ -1274,14 +1275,14 @@ class IdentityModule {
             expirationDate = completeId.info.tokenIDJSON.exp;
           } else {
             // throw 'The ID Token does not have an expiration time';
-            console.info('The ID Token does not have an expiration time');
+            log.info('The ID Token does not have an expiration time');
             resolve(identity);
           }
         } else if (completeId.hasOwnProperty('infoToken') && completeId.infoToken.hasOwnProperty('exp')) {
           expirationDate = completeId.infoToken.exp;
         } else {
           // throw 'The ID Token does not have an expiration time';
-          console.info('The ID Token does not have an expiration time');
+          log.info('The ID Token does not have an expiration time');
           resolve(identity);
         }
 
@@ -1295,7 +1296,7 @@ class IdentityModule {
               _this.storeIdentity(newIdentity, completeId.keyPair).then((value) => {
                 resolve(value);
               }, (err) => {
-                console.error('[Identity.IdentityModule.getToken] error on getToken', err);
+                log.error('[Identity.IdentityModule.getToken] error on getToken', err);
                 reject(err);
               });
             });
@@ -1311,7 +1312,7 @@ class IdentityModule {
           resolve(identity);
         }
       }).catch(function(error) {
-        console.error('[Identity.IdentityModule.getToken] error on getToken', error);
+        log.error('[Identity.IdentityModule.getToken] error on getToken', error);
         reject(error);
       });
     });
@@ -1323,7 +1324,7 @@ class IdentityModule {
   * @return   {String}  reporter              dataObject url reporter
   */
   _getHypertyFromDataObject(dataObjectURL) {
-    console.info('_getHypertyFromDataObject:dataObjectURL', dataObjectURL);
+    log.info('_getHypertyFromDataObject:dataObjectURL', dataObjectURL);
     let _this = this;
 
     return new Promise(function(resolve, reject) {
@@ -1334,21 +1335,21 @@ class IdentityModule {
 
       // check if is the creator of the hyperty
       let reporterURL = _this.registry.getReporterURLSynchonous(finalURL);
-      console.info('_getHypertyFromDataObject:reporterURL', reporterURL);
+      log.info('_getHypertyFromDataObject:reporterURL', reporterURL);
 
       if (reporterURL) {
         resolve(reporterURL);
       } else {
         // check if there is already an association from an hypertyURL to the dataObject
         let storedReporterURL = _this.dataObjectsIdentity[finalURL];
-        console.info('_getHypertyFromDataObject:storedReporterURL', storedReporterURL);
+        log.info('_getHypertyFromDataObject:storedReporterURL', storedReporterURL);
 
         if (storedReporterURL) {
           resolve(storedReporterURL);
         } else {
           // check if there is any hyperty that subscribed the dataObjectURL
           let subscriberHyperty = _this.registry.getDataObjectSubscriberHyperty(dataObjectURL);
-          console.info('_getHypertyFromDataObject:subscriberHyperty', subscriberHyperty);
+          log.info('_getHypertyFromDataObject:subscriberHyperty', subscriberHyperty);
 
           if (subscriberHyperty) {
             resolve(subscriberHyperty);
@@ -1356,9 +1357,9 @@ class IdentityModule {
             // search in domain registry for the hyperty associated to the dataObject
             // search in case is a subscriber who wants to know the reporter
             _this._coreDiscovery.discoverDataObjectPerURL(finalURL, domain).then(dataObject => {
-              console.info('_getHypertyFromDataObject:dataObject', dataObject);
+              log.info('_getHypertyFromDataObject:dataObject', dataObject);
               _this.dataObjectsIdentity[finalURL] = dataObject.reporter;
-              console.info('_getHypertyFromDataObject:dataObject.reporter', dataObject.reporter);
+              log.info('_getHypertyFromDataObject:dataObject.reporter', dataObject.reporter);
               resolve(dataObject.reporter);
             }, err => {
               reject(err);
@@ -1379,431 +1380,6 @@ class IdentityModule {
     } else {
       return 'domain-idp://' + idpDomain;
     }
-  }
-
-  _doHandShakePhase(message, chatKeys) {
-  // log('_doHandShakePhase:dataObject', message);
-  //	log('_doHandShakePhase:chatKeys', chatKeys);
-
-    let _this = this;
-
-    return new Promise(function(resolve, reject) {
-
-      let handshakeType = message.body.handshakePhase;
-      let iv;
-      let hash;
-      let value = {};
-      let filteredMessage;
-
-      console.info('handshake phase: ', handshakeType);
-
-      switch (handshakeType) {
-
-        case 'startHandShake': {
-          chatKeys.keys.fromRandom = _this.crypto.generateRandom();
-          let startHandShakeMsg = {
-            type: 'handshake',
-            to: message.to,
-            from: message.from,
-            body: {
-              handshakePhase: 'senderHello',
-              value: _this.crypto.encode(chatKeys.keys.fromRandom)
-            }
-          };
-          chatKeys.handshakeHistory.senderHello = _this._filterMessageToHash(startHandShakeMsg, undefined, chatKeys.hypertyFrom.messageInfo);
-
-          // check if was the encrypt function or the mutual authentication that request the
-          // start of the handShakePhase.
-
-          if (chatKeys.initialMessage) {
-            resolve({message: startHandShakeMsg, chatKeys: chatKeys});
-          } else {
-            _this.chatKeys[message.from + '<->' + message.to] = chatKeys;
-            _this._messageBus.postMessage(startHandShakeMsg);
-          }
-
-          break;
-
-        }
-        case 'senderHello': {
-
-          log.log('senderHello');
-          chatKeys.handshakeHistory.senderHello = _this._filterMessageToHash(message);
-          chatKeys.keys.fromRandom = _this.crypto.decodeToUint8Array(message.body.value);
-          chatKeys.keys.toRandom = _this.crypto.generateRandom();
-
-          let senderHelloMsg = {
-            type: 'handshake',
-            to: message.from,
-            from: message.to,
-            body: {
-              handshakePhase: 'receiverHello',
-              value: _this.crypto.encode(chatKeys.keys.toRandom)
-            }
-          };
-          chatKeys.handshakeHistory.receiverHello = _this._filterMessageToHash(senderHelloMsg, undefined, chatKeys.hypertyFrom.messageInfo);
-          resolve({message: senderHelloMsg, chatKeys: chatKeys});
-
-          break;
-        }
-        case 'receiverHello': {
-
-          log.log('receiverHello');
-          chatKeys.handshakeHistory.receiverHello = _this._filterMessageToHash(message);
-
-          _this.validateAssertion(message.body.identity.assertion, undefined, message.body.identity.idp).then((value) => {
-
-            //TODO remove later this verification as soon as all the IdP proxy are updated in the example
-            let encodedpublicKey = (typeof value.contents === 'string') ? value.contents : value.contents.nonce;
-
-            let receiverPublicKey = _this.crypto.decodeToUint8Array(encodedpublicKey);
-            let premasterSecret = _this.crypto.generatePMS();
-            let toRandom = message.body.value;
-            chatKeys.hypertyTo.assertion = message.body.identity.assertion;
-            chatKeys.hypertyTo.publicKey = receiverPublicKey;
-            chatKeys.hypertyTo.userID    = value.contents.email;
-            chatKeys.keys.toRandom  = _this.crypto.decodeToUint8Array(toRandom);
-            chatKeys.keys.premasterKey = premasterSecret;
-
-            let concatKey = _this.crypto.concatPMSwithRandoms(premasterSecret, chatKeys.keys.toRandom, chatKeys.keys.fromRandom);
-
-            return _this.crypto.generateMasterSecret(concatKey, 'messageHistoric' + chatKeys.keys.toRandom + chatKeys.keys.fromRandom);
-
-            //generate the master key
-          }).then((masterKey) => {
-            chatKeys.keys.masterKey = masterKey;
-
-            return _this.crypto.generateKeys(masterKey, 'key expansion' + chatKeys.keys.toRandom + chatKeys.keys.fromRandom);
-
-            //generate the symmetric and hash keys
-          }).then((keys) => {
-
-            chatKeys.keys.hypertyToSessionKey = new Uint8Array(keys[0]);
-            chatKeys.keys.hypertyFromSessionKey = new Uint8Array(keys[1]);
-            chatKeys.keys.hypertyToHashKey = new Uint8Array(keys[2]);
-            chatKeys.keys.hypertyFromHashKey = new Uint8Array(keys[3]);
-            iv = _this.crypto.generateIV();
-            value.iv = _this.crypto.encode(iv);
-
-            let messageStructure = {
-              type: 'handshake',
-              to: message.from,
-              from: message.to,
-              body: {
-                handshakePhase: 'senderCertificate'
-              }
-            };
-
-            // hash the value and the iv
-            filteredMessage = _this._filterMessageToHash(messageStructure, 'ok' + iv, chatKeys.hypertyFrom.messageInfo);
-            return _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, filteredMessage);
-          }).then((hash) => {
-            value.hash = _this.crypto.encode(hash);
-
-            //encrypt the data
-            return _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, 'ok', iv);
-          }).then((encryptedData) => {
-            value.symetricEncryption = _this.crypto.encode(encryptedData);
-
-            return _this.crypto.encryptRSA(chatKeys.hypertyTo.publicKey, chatKeys.keys.premasterKey);
-
-          }).then((encryptedValue) => {
-
-            value.assymetricEncryption = _this.crypto.encode(encryptedValue);
-
-            let messageStructure = {
-              type: 'handshake',
-              to: message.from,
-              from: message.to,
-              body: {
-                handshakePhase: 'senderCertificate'
-              }
-            };
-
-            let messageToHash = _this._filterMessageToHash(messageStructure, chatKeys.keys.premasterKey, chatKeys.hypertyFrom.messageInfo);
-
-            return _this.crypto.signRSA(chatKeys.hypertyFrom.privateKey, _this.crypto.encode(chatKeys.handshakeHistory) + _this.crypto.encode(messageToHash));
-
-          }).then(signature => {
-
-            value.signature = _this.crypto.encode(signature);
-
-            let receiverHelloMsg = {
-              type: 'handshake',
-              to: message.from,
-              from: message.to,
-              body: {
-                handshakePhase: 'senderCertificate',
-                value: _this.crypto.encode(value)
-              }
-            };
-            chatKeys.handshakeHistory.senderCertificate = _this._filterMessageToHash(receiverHelloMsg, 'ok' + iv, chatKeys.hypertyFrom.messageInfo);
-
-            resolve({message: receiverHelloMsg, chatKeys: chatKeys});
-
-          }, error => reject(error));
-
-          break;
-        }
-        case 'senderCertificate': {
-
-          log.log('senderCertificate');
-          let receivedValue = _this.crypto.decode(message.body.value);
-
-          _this.validateAssertion(message.body.identity.assertion, undefined, message.body.identity.idp).then((value) => {
-            let encryptedPMS = _this.crypto.decodeToUint8Array(receivedValue.assymetricEncryption);
-
-            //TODO remove later this verification as soon as all the IdP proxy are updated in the example
-            let encodedpublicKey = (typeof value.contents === 'string') ? value.contents : value.contents.nonce;
-
-            let senderPublicKey = _this.crypto.decodeToUint8Array(encodedpublicKey);
-            chatKeys.hypertyTo.assertion = message.body.identity.assertion;
-            chatKeys.hypertyTo.publicKey = senderPublicKey;
-            chatKeys.hypertyTo.userID    = value.contents.email;
-
-            return _this.crypto.decryptRSA(chatKeys.hypertyFrom.privateKey, encryptedPMS);
-
-          }, (error) => {
-            // log.log(error);
-            reject('Error during authentication of identity');
-
-            //obtain the PremasterKey using the private key
-          }).then(pms => {
-
-            chatKeys.keys.premasterKey = new Uint8Array(pms);
-
-            let signature = _this.crypto.decodeToUint8Array(receivedValue.signature);
-
-            let receivedmsgToHash = _this._filterMessageToHash(message, chatKeys.keys.premasterKey);
-
-            return _this.crypto.verifyRSA(chatKeys.hypertyTo.publicKey, _this.crypto.encode(chatKeys.handshakeHistory) + _this.crypto.encode(receivedmsgToHash), signature);
-
-            // validates the signature received
-          }).then(signValidationResult => {
-
-            //log.log('SenderCertificate - signature validation result ', signValidationResult);
-            let concatKey = _this.crypto.concatPMSwithRandoms(chatKeys.keys.premasterKey, chatKeys.keys.toRandom, chatKeys.keys.fromRandom);
-
-            return _this.crypto.generateMasterSecret(concatKey, 'messageHistoric' + chatKeys.keys.toRandom + chatKeys.keys.fromRandom);
-
-            // generates the master keys from the Premaster key and the randoms
-          }).then(masterKey => {
-            chatKeys.keys.masterKey = masterKey;
-
-            return _this.crypto.generateKeys(masterKey, 'key expansion' + chatKeys.keys.toRandom + chatKeys.keys.fromRandom);
-
-            // generates the symmetric keys to be used in the symmetric encryption
-          }).then(keys => {
-            chatKeys.keys.hypertyFromSessionKey = new Uint8Array(keys[0]);
-            chatKeys.keys.hypertyToSessionKey = new Uint8Array(keys[1]);
-            chatKeys.keys.hypertyFromHashKey = new Uint8Array(keys[2]);
-            chatKeys.keys.hypertyToHashKey = new Uint8Array(keys[3]);
-            iv = _this.crypto.decodeToUint8Array(receivedValue.iv);
-            let data = _this.crypto.decodeToUint8Array(receivedValue.symetricEncryption);
-
-            return _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, data, iv);
-
-          }).then(decryptedData => {
-            // log.log('decryptedData', decryptedData);
-
-            chatKeys.handshakeHistory.senderCertificate = _this._filterMessageToHash(message, decryptedData + iv);
-
-            let hashReceived = _this.crypto.decodeToUint8Array(receivedValue.hash);
-
-            filteredMessage = _this._filterMessageToHash(message, decryptedData + iv);
-
-            return _this.crypto.verifyHMAC(chatKeys.keys.hypertyToHashKey, filteredMessage, hashReceived);
-
-          }).then(verifiedHash  => {
-
-            // log.log('result of hash verification ', verifiedHash);
-            let receiverFinishedMessage = {
-              type: 'handshake',
-              to: message.from,
-              from: message.to,
-              body: {
-                handshakePhase: 'receiverFinishedMessage'
-              }
-            };
-            iv = _this.crypto.generateIV();
-            value.iv = _this.crypto.encode(iv);
-
-            filteredMessage = _this._filterMessageToHash(receiverFinishedMessage, 'ok!' + iv, chatKeys.hypertyFrom.messageInfo);
-
-            //log.log('TIAGO: doHandShakePhase verifiedHash');
-            return _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, filteredMessage);
-          }).then(hash => {
-
-            value.hash = _this.crypto.encode(hash);
-            return _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, 'ok!', iv);
-
-          }).then(encryptedValue => {
-            value.value = _this.crypto.encode(encryptedValue);
-            let receiverFinishedMessage = {
-              type: 'handshake',
-              to: message.from,
-              from: message.to,
-              body: {
-                handshakePhase: 'receiverFinishedMessage',
-                value: _this.crypto.encode(value)
-              }
-            };
-
-            chatKeys.handshakeHistory.receiverFinishedMessage = _this._filterMessageToHash(receiverFinishedMessage, 'ok!' + iv, chatKeys.hypertyFrom.messageInfo);
-            chatKeys.authenticated = true;
-            resolve({message: receiverFinishedMessage, chatKeys: chatKeys});
-          }).catch(err => {
-            reject('On _doHandShakePhase from senderCertificate error: ' + err);
-          });
-
-          break;
-        }
-        case 'receiverFinishedMessage': {
-
-          chatKeys.authenticated = true;
-
-          value = _this.crypto.decode(message.body.value);
-
-          iv = _this.crypto.decodeToUint8Array(value.iv);
-          let data = _this.crypto.decodeToUint8Array(value.value);
-          hash = _this.crypto.decodeToUint8Array(value.hash);
-
-          _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, data, iv).then(decryptedData => {
-            // log.log('decryptedData', decryptedData);
-            chatKeys.handshakeHistory.receiverFinishedMessage = _this._filterMessageToHash(message, decryptedData + iv);
-
-            let filteredMessage = _this._filterMessageToHash(message, decryptedData + iv);
-            _this.crypto.verifyHMAC(chatKeys.keys.hypertyToHashKey, filteredMessage, hash).then(result => {
-
-              // check if there was an initial message that was blocked and send it
-              if (chatKeys.initialMessage) {
-
-                let initialMessage = {
-                  type: 'create',
-                  to: message.from,
-                  from: message.to,
-                  body: {
-                    value: chatKeys.initialMessage.body.value
-                  }
-                };
-
-                resolve({message: initialMessage, chatKeys: chatKeys});
-
-                //sends the sessionKey to the subscriber hyperty
-              } else {
-                _this._sendReporterSessionKey(message, chatKeys).then(value => {
-
-                  resolve(value);
-                }).catch(err => {
-                  reject('On _doHandShakePhase from receiverFinishedMessage error: ' + err);
-                });
-              }
-            });
-          });
-
-          break;
-        }
-
-        case 'reporterSessionKey': {
-
-          log.log('reporterSessionKey');
-
-          let valueIVandHash = _this.crypto.decode(message.body.value);
-          hash = _this.crypto.decodeToUint8Array(valueIVandHash.hash);
-          iv = _this.crypto.decodeToUint8Array(valueIVandHash.iv);
-          let encryptedValue = _this.crypto.decodeToUint8Array(valueIVandHash.value);
-          let parsedValue;
-          let sessionKey;
-          let dataObjectURL;
-          let receiverAcknowledgeMsg;
-
-          //log.log('[IdentityModule reporterSessionKey] - decryptAES: ', chatKeys.keys.hypertyToSessionKey, encryptedValue, iv);
-
-          _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, encryptedValue, iv).then(decryptedValue => {
-
-            parsedValue = _this.crypto.decode(decryptedValue);
-            sessionKey = _this.crypto.decodeToUint8Array(parsedValue.value);
-            dataObjectURL = parsedValue.dataObjectURL;
-
-            let messageToHash = _this._filterMessageToHash(message, decryptedValue + iv);
-
-            return _this.crypto.verifyHMAC(chatKeys.keys.hypertyToHashKey, messageToHash, hash);
-
-          }).then(hashResult => {
-
-
-            // log.log('hash successfully validated ', hashResult);
-
-            _this.dataObjectSessionKeys[dataObjectURL] =  {sessionKey: sessionKey, isToEncrypt: true};
-            let dataObjectSessionKeysClone = _chatkeysToStringCloner(dataObjectURL, _this.dataObjectSessionKeys);
-            _this.storageManager.set('dataObjectSessionKeys', 0, dataObjectSessionKeysClone).catch(err => {
-              reject('On _sendReporterSessionKey from method reporterSessionKey error: ' + err);
-            });
-
-            iv = _this.crypto.generateIV();
-            value.iv = _this.crypto.encode(iv);
-
-            return _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, 'ok!!', iv);
-          }).then(encryptedValue => {
-
-            receiverAcknowledgeMsg = {
-              type: 'handshake',
-              to: message.from,
-              from: message.to,
-              body: {
-                handshakePhase: 'receiverAcknowledge'
-              }
-            };
-
-            value.value = _this.crypto.encode(encryptedValue);
-            let messageToHash = _this._filterMessageToHash(receiverAcknowledgeMsg, 'ok!!' + iv, chatKeys.hypertyFrom.messageInfo);
-
-            return _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, messageToHash);
-          }).then(hashedMessage => {
-            let finalValue = _this.crypto.encode({value: value.value, hash: _this.crypto.encode(hashedMessage), iv: value.iv});
-
-            receiverAcknowledgeMsg.body.value = finalValue;
-            resolve({message: receiverAcknowledgeMsg, chatKeys: chatKeys});
-          }).catch(err => {
-            reject('On _doHandShakePhase from reporterSessionKey error: ' + err);
-          });
-
-          break;
-        }
-
-        case 'receiverAcknowledge': {
-
-          log.log('receiverAcknowledge');
-
-          let receivedvalueIVandHash = _this.crypto.decode(message.body.value);
-          let receivedHash = _this.crypto.decodeToUint8Array(receivedvalueIVandHash.hash);
-          iv = _this.crypto.decodeToUint8Array(receivedvalueIVandHash.iv);
-          let receivedEncryptedValue = _this.crypto.decodeToUint8Array(receivedvalueIVandHash.value);
-
-          _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, receivedEncryptedValue, iv).then(decryptedValue => {
-
-            let filteredMessage = _this._filterMessageToHash(message, decryptedValue + iv);
-            return _this.crypto.verifyHMAC(chatKeys.keys.hypertyToHashKey, filteredMessage, receivedHash);
-          }).then(hashResult => {
-            // log.log('hashResult ', hashResult);
-
-            let callback = chatKeys.callback;
-
-            if (callback) {
-              callback('handShakeEnd');
-            }
-            resolve('handShakeEnd');
-          }).catch(err => {
-            reject('On _doHandShakePhase from receiverAcknowledge error: ' + err);
-          });
-
-          break;
-        }
-
-        default:
-          reject(message);
-      }
-    });
   }
 
   /**
@@ -1966,4 +1542,8 @@ function _chatkeysToArrayCloner(chatKeysURL, sessionKeys) {
 //  log.log(f1, JSON.stringify(util.inspect(f2)));
 //}
 
+/*
+const nodeJSKeyPairPopulate = { public: [48, 130, 1, 34, 48, 13, 6, 9, 42, 134, 72, 134, 247, 13, 1, 1, 1, 5, 0, 3, 130, 1, 15, 0, 48, 130, 1, 10, 2, 130, 1, 1, 0, 228, 43, 101, 12, 121, 7, 157, 71, 81, 58, 219, 32, 10, 108, 193, 179, 212, 116, 255, 59, 217, 32, 161, 201, 53, 171, 226, 199, 137, 202, 171, 60, 82, 53, 125, 62, 177, 126, 165, 24, 141, 30, 15, 226, 59, 107, 34, 7, 13, 149, 112, 125, 10, 230, 191, 156, 164, 177, 10, 185, 13, 66, 3, 217, 166, 244, 90, 119, 111, 27, 145, 104, 71, 189, 166, 226, 255, 133, 83, 151, 231, 101, 151, 89, 22, 19, 65, 154, 10, 53, 208, 218, 252, 219, 37, 50, 212, 86, 145, 107, 132, 90, 233, 202, 227, 108, 114, 141, 29, 73, 187, 31, 13, 234, 0, 232, 24, 191, 35, 149, 179, 138, 214, 159, 245, 162, 148, 221, 118, 17, 105, 89, 151, 146, 209, 55, 236, 61, 143, 233, 228, 10, 115, 8, 81, 197, 45, 123, 187, 223, 176, 254, 165, 69, 143, 29, 100, 114, 17, 130, 226, 223, 33, 11, 240, 81, 61, 172, 191, 157, 246, 202, 87, 131, 221, 88, 48, 127, 159, 119, 160, 152, 117, 61, 253, 174, 65, 214, 203, 218, 63, 50, 78, 160, 181, 221, 211, 128, 70, 178, 191, 170, 0, 13, 122, 173, 12, 203, 252, 4, 184, 225, 252, 7, 62, 96, 116, 15, 216, 158, 55, 85, 48, 16, 9, 206, 119, 74, 112, 243, 136, 84, 184, 223, 254, 101, 91, 61, 10, 91, 85, 192, 147, 144, 57, 29, 66, 238, 199, 244, 193, 194, 150, 232, 200, 107, 2, 3, 1, 0, 1],
+  private: [48, 130, 4, 191, 2, 1, 0, 48, 13, 6, 9, 42, 134, 72, 134, 247, 13, 1, 1, 1, 5, 0, 4, 130, 4, 169, 48, 130, 4, 165, 2, 1, 0, 2, 130, 1, 1, 0, 228, 43, 101, 12, 121, 7, 157, 71, 81, 58, 219, 32, 10, 108, 193, 179, 212, 116, 255, 59, 217, 32, 161, 201, 53, 171, 226, 199, 137, 202, 171, 60, 82, 53, 125, 62, 177, 126, 165, 24, 141, 30, 15, 226, 59, 107, 34, 7, 13, 149, 112, 125, 10, 230, 191, 156, 164, 177, 10, 185, 13, 66, 3, 217, 166, 244, 90, 119, 111, 27, 145, 104, 71, 189, 166, 226, 255, 133, 83, 151, 231, 101, 151, 89, 22, 19, 65, 154, 10, 53, 208, 218, 252, 219, 37, 50, 212, 86, 145, 107, 132, 90, 233, 202, 227, 108, 114, 141, 29, 73, 187, 31, 13, 234, 0, 232, 24, 191, 35, 149, 179, 138, 214, 159, 245, 162, 148, 221, 118, 17, 105, 89, 151, 146, 209, 55, 236, 61, 143, 233, 228, 10, 115, 8, 81, 197, 45, 123, 187, 223, 176, 254, 165, 69, 143, 29, 100, 114, 17, 130, 226, 223, 33, 11, 240, 81, 61, 172, 191, 157, 246, 202, 87, 131, 221, 88, 48, 127, 159, 119, 160, 152, 117, 61, 253, 174, 65, 214, 203, 218, 63, 50, 78, 160, 181, 221, 211, 128, 70, 178, 191, 170, 0, 13, 122, 173, 12, 203, 252, 4, 184, 225, 252, 7, 62, 96, 116, 15, 216, 158, 55, 85, 48, 16, 9, 206, 119, 74, 112, 243, 136, 84, 184, 223, 254, 101, 91, 61, 10, 91, 85, 192, 147, 144, 57, 29, 66, 238, 199, 244, 193, 194, 150, 232, 200, 107, 2, 3, 1, 0, 1, 2, 130, 1, 0, 103, 244, 137, 118, 116, 82, 14, 203, 102, 107, 253, 88, 12, 199, 222, 60, 243, 136, 86, 157, 74, 224, 190, 53, 113, 57, 157, 250, 49, 130, 96, 31, 252, 136, 152, 70, 143, 17, 215, 96, 103, 51, 18, 35, 141, 212, 210, 205, 9, 216, 83, 70, 245, 71, 138, 119, 112, 229, 164, 176, 9, 37, 81, 161, 193, 154, 68, 249, 115, 106, 201, 6, 12, 225, 144, 126, 141, 210, 141, 242, 128, 159, 221, 163, 222, 21, 233, 230, 167, 206, 59, 24, 250, 233, 81, 122, 102, 26, 6, 233, 72, 133, 47, 77, 155, 238, 86, 6, 139, 24, 131, 163, 179, 112, 48, 247, 142, 6, 207, 204, 173, 223, 140, 199, 150, 95, 123, 152, 202, 155, 131, 238, 62, 96, 133, 4, 217, 51, 121, 30, 38, 178, 189, 216, 44, 35, 241, 93, 7, 62, 90, 111, 216, 66, 209, 243, 128, 234, 141, 84, 135, 181, 13, 38, 220, 114, 245, 240, 178, 95, 220, 206, 11, 186, 234, 213, 66, 121, 83, 68, 89, 75, 46, 183, 145, 183, 147, 160, 215, 118, 198, 125, 181, 146, 30, 251, 58, 87, 47, 209, 237, 97, 24, 47, 179, 6, 110, 242, 99, 150, 226, 148, 198, 174, 146, 101, 213, 87, 178, 10, 223, 105, 18, 56, 53, 22, 212, 158, 170, 176, 51, 86, 145, 125, 124, 44, 9, 85, 19, 144, 246, 170, 78, 124, 30, 32, 12, 166, 174, 139, 77, 63, 173, 82, 10, 153, 2, 129, 129, 0, 248, 18, 143, 246, 137, 136, 145, 219, 178, 39, 27, 94, 64, 90, 47, 163, 114, 60, 63, 187, 131, 143, 244, 16, 42, 128, 231, 117, 92, 98, 219, 155, 62, 107, 252, 17, 245, 45, 160, 225, 103, 142, 72, 36, 193, 150, 235, 214, 175, 62, 212, 56, 45, 9, 0, 60, 114, 107, 134, 228, 204, 131, 131, 214, 94, 201, 148, 159, 99, 139, 181, 13, 119, 38, 30, 107, 166, 165, 203, 43, 34, 20, 207, 171, 32, 58, 167, 62, 196, 153, 103, 204, 213, 247, 48, 111, 227, 59, 95, 97, 194, 187, 53, 10, 247, 108, 58, 86, 28, 29, 113, 8, 110, 171, 220, 245, 11, 82, 233, 223, 91, 68, 166, 117, 174, 187, 62, 77, 2, 129, 129, 0, 235, 118, 2, 105, 239, 212, 30, 104, 157, 41, 109, 11, 248, 152, 22, 236, 97, 40, 153, 131, 228, 5, 86, 187, 113, 126, 144, 76, 141, 79, 110, 250, 146, 152, 49, 58, 156, 201, 176, 92, 189, 209, 30, 112, 108, 175, 204, 204, 247, 164, 46, 129, 239, 98, 127, 49, 145, 218, 63, 193, 124, 174, 18, 98, 201, 99, 154, 162, 138, 78, 159, 253, 3, 248, 3, 209, 36, 239, 193, 155, 193, 5, 19, 236, 37, 78, 118, 135, 250, 199, 7, 141, 248, 120, 36, 136, 93, 98, 174, 60, 18, 215, 93, 174, 107, 141, 116, 145, 167, 221, 210, 169, 247, 67, 254, 222, 161, 134, 63, 221, 90, 87, 42, 99, 227, 81, 173, 151, 2, 129, 129, 0, 133, 23, 168, 103, 83, 232, 146, 160, 181, 23, 40, 38, 204, 13, 214, 203, 49, 41, 195, 227, 189, 181, 8, 243, 119, 106, 75, 67, 250, 250, 10, 234, 98, 118, 26, 250, 35, 121, 132, 124, 10, 76, 26, 198, 165, 154, 108, 19, 117, 88, 23, 17, 192, 143, 184, 177, 181, 141, 157, 4, 185, 248, 193, 77, 204, 243, 7, 170, 240, 4, 111, 113, 183, 0, 27, 136, 20, 19, 149, 74, 33, 241, 218, 108, 236, 80, 171, 148, 16, 116, 97, 109, 83, 74, 88, 145, 94, 239, 102, 192, 19, 114, 207, 5, 128, 51, 111, 164, 237, 86, 154, 99, 52, 197, 62, 57, 182, 6, 152, 245, 61, 137, 58, 105, 159, 2, 84, 109, 2, 129, 129, 0, 226, 67, 111, 132, 95, 91, 101, 177, 63, 189, 44, 53, 193, 184, 92, 230, 223, 98, 133, 74, 209, 86, 52, 7, 65, 195, 206, 100, 81, 178, 144, 65, 167, 151, 42, 79, 89, 149, 18, 173, 188, 21, 244, 251, 49, 230, 41, 150, 153, 46, 35, 38, 231, 99, 174, 56, 115, 32, 215, 253, 85, 147, 108, 197, 147, 34, 236, 216, 222, 177, 57, 90, 136, 114, 207, 48, 46, 31, 90, 220, 18, 58, 143, 239, 111, 214, 27, 95, 6, 36, 53, 229, 62, 108, 45, 39, 1, 30, 47, 178, 56, 164, 206, 56, 42, 208, 46, 193, 61, 31, 147, 45, 147, 23, 187, 22, 50, 255, 111, 229, 132, 199, 152, 75, 142, 136, 209, 151, 2, 129, 129, 0, 165, 56, 232, 76, 55, 57, 240, 159, 92, 207, 220, 143, 130, 30, 57, 234, 251, 172, 171, 180, 54, 159, 229, 96, 246, 73, 112, 146, 75, 157, 242, 201, 161, 218, 37, 176, 35, 170, 50, 90, 148, 102, 191, 199, 239, 174, 78, 72, 67, 85, 199, 45, 149, 145, 132, 161, 212, 33, 157, 75, 216, 79, 39, 233, 18, 210, 255, 26, 72, 229, 239, 44, 12, 147, 158, 176, 192, 95, 126, 32, 175, 23, 226, 131, 139, 197, 175, 193, 62, 8, 151, 252, 68, 154, 94, 89, 189, 125, 90, 30, 36, 175, 73, 230, 194, 13, 233, 247, 123, 60, 241, 47, 171, 51, 189, 112, 111, 213, 141, 89, 70, 249, 236, 63, 236, 110, 115, 208]};
+*/
 export default IdentityModule;

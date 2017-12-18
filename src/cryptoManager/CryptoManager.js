@@ -2,7 +2,8 @@
 import * as logger from 'loglevel';
 let log = logger.getLogger('CryptoManager');
 
-import {divideURL, isDataObjectURL, isLegacy, chatkeysToStringCloner, chatkeysToArrayCloner, parseMessageURL } from '../utils/utils.js';
+import {divideURL, isDataObjectURL, isLegacy, chatkeysToStringCloner, chatkeysToArrayCloner, parseMessageURL,
+        parse, stringify, encode, decode, decodeToUint8Array, parseToUint8Array} from '../utils/utils.js';
 import Crypto from './Crypto';
 
 /**
@@ -154,11 +155,12 @@ class CryptoManager {
 
     //if is not to apply encryption, then returns resolve
     if (!this.isToUseEncryption && !(message.type === 'handshake')) {
-      log.info('encryption disabled');
+      log.info('not handshake: encryption disabled');
       return false;
     }
 
     if (message.type === 'update') {
+      log.info('update:encryption disabled');
       return false;
     }
 
@@ -178,6 +180,7 @@ class CryptoManager {
       let isFromRemoteSM = _this._isFromRemoteSM(message.from);
 
       if (isSubscription & isFromRemoteSM) {
+        console.log('_doMutualAuthenticationPhase1');
 
         _this._doMutualAuthenticationPhase1(message).then(() => {
           resolve(false);
@@ -186,12 +189,15 @@ class CryptoManager {
         });
 
       } else if (message.hasOwnProperty('body') && message.body.hasOwnProperty('value') && typeof message.body.value === 'string') {
+        console.log('_isToDecrypt:true');
         resolve(true);
-      } else resolve(false);
+      } else {
+        console.log('_isToDecrypt:false');
+        resolve(false);
+      }
 
     }).catch((error) => {
       log.error('[CryptoManager._isToDecrypt]', error);
-      resolve(false);
     });
 
   }
@@ -243,14 +249,15 @@ class CryptoManager {
           if (chatKeys.authenticated && !isHandShakeType) {
 
             let iv = _this.crypto.generateIV();
-            _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, message.body.value, iv).then(encryptedValue => {
+            _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, stringify(message.body.value), iv).then(encryptedValue => {
 
-              let filteredMessage = _this._filterMessageToHash(message, JSON.stringify(message.body.value) + JSON.stringify(iv), chatKeys.hypertyFrom.messageInfo);
+              let filteredMessage = _this._filterMessageToHash(message, stringify(message.body.value) +
+                                                                        stringify(iv), chatKeys.hypertyFrom.messageInfo);
 
               _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, filteredMessage).then(hash => {
                 //log.log('result of hash ', hash);
-                let value = {iv: _this.crypto.encode(iv), value: _this.crypto.encode(encryptedValue), hash: _this.crypto.encode(hash)};
-                message.body.value = _this.crypto.encode(value);
+                let value = {iv: encode(iv), value: encode(encryptedValue), hash: encode(hash)};
+                message.body.value = encode(value);
 
                 resolve(message);
               });
@@ -307,18 +314,20 @@ class CryptoManager {
               // and if is to apply encryption, encrypt the messages
               if (dataObjectKey.isToEncrypt) {
                 let iv = _this.crypto.generateIV();
+                let stringifiedIV = stringify(iv);
+                let stringifiedMessageBody = stringify(message.body.value);
 
-                _this.crypto.encryptAES(dataObjectKey.sessionKey, _this.crypto.encode(message.body.value), iv).then(encryptedValue => {
+                _this.crypto.encryptAES(dataObjectKey.sessionKey, stringifiedMessageBody, iv).then(encryptedValue => {
                   delete message.body.identity.assertion; //TODO: Check why assertion is comming on the message!
                   delete message.body.identity.expires; //TODO: Check why expires is comming on the message!
-                  let filteredMessage = _this._filterMessageToHash(message, JSON.stringify(message.body.value) + JSON.stringify(iv));
+                  let filteredMessage = _this._filterMessageToHash(message, stringifiedMessageBody + stringifiedIV);
 
                   _this.crypto.hashHMAC(dataObjectKey.sessionKey, filteredMessage).then(hash => {
                     // log.log('hash ', hash);
 
-                    let newValue = {value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv), hash: _this.crypto.encode(hash)};
+                    let newValue = {value: encode(encryptedValue), iv: encode(iv), hash: encode(hash)};
 
-                    message.body.value = JSON.stringify(newValue);
+                    message.body.value = stringify(newValue);
                     resolve(message);
                   });
                 });
@@ -357,8 +366,8 @@ class CryptoManager {
           if (dataObjectKey.isToEncrypt) {
             let iv = _this.crypto.generateIV();
 
-            _this.crypto.encryptAES(dataObjectKey.sessionKey, _this.crypto.encode(dataObject), iv).then(encryptedValue => {
-              let newValue = { value: _this.crypto.encode(encryptedValue), iv: _this.crypto.encode(iv) };
+            _this.crypto.encryptAES(dataObjectKey.sessionKey, stringify(dataObject), iv).then(encryptedValue => {
+              let newValue = { value: encode(encryptedValue), iv: encode(iv) };
 
               //log.log('encrypted dataObject', newValue);
               return resolve(newValue);
@@ -414,10 +423,10 @@ class CryptoManager {
             }
 
             if (chatKeys.authenticated && !isHandShakeType) {
-              let value = _this.crypto.decode(message.body.value);
-              let iv = _this.crypto.decodeToUint8Array(value.iv);
-              let data = _this.crypto.decodeToUint8Array(value.value);
-              let hash = _this.crypto.decodeToUint8Array(value.hash);
+              let value = decode(message.body.value);
+              let iv = decodeToUint8Array(value.iv);
+              let data = decodeToUint8Array(value.value);
+              let hash = decodeToUint8Array(value.hash);
               _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, data, iv).then(decryptedData => {
                 // log.log('decrypted value ', decryptedData);
                 message.body.value = decryptedData;
@@ -465,25 +474,25 @@ class CryptoManager {
 
               //check if is to apply encryption
               if (dataObjectKey.isToEncrypt) {
-                let parsedValue = JSON.parse(message.body.value);
-                let iv = _this.crypto.decodeToUint8Array(parsedValue.iv);
-                let encryptedValue = _this.crypto.decodeToUint8Array(parsedValue.value);
-                let hash = _this.crypto.decodeToUint8Array(parsedValue.hash);
+                let parsedValue = parse(message.body.value);
+                let iv = decodeToUint8Array(parsedValue.iv);
+                let encryptedValue = decodeToUint8Array(parsedValue.value);
+                let hash = decodeToUint8Array(parsedValue.hash);
 
                 _this.crypto.decryptAES(dataObjectKey.sessionKey, encryptedValue, iv).then(decryptedValue => {
-                  let parsedValue = _this.crypto.decode(decryptedValue);
+                  let parsedValue = parse(decryptedValue);
 
                   // log.log('decrypted Value,', parsedValue);
                   message.body.value = parsedValue;
 
-                  let filteredMessage = _this._filterMessageToHash(message, JSON.stringify(parsedValue) + JSON.stringify(iv));
+                  let filteredMessage = _this._filterMessageToHash(message, stringify(parsedValue) + stringify(iv));
 
                   _this.crypto.verifyHMAC(dataObjectKey.sessionKey, filteredMessage, hash).then(result => {
-                    // log.log('result of hash verification! ', result);
+                    log.log('Received message HMAC result', result);
 
                     message.body.assertedIdentity = true;
                     resolve(message);
-                  });
+                  }).catch(err => { reject('Message HMAC is invalid: ' + err); });
                 });
 
                 //if not, just return the message
@@ -530,12 +539,12 @@ class CryptoManager {
 
           //check if is to apply encryption
           if (dataObjectKey.isToEncrypt) {
-            let iv = _this.crypto.decodeToUint8Array(dataObject.iv);
-            let encryptedValue = _this.crypto.decodeToUint8Array(dataObject.value);
+            let iv = decodeToUint8Array(dataObject.iv);
+            let encryptedValue = decodeToUint8Array(dataObject.value);
 
             _this.crypto.decryptAES(dataObjectKey.sessionKey, encryptedValue, iv).then(decryptedValue => {
-              let parsedValue = _this.crypto.decode(decryptedValue);
-              let newValue = { value: parsedValue, iv: _this.crypto.encode(iv) };
+              let parsedValue = parse(decryptedValue);
+              let newValue = { value: parsedValue, iv: encode(iv) };
 
               // log.log('decrypted dataObject,', newValue);
 
@@ -720,13 +729,13 @@ class CryptoManager {
       }
 
       try {
-        valueToEncrypt = _this.crypto.encode({value: _this.crypto.encode(sessionKey), dataObjectURL: chatKeys.dataObjectURL});
+        valueToEncrypt = encode({value: encode(sessionKey), dataObjectURL: chatKeys.dataObjectURL});
       } catch (err) {
         return reject('On _sendReporterSessionKey from method storageManager.set error valueToEncrypt: ' + err);
       }
 
       iv = _this.crypto.generateIV();
-      value.iv = _this.crypto.encode(iv);
+      value.iv = encode(iv);
       _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, valueToEncrypt, iv).then(encryptedValue => {
 
         reporterSessionKeyMsg = {
@@ -735,7 +744,7 @@ class CryptoManager {
           from: message.to,
           body: {
             handshakePhase: 'reporterSessionKey',
-            value: _this.crypto.encode(encryptedValue)
+            value: encode(encryptedValue)
           }
         };
 
@@ -743,7 +752,7 @@ class CryptoManager {
 
         return _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, filteredMessage);
       }).then(hashedMessage => {
-        let valueWithHash = _this.crypto.encode({value: reporterSessionKeyMsg.body.value, hash: _this.crypto.encode(hashedMessage), iv: value.iv});
+        let valueWithHash = encode({value: reporterSessionKeyMsg.body.value, hash: encode(hashedMessage), iv: value.iv});
 
         reporterSessionKeyMsg.body.value = valueWithHash;
 
@@ -792,7 +801,7 @@ class CryptoManager {
             from: message.from,
             body: {
               handshakePhase: 'senderHello',
-              value: _this.crypto.encode(chatKeys.keys.fromRandom)
+              value: encode(chatKeys.keys.fromRandom)
             }
           };
           chatKeys.handshakeHistory.senderHello = _this._filterMessageToHash(startHandShakeMsg, undefined, chatKeys.hypertyFrom.messageInfo);
@@ -814,7 +823,7 @@ class CryptoManager {
 
           log.log('senderHello');
           chatKeys.handshakeHistory.senderHello = _this._filterMessageToHash(message);
-          chatKeys.keys.fromRandom = _this.crypto.decodeToUint8Array(message.body.value);
+          chatKeys.keys.fromRandom = decodeToUint8Array(message.body.value);
           chatKeys.keys.toRandom = _this.crypto.generateRandom();
 
           let senderHelloMsg = {
@@ -823,7 +832,7 @@ class CryptoManager {
             from: message.to,
             body: {
               handshakePhase: 'receiverHello',
-              value: _this.crypto.encode(chatKeys.keys.toRandom)
+              value: encode(chatKeys.keys.toRandom)
             }
           };
           chatKeys.handshakeHistory.receiverHello = _this._filterMessageToHash(senderHelloMsg, undefined, chatKeys.hypertyFrom.messageInfo);
@@ -841,13 +850,13 @@ class CryptoManager {
             //TODO remove later this verification as soon as all the IdP proxy are updated in the example
             let encodedpublicKey = (typeof value.contents === 'string') ? value.contents : value.contents.nonce;
 
-            let receiverPublicKey = _this.crypto.decodeToUint8Array(encodedpublicKey);
+            let receiverPublicKey = parseToUint8Array(encodedpublicKey);
             let premasterSecret = _this.crypto.generatePMS();
             let toRandom = message.body.value;
             chatKeys.hypertyTo.assertion = message.body.identity.assertion;
             chatKeys.hypertyTo.publicKey = receiverPublicKey;
             chatKeys.hypertyTo.userID    = value.contents.email;
-            chatKeys.keys.toRandom  = _this.crypto.decodeToUint8Array(toRandom);
+            chatKeys.keys.toRandom  = decodeToUint8Array(toRandom);
             chatKeys.keys.premasterKey = premasterSecret;
 
             let concatKey = _this.crypto.concatPMSwithRandoms(premasterSecret, chatKeys.keys.toRandom, chatKeys.keys.fromRandom);
@@ -868,7 +877,7 @@ class CryptoManager {
             chatKeys.keys.hypertyToHashKey = new Uint8Array(keys[2]);
             chatKeys.keys.hypertyFromHashKey = new Uint8Array(keys[3]);
             iv = _this.crypto.generateIV();
-            value.iv = _this.crypto.encode(iv);
+            value.iv = encode(iv);
 
             let messageStructure = {
               type: 'handshake',
@@ -883,18 +892,18 @@ class CryptoManager {
             filteredMessage = _this._filterMessageToHash(messageStructure, 'ok' + iv, chatKeys.hypertyFrom.messageInfo);
             return _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, filteredMessage);
           }).then((hash) => {
-            value.hash = _this.crypto.encode(hash);
+            value.hash = encode(hash);
 
             //encrypt the data
             return _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, 'ok', iv);
           }).then((encryptedData) => {
-            value.symetricEncryption = _this.crypto.encode(encryptedData);
+            value.symetricEncryption = encode(encryptedData);
 
             return _this.crypto.encryptRSA(chatKeys.hypertyTo.publicKey, chatKeys.keys.premasterKey);
 
           }).then((encryptedValue) => {
 
-            value.assymetricEncryption = _this.crypto.encode(encryptedValue);
+            value.assymetricEncryption = encode(encryptedValue);
 
             let messageStructure = {
               type: 'handshake',
@@ -907,11 +916,11 @@ class CryptoManager {
 
             let messageToHash = _this._filterMessageToHash(messageStructure, chatKeys.keys.premasterKey, chatKeys.hypertyFrom.messageInfo);
 
-            return _this.crypto.signRSA(chatKeys.hypertyFrom.privateKey, _this.crypto.encode(chatKeys.handshakeHistory) + _this.crypto.encode(messageToHash));
+            return _this.crypto.signRSA(chatKeys.hypertyFrom.privateKey, encode(chatKeys.handshakeHistory) + encode(messageToHash));
 
           }).then(signature => {
 
-            value.signature = _this.crypto.encode(signature);
+            value.signature = encode(signature);
 
             let receiverHelloMsg = {
               type: 'handshake',
@@ -919,7 +928,7 @@ class CryptoManager {
               from: message.to,
               body: {
                 handshakePhase: 'senderCertificate',
-                value: _this.crypto.encode(value)
+                value: encode(value)
               }
             };
             chatKeys.handshakeHistory.senderCertificate = _this._filterMessageToHash(receiverHelloMsg, 'ok' + iv, chatKeys.hypertyFrom.messageInfo);
@@ -933,15 +942,15 @@ class CryptoManager {
         case 'senderCertificate': {
 
           log.log('senderCertificate');
-          let receivedValue = _this.crypto.decode(message.body.value);
+          let receivedValue = decode(message.body.value);
 
           _this._idm.validateAssertion(message.body.identity.assertion, undefined, message.body.identity.idp).then((value) => {
-            let encryptedPMS = _this.crypto.decodeToUint8Array(receivedValue.assymetricEncryption);
+            let encryptedPMS = decodeToUint8Array(receivedValue.assymetricEncryption);
 
             //TODO remove later this verification as soon as all the IdP proxy are updated in the example
             let encodedpublicKey = (typeof value.contents === 'string') ? value.contents : value.contents.nonce;
 
-            let senderPublicKey = _this.crypto.decodeToUint8Array(encodedpublicKey);
+            let senderPublicKey = parseToUint8Array(encodedpublicKey);
             chatKeys.hypertyTo.assertion = message.body.identity.assertion;
             chatKeys.hypertyTo.publicKey = senderPublicKey;
             chatKeys.hypertyTo.userID    = value.contents.email;
@@ -957,11 +966,11 @@ class CryptoManager {
 
             chatKeys.keys.premasterKey = new Uint8Array(pms);
 
-            let signature = _this.crypto.decodeToUint8Array(receivedValue.signature);
+            let signature = decodeToUint8Array(receivedValue.signature);
 
             let receivedmsgToHash = _this._filterMessageToHash(message, chatKeys.keys.premasterKey);
 
-            return _this.crypto.verifyRSA(chatKeys.hypertyTo.publicKey, _this.crypto.encode(chatKeys.handshakeHistory) + _this.crypto.encode(receivedmsgToHash), signature);
+            return _this.crypto.verifyRSA(chatKeys.hypertyTo.publicKey, encode(chatKeys.handshakeHistory) + encode(receivedmsgToHash), signature);
 
             // validates the signature received
           }).then(signValidationResult => {
@@ -983,8 +992,8 @@ class CryptoManager {
             chatKeys.keys.hypertyToSessionKey = new Uint8Array(keys[1]);
             chatKeys.keys.hypertyFromHashKey = new Uint8Array(keys[2]);
             chatKeys.keys.hypertyToHashKey = new Uint8Array(keys[3]);
-            iv = _this.crypto.decodeToUint8Array(receivedValue.iv);
-            let data = _this.crypto.decodeToUint8Array(receivedValue.symetricEncryption);
+            iv = decodeToUint8Array(receivedValue.iv);
+            let data = decodeToUint8Array(receivedValue.symetricEncryption);
 
             return _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, data, iv);
 
@@ -993,7 +1002,7 @@ class CryptoManager {
 
             chatKeys.handshakeHistory.senderCertificate = _this._filterMessageToHash(message, decryptedData + iv);
 
-            let hashReceived = _this.crypto.decodeToUint8Array(receivedValue.hash);
+            let hashReceived = decodeToUint8Array(receivedValue.hash);
 
             filteredMessage = _this._filterMessageToHash(message, decryptedData + iv);
 
@@ -1011,7 +1020,7 @@ class CryptoManager {
               }
             };
             iv = _this.crypto.generateIV();
-            value.iv = _this.crypto.encode(iv);
+            value.iv = encode(iv);
 
             filteredMessage = _this._filterMessageToHash(receiverFinishedMessage, 'ok!' + iv, chatKeys.hypertyFrom.messageInfo);
 
@@ -1019,18 +1028,18 @@ class CryptoManager {
             return _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, filteredMessage);
           }).then(hash => {
 
-            value.hash = _this.crypto.encode(hash);
+            value.hash = encode(hash);
             return _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, 'ok!', iv);
 
           }).then(encryptedValue => {
-            value.value = _this.crypto.encode(encryptedValue);
+            value.value = encode(encryptedValue);
             let receiverFinishedMessage = {
               type: 'handshake',
               to: message.from,
               from: message.to,
               body: {
                 handshakePhase: 'receiverFinishedMessage',
-                value: _this.crypto.encode(value)
+                value: encode(value)
               }
             };
 
@@ -1047,11 +1056,11 @@ class CryptoManager {
 
           chatKeys.authenticated = true;
 
-          value = _this.crypto.decode(message.body.value);
+          value = decode(message.body.value);
 
-          iv = _this.crypto.decodeToUint8Array(value.iv);
-          let data = _this.crypto.decodeToUint8Array(value.value);
-          hash = _this.crypto.decodeToUint8Array(value.hash);
+          iv = decodeToUint8Array(value.iv);
+          let data = decodeToUint8Array(value.value);
+          hash = decodeToUint8Array(value.hash);
 
           _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, data, iv).then(decryptedData => {
             // log.log('decryptedData', decryptedData);
@@ -1093,10 +1102,10 @@ class CryptoManager {
 
           log.log('reporterSessionKey');
 
-          let valueIVandHash = _this.crypto.decode(message.body.value);
-          hash = _this.crypto.decodeToUint8Array(valueIVandHash.hash);
-          iv = _this.crypto.decodeToUint8Array(valueIVandHash.iv);
-          let encryptedValue = _this.crypto.decodeToUint8Array(valueIVandHash.value);
+          let valueIVandHash = decode(message.body.value);
+          hash = decodeToUint8Array(valueIVandHash.hash);
+          iv = decodeToUint8Array(valueIVandHash.iv);
+          let encryptedValue = decodeToUint8Array(valueIVandHash.value);
           let parsedValue;
           let sessionKey;
           let dataObjectURL;
@@ -1106,8 +1115,8 @@ class CryptoManager {
 
           _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, encryptedValue, iv).then(decryptedValue => {
 
-            parsedValue = _this.crypto.decode(decryptedValue);
-            sessionKey = _this.crypto.decodeToUint8Array(parsedValue.value);
+            parsedValue = decode(decryptedValue);
+            sessionKey = decodeToUint8Array(parsedValue.value);
             dataObjectURL = parsedValue.dataObjectURL;
 
             let messageToHash = _this._filterMessageToHash(message, decryptedValue + iv);
@@ -1126,7 +1135,7 @@ class CryptoManager {
             });
 
             iv = _this.crypto.generateIV();
-            value.iv = _this.crypto.encode(iv);
+            value.iv = encode(iv);
 
             return _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, 'ok!!', iv);
           }).then(encryptedValue => {
@@ -1140,12 +1149,12 @@ class CryptoManager {
               }
             };
 
-            value.value = _this.crypto.encode(encryptedValue);
+            value.value = encode(encryptedValue);
             let messageToHash = _this._filterMessageToHash(receiverAcknowledgeMsg, 'ok!!' + iv, chatKeys.hypertyFrom.messageInfo);
 
             return _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, messageToHash);
           }).then(hashedMessage => {
-            let finalValue = _this.crypto.encode({value: value.value, hash: _this.crypto.encode(hashedMessage), iv: value.iv});
+            let finalValue = encode({value: value.value, hash: encode(hashedMessage), iv: value.iv});
 
             receiverAcknowledgeMsg.body.value = finalValue;
             resolve({message: receiverAcknowledgeMsg, chatKeys: chatKeys});
@@ -1160,10 +1169,10 @@ class CryptoManager {
 
           log.log('receiverAcknowledge');
 
-          let receivedvalueIVandHash = _this.crypto.decode(message.body.value);
-          let receivedHash = _this.crypto.decodeToUint8Array(receivedvalueIVandHash.hash);
-          iv = _this.crypto.decodeToUint8Array(receivedvalueIVandHash.iv);
-          let receivedEncryptedValue = _this.crypto.decodeToUint8Array(receivedvalueIVandHash.value);
+          let receivedvalueIVandHash = decode(message.body.value);
+          let receivedHash = decodeToUint8Array(receivedvalueIVandHash.hash);
+          iv = decodeToUint8Array(receivedvalueIVandHash.iv);
+          let receivedEncryptedValue = decodeToUint8Array(receivedvalueIVandHash.value);
 
           _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, receivedEncryptedValue, iv).then(decryptedValue => {
 
