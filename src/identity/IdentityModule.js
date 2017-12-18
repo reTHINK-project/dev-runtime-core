@@ -201,9 +201,12 @@ class IdentityModule {
     //   { domain: 'slack.com', type: 'Legacy'}
     // ];
 
+    // todo: retrieve available idps from runtime catalogue
+    // todo: enable oauth idps
     let idps = [
       { domain: 'google.com', type: 'idToken'},
       { domain: 'microsoft.com', type: 'idToken'},
+      { domain: 'facebook.com', type: 'idToken'},
       { domain: 'slack.com', type: 'Legacy'}
     ];
 
