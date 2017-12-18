@@ -2,7 +2,7 @@
 import * as logger from 'loglevel';
 let log = logger.getLogger('IdentityModule');
 
-import {divideURL, getUserEmailFromURL, getUserIdentityDomain, parseMessageURL } from '../utils/utils.js';
+import {divideURL, getUserEmailFromURL, getUserIdentityDomain, parseMessageURL, stringify, decode } from '../utils/utils.js';
 import Identity from './Identity';
 import Crypto from '../cryptoManager/Crypto';
 import GuiFake from './GuiFake';
@@ -287,7 +287,7 @@ class IdentityModule {
             log.log('[IdentityModule] Identity selected by hyperty.');
             return resolve(assertion);
           }, (err) => { // if it got an error then just select identity from GUI
-            // console.error('[IdentityModule] Could not select identity from hyperty.');
+            // log.error('[IdentityModule] Could not select identity from hyperty.');
             _this.selectIdentityFromGUI().then((newAssertion) => {
               log.log('[IdentityModule] Identity selected by hyperty.');
               return resolve(newAssertion);
@@ -317,7 +317,7 @@ class IdentityModule {
           }
         }
       }).catch(error => {
-        console.error('Error on identity acquisition ', error);
+        log.error('Error on identity acquisition ', error);
         return reject(error);
       });
 
@@ -342,7 +342,7 @@ class IdentityModule {
         }
 
       }).catch(error => {
-        console.error('Error on identity acquisition ', error);
+        log.error('Error on identity acquisition ', error);
         reject(error);
       });
     });
@@ -469,7 +469,7 @@ class IdentityModule {
 
       log.log('[callNodeJsGenerateMethods:keyPair.public]', keyPair.public);
 
-      publicKey = _this.crypto.stringify(keyPair.public);
+      publicKey = stringify(keyPair.public);
 
       userkeyPair = keyPair;
 
@@ -478,9 +478,6 @@ class IdentityModule {
       //}).then(function(url) {
 
       log.log('[callNodeJsGenerateMethods:generateSelectedIdentity] NO_URL');
-
-      //let url = 'https://localhost/#state=state&code=4/-mlGUZDkPUC79MzA9sd4Sk5vMJLihmmxFvewM8yJrbs&access_token=ya29.Glv3BKDuB09-tnIKKu5WT_Zextcd7ysgWKvZbvGv-RYI0HaQ76qwIvsTF3sVuJfh2e-cztojXy0ZsjHSfa1cMfnqNKYtjg8Z2qm0POvZkJODsNVUdO2-oz7dHhvr&token_type=Bearer&expires_in=3600&id_token=eyJhbGciOiJSUzI1NiIsImtpZCI6ImI3NjcxOTI2M2NlYWFkZTkyZGI5YTMxMzI4YWRhNDRiNzE5MjA3ZjcifQ.eyJhenAiOiI4MDgzMjk1NjYwMTItdHFyOHFvaDExMTk0MmdkMmtnMDA3dDBzOGYyNzdyb2kuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiI4MDgzMjk1NjYwMTItdHFyOHFvaDExMTk0MmdkMmtnMDA3dDBzOGYyNzdyb2kuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMTc5NTkxMDUyOTU3NjE2ODc4ODkiLCJlbWFpbCI6InRlc3RhbmR0aGluazEyM0BnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiYXRfaGFzaCI6Ikl6NnZJNXRremZlelY2VDVadGVtdEEiLCJjX2hhc2giOiI1ZGV6Z1FrTTFyZ25FVTJFanpTUFVBIiwibm9uY2UiOiJORGdzTVRNd0xERXNNelFzTkRnc01UTXNOaXc1TERReUxERXpOQ3czTWl3eE16UXNNalEzTERFekxERXNNU3d4TERVc01Dd3pMREV6TUN3eExERTFMREFzTkRnc01UTXdMREVzTVRBc01pd3hNekFzTVN3eExEQXNNVGd3TERFME1pd3lNekFzTWpJeUxESXpMREU1T0N3eU9Td3hOVFlzTVRFeUxESXpOaXd4TWpZc01qSXlMREkwTml3ME15dzROaXc0TUN3eE9Ea3NNVFE0TERZNExERTVOaXd4TmpJc09USXNOakVzTWpZc01qUTRMRE15TERJeE5TdzROU3d4T1RJc01UVXhMRGs0TERRM0xESTBNaXd4TVN3eE56UXNNVGNzTWpJeUxERXhNeXd5TkRrc09EVXNNVE0xTERFeU9Dd3lOVFFzTVRJMUxERTNOQ3d5TURBc01UYzRMRGd4TERZMkxEazRMRFUwTERFMU1Td3hNelFzTVRJMUxETTFMREl5TVN3eE9UZ3NNeklzTVRBNUxETTJMRGNzTnpJc01UVTVMRFUyTERZekxEWXlMRGMwTERFNU1Td3hNellzTVRVc016WXNNVGd3TERFM09Td3hOVGdzTlRFc01UZ3NNVGt5TERFM01pd3lNamtzTWpVMUxERXhPU3cxTnl3eU16QXNNakFzTWpReUxESXdNaXd4T0RBc01URXdMREUyTnl3NE15d3lORGNzTVRVekxERTVPU3c1TVN3eE1qVXNNVGt5TERJeE9Dd3hNeXd4TlRrc01qRTNMREV5Tnl3eE1EUXNNakUwTERRNExEVXNNVEl4TERJeU9Dd3pNeXd4TWpZc09UUXNNVEU0TERneExERTJNaXd4TURJc01URXdMRGMxTERrNExETXhMREl3TWl3ek5Td3hOemtzTVRRc016Y3NNVElzTWpFMkxEWTFMREkwTlN3Mk5Td3hNRFVzTWpNM0xESTBOU3d4TkRBc01UZzBMRFU0TERJeU15dzNOeXd4TXpVc01qVXlMRElzTkRjc01UQTBMRFU1TERJMU5Td3lNVFlzTVRNM0xERTFNeXd5Tnl3eE56SXNNakl3TERFMU9Td3hPVFVzTWpFeUxESTVMREV4Tml3eE1EVXNNVEUyTERJeE1pd3lORGdzTnl3MU1pd3lPQ3d4TlRBc016QXNNamNzTWpFc01UY3NNVEkzTERnNExEVTBMREUzTkN3eE15dzBPU3d5TWpJc01UY3lMREl4TXl3eE1EZ3NNVFl5TERRM0xERTROaXd4TXpBc01qSTJMRFFzTVRjc01UZzVMRGcxTERFNE5Dd3lNVGNzTVRnMUxERTFNaXd4TVRrc01UQTBMREU1TXl3MU5Dd3lNVEVzTVRZeExERTVNU3d6TVN3ek9Dd3hNamtzTVRFM0xESXdOU3d4TURRc05pd3hOelVzTWpFNUxERXhOQ3czTERnMkxERTJNeXd4TWpZc01qVXpMREl4TXl3ek5pd3hNamtzTVRJc01UWTBMREV5Tnl3eU1qY3NNakF6TERnMUxEWTJMREl6TERVM0xERTBMREU1Tnl3eU9Dd3lOVElzTWpJeExEUXNNelFzTWpVd0xERTNOU3d5TVRnc01UZzFMREV4T1N3M01Dd3lORFlzTVRNMkxEZzVMREl3TERjd0xERXlNaXd4TURjc01qSXdMRGMxTERJd01Td3hOekFzTkRNc01qTXdMREl6Tml3ME55d3hNQ3d5TURjc01URTFMREkyTERFek1Td3lMRE1zTVN3d0xERT0iLCJpc3MiOiJhY2NvdW50cy5nb29nbGUuY29tIiwianRpIjoiNDU0MTM3NGVjMmY1OWExMWMwNWE0NDFjMTRmMTJkNTllY2UxYzVmYiIsImlhdCI6MTUwOTY0MDA0OSwiZXhwIjoxNTA5NjQzNjQ5fQ.vlWWkWcz333hA4lY0onl2jeat5eHCKvyMD_m-KieMtGqcLhtknMl3HbYTABL2k3HEdqbnNlD1G6OyRG-nDWt6qWCgI-gGJ6ZeU9Xrd5fPlFyRPj-FOAhA514uaYss10GYgt5XoArV7oXrR1-FNVZVNhyioggqJjJ4xtnZ6_j0isUxE7uZTlJLX8ixL44eoPVujmXKIJaXRYp0xf3626rnBz8znmGTt1G1jTwMNZmhZc8LxSauVFMLLoRjmLgNKgsGJNKN3ND7H6rsD0Vw5t24tlBwT_fsYIPauJJVZeqpmzy6L-pCEPUc0oJ7OqML84MB2W2zTq4uv6bMh4nQ_mdrA&authuser=0&session_state=44077304f5ec024da73af13a720afad0e4cb945d..2df8&prompt=consent';
-      //_this.myHint = url;
 
       return _this.generateAssertion(publicKey, origin, 'url', userkeyPair, idp);
 
@@ -524,7 +521,7 @@ class IdentityModule {
         log.log('[callNodeJsGenerateMethods:keyPair.public]', keyPair.public);
         log.log('[callNodeJsGenerateMethods:keyPair.private]', keyPair.private);
 
-        publicKey = _this.crypto.stringify(keyPair.public);
+        publicKey = stringify(keyPair.public);
         userkeyPair = keyPair;
         log.log('generateAssertion:no_hint');
         return _this.generateAssertion(publicKey, origin, '', userkeyPair, idp);
@@ -541,7 +538,7 @@ class IdentityModule {
           reject('Error on obtaining Identity');
         }
       }).catch(function(err) {
-        console.error(err);
+        log.error(err);
         reject(err);
       });
     });
@@ -561,7 +558,7 @@ class IdentityModule {
       _this.callIdentityModuleFunc('openPopup', {urlreceived: loginUrl}).then((idCode) => {
         return idCode;
       }, (err) => {
-        console.error('Error while logging in for the selected identity.');
+        log.error('Error while logging in for the selected identity.');
         return reject(err);
       }).then((idCode) => {
         _this.sendGenerateMessage(publicKey, origin, idCode, idp).then((newResponse) => {
@@ -570,7 +567,7 @@ class IdentityModule {
               resolve('Login was successfull');
             }).catch(err => { reject('Login has failed:' + err); });
           } else {
-            console.error('Error while logging in for the selected identity.');
+            log.error('Error while logging in for the selected identity.');
             return reject('Could not generate a valid assertion for selected identity.');
           }
         }).catch(err => { reject('On loginSelectedIdentity from method sendGenerateMessage error:  ' + err); });
@@ -589,7 +586,7 @@ class IdentityModule {
 
       //generates the RSA key pair
       _this.crypto.generateRSAKeyPair().then(function(keyPair) {
-        let publicKey = _this.crypto.stringify(keyPair.public);
+        let publicKey = stringify(keyPair.public);
 
         _this.sendGenerateMessage(publicKey, origin, idHint, idp).then((response) => {
           if (response.hasOwnProperty('assertion')) { // identity was logged in, just save it
@@ -605,7 +602,7 @@ class IdentityModule {
               return reject(err);
             });
           } else { // you should never get here, if you do then the IdP Proxy is not well implemented
-            // console.error('GenerateAssertion returned invalid response.');
+            // log.error('GenerateAssertion returned invalid response.');
             log.log('Proceeding by logging in.');
             _this.generateSelectedIdentity(publicKey, origin, idp, keyPair).then((value) => {
               return resolve(value);
@@ -675,9 +672,9 @@ class IdentityModule {
       //verify if the token contains the 3 components, or just the assertion
       try {
         if (splitedAssertion[1]) {
-          assertionParsed = _this.crypto.decode(splitedAssertion[1]);
+          assertionParsed = decode(splitedAssertion[1]);
         } else {
-          assertionParsed = _this.crypto.decode(result.assertion);
+          assertionParsed = decode(result.assertion);
         }
       } catch (err) {
         return reject('In storeIdentity, error parsing assertion: ' + err);
@@ -795,7 +792,7 @@ class IdentityModule {
           return reject('Error on obtaining Identity');
         }
       }).catch(function(err) {
-        console.error(err);
+        log.error(err);
         return reject(err);
       });
     });
@@ -886,7 +883,7 @@ class IdentityModule {
                   return reject('No Access token found');
                 }
               }, (err) => {
-                console.error('[Identity.IdentityModule.getToken] error CallGeneratemethods');
+                log.error('[Identity.IdentityModule.getToken] error CallGeneratemethods');
                 return reject(err);
               });
             }
@@ -911,7 +908,7 @@ class IdentityModule {
   * @return {JSON}    token    Id token to be added to the message
   */
   getIdToken(hypertyURL) {
-    console.info('getIdToken:hypertyURL ', hypertyURL);
+    log.info('getIdToken:hypertyURL ', hypertyURL);
     let _this = this;
     return new Promise(function(resolve, reject) {
       let splitURL = hypertyURL.split('://');
@@ -933,7 +930,7 @@ class IdentityModule {
             return reject('no identity was found ');
           }
         }).catch((reason) => {
-          console.error('no identity was found: ', reason);
+          log.error('no identity was found: ', reason);
           reject(reason);
         });
       } else {
@@ -1047,7 +1044,7 @@ class IdentityModule {
       let message;
       let assertion = _this.getIdentity(oldIdentity.userProfile.userURL);
 
-      console.info('sendRefreshMessage:oldIdentity', oldIdentity);
+      log.info('sendRefreshMessage:oldIdentity', oldIdentity);
 
       message = {type: 'execute', to: domain, from: _this._idmURL, body: {resource: 'identity', method: 'refreshAssertion', params: {identity: assertion}}};
       try {
@@ -1275,14 +1272,14 @@ class IdentityModule {
             expirationDate = completeId.info.tokenIDJSON.exp;
           } else {
             // throw 'The ID Token does not have an expiration time';
-            console.info('The ID Token does not have an expiration time');
+            log.info('The ID Token does not have an expiration time');
             resolve(identity);
           }
         } else if (completeId.hasOwnProperty('infoToken') && completeId.infoToken.hasOwnProperty('exp')) {
           expirationDate = completeId.infoToken.exp;
         } else {
           // throw 'The ID Token does not have an expiration time';
-          console.info('The ID Token does not have an expiration time');
+          log.info('The ID Token does not have an expiration time');
           resolve(identity);
         }
 
@@ -1296,7 +1293,7 @@ class IdentityModule {
               _this.storeIdentity(newIdentity, completeId.keyPair).then((value) => {
                 resolve(value);
               }, (err) => {
-                console.error('[Identity.IdentityModule.getToken] error on getToken', err);
+                log.error('[Identity.IdentityModule.getToken] error on getToken', err);
                 reject(err);
               });
             });
@@ -1312,7 +1309,7 @@ class IdentityModule {
           resolve(identity);
         }
       }).catch(function(error) {
-        console.error('[Identity.IdentityModule.getToken] error on getToken', error);
+        log.error('[Identity.IdentityModule.getToken] error on getToken', error);
         reject(error);
       });
     });
@@ -1324,7 +1321,7 @@ class IdentityModule {
   * @return   {String}  reporter              dataObject url reporter
   */
   _getHypertyFromDataObject(dataObjectURL) {
-    console.info('_getHypertyFromDataObject:dataObjectURL', dataObjectURL);
+    log.info('_getHypertyFromDataObject:dataObjectURL', dataObjectURL);
     let _this = this;
 
     return new Promise(function(resolve, reject) {
@@ -1335,21 +1332,21 @@ class IdentityModule {
 
       // check if is the creator of the hyperty
       let reporterURL = _this.registry.getReporterURLSynchonous(finalURL);
-      console.info('_getHypertyFromDataObject:reporterURL', reporterURL);
+      log.info('_getHypertyFromDataObject:reporterURL', reporterURL);
 
       if (reporterURL) {
         resolve(reporterURL);
       } else {
         // check if there is already an association from an hypertyURL to the dataObject
         let storedReporterURL = _this.dataObjectsIdentity[finalURL];
-        console.info('_getHypertyFromDataObject:storedReporterURL', storedReporterURL);
+        log.info('_getHypertyFromDataObject:storedReporterURL', storedReporterURL);
 
         if (storedReporterURL) {
           resolve(storedReporterURL);
         } else {
           // check if there is any hyperty that subscribed the dataObjectURL
           let subscriberHyperty = _this.registry.getDataObjectSubscriberHyperty(dataObjectURL);
-          console.info('_getHypertyFromDataObject:subscriberHyperty', subscriberHyperty);
+          log.info('_getHypertyFromDataObject:subscriberHyperty', subscriberHyperty);
 
           if (subscriberHyperty) {
             resolve(subscriberHyperty);
@@ -1357,9 +1354,9 @@ class IdentityModule {
             // search in domain registry for the hyperty associated to the dataObject
             // search in case is a subscriber who wants to know the reporter
             _this._coreDiscovery.discoverDataObjectPerURL(finalURL, domain).then(dataObject => {
-              console.info('_getHypertyFromDataObject:dataObject', dataObject);
+              log.info('_getHypertyFromDataObject:dataObject', dataObject);
               _this.dataObjectsIdentity[finalURL] = dataObject.reporter;
-              console.info('_getHypertyFromDataObject:dataObject.reporter', dataObject.reporter);
+              log.info('_getHypertyFromDataObject:dataObject.reporter', dataObject.reporter);
               resolve(dataObject.reporter);
             }, err => {
               reject(err);
