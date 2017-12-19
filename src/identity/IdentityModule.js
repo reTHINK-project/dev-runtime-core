@@ -174,9 +174,9 @@ class IdentityModule {
   * These identities are returned in an array containing a JSON package for each user identity.
   * @return {Array<Identities>}         Identities
   */
-  getIdentities() {
+  get identities() {
     let _this = this;
-    return _this.identities;
+    return _this._identities;
   }
 
   getIdentitiesToChoose() {
@@ -218,6 +218,7 @@ class IdentityModule {
         _this._crypto.getMyPublicKey().then((key) => {
           let guid = 'user-guid://' + key;
           _this._identities.guid = guid;
+          resolve();
         });
 
       });
