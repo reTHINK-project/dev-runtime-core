@@ -234,7 +234,7 @@ describe.skip('Identity Module tests', function() {
     handlers = handlersPopulate;
     msgNodeResponseFunc = msgNodeResponseFuncPopulate;
     coreDiscovery = coreDiscoveryPopulate;
-    storageManager = runtimeFactory.storageManager();
+    storageManager = runtimeFactory.storageManager('idModule:identities');
     runtimeCapabilities = runtimeFactory.runtimeCapabilities(storageManager);
   });
 

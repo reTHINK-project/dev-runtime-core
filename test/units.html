@@ -13,32 +13,15 @@
         <td colspan="3" title="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.108 Safari/537.36">Browser: Chrome 63.0.3239 (Linux 0.0.0)</td>
       </tr>
       <tr class="overview">
-        <td colspan="3">Timestamp: 2017-12-15 18:56:33</td>
-      </tr>
-      <tr>
-        <td colspan="3"/>
-      </tr>
-      <tr class="header">
-        <td>Status</td>
-        <td>Spec</td>
-        <td>Suite / Results</td>
-      </tr>
-    </table>
-    <hr/>
-    <table cellspacing="0" cellpadding="0" border="0">
-      <tr class="overview">
-        <td colspan="3" title="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.108 Safari/537.36">Browser: Chrome 63.0.3239 (Linux 0.0.0)</td>
-      </tr>
-      <tr class="overview">
-        <td colspan="3">Timestamp: 2017-12-15 18:56:34</td>
+        <td colspan="3">Timestamp: 2017-12-19 17:58:04</td>
       </tr>
       <tr>
         <td colspan="3">
-          4 tests / 
+          5 tests / 
           0 errors / 
-          0 failures / 
+          3 failures / 
           0 skipped / 
-          runtime: 2.104s
+          runtime: 1.923s
         </td>
       </tr>
       <tr class="header">
@@ -47,51 +30,90 @@
         <td>Suite / Results</td>
       </tr>
       <tr class="pass">
-        <td>Passed in 0.005s</td>
+        <td>Passed in 0.004s</td>
         <td>check available space</td>
         <td>Hyperty Resource Storage</td>
       </tr>
-      <tr class="pass">
-        <td>Passed in 0.534s</td>
+      <tr class="fail">
+        <td>Failed</td>
         <td>should add resources</td>
-        <td>Hyperty Resource Storage</td>
+        <td>
+          Hyperty Resource Storage
+          <br />ReferenceError: _toSave is not defined
+    at HypertyResourcesStorage._onCreate (webpack:///src/hyperty-resources-storage/HypertyResourcesStorage.js:113:0 &lt;- test/HypertyResourceStorage.spec.js:18775:15)
+    at MsgListener.HypertyResourcesStorage.bus.addListener [as _callback] (webpack:///src/hyperty-resources-storage/HypertyResourcesStorage.js:38:0 &lt;- test/HypertyResourceStorage.spec.js:18700:30)
+    at itemList.forEach (webpack:///src/bus/Bus.js:145:0 &lt;- test/HypertyResourceStorage.spec.js:2837:11)
+    at Array.forEach (&lt;anonymous&gt;)
+    at MessageBus._publishOn (webpack:///src/bus/Bus.js:144:0 &lt;- test/HypertyResourceStorage.spec.js:2836:14)
+    at deliver (webpack:///src/bus/MessageBus.js:85:0 &lt;- test/HypertyResourceStorage.spec.js:19093:21)
+    at MessageBus.postMessage (webpack:///src/bus/MessageBus.js:100:5 &lt;- test/HypertyResourceStorage.spec.js:19108:12)
+    at Context.&lt;anonymous&gt; (webpack:///test/HypertyResourceStorage.spec.js:76:0 &lt;- test/HypertyResourceStorage.spec.js:3121:20)
+
+        </td>
+      </tr>
+      <tr class="fail">
+        <td>Failed</td>
+        <td>should multiple resources</td>
+        <td>
+          Hyperty Resource Storage
+          <br />ReferenceError: _toSave is not defined
+    at HypertyResourcesStorage._onCreate (webpack:///src/hyperty-resources-storage/HypertyResourcesStorage.js:113:0 &lt;- test/HypertyResourceStorage.spec.js:18775:15)
+    at MsgListener.HypertyResourcesStorage.bus.addListener [as _callback] (webpack:///src/hyperty-resources-storage/HypertyResourcesStorage.js:38:0 &lt;- test/HypertyResourceStorage.spec.js:18700:30)
+    at itemList.forEach (webpack:///src/bus/Bus.js:145:0 &lt;- test/HypertyResourceStorage.spec.js:2837:11)
+    at Array.forEach (&lt;anonymous&gt;)
+    at MessageBus._publishOn (webpack:///src/bus/Bus.js:144:0 &lt;- test/HypertyResourceStorage.spec.js:2836:14)
+    at deliver (webpack:///src/bus/MessageBus.js:85:0 &lt;- test/HypertyResourceStorage.spec.js:19093:21)
+    at MessageBus.postMessage (webpack:///src/bus/MessageBus.js:100:5 &lt;- test/HypertyResourceStorage.spec.js:19108:12)
+    at Context.&lt;anonymous&gt; (webpack:///test/HypertyResourceStorage.spec.js:94:0 &lt;- test/HypertyResourceStorage.spec.js:3139:22)
+
+        </td>
       </tr>
       <tr class="pass">
-        <td>Passed in 0s</td>
+        <td>Passed in 0.008s</td>
         <td>should have one resource with 50Mb</td>
         <td>Hyperty Resource Storage</td>
       </tr>
-      <tr class="pass">
-        <td>Passed in 1.565s</td>
+      <tr class="fail">
+        <td>Failed</td>
         <td>should add resources out of limit</td>
-        <td>Hyperty Resource Storage</td>
+        <td>
+          Hyperty Resource Storage
+          <br />ReferenceError: _toSave is not defined
+    at HypertyResourcesStorage._onCreate (webpack:///src/hyperty-resources-storage/HypertyResourcesStorage.js:113:0 &lt;- test/HypertyResourceStorage.spec.js:18775:15)
+    at MsgListener.HypertyResourcesStorage.bus.addListener [as _callback] (webpack:///src/hyperty-resources-storage/HypertyResourcesStorage.js:38:0 &lt;- test/HypertyResourceStorage.spec.js:18700:30)
+    at itemList.forEach (webpack:///src/bus/Bus.js:145:0 &lt;- test/HypertyResourceStorage.spec.js:2837:11)
+    at Array.forEach (&lt;anonymous&gt;)
+    at MessageBus._publishOn (webpack:///src/bus/Bus.js:144:0 &lt;- test/HypertyResourceStorage.spec.js:2836:14)
+    at deliver (webpack:///src/bus/MessageBus.js:85:0 &lt;- test/HypertyResourceStorage.spec.js:19093:21)
+    at MessageBus.postMessage (webpack:///src/bus/MessageBus.js:100:5 &lt;- test/HypertyResourceStorage.spec.js:19108:12)
+    at Context.&lt;anonymous&gt; (webpack:///test/HypertyResourceStorage.spec.js:129:0 &lt;- test/HypertyResourceStorage.spec.js:3174:20)
+
+        </td>
       </tr>
       <tr class="system-out">
-        <td colspan="3"><strong>System output:</strong><br />Chrome 63.0.3239 (Linux 0.0.0) LOG: Object{hypertyResources: Dexie{_dbSchema: Object{hypertyResources: ...}, version: function (versionNumber) { ... }, _allTables: Object{hypertyResources: ...}, _tableFactory: function createTable(mode, tableSchema) { ... }, _createTransaction: function (mode, storeNames, dbschema, parentTransaction) { ... }, _whenReady: function (fn) { ... }, verno: 1, open: function () { ... }, close: function () { ... }, delete: function () { ... }, backendDB: function () { ... }, isOpen: function () { ... }, hasFailed: function () { ... }, dynamicallyOpened: function () { ... }, name: 'hypertyResources', on: function (eventName, subscriber) { ... }, transaction: function (mode, tableInstances, scopeFunc) { ... }, table: function (tableName) { ... }, Collection: function Collection(whereClause, keyRangeGenerator) { ... }, Table: function Table(name, tableSchema, collClass) { ... }, Transaction: function Transaction(mode, storeNames, dbschema, parent) { ... }, Version: function Version(versionNumber) { ... }, WhereClause: function WhereClause(table, index, orCollection) { ... }, WriteableCollection: function WriteableCollection() { ... }, WriteableTable: function WriteableTable(name, tableSchema, collClass) { ... }, hypertyResources: WriteableTable{name: ..., schema: ..., hook: ..., _collClass: ...}}}, StorageManager{db: Dexie{_dbSchema: Object{hypertyResources: ...}, version: function (versionNumber) { ... }, _allTables: Object{hypertyResources: ...}, _tableFactory: function createTable(mode, tableSchema) { ... }, _createTransaction: function (mode, storeNames, dbschema, parentTransaction) { ... }, _whenReady: function (fn) { ... }, verno: 1, open: function () { ... }, close: function () { ... }, delete: function () { ... }, backendDB: function () { ... }, isOpen: function () { ... }, hasFailed: function () { ... }, dynamicallyOpened: function () { ... }, name: 'hypertyResources', on: function (eventName, subscriber) { ... }, transaction: function (mode, tableInstances, scopeFunc) { ... }, table: function (tableName) { ... }, Collection: function Collection(whereClause, keyRangeGenerator) { ... }, Table: function Table(name, tableSchema, collClass) { ... }, Transaction: function Transaction(mode, storeNames, dbschema, parent) { ... }, Version: function Version(versionNumber) { ... }, WhereClause: function WhereClause(table, index, orCollection) { ... }, WriteableCollection: function WriteableCollection() { ... }, WriteableTable: function WriteableTable(name, tableSchema, collClass) { ... }, hypertyResources: WriteableTable{name: ..., schema: ..., hook: ..., _collClass: ...}}, storageName: 'hypertyResources'}
-<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'RESULT:', undefined
-<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'Change: ', Object{name: 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage/8e641360-670b-53a0-675c-064960b3cb82', object: Object{runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage/8e641360-670b-53a0-675c-064960b3cb82: Object{status: ..., content: ..., message: ...}}, type: 'add', oldValue: undefined, newValue: Object{status: 'START', content: Object{url: ..., size: ...}, message: Object{id: ..., to: ..., from: ...}}, keypath: 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage/8e641360-670b-53a0-675c-064960b3cb82'}
-<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'Change: ', 'START'
-<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'HERE:', Object{status: 'START', content: Object{url: 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage/8e641360-670b-53a0-675c-064960b3cb82', size: 52428800}, message: Object{id: 1, to: 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage', from: 'hyperty://localhost/e7cff448-e249-5dbe-fd12-7f87984dde33'}}
-<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'Process resource: ', 0, Object{status: 'START', content: Object{url: 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage/8e641360-670b-53a0-675c-064960b3cb82', size: 52428800}, message: Object{id: 1, to: 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage', from: 'hyperty://localhost/e7cff448-e249-5dbe-fd12-7f87984dde33'}}
-<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'File Size: ', 52428800, ' usage Size: ', 705, ' Total Size: ', 52429505, ' Quota: ', 110564802
-<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'REsult', 'not clean'
-<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'HYPERTY RESOURCES: ', 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage/8e641360-670b-53a0-675c-064960b3cb82', Object{runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage/8e641360-670b-53a0-675c-064960b3cb82: Object{children: 'resources', p2pHandler: 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280p2phandler/e54690de-3e52-a964-c7cf-c4ea28ac8de4', parent: 'comm://localhost/3c370a35-57f8-1a0f-8e22-c7b742cfd17f', runtime: 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280', schema: 'hyperty-catalogue://catalogue.localhost/.well-known/dataschema/Communication', reporter: 'hyperty://localhost/e7cff448-e249-5dbe-fd12-7f87984dde33', content: Blob{lastModifiedDate: ..., name: ...}, created: Fri Dec 15 2017 18:56:35 GMT+0000 (WET), lastModified: Fri Dec 15 2017 18:56:35 GMT+0000 (WET), mimetype: 'text/plain', name: '198116.txt', resourceType: 'file', size: 52428800, url: 'hyperty://localhost/e7cff448-e249-5dbe-fd12-7f87984dde33#1', contentURL: [...]}}
-<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'r:', 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage/8e641360-670b-53a0-675c-064960b3cb82'
-<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: Object{runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage/8e641360-670b-53a0-675c-064960b3cb82: Object{children: 'resources', p2pHandler: 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280p2phandler/e54690de-3e52-a964-c7cf-c4ea28ac8de4', parent: 'comm://localhost/3c370a35-57f8-1a0f-8e22-c7b742cfd17f', runtime: 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280', schema: 'hyperty-catalogue://catalogue.localhost/.well-known/dataschema/Communication', reporter: 'hyperty://localhost/e7cff448-e249-5dbe-fd12-7f87984dde33', content: Blob{lastModifiedDate: ..., name: ...}, created: Fri Dec 15 2017 18:56:35 GMT+0000 (WET), lastModified: Fri Dec 15 2017 18:56:35 GMT+0000 (WET), mimetype: 'text/plain', name: '198116.txt', resourceType: 'file', size: 52428800, url: 'hyperty://localhost/e7cff448-e249-5dbe-fd12-7f87984dde33#1', contentURL: [...]}}
-<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'Change: ', Object{name: 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage/f7cb8a58-eb6a-8136-5919-e37feb330a21', object: Object{runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage/f7cb8a58-eb6a-8136-5919-e37feb330a21: Object{status: ..., content: ..., message: ...}}, type: 'add', oldValue: undefined, newValue: Object{status: 'START', content: Object{url: ..., size: ...}, message: Object{id: ..., to: ..., from: ...}}, keypath: 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage/f7cb8a58-eb6a-8136-5919-e37feb330a21'}
-<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'Change: ', 'START'
-<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'HERE:', Object{status: 'START', content: Object{url: 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage/f7cb8a58-eb6a-8136-5919-e37feb330a21', size: 524288000}, message: Object{id: 2, to: 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage', from: 'hyperty://localhost/737fa698-f7cf-7d0b-112f-55ade6903c42'}}
-<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'Process resource: ', 0, Object{status: 'START', content: Object{url: 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage/f7cb8a58-eb6a-8136-5919-e37feb330a21', size: 524288000}, message: Object{id: 2, to: 'runtime://localhost/49119676-b887-2552-0ec7-b28df72a1280/storage', from: 'hyperty://localhost/737fa698-f7cf-7d0b-112f-55ade6903c42'}}
-<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'File Size: ', 524288000, ' usage Size: ', 705, ' Total Size: ', 524288705, ' Quota: ', 110564802
-<br />Chrome 63.0.3239 (Linux 0.0.0) WARN: 'The file you will save is bigger than the space you have'
-<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'AQUI:', 524288000, 110564802
-<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'ERROR:', 'Nothing to clean. You don't have space on storage to save that file'
-<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'AQUI:', 'hypertyResources'
-<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'ERROR:', TypeError{}
-</td>
-      </tr>
-      <tr class="system-errors">
-        <td colspan="3"><strong>Errors:</strong><br />Disconnectedundefined
+        <td colspan="3"><strong>System output:</strong><br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'Storage:', Object{}
+<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'Key:', 'capabilities', Object{capabilities: 'key,version,value'}
+<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'Key:', 'subscriptions', Object{subscriptions: 'key,version,value'}
+<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'Key:', 'runtime', Object{runtime:URL: 'key,version,value', p2pHandler:URL: 'key,version,value'}
+<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'Key:', 'registry', Object{registry:DataObjectURLs: 'key,version,value', registry:HypertyURLs: 'key,version,value'}
+<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'Key:', 'identity', Object{idModule:identities: 'key,version,value', dataObjectSessionKeys: 'key,version,value'}
+<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'Key:', 'runtimeCatalogue', Object{runtimeCatalogue: '&cguid, accessControlPolicy, constraints, dataObjects, hypertyType, objectName, sourcePackage, version'}
+<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'Key:', 'policy', Object{rethink:activePolicy: 'key,version,value', rethink:groups: 'key,version,value', rethink:userPolicies: 'key,version,value', rethink:spPolicies: 'key,version,value'}
+<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'Key:', 'syncherManager', Object{syncherManager:ObjectURLs: 'key,version,value'}
+<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'Key:', 'hypertyResources', Object{hypertyResources: '&resourceURL, name, contentUrl, content, created, reporter, resourceType'}
+<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: Object{capabilities: StorageManager{db: Dexie{_dbSchema: ..., version: ..., _allTables: ..., _tableFactory: ..., _createTransaction: ..., _whenReady: ..., verno: ..., open: ..., close: ..., delete: ..., backendDB: ..., isOpen: ..., hasFailed: ..., dynamicallyOpened: ..., name: ..., on: ..., transaction: ..., table: ..., Collection: ..., Table: ..., Transaction: ..., Version: ..., WhereClause: ..., WriteableCollection: ..., WriteableTable: ..., capabilities: ...}, storageName: 'capabilities'}, subscriptions: StorageManager{db: Dexie{_dbSchema: ..., version: ..., _allTables: ..., _tableFactory: ..., _createTransaction: ..., _whenReady: ..., verno: ..., open: ..., close: ..., delete: ..., backendDB: ..., isOpen: ..., hasFailed: ..., dynamicallyOpened: ..., name: ..., on: ..., transaction: ..., table: ..., Collection: ..., Table: ..., Transaction: ..., Version: ..., WhereClause: ..., WriteableCollection: ..., WriteableTable: ..., subscriptions: ...}, storageName: 'subscriptions'}, runtime: StorageManager{db: Dexie{_dbSchema: ..., version: ..., _allTables: ..., _tableFactory: ..., _createTransaction: ..., _whenReady: ..., verno: ..., open: ..., close: ..., delete: ..., backendDB: ..., isOpen: ..., hasFailed: ..., dynamicallyOpened: ..., name: ..., on: ..., transaction: ..., table: ..., Collection: ..., Table: ..., Transaction: ..., Version: ..., WhereClause: ..., WriteableCollection: ..., WriteableTable: ..., runtime:URL: ..., p2pHandler:URL: ...}, storageName: 'runtime'}, registry: StorageManager{db: Dexie{_dbSchema: ..., version: ..., _allTables: ..., _tableFactory: ..., _createTransaction: ..., _whenReady: ..., verno: ..., open: ..., close: ..., delete: ..., backendDB: ..., isOpen: ..., hasFailed: ..., dynamicallyOpened: ..., name: ..., on: ..., transaction: ..., table: ..., Collection: ..., Table: ..., Transaction: ..., Version: ..., WhereClause: ..., WriteableCollection: ..., WriteableTable: ..., registry:DataObjectURLs: ..., registry:HypertyURLs: ...}, storageName: 'registry'}, identity: StorageManager{db: Dexie{_dbSchema: ..., version: ..., _allTables: ..., _tableFactory: ..., _createTransaction: ..., _whenReady: ..., verno: ..., open: ..., close: ..., delete: ..., backendDB: ..., isOpen: ..., hasFailed: ..., dynamicallyOpened: ..., name: ..., on: ..., transaction: ..., table: ..., Collection: ..., Table: ..., Transaction: ..., Version: ..., WhereClause: ..., WriteableCollection: ..., WriteableTable: ..., idModule:identities: ..., dataObjectSessionKeys: ...}, storageName: 'identity'}, runtimeCatalogue: StorageManager{db: Dexie{_dbSchema: ..., version: ..., _allTables: ..., _tableFactory: ..., _createTransaction: ..., _whenReady: ..., verno: ..., open: ..., close: ..., delete: ..., backendDB: ..., isOpen: ..., hasFailed: ..., dynamicallyOpened: ..., name: ..., on: ..., transaction: ..., table: ..., Collection: ..., Table: ..., Transaction: ..., Version: ..., WhereClause: ..., WriteableCollection: ..., WriteableTable: ..., runtimeCatalogue: ...}, storageName: 'runtimeCatalogue'}, policy: StorageManager{db: Dexie{_dbSchema: ..., version: ..., _allTables: ..., _tableFactory: ..., _createTransaction: ..., _whenReady: ..., verno: ..., open: ..., close: ..., delete: ..., backendDB: ..., isOpen: ..., hasFailed: ..., dynamicallyOpened: ..., name: ..., on: ..., transaction: ..., table: ..., Collection: ..., Table: ..., Transaction: ..., Version: ..., WhereClause: ..., WriteableCollection: ..., WriteableTable: ..., rethink:activePolicy: ..., rethink:groups: ..., rethink:userPolicies: ..., rethink:spPolicies: ...}, storageName: 'policy'}, syncherManager: StorageManager{db: Dexie{_dbSchema: ..., version: ..., _allTables: ..., _tableFactory: ..., _createTransaction: ..., _whenReady: ..., verno: ..., open: ..., close: ..., delete: ..., backendDB: ..., isOpen: ..., hasFailed: ..., dynamicallyOpened: ..., name: ..., on: ..., transaction: ..., table: ..., Collection: ..., Table: ..., Transaction: ..., Version: ..., WhereClause: ..., WriteableCollection: ..., WriteableTable: ..., syncherManager:ObjectURLs: ...}, storageName: 'syncherManager'}, hypertyResources: StorageManager{db: Dexie{_dbSchema: ..., version: ..., _allTables: ..., _tableFactory: ..., _createTransaction: ..., _whenReady: ..., verno: ..., open: ..., close: ..., delete: ..., backendDB: ..., isOpen: ..., hasFailed: ..., dynamicallyOpened: ..., name: ..., on: ..., transaction: ..., table: ..., Collection: ..., Table: ..., Transaction: ..., Version: ..., WhereClause: ..., WriteableCollection: ..., WriteableTable: ..., hypertyResources: ...}, storageName: 'hypertyResources'}}
+<br />Chrome 63.0.3239 (Linux 0.0.0) INFO: '[StorageManager] - get ', undefined, undefined
+<br />Chrome 63.0.3239 (Linux 0.0.0) INFO: 'Found database name capabilities with version no: 1'
+<br />Chrome 63.0.3239 (Linux 0.0.0) INFO: 'Found database name subscriptions with version no: 1'
+<br />Chrome 63.0.3239 (Linux 0.0.0) INFO: 'Found database name runtime with version no: 1'
+<br />Chrome 63.0.3239 (Linux 0.0.0) INFO: 'Found database name registry with version no: 1'
+<br />Chrome 63.0.3239 (Linux 0.0.0) INFO: 'Found database name identity with version no: 1'
+<br />Chrome 63.0.3239 (Linux 0.0.0) INFO: 'Found database name runtimeCatalogue with version no: 1'
+<br />Chrome 63.0.3239 (Linux 0.0.0) INFO: 'Found database name policy with version no: 1'
+<br />Chrome 63.0.3239 (Linux 0.0.0) INFO: 'Found database name syncherManager with version no: 1'
+<br />Chrome 63.0.3239 (Linux 0.0.0) INFO: 'Found database name hypertyResources with version no: 1'
+<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: 'RESULT:', Object{}
+<br />Chrome 63.0.3239 (Linux 0.0.0) LOG: Object{runtime://localhost/0b0d309f-13a6-9630-1fc0-e212e59dc789/storage/7c4d2173-7a91-9159-1eb4-af176ff92fd7: Object{children: 'resources', p2pHandler: 'runtime://localhost/0b0d309f-13a6-9630-1fc0-e212e59dc789p2phandler/8e7b46a7-3810-2481-ada9-ab1fe539aa31', parent: 'comm://localhost/1da3664e-2422-2b0a-e881-ac3f040eb41e', runtime: 'runtime://localhost/0b0d309f-13a6-9630-1fc0-e212e59dc789', schema: 'hyperty-catalogue://catalogue.localhost/.well-known/dataschema/Communication', reporter: 'hyperty://localhost/1acaf951-d41e-9b37-a400-b7fa59c77804', content: Blob{lastModifiedDate: ..., name: ...}, created: Tue Dec 19 2017 17:58:04 GMT+0000 (WET), lastModified: Tue Dec 19 2017 17:58:04 GMT+0000 (WET), mimetype: 'text/plain', name: '179103.txt', resourceType: 'file', size: 52428800, url: 'hyperty://localhost/1acaf951-d41e-9b37-a400-b7fa59c77804#1', contentURL: [...]}, runtime://localhost/0b0d309f-13a6-9630-1fc0-e212e59dc789/storage/c7d29b22-3f86-88b4-5a49-65a7bd429524: Object{children: 'resources', p2pHandler: 'runtime://localhost/0b0d309f-13a6-9630-1fc0-e212e59dc789p2phandler/46673551-581b-2fe0-835e-ae3b4f0eacad', parent: 'comm://localhost/bb84e5c8-0b84-383e-744e-87a25bd67d95', runtime: 'runtime://localhost/0b0d309f-13a6-9630-1fc0-e212e59dc789', schema: 'hyperty-catalogue://catalogue.localhost/.well-known/dataschema/Communication', reporter: 'hyperty://localhost/1acaf951-d41e-9b37-a400-b7fa59c77804', content: Blob{lastModifiedDate: ..., name: ...}, created: Tue Dec 19 2017 17:58:05 GMT+0000 (WET), lastModified: Tue Dec 19 2017 17:58:05 GMT+0000 (WET), mimetype: 'text/plain', name: '115661.txt', resourceType: 'file', size: 52428800, url: 'hyperty://localhost/1acaf951-d41e-9b37-a400-b7fa59c77804#2', contentURL: [...]}}
 </td>
       </tr>
     </table>

@@ -2,11 +2,9 @@
 import * as logger from 'loglevel';
 let log = logger.getLogger('HypertyResourcesStorage');
 
-import { WatchingYou } from 'service-framework/dist/Utils';
-
 import { generateGUID, deepClone, availableSpace } from '../utils/utils';
 
-const STATUS = { START_SAVING: 'START', SAVED: 'END', ERROR: 'ERROR'};
+import PromiseQueue from '../utils/PromiseQueue';
 
 class HypertyResourcesStorage {
 
@@ -24,19 +22,15 @@ class HypertyResourcesStorage {
 
     _this._availableQuota = 0;
     _this._usage = 0;
-    _this._pool = [];
+    
 
     _this._url = runtimeURL + '/storage';
 
     _this._storageManager = storageManager;
 
+    _this.promiseQueue = new PromiseQueue();
+
     _this._hypertyResources = hypertyResources;
-
-    _this.watchingYou = new WatchingYou();
-    _this.poolingList = _this.watchingYou.watch('poolingList', {}, true);
-    _this.current = 0;
-
-    this._poolingResources();
 
     bus.addListener(_this._url, (msg) => {
       log.info('[HypertyResourcesStorage] Message RCV: ', msg);
@@ -116,24 +110,34 @@ class HypertyResourcesStorage {
 
     this._hypertyResources[resourceURL] = content;
 
-    this.poolingList[resourceURL] = {
-      status: STATUS.START_SAVING,
-      content: {
-        url: resourceURL,
-        size: content.size
-      },
-      message: {
-        id: message.id,
-        to: message.to,
-        from: message.from
+    const a = _toSave(resourceURL, message, content);
+
+    this.promiseQueue.add(this._toSave);
+
+  }
+
+  _toSave(resourceURL, message, content) {
+    this.checkStorageQuota().then((result) => {
+
+      console.log(result);
+
+      if (content.size > result.quota) {
+        throw Error('The storage do not have space to store that resource');
       }
-    };
 
-    this._hypertyResources[resourceURL] = content;
+      const spaceAvailable = result.quota;
+      const allocated = result.usage + content.size;
 
-    this._storageManager.set(resourceURL, 1, _this._hypertyResources).then((r) => {
+      if (result.percent >= this._storageLimit || allocated > spaceAvailable) {
+        return this._getOlderResources(content.size);
+      } else {
+        return true;
+      }
 
-      console.log('r:', r);
+    }).then(() => {
+
+      return this._storageManager.set(resourceURL, 1, content);
+    }).then(() => {
 
       let response = {
         from: message.to,
@@ -143,7 +147,8 @@ class HypertyResourcesStorage {
         body: { value: resourceURL, code: 200 }
       };
 
-      _this._bus.postMessage(response);
+      this._bus.postMessage(response);
+
     }).catch((reason) => {
 
       let response = {
@@ -154,270 +159,50 @@ class HypertyResourcesStorage {
         body: { value: resourceURL, code: 500, description: reason }
       };
 
-      _this._bus.postMessage(response);
+      this._bus.postMessage(response);
 
     });
-
-    //   _this._storageManager.set('hypertyResources', 1, _this._hypertyResources).then(() => {
-
-    //     let response = {
-    //       from: message.to,
-    //       to: message.from,
-    //       id: message.id,
-    //       type: 'response',
-    //       body: { value: resourceURL, code: 200 }
-    //     };
-
-    //     _this._bus.postMessage(response);
-    //   }).catch((reason) => {
-
-    //     log.warn(reason);
-
-    //     let response = {
-    //       from: message.to,
-    //       to: message.from,
-    //       id: message.id,
-    //       type: 'response',
-    //       body: { value: resourceURL, code: 500, description: reason }
-    //     };
-
-    //     _this._bus.postMessage(response);
-    //   });
-
-    // }).catch((reason) => {
-
-    //   log.warn(reason);
-
-    //   let response = {
-    //     from: message.to,
-    //     to: message.from,
-    //     id: message.id,
-    //     type: 'response',
-    //     body: { value: resourceURL, code: 500, description: reason }
-    //   };
-
-    //   _this._bus.postMessage(response);
-
   }
 
-  _poolingResources() {
+  _getOlderResources(size) {
 
-    this.watchingYou.observe('poolingList', (change) => {
+    return new Promise((resolve, reject) => {
 
-      let current;
-      let resource;
+      this._storageManager.get().then((result) => {
 
-      console.log('Change: ', change);
+        const resources = Object.keys(result);
 
-      if (change.type === 'update') {
-        current = change.object;
-      } else if (change.type === 'add') {
-        current = change.newValue;
-      } else {
-        return;
-      }
+        let total = 0;
+        const reduced = resources.sort((a, b) => result[a].created < result[b].created)
+          .reduce((previousResource, currentResource) => {
+            const current = this._hypertyResources[currentResource];
 
-      const getResource = () => {
-        const resources = Object.keys(this.poolingList);
-        const resourceURL = resources[this.current];
+            console.log('[HypertyResourcesStorage] _getOlderResources: ', total, size, currentResource, this._availableQuota);
 
-        console.log('HERE:', this.poolingList[resourceURL]);
-
-        return this.poolingList[resourceURL];
-      };
-
-      console.log('Change: ', current.status);
-
-      switch (current.status) {
-
-        case STATUS.START_SAVING:
-
-          if (this.current === 0) {
-            resource = getResource();
-            if (resource) {
-              delete this.poolingList[current.content.url];
-              this._saveResource(resource);
+            if (total <= size) {
+              total += current.size;
+              previousResource.push(currentResource);
             }
-          }
 
-          break;
+            return previousResource;
 
-        case STATUS.SAVED:
-          console.log('AQUI: Saved:'. current);
-          this.current++;
+          }, []);
 
-          resource = getResource();
+        console.log('DELETING: ', reduced);
 
-          if (resource) {
-            delete this.poolingList[current.content.url];
-            this._saveResource(resource);
-          }
+        const deleting = reduced.map(key => this._storageManager.delete(key));
 
-          break;
-
-        case STATUS.ERROR:
-          console.log('AQUI: Error:'. current);
-          this.current++;
-
-          resource = getResource();
-          if (resource) {
-            delete this.poolingList[current.content.url];
-            this._saveResource(resource);
-          }
-
-          break;
-
-      }
-
-    });
-
-  }
-
-  _saveResource(resource) {
-
-    return new Promise((resolve, reject) => {
-
-      const resourceURL = resource.content.url;
-      const message = deepClone(resource.message);
-
-      console.log('Process resource: ', this.current, resource);
-
-      this.checkStorageQuota().then((result) => {
-
-        const fileSize = resource.content.size;
-        const usage = result.usage;
-        const totalSize = result.usage + fileSize;
-
-        console.log('File Size: ', fileSize, ' usage Size: ', usage, ' Total Size: ', totalSize, ' Quota: ', result.quota);
-
-        let b;
-
-        if (totalSize > result.quota) {
-          log.warn('The file you will save is bigger than the space you have');
-          b = this._cleanOlderResources(fileSize);
-        } else {
-          b = Promise.resolve('not clean');
-        }
-
-        return b;
-
-      }).then((result) => {
-        console.log('REsult', result);
-
-        console.log('HYPERTY RESOURCES: ', resourceURL, this._hypertyResources);
-
-        return this._storageManager.set('hypertyResources', 1, this._hypertyResources);
-      }).then((result) => {
-
-        console.log('AQUI:', result);
-
-        this.poolingList[resourceURL].status = STATUS.SAVED;
-
-        let response = {
-          from: message.to,
-          to: message.from,
-          id: message.id,
-          type: 'response',
-          body: { value: resourceURL, code: 200 }
-        };
-
-        this._bus.postMessage(response);
-
-      }).catch((reason) => {
-
-        console.log('ERROR:', reason);
-
-        let response = {
-          from: message.to,
-          to: message.from,
-          id: message.id,
-          type: 'response',
-          body: { value: resourceURL, code: 500, description: reason }
-        };
-
-        this._bus.postMessage(response);
-
-        this.poolingList[resourceURL].status = STATUS.ERROR;
-
-      });
-
-    })
-
-  }
-
-
-  _cleanOlderResources(size) {
-
-    return new Promise((resolve, reject) => {
-
-      console.log('AQUI:', size, this._availableQuota);
-
-      if (size >= this._availableQuota) {
-        return reject('Nothing to clean. You don\'t have space on storage to save that file');
-      }
-
-      console.log(this._usage, this._availableQuota);
-      console.log('Before:', JSON.stringify(this._hypertyResources));
-
-      this._getOlderResources(size);
-
-      console.log('After:', this._hypertyResources);
-
-      this._storageManager.set('hypertyResources', 1, this._hypertyResources).then(() => {
-        resolve(true);
-      }).catch((error) => {
-        console.log('[HypertyResourcesStorage] _cleanOlderResources error', error);
-
-        this._storageManager.delete('hypertyResources').then(() => {
-
-          console.log('TESTES', this._hypertyResources);
-
-          // this._storageManager.set('hypertyResources', 2, this._hypertyResources).then(() => {
-          //   console.log('Success:', error);
-          //   resolve(true);
-          // }).catch((error) => {
-          //   console.log('ERROR:', error);
-          //   reject(error);
-          // })
-
-        }).catch((error) => {
-          console.error('ERROR', error);
-          reject(error);
+        Promise.all(deleting).then((a) => {
+          console.log('Deleted:', a);
+          resolve(true);
+        }).catch((b) => {
+          console.log('Deleted:', b);
         });
 
       });
 
     });
 
-  }
-
-  _getOlderResources(size) {
-    const resources = Object.keys(this._hypertyResources);
-
-    let total = 0;
-    const result = resources.sort((a, b) => this._hypertyResources[a].created < this._hypertyResources[b].created)
-      .reduce((previousResource, currentResource) => {
-        const current = this._hypertyResources[currentResource];
-
-        console.log('[HypertyResourcesStorage] _getOlderResources: ', total, size, currentResource, this._availableQuota);
-
-        if (total <= size) {
-          total += current.size;
-          previousResource.push(currentResource);
-        }
-
-        return previousResource;
-
-      }, []);
-
-    console.log('DELETING: ', result);
-
-    result.forEach(key => {
-      // this._usage -= this._hypertyResources[key].size;
-      delete this._hypertyResources[key];
-    });
-
-    return result;
   }
 
   /**
@@ -442,25 +227,33 @@ class HypertyResourcesStorage {
       body: {}
     };
 
-    let content = _this._hypertyResources[contentUrl];
+    // let content = _this._hypertyResources[contentUrl];
 
-    if (content) {
+    console.log('AQUI:', _this._hypertyResources);
 
-      if (content.resourceType === 'file') {
-        _this._onReadFile(response, content);
+    this._storageManager.get('resourceURL', contentUrl).then((content) => {
+
+      console.log('GET resourceURL:', content);
+
+      if (content) {
+
+        if (content.resourceType === 'file') {
+          _this._onReadFile(response, content);
+        } else {
+          response.body.code = 200;
+          response.body.p2p = true;
+          response.body.value = content;
+          _this._bus.postMessage(response);
+        }
+
       } else {
-        response.body.code = 200;
-        response.body.p2p = true;
-        response.body.value = content;
+        response.body.code = 404;
+        response.body.desc = 'Content Not Found for ' + contentUrl;
         _this._bus.postMessage(response);
+
       }
 
-    } else {
-      response.body.code = 404;
-      response.body.desc = 'Content Not Found for ' + contentUrl;
-      _this._bus.postMessage(response);
-
-    }
+    });
 
     //response.body.code = 404;
 
@@ -523,7 +316,7 @@ class HypertyResourcesStorage {
       throw new Error('[HypertyResourcesStorage._onDelete] mandatory resource missing: ', message);
     }
 
-    _this._storageManager.set('hypertyResources', 1, _this._hypertyResources).then(() => {
+    _this._storageManager.delete('resourceURL', message.body.resource).then(() => {
       let response = {
         from: message.to,
         to: message.from,

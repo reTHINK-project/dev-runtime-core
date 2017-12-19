@@ -23,12 +23,16 @@ import { runtimeFactory } from './resources/runtimeFactory';
 
 import AddressAllocation from '../src/allocation/AddressAllocation';
 
+import { storage } from '../src/runtime/Storage';
+
 // Testing Registry
 let runtimeURL = 'runtime://ua.pt';
 let p2pHandlerURL;
 
 let sandboxDummyCapabilities = {browser: true};
-let storageManager = runtimeFactory.storageManager();
+
+const storages = storage(runtimeFactory);
+let storageManager = storages.registry;
 let appSandbox = runtimeFactory.createAppSandbox();
 appSandbox.type = 'app';
 

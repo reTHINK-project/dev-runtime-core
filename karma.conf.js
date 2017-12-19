@@ -3,9 +3,10 @@ module.exports = function(config) {
     basePath: '',
     frameworks: ['mocha', 'chai', 'sinon'],
     files: [
-      './test/**/HypertyResourceStorage.spec.js'
+      './test/HypertyResourceStorage.spec.js'
     ],
     exclude: [
+      './test/GraphConnector.spec.js',
       './test/PolicyEngine.spec.js'
 
     ],

@@ -66,9 +66,9 @@ describe('RuntimeUA', function() {
 
       return result;
     }))
-    .to.be.fulfilled
-    .and.to.eventually.be.true
-    .and.notify(done);
+      .to.be.fulfilled
+      .and.to.eventually.be.true
+      .and.notify(done);
 
   });
 

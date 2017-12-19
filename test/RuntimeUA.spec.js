@@ -1,5 +1,6 @@
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
+import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 
 chai.config.truncateThreshold = 0;
@@ -21,17 +22,15 @@ import IdentityModule from '../src/identity/IdentityModule';
 import PEP from '../src/policy/PEP';
 import MessageBus from '../src/bus/MessageBus';
 
-import { divideURL } from '../src/utils/utils';
-
 import { runtimeFactory } from './resources/runtimeFactory';
-
-/// import { runtimeConfiguration } from './resources/runtimeConfiguration';
 
 // Testing runtimeUA;
 let domain = 'localhost';
 describe('RuntimeUA', function() {
 
   let runtime = new RuntimeUA(descriptors.Runtimes.Runtime, runtimeFactory, domain);
+
+  console.log(runtime);
 
   before(function() {
 
@@ -51,6 +50,8 @@ describe('RuntimeUA', function() {
 
       expect(runtime.init().then((result) => {
 
+        console.log('init:', result);
+
         sinon.stub(runtime.messageBus, 'postMessage').callsFake(function(msg, replyCallback) {
 
           if (replyCallback) {
@@ -63,10 +64,12 @@ describe('RuntimeUA', function() {
         });
 
         sinon.stub(runtime.descriptorInstance, 'getHypertyDescriptor').callsFake(function(hypertyURL) {
+          console.log('AQWASDAS', hypertyURL);
           return getDescriptor(hypertyURL);
         });
 
         sinon.stub(runtime.descriptorInstance, 'getStubDescriptor').callsFake(function(stubURL) {
+          console.log('AQWASDAS', stubURL);
           return getDescriptor(stubURL);
         });
 
@@ -81,7 +84,6 @@ describe('RuntimeUA', function() {
 
         sinon.stub(runtime.registry, 'registerHyperty').callsFake(function(sandbox, descriptorURL, descriptor, addressURL) {
           return new Promise(function(resolve) {
-            console.log('AQIO:', addressURL);
             if (addressURL.newAddress) {
               resolve('hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d');
             } else {
@@ -110,9 +112,9 @@ describe('RuntimeUA', function() {
 
         return result;
       }))
-      .to.be.fulfilled
-      .and.to.eventually.be.true
-      .and.notify(done);
+        .to.be.fulfilled
+        .and.to.eventually.be.true
+        .and.notify(done);
 
     });
 
@@ -225,8 +227,8 @@ describe('RuntimeUA', function() {
       let loadStubPromise = runtime.loadStub(spDomain);
 
       expect(loadStubPromise).to.be.fulfilled
-      .to.be.instanceof(Promise)
-      .and.notify(done);
+        .to.be.instanceof(Promise)
+        .and.notify(done);
     });
 
     it('should be deployed', function(done) {
@@ -236,9 +238,9 @@ describe('RuntimeUA', function() {
       //let stubResolved = ['url', 'status'];
 
       expect(loadStubPromise).to.be.fulfilled
-      .and.eventually.have.all.keys('url', 'status', 'descriptorURL')
-      .and.eventually.to.have.property('url').to.include('runtime://sp.domain/protostub/')
-      .and.notify(done);
+        .and.eventually.have.all.keys('url', 'status', 'descriptorURL')
+        .and.eventually.to.have.property('url').to.include('runtime://sp.domain/protostub/')
+        .and.notify(done);
     });
 
   });
@@ -257,8 +259,8 @@ describe('RuntimeUA', function() {
       let loadIdpPromise = runtime.loadIdpProxy(domain);
 
       expect(loadIdpPromise).to.be.fulfilled
-      .to.be.instanceof(Promise)
-      .and.notify(done);
+        .to.be.instanceof(Promise)
+        .and.notify(done);
     });
 
     it('should be deployed', function(done) {
@@ -267,8 +269,8 @@ describe('RuntimeUA', function() {
       let stubResolved = ['url', 'status'];
 
       expect(loadIdpPromise).to.be.fulfilled
-      .and.eventually.to.have.all.keys(stubResolved)
-      .and.notify(done);
+        .and.eventually.to.have.all.keys(stubResolved)
+        .and.notify(done);
     });
 
   });

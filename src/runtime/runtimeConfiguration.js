@@ -4,14 +4,39 @@ export const runtimeConfiguration = {
   // look at: https://developer.mozilla.org/en-US/docs/Web/API/IDBObjectStore
   // Now we are using the definition for Dexie; (http://dexie.org/docs/Version/Version.stores())
   storageSchemas: {
-    runtime: 'key,version,value',
-    'registry:HypertyURLs': 'key,version,value',
-    'registry:DataObjectURLs': 'key,version,value',
-    p2pHandler: 'key,version,value',
-    catalogue: '&cguid, accessControlPolicy, constraints, dataObjects, hypertyType, objectName, sourcePackage, version',
-    identityModule: '&userURL,idp',
-    hypertyResources: '&resourceURL, name, contentUrl, content, created, reporter, resourceType',
-    syncerManager: 'key,version,value'
+    capabilities: {
+      capabilities: 'key,version,value'
+    },
+    subscriptions: {
+      subscriptions: 'key,version,value'
+    },
+    runtime: {
+      'runtime:URL': 'key,version,value',
+      'p2pHandler:URL': 'key,version,value'
+    },
+    registry: {
+      'registry:DataObjectURLs': 'key,version,value',
+      'registry:HypertyURLs': 'key,version,value'
+    },
+    identity: {
+      'idModule:identities': 'key,version,value',
+      dataObjectSessionKeys: 'key,version,value'
+    },
+    runtimeCatalogue: {
+      runtimeCatalogue: '&cguid, accessControlPolicy, constraints, dataObjects, hypertyType, objectName, sourcePackage, version'
+    },
+    policy: {
+      'rethink:activePolicy': 'key,version,value',
+      'rethink:groups': 'key,version,value',
+      'rethink:userPolicies': 'key,version,value',
+      'rethink:spPolicies': 'key,version,value'
+    },
+    syncherManager: {
+      'syncherManager:ObjectURLs': 'key,version,value'
+    },
+    hypertyResources: {
+      hypertyResources: '&resourceURL, name, contentUrl, content, created, reporter, resourceType'
+    }
   },
 
   runtimeURLS: {

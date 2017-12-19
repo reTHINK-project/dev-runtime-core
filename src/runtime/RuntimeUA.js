@@ -40,6 +40,7 @@ import AddressAllocation from '../allocation/AddressAllocation';
 import * as cryptoManager from '../cryptoManager/CryptoManager';
 
 import Loader from './Loader';
+import { storage } from './Storage';
 import Descriptors from './Descriptors';
 
 import { runtimeConfiguration } from './runtimeConfiguration';
@@ -87,7 +88,6 @@ class RuntimeUA {
     // Configuration object with information related with servers
     this.runtimeConfiguration = Object.assign({domain: domain}, runtimeConfiguration);
     this.runtimeFactory = runtimeFactory;
-    this.runtimeCatalogue = runtimeFactory.createRuntimeCatalogue();
 
     this.log = log;
     this.logLevels = logLevels;
@@ -101,8 +101,10 @@ class RuntimeUA {
     runtimeUtils.runtimeDescriptor = runtimeDescriptor;
     this.runtimeUtils = runtimeUtils;
 
+    this.storages = {};
+
     if (typeof runtimeFactory.createRuntimeCatalogue === 'function') {
-      this.persistenceManager = runtimeFactory.createRuntimeCatalogue();
+      this.runtimeCatalogue = runtimeFactory.createRuntimeCatalogue();
     } else {
       throw new Error('Check your Runtime Factory because it needs the Runtime Catalogue implementation');
     }
@@ -114,13 +116,15 @@ class RuntimeUA {
     }
 
     if (typeof runtimeFactory.storageManager === 'function') {
-      this.storageManager = runtimeFactory.storageManager();
+
+      this.storages = storage(runtimeFactory);
+
     } else {
       throw new Error('Check your Runtime Factory because it needs the Storage Manager implementation');
     }
 
     if (typeof runtimeFactory.runtimeCapabilities === 'function') {
-      this.runtimeCapabilities = runtimeFactory.runtimeCapabilities(this.storageManager);
+      this.runtimeCapabilities = runtimeFactory.runtimeCapabilities(this.storages.capabilities);
     } else {
       log.info('Check your RuntimeFactory because it needs the Runtime Capabilities implementation');
     }
@@ -140,26 +144,30 @@ class RuntimeUA {
 
       this.domain = this.runtimeConfiguration.domain;
 
+      console.log('this.storages:', this.storages);
+
       try {
         let getCapabilities = this.runtimeCapabilities.getRuntimeCapabilities();
-        let getRuntimeURL = this.storageManager.get('runtime:URL');
-        let getStoredDataObjects = this.storageManager.get('syncherManager:ObjectURLs');
-        let getHypertyStorageObjects = this.storageManager.get('hypertyResources');
-        let getP2PHandlerURL = this.storageManager.get('p2pHandler:URL');
+        let getRuntimeURL = this.storages.runtime.get('runtime:URL');
+        let getStoredDataObjects = this.storages.syncherManager.get('syncherManager:ObjectURLs');
+        let getHypertyStorageObjects = this.storages.hypertyResources.get();
+        let getP2PHandlerURL = this.storages.runtime.get('p2pHandler:URL');
 
         Promise.all([getRuntimeURL, getCapabilities, getStoredDataObjects, getHypertyStorageObjects, getP2PHandlerURL]).then((results) => {
+
+          console.log('ALL GETS:', results);
 
           this.runtimeURL = results[0] ? results[0].runtimeURL : results[0];
           if (!this.runtimeURL) {
             this.runtimeURL = 'runtime://' + this.domain + '/' + generateGUID();
-            this.storageManager.set('runtime:URL', 1, {runtimeURL: this.runtimeURL});
+            this.storages.runtime.set('runtime:URL', 1, {runtimeURL: this.runtimeURL});
           }
 
 
           this.capabilities = results[1];
           Object.assign(runtimeUtils.runtimeCapabilities.constraints, results[1]);
 
-          this._dataObjectsStorage = new DataObjectsStorage(this.storageManager, results[2] || {});
+          this._dataObjectsStorage = new DataObjectsStorage(this.storages.syncherManager, results[2] || {});
 
           this._hypertyResources = results[3] || {};
 
@@ -168,14 +176,14 @@ class RuntimeUA {
             this.p2pHandlerURL = this.runtimeURL + '/p2phandler/' + generateGUID();
             log.info('[RuntimeUA - init] P2PHandlerURL: ', this.p2pHandlerURL);
 
-            this.storageManager.set('p2pHandler:URL', 1, {p2pHandlerURL: this.p2pHandlerURL});
+            this.storages.runtime.set('p2pHandler:URL', 1, {p2pHandlerURL: this.p2pHandlerURL});
           }
 
           return this._loadComponents();
 
         }).then((status) => {
 
-          this._hypertyResourcesStorage = new HypertyResourcesStorage(this.runtimeURL, this.messageBus, this.storageManager, this._hypertyResources);
+          this._hypertyResourcesStorage = new HypertyResourcesStorage(this.runtimeURL, this.messageBus, this.storages.hypertyResources, this._hypertyResources);
 
           if (this.p2p) {
             log.info('[RuntimeUA - init] load p2pHandler: ', status);
@@ -267,7 +275,7 @@ class RuntimeUA {
         this.loader = new Loader(this.runtimeURL, this.runtimeConfiguration, this.descriptorInstance);
 
         // Instantiate the identity Module
-        this.identityModule = new IdentityModule(this.runtimeURL, this.runtimeCapabilities, this.storageManager, this._dataObjectsStorage, this.runtimeFactory);
+        this.identityModule = new IdentityModule(this.runtimeURL, this.runtimeCapabilities, this.storages.identity, this._dataObjectsStorage, this.runtimeFactory);
 
         // Use the sandbox factory to create an AppSandbox;
         // In the future can be decided by policyEngine if we need
@@ -275,7 +283,7 @@ class RuntimeUA {
         let appSandbox = this.runtimeFactory.createAppSandbox();
 
         // Instantiate the Registry Module
-        this.registry = new Registry(this.runtimeURL, appSandbox, this.identityModule, this.runtimeCatalogue, this.runtimeCapabilities, this.storageManager, this.p2pHandlerURL);
+        this.registry = new Registry(this.runtimeURL, appSandbox, this.identityModule, this.runtimeCatalogue, this.runtimeCapabilities, this.storages.registry, this.p2pHandlerURL);
 
         // Set the loader to load Hyperties, Stubs and IdpProxies
         this.registry.loader = this.loader;
@@ -287,7 +295,7 @@ class RuntimeUA {
         this.addressAllocation = new AddressAllocation(this.runtimeURL, this.messageBus, this.registry);
 
         // Instantiate the Policy Engine
-        this.policyEngine = new PEP(new RuntimeCoreCtx(this.runtimeURL, this.identityModule, this.registry, this.storageManager, this.runtimeCapabilities));
+        this.policyEngine = new PEP(new RuntimeCoreCtx(this.runtimeURL, this.identityModule, this.registry, this.storages.policy, this.runtimeCapabilities));
 
         // Instantiate Discovery
         this.coreDiscovery = new CoreDiscovery(this.runtimeURL, this.messageBus, this.graphConnector, this.runtimeFactory, this.registry);
@@ -296,7 +304,7 @@ class RuntimeUA {
         this.identityManager = new IdentityManager(this.identityModule);
 
         // initialise the CryptoManager
-        cryptoManager.default.init(this.runtimeURL, this.runtimeCapabilities, this.storageManager, this._dataObjectsStorage, this.registry, this.coreDiscovery, this.identityModule, this.runtimeFactory);
+        cryptoManager.default.init(this.runtimeURL, this.runtimeCapabilities, this.storages.identity, this._dataObjectsStorage, this.registry, this.coreDiscovery, this.identityModule, this.runtimeFactory);
 
         // Instantiate the Graph Connector
         this.graphConnector = process.env.MODE !== 'light' ? new GraphConnector(this.runtimeURL, this.messageBus, this.storageManager) : null;
@@ -333,7 +341,7 @@ class RuntimeUA {
         this.runtimeFactory.messageBus = this.messageBus;
 
         // Instanciate the SyncherManager;
-        this.syncherManager = new SyncherManager(this.runtimeURL, this.messageBus, this.registry, this.runtimeCatalogue, this.storageManager, null, this._dataObjectsStorage, this.identityModule);
+        this.syncherManager = new SyncherManager(this.runtimeURL, this.messageBus, this.registry, this.runtimeCatalogue, this.storages.syncherManager, null, this._dataObjectsStorage, this.identityModule);
 
 
         // Set into loader the needed components;
@@ -357,7 +365,7 @@ class RuntimeUA {
         // }, 2000);
 
         // Instanciate the SubscriptionManager;
-        this.subscriptionManager = new SubscriptionManager(this.runtimeURL, this.messageBus, this.storageManager);
+        this.subscriptionManager = new SubscriptionManager(this.runtimeURL, this.messageBus, this.storages.subscriptions);
 
         // this.subscriptionManager.init().then(()=>{
         //   resolve(true);

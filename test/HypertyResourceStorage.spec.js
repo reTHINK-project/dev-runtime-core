@@ -11,6 +11,8 @@ import HypertyResourcesStorage from '../src/hyperty-resources-storage/HypertyRes
 
 import MessageBus from '../src/bus/MessageBus';
 
+import { storage } from '../src/runtime/Storage';
+
 chai.config.truncateThreshold = 0;
 
 let expect = chai.expect;
@@ -19,7 +21,10 @@ chai.use(chaiAsPromised);
 describe('Hyperty Resource Storage', function() {
 
   const runtimeURL = 'runtime://localhost/' + generateGUID();
-  const storageManager = runtimeFactory.storageManager('hypertyResources');
+  const storages = storage(runtimeFactory);
+
+  const storageManager = storages.hypertyResources;
+
   const from = 'hyperty://localhost/' + generateGUID();
   const to = runtimeURL + '/storage';
 
@@ -37,7 +42,7 @@ describe('Hyperty Resource Storage', function() {
 
     bus = new MessageBus(registry);
 
-    storageManager.get('hypertyResources').then(function(result) {
+    storageManager.get().then(function(result) {
 
       console.log('RESULT:', result);
 
@@ -79,6 +84,30 @@ describe('Hyperty Resource Storage', function() {
 
   });
 
+  it('should multiple resources', function(done) {
+
+    for (let i = 0; i < 10; i++) {
+      const generatedData = generateData('50MB');
+
+      const msg = buildResourceMessage(from, to, runtimeURL, generatedData);
+
+      const id = bus.postMessage(msg);
+
+      bus.addResponseListener(from, id, (reply) => {
+        bus.removeResponseListener(from, reply.id);
+
+        expect(reply.body.code).to.be.equal(200, 'The message code should be 200');
+
+        if (i === 9) {
+          done();
+        }
+
+      });
+
+    }
+
+
+  });
 
   it('should have one resource with 50Mb', function(done) {
 
