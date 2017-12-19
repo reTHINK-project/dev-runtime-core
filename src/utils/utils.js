@@ -96,6 +96,11 @@ export function emptyObject(object) {
   return Object.keys(object).length > 0 ? false : true;
 }
 
+export function secondsSinceEpoch() {
+  return Math.floor(Date.now() / 1000);
+}
+
+
 /**
  * Make a COPY of the original data
  * @param  {Object}  obj - object to be cloned

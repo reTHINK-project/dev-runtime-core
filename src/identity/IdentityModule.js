@@ -2,7 +2,7 @@
 import * as logger from 'loglevel';
 let log = logger.getLogger('IdentityModule');
 
-import {divideURL, getUserEmailFromURL, getUserIdentityDomain, parseMessageURL, stringify, decode } from '../utils/utils.js';
+import {secondsSinceEpoch, divideURL, getUserEmailFromURL, getUserIdentityDomain, parseMessageURL, stringify, decode } from '../utils/utils.js';
 import Identities from './Identities';
 import Crypto from '../cryptoManager/Crypto';
 import GuiFake from './GuiFake';
@@ -1360,10 +1360,10 @@ class IdentityModule {
       return 'domain-idp://' + idpDomain;
     }
   }
-
+/*
   _secondsSinceEpoch() {
     return Math.floor(Date.now() / 1000);
-  }
+  }*/
 }
 
 /*
