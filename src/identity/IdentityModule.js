@@ -3,7 +3,7 @@ import * as logger from 'loglevel';
 let log = logger.getLogger('IdentityModule');
 
 import {divideURL, getUserEmailFromURL, getUserIdentityDomain, parseMessageURL, stringify, decode } from '../utils/utils.js';
-import Identity from './Identity';
+import Identities from './Identities';
 import Crypto from '../cryptoManager/Crypto';
 import GuiFake from './GuiFake';
 import { WatchingYou } from 'service-framework/dist/Utils';
@@ -41,46 +41,39 @@ class IdentityModule {
   /**
   * This is the constructor to initialise the Identity Module it does not require any input.
   */
-  constructor(runtimeURL, runtimeCapabilities, storageManager, dataObjectsStorage, runtimeFactory) {
+  constructor(runtimeURL, runtimeCapabilities, storageManager, dataObjectsStorage, cryptoManager) {
     let _this = this;
 
     if (!runtimeURL) throw new Error('runtimeURL is missing.');
     if (!storageManager) throw new Error('storageManager is missing');
-    if (!runtimeFactory) throw new Error('runtimeFactory is missing');
+    if (!cryptoManager) throw new Error('cryptoManager is missing');
 
     _this._runtimeURL = runtimeURL;
-    _this.storageManager = storageManager;
+//    _this.storageManager = storageManager;
     _this.dataObjectsStorage = dataObjectsStorage;
     _this._idmURL = _this._runtimeURL + '/idm';
     _this._guiURL = _this._runtimeURL + '/identity-gui';
     _this.runtimeCapabilities = runtimeCapabilities;
-    _this.runtimeFactory = runtimeFactory;
 
     _this._domain = divideURL(_this._runtimeURL).domain;
 
     _this.watchingYou = new WatchingYou();
 
     //to store items with this format: {identity: identityURL, token: tokenID}
-    _this.identities = [];
+    _this._identities = new Identities('human', storageManager);
+    // to be reviewed: watchingYou identitiesList or identities?
     _this.identitiesList =  _this.watchingYou.watch('identitiesList', {}, true);
-    _this.emailsList = [];
+    _this._crypto = cryptoManager;
+
+    /*    _this.emailsList = [];
     let newIdentity = new Identity('guid', 'HUMAN');
     _this.identity = newIdentity;
-    _this.crypto = new Crypto(_this.runtimeFactory);
     _this.currentIdentity;
-    _this.defaultIdentity;
+    _this.identities.defaultIdentity;*/
 
     //stores the association of the dataObject and the Hyperty registered within
-    _this.dataObjectsIdentity = {};
+    _this.dataObjectsIdentity = {}; // is this needed?
 
-    // hashTable to store all the crypto information between two hyperties
-    _this.chatKeys = {};
-
-    // hashTable to store the symmetric keys to be used in the chat group
-    _this.dataObjectSessionKeys = {};
-
-    //failsafe to enable/disable all the criptographic functions
-    _this.isToUseEncryption = true;
 
     // variable to know if the GUI is deployed to choose the identity. if the real GUI is not deployed, a fake gui is deployed instead.
     _this.guiDeployed = false;
@@ -110,6 +103,7 @@ class IdentityModule {
 
   /**
   * return the coreDiscovery component
+  * do we need this??
   */
   get coreDiscovery() {
     let _this = this;
@@ -169,10 +163,11 @@ class IdentityModule {
   * Function to set the current Identity with a given Identity
   * @param {Identity}        identity         identity
   */
-  setCurrentIdentity(identity) {
+
+/*  setCurrentIdentity(identity) {
     let _this = this;
     _this.currentIdentity = identity;
-  }
+  }*/
 
   /**
   * Function to return all the identities registered within a session by a user.
@@ -211,11 +206,26 @@ class IdentityModule {
   * Function to return the selected Identity within a session
   * @return {Identity}        identity         identity
   */
-  getCurrentIdentity() {
+/*  getCurrentIdentity() {
     let _this = this;
     return _this.currentIdentity;
-  }
+  }*/
 
+  init() {
+    let _this = this;
+    return new Promise((resolve) => {
+      _this._identities.loadIdentities().then(() => {
+        _this._crypto.getMyPublicKey().then((key) => {
+          let guid = 'user-guid://' + key;
+          _this._identities.guid = guid;
+        });
+
+      });
+
+    });
+      
+  }
+/*
   loadIdentities() {
     let _this = this;
     return new Promise((resolve) => {
@@ -236,11 +246,11 @@ class IdentityModule {
             }
 
             if (!identity.hasOwnProperty('interworking') && !identity.interworking) {
-              _this.defaultIdentity = identity.messageInfo;
+              _this.identities.identities.defaultIdentity = identity.messageInfo;
 
               if (parseInt(expires) > timeNow) {
-                _this.defaultIdentity.expires = parseInt(expires);
-                _this.currentIdentity = _this.defaultIdentity;
+                _this.identities.defaultIdentity.expires = parseInt(expires);
+                _this.currentIdentity = _this.identities.defaultIdentity;
               }
 
             }
@@ -250,7 +260,7 @@ class IdentityModule {
         resolve();
       });
     });
-  }
+  }*/
 
   /**
   * Function that fetch an identityAssertion from a user.
@@ -294,19 +304,19 @@ class IdentityModule {
           });
         } else {
 
-          if (_this.defaultIdentity && _this.defaultIdentity.expires > _this._secondsSinceEpoch()) {
-            return resolve(_this.defaultIdentity);
+          if (_this.identities.defaultIdentity && _this.identities.defaultIdentity.expires > _this._secondsSinceEpoch()) {
+            return resolve(_this.identities.defaultIdentity);
           } else {
             _this.selectIdentityFromGUI().then((assertion) => {
 
               log.log('[IdentityModule] Identity selected from GUI.');
 
               if (assertion.hasOwnProperty('messageInfo')) {
-                _this.defaultIdentity = assertion.messageInfo;
+                _this.identities.defaultIdentity = assertion.messageInfo;
                 return resolve(assertion.messageInfo);
               }
 
-              _this.defaultIdentity = assertion;
+              _this.identities.defaultIdentity = assertion;
               return resolve(assertion);
             }, (err) => {
               return reject(err);
@@ -462,21 +472,21 @@ class IdentityModule {
       //let keyPair = nodeJSKeyPairPopulate;
 
       //generates the RSA key pair
-      _this.crypto.generateRSAKeyPair().then(function(keyPair) {
+      _this._crypto.getMyPublicKey().then(function(key) {
 
-      log.log('[callNodeJsGenerateMethods:keyPair.public]', keyPair.public);
+      log.log('[callNodeJsGenerateMethods:key]', key);
 
-      publicKey = stringify(keyPair.public);
+      publicKey = stringify(key);
 
-      userkeyPair = keyPair;
+//      userkeyPair = keyPair;
 
-      //log.log('[callNodeJsGenerateMethods:generateSelectedIdentity] NO_URL');
+//      //log.log('[callNodeJsGenerateMethods:generateSelectedIdentity] NO_URL');
       //    return _this.generateAssertion(publicKey, origin, '', userkeyPair, idp);
       //}).then(function(url) {
 
       log.log('[callNodeJsGenerateMethods:generateSelectedIdentity] NO_URL');
 
-      return _this.generateAssertion(publicKey, origin, 'url', userkeyPair, idp);
+      return _this.generateAssertion(publicKey, origin, 'url', idp);
 
     }).then(function(value) {
       if (value) {
@@ -503,20 +513,19 @@ class IdentityModule {
       let userkeyPair;
 
       //generates the RSA key pair
-      _this.crypto.generateRSAKeyPair().then(function(keyPair) {
+      _this._crypto.getMyPublicKey().then(function(key) {
 
-        log.log('[callNodeJsGenerateMethods:keyPair.public]', keyPair.public);
-        log.log('[callNodeJsGenerateMethods:keyPair.private]', keyPair.private);
+        log.log('[callNodeJsGenerateMethods:key]', key);
 
-        publicKey = stringify(keyPair.public);
-        userkeyPair = keyPair;
+        publicKey = stringify(key);
+//        userkeyPair = keyPair;
         log.log('generateAssertion:no_hint');
-        return _this.generateAssertion(publicKey, origin, '', userkeyPair, idp);
+        return _this.generateAssertion(publicKey, origin, '', idp);
 
       }).then(function(url) {
         _this.myHint = url;
         log.log('generateAssertion:hint');
-        return _this.generateAssertion(publicKey, origin, url, userkeyPair, idp);
+        return _this.generateAssertion(publicKey, origin, url, idp);
 
       }).then(function(value) {
         if (value) {
@@ -532,11 +541,11 @@ class IdentityModule {
   }
 
 
-  loginSelectedIdentity(publicKey, origin, idp, keyPair, loginUrl) {
+  loginSelectedIdentity(publicKey, origin, idp, loginUrl) {
     log.log('[loginSelectedIdentity:publicKey]', publicKey);
     log.log('[loginSelectedIdentity:origin]', origin);
     log.log('[loginSelectedIdentity:idp]', idp);
-    log.log('[loginSelectedIdentity:keyPair]', keyPair);
+//    log.log('[loginSelectedIdentity:keyPair]', keyPair);
     log.log('[loginSelectedIdentity:loginUrl]', loginUrl);
     let _this = this;
 
@@ -550,7 +559,7 @@ class IdentityModule {
       }).then((idCode) => {
         _this.sendGenerateMessage(publicKey, origin, idCode, idp).then((newResponse) => {
           if (newResponse.hasOwnProperty('assertion')) {
-            _this.storeIdentity(newResponse, keyPair).then(result => {
+            _this.identities.addIdentity(newResponse).then(result => {
               resolve('Login was successfull');
             }).catch(err => { reject('Login has failed:' + err); });
           } else {
@@ -572,18 +581,18 @@ class IdentityModule {
     return new Promise((resolve, reject) => {
 
       //generates the RSA key pair
-      _this.crypto.generateRSAKeyPair().then(function(keyPair) {
-        let publicKey = stringify(keyPair.public);
+      _this._crypto.getMyPublicKey().then(function(key) {
+        let publicKey = stringify(key);
 
         _this.sendGenerateMessage(publicKey, origin, idHint, idp).then((response) => {
           if (response.hasOwnProperty('assertion')) { // identity was logged in, just save it
-            _this.storeIdentity(response, keyPair).then((value) => {
+            _this.identities.addIdentity(response).then((value) => {
               return resolve(value);
             }, (err) => {
               return reject(err);
             });
           } else if (response.hasOwnProperty('loginUrl')) { // identity was not logged in
-            _this.loginSelectedIdentity(publicKey, origin, idp, keyPair, response.loginUrl).then((value) => {
+            _this.loginSelectedIdentity(publicKey, origin, idp, response.loginUrl).then((value) => {
               return resolve(value);
             }, (err) => {
               return reject(err);
@@ -591,7 +600,7 @@ class IdentityModule {
           } else { // you should never get here, if you do then the IdP Proxy is not well implemented
             // log.error('GenerateAssertion returned invalid response.');
             log.log('Proceeding by logging in.');
-            _this.generateSelectedIdentity(publicKey, origin, idp, keyPair).then((value) => {
+            _this.generateSelectedIdentity(publicKey, origin, idp).then((value) => {
               return resolve(value);
             }, (err) => {
               return reject(err);
@@ -616,17 +625,13 @@ class IdentityModule {
         //  let chosenID = getUserURLFromEmail(value.value);
         // hack while the user url is not returned from requestIdentityToGUI;
 
-          let chosenID = 'user://' + _this.currentIdentity.idp + '/' + value.value;
+          let chosenID = 'user://' + _this.identities.currentIdentity.idp.domain + '/' + value.value;
 
-          _this.defaultIdentity = _this.currentIdentity;
+          _this.identities.defaultIdentity = _this.identities.currentIdentity;
 
           // returns the identity info from the chosen id
-          for (let i in _this.identities) {
-            if (_this.identities[i].identity === chosenID) {
-              return resolve(_this.identities[i].messageInfo);
-            }
-          }
-          return reject('no identity was found .');
+          if (_this.identities[chosenID]) resolve(_this.identities[chosenID].assertion);
+          else reject('[IdentityModule.selectIdentityFromGUI] Not found:', chosenID);
         } else if (value.type === 'idp') {
 
           _this.callGenerateMethods(value.value, origin).then((value) => {
@@ -642,6 +647,8 @@ class IdentityModule {
     });
   }
 
+  //TODO: remove
+/*
   storeIdentity(result, keyPair) {
     log.log('[storeIdentity:result]', result);
     log.log('[storeIdentity:keyPair]', keyPair);
@@ -755,23 +762,23 @@ class IdentityModule {
       });
 
     });
-  }
+  }*/
 
-  generateSelectedIdentity(publicKey, origin, idp, keyPair) {
+  generateSelectedIdentity(publicKey, origin, idp) {
     log.log('[generateSelectedIdentity:publicKey]', publicKey);
     log.log('[generateSelectedIdentity:origin]', origin);
     log.log('[generateSelectedIdentity:idp]', idp);
-    log.log('[generateSelectedIdentity:keyPair]', keyPair);
+//    log.log('[generateSelectedIdentity:keyPair]', keyPair);
 
     let _this = this;
 
     return new Promise((resolve, reject) => {
       log.log('[IdentityModule:generateSelectedIdentity] NO_URL');
-      _this.generateAssertion(publicKey, origin, '', keyPair, idp).then((loginUrl) => {
+      _this.generateAssertion(publicKey, origin, '', idp).then((loginUrl) => {
         return loginUrl;
       }).then(function(url) {
         log.log('[IdentityModule:generateSelectedIdentity] URL');
-        return _this.generateAssertion(publicKey, origin, url, keyPair, idp);
+        return _this.generateAssertion(publicKey, origin, url, idp);
       }).then(function(value) {
         if (value) {
           return resolve(value);
@@ -899,48 +906,31 @@ class IdentityModule {
     let _this = this;
     return new Promise(function(resolve, reject) {
       let splitURL = hypertyURL.split('://');
-      if (splitURL[0] !== 'hyperty') {
+      if (splitURL[0] !== 'hyperty') {// it is a Data Object URL
 
         _this._getHypertyFromDataObject(hypertyURL).then((returnedHypertyURL) => {
 
           let userURL = _this.registry.getHypertyOwner(returnedHypertyURL);
 
           if (userURL) {
-
-            for (let index in _this.identities) {
-              let identity = _this.identities[index];
-              if (identity.identity === userURL) {
-                return resolve(identity.messageInfo);
-              }
-            }
-          } else {
-            return reject('no identity was found ');
-          }
+            let identity = identities[userURL]
+            if (identity) return resolve(identity.assertion);
+            else return reject('[IdentityModule.getIdToken] Identity not found for: ', userUrl);
+          } else return reject('[IdentityModule.getIdToken] User not found for hyperty: ', returnedHypertyURL);
         }).catch((reason) => {
-          log.error('no identity was found: ', reason);
+          log.error('[IdentityModule.getIdToken] Error: ', reason);
           reject(reason);
         });
       } else {
         let userURL = _this.registry.getHypertyOwner(hypertyURL);
         if (userURL) {
 
-          for (let index in _this.identities) {
-            let identity = _this.identities[index];
-            if (identity.identity === userURL) {
-              // TODO check this getIdToken when we run on nodejs environment;
-              if (identity.hasOwnProperty('messageInfo')) {
-                if (identity.messageInfo.hasOwnProperty('assertion')) { return resolve(identity.messageInfo); } else { //hack while idm is not reestuctured
-                  identity.messageInfo.assertion = identity.assertion;
-                  return resolve(identity.messageInfo);
-                }
-              } else {
-                return resolve(identity);
-              }
-            }
-          }
-        } else {
-          return reject('no identity was found.');
-        }
+          let identity = identities[userURL]
+          if (identity) return resolve(identity.assertion);
+          else return reject('[IdentityModule.getIdToken] Identity not found for: ', userUrl);
+
+        let userURL = _this.registry.getHypertyOwner(hypertyURL);
+      } else return reject('[IdentityModule.getIdToken] User not found for hyperty: ', userUrl);
       }
     });
   }
@@ -1000,7 +990,7 @@ class IdentityModule {
 
   //******************* OTHER METHODS *******************
 
-  loadSessionKeys() {
+/*  loadSessionKeys() {
     let _this = this;
     return new Promise((resolve) => {
 
@@ -1015,7 +1005,7 @@ class IdentityModule {
         resolve();
       });
     });
-  }
+  }*/
 
 
   sendRefreshMessage(oldIdentity) {
@@ -1081,11 +1071,11 @@ class IdentityModule {
   * @param  {JSON}      keyPair       user keyPair
   * @return {IdAssertion}              IdAssertion
   */
-  generateAssertion(contents, origin, usernameHint, keyPair, idpDomain) {
+  generateAssertion(contents, origin, usernameHint, idpDomain) {
     log.log('[generateAssertion:contents]', contents);
     log.log('[generateAssertion:origin]', origin);
     log.log('[generateAssertion:usernameHint]', usernameHint);
-    log.log('[generateAssertion:keyPair]', keyPair);
+//    log.log('[generateAssertion:keyPair]', keyPair);
     log.log('[generateAssertion:idpDomain]', idpDomain);
     let _this = this;
 
@@ -1104,7 +1094,7 @@ class IdentityModule {
           });
         } else if (result) {
 
-          _this.storeIdentity(result, keyPair).then((value) => {
+          _this.identities.addIdentity(result).then((value) => {
             resolve(value);
           }, (err) => {
             reject(err);
@@ -1168,8 +1158,8 @@ class IdentityModule {
       } else if (funcName === 'generateRSAKeyPair') {
         // because generateRSAKeyPair is a promise
         // we have to send the message only after getting the key pair
-        _this.crypto.generateRSAKeyPair().then((keyPair) => {
-          let value = {type: 'execute', value: keyPair, code: 200};
+        _this._crypto.getMyPublicKey().then((key) => {
+          let value = {type: 'execute', value: key, code: 200};
           let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
           try {
             _this._messageBus.postMessage(replyMsg);
@@ -1244,15 +1234,19 @@ class IdentityModule {
     log.log('_getValidToken:hypertyURL', hypertyURL);
     let _this = this;
     return new Promise((resolve, reject) => {
-      _this.getIdToken(hypertyURL).then(function(identity) {
-        log.log('_getValidToken:Promise', identity);
-        log.log('_getValidToken:identity.userProfile.userURL', identity.userProfile.userURL);
-        //        log.log('[Identity.IdentityModule.getValidToken] Token', identity);
+      _this.getIdToken(hypertyURL).then(function(assertion) {
+        log.log('_getValidToken:Promise', assertion);
+        log.log('_getValidToken:assertion.userProfile.userURL', assertion.userProfile.userURL);
+        // log.log('[Identity.IdentityModule.getValidToken] Token', assertion);
         let timeNow = _this._secondsSinceEpoch();
-        let completeId = _this.getIdentity(identity.userProfile.userURL);
-        let expirationDate = undefined;
+        // let completeId = _this.getIdentity(assertion.userProfile.userURL);
 
-        if (completeId.hasOwnProperty('info')) {
+        log.info('The ID Token does not have an expiration time');
+        if (!assertion.hasOwnProperty(expires)) return resolve(assertion);
+
+        let expirationDate = assertion.expires;
+
+       /* if (completeId.hasOwnProperty('info')) {
           if (completeId.info.hasOwnProperty('expires')) {
             expirationDate = completeId.info.expires;
           } else if (completeId.info.hasOwnProperty('tokenIDJSON')) {
@@ -1260,43 +1254,40 @@ class IdentityModule {
           } else {
             // throw 'The ID Token does not have an expiration time';
             log.info('The ID Token does not have an expiration time');
-            resolve(identity);
+            resolve(assertion);
           }
         } else if (completeId.hasOwnProperty('infoToken') && completeId.infoToken.hasOwnProperty('exp')) {
           expirationDate = completeId.infoToken.exp;
         } else {
           // throw 'The ID Token does not have an expiration time';
           log.info('The ID Token does not have an expiration time');
-          resolve(identity);
-        }
+          resolve(assertion);
+        }*/
 
         log.log('[Identity.IdentityModule.getValidToken] Token expires in', expirationDate);
         log.log('[Identity.IdentityModule.getValidToken] time now:', timeNow);
 
         if (timeNow >= expirationDate) {
-          if (identity.idp === 'google.com') {
-            _this.sendRefreshMessage(identity).then((newIdentity) => {
-              _this.deleteIdentity(completeId.identity);
-              _this.storeIdentity(newIdentity, completeId.keyPair).then((value) => {
-                resolve(value);
-              }, (err) => {
-                log.error('[Identity.IdentityModule.getToken] error on getToken', err);
+          if (assertion.hasOwnProperty(refresh)) {
+            _this.sendRefreshMessage(assertion).then((newAssertion) => {
+              _this.identities.updateAssertion(newAssertion).then(()=>{
+                resolve(newAssertion);
+              });
+            }, (err) => {
+                log.error('[IdentityModule.getValidToken] error refreshing the assertion ', err);
                 reject(err);
               });
-            });
-          } else { // microsoft.com
-            _this.deleteIdentity(completeId.identity);
-
+          } else { // no refresh token available, user has to authenticate again to get a new assertion
             // generate new idToken
-            _this.callGenerateMethods(identity.idp).then((value) => {
+            _this.callGenerateMethods(assertion.idp.domain).then((value) => {
               resolve(value);
-            }).catch(err => { reject('On addGUIListeners from if storeIdentity method postMessage error: ' + err); });
+            }).catch(err => { reject('[IdentityModule.getValidToken] error when generating a new assertion ' + err); });
           }
         } else {
-          resolve(identity);
+          resolve(assertion);
         }
       }).catch(function(error) {
-        log.error('[Identity.IdentityModule.getToken] error on getToken', error);
+        log.error('[IdentityModule.getValidToken] error on getIdToken', error);
         reject(error);
       });
     });
@@ -1340,6 +1331,7 @@ class IdentityModule {
           } else {
             // search in domain registry for the hyperty associated to the dataObject
             // search in case is a subscriber who wants to know the reporter
+            // To be reviewed in order to avoid the discovery transaction
             _this._coreDiscovery.discoverDataObjectPerURL(finalURL, domain).then(dataObject => {
               log.info('_getHypertyFromDataObject:dataObject', dataObject);
               _this.dataObjectsIdentity[finalURL] = dataObject.reporter;

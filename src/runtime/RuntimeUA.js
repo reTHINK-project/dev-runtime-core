@@ -267,7 +267,7 @@ class RuntimeUA {
         this.loader = new Loader(this.runtimeURL, this.runtimeConfiguration, this.descriptorInstance);
 
         // Instantiate the identity Module
-        this.identityModule = new IdentityModule(this.runtimeURL, this.runtimeCapabilities, this.storageManager, this._dataObjectsStorage, this.runtimeFactory);
+        this.identityModule = new IdentityModule(this.runtimeURL, this.runtimeCapabilities, this.storageManager, this._dataObjectsStorage, cryptoManager.default);
 
         // Use the sandbox factory to create an AppSandbox;
         // In the future can be decided by policyEngine if we need
@@ -365,8 +365,8 @@ class RuntimeUA {
 
         const prepareComponents = [];
         prepareComponents.push(this.subscriptionManager.init());
-        prepareComponents.push(this.identityModule.loadIdentities());
-        prepareComponents.push(this.identityModule.loadSessionKeys());
+        prepareComponents.push(this.identityModule.init());
+        prepareComponents.push(this.cryptoManager.default.loadSessionKeys());
 
         Promise.all(prepareComponents).then((result) => {
           if (result.length === 3) {
