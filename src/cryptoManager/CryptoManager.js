@@ -20,7 +20,8 @@ class CryptoManager {
   * The init() must called in order to set mandatories attributes
   */
 
-  constructor() {
+  constructor(storageManager) {
+    this.storageManager = storageManager;
 
   }
 
@@ -1283,11 +1284,44 @@ class CryptoManager {
     return newChatCrypto;
   }
 
-/*
-  _seconds_since_epoch() {
-    return Math.floor(Date.now() / 1000);
-  }*/
+  getMyPublicKey(userRef = 'cryptoManager:userAsymmetricKey'){
+    let _this = this;
+    return new Promise((resolve, reject) => {
+      _this.storageManager.get(userRef).then(storedKeyPair => {
+        console.log('cryptoManager:userAsymmetricKeyStore', storedKeyPair);
+        if(storedKeyPair) {
+          return resolve(storedKeyPair.public);
+        }
+        _this._generateAndStoreNewAsymetricKey(userRef).then(publicKey => {
+          resolve(publicKey);
+        }).catch(err => {
+          console.err('[getMyPublicKey:err]: ' + err.message);
+          reject(err);
+        });
+      }).catch(err => {
+        console.err('[getMyPublicKey:err]: ' + err.message);
+        reject(err);
+      });
+    });
+  }
 
+  _generateAndStoreNewAsymetricKey(userRef){
+    let _this = this;
+    let keyPair = undefined;
+    return new Promise((resolve, reject) => {
+      _this.crypto.generateRSAKeyPair().then(generatedKeyPair => {
+        console.log('cryptoManager:userAsymmetricKeyGenerated', generatedKeyPair);
+        keyPair = generatedKeyPair;
+        return _this.storageManager.set(userRef, 0, generatedKeyPair);
+      }).then(storedReference => {
+        console.log('cryptoManager:userAsymmetricKeySuccess', storedReference);
+        resolve(keyPair.public);
+      }).catch(err => {
+      console.err('[storeNewAsymmetricKey:err]: ' + err.message);
+      reject(err);
+      });
+    });
+  }
 
 }
 
