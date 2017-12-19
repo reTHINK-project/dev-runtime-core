@@ -181,7 +181,7 @@ class CryptoManager {
       let isFromRemoteSM = _this._isFromRemoteSM(message.from);
 
       if (isSubscription & isFromRemoteSM) {
-        console.log('_doMutualAuthenticationPhase1');
+        log.log('_doMutualAuthenticationPhase1');
 
         _this._doMutualAuthenticationPhase1(message).then(() => {
           resolve(false);
@@ -190,10 +190,10 @@ class CryptoManager {
         });
 
       } else if (message.hasOwnProperty('body') && message.body.hasOwnProperty('value') && typeof message.body.value === 'string') {
-        console.log('_isToDecrypt:true');
+        log.log('_isToDecrypt:true');
         resolve(true);
       } else {
-        console.log('_isToDecrypt:false');
+        log.log('_isToDecrypt:false');
         resolve(false);
       }
 
@@ -1288,18 +1288,18 @@ class CryptoManager {
     let _this = this;
     return new Promise((resolve, reject) => {
       _this.storageManager.get(userRef).then(storedKeyPair => {
-        console.log('cryptoManager:userAsymmetricKeyStore', storedKeyPair);
+        log.log('cryptoManager:userAsymmetricKeyStore', storedKeyPair);
         if(storedKeyPair) {
           return resolve(storedKeyPair.public);
         }
         _this._generateAndStoreNewAsymetricKey(userRef).then(publicKey => {
           resolve(publicKey);
         }).catch(err => {
-          console.err('[getMyPublicKey:err]: ' + err.message);
+          log.error('[getMyPublicKey:err]: ' + err.message);
           reject(err);
         });
       }).catch(err => {
-        console.err('[getMyPublicKey:err]: ' + err.message);
+        log.error('[getMyPublicKey:err]: ' + err.message);
         reject(err);
       });
     });
@@ -1310,14 +1310,14 @@ class CryptoManager {
     let keyPair = undefined;
     return new Promise((resolve, reject) => {
       _this.crypto.generateRSAKeyPair().then(generatedKeyPair => {
-        console.log('cryptoManager:userAsymmetricKeyGenerated', generatedKeyPair);
+        log.log('cryptoManager:userAsymmetricKeyGenerated', generatedKeyPair);
         keyPair = generatedKeyPair;
         return _this.storageManager.set(userRef, 0, generatedKeyPair);
       }).then(storedReference => {
-        console.log('cryptoManager:userAsymmetricKeySuccess', storedReference);
+        log.log('cryptoManager:userAsymmetricKeySuccess', storedReference);
         resolve(keyPair.public);
       }).catch(err => {
-      console.err('[storeNewAsymmetricKey:err]: ' + err.message);
+      log.error('[storeNewAsymmetricKey:err]: ' + err.message);
       reject(err);
       });
     });
