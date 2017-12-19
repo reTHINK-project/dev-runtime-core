@@ -89,6 +89,24 @@ class Identities {
 
   }
 
+  updateAssertion(assertion) {
+    let _this = this;
+
+    return new Promise( (resolve) => {
+      let userUrl = assertion.userProfile.userUrl;
+
+      if (!_this.identities[userUrl]) return reject('[Identities.updateAssertion] Identity not found for ', userUrl);
+      else {
+        _this.identities[userUrl].assertion.assertion = assertion;
+        _this._store().then(()=> {
+          resolve();
+        });
+      }
+
+    });
+
+  }
+
   addIdAssertion(identifier, assertion, idp, scope) {
     let _this = this;
 

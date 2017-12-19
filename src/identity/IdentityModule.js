@@ -1272,6 +1272,9 @@ class IdentityModule {
             _this.sendRefreshMessage(assertion).then((newAssertion) => {
               _this.identities.updateAssertion(newAssertion).then(()=>{
                 resolve(newAssertion);
+              }, (err) => {
+                log.error('[IdentityModule.getValidToken] error updating the assertion ', err);
+                reject(err);
               });
             }, (err) => {
                 log.error('[IdentityModule.getValidToken] error refreshing the assertion ', err);
