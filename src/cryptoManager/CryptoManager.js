@@ -90,6 +90,19 @@ class CryptoManager {
   }
 
   /**
+  * return user's public key
+  */
+
+  getMyPublicKey() {
+    // to be implemented
+
+    return new Promise((resolve)=> {
+      resolve('mypublickey');
+
+    });
+  }
+
+  /**
   * Set the coreDiscovery component
   * @param {coreDiscovery} coreDiscovery
   */
