@@ -366,7 +366,7 @@ class RuntimeUA {
         const prepareComponents = [];
         prepareComponents.push(this.subscriptionManager.init());
         prepareComponents.push(this.identityModule.init());
-        prepareComponents.push(this.cryptoManager.default.loadSessionKeys());
+        prepareComponents.push(cryptoManager.default.loadSessionKeys());
 
         Promise.all(prepareComponents).then((result) => {
           if (result.length === 3) {

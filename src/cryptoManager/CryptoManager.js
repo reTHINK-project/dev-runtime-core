@@ -94,7 +94,7 @@ class CryptoManager {
   * return user's public key
   */
 
-  getMyPublicKey() {
+/*  getMyPublicKey() {
     // to be implemented
 
     return new Promise((resolve)=> {
@@ -102,7 +102,7 @@ class CryptoManager {
 
     });
   }
-
+*/
   /**
   * Set the coreDiscovery component
   * @param {coreDiscovery} coreDiscovery
@@ -1327,6 +1327,8 @@ class CryptoManager {
   getMyPublicKey(userRef = 'cryptoManager:userAsymmetricKey'){
     let _this = this;
     return new Promise((resolve, reject) => {
+//      return resolve('mypublickey');
+      
       _this.storageManager.get(userRef).then(storedKeyPair => {
         log.log('cryptoManager:userAsymmetricKeyStore', storedKeyPair);
         if(storedKeyPair) {

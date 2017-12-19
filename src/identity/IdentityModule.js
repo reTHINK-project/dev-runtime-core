@@ -2,7 +2,7 @@
 import * as logger from 'loglevel';
 let log = logger.getLogger('IdentityModule');
 
-import {divideURL, getUserEmailFromURL, getUserIdentityDomain, parseMessageURL, stringify, decode } from '../utils/utils.js';
+import {secondsSinceEpoch, divideURL, getUserEmailFromURL, getUserIdentityDomain, parseMessageURL, stringify, decode } from '../utils/utils.js';
 import Identities from './Identities';
 import Crypto from '../cryptoManager/Crypto';
 import GuiFake from './GuiFake';
@@ -174,9 +174,9 @@ class IdentityModule {
   * These identities are returned in an array containing a JSON package for each user identity.
   * @return {Array<Identities>}         Identities
   */
-  getIdentities() {
+  get identities() {
     let _this = this;
-    return _this.identities;
+    return _this._identities;
   }
 
   getIdentitiesToChoose() {
@@ -218,6 +218,7 @@ class IdentityModule {
         _this._crypto.getMyPublicKey().then((key) => {
           let guid = 'user-guid://' + key;
           _this._identities.guid = guid;
+          resolve();
         });
 
       });
@@ -1362,10 +1363,10 @@ class IdentityModule {
       return 'domain-idp://' + idpDomain;
     }
   }
-
+/*
   _secondsSinceEpoch() {
     return Math.floor(Date.now() / 1000);
-  }
+  }*/
 }
 
 

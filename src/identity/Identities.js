@@ -1,4 +1,4 @@
-import { decode } from '../utils/utils.js';
+import { decode, secondsSinceEpoch } from '../utils/utils.js';
 
 
 /**
@@ -55,7 +55,7 @@ class Identities {
           // let's set as default identity the one that expires later
 
           identities.forEach((identity) => {
-            let timeNow = _this._secondsSinceEpoch();
+            let timeNow = secondsSinceEpoch();
             let expires = identity.assertion.expires;
 
             if (!identity.hasOwnProperty('interworking') && !identity.interworking) {
