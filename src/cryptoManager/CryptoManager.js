@@ -22,7 +22,7 @@ class CryptoManager {
 
   constructor(storageManager) {
     this.storageManager = storageManager;
-
+    this.userDefaultKeyRef = 'cryptoManager:userAsymmetricKey'
   }
 
   init(runtimeURL, runtimeCapabilities, storageManager, dataObjectsStorage, registry, coreDiscovery, idm, runtimeFactory) {
@@ -957,7 +957,10 @@ class CryptoManager {
 
             let messageToHash = _this._filterMessageToHash(messageStructure, chatKeys.keys.premasterKey, chatKeys.hypertyFrom.messageInfo);
 
-            return _this.crypto.signRSA(chatKeys.hypertyFrom.privateKey, encode(chatKeys.handshakeHistory) + encode(messageToHash));
+            return _this.getMyPrivateKey();
+          }).then(privateKey => {
+
+            return _this.crypto.signRSA(privateKey, encode(chatKeys.handshakeHistory) + encode(messageToHash));
 
           }).then(signature => {
 
@@ -996,7 +999,10 @@ class CryptoManager {
             chatKeys.hypertyTo.publicKey = senderPublicKey;
             chatKeys.hypertyTo.userID    = value.contents.email;
 
-            return _this.crypto.decryptRSA(chatKeys.hypertyFrom.privateKey, encryptedPMS);
+            return _this.getMyPrivateKey();
+          }).then(privateKey => {
+
+            return _this.crypto.decryptRSA(privateKey, encryptedPMS);
 
           }, (error) => {
             // log.log(error);
@@ -1286,8 +1292,8 @@ class CryptoManager {
         {
           hyperty: from,
           userID: userInfo.messageInfo.userProfile.username,
-          privateKey: userInfo.keyPair.private,
-          publicKey: userInfo.keyPair.public,
+          //privateKey: "getMyPublicKey",
+          //publicKey: "getMyPrivateKey",
           assertion: userInfo.assertion,
           messageInfo: userInfo.messageInfo
         },
@@ -1324,43 +1330,79 @@ class CryptoManager {
     return newChatCrypto;
   }
 
-  getMyPublicKey(userRef = 'cryptoManager:userAsymmetricKey'){
+  /**
+  * Retrieves a public keys given a user refrence. If no key is found,
+  generates a new key asymmetric key and retrieves the public keys.
+  * @param   {userRef}    String    user reference for the key pair
+  * @return  {Array}   public key
+  */
+  getMyPublicKey(userRef = this.userDefaultKeyRef){
     let _this = this;
     return new Promise((resolve, reject) => {
-//      return resolve('mypublickey');
-      
       _this.storageManager.get(userRef).then(storedKeyPair => {
-        log.log('cryptoManager:userAsymmetricKeyStore', storedKeyPair);
         if(storedKeyPair) {
           return resolve(storedKeyPair.public);
         }
-        _this._generateAndStoreNewAsymetricKey(userRef).then(publicKey => {
-          resolve(publicKey);
+        _this._generateAndStoreNewAsymetricKey(userRef).then(generatedKeyPair => {
+          resolve(generatedKeyPair.public);
         }).catch(err => {
-          log.error('[getMyPublicKey:err]: ' + err.message);
+          log.error('[getMyPublicKey:_generateAndStoreNewAsymetricKey:err]: ' + err.message);
           reject(err);
         });
       }).catch(err => {
-        log.error('[getMyPublicKey:err]: ' + err.message);
+        log.error('[getMyPublicKey:storageManager:err]: ' + err.message);
         reject(err);
       });
     });
   }
 
+  /**
+  * Retrieves a private keys given a user refrence. If no key is found,
+  generates a new key asymmetric key and retrieves the private key.
+  * @param   {userRef}    String    user reference for the key pair
+  * @return  {Array}   private key
+  **/
+  getMyPrivateKey(userRef = this.userDefaultKeyRef){
+    let _this = this;
+    return new Promise((resolve, reject) => {
+      _this.storageManager.get(userRef).then(storedKeyPair => {
+        if(storedKeyPair) {
+          return resolve(storedKeyPair.private);
+        }
+        _this._generateAndStoreNewAsymetricKey(userRef).then(generatedKeyPair => {
+          let x = 'asdf';
+          resolve(generatedKeyPair.private);
+        }).catch(err => {
+          log.error('[getMyPrivateKey:_generateAndStoreNewAsymetricKey:err]: ' + err.message);
+          reject(err);
+        });
+      }).catch(err => {
+        log.error('[getMyPrivateKey:storageManager:err]: ' + err.message);
+        reject(err);
+      });
+    });
+  }
+
+
+  /**
+  * Generates a new key pair, stores and retrives the key pair.
+  * @param   {userRef}    String    user reference for the key pair
+  * @return  {Array}   private key
+  **/
   _generateAndStoreNewAsymetricKey(userRef){
     let _this = this;
     let keyPair = undefined;
     return new Promise((resolve, reject) => {
       _this.crypto.generateRSAKeyPair().then(generatedKeyPair => {
-        log.log('cryptoManager:userAsymmetricKeyGenerated', generatedKeyPair);
+        log.log('_generateAndStoreNewAsymetricKey:userAsymmetricKeyGenerated', generatedKeyPair);
         keyPair = generatedKeyPair;
         return _this.storageManager.set(userRef, 0, generatedKeyPair);
       }).then(storedReference => {
-        log.log('cryptoManager:userAsymmetricKeySuccess', storedReference);
-        resolve(keyPair.public);
+        log.log('_generateAndStoreNewAsymetricKey:userAsymmetricKeySuccess', storedReference);
+        resolve(keyPair);
       }).catch(err => {
-      log.error('[storeNewAsymmetricKey:err]: ' + err.message);
-      reject(err);
+        log.error('[_generateAndStoreNewAsymetricKey:err]: ' + err.message);
+        reject(err);
       });
     });
   }
