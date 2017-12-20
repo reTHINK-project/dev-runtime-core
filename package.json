@@ -10,7 +10,7 @@
     "test": "karma start",
     "test:lint": "eslint --config .eslintrc.yml ./src/",
     "build:doc": "./node_modules/.bin/esdoc -c esdoc.json",
-    "build:dev": "cross-env MODE=dev webpack",
+    "build:dev": "cross-env MODE=dev webpack && cp -rf dist/Runtime.js ../dev-hyperty-toolkit/resources",
     "build:dev:monitor": "cross-env MODE=dev cross-env MONITOR=true webpack",
     "build:prod": "cross-env MODE=prod webpack",
     "build:light": "cross-env MODE=light webpack",

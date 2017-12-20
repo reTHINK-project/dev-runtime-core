@@ -48,70 +48,70 @@ export { log };
 
 
 // address-allocation
-a.setLevel(0);
+a.setLevel(3);
 
 // Bus
-b.setLevel(0);
+b.setLevel(3);
 
 // MessageBus
 c.setLevel(0);
 
 // CoreDiscovery
-d.setLevel(0);
+d.setLevel(3);
 
 // GraphConnector
-e.setLevel(0);
+e.setLevel(3);
 
 // HypertyResourcesStorage
-f.setLevel(0);
+f.setLevel(3);
 
 // IdentityModule
-g.setLevel(4);
+g.setLevel(0);
 
 // PEP
-h.setLevel(0);
+h.setLevel(3);
 
 // P2PConnectionResolve
-i.setLevel(0);
+i.setLevel(3);
 
 // Registry
-j.setLevel(0);
+j.setLevel(3);
 
 // RuntimeUA
-k.setLevel(0);
+k.setLevel(3);
 
 // Loader
-l.setLevel(0);
+l.setLevel(3);
 
 // Descriptors
-m.setLevel(0);
+m.setLevel(3);
 
 // DataObjectsStorage
-n.setLevel(0);
+n.setLevel(3);
 
 // Subscription
-o.setLevel(0);
+o.setLevel(3);
 
 // SubscriptionManager
-p.setLevel(0);
+p.setLevel(3);
 
 // ObserverObject
-q.setLevel(0);
+q.setLevel(3);
 
 // ReporterObject
-r.setLevel(0);
+r.setLevel(3);
 
 // SynSubscription
-s.setLevel(0);
+s.setLevel(3);
 
 // SyncherManager
-t.setLevel(0);
+t.setLevel(3);
 
 // IdentityManager
 u.setLevel(0);
 
 // CryptoManager
-v.setLevel(0);
+v.setLevel(3);
 
 // Pipeline
-x.setLevel(0);
+x.setLevel(3);

@@ -328,7 +328,7 @@ class CryptoManager {
         //log.log('IdentityModule - encrypt from hyperty to dataobject ', message);
 
         _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
-          sessionKeys = chatkeysToArrayCloner(sessionKeys);
+          sessionKeys = chatkeysToArrayCloner(sessionKeys || {} );
           let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
 
           _this.dataObjectsStorage.getDataObject(dataObjectURL).then((isHypertyReporter) => {
@@ -397,7 +397,7 @@ class CryptoManager {
       let dataObjectURL = parseMessageURL(sender);
 
       _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
-        sessionKeys = chatkeysToArrayCloner(sessionKeys);
+        sessionKeys = chatkeysToArrayCloner(sessionKeys || {});
         let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
 
         //check if there is already a session key for the chat room
@@ -508,7 +508,7 @@ class CryptoManager {
           // log.log('dataObject value to decrypt: ', message.body);
 
           _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
-            sessionKeys = chatkeysToArrayCloner(sessionKeys);
+            sessionKeys = chatkeysToArrayCloner(sessionKeys || {});
             let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
 
             if (dataObjectKey) {
