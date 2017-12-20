@@ -1,3 +1,7 @@
+// Log System
+import * as logger from 'loglevel';
+let log = logger.getLogger('IdentityModule');
+
 import { decode, secondsSinceEpoch } from '../utils/utils.js';
 
 
@@ -11,7 +15,7 @@ class Identities {
     let _this = this;
 
     _this._storageManager = storageManager;
-    _this._guid = undefined;
+    _this._guid;
     _this._type = type;
     _this._identities = {};
 
@@ -21,22 +25,35 @@ class Identities {
     return this._identities;
   }
 
-  set defaultIdentity(identity) {
-    if (this.identities[identity.identifier[0]]) this._defaultIdentity = identity.identifier[0];
+  set guid(guid) {
+    this._guid = guid;
+  }
+
+  get guid() {
+    return this._guid;
+  }
+
+  set defaultIdentity(identifier) {
+    if (this.identities[identifier]) this._defaultIdentity = identifier;
     else throw new Error('[Identities.set defaultIdentity ] Error: identity does not exist here: ', identity);
   }
 
-  set currentIdentity(identity) {
-    if (this.identities[identity.identifier[0]]) this._currentIdentity = identity.identifier[0];
-    else throw '[Identities.set currentIdentity ] Error: identity does not exist here: ', identity;
+  set currentIdentity(identifier) {
+    if (this.identities[identifier]) this._currentIdentity = identifier;
+    else throw '[Identities.set currentIdentity ] Error: identity does not exist here: ', identifier;
   }
 
   get defaultIdentity() {
-    return this.identities[this._defaultIdentity];
+    if (this._defaultIdentity) return this.identities[this._defaultIdentity];
+    else return false;
   }
   
   get currentIdentity() {
     return this.identities[this._currentIdentity];
+  }
+
+  get identifiers() {
+    return Object.keys(this._identities);
   }
 
   getIdentity(identifier) {
@@ -54,16 +71,19 @@ class Identities {
 
           // let's set as default identity the one that expires later
 
-          identities.forEach((identity) => {
+          _this.identifiers.forEach((id) => {
             let timeNow = secondsSinceEpoch();
+            let identity = _this._identities[id];
             let expires = identity.assertion.expires;
 
-            if (!identity.hasOwnProperty('interworking') && !identity.interworking) {
-              _this.defaultIdentity = identity;
+            if (!identity.hasOwnProperty('interworking') 
+            || !identity.interworking) {
+              _this.defaultIdentity = id;
 
               if (parseInt(expires) > timeNow) {
-                _this.defaultIdentity.expires = parseInt(expires);
-                _this.currentIdentity = _this.defaultIdentity;               }
+                _this.defaultIdentity.assertion.expires = parseInt(expires);
+                _this.currentIdentity = id;               
+              }
             }
 
           });
@@ -72,6 +92,8 @@ class Identities {
       });
     });
   }
+
+  // to confirm if this function is required when the App constraints the identity selection
   
   addIdentity(identity) {
     let _this = this;
@@ -89,6 +111,26 @@ class Identities {
 
   }
 
+  addAssertion(assertion) {
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+      if (_this._isValid(assertion)) {
+
+        let userUrl = assertion.userProfile.userURL;
+
+        if (!_this.identities[userUrl]) _this._identities[userUrl] = { assertion: assertion };
+        else _this.identities[userUrl].assertion = assertion;
+
+          _this._store().then(()=> {
+            this._identities[userUrl].status = 'created';
+            resolve(assertion);
+          });
+      } else reject('[Identities.addIdentity] invalid IdAssertion');
+    });
+
+  }
+  
   updateAssertion(assertion) {
     let _this = this;
 
@@ -97,7 +139,7 @@ class Identities {
 
       if (!_this.identities[userUrl]) return reject('[Identities.updateAssertion] Identity not found for ', userUrl);
       else {
-        _this.identities[userUrl].assertion.assertion = assertion;
+        _this.identities[userUrl].assertion = assertion;
         _this._store().then(()=> {
           resolve();
         });
@@ -144,7 +186,6 @@ class Identities {
   //TODO: add function to only set one new identity using the new indexed storage manager
 
   _store() {
-    log.log('[Identities._storeIdentity:identity]', identity);
     let _this = this;
 
     return new Promise((resolve, reject) => {

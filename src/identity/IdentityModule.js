@@ -180,8 +180,7 @@ class IdentityModule {
   }
 
   getIdentitiesToChoose() {
-    let _this = this;
-    let identities = _this.emailsList;
+//    let identities = _this.identities.identifiers;
 
     // let idps = [
     //   { domain: 'google.com', type: 'idToken'},
@@ -199,7 +198,7 @@ class IdentityModule {
       { domain: 'slack.com', type: 'Legacy'}
     ];
 
-    return {identities: identities, idps: idps};
+    return {identities: this.identities.identifiers, idps: idps};
   }
 
   /**
@@ -216,8 +215,8 @@ class IdentityModule {
     return new Promise((resolve) => {
       _this._identities.loadIdentities().then(() => {
         _this._crypto.getMyPublicKey().then((key) => {
-          let guid = 'user-guid://' + key;
-          _this._identities.guid = guid;
+          let guid = 'user-guid://' + JSON.stringify(key,);
+          _this.identities.guid = guid;
           resolve();
         });
 
@@ -269,7 +268,7 @@ class IdentityModule {
   * @return {IdAssertion}              IdAssertion
   */
   getIdentityAssertion(identityBundle) {
-    log.log('[getIdentityAssertion:identityBundle]', identityBundle);
+    log.log('[IdentityModule.getIdentityAssertion:identityBundle]', identityBundle);
     let _this = this;
 
     return new Promise(function(resolve, reject) {
@@ -305,19 +304,19 @@ class IdentityModule {
           });
         } else {
 
-          if (_this.identities.defaultIdentity && _this.identities.defaultIdentity.expires > _this._secondsSinceEpoch()) {
-            return resolve(_this.identities.defaultIdentity);
+          if (_this.identities.defaultIdentity && _this.identities.defaultIdentity.assertion.expires > secondsSinceEpoch()) {
+            return resolve(_this.identities.defaultIdentity.assertion);
           } else {
             _this.selectIdentityFromGUI().then((assertion) => {
 
               log.log('[IdentityModule] Identity selected from GUI.');
 
-              if (assertion.hasOwnProperty('messageInfo')) {
-                _this.identities.defaultIdentity = assertion.messageInfo;
-                return resolve(assertion.messageInfo);
-              }
+/*
+                _this.identities.defaultIdentity = assertion.userProfile.userURL;
+                return resolve(assertion);
+              }*/
 
-              _this.identities.defaultIdentity = assertion;
+              _this.identities.defaultIdentity = assertion.userProfile.userURL;
               return resolve(assertion);
             }, (err) => {
               return reject(err);
@@ -334,10 +333,10 @@ class IdentityModule {
 
         if (!result) return;
 
-        if (_this.currentIdentity !== undefined) {
+        if (_this.identities.currentIdentity ) {
           //TODO verify whether the token is still valid or not.
           // should be needed to make further requests, to obtain a valid token
-          return resolve(_this.currentIdentity);
+          return resolve(_this.identities.currentIdentity);
         } else {
           log.log('getIdentityAssertion for nodejs');
 
@@ -360,24 +359,23 @@ class IdentityModule {
   /**
   * Function to return all the users URLs registered within a session
   * These users URLs are returned in an array of strings.
-  * @param  {Boolean}  emailFormat (Optional)   boolean to indicate to return in email format
   * @return {Array<String>}         users
   */
-  getUsersIDs(emailFormat) {
-    log.log('[getUsersIDs:emailFormat]', emailFormat);
+  getUsersIDs() {
+  /*  log.log('[getUsersIDs:emailFormat]', emailFormat);
     log.log('getUsersIDs:emailFormat', emailFormat);
     let _this = this;
-    let users = [];
+    let users = [];*/
 
     //if request comes with the emailFormat option, then convert url to email format
-    let converter = (emailFormat) ? getUserEmailFromURL : (value) => { return value; };
+/*    let converter = (emailFormat) ? getUserEmailFromURL : (value) => { return value; };
 
     for (let index in _this.identities) {
       let identity = _this.identities[index];
       users.push(converter(identity.identity));
-    }
+    }*/
 
-    return users;
+    return this.identities.identifiers;
   }
 
   /**
@@ -418,8 +416,8 @@ class IdentityModule {
   * @return {Promise}         returns a chosen identity or idp
   */
   requestIdentityToGUI(identities, idps) {
-    log.log('[requestIdentityToGUI:identities]', identities);
-    log.log('[requestIdentityToGUI:idps]', idps);
+    log.log('[IdentityModule.requestIdentityToGUI:identities]', identities);
+    log.log('[IdentityModule.requestIdentityToGUI:idps]', idps);
 
     let _this = this;
     return new Promise(function(resolve, reject) {
@@ -560,7 +558,7 @@ class IdentityModule {
       }).then((idCode) => {
         _this.sendGenerateMessage(publicKey, origin, idCode, idp).then((newResponse) => {
           if (newResponse.hasOwnProperty('assertion')) {
-            _this.identities.addIdentity(newResponse).then(result => {
+            _this.identities.addAssertion(newResponse).then(result => {
               resolve('Login was successfull');
             }).catch(err => { reject('Login has failed:' + err); });
           } else {
@@ -587,8 +585,8 @@ class IdentityModule {
 
         _this.sendGenerateMessage(publicKey, origin, idHint, idp).then((response) => {
           if (response.hasOwnProperty('assertion')) { // identity was logged in, just save it
-            _this.identities.addIdentity(response).then((value) => {
-              return resolve(value);
+            _this.identities.addAssertion(response).then((value) => {
+              return resolve(response);
             }, (err) => {
               return reject(err);
             });
@@ -613,7 +611,7 @@ class IdentityModule {
   }
 
   selectIdentityFromGUI(origin) {
-    log.log('[selectIdentityFromGUI:origin]', origin);
+    log.log('[IdentityModule.selectIdentityFromGUI:origin]', origin);
     let _this = this;
 
     return new Promise((resolve, reject) => {
@@ -626,13 +624,13 @@ class IdentityModule {
         //  let chosenID = getUserURLFromEmail(value.value);
         // hack while the user url is not returned from requestIdentityToGUI;
 
-          let chosenID = 'user://' + _this.identities.currentIdentity.idp.domain + '/' + value.value;
+/*          let chosenID = 'user://' + _this.identities.currentIdentity.idp.domain + '/' + value.value;
 
-          _this.identities.defaultIdentity = _this.identities.currentIdentity;
+          _this.identities.defaultIdentity = _this.identities.currentIdentity;*/
 
           // returns the identity info from the chosen id
-          if (_this.identities[chosenID]) resolve(_this.identities[chosenID].assertion);
-          else reject('[IdentityModule.selectIdentityFromGUI] Not found:', chosenID);
+          if (_this.identities.currentIdentity) resolve(_this.identities.currentIdentity.assertion);
+          else reject('[IdentityModule.selectIdentityFromGUI] No identity selected');
         } else if (value.type === 'idp') {
 
           _this.callGenerateMethods(value.value, origin).then((value) => {
@@ -694,7 +692,7 @@ class IdentityModule {
 
       result.identity = identifier;
 
-      _this.identity.addIdentity(result);
+      _this.identity.addAssertion(result);
 
       // check if exists any infoToken in the result received
       let infoToken = (result.infoToken) ? result.infoToken : {};
@@ -828,7 +826,7 @@ class IdentityModule {
   getToken(fromURL, toUrl) {
     let _this = this;
     return new Promise(function(resolve, reject) {
-      // log.log('[Identity.IdentityModule.getToken] from->', fromURL, '  to->', toUrl);
+      log.log('[IdentityModule.getToken] from->', fromURL, '  to->', toUrl);
 
       if (toUrl) {
         //log.log('toUrl', toUrl);
@@ -1095,8 +1093,8 @@ class IdentityModule {
           });
         } else if (result) {
 
-          _this.identities.addIdentity(result).then((value) => {
-            resolve(value);
+          _this.identities.addAssertion(result).then((value) => {
+            resolve(result);
           }, (err) => {
             reject(err);
           });
