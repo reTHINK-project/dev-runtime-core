@@ -3,7 +3,7 @@ module.exports = function(config) {
     basePath: '',
     frameworks: ['mocha', 'chai', 'sinon'],
     files: [
-      './test/HypertyResourceStorage.spec.js'
+      './test/*.spec.js'
     ],
     exclude: [
       './test/GraphConnector.spec.js',
@@ -77,8 +77,8 @@ module.exports = function(config) {
       ChromeTravis: {
         base: 'Chrome',
         flags: [
-          '--disable-web-security',
           '--disable-popup',
+          '--disable-web-security',
           '--ignore-certificate-errors'
         ]
       }
@@ -86,6 +86,6 @@ module.exports = function(config) {
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
-    singleRun: false
+    singleRun: true
   });
 };

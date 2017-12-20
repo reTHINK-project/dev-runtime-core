@@ -20,10 +20,6 @@ class HypertyResourcesStorage {
 
     _this._storageLimit = 0.9; // the save storageLimit;
 
-    _this._availableQuota = 0;
-    _this._usage = 0;
-    
-
     _this._url = runtimeURL + '/storage';
 
     _this._storageManager = storageManager;
@@ -110,58 +106,67 @@ class HypertyResourcesStorage {
 
     this._hypertyResources[resourceURL] = content;
 
-    const a = _toSave(resourceURL, message, content);
-
-    this.promiseQueue.add(this._toSave);
+    this.promiseQueue.add(this._toSave(resourceURL, message, content));
 
   }
 
   _toSave(resourceURL, message, content) {
-    this.checkStorageQuota().then((result) => {
 
-      console.log(result);
+    return new Promise((resolve, reject) => {
 
-      if (content.size > result.quota) {
-        throw Error('The storage do not have space to store that resource');
-      }
+      const error = (reason) => {
+        let response = {
+          from: message.to,
+          to: message.from,
+          id: message.id,
+          type: 'response',
+          body: { value: resourceURL, code: 500, description: reason }
+        };
 
-      const spaceAvailable = result.quota;
-      const allocated = result.usage + content.size;
+        this._bus.postMessage(response);
 
-      if (result.percent >= this._storageLimit || allocated > spaceAvailable) {
-        return this._getOlderResources(content.size);
-      } else {
-        return true;
-      }
-
-    }).then(() => {
-
-      return this._storageManager.set(resourceURL, 1, content);
-    }).then(() => {
-
-      let response = {
-        from: message.to,
-        to: message.from,
-        id: message.id,
-        type: 'response',
-        body: { value: resourceURL, code: 200 }
+        return reject(reason);
       };
 
-      this._bus.postMessage(response);
+      this.checkStorageQuota().then((result) => {
 
-    }).catch((reason) => {
+        if (content.size > result.quota) {
+          const msg = 'The storage do not have space to store that resource';
+          error(msg);
+          throw Error(msg);
+        }
 
-      let response = {
-        from: message.to,
-        to: message.from,
-        id: message.id,
-        type: 'response',
-        body: { value: resourceURL, code: 500, description: reason }
-      };
+        const spaceAvailable = result.quota;
+        const allocated = result.usage + content.size;
 
-      this._bus.postMessage(response);
+        if (result.percent >= this._storageLimit || allocated > spaceAvailable) {
+          return this._getOlderResources(content.size);
+        } else {
+          return true;
+        }
+
+      }).then(() => {
+        return this._storageManager.set(resourceURL, 1, content);
+      }).then(() => {
+
+        let response = {
+          from: message.to,
+          to: message.from,
+          id: message.id,
+          type: 'response',
+          body: { value: resourceURL, code: 200 }
+        };
+
+        this._bus.postMessage(response);
+
+        console.log('Success');
+
+        return resolve();
+
+      }).catch(error);
 
     });
+
   }
 
   _getOlderResources(size) {
@@ -188,15 +193,12 @@ class HypertyResourcesStorage {
 
           }, []);
 
-        console.log('DELETING: ', reduced);
-
         const deleting = reduced.map(key => this._storageManager.delete(key));
 
-        Promise.all(deleting).then((a) => {
-          console.log('Deleted:', a);
+        Promise.all(deleting).then(() => {
           resolve(true);
-        }).catch((b) => {
-          console.log('Deleted:', b);
+        }).catch((reason) => {
+          reject(reason);
         });
 
       });
@@ -323,6 +325,16 @@ class HypertyResourcesStorage {
         id: message.id,
         type: 'response',
         body: { code: 200 }
+      };
+
+      _this._bus.postMessage(response);
+    }).catch((reason) => {
+      let response = {
+        from: message.to,
+        to: message.from,
+        id: message.id,
+        type: 'response',
+        body: { code: 400, description: reason }
       };
 
       _this._bus.postMessage(response);

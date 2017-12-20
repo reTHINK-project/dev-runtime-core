@@ -44,8 +44,6 @@ describe('Hyperty Resource Storage', function() {
 
     storageManager.get().then(function(result) {
 
-      console.log('RESULT:', result);
-
       hypertyResources = result || {};
 
       hypertyResourcesStorage = new HypertyResourcesStorage(runtimeURL, bus, storageManager, hypertyResources);
@@ -68,7 +66,6 @@ describe('Hyperty Resource Storage', function() {
 
   it('should add resources', function(done) {
 
-
     const generatedData = generateData('50MB');
 
     const msg = buildResourceMessage(from, to, runtimeURL, generatedData);
@@ -86,8 +83,10 @@ describe('Hyperty Resource Storage', function() {
 
   it('should multiple resources', function(done) {
 
-    for (let i = 0; i < 10; i++) {
-      const generatedData = generateData('50MB');
+    const max = 1;
+
+    for (let i = 0; i <= max; i++) {
+      const generatedData = generateData('5MB');
 
       const msg = buildResourceMessage(from, to, runtimeURL, generatedData);
 
@@ -98,7 +97,7 @@ describe('Hyperty Resource Storage', function() {
 
         expect(reply.body.code).to.be.equal(200, 'The message code should be 200');
 
-        if (i === 9) {
+        if (i === max) {
           done();
         }
 
