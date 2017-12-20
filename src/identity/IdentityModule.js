@@ -479,13 +479,7 @@ class IdentityModule {
 
       publicKey = stringify(key);
 
-//      userkeyPair = keyPair;
-
-//      //log.log('[callNodeJsGenerateMethods:generateSelectedIdentity] NO_URL');
-      //    return _this.generateAssertion(publicKey, origin, '', userkeyPair, idp);
-      //}).then(function(url) {
-
-      log.log('[callNodeJsGenerateMethods:generateSelectedIdentity] NO_URL');
+      log.log('[callNodeJsGenerateMethods] NO_URL');
 
       return _this.generateAssertion(publicKey, origin, 'url', idp);
 
@@ -551,7 +545,7 @@ class IdentityModule {
     let _this = this;
 
     return new Promise((resolve, reject) => {
-      log.log('[IdentityModule:generateSelectedIdentity] openPopup');
+      log.log('[IdentityModule] openPopup');
       _this.callIdentityModuleFunc('openPopup', {urlreceived: loginUrl}).then((idCode) => {
         return idCode;
       }, (err) => {
@@ -601,7 +595,7 @@ class IdentityModule {
           } else { // you should never get here, if you do then the IdP Proxy is not well implemented
             // log.error('GenerateAssertion returned invalid response.');
             log.log('Proceeding by logging in.');
-            _this.generateSelectedIdentity(publicKey, origin, idp).then((value) => {
+            _this.callGenerateMethods(origin, idp).then((value) => {
               return resolve(value);
             }, (err) => {
               return reject(err);
@@ -765,33 +759,7 @@ class IdentityModule {
     });
   }*/
 
-  generateSelectedIdentity(publicKey, origin, idp) {
-    log.log('[generateSelectedIdentity:publicKey]', publicKey);
-    log.log('[generateSelectedIdentity:origin]', origin);
-    log.log('[generateSelectedIdentity:idp]', idp);
-//    log.log('[generateSelectedIdentity:keyPair]', keyPair);
 
-    let _this = this;
-
-    return new Promise((resolve, reject) => {
-      log.log('[IdentityModule:generateSelectedIdentity] NO_URL');
-      _this.generateAssertion(publicKey, origin, '', idp).then((loginUrl) => {
-        return loginUrl;
-      }).then(function(url) {
-        log.log('[IdentityModule:generateSelectedIdentity] URL');
-        return _this.generateAssertion(publicKey, origin, url, idp);
-      }).then(function(value) {
-        if (value) {
-          return resolve(value);
-        } else {
-          return reject('Error on obtaining Identity');
-        }
-      }).catch(function(err) {
-        log.error(err);
-        return reject(err);
-      });
-    });
-  }
 
   callIdentityModuleFunc(methodName, parameters) {
     log.log('[callIdentityModuleFunc:methodName]', methodName);
@@ -1081,13 +1049,13 @@ class IdentityModule {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
-      log.log('[IdentityModule:generateSelectedIdentity:sendGenerateMessage]', usernameHint);
+      log.log('[IdentityModule:sendGenerateMessage:sendGenerateMessage]', usernameHint);
       _this.sendGenerateMessage(contents, origin, usernameHint, idpDomain).then((result) => {
 
         if (result.loginUrl) {
 
           _this.callIdentityModuleFunc('openPopup', {urlreceived: result.loginUrl}).then((value) => {
-            log.log('[IdentityModule:generateSelectedIdentity:openPopup]', usernameHint);
+            log.log('[IdentityModule:callIdentityModuleFunc:openPopup]', usernameHint);
 
             resolve(value);
           }, (err) => {
