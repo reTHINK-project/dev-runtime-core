@@ -485,5 +485,98 @@ export function availableSpace(usage, quota) {
     usage: usage,
     percent: Number(available)
   };
+}
 
+/**
+* Encodes a JS object to base 64 encode
+* @param   {Object}    value    byteArray value
+* @return  {string}   encoded value
+*/
+export function encode(value) {
+  try {
+    let stringValue = stringify(value);
+    return btoa(stringValue);
+  } catch (err) {
+    console.error('[Utils.encode:err] ' + err);
+    throw err;
+  }
+}
+
+/**
+  * Decode a base64 string to object
+  * @param   {string_b64}    value    value encoded in base 64
+  * @return  {Object} decodedValue
+  */
+export function decode(value) {
+  try {
+    return JSON.parse(atob(value));
+  } catch (err) {
+    console.log('[Utils.decode:err] ' + err);
+    throw err;
+  }
+}
+
+/**
+* Decode a base64 string to Uint8Array
+* @param   {string_b64}    value    byteArray value
+* @return  {Uint8Array}   encoded value
+*/
+export function decodeToUint8Array(value) {
+  try {
+    return new Uint8Array(decode(value));
+  } catch (err) {
+    console.error('[Utils.decodeToUint8Array:err] ' + err);
+    throw err;
+  }
+}
+
+/**
+* Converts a JS object to string
+* NOTE: Special conversion for Uint8Arrays
+* @param   {Object}    value    byteArray value
+* @return  {Uint8Array}   encoded value
+*/
+export function stringify(value) {
+  try {
+    let stringValue;
+    if (value.constructor === Uint8Array) {
+      stringValue = '[' + value.toString() + ']'; // the [] is for JSON.parse compatibility
+    } else {
+      stringValue = JSON.stringify(value);
+    }
+    return stringValue;
+  } catch (err) {
+    console.error('[Utils.stringify:err] ' + err);
+    throw err;
+  }
+}
+
+/**
+* Converts a stringified object to object
+* @param   {String}    value    byteArray value
+* @return  {Object}   encoded value
+*/
+export function parse(value) {
+  try {
+    return JSON.parse(value);
+  } catch (err) {
+    console.error('[Utils.parse:err]' + err);
+    console.trace();
+    console.error('That that cause the error:', value);
+    throw err;
+  }
+}
+
+/**
+* Converts a stringified object to object
+* @param   {String}    value    byteArray value
+* @return  {Uint8Array}   encoded value
+*/
+export function parseToUint8Array(value) {
+  try {
+    return new Uint8Array(parse(value));
+  } catch (err) {
+    console.error('[Utils.parseToUint8Array:err]' + err);
+    throw err;
+  }
 }
