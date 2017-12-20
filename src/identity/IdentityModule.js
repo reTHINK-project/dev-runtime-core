@@ -595,7 +595,7 @@ class IdentityModule {
           } else { // you should never get here, if you do then the IdP Proxy is not well implemented
             // log.error('GenerateAssertion returned invalid response.');
             log.log('Proceeding by logging in.');
-            _this.callGenerateMethods(origin, idp).then((value) => {
+            _this.callGenerateMethods(idp, origin).then((value) => {
               return resolve(value);
             }, (err) => {
               return reject(err);
