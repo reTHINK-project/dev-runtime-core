@@ -905,14 +905,15 @@ class IdentityModule {
     let _this = this;
     return new Promise(function(resolve, reject) {
       let splitURL = hypertyURL.split('://');
+      let userURL;
       if (splitURL[0] !== 'hyperty') {// it is a Data Object URL
 
         _this._getHypertyFromDataObject(hypertyURL).then((returnedHypertyURL) => {
 
-          let userURL = _this.registry.getHypertyOwner(returnedHypertyURL);
+          userURL = _this.registry.getHypertyOwner(returnedHypertyURL);
 
           if (userURL) {
-            let identity = identities[userURL]
+            let identity = _this.identities.getIdentity(userURL);
             if (identity) return resolve(identity.assertion);
             else return reject('[IdentityModule.getIdToken] Identity not found for: ', userUrl);
           } else return reject('[IdentityModule.getIdToken] User not found for hyperty: ', returnedHypertyURL);
@@ -921,14 +922,13 @@ class IdentityModule {
           reject(reason);
         });
       } else {
-        let userURL = _this.registry.getHypertyOwner(hypertyURL);
+        userURL = _this.registry.getHypertyOwner(hypertyURL);
         if (userURL) {
 
-          let identity = identities[userURL]
+          let identity = _this.identities.getIdentity(userURL);
           if (identity) return resolve(identity.assertion);
           else return reject('[IdentityModule.getIdToken] Identity not found for: ', userUrl);
 
-        let userURL = _this.registry.getHypertyOwner(hypertyURL);
       } else return reject('[IdentityModule.getIdToken] User not found for hyperty: ', userUrl);
       }
     });
@@ -953,7 +953,7 @@ class IdentityModule {
 
     let identityToReturn;
     let expirationDate = undefined;
-    let timeNow = _this._secondsSinceEpoch();
+    let timeNow = secondsSinceEpoch();
     for (let index in _this.identities) {
       let identity = _this.identities[index];
       if (identity.hasOwnProperty('interworking') && identity.interworking.domain === domainToCheck) {
@@ -1230,18 +1230,14 @@ class IdentityModule {
    * @return {Promise}
    */
   _getValidToken(hypertyURL) {
-    log.log('_getValidToken:hypertyURL', hypertyURL);
+    log.log('[IdentityModule._getValidToken]:hypertyURL', hypertyURL);
     let _this = this;
     return new Promise((resolve, reject) => {
       _this.getIdToken(hypertyURL).then(function(assertion) {
-        log.log('_getValidToken:Promise', assertion);
-        log.log('_getValidToken:assertion.userProfile.userURL', assertion.userProfile.userURL);
-        // log.log('[Identity.IdentityModule.getValidToken] Token', assertion);
-        let timeNow = _this._secondsSinceEpoch();
-        // let completeId = _this.getIdentity(assertion.userProfile.userURL);
+        log.log('[IdentityModule._getValidToken] retrieved IdAssertion', assertion);
+        let timeNow = secondsSinceEpoch();
 
-        log.info('The ID Token does not have an expiration time');
-        if (!assertion.hasOwnProperty(expires)) return resolve(assertion);
+        if (!assertion.hasOwnProperty('expires')) return resolve(assertion);
 
         let expirationDate = assertion.expires;
 
