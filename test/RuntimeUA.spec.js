@@ -111,7 +111,7 @@ describe('RuntimeUA', function() {
         });
 
         return result;
-      }))
+      }).catch(done))
         .to.be.fulfilled
         .and.to.eventually.be.true
         .and.notify(done);
