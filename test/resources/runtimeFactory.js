@@ -35,30 +35,37 @@ export const runtimeFactory = {
     return new PersistenceManager(localStorage);
   },
 
-  storageManager() {
+  storageManager(name, schemas) {
+
+    if (!this.databases) { this.databases = {}; }
+    if (!this.storeManager) { this.storeManager = {}; }
+
     // Using the implementation of Service Framework
     // Dexie is the IndexDB Wrapper
-    const db = new Dexie('cache');
-    const storeName = 'objects';
+    if (!this.databases.hasOwnProperty(name)) {
+      this.databases[name] = new Dexie(name);
+    }
 
-    return new StorageManager(db, storeName);
+    if (!this.storeManager.hasOwnProperty(name)) {
+      this.storeManager[name] = new StorageManager(this.databases[name], name, schemas);
+    }
 
-    // return new StorageManagerFake('a', 'b');
+    return this.storeManager[name];
   },
 
   runtimeCapabilities: (storageManager) => {
     return {
-      getRuntimeCapabilities:() => {
+      getRuntimeCapabilities: () => {
         return new Promise((resolve) => {
           resolve(undefined);
         });
       },
-      isAvailable:(capability) => {
+      isAvailable: (capability) => {
         return new Promise((resolve) => {
           resolve(undefined);
         });
       },
-      update:() => {
+      update: () => {
         return new Promise((resolve) => {
           resolve(undefined);
         });

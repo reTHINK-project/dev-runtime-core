@@ -19,7 +19,7 @@ let msgbus;
 let runtimeURL = 'hyperty-runtime://ua.pt/123';
 let domain = 'ua.pt';
 let appSandbox = runtimeFactory.createAppSandbox();
-let storageManager = runtimeFactory.storageManager();
+let storageManager = runtimeFactory.storageManager('capabilities');
 let runtimeCatalogue = runtimeFactory.createRuntimeCatalogue();
 let runtimeCapabilities = runtimeFactory.runtimeCapabilities(storageManager);
 let coreDiscovery;

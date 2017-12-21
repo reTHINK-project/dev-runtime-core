@@ -40,7 +40,7 @@ describe('AddressAllocation', function() {
       }
     };
 
-    sinon.stub(registry, 'checkRegisteredURLs', (info) => {
+    sinon.stub(registry, 'checkRegisteredURLs').callsFake((info) => {
 
       return new Promise((resolve) => {
 
