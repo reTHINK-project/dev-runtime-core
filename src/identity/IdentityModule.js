@@ -1155,8 +1155,8 @@ class IdentityModule {
         return;
       } else if (funcName === 'storeIdentity') {
         let result = msg.body.params.result;
-        let keyPair = msg.body.params.keyPair;
-        _this.storeIdentity(result, keyPair).then((returnedValue) => {
+//        let keyPair = msg.body.params.keyPair;
+        _this.identities.addAssertion(result).then((returnedValue) => {
           let value = {type: 'execute', value: returnedValue, code: 200};
           let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
           try {
