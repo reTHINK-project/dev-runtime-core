@@ -145,18 +145,7 @@ class IdentityModule {
   * @return {JSON}    identity    identity bundle from the userURL
   */
   getIdentity(userURL) {
-    let _this = this;
-
-    for (let index in _this.identities) {
-
-      let identity = _this.identities[index];
-
-      if (identity.identity === userURL) {
-        return identity;
-      }
-    }
-
-    throw 'identity not found';
+    return this.identities.getIdentity(userURL);
   }
 
   /**
@@ -387,9 +376,9 @@ class IdentityModule {
 
     //let userURL = convertToUserURL(userID);
 
-    for (let identity in _this.identities) {
-      if (_this.identities[identity].identity === userURL) {
-        _this.identities.splice(identity, 1);
+    for (let identity in _this.identities.identities) {
+      if (_this.identities.identities[identity].assertion.userProfile.userURL === userURL) {
+        _this.identities.identities.splice(identity, 1);
       }
     }
   }
@@ -629,8 +618,9 @@ class IdentityModule {
           _this.identities.defaultIdentity = _this.identities.currentIdentity;*/
 
           // returns the identity info from the chosen id
-          if (_this.identities.currentIdentity) resolve(_this.identities.currentIdentity.assertion);
-          else reject('[IdentityModule.selectIdentityFromGUI] No identity selected');
+//          if (_this.identities.currentIdentity) resolve(_this.identities.currentIdentity.assertion);
+          if (_this.identities.identities[value.value]) resolve(_this.identities.identities[value.value].assertion);
+          else reject('[IdentityModule.selectIdentityFromGUI] identity not found: ', value.value);
         } else if (value.type === 'idp') {
 
           _this.callGenerateMethods(value.value, origin).then((value) => {
@@ -954,8 +944,8 @@ class IdentityModule {
     let identityToReturn;
     let expirationDate = undefined;
     let timeNow = secondsSinceEpoch();
-    for (let index in _this.identities) {
-      let identity = _this.identities[index];
+    for (let index in _this.identities.identities) {
+      let identity = _this.identities.identities[index];
       if (identity.hasOwnProperty('interworking') && identity.interworking.domain === domainToCheck) {
         // check if there is expiration time
         if (identity.hasOwnProperty('info') && identity.info.hasOwnProperty('expires')) {
@@ -1154,7 +1144,7 @@ class IdentityModule {
       } else if (funcName === 'unregisterIdentity') {
         let email = msg.body.params.email;
         returnedValue = _this.unregisterIdentity(email);
-      } else if (funcName === 'generateRSAKeyPair') {
+      } else if (funcName === 'getMyPublicKey') {
         // because generateRSAKeyPair is a promise
         // we have to send the message only after getting the key pair
         _this._crypto.getMyPublicKey().then((key) => {
@@ -1183,8 +1173,8 @@ class IdentityModule {
 
         });
         return;
-      } else if (funcName === 'storeIdentity') {
-        let result = msg.body.params.result;
+      } else if (funcName === 'addAssertion') {
+        let result = msg.body.params;
 //        let keyPair = msg.body.params.keyPair;
         _this.identities.addAssertion(result).then((returnedValue) => {
           let value = {type: 'execute', value: returnedValue, code: 200};
