@@ -48,7 +48,7 @@ export { log };
 
 
 // address-allocation
-a.setLevel(0);
+a.setLevel(3);
 
 // Bus
 b.setLevel(0);
@@ -57,10 +57,10 @@ b.setLevel(0);
 c.setLevel(0);
 
 // CoreDiscovery
-d.setLevel(0);
+d.setLevel(5);
 
 // GraphConnector
-e.setLevel(0);
+e.setLevel(5);
 
 // HypertyResourcesStorage
 f.setLevel(0);
@@ -108,10 +108,10 @@ s.setLevel(0);
 t.setLevel(0);
 
 // IdentityManager
-u.setLevel(0);
+u.setLevel(3);
 
 // CryptoManager
-v.setLevel(0);
+v.setLevel(3);
 
 // Pipeline
 x.setLevel(0);
