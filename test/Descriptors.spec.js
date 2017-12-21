@@ -27,13 +27,14 @@ describe('Should get configuration and parse to Descriptors', () => {
     let catalogue = runtimeFactory.createRuntimeCatalogue();
     descriptorsInstance = new Descriptors(runtimeURL, catalogue, runtimeConfiguration);
 
-    sinon.stub(descriptorsInstance.catalogue, 'getStubDescriptor', (url) => {
+    
+    sinon.stub(descriptorsInstance.catalogue, 'getStubDescriptor').callsFake((url) => {
       return new Promise((resolve) => {
         resolve(descriptors.ProtoStubs.default);
       });
     });
 
-    sinon.stub(descriptorsInstance.catalogue, 'getIdpProxyDescriptor', (url) => {
+    sinon.stub(descriptorsInstance.catalogue, 'getIdpProxyDescriptor').callsFake((url) => {
       return new Promise((resolve, reject) => {
         if (url.includes('catalogue.google.com')) {
           reject();
@@ -43,7 +44,7 @@ describe('Should get configuration and parse to Descriptors', () => {
       });
     });
 
-    sinon.stub(descriptorsInstance.catalogue, 'getHypertyDescriptor', (url) => {
+    sinon.stub(descriptorsInstance.catalogue, 'getHypertyDescriptor').callsFake((url) => {
       return new Promise((resolve) => {
         resolve(descriptors.Hyperties.HelloHyperty);
       });

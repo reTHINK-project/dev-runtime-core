@@ -47,7 +47,13 @@ describe('Hyperty Resource Storage', function() {
       hypertyResources = result || {};
 
       hypertyResourcesStorage = new HypertyResourcesStorage(runtimeURL, bus, storageManager, hypertyResources);
-      hypertyResourcesStorage.checkStorageQuota().then(() => done());
+      hypertyResourcesStorage.checkStorageQuota().then((result) => {
+        console.log('Storage Quota:', result);
+        done();
+      }).catch((reason) => {
+        console.log('Storage Quota error:', reason);
+        done();
+      });
 
     });
 
