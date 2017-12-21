@@ -1022,7 +1022,7 @@ class CryptoManager {
             return _this.crypto.verifyRSA(chatKeys.hypertyTo.publicKey, encode(chatKeys.handshakeHistory) + encode(receivedmsgToHash), signature);
 
             // validates the signature received
-          }).then(signValidationResult => { 
+          }).then(signValidationResult => {
 
             //log.log('SenderCertificate - signature validation result ', signValidationResult);
             let concatKey = _this.crypto.concatPMSwithRandoms(chatKeys.keys.premasterKey, chatKeys.keys.toRandom, chatKeys.keys.fromRandom);

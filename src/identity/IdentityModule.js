@@ -2,9 +2,8 @@
 import * as logger from 'loglevel';
 let log = logger.getLogger('IdentityModule');
 
-import {secondsSinceEpoch, divideURL, getUserEmailFromURL, getUserIdentityDomain, parseMessageURL, stringify, decode } from '../utils/utils.js';
+import {secondsSinceEpoch, divideURL, getUserIdentityDomain, parseMessageURL, stringify } from '../utils/utils.js';
 import Identities from './Identities';
-import Crypto from '../cryptoManager/Crypto';
 import GuiFake from './GuiFake';
 import { WatchingYou } from 'service-framework/dist/Utils';
 
@@ -49,7 +48,8 @@ class IdentityModule {
     if (!cryptoManager) throw new Error('cryptoManager is missing');
 
     _this._runtimeURL = runtimeURL;
-//    _this.storageManager = storageManager;
+
+    //    _this.storageManager = storageManager;
     _this.dataObjectsStorage = dataObjectsStorage;
     _this._idmURL = _this._runtimeURL + '/idm';
     _this._guiURL = _this._runtimeURL + '/identity-gui';
@@ -61,6 +61,7 @@ class IdentityModule {
 
     //to store items with this format: {identity: identityURL, token: tokenID}
     _this._identities = new Identities('human', storageManager);
+
     // to be reviewed: watchingYou identitiesList or identities?
     _this.identitiesList =  _this.watchingYou.watch('identitiesList', {}, true);
     _this._crypto = cryptoManager;
@@ -145,16 +146,7 @@ class IdentityModule {
   * @return {JSON}    identity    identity bundle from the userURL
   */
   getIdentity(userURL) {
-    let _this = this;
-
-    for (let index in _this.identities._identities) {
-
-      if (index === userURL) {
-        return _this.identities._identities[index];
-      }
-    }
-
-    throw 'identity not found';
+    return this.identities.getIdentity(userURL);
   }
 
   /**
@@ -162,7 +154,7 @@ class IdentityModule {
   * @param {Identity}        identity         identity
   */
 
-/*  setCurrentIdentity(identity) {
+  /*  setCurrentIdentity(identity) {
     let _this = this;
     _this.currentIdentity = identity;
   }*/
@@ -178,7 +170,7 @@ class IdentityModule {
   }
 
   getIdentitiesToChoose() {
-//    let identities = _this.identities.identifiers;
+    //    let identities = _this.identities.identifiers;
 
     // let idps = [
     //   { domain: 'google.com', type: 'idToken'},
@@ -203,7 +195,7 @@ class IdentityModule {
   * Function to return the selected Identity within a session
   * @return {Identity}        identity         identity
   */
-/*  getCurrentIdentity() {
+  /*  getCurrentIdentity() {
     let _this = this;
     return _this.currentIdentity;
   }*/
@@ -213,7 +205,7 @@ class IdentityModule {
     return new Promise((resolve) => {
       _this._identities.loadIdentities().then(() => {
         _this._crypto.getMyPublicKey().then((key) => {
-          let guid = 'user-guid://' + JSON.stringify(key,);
+          let guid = 'user-guid://' + JSON.stringify(key);
           _this.identities.guid = guid;
           resolve();
         });
@@ -223,7 +215,8 @@ class IdentityModule {
     });
 
   }
-/*
+
+  /*
   loadIdentities() {
     let _this = this;
     return new Promise((resolve) => {
@@ -309,7 +302,7 @@ class IdentityModule {
 
               log.log('[IdentityModule] Identity selected from GUI.');
 
-/*
+              /*
                 _this.identities.defaultIdentity = assertion.userProfile.userURL;
                 return resolve(assertion);
               }*/
@@ -331,7 +324,7 @@ class IdentityModule {
 
         if (!result) return;
 
-        if (_this.identities.currentIdentity ) {
+        if (_this.identities.currentIdentity) {
           //TODO verify whether the token is still valid or not.
           // should be needed to make further requests, to obtain a valid token
           return resolve(_this.identities.currentIdentity);
@@ -366,7 +359,7 @@ class IdentityModule {
     let users = [];*/
 
     //if request comes with the emailFormat option, then convert url to email format
-/*    let converter = (emailFormat) ? getUserEmailFromURL : (value) => { return value; };
+    /*    let converter = (emailFormat) ? getUserEmailFromURL : (value) => { return value; };
 
     for (let index in _this.identities) {
       let identity = _this.identities[index];
@@ -385,9 +378,9 @@ class IdentityModule {
 
     //let userURL = convertToUserURL(userID);
 
-    for (let identity in _this.identities) {
-      if (_this.identities[identity].identity === userURL) {
-        _this.identities.splice(identity, 1);
+    for (let identity in _this.identities.identities) {
+      if (_this.identities.identities[identity].assertion.userProfile.userURL === userURL) {
+        _this.identities.identities.splice(identity, 1);
       }
     }
   }
@@ -464,32 +457,31 @@ class IdentityModule {
     return new Promise((resolve, reject) => {
       //debugger;
       let publicKey;
-      let userkeyPair;
 
       //let keyPair = nodeJSKeyPairPopulate;
 
       //generates the RSA key pair
       _this._crypto.getMyPublicKey().then(function(key) {
 
-      log.log('[callNodeJsGenerateMethods:key]', key);
+        log.log('[callNodeJsGenerateMethods:key]', key);
 
-      publicKey = stringify(key);
+        publicKey = stringify(key);
 
-      log.log('[callNodeJsGenerateMethods] NO_URL');
+        log.log('[callNodeJsGenerateMethods] NO_URL');
 
-      return _this.generateAssertion(publicKey, origin, 'url', idp);
+        return _this.generateAssertion(publicKey, origin, 'url', idp);
 
-    }).then(function(value) {
-      if (value) {
-        resolve(value);
-      } else {
-        reject('Error on obtaining Identity');
-      }
-    }).catch(function(err) {
-      log.log(err);
-      reject(err);
+      }).then(function(value) {
+        if (value) {
+          resolve(value);
+        } else {
+          reject('Error on obtaining Identity');
+        }
+      }).catch(function(err) {
+        log.log(err);
+        reject(err);
 
-            });
+      });
     });
   }
 
@@ -501,7 +493,6 @@ class IdentityModule {
     return new Promise((resolve, reject) => {
 
       let publicKey;
-      let userkeyPair;
 
       //generates the RSA key pair
       _this._crypto.getMyPublicKey().then(function(key) {
@@ -509,7 +500,8 @@ class IdentityModule {
         log.log('[callNodeJsGenerateMethods:key]', key);
 
         publicKey = stringify(key);
-//        userkeyPair = keyPair;
+
+        //        userkeyPair = keyPair;
         log.log('generateAssertion:no_hint');
         return _this.generateAssertion(publicKey, origin, '', idp);
 
@@ -536,7 +528,8 @@ class IdentityModule {
     log.log('[loginSelectedIdentity:publicKey]', publicKey);
     log.log('[loginSelectedIdentity:origin]', origin);
     log.log('[loginSelectedIdentity:idp]', idp);
-//    log.log('[loginSelectedIdentity:keyPair]', keyPair);
+
+    //    log.log('[loginSelectedIdentity:keyPair]', keyPair);
     log.log('[loginSelectedIdentity:loginUrl]', loginUrl);
     let _this = this;
 
@@ -616,13 +609,14 @@ class IdentityModule {
         //  let chosenID = getUserURLFromEmail(value.value);
         // hack while the user url is not returned from requestIdentityToGUI;
 
-/*          let chosenID = 'user://' + _this.identities.currentIdentity.idp.domain + '/' + value.value;
+          /*          let chosenID = 'user://' + _this.identities.currentIdentity.idp.domain + '/' + value.value;
 
           _this.identities.defaultIdentity = _this.identities.currentIdentity;*/
 
           // returns the identity info from the chosen id
-          if (_this.identities.currentIdentity) resolve(_this.identities.currentIdentity.assertion);
-          else reject('[IdentityModule.selectIdentityFromGUI] No identity selected');
+          //          if (_this.identities.currentIdentity) resolve(_this.identities.currentIdentity.assertion);
+          if (_this.identities.identities[value.value]) resolve(_this.identities.identities[value.value].assertion);
+          else reject('[IdentityModule.selectIdentityFromGUI] identity not found: ', value.value);
         } else if (value.type === 'idp') {
 
           _this.callGenerateMethods(value.value, origin).then((value) => {
@@ -639,7 +633,7 @@ class IdentityModule {
   }
 
   //TODO: remove
-/*
+  /*
   storeIdentity(result, keyPair) {
     log.log('[storeIdentity:result]', result);
     log.log('[storeIdentity:keyPair]', keyPair);
@@ -754,7 +748,6 @@ class IdentityModule {
 
     });
   }*/
-
 
 
   callIdentityModuleFunc(methodName, parameters) {
@@ -872,7 +865,7 @@ class IdentityModule {
     return new Promise(function(resolve, reject) {
       let splitURL = hypertyURL.split('://');
       let userURL;
-      if (splitURL[0] !== 'hyperty') {// it is a Data Object URL
+      if (splitURL[0] !== 'hyperty') { // it is a Data Object URL
 
         _this._getHypertyFromDataObject(hypertyURL).then((returnedHypertyURL) => {
 
@@ -881,8 +874,8 @@ class IdentityModule {
           if (userURL) {
             let identity = _this.identities.getIdentity(userURL);
             if (identity) return resolve(identity.assertion);
-            else return reject('[IdentityModule.getIdToken] Identity not found for: ', userUrl);
-          } else return reject('[IdentityModule.getIdToken] User not found for hyperty: ', returnedHypertyURL);
+            else return reject('[IdentityModule.getIdToken] Identity not found for: ', userURL);
+          } else { return reject('[IdentityModule.getIdToken] User not found for hyperty: ', returnedHypertyURL); }
         }).catch((reason) => {
           log.error('[IdentityModule.getIdToken] Error: ', reason);
           reject(reason);
@@ -893,9 +886,9 @@ class IdentityModule {
 
           let identity = _this.identities.getIdentity(userURL);
           if (identity) return resolve(identity.assertion);
-          else return reject('[IdentityModule.getIdToken] Identity not found for: ', userUrl);
+          else return reject('[IdentityModule.getIdToken] Identity not found for: ', userURL);
 
-      } else return reject('[IdentityModule.getIdToken] User not found for hyperty: ', userUrl);
+        } else { return reject('[IdentityModule.getIdToken] User not found for hyperty: ', userURL); }
       }
     });
   }
@@ -920,8 +913,8 @@ class IdentityModule {
     let identityToReturn;
     let expirationDate = undefined;
     let timeNow = secondsSinceEpoch();
-    for (let index in _this.identities) {
-      let identity = _this.identities[index];
+    for (let index in _this.identities.identities) {
+      let identity = _this.identities.identities[index];
       if (identity.hasOwnProperty('interworking') && identity.interworking.domain === domainToCheck) {
         // check if there is expiration time
         if (identity.hasOwnProperty('info') && identity.info.hasOwnProperty('expires')) {
@@ -955,7 +948,7 @@ class IdentityModule {
 
   //******************* OTHER METHODS *******************
 
-/*  loadSessionKeys() {
+  /*  loadSessionKeys() {
     let _this = this;
     return new Promise((resolve) => {
 
@@ -975,9 +968,10 @@ class IdentityModule {
 
   sendRefreshMessage(oldIdentity) {
     let _this = this;
-    let domain = _this._resolveDomain(oldIdentity.idp);
-    let message;
-    let assertion = _this.getIdentity(oldIdentity.userProfile.userURL);
+
+    //    let domain = _this._resolveDomain(oldIdentity.idp);
+    //    let message;
+    //    let assertion = _this.getIdentity(oldIdentity.userProfile.userURL);
 
     log.log('sendRefreshMessage:oldIdentity', oldIdentity);
 
@@ -1040,7 +1034,8 @@ class IdentityModule {
     log.log('[generateAssertion:contents]', contents);
     log.log('[generateAssertion:origin]', origin);
     log.log('[generateAssertion:usernameHint]', usernameHint);
-//    log.log('[generateAssertion:keyPair]', keyPair);
+
+    //    log.log('[generateAssertion:keyPair]', keyPair);
     log.log('[generateAssertion:idpDomain]', idpDomain);
     let _this = this;
 
@@ -1120,8 +1115,7 @@ class IdentityModule {
       } else if (funcName === 'unregisterIdentity') {
         let email = msg.body.params.email;
         returnedValue = _this.unregisterIdentity(email);
-      /*
-      } else if (funcName === 'generateRSAKeyPair') {
+      } else if (funcName === 'getMyPublicKey') {
         // because generateRSAKeyPair is a promise
         // we have to send the message only after getting the key pair
         _this._crypto.getMyPublicKey().then((key) => {
@@ -1130,11 +1124,10 @@ class IdentityModule {
           try {
             _this._messageBus.postMessage(replyMsg);
           } catch (err) {
-            reject('On addGUIListeners from if generateRSAKeyPair method postMessage error: ' + err);
+            log.error('On addGUIListeners from if generateRSAKeyPair method postMessage error: ' + err);
           }
         });
         return;
-      */
       } else if (funcName === 'sendGenerateMessage') {
         let contents = msg.body.params.contents;
         let origin = msg.body.params.origin;
@@ -1146,21 +1139,22 @@ class IdentityModule {
           try {
             _this._messageBus.postMessage(replyMsg);
           } catch (err) {
-            reject('On addGUIListeners from if sendGenerateMessage method postMessage error: ' + err);
+            log.error('On addGUIListeners from if sendGenerateMessage method postMessage error: ' + err);
           }
 
         });
         return;
-      } else if (funcName === 'storeIdentity') {
-        let result = msg.body.params.result;
-//        let keyPair = msg.body.params.keyPair;
+      } else if (funcName === 'addAssertion') {
+        let result = msg.body.params;
+
+        //        let keyPair = msg.body.params.keyPair;
         _this.identities.addAssertion(result).then((returnedValue) => {
           let value = {type: 'execute', value: returnedValue, code: 200};
           let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};
           try {
             _this._messageBus.postMessage(replyMsg);
           } catch (err) {
-            reject('On addGUIListeners from if storeIdentity method postMessage error: ' + err);
+            log.error('On addGUIListeners from if storeIdentity method postMessage error: ' + err);
           }
 
         });
@@ -1179,7 +1173,7 @@ class IdentityModule {
       try {
         _this._messageBus.postMessage(replyMsg);
       } catch (err) {
-        reject('On addGUIListeners from if storeIdentity method postMessage error: ' + err);
+        log.error('On addGUIListeners from if storeIdentity method postMessage error: ' + err);
       }
 
     });
@@ -1209,7 +1203,7 @@ class IdentityModule {
 
         let expirationDate = assertion.expires;
 
-       /* if (completeId.hasOwnProperty('info')) {
+        /* if (completeId.hasOwnProperty('info')) {
           if (completeId.info.hasOwnProperty('expires')) {
             expirationDate = completeId.info.expires;
           } else if (completeId.info.hasOwnProperty('tokenIDJSON')) {
@@ -1240,9 +1234,9 @@ class IdentityModule {
                 reject(err);
               });
             }, (err) => {
-                log.error('[IdentityModule.getValidToken] error refreshing the assertion ', err);
-                reject(err);
-              });
+              log.error('[IdentityModule.getValidToken] error refreshing the assertion ', err);
+              reject(err);
+            });
           } else { // no refresh token available, user has to authenticate again to get a new assertion
             // generate new idToken
             _this.callGenerateMethods(assertion.idp.domain).then((value) => {
@@ -1323,6 +1317,7 @@ class IdentityModule {
       return 'domain-idp://' + idpDomain;
     }
   }
+
 /*
   _secondsSinceEpoch() {
     return Math.floor(Date.now() / 1000);
