@@ -144,8 +144,6 @@ class RuntimeUA {
 
       this.domain = this.runtimeConfiguration.domain;
 
-      console.log('this.storages:', this.storages);
-
       try {
         let getCapabilities = this.runtimeCapabilities.getRuntimeCapabilities();
         let getRuntimeURL = this.storages.runtime.get('runtime:URL');
@@ -154,8 +152,6 @@ class RuntimeUA {
         let getP2PHandlerURL = this.storages.runtime.get('p2pHandler:URL');
 
         Promise.all([getRuntimeURL, getCapabilities, getStoredDataObjects, getHypertyStorageObjects, getP2PHandlerURL]).then((results) => {
-
-          console.log('ALL GETS:', results);
 
           this.runtimeURL = results[0] ? results[0].runtimeURL : results[0];
           if (!this.runtimeURL) {
@@ -429,7 +425,7 @@ class RuntimeUA {
   * @param  {URL.URL}     domain          domain
   */
   loadIdpProxy(ipdProxyCatalogueURL) {
-    console.log('ipdProxyCatalogueURL', ipdProxyCatalogueURL);
+    log.log('ipdProxyCatalogueURL', ipdProxyCatalogueURL);
 
     if (!ipdProxyCatalogueURL) throw new Error('The IDP Proxy URL is a needed parameter, could be a DOMAIN or a URL');
     return this.loader.loadIdpProxy(ipdProxyCatalogueURL);

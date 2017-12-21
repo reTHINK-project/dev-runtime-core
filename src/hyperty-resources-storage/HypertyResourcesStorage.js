@@ -60,7 +60,7 @@ class HypertyResourcesStorage {
           resolve(availableSpace(this._usage, this._availableQuota));
 
         }).catch((reason) => {
-          console.error('[HypertyResourcesStorage] CheckStorageQuota error: ', reason);
+          log.error('[HypertyResourcesStorage] CheckStorageQuota error: ', reason);
           reject(reason);
         });
 
@@ -159,7 +159,7 @@ class HypertyResourcesStorage {
 
         this._bus.postMessage(response);
 
-        console.log('Success');
+        log.log('Success');
 
         return resolve();
 
@@ -182,7 +182,7 @@ class HypertyResourcesStorage {
           .reduce((previousResource, currentResource) => {
             const current = this._hypertyResources[currentResource];
 
-            console.log('[HypertyResourcesStorage] _getOlderResources: ', total, size, currentResource, this._availableQuota);
+            log.log('[HypertyResourcesStorage] _getOlderResources: ', total, size, currentResource, this._availableQuota);
 
             if (total <= size) {
               total += current.size;
@@ -231,11 +231,11 @@ class HypertyResourcesStorage {
 
     // let content = _this._hypertyResources[contentUrl];
 
-    console.log('AQUI:', _this._hypertyResources);
+    log.info('[HypertyResourcesStorage._onRead] get resourceURL:', contentUrl);
 
     this._storageManager.get('resourceURL', contentUrl).then((content) => {
 
-      console.log('GET resourceURL:', content);
+      log.info('[HypertyResourcesStorage._onRead] found content:', content);
 
       if (content) {
 

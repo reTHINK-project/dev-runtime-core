@@ -180,7 +180,7 @@ class CryptoManager {
       let isFromRemoteSM = _this._isFromRemoteSM(message.from);
 
       if (isSubscription & isFromRemoteSM) {
-        console.log('_doMutualAuthenticationPhase1');
+        log.log('_doMutualAuthenticationPhase1');
 
         _this._doMutualAuthenticationPhase1(message).then(() => {
           resolve(false);
@@ -189,10 +189,10 @@ class CryptoManager {
         });
 
       } else if (message.hasOwnProperty('body') && message.body.hasOwnProperty('value') && typeof message.body.value === 'string') {
-        console.log('_isToDecrypt:true');
+        log.log('_isToDecrypt:true');
         resolve(true);
       } else {
-        console.log('_isToDecrypt:false');
+        log.log('_isToDecrypt:false');
         resolve(false);
       }
 
@@ -203,7 +203,7 @@ class CryptoManager {
   }
 
   encryptMessage(message) {
-    //console.info('encryptMessage:message', message);
+    //log.info('encryptMessage:message', message);
     let _this = this;
 
     log.log('encrypt message ');
@@ -376,7 +376,7 @@ class CryptoManager {
 
           // if not, just send the message
           } else {
-            console.info('The dataObject is not encrypted');
+            log.info('The dataObject is not encrypted');
             return resolve(dataObject);
           }
 
@@ -790,7 +790,7 @@ class CryptoManager {
       let value = {};
       let filteredMessage;
 
-      console.info('handshake phase: ', handshakeType);
+      log.info('handshake phase: ', handshakeType);
 
       switch (handshakeType) {
 
