@@ -147,12 +147,10 @@ class IdentityModule {
   getIdentity(userURL) {
     let _this = this;
 
-    for (let index in _this.identities) {
+    for (let index in _this.identities._identities) {
 
-      let identity = _this.identities[index];
-
-      if (identity.identity === userURL) {
-        return identity;
+      if (index === userURL) {
+        return _this.identities._identities[index];
       }
     }
 

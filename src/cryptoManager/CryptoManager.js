@@ -3,7 +3,7 @@ import * as logger from 'loglevel';
 let log = logger.getLogger('CryptoManager');
 
 import {divideURL, isDataObjectURL, isLegacy, chatkeysToStringCloner, chatkeysToArrayCloner, parseMessageURL,
-        parse, stringify, encode, decode, decodeToUint8Array, parseToUint8Array} from '../utils/utils.js';
+  parse, stringify, encode, decode, decodeToUint8Array, parseToUint8Array} from '../utils/utils.js';
 import Crypto from './Crypto';
 
 /**
@@ -22,7 +22,7 @@ class CryptoManager {
 
   constructor(storageManager) {
     this.storageManager = storageManager;
-    this.userDefaultKeyRef = 'cryptoManager:userAsymmetricKey'
+    this.userDefaultKeyRef = 'cryptoManager:userAsymmetricKey';
   }
 
   init(runtimeURL, runtimeCapabilities, storageManager, dataObjectsStorage, registry, coreDiscovery, idm, runtimeFactory) {
@@ -34,6 +34,7 @@ class CryptoManager {
 
     _this._runtimeURL = runtimeURL;
     _this._cryptoManagerURL = _this._runtimeURL + '/cryptoManager';
+
     //_this._myURL = _this._runtimeURL + '/crypto';
     _this.storageManager = storageManager;
     _this.dataObjectsStorage = dataObjectsStorage;
@@ -94,7 +95,7 @@ class CryptoManager {
   * return user's public key
   */
 
-/*  getMyPublicKey() {
+  /*  getMyPublicKey() {
     // to be implemented
 
     return new Promise((resolve)=> {
@@ -157,7 +158,7 @@ class CryptoManager {
     _this._messageBus.addListener(_this._cryptoManagerURL, (msg) => {
       let funcName = msg.body.method;
 
-      let returnedValue;
+      //let returnedValue;
       if (funcName === 'generateRSAKeyPair') {
         _this._crypto.getMyPublicKey().then((key) => {
           let value = {type: 'execute', value: key, code: 200};
@@ -165,7 +166,7 @@ class CryptoManager {
           try {
             _this._messageBus.postMessage(replyMsg);
           } catch (err) {
-            reject('On addGUIListeners from if generateRSAKeyPair method postMessage error: ' + err);
+            log.error('On addGUIListeners from if generateRSAKeyPair method postMessage error: ' + err);
           }
         });
         return;
@@ -173,7 +174,6 @@ class CryptoManager {
 
     });
   }
-
 
 
   //******************* ENCRYPTION METHODS *******************
@@ -328,7 +328,7 @@ class CryptoManager {
         //log.log('IdentityModule - encrypt from hyperty to dataobject ', message);
 
         _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
-          sessionKeys = chatkeysToArrayCloner(sessionKeys || {} );
+          sessionKeys = chatkeysToArrayCloner(sessionKeys || {});
           let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
 
           _this.dataObjectsStorage.getDataObject(dataObjectURL).then((isHypertyReporter) => {
@@ -609,8 +609,9 @@ class CryptoManager {
     let _this = this;
     return new Promise(function(resolve, reject) {
       let to = message.to.split('/');
-      let subsIndex = to.indexOf('subscription');
-      let isDataObjectSubscription = subsIndex !== -1;
+
+      //let subsIndex = to.indexOf('subscription');
+      //let isDataObjectSubscription = subsIndex !== -1;
       to.pop();
       let dataObjectURL = to[0] + '//' + to[2] + '/' + to[3];
       _this._doMutualAuthenticationPhase2(dataObjectURL, message.body.subscriber).then(() => {
@@ -829,6 +830,7 @@ class CryptoManager {
       let hash;
       let value = {};
       let filteredMessage;
+      let privateKeyHolder;
 
       console.info('handshake phase: ', handshakeType);
 
@@ -884,9 +886,13 @@ class CryptoManager {
         case 'receiverHello': {
 
           log.log('receiverHello');
-          chatKeys.handshakeHistory.receiverHello = _this._filterMessageToHash(message);
+          _this.getMyPrivateKey().then(privateKey =>{
+            privateKeyHolder = privateKey;
 
-          _this._idm.validateAssertion(message.body.identity.assertion, undefined, message.body.identity.idp).then((value) => {
+            chatKeys.handshakeHistory.receiverHello = _this._filterMessageToHash(message);
+
+            return _this._idm.validateAssertion(message.body.identity.assertion, undefined, message.body.identity.idp.domain);
+          }).then((value) => {
 
             //TODO remove later this verification as soon as all the IdP proxy are updated in the example
             let encodedpublicKey = (typeof value.contents === 'string') ? value.contents : value.contents.nonce;
@@ -943,7 +949,6 @@ class CryptoManager {
             return _this.crypto.encryptRSA(chatKeys.hypertyTo.publicKey, chatKeys.keys.premasterKey);
 
           }).then((encryptedValue) => {
-
             value.assymetricEncryption = encode(encryptedValue);
 
             let messageStructure = {
@@ -956,12 +961,7 @@ class CryptoManager {
             };
 
             let messageToHash = _this._filterMessageToHash(messageStructure, chatKeys.keys.premasterKey, chatKeys.hypertyFrom.messageInfo);
-
-            return _this.getMyPrivateKey();
-          }).then(privateKey => {
-
-            return _this.crypto.signRSA(privateKey, encode(chatKeys.handshakeHistory) + encode(messageToHash));
-
+            return _this.crypto.signRSA(privateKeyHolder, encode(chatKeys.handshakeHistory) + encode(messageToHash));
           }).then(signature => {
 
             value.signature = encode(signature);
@@ -986,9 +986,14 @@ class CryptoManager {
         case 'senderCertificate': {
 
           log.log('senderCertificate');
+
           let receivedValue = decode(message.body.value);
 
-          _this._idm.validateAssertion(message.body.identity.assertion, undefined, message.body.identity.idp).then((value) => {
+          _this.getMyPrivateKey().then(privateKey =>{
+            privateKeyHolder = privateKey;
+
+            return _this._idm.validateAssertion(message.body.identity.assertion, undefined, message.body.identity.idp.domain);
+          }).then((value) => {
             let encryptedPMS = decodeToUint8Array(receivedValue.assymetricEncryption);
 
             //TODO remove later this verification as soon as all the IdP proxy are updated in the example
@@ -999,14 +1004,11 @@ class CryptoManager {
             chatKeys.hypertyTo.publicKey = senderPublicKey;
             chatKeys.hypertyTo.userID    = value.contents.email;
 
-            return _this.getMyPrivateKey();
-          }).then(privateKey => {
-
-            return _this.crypto.decryptRSA(privateKey, encryptedPMS);
+            return _this.crypto.decryptRSA(privateKeyHolder, encryptedPMS);
 
           }, (error) => {
             // log.log(error);
-            reject('Error during authentication of identity');
+            reject('Error during authentication of identity: ', error.message);
 
             //obtain the PremasterKey using the private key
           }).then(pms => {
@@ -1020,7 +1022,7 @@ class CryptoManager {
             return _this.crypto.verifyRSA(chatKeys.hypertyTo.publicKey, encode(chatKeys.handshakeHistory) + encode(receivedmsgToHash), signature);
 
             // validates the signature received
-          }).then(signValidationResult => {
+          }).then(signValidationResult => { 
 
             //log.log('SenderCertificate - signature validation result ', signValidationResult);
             let concatKey = _this.crypto.concatPMSwithRandoms(chatKeys.keys.premasterKey, chatKeys.keys.toRandom, chatKeys.keys.fromRandom);
@@ -1291,11 +1293,12 @@ class CryptoManager {
         hypertyFrom:
         {
           hyperty: from,
-          userID: userInfo.messageInfo.userProfile.username,
+          userID: userInfo.assertion.userProfile.userURL,
+
           //privateKey: "getMyPublicKey",
           //publicKey: "getMyPrivateKey",
-          assertion: userInfo.assertion,
-          messageInfo: userInfo.messageInfo
+          assertion: userInfo.assertion.assertion,
+          messageInfo: userInfo.assertion
         },
         hypertyTo:
         {
@@ -1336,11 +1339,11 @@ class CryptoManager {
   * @param   {userRef}    String    user reference for the key pair
   * @return  {Array}   public key
   */
-  getMyPublicKey(userRef = this.userDefaultKeyRef){
+  getMyPublicKey(userRef = this.userDefaultKeyRef) {
     let _this = this;
     return new Promise((resolve, reject) => {
       _this.storageManager.get(userRef).then(storedKeyPair => {
-        if(storedKeyPair) {
+        if (storedKeyPair) {
           return resolve(storedKeyPair.public);
         }
         _this._generateAndStoreNewAsymetricKey(userRef).then(generatedKeyPair => {
@@ -1362,15 +1365,14 @@ class CryptoManager {
   * @param   {userRef}    String    user reference for the key pair
   * @return  {Array}   private key
   **/
-  getMyPrivateKey(userRef = this.userDefaultKeyRef){
+  getMyPrivateKey(userRef = this.userDefaultKeyRef) {
     let _this = this;
     return new Promise((resolve, reject) => {
       _this.storageManager.get(userRef).then(storedKeyPair => {
-        if(storedKeyPair) {
+        if (storedKeyPair) {
           return resolve(storedKeyPair.private);
         }
         _this._generateAndStoreNewAsymetricKey(userRef).then(generatedKeyPair => {
-          let x = 'asdf';
           resolve(generatedKeyPair.private);
         }).catch(err => {
           log.error('[getMyPrivateKey:_generateAndStoreNewAsymetricKey:err]: ' + err.message);
@@ -1389,7 +1391,7 @@ class CryptoManager {
   * @param   {userRef}    String    user reference for the key pair
   * @return  {Array}   private key
   **/
-  _generateAndStoreNewAsymetricKey(userRef){
+  _generateAndStoreNewAsymetricKey(userRef) {
     let _this = this;
     let keyPair = undefined;
     return new Promise((resolve, reject) => {
