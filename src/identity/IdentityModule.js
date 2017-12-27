@@ -1245,7 +1245,7 @@ class IdentityModule {
         log.log('[Identity.IdentityModule.getValidToken] time now:', timeNow);
 
         if (timeNow >= expirationDate) {
-          if (assertion.hasOwnProperty(refresh)) {
+          if (assertion.hasOwnProperty('refresh')) {
             _this.sendRefreshMessage(assertion).then((newAssertion) => {
               _this.identities.updateAssertion(newAssertion).then(() => {
                 resolve(newAssertion);
