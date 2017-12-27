@@ -183,7 +183,7 @@ class IdentityModule {
       { domain: 'google.com', type: 'idToken' },
       { domain: 'microsoft.com', type: 'idToken' },
       { domain: 'facebook.com', type: 'idToken' },
-      { domain: 'slack.com', type: 'Legacy' }
+      { domain: 'slack.com', type: 'idToken' }
     ];
 
     return { identities: this.identities.identifiers, idps: idps };

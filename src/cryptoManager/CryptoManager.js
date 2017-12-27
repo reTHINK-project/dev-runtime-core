@@ -902,7 +902,7 @@ class CryptoManager {
             let toRandom = message.body.value;
             chatKeys.hypertyTo.assertion = message.body.identity.assertion;
             chatKeys.hypertyTo.publicKey = receiverPublicKey;
-            chatKeys.hypertyTo.userID    = value.contents.email;
+            chatKeys.hypertyTo.userID    = message.body.identity.userProfile.userURL;
             chatKeys.keys.toRandom  = decodeToUint8Array(toRandom);
             chatKeys.keys.premasterKey = premasterSecret;
 
@@ -1002,7 +1002,7 @@ class CryptoManager {
             let senderPublicKey = parseToUint8Array(encodedpublicKey);
             chatKeys.hypertyTo.assertion = message.body.identity.assertion;
             chatKeys.hypertyTo.publicKey = senderPublicKey;
-            chatKeys.hypertyTo.userID    = value.contents.email;
+            chatKeys.hypertyTo.userID    = message.body.identity.userProfile.userURL;
 
             return _this.crypto.decryptRSA(privateKeyHolder, encryptedPMS);
 
