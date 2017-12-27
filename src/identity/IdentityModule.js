@@ -61,7 +61,7 @@ class IdentityModule {
     _this._identities = new Identities('human', storageManager);
 
     // to be reviewed: watchingYou identitiesList or identities?
-//    _this.identitiesList = _this.watchingYou.watch('identitiesList', {}, true);
+    //    _this.identitiesList = _this.watchingYou.watch('identitiesList', {}, true);
     _this._crypto = cryptoManager;
 
     /*    _this.emailsList = [];
@@ -206,10 +206,10 @@ class IdentityModule {
           let guid = 'user-guid://' + JSON.stringify(key);
           _this.identities.guid = guid;
           _this._identities.loadAccessTokens().then(() => {
-          
-          resolve();
+
+            resolve();
+          });
         });
-      });
 
       });
 
@@ -634,13 +634,25 @@ class IdentityModule {
   /**
   * get a Token to be added to a message
   * @param  {String}  fromURL     origin of the message
-  * @param  {String}  toURL     target of the message
+  * @param  {String}  toURL     target of the messageok
   * @return {JSON}    token    token to be added to the message
   */
   getToken(msg) {
     let _this = this;
     let fromURL = msg.from;
     let toUrl = msg.to;
+    if ( msg.hasOwnProperty('body') && msg.body.hasOwnProperty('source')) {
+      fromURL = msg.body.source;
+    }
+
+    if (msg.type === 'forward') {
+      fromURL = msg.body.from;
+    }
+
+    if (msg.hasOwnProperty('body') && msg.body.hasOwnProperty('subscriber')) {
+      fromURL = msg.body.subscriber;
+    }
+
     return new Promise(function (resolve, reject) {
       log.log('[IdentityModule.getToken] for msg ', msg);
 
@@ -716,13 +728,13 @@ class IdentityModule {
 
     return new Promise((resolve, reject) => {
 
-      if (!msg.hasOwnProperty('body')){
+      if (!msg.hasOwnProperty('body')) {
         return reject('[IdentityModule._getAccessToken] missing mandatory msg body: ', msg);
-      } 
+      }
       if (!msg.body.hasOwnProperty('value')) {
         return reject('[IdentityModule._getAccessToken] missing mandatory msg body value: ', msg);
-      } 
-      if (!msg.body.value.hasOwnProperty('resources')){
+      }
+      if (!msg.body.value.hasOwnProperty('resources')) {
         return reject('[IdentityModule._getAccessToken] missing mandatory msg body value resources: ', msg);
       }
       let domainToCheck = divideURL(url).domain;
@@ -750,10 +762,10 @@ class IdentityModule {
         let timeNow = secondsSinceEpoch();
 
         log.log('[Identity.IdentityModule.getAccessToken] found  Access Token ', token);
-  
+
         if (timeNow >= token.expires) return resolve(_this._getNewAccessToken(domain, resources));
         else return resolve(token);
-      } 
+      }
 
     });
   }
@@ -797,8 +809,8 @@ class IdentityModule {
 
       //let's first get the authorisation URL from the Idp Proxy
       _this._messageBus.postMessage(message, (res) => {
-        if (res.body.code > 299) 
-        return reject('[IdentityModule._getNewAccessToken] Error on getAccessTokenAuthorisationEndpoint from IdP Proxy: ', res.body.desc);
+        if (res.body.code > 299)
+          return reject('[IdentityModule._getNewAccessToken] Error on getAccessTokenAuthorisationEndpoint from IdP Proxy: ', res.body.desc);
 
         // let's ask the user for authorisation 
         _this.callIdentityModuleFunc('openPopup', { urlreceived: res.body.value }).then((authorisation) => {
@@ -812,8 +824,8 @@ class IdentityModule {
 
           //wihtout callback to avoid timeout errors?
 
-        // let's ask Access Token from the Idp Proxy 
-        _this._messageBus.postMessage(message, (res) => {
+          // let's ask Access Token from the Idp Proxy 
+          _this._messageBus.postMessage(message, (res) => {
             if (res.body.code > 299) return reject('[IdentityModule._getNewAccessToken] Error on getAccessToken from IdP Proxy: ', res.body.desc);
 
             _this.identities.addAccessToken(res.body.value).then((token) => {
@@ -877,8 +889,9 @@ class IdentityModule {
       let domain = _this._resolveDomain(idpDomain);
       let message;
 
-      message = { 
-        type: 'execute', to: domain, from: _this._idmURL, body: { resource: 'identity', method: 'generateAssertion', params: { contents: contents, origin: origin, usernameHint: usernameHint } } };
+      message = {
+        type: 'execute', to: domain, from: _this._idmURL, body: { resource: 'identity', method: 'generateAssertion', params: { contents: contents, origin: origin, usernameHint: usernameHint } }
+      };
       try {
         _this._messageBus.postMessage(message, (res) => {
           let result = res.body.value;

@@ -48,7 +48,7 @@ class IdentityManager {
 
       if (!this._isToSetID(message)) return resolve(message);
 
-      let from = message.from;
+/*      let from = message.from;
       let sourceURL = undefined;
       if ( message.hasOwnProperty('body') && message.body.hasOwnProperty('source')) {
         from = message.body.source;
@@ -60,7 +60,7 @@ class IdentityManager {
 
       if (message.hasOwnProperty('body') && message.body.hasOwnProperty('subscriber')) {
         from = message.body.subscriber;
-      }
+      }*/
 
       this._idm.getToken(message).then((identity) => {
 
