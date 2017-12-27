@@ -30,8 +30,6 @@ describe('RuntimeUA', function() {
 
   let runtime = new RuntimeUA(descriptors.Runtimes.Runtime, runtimeFactory, domain);
 
-  console.log(runtime);
-
   before(function() {
 
     runtime.graphConnector = function() {};
@@ -64,12 +62,10 @@ describe('RuntimeUA', function() {
         });
 
         sinon.stub(runtime.descriptorInstance, 'getHypertyDescriptor').callsFake(function(hypertyURL) {
-          console.log('AQWASDAS', hypertyURL);
           return getDescriptor(hypertyURL);
         });
 
         sinon.stub(runtime.descriptorInstance, 'getStubDescriptor').callsFake(function(stubURL) {
-          console.log('AQWASDAS', stubURL);
           return getDescriptor(stubURL);
         });
 

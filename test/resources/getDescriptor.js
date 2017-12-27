@@ -2,7 +2,7 @@ import { descriptors } from './descriptors.js';
 
 import { divideURL } from '../../src/utils/utils';
 
-export const getDescriptor = function (url) {
+export const getDescriptor = function(url) {
 
   return new Promise(function(resolve, reject) {
 
@@ -65,10 +65,6 @@ export const getDescriptor = function (url) {
       }
 
     }
-
-    console.log('RESULT:', result);
-
     resolve(result);
-
   });
 };
