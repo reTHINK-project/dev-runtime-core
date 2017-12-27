@@ -6,6 +6,7 @@ module.exports = function(config) {
       './test/*.spec.js'
     ],
     exclude: [
+      './test/HypertyResourceStorage.spec.js',
       './test/GraphConnector.spec.js',
       './test/PolicyEngine.spec.js'
 
