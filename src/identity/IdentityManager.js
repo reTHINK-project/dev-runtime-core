@@ -42,15 +42,16 @@ class IdentityManager {
   processMessage(message) {
     log.log('[IdentityManager.processMessage] ', message);
 
-    return new Promise((resolve,reject) => {
+    return new Promise((resolve, reject) => {
 
       // skip messages that don't need identity tokens in the body
 
       if (!this._isToSetID(message)) return resolve(message);
 
       let from = message.from;
-      let sourceURL = undefined;
-      if ( message.hasOwnProperty('body') && message.body.hasOwnProperty('source')) {
+
+      //let sourceURL = undefined;
+      if (message.hasOwnProperty('body') && message.body.hasOwnProperty('source')) {
         from = message.body.source;
       }
 

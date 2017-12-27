@@ -1,9 +1,11 @@
 // Log System
 import * as logger from 'loglevel';
 let log = logger.getLogger('CryptoManager');
+import HandShakeProtocol from './HandShakeProtocol';
 
 import {divideURL, isDataObjectURL, isLegacy, chatkeysToStringCloner, chatkeysToArrayCloner, parseMessageURL,
-  parse, stringify, encode, decode, decodeToUint8Array, parseToUint8Array} from '../utils/utils.js';
+  parse, stringify, encode, decode, decodeToUint8Array, filterMessageToHash} from '../utils/utils.js';
+
 import Crypto from './Crypto';
 
 /**
@@ -44,6 +46,7 @@ class CryptoManager {
     _this._domain = divideURL(_this._runtimeURL).domain;
 
     _this.crypto = new Crypto(_this._runtimeFactory);
+    _this.handShakeProtocol = new HandShakeProtocol(_this.crypto);
 
     // hashTable to store all the crypto information between two hyperties
     _this.chatKeys = {};
@@ -292,7 +295,7 @@ class CryptoManager {
             let iv = _this.crypto.generateIV();
             _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, stringify(message.body.value), iv).then(encryptedValue => {
 
-              let filteredMessage = _this._filterMessageToHash(message, stringify(message.body.value) +
+              let filteredMessage = filterMessageToHash(message, stringify(message.body.value) +
                                                                         stringify(iv), chatKeys.hypertyFrom.messageInfo);
 
               _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, filteredMessage).then(hash => {
@@ -361,7 +364,7 @@ class CryptoManager {
                 _this.crypto.encryptAES(dataObjectKey.sessionKey, stringifiedMessageBody, iv).then(encryptedValue => {
                   delete message.body.identity.assertion; //TODO: Check why assertion is comming on the message!
                   delete message.body.identity.expires; //TODO: Check why expires is comming on the message!
-                  let filteredMessage = _this._filterMessageToHash(message, stringifiedMessageBody + stringifiedIV);
+                  let filteredMessage = filterMessageToHash(message, stringifiedMessageBody + stringifiedIV);
 
                   _this.crypto.hashHMAC(dataObjectKey.sessionKey, filteredMessage).then(hash => {
                     // log.log('hash ', hash);
@@ -472,12 +475,15 @@ class CryptoManager {
                 // log.log('decrypted value ', decryptedData);
                 message.body.value = decryptedData;
 
-                let filteredMessage = _this._filterMessageToHash(message, decryptedData + iv);
+                let filteredMessage = filterMessageToHash(message, decryptedData + iv);
 
                 _this.crypto.verifyHMAC(chatKeys.keys.hypertyToHashKey, filteredMessage, hash).then(result => {
-                  //log.log('result of hash verification! ', result);
+                  log.log('Result of hash verification in decryptMessage: ', result);
                   message.body.assertedIdentity = true;
                   resolve(message);
+                }).chatch(err => {
+                  console.log('decryptMessage HMAC failed:', err);
+                  throw err;
                 });
               });
 
@@ -526,7 +532,7 @@ class CryptoManager {
                   // log.log('decrypted Value,', parsedValue);
                   message.body.value = parsedValue;
 
-                  let filteredMessage = _this._filterMessageToHash(message, stringify(parsedValue) + stringify(iv));
+                  let filteredMessage = filterMessageToHash(message, stringify(parsedValue) + stringify(iv));
 
                   _this.crypto.verifyHMAC(dataObjectKey.sessionKey, filteredMessage, hash).then(result => {
                     log.log('Received message HMAC result', result);
@@ -790,7 +796,7 @@ class CryptoManager {
           }
         };
 
-        let filteredMessage = _this._filterMessageToHash(reporterSessionKeyMsg, valueToEncrypt + iv, chatKeys.hypertyFrom.messageInfo);
+        let filteredMessage = filterMessageToHash(reporterSessionKeyMsg, valueToEncrypt + iv, chatKeys.hypertyFrom.messageInfo);
 
         return _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, filteredMessage);
       }).then(hashedMessage => {
@@ -817,6 +823,7 @@ class CryptoManager {
     }
   }
 
+
   _doHandShakePhase(message, chatKeys) {
   // log('_doHandShakePhase:dataObject', message);
   //	log('_doHandShakePhase:chatKeys', chatKeys);
@@ -826,420 +833,43 @@ class CryptoManager {
     return new Promise(function(resolve, reject) {
 
       let handshakeType = message.body.handshakePhase;
-      let iv;
-      let hash;
-      let value = {};
-      let filteredMessage;
-      let privateKeyHolder;
-
       console.info('handshake phase: ', handshakeType);
 
       switch (handshakeType) {
 
-        case 'startHandShake': {
-          chatKeys.keys.fromRandom = _this.crypto.generateRandom();
-          let startHandShakeMsg = {
-            type: 'handshake',
-            to: message.to,
-            from: message.from,
-            body: {
-              handshakePhase: 'senderHello',
-              value: encode(chatKeys.keys.fromRandom)
-            }
-          };
-          chatKeys.handshakeHistory.senderHello = _this._filterMessageToHash(startHandShakeMsg, undefined, chatKeys.hypertyFrom.messageInfo);
-
-          // check if was the encrypt function or the mutual authentication that request the
-          // start of the handShakePhase.
-
-          if (chatKeys.initialMessage) {
-            resolve({message: startHandShakeMsg, chatKeys: chatKeys});
-          } else {
-            _this.chatKeys[message.from + '<->' + message.to] = chatKeys;
-            _this._messageBus.postMessage(startHandShakeMsg);
-          }
-
+        case 'startHandShake':
+          _this.handShakeProtocol.startHandShake(message, chatKeys).then(result => { resolve(result); });
           break;
 
-        }
-        case 'senderHello': {
-
-          log.log('senderHello');
-          chatKeys.handshakeHistory.senderHello = _this._filterMessageToHash(message);
-          chatKeys.keys.fromRandom = decodeToUint8Array(message.body.value);
-          chatKeys.keys.toRandom = _this.crypto.generateRandom();
-
-          let senderHelloMsg = {
-            type: 'handshake',
-            to: message.from,
-            from: message.to,
-            body: {
-              handshakePhase: 'receiverHello',
-              value: encode(chatKeys.keys.toRandom)
-            }
-          };
-          chatKeys.handshakeHistory.receiverHello = _this._filterMessageToHash(senderHelloMsg, undefined, chatKeys.hypertyFrom.messageInfo);
-          resolve({message: senderHelloMsg, chatKeys: chatKeys});
-
+        case 'senderHello':
+          _this.handShakeProtocol.senderHello(message, chatKeys).then(result => { resolve(result); });
           break;
-        }
-        case 'receiverHello': {
 
-          log.log('receiverHello');
-          _this.getMyPrivateKey().then(privateKey =>{
-            privateKeyHolder = privateKey;
-
-            chatKeys.handshakeHistory.receiverHello = _this._filterMessageToHash(message);
-
-            return _this._idm.validateAssertion(message.body.identity.assertion, undefined, message.body.identity.idp.domain);
-          }).then((value) => {
-
-            //TODO remove later this verification as soon as all the IdP proxy are updated in the example
-            let encodedpublicKey = (typeof value.contents === 'string') ? value.contents : value.contents.nonce;
-
-            let receiverPublicKey = parseToUint8Array(encodedpublicKey);
-            let premasterSecret = _this.crypto.generatePMS();
-            let toRandom = message.body.value;
-            chatKeys.hypertyTo.assertion = message.body.identity.assertion;
-            chatKeys.hypertyTo.publicKey = receiverPublicKey;
-            chatKeys.hypertyTo.userID    = value.contents.email;
-            chatKeys.keys.toRandom  = decodeToUint8Array(toRandom);
-            chatKeys.keys.premasterKey = premasterSecret;
-
-            let concatKey = _this.crypto.concatPMSwithRandoms(premasterSecret, chatKeys.keys.toRandom, chatKeys.keys.fromRandom);
-
-            return _this.crypto.generateMasterSecret(concatKey, 'messageHistoric' + chatKeys.keys.toRandom + chatKeys.keys.fromRandom);
-
-            //generate the master key
-          }).then((masterKey) => {
-            chatKeys.keys.masterKey = masterKey;
-
-            return _this.crypto.generateKeys(masterKey, 'key expansion' + chatKeys.keys.toRandom + chatKeys.keys.fromRandom);
-
-            //generate the symmetric and hash keys
-          }).then((keys) => {
-
-            chatKeys.keys.hypertyToSessionKey = new Uint8Array(keys[0]);
-            chatKeys.keys.hypertyFromSessionKey = new Uint8Array(keys[1]);
-            chatKeys.keys.hypertyToHashKey = new Uint8Array(keys[2]);
-            chatKeys.keys.hypertyFromHashKey = new Uint8Array(keys[3]);
-            iv = _this.crypto.generateIV();
-            value.iv = encode(iv);
-
-            let messageStructure = {
-              type: 'handshake',
-              to: message.from,
-              from: message.to,
-              body: {
-                handshakePhase: 'senderCertificate'
-              }
-            };
-
-            // hash the value and the iv
-            filteredMessage = _this._filterMessageToHash(messageStructure, 'ok' + iv, chatKeys.hypertyFrom.messageInfo);
-            return _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, filteredMessage);
-          }).then((hash) => {
-            value.hash = encode(hash);
-
-            //encrypt the data
-            return _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, 'ok', iv);
-          }).then((encryptedData) => {
-            value.symetricEncryption = encode(encryptedData);
-
-            return _this.crypto.encryptRSA(chatKeys.hypertyTo.publicKey, chatKeys.keys.premasterKey);
-
-          }).then((encryptedValue) => {
-            value.assymetricEncryption = encode(encryptedValue);
-
-            let messageStructure = {
-              type: 'handshake',
-              to: message.from,
-              from: message.to,
-              body: {
-                handshakePhase: 'senderCertificate'
-              }
-            };
-
-            let messageToHash = _this._filterMessageToHash(messageStructure, chatKeys.keys.premasterKey, chatKeys.hypertyFrom.messageInfo);
-            return _this.crypto.signRSA(privateKeyHolder, encode(chatKeys.handshakeHistory) + encode(messageToHash));
-          }).then(signature => {
-
-            value.signature = encode(signature);
-
-            let receiverHelloMsg = {
-              type: 'handshake',
-              to: message.from,
-              from: message.to,
-              body: {
-                handshakePhase: 'senderCertificate',
-                value: encode(value)
-              }
-            };
-            chatKeys.handshakeHistory.senderCertificate = _this._filterMessageToHash(receiverHelloMsg, 'ok' + iv, chatKeys.hypertyFrom.messageInfo);
-
-            resolve({message: receiverHelloMsg, chatKeys: chatKeys});
-
-          }, error => reject(error));
-
+        case 'receiverHello':
+          _this.handShakeProtocol.receiverHello(message, chatKeys).then(result => { resolve(result); })
+            .catch(err => { reject(err); });
           break;
-        }
-        case 'senderCertificate': {
 
-          log.log('senderCertificate');
-
-          let receivedValue = decode(message.body.value);
-
-          _this.getMyPrivateKey().then(privateKey =>{
-            privateKeyHolder = privateKey;
-
-            return _this._idm.validateAssertion(message.body.identity.assertion, undefined, message.body.identity.idp.domain);
-          }).then((value) => {
-            let encryptedPMS = decodeToUint8Array(receivedValue.assymetricEncryption);
-
-            //TODO remove later this verification as soon as all the IdP proxy are updated in the example
-            let encodedpublicKey = (typeof value.contents === 'string') ? value.contents : value.contents.nonce;
-
-            let senderPublicKey = parseToUint8Array(encodedpublicKey);
-            chatKeys.hypertyTo.assertion = message.body.identity.assertion;
-            chatKeys.hypertyTo.publicKey = senderPublicKey;
-            chatKeys.hypertyTo.userID    = value.contents.email;
-
-            return _this.crypto.decryptRSA(privateKeyHolder, encryptedPMS);
-
-          }, (error) => {
-            // log.log(error);
-            reject('Error during authentication of identity: ', error.message);
-
-            //obtain the PremasterKey using the private key
-          }).then(pms => {
-
-            chatKeys.keys.premasterKey = new Uint8Array(pms);
-
-            let signature = decodeToUint8Array(receivedValue.signature);
-
-            let receivedmsgToHash = _this._filterMessageToHash(message, chatKeys.keys.premasterKey);
-
-            return _this.crypto.verifyRSA(chatKeys.hypertyTo.publicKey, encode(chatKeys.handshakeHistory) + encode(receivedmsgToHash), signature);
-
-            // validates the signature received
-          }).then(signValidationResult => {
-
-            //log.log('SenderCertificate - signature validation result ', signValidationResult);
-            let concatKey = _this.crypto.concatPMSwithRandoms(chatKeys.keys.premasterKey, chatKeys.keys.toRandom, chatKeys.keys.fromRandom);
-
-            return _this.crypto.generateMasterSecret(concatKey, 'messageHistoric' + chatKeys.keys.toRandom + chatKeys.keys.fromRandom);
-
-            // generates the master keys from the Premaster key and the randoms
-          }).then(masterKey => {
-            chatKeys.keys.masterKey = masterKey;
-
-            return _this.crypto.generateKeys(masterKey, 'key expansion' + chatKeys.keys.toRandom + chatKeys.keys.fromRandom);
-
-            // generates the symmetric keys to be used in the symmetric encryption
-          }).then(keys => {
-            chatKeys.keys.hypertyFromSessionKey = new Uint8Array(keys[0]);
-            chatKeys.keys.hypertyToSessionKey = new Uint8Array(keys[1]);
-            chatKeys.keys.hypertyFromHashKey = new Uint8Array(keys[2]);
-            chatKeys.keys.hypertyToHashKey = new Uint8Array(keys[3]);
-            iv = decodeToUint8Array(receivedValue.iv);
-            let data = decodeToUint8Array(receivedValue.symetricEncryption);
-
-            return _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, data, iv);
-
-          }).then(decryptedData => {
-            // log.log('decryptedData', decryptedData);
-
-            chatKeys.handshakeHistory.senderCertificate = _this._filterMessageToHash(message, decryptedData + iv);
-
-            let hashReceived = decodeToUint8Array(receivedValue.hash);
-
-            filteredMessage = _this._filterMessageToHash(message, decryptedData + iv);
-
-            return _this.crypto.verifyHMAC(chatKeys.keys.hypertyToHashKey, filteredMessage, hashReceived);
-
-          }).then(verifiedHash  => {
-
-            // log.log('result of hash verification ', verifiedHash);
-            let receiverFinishedMessage = {
-              type: 'handshake',
-              to: message.from,
-              from: message.to,
-              body: {
-                handshakePhase: 'receiverFinishedMessage'
-              }
-            };
-            iv = _this.crypto.generateIV();
-            value.iv = encode(iv);
-
-            filteredMessage = _this._filterMessageToHash(receiverFinishedMessage, 'ok!' + iv, chatKeys.hypertyFrom.messageInfo);
-
-            //log.log('TIAGO: doHandShakePhase verifiedHash');
-            return _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, filteredMessage);
-          }).then(hash => {
-
-            value.hash = encode(hash);
-            return _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, 'ok!', iv);
-
-          }).then(encryptedValue => {
-            value.value = encode(encryptedValue);
-            let receiverFinishedMessage = {
-              type: 'handshake',
-              to: message.from,
-              from: message.to,
-              body: {
-                handshakePhase: 'receiverFinishedMessage',
-                value: encode(value)
-              }
-            };
-
-            chatKeys.handshakeHistory.receiverFinishedMessage = _this._filterMessageToHash(receiverFinishedMessage, 'ok!' + iv, chatKeys.hypertyFrom.messageInfo);
-            chatKeys.authenticated = true;
-            resolve({message: receiverFinishedMessage, chatKeys: chatKeys});
-          }).catch(err => {
-            reject('On _doHandShakePhase from senderCertificate error: ' + err);
-          });
-
+        case 'senderCertificate':
+          _this.handShakeProtocol.senderCertificate(message, chatKeys).then(result => { resolve(result); })
+            .catch(err => { reject(err); });
           break;
-        }
+
         case 'receiverFinishedMessage': {
-
-          chatKeys.authenticated = true;
-
-          value = decode(message.body.value);
-
-          iv = decodeToUint8Array(value.iv);
-          let data = decodeToUint8Array(value.value);
-          hash = decodeToUint8Array(value.hash);
-
-          _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, data, iv).then(decryptedData => {
-            // log.log('decryptedData', decryptedData);
-            chatKeys.handshakeHistory.receiverFinishedMessage = _this._filterMessageToHash(message, decryptedData + iv);
-
-            let filteredMessage = _this._filterMessageToHash(message, decryptedData + iv);
-            _this.crypto.verifyHMAC(chatKeys.keys.hypertyToHashKey, filteredMessage, hash).then(result => {
-
-              // check if there was an initial message that was blocked and send it
-              if (chatKeys.initialMessage) {
-
-                let initialMessage = {
-                  type: 'create',
-                  to: message.from,
-                  from: message.to,
-                  body: {
-                    value: chatKeys.initialMessage.body.value
-                  }
-                };
-
-                resolve({message: initialMessage, chatKeys: chatKeys});
-
-                //sends the sessionKey to the subscriber hyperty
-              } else {
-                _this._sendReporterSessionKey(message, chatKeys).then(value => {
-
-                  resolve(value);
-                }).catch(err => {
-                  reject('On _doHandShakePhase from receiverFinishedMessage error: ' + err);
-                });
-              }
-            });
-          });
-
+          _this.handShakeProtocol.receiverFinishedMessage(message, chatKeys).then(result => { resolve(result); })
+            .catch(err => { reject(err); });
           break;
         }
 
         case 'reporterSessionKey': {
-
-          log.log('reporterSessionKey');
-
-          let valueIVandHash = decode(message.body.value);
-          hash = decodeToUint8Array(valueIVandHash.hash);
-          iv = decodeToUint8Array(valueIVandHash.iv);
-          let encryptedValue = decodeToUint8Array(valueIVandHash.value);
-          let parsedValue;
-          let sessionKey;
-          let dataObjectURL;
-          let receiverAcknowledgeMsg;
-
-          //log.log('[IdentityModule reporterSessionKey] - decryptAES: ', chatKeys.keys.hypertyToSessionKey, encryptedValue, iv);
-
-          _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, encryptedValue, iv).then(decryptedValue => {
-
-            parsedValue = decode(decryptedValue);
-            sessionKey = decodeToUint8Array(parsedValue.value);
-            dataObjectURL = parsedValue.dataObjectURL;
-
-            let messageToHash = _this._filterMessageToHash(message, decryptedValue + iv);
-
-            return _this.crypto.verifyHMAC(chatKeys.keys.hypertyToHashKey, messageToHash, hash);
-
-          }).then(hashResult => {
-
-
-            // log.log('hash successfully validated ', hashResult);
-
-            _this.dataObjectSessionKeys[dataObjectURL] =  {sessionKey: sessionKey, isToEncrypt: true};
-            let dataObjectSessionKeysClone = chatkeysToStringCloner(_this.dataObjectSessionKeys);
-            _this.storageManager.set('dataObjectSessionKeys', 0, dataObjectSessionKeysClone).catch(err => {
-              reject('On _sendReporterSessionKey from method reporterSessionKey error: ' + err);
-            });
-
-            iv = _this.crypto.generateIV();
-            value.iv = encode(iv);
-
-            return _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, 'ok!!', iv);
-          }).then(encryptedValue => {
-
-            receiverAcknowledgeMsg = {
-              type: 'handshake',
-              to: message.from,
-              from: message.to,
-              body: {
-                handshakePhase: 'receiverAcknowledge'
-              }
-            };
-
-            value.value = encode(encryptedValue);
-            let messageToHash = _this._filterMessageToHash(receiverAcknowledgeMsg, 'ok!!' + iv, chatKeys.hypertyFrom.messageInfo);
-
-            return _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, messageToHash);
-          }).then(hashedMessage => {
-            let finalValue = encode({value: value.value, hash: encode(hashedMessage), iv: value.iv});
-
-            receiverAcknowledgeMsg.body.value = finalValue;
-            resolve({message: receiverAcknowledgeMsg, chatKeys: chatKeys});
-          }).catch(err => {
-            reject('On _doHandShakePhase from reporterSessionKey error: ' + err);
-          });
-
+          _this.handShakeProtocol.reporterSessionKey(message, chatKeys).then(result => { resolve(result); })
+            .catch(err => { reject(err); });
           break;
         }
 
         case 'receiverAcknowledge': {
-
-          log.log('receiverAcknowledge');
-
-          let receivedvalueIVandHash = decode(message.body.value);
-          let receivedHash = decodeToUint8Array(receivedvalueIVandHash.hash);
-          iv = decodeToUint8Array(receivedvalueIVandHash.iv);
-          let receivedEncryptedValue = decodeToUint8Array(receivedvalueIVandHash.value);
-
-          _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, receivedEncryptedValue, iv).then(decryptedValue => {
-
-            let filteredMessage = _this._filterMessageToHash(message, decryptedValue + iv);
-            return _this.crypto.verifyHMAC(chatKeys.keys.hypertyToHashKey, filteredMessage, receivedHash);
-          }).then(hashResult => {
-            // log.log('hashResult ', hashResult);
-
-            let callback = chatKeys.callback;
-
-            if (callback) {
-              callback('handShakeEnd');
-            }
-            resolve('handShakeEnd');
-          }).catch(err => {
-            reject('On _doHandShakePhase from receiverAcknowledge error: ' + err);
-          });
-
+          _this.handShakeProtocol.receiverAcknowledge(message, chatKeys).then(result => { resolve(result); })
+            .catch(err => { reject(err); });
           break;
         }
 
@@ -1249,26 +879,6 @@ class CryptoManager {
     });
   }
 
-  /**
-  * filter the messages to hash, by removing some fields not generated by the runtime core
-  * @param {Message}  message                     message
-  * @param {String}  decryptedValue (Optional)    value from body.value in case it originally comes encrypted
-  * @param {JSON}  identity(Optional)    add the hyperty identity associated in case is not added to the initial message
-  * @return {Message}  new message filtered
-  */
-  _filterMessageToHash(message, decryptedValue, identity) {
-
-    return {
-      type: message.type,
-      from: message.from,
-      to: message.to,
-      body: {
-        identity: identity || message.body.identity,
-        value: decryptedValue || message.body.value,
-        handshakePhase: message.body.handshakePhase
-      }
-    };
-  }
 
   /**
   * generates the initial structure for the keys between two users
@@ -1415,5 +1025,6 @@ class CryptoManager {
 const nodeJSKeyPairPopulate = { public: [48, 130, 1, 34, 48, 13, 6, 9, 42, 134, 72, 134, 247, 13, 1, 1, 1, 5, 0, 3, 130, 1, 15, 0, 48, 130, 1, 10, 2, 130, 1, 1, 0, 228, 43, 101, 12, 121, 7, 157, 71, 81, 58, 219, 32, 10, 108, 193, 179, 212, 116, 255, 59, 217, 32, 161, 201, 53, 171, 226, 199, 137, 202, 171, 60, 82, 53, 125, 62, 177, 126, 165, 24, 141, 30, 15, 226, 59, 107, 34, 7, 13, 149, 112, 125, 10, 230, 191, 156, 164, 177, 10, 185, 13, 66, 3, 217, 166, 244, 90, 119, 111, 27, 145, 104, 71, 189, 166, 226, 255, 133, 83, 151, 231, 101, 151, 89, 22, 19, 65, 154, 10, 53, 208, 218, 252, 219, 37, 50, 212, 86, 145, 107, 132, 90, 233, 202, 227, 108, 114, 141, 29, 73, 187, 31, 13, 234, 0, 232, 24, 191, 35, 149, 179, 138, 214, 159, 245, 162, 148, 221, 118, 17, 105, 89, 151, 146, 209, 55, 236, 61, 143, 233, 228, 10, 115, 8, 81, 197, 45, 123, 187, 223, 176, 254, 165, 69, 143, 29, 100, 114, 17, 130, 226, 223, 33, 11, 240, 81, 61, 172, 191, 157, 246, 202, 87, 131, 221, 88, 48, 127, 159, 119, 160, 152, 117, 61, 253, 174, 65, 214, 203, 218, 63, 50, 78, 160, 181, 221, 211, 128, 70, 178, 191, 170, 0, 13, 122, 173, 12, 203, 252, 4, 184, 225, 252, 7, 62, 96, 116, 15, 216, 158, 55, 85, 48, 16, 9, 206, 119, 74, 112, 243, 136, 84, 184, 223, 254, 101, 91, 61, 10, 91, 85, 192, 147, 144, 57, 29, 66, 238, 199, 244, 193, 194, 150, 232, 200, 107, 2, 3, 1, 0, 1],
   private: [48, 130, 4, 191, 2, 1, 0, 48, 13, 6, 9, 42, 134, 72, 134, 247, 13, 1, 1, 1, 5, 0, 4, 130, 4, 169, 48, 130, 4, 165, 2, 1, 0, 2, 130, 1, 1, 0, 228, 43, 101, 12, 121, 7, 157, 71, 81, 58, 219, 32, 10, 108, 193, 179, 212, 116, 255, 59, 217, 32, 161, 201, 53, 171, 226, 199, 137, 202, 171, 60, 82, 53, 125, 62, 177, 126, 165, 24, 141, 30, 15, 226, 59, 107, 34, 7, 13, 149, 112, 125, 10, 230, 191, 156, 164, 177, 10, 185, 13, 66, 3, 217, 166, 244, 90, 119, 111, 27, 145, 104, 71, 189, 166, 226, 255, 133, 83, 151, 231, 101, 151, 89, 22, 19, 65, 154, 10, 53, 208, 218, 252, 219, 37, 50, 212, 86, 145, 107, 132, 90, 233, 202, 227, 108, 114, 141, 29, 73, 187, 31, 13, 234, 0, 232, 24, 191, 35, 149, 179, 138, 214, 159, 245, 162, 148, 221, 118, 17, 105, 89, 151, 146, 209, 55, 236, 61, 143, 233, 228, 10, 115, 8, 81, 197, 45, 123, 187, 223, 176, 254, 165, 69, 143, 29, 100, 114, 17, 130, 226, 223, 33, 11, 240, 81, 61, 172, 191, 157, 246, 202, 87, 131, 221, 88, 48, 127, 159, 119, 160, 152, 117, 61, 253, 174, 65, 214, 203, 218, 63, 50, 78, 160, 181, 221, 211, 128, 70, 178, 191, 170, 0, 13, 122, 173, 12, 203, 252, 4, 184, 225, 252, 7, 62, 96, 116, 15, 216, 158, 55, 85, 48, 16, 9, 206, 119, 74, 112, 243, 136, 84, 184, 223, 254, 101, 91, 61, 10, 91, 85, 192, 147, 144, 57, 29, 66, 238, 199, 244, 193, 194, 150, 232, 200, 107, 2, 3, 1, 0, 1, 2, 130, 1, 0, 103, 244, 137, 118, 116, 82, 14, 203, 102, 107, 253, 88, 12, 199, 222, 60, 243, 136, 86, 157, 74, 224, 190, 53, 113, 57, 157, 250, 49, 130, 96, 31, 252, 136, 152, 70, 143, 17, 215, 96, 103, 51, 18, 35, 141, 212, 210, 205, 9, 216, 83, 70, 245, 71, 138, 119, 112, 229, 164, 176, 9, 37, 81, 161, 193, 154, 68, 249, 115, 106, 201, 6, 12, 225, 144, 126, 141, 210, 141, 242, 128, 159, 221, 163, 222, 21, 233, 230, 167, 206, 59, 24, 250, 233, 81, 122, 102, 26, 6, 233, 72, 133, 47, 77, 155, 238, 86, 6, 139, 24, 131, 163, 179, 112, 48, 247, 142, 6, 207, 204, 173, 223, 140, 199, 150, 95, 123, 152, 202, 155, 131, 238, 62, 96, 133, 4, 217, 51, 121, 30, 38, 178, 189, 216, 44, 35, 241, 93, 7, 62, 90, 111, 216, 66, 209, 243, 128, 234, 141, 84, 135, 181, 13, 38, 220, 114, 245, 240, 178, 95, 220, 206, 11, 186, 234, 213, 66, 121, 83, 68, 89, 75, 46, 183, 145, 183, 147, 160, 215, 118, 198, 125, 181, 146, 30, 251, 58, 87, 47, 209, 237, 97, 24, 47, 179, 6, 110, 242, 99, 150, 226, 148, 198, 174, 146, 101, 213, 87, 178, 10, 223, 105, 18, 56, 53, 22, 212, 158, 170, 176, 51, 86, 145, 125, 124, 44, 9, 85, 19, 144, 246, 170, 78, 124, 30, 32, 12, 166, 174, 139, 77, 63, 173, 82, 10, 153, 2, 129, 129, 0, 248, 18, 143, 246, 137, 136, 145, 219, 178, 39, 27, 94, 64, 90, 47, 163, 114, 60, 63, 187, 131, 143, 244, 16, 42, 128, 231, 117, 92, 98, 219, 155, 62, 107, 252, 17, 245, 45, 160, 225, 103, 142, 72, 36, 193, 150, 235, 214, 175, 62, 212, 56, 45, 9, 0, 60, 114, 107, 134, 228, 204, 131, 131, 214, 94, 201, 148, 159, 99, 139, 181, 13, 119, 38, 30, 107, 166, 165, 203, 43, 34, 20, 207, 171, 32, 58, 167, 62, 196, 153, 103, 204, 213, 247, 48, 111, 227, 59, 95, 97, 194, 187, 53, 10, 247, 108, 58, 86, 28, 29, 113, 8, 110, 171, 220, 245, 11, 82, 233, 223, 91, 68, 166, 117, 174, 187, 62, 77, 2, 129, 129, 0, 235, 118, 2, 105, 239, 212, 30, 104, 157, 41, 109, 11, 248, 152, 22, 236, 97, 40, 153, 131, 228, 5, 86, 187, 113, 126, 144, 76, 141, 79, 110, 250, 146, 152, 49, 58, 156, 201, 176, 92, 189, 209, 30, 112, 108, 175, 204, 204, 247, 164, 46, 129, 239, 98, 127, 49, 145, 218, 63, 193, 124, 174, 18, 98, 201, 99, 154, 162, 138, 78, 159, 253, 3, 248, 3, 209, 36, 239, 193, 155, 193, 5, 19, 236, 37, 78, 118, 135, 250, 199, 7, 141, 248, 120, 36, 136, 93, 98, 174, 60, 18, 215, 93, 174, 107, 141, 116, 145, 167, 221, 210, 169, 247, 67, 254, 222, 161, 134, 63, 221, 90, 87, 42, 99, 227, 81, 173, 151, 2, 129, 129, 0, 133, 23, 168, 103, 83, 232, 146, 160, 181, 23, 40, 38, 204, 13, 214, 203, 49, 41, 195, 227, 189, 181, 8, 243, 119, 106, 75, 67, 250, 250, 10, 234, 98, 118, 26, 250, 35, 121, 132, 124, 10, 76, 26, 198, 165, 154, 108, 19, 117, 88, 23, 17, 192, 143, 184, 177, 181, 141, 157, 4, 185, 248, 193, 77, 204, 243, 7, 170, 240, 4, 111, 113, 183, 0, 27, 136, 20, 19, 149, 74, 33, 241, 218, 108, 236, 80, 171, 148, 16, 116, 97, 109, 83, 74, 88, 145, 94, 239, 102, 192, 19, 114, 207, 5, 128, 51, 111, 164, 237, 86, 154, 99, 52, 197, 62, 57, 182, 6, 152, 245, 61, 137, 58, 105, 159, 2, 84, 109, 2, 129, 129, 0, 226, 67, 111, 132, 95, 91, 101, 177, 63, 189, 44, 53, 193, 184, 92, 230, 223, 98, 133, 74, 209, 86, 52, 7, 65, 195, 206, 100, 81, 178, 144, 65, 167, 151, 42, 79, 89, 149, 18, 173, 188, 21, 244, 251, 49, 230, 41, 150, 153, 46, 35, 38, 231, 99, 174, 56, 115, 32, 215, 253, 85, 147, 108, 197, 147, 34, 236, 216, 222, 177, 57, 90, 136, 114, 207, 48, 46, 31, 90, 220, 18, 58, 143, 239, 111, 214, 27, 95, 6, 36, 53, 229, 62, 108, 45, 39, 1, 30, 47, 178, 56, 164, 206, 56, 42, 208, 46, 193, 61, 31, 147, 45, 147, 23, 187, 22, 50, 255, 111, 229, 132, 199, 152, 75, 142, 136, 209, 151, 2, 129, 129, 0, 165, 56, 232, 76, 55, 57, 240, 159, 92, 207, 220, 143, 130, 30, 57, 234, 251, 172, 171, 180, 54, 159, 229, 96, 246, 73, 112, 146, 75, 157, 242, 201, 161, 218, 37, 176, 35, 170, 50, 90, 148, 102, 191, 199, 239, 174, 78, 72, 67, 85, 199, 45, 149, 145, 132, 161, 212, 33, 157, 75, 216, 79, 39, 233, 18, 210, 255, 26, 72, 229, 239, 44, 12, 147, 158, 176, 192, 95, 126, 32, 175, 23, 226, 131, 139, 197, 175, 193, 62, 8, 151, 252, 68, 154, 94, 89, 189, 125, 90, 30, 36, 175, 73, 230, 194, 13, 233, 247, 123, 60, 241, 47, 171, 51, 189, 112, 111, 213, 141, 89, 70, 249, 236, 63, 236, 110, 115, 208]};
 */
+
 
 export default new CryptoManager();

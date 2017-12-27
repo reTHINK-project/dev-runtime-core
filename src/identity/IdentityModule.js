@@ -285,7 +285,7 @@ class IdentityModule {
             log.log('[IdentityModule] Identity selected by hyperty.');
             return resolve(assertion);
           }, (err) => { // if it got an error then just select identity from GUI
-            // log.error('[IdentityModule] Could not select identity from hyperty.');
+            log.error('[IdentityModule] Could not select identity from hyperty:', err);
             _this.selectIdentityFromGUI().then((newAssertion) => {
               log.log('[IdentityModule] Identity selected by hyperty.');
               return resolve(newAssertion);
