@@ -261,8 +261,8 @@ class IdentityModule {
           });
         } else {
 
-          if (_this.identities.defaultIdentity && _this.identities.defaultIdentity.assertion.expires > secondsSinceEpoch()) {
-            return resolve(_this.identities.defaultIdentity.assertion);
+          if (_this.identities.defaultIdentity && _this.identities.defaultIdentity.expires > secondsSinceEpoch()) {
+            return resolve(_this.identities.defaultIdentity);
           } else {
             _this.selectIdentityFromGUI().then((assertion) => {
 
@@ -336,26 +336,22 @@ class IdentityModule {
   }
 
   /**
-  * Function to remove an identity from the Identities array
+  * Function to remove an identity 
   * @param {String}    userURL      userURL
+  * @return {Promise}  
   */
+
   deleteIdentity(userURL) {
-    let _this = this;
 
-    //let userURL = convertToUserURL(userID);
+    return this.identities.removeIdentity(userURL);
 
-    for (let identity in _this.identities.identities) {
-      if (_this.identities.identities[identity].assertion.userProfile.userURL === userURL) {
-        _this.identities.identities.splice(identity, 1);
-      }
-    }
   }
 
   /**
   * Function to unregister an identity from the emailsList array and not show in to the GUI
   * @param {String}    email      email
   */
-  unregisterIdentity(email) {
+/*  unregisterIdentity(email) {
     let _this = this;
 
     for (let e in _this.emailsList) {
@@ -363,7 +359,7 @@ class IdentityModule {
         _this.emailsList.splice(e, 1);
       }
     }
-  }
+  }*/
 
   /**
   * Function that sends a request to the GUI using messages. Sends all identities registered and
@@ -583,7 +579,7 @@ class IdentityModule {
 
           // returns the identity info from the chosen id
           //          if (_this.identities.currentIdentity) resolve(_this.identities.currentIdentity.assertion);
-          if (_this.identities.identities[value.value]) resolve(_this.identities.identities[value.value].assertion);
+          if (_this.identities.identities[value.value]) resolve(_this.identities.identities[value.value]);
           else reject('[IdentityModule.selectIdentityFromGUI] identity not found: ', value.value);
         } else if (value.type === 'idp') {
 
@@ -695,7 +691,7 @@ class IdentityModule {
 
           if (userURL) {
             let identity = _this.identities.getIdentity(userURL);
-            if (identity) return resolve(identity.assertion);
+            if (identity) return resolve(identity);
             else return reject('[IdentityModule.getIdToken] Identity not found for: ', userURL);
           } else { return reject('[IdentityModule.getIdToken] User not found for hyperty: ', returnedHypertyURL); }
         }).catch((reason) => {
@@ -707,7 +703,7 @@ class IdentityModule {
         if (userURL) {
 
           let identity = _this.identities.getIdentity(userURL);
-          if (identity) return resolve(identity.assertion);
+          if (identity) return resolve(identity);
           else return reject('[IdentityModule.getIdToken] Identity not found for: ', userURL);
 
         } else { return reject('[IdentityModule.getIdToken] User not found for hyperty: ', userURL); }

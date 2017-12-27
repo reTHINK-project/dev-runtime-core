@@ -1293,12 +1293,12 @@ class CryptoManager {
         hypertyFrom:
         {
           hyperty: from,
-          userID: userInfo.assertion.userProfile.userURL,
+          userID: userInfo.userProfile.userURL,
 
           //privateKey: "getMyPublicKey",
           //publicKey: "getMyPrivateKey",
-          assertion: userInfo.assertion.assertion,
-          messageInfo: userInfo.assertion
+          assertion: userInfo.assertion,
+          messageInfo: userInfo
         },
         hypertyTo:
         {
