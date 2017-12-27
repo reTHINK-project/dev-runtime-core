@@ -2,7 +2,8 @@
 import * as logger from 'loglevel';
 let log = logger.getLogger('IdentityModule');
 
-import { decode, secondsSinceEpoch } from '../utils/utils.js';
+import { decode, secondsSinceEpoch, deepClone } from '../utils/utils.js';
+import { WatchingYou } from 'service-framework/dist/Utils';
 
 
 /**
@@ -14,15 +15,26 @@ class Identities {
   constructor(type, storageManager) {
     let _this = this;
 
+    _this._watchingYou = new WatchingYou();
+
     _this._storageManager = storageManager;
     _this._guid;
     _this._type = type;
     _this._identities = {};
+    _this._accessTokens = _this.watchingYou.watch('accessTokens', {}, true);
 
   }
 
   get identities() {
     return this._identities;
+  }
+
+  get accessTokens() {
+    return this._accessTokens;
+  }
+  
+  get watchingYou() {
+    return this._watchingYou;
   }
 
   set guid(guid) {
@@ -126,9 +138,48 @@ class Identities {
             this._identities[userUrl].status = 'created';
             resolve(assertion);
           });
-      } else reject('[Identities.addIdentity] invalid IdAssertion');
+      } else reject('[Identities.addAssertion] invalid IdAssertion: ', assertion);
     });
 
+  }
+
+  addAccessToken(accessToken) {
+    let _this = this;
+    log.info('[Identities.addAccessToken] ', accessToken);
+
+    return new Promise((resolve, reject) => {
+
+      if (_this._isValidAccessToken(accessToken)) {
+
+//        let newAccessToken = deepClone(accessToken);
+
+        _this._accessTokens[accessToken.domain] = accessToken;
+
+          _this._storeAccessTokens().then(()=> {
+            _this._accessTokens[accessToken.domain].status = 'created';
+            resolve(accessToken);
+          });
+      } else reject('[Identities.addIdentity] invalid AccessToken: ', accessToken);
+    });
+
+  }
+
+  setAccessTokenInProgress(domain) {
+
+    if (this._accessTokens[domain]) this._accessTokens[domain].status = 'in-progress';
+    else this._accessTokens[domain] = { status: 'in-progress'};
+  }
+
+  getAccessToken(domain, resources) {
+    let accessToken = this._accessTokens[domain];
+
+    if (!accessToken) return undefined;
+    else if (  
+      resources.every((i) => { return accessToken.resources.indexOf(i) != -1; } ) )
+      return this._accessTokens[domain];
+    else 
+      return new Error('[Identities.getAccessToken] Not found for ', domain);
+    
   }
   
   updateAssertion(assertion) {
@@ -183,6 +234,33 @@ class Identities {
 
   }
 
+  _isValidAccessToken(accessToken) {
+
+    if (!accessToken.hasOwnProperty('accessToken')) {
+      return false;
+    }
+
+    if (!accessToken.hasOwnProperty('domain')) {
+      return false;
+    }
+
+    if (!(accessToken.hasOwnProperty('resources') && Array.isArray(accessToken.resources))  ) {
+      return false;
+    }
+
+
+    if (!(accessToken.hasOwnProperty('expires') && Number.isInteger(accessToken.expires))  ) {
+      return false;
+    }
+
+    if (!accessToken.hasOwnProperty('input') ) {
+      return false;
+    }
+
+    return true;
+
+  }
+  
   //TODO: add function to only set one new identity using the new indexed storage manager
 
   _store() {
@@ -199,6 +277,22 @@ class Identities {
 
     });
   }
+  _storeAccessTokens() {
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+
+      let accessTokens = deepClone( _this._accessTokens);
+
+      _this._storageManager.set('idModule:accessTokens', 0, accessTokens).then(() => {
+        resolve();
+      }).catch(err => {
+        reject('On _sendReporterSessionKey from method storeIdentity error: ' + err);
+      });
+
+    });
+  }
+
 }
 
 // move to Identity service framework?

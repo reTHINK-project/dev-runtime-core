@@ -62,7 +62,7 @@ class IdentityManager {
         from = message.body.subscriber;
       }
 
-      this._idm.getToken(from, message.to).then((identity) => {
+      this._idm.getToken(message).then((identity) => {
 
         if (!message.hasOwnProperty('body')) message.body = {};
 
