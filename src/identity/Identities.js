@@ -88,15 +88,15 @@ class Identities {
             let identity = _this._identities[id];
             let expires = identity.assertion.expires;
 
-            if (!identity.hasOwnProperty('interworking') 
-            || !identity.interworking) {
+//            if (!identity.hasOwnProperty('interworking') 
+//            || !identity.interworking) {
               _this.defaultIdentity = id;
 
               if (parseInt(expires) > timeNow) {
                 _this.defaultIdentity.assertion.expires = parseInt(expires);
                 _this.currentIdentity = id;               
               }
-            }
+//            }
 
           });
         }
@@ -105,6 +105,18 @@ class Identities {
     });
   }
 
+  loadAccessTokens() {
+    let _this = this;
+    return new Promise((resolve) => {
+
+      _this._storageManager.get('idModule:accessTokens').then((accessTokens) => {
+
+        if (accessTokens) _this._accessTokens = accessTokens;
+        resolve();
+      });
+    });
+  }
+  
   // to confirm if this function is required when the App constraints the identity selection
   
   addIdentity(identity) {

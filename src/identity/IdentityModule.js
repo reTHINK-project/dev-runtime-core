@@ -205,8 +205,11 @@ class IdentityModule {
         _this._crypto.getMyPublicKey().then((key) => {
           let guid = 'user-guid://' + JSON.stringify(key);
           _this.identities.guid = guid;
+          _this._identities.loadAccessTokens().then(() => {
+          
           resolve();
         });
+      });
 
       });
 
@@ -214,42 +217,7 @@ class IdentityModule {
 
   }
 
-  /*
-  loadIdentities() {
-    let _this = this;
-    return new Promise((resolve) => {
 
-      _this.storageManager.get('idModule:identities').then((identities) => {
-
-        if (identities) {
-          _this.identities = identities;
-
-          identities.forEach((identity) => {
-            let timeNow = _this._secondsSinceEpoch();
-            let expires = 0;
-
-            if (identity.info && identity.info.expires) {
-              expires = identity.info.expires;
-            }  else if (identity.info && identity.info.tokenIDJSON && identity.info.tokenIDJSON.exp) {
-              expires = identity.info.tokenIDJSON.exp;
-            }
-
-            if (!identity.hasOwnProperty('interworking') && !identity.interworking) {
-              _this.identities.identities.defaultIdentity = identity.messageInfo;
-
-              if (parseInt(expires) > timeNow) {
-                _this.identities.defaultIdentity.expires = parseInt(expires);
-                _this.currentIdentity = _this.identities.defaultIdentity;
-              }
-
-            }
-
-          });
-        }
-        resolve();
-      });
-    });
-  }*/
 
   /**
   * Function that fetch an identityAssertion from a user.
@@ -632,122 +600,7 @@ class IdentityModule {
     });
   }
 
-  //TODO: remove
-  /*
-  storeIdentity(result, keyPair) {
-    log.log('[storeIdentity:result]', result);
-    log.log('[storeIdentity:keyPair]', keyPair);
-    let _this = this;
 
-    return new Promise((resolve, reject) => {
-
-      if (!result.hasOwnProperty('assertion')) {
-        return reject('StoreIdentity: input is not an identity assertion.');
-      }
-
-      let splitedAssertion = result.assertion.split('.');
-      let assertionParsed;
-
-      //verify if the token contains the 3 components, or just the assertion
-      try {
-        if (splitedAssertion[1]) {
-          assertionParsed = decode(splitedAssertion[1]);
-        } else {
-          assertionParsed = decode(result.assertion);
-        }
-      } catch (err) {
-        return reject('In storeIdentity, error parsing assertion: ' + err);
-      }
-
-      let idToken;
-
-      //TODO remove the verification and remove the tokenIDJSON from the google idpProxy;
-      if (assertionParsed.tokenIDJSON) {
-        idToken = assertionParsed.tokenIDJSON;
-      } else {
-        idToken = assertionParsed;
-      }
-
-      idToken.idp = result.idp;
-
-      let email = idToken.email || idToken.sub;
-
-      // let identifier = getUserURLFromEmail(email);
-
-      let identifier = 'user://' + idToken.idp.domain + '/' + email;
-
-      result.identity = identifier;
-
-      _this.identity.addAssertion(result);
-
-      // check if exists any infoToken in the result received
-      let infoToken = (result.infoToken) ? result.infoToken : {};
-
-      let commonName = idToken.name || email.substring(0, email.indexOf('@'));
-      let userProfileBundle = {username: email, cn: commonName, avatar: infoToken.picture, locale: infoToken.locale, userURL: identifier};
-
-      let expires = undefined;
-      if (infoToken.hasOwnProperty('exp')) {
-        expires = infoToken.exp;
-      } else if (result.hasOwnProperty('info') && result.info.hasOwnProperty('expires')) {
-        expires = result.info.expires;
-      }
-
-      //creation of a new JSON with the identity to send via messages
-      let newIdentity = {userProfile: userProfileBundle, idp: result.idp.domain, assertion: result.assertion, expires: expires};
-      result.messageInfo = newIdentity;
-      result.keyPair = keyPair;
-
-      _this.currentIdentity = newIdentity;
-
-      //verify if the id already exists. If already exists then do not add to the identities list;
-      //to be reviewed since the identity contains data like the asssrtion and ley pairs that may be different if generated twice
-
-      let idAlreadyExists = false;
-      let oldId;
-      for (let identity in _this.identities) {
-        if (_this.identities[identity].identity === result.identity) {
-          idAlreadyExists = true;
-          oldId = _this.identities[identity];
-        }
-      }
-
-      if (idAlreadyExists) { // TODO: maybe overwrite the identity
-
-        oldId = Object.assign(oldId, result);
-        resolve(oldId.messageInfo);
-        let exists = false;
-
-        //check if the identity exists in emailList, if not add it
-        //This is useful if an identity was previously registered but was later unregistered
-        for (let i in _this.emailsList) {
-          if (_this.emailsList[i] === email) {
-            exists = true;
-            break;
-          }
-        }
-        if (!exists) {
-          _this.emailsList.push(email);
-        }
-
-      } else {
-        _this.emailsList.push(email);
-        _this.identities.push(result);
-      }
-
-      _this.storageManager.set('idModule:identities', 0, _this.identities).then(() => {
-
-        if (_this.identitiesList[idToken.idp.domain]) {
-          _this.identitiesList[idToken.idp.domain].status = 'created';
-        }
-        log.log('storeIdentity:newID', newIdentity);
-        resolve(newIdentity);
-      }).catch(err => {
-        reject('On _sendReporterSessionKey from method storeIdentity error: ' + err);
-      });
-
-    });
-  }*/
 
 
   callIdentityModuleFunc(methodName, parameters) {
