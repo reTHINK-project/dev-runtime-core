@@ -203,7 +203,7 @@ class IdentityModule {
     return new Promise((resolve) => {
       _this._identities.loadIdentities().then(() => {
         _this._crypto.getMyPublicKey().then((key) => {
-          let guid = 'user-guid://' + JSON.stringify(key);
+          let guid = 'user-guid://' + stringify(key);
           _this.identities.guid = guid;
           _this._identities.loadAccessTokens().then(() => {
 
@@ -429,7 +429,7 @@ class IdentityModule {
       //let keyPair = nodeJSKeyPairPopulate;
 
       //generates the RSA key pair
-      _this._crypto.getMyPublicKey().then(function (key) {
+      _this._crypto.getMyPublicKey().then(function(key) {
 
         log.log('[callNodeJsGenerateMethods:key]', key);
 
@@ -439,7 +439,7 @@ class IdentityModule {
 
         return _this.generateAssertion(publicKey, origin, 'url', idp);
 
-      }).then(function (value) {
+      }).then(function(value) {
         if (value) {
           resolve(value);
         } else {
@@ -812,7 +812,7 @@ class IdentityModule {
         if (res.body.code > 299)
           return reject('[IdentityModule._getNewAccessToken] Error on getAccessTokenAuthorisationEndpoint from IdP Proxy: ', res.body.desc);
 
-        // let's ask the user for authorisation 
+        // let's ask the user for authorisation
         _this.callIdentityModuleFunc('openPopup', { urlreceived: res.body.value }).then((authorisation) => {
           log.log('[IdentityModule:callIdentityModuleFunc:openPopup] auhtorisation result: ', authorisation);
 
@@ -824,7 +824,7 @@ class IdentityModule {
 
           //wihtout callback to avoid timeout errors?
 
-          // let's ask Access Token from the Idp Proxy 
+          // let's ask Access Token from the Idp Proxy
           _this._messageBus.postMessage(message, (res) => {
             if (res.body.code > 299) return reject('[IdentityModule._getNewAccessToken] Error on getAccessToken from IdP Proxy: ', res.body.desc);
 
@@ -1004,8 +1004,9 @@ class IdentityModule {
       } else if (funcName === 'getMyPublicKey') {
         // because generateRSAKeyPair is a promise
         // we have to send the message only after getting the key pair
-        _this._crypto.getMyPublicKey().then((key) => {
-          let value = { type: 'execute', value: key, code: 200 };
+        _this._crypto.getMyPublicKey().then((pubKey) => {
+          pubKey = stringify(pubKey);
+          let value = { type: 'execute', value: pubKey, code: 200 };
           let replyMsg = { id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value };
           try {
             _this._messageBus.postMessage(replyMsg);
