@@ -57,10 +57,10 @@ b.setLevel(3);
 c.setLevel(0);
 
 // CoreDiscovery
-d.setLevel(3);
+d.setLevel(5);
 
 // GraphConnector
-e.setLevel(3);
+e.setLevel(5);
 
 // HypertyResourcesStorage
 f.setLevel(3);
@@ -108,7 +108,7 @@ s.setLevel(3);
 t.setLevel(3);
 
 // IdentityManager
-u.setLevel(0);
+u.setLevel(3);
 
 // CryptoManager
 v.setLevel(3);

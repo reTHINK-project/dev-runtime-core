@@ -1,5 +1,7 @@
-import MiniBus from '../../../dist/minibus';
-import {Sandbox, SandboxType, SandboxRegistry} from '../../../dist/sandbox';
+import MiniBus from '../../../src/bus/MiniBus';
+import SandboxRegistry from '../../../src/sandbox/SandboxRegistry';
+import Sandbox, { SandboxType } from '../../../src/sandbox/Sandbox';
+
 //import activate from '../VertxProtoStub.js'
 
 // Mockup code for testing
@@ -10,7 +12,7 @@ class SandboxBrowser extends Sandbox {
     let _this = this;
     _this.type = SandboxType.NORMAL;
 
-    console.log('[SandboxBrowser] New with capabilities: ',capabilities);
+    console.log('[SandboxBrowser] New with capabilities: ', capabilities);
 
     //simulate sandbox frontier
     _this._bus = new MiniBus();

@@ -69,6 +69,8 @@ class RuntimeCoreCtx extends ReThinkCtx {
 
     return new Promise((resolve, reject) => {
 
+      console.log(_this.storageManager);
+
       _this.storageManager.get('rethink:activePolicy').then((value) => {
         _this.activeUserPolicy = value;
 

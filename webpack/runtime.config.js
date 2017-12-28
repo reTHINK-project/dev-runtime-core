@@ -6,8 +6,6 @@ var WebpackMonitor = require('webpack-monitor');
 
 var plugins = getModeConfig();
 
-
-console.log('Monitor:', process.env.MONITOR);
 if (process.env.MONITOR) {
   plugins.push(new WebpackMonitor({
     launch: true, // -> default 'false'

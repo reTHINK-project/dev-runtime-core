@@ -32,7 +32,7 @@ class Identities {
   get accessTokens() {
     return this._accessTokens;
   }
-  
+
   get watchingYou() {
     return this._watchingYou;
   }
@@ -59,7 +59,7 @@ class Identities {
     if (this._defaultIdentity) return this.identities[this._defaultIdentity];
     else return false;
   }
-  
+
   get currentIdentity() {
     return this.identities[this._currentIdentity];
   }
@@ -86,17 +86,17 @@ class Identities {
           _this.identifiers.forEach((id) => {
             let timeNow = secondsSinceEpoch();
             let identity = _this._identities[id];
-            let expires = identity.assertion.expires;
+            let expires = identity.expires;
 
-//            if (!identity.hasOwnProperty('interworking') 
-//            || !identity.interworking) {
-              _this.defaultIdentity = id;
+            //            if (!identity.hasOwnProperty('interworking') 
+            //            || !identity.interworking) {
+            _this.defaultIdentity = id;
 
-              if (parseInt(expires) > timeNow) {
-                _this.defaultIdentity.assertion.expires = parseInt(expires);
-                _this.currentIdentity = id;               
-              }
-//            }
+            if (parseInt(expires) > timeNow) {
+              _this.defaultIdentity.expires = parseInt(expires);
+              _this.currentIdentity = id;
+            }
+            //            }
 
           });
         }
@@ -116,9 +116,9 @@ class Identities {
       });
     });
   }
-  
+
   // to confirm if this function is required when the App constraints the identity selection
-  
+
   addIdentity(identity) {
     let _this = this;
 
@@ -126,7 +126,7 @@ class Identities {
       if (_this._isValid(identity)) {
         let id = identity.identifiers[0];
         Object.assign(this._identities[id], identity);
-        this._storeIdentity(identity).then(()=> {
+        this._storeIdentity(identity).then(() => {
           this._identities[id].status = 'created';
           resolve();
         });
@@ -143,14 +143,28 @@ class Identities {
 
         let userUrl = assertion.userProfile.userURL;
 
-        if (!_this.identities[userUrl]) _this._identities[userUrl] = { assertion: assertion };
-        else _this.identities[userUrl].assertion = assertion;
+        if (!_this.identities[userUrl]) _this._identities[userUrl] = assertion;
+        else _this.identities[userUrl] = assertion;
 
-          _this._store().then(()=> {
-            this._identities[userUrl].status = 'created';
-            resolve(assertion);
-          });
+        _this._store().then(() => {
+          this._identities[userUrl].status = 'created';
+          resolve(assertion);
+        });
       } else reject('[Identities.addAssertion] invalid IdAssertion: ', assertion);
+    });
+
+  }
+
+  removeIdentity(userUrl) {
+    let _this = this;
+
+
+    return new Promise((resolve, reject) => {
+      delete _this.identities[userUrl];
+
+      _this._store().then(() => {
+        resolve(assertion);
+      });
     });
 
   }
@@ -163,14 +177,14 @@ class Identities {
 
       if (_this._isValidAccessToken(accessToken)) {
 
-//        let newAccessToken = deepClone(accessToken);
+        //        let newAccessToken = deepClone(accessToken);
 
         _this._accessTokens[accessToken.domain] = accessToken;
 
-          _this._storeAccessTokens().then(()=> {
-            _this._accessTokens[accessToken.domain].status = 'created';
-            resolve(accessToken);
-          });
+        _this._storeAccessTokens().then(() => {
+          _this._accessTokens[accessToken.domain].status = 'created';
+          resolve(accessToken);
+        });
       } else reject('[Identities.addIdentity] invalid AccessToken: ', accessToken);
     });
 
@@ -179,31 +193,31 @@ class Identities {
   setAccessTokenInProgress(domain) {
 
     if (this._accessTokens[domain]) this._accessTokens[domain].status = 'in-progress';
-    else this._accessTokens[domain] = { status: 'in-progress'};
+    else this._accessTokens[domain] = { status: 'in-progress' };
   }
 
   getAccessToken(domain, resources) {
     let accessToken = this._accessTokens[domain];
 
     if (!accessToken) return undefined;
-    else if (  
-      resources.every((i) => { return accessToken.resources.indexOf(i) != -1; } ) )
+    else if (
+      resources.every((i) => { return accessToken.resources.indexOf(i) != -1; }))
       return this._accessTokens[domain];
-    else 
+    else
       return new Error('[Identities.getAccessToken] Not found for ', domain);
-    
+
   }
-  
+
   updateAssertion(assertion) {
     let _this = this;
 
-    return new Promise( (resolve) => {
+    return new Promise((resolve) => {
       let userUrl = assertion.userProfile.userUrl;
 
       if (!_this.identities[userUrl]) return reject('[Identities.updateAssertion] Identity not found for ', userUrl);
       else {
-        _this.identities[userUrl].assertion = assertion;
-        _this._store().then(()=> {
+        _this.identities[userUrl] = assertion;
+        _this._store().then(() => {
           resolve();
         });
       }
@@ -256,23 +270,23 @@ class Identities {
       return false;
     }
 
-    if (!(accessToken.hasOwnProperty('resources') && Array.isArray(accessToken.resources))  ) {
+    if (!(accessToken.hasOwnProperty('resources') && Array.isArray(accessToken.resources))) {
       return false;
     }
 
 
-    if (!(accessToken.hasOwnProperty('expires') && Number.isInteger(accessToken.expires))  ) {
+    if (!(accessToken.hasOwnProperty('expires') && Number.isInteger(accessToken.expires))) {
       return false;
     }
 
-    if (!accessToken.hasOwnProperty('input') ) {
+    if (!accessToken.hasOwnProperty('input')) {
       return false;
     }
 
     return true;
 
   }
-  
+
   //TODO: add function to only set one new identity using the new indexed storage manager
 
   _store() {
@@ -294,7 +308,7 @@ class Identities {
 
     return new Promise((resolve, reject) => {
 
-      let accessTokens = deepClone( _this._accessTokens);
+      let accessTokens = deepClone(_this._accessTokens);
 
       _this._storageManager.set('idModule:accessTokens', 0, accessTokens).then(() => {
         resolve();
@@ -330,7 +344,7 @@ class IdAssertion {
   get userProfile() {
     return this._userProfile;
   }
-  
+
 }
 
 class IdValidation {

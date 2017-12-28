@@ -16,7 +16,7 @@ let expect = chai.expect;
 chai.use(chaiAsPromised);
 
 describe('Data Synchronisation', function() {
-  let storageManager = runtimeFactory.storageManager();
+  let storageManager = runtimeFactory.storageManager('syncherManager:ObjectURLs');
   let dataObjectsStorage = new DataObjectsStorage(storageManager, {});
 
   let schemaURL = 'schema://fake-schema-url';
@@ -113,11 +113,8 @@ describe('Data Synchronisation', function() {
         console.log('isLocal: ', url);
         return false;
       },
-      isLocal: () => {
-        return false;
-      },
       getHypertyOwner: () => {
-          return 'user://user@domain.pt';
+        return 'user://user@domain.pt';
       },
       runtimeURL: 'runtime://localhost/7601'
     };
