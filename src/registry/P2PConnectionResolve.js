@@ -57,7 +57,7 @@ class P2PConnectionResolve  {
 
     let url;
 
-    if (comp) url = msg.to.substring(0, msg.to.indexOf('/' + comp))
+    if (comp) url = msg.to.substring(0, msg.to.indexOf('/' + comp));
     else url = msg.to;
 
     let p2p = {};

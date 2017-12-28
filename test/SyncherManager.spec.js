@@ -16,6 +16,8 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import sinonChai from 'sinon-chai';
 
+import { storage } from '../src/runtime/Storage';
+
 chai.config.truncateThreshold = 0;
 
 let expect = chai.expect;
@@ -23,8 +25,10 @@ chai.use(chaiAsPromised);
 chai.use(sinonChai);
 
 describe('SyncherManager', function() {
-  let storageManager = runtimeFactory.storageManager();
-  let dataObjectsStorage = new DataObjectsStorage(storageManager, {});
+
+  const storages = storage(runtimeFactory);
+
+  let dataObjectsStorage = new DataObjectsStorage(storages.syncherManager, {});
 
   let schemaURL = 'schema://fake-schema-url';
   let runtimeURL = 'hyperty-runtime://fake-runtime';
@@ -169,7 +173,7 @@ describe('SyncherManager', function() {
 
   let runtimeCapabilities =  runtimeFactory.runtimeCapabilities();
 
-  let runtimeCoreCtx = new RuntimeCoreCtx(runtimeURL, identityModule, registry, storageManager, runtimeCapabilities);
+  let runtimeCoreCtx = new RuntimeCoreCtx(runtimeURL, identityModule, registry, storages.policy, runtimeCapabilities);
   let policyEngine = new PEP(runtimeCoreCtx);
 
   let identityManager = new IdentityManager(identityModule);
@@ -225,7 +229,7 @@ describe('SyncherManager', function() {
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storages.syncherManager, allocator, dataObjectsStorage, identityModule);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
@@ -256,7 +260,7 @@ describe('SyncherManager', function() {
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storages.syncherManager, allocator, dataObjectsStorage, identityModule);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
@@ -315,7 +319,7 @@ describe('SyncherManager', function() {
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storages.syncherManager, allocator, dataObjectsStorage, identityModule);
 
     let a;
 
@@ -374,7 +378,7 @@ describe('SyncherManager', function() {
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storages.syncherManager, allocator, dataObjectsStorage, identityModule);
 
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
     sync1.resumeReporters({}).then((dors) => {
@@ -871,7 +875,7 @@ describe('SyncherManager', function() {
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storages.syncherManager, allocator, dataObjectsStorage, identityModule);
 
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
     sync1.create(schemaURL, [], initialData).then((dor) => {
@@ -891,7 +895,7 @@ describe('SyncherManager', function() {
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storages.syncherManager, allocator, dataObjectsStorage, identityModule);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
 
@@ -945,7 +949,7 @@ describe('SyncherManager', function() {
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storages.syncherManager, allocator, dataObjectsStorage, identityModule);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
@@ -1011,7 +1015,7 @@ describe('SyncherManager', function() {
       }
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storages.syncherManager, allocator, dataObjectsStorage, identityModule);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
@@ -1067,7 +1071,7 @@ describe('SyncherManager', function() {
       }
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storages.syncherManager, allocator, dataObjectsStorage, identityModule);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
@@ -1138,7 +1142,7 @@ describe('SyncherManager', function() {
         }
       };
 
-      new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
+      new SyncherManager(runtimeURL, bus, registry, catalog, storages.syncherManager, allocator, dataObjectsStorage, identityModule);
 
       let hypertyURL3 = 'hyperty://h1.domain/' + guid();
       hyperties.h3 = hypertyURL3;
@@ -1206,7 +1210,7 @@ describe('SyncherManager', function() {
         }
       };
 
-      new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
+      new SyncherManager(runtimeURL, bus, registry, catalog, storages.syncherManager, allocator, dataObjectsStorage, identityModule);
 
       let sync3 = new Syncher(hyperties.h3, bus, { runtimeURL: runtimeURL });
       sync3.onNotification((notifyEvent) => {

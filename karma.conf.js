@@ -6,6 +6,7 @@ module.exports = function(config) {
       './test/*.spec.js'
     ],
     exclude: [
+      './test/GraphConnector.spec.js',
       './test/PolicyEngine.spec.js'
 
     ],
@@ -59,7 +60,8 @@ module.exports = function(config) {
       mocha: {
         reporter: 'html'
       },
-      captureConsole: true
+      captureConsole: true,
+      useIframe: true
     },
 
     port: 9876,
@@ -75,6 +77,7 @@ module.exports = function(config) {
       ChromeTravis: {
         base: 'Chrome',
         flags: [
+          '--disable-popup',
           '--disable-web-security',
           '--ignore-certificate-errors'
         ]

@@ -7,7 +7,7 @@ import StorageManager from 'service-framework/dist/StorageManager';
 
 import Dexie from 'dexie';
 
-export const runtimeFactory = {
+export const runtimeFactory = Object.create({
 
   createSandbox(capabilities) {
 
@@ -35,35 +35,57 @@ export const runtimeFactory = {
     return new PersistenceManager(localStorage);
   },
 
-  storageManager() {
+  storageManager(name, schemas) {
+
+    if (!this.databases) { this.databases = {}; }
+    if (!this.storeManager) { this.storeManager = {}; }
+
+    if (navigator && navigator.storage && navigator.storage.persist) {
+      navigator.storage.persist().then(function(persistent) {
+        if (persistent) { console.log('Storage will not be cleared except by explicit user action'); } else { console.log('Storage may be cleared by the UA under storage pressure.'); }
+      });
+    }
+
     // Using the implementation of Service Framework
     // Dexie is the IndexDB Wrapper
-    const db = new Dexie('cache');
-    const storeName = 'objects';
+    if (!this.databases.hasOwnProperty(name)) {
+      this.databases[name] = new Dexie(name);
+    }
 
-    return new StorageManager(db, storeName);
+    if (!this.storeManager.hasOwnProperty(name)) {
+      this.storeManager[name] = new StorageManager(this.databases[name], name, schemas);
+    }
 
-    // return new StorageManagerFake('a', 'b');
+    return this.storeManager[name];
   },
 
-  runtimeCapabilities: (storageManager) => {
-    return {
-      getRuntimeCapabilities:() => {
-        return new Promise((resolve) => {
-          resolve(undefined);
-        });
-      },
-      isAvailable:(capability) => {
-        return new Promise((resolve) => {
-          resolve(undefined);
-        });
-      },
-      update:() => {
-        return new Promise((resolve) => {
-          resolve(undefined);
-        });
-      }
-    };
+  runtimeCapabilities() {
+
+    if (!this.capabilitiesManager) {
+
+      let storageManager = this.storageManager('capabilities');
+
+      this.capabilitiesManager = {
+        getRuntimeCapabilities: () => {
+          return new Promise((resolve) => {
+
+            const capabilities = {
+              browser: true
+            };
+
+            storageManager.set('capabilities', '1', capabilities);
+            resolve(capabilities);
+          });
+
+        }
+
+      };
+
+    }
+
+    console.log(this.capabilitiesManager);
+
+    return this.capabilitiesManager;
   },
 
   // TODO optimize the parameter was passed to inside the RuntimeCatalogue
@@ -75,4 +97,4 @@ export const runtimeFactory = {
   removeSandbox() {
 
   }
-};
+});

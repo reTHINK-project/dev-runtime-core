@@ -54,21 +54,21 @@ describe('RuntimeUA', function() {
       //   }
       //
       // });
-      sinon.stub(runtime.descriptorInstance, 'getStubDescriptor', (stubURL) => {
+      sinon.stub(runtime.descriptorInstance, 'getStubDescriptor').callsFake((stubURL) => {
         console.log('stubURL', stubURL);
         return getDescriptor(stubURL);
       });
 
-      sinon.stub(runtime.descriptorInstance, 'getIdpProxyDescriptor', (idpProxyURL) => {
+      sinon.stub(runtime.descriptorInstance, 'getIdpProxyDescriptor').callsFake((idpProxyURL) => {
         let url = 'https://localhost/.well-known/idp-proxy/' +  idpProxyURL;
         return getDescriptor(url);
       });
 
       return result;
     }))
-    .to.be.fulfilled
-    .and.to.eventually.be.true
-    .and.notify(done);
+      .to.be.fulfilled
+      .and.to.eventually.be.true
+      .and.notify(done);
 
   });
 

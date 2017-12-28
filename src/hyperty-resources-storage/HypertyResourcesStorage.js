@@ -2,8 +2,9 @@
 import * as logger from 'loglevel';
 let log = logger.getLogger('HypertyResourcesStorage');
 
+import { generateGUID, deepClone, availableSpace } from '../utils/utils';
 
-import { generateGUID, deepClone } from '../utils/utils';
+import PromiseQueue from '../utils/PromiseQueue';
 
 class HypertyResourcesStorage {
 
@@ -17,9 +18,13 @@ class HypertyResourcesStorage {
 
     _this._bus = bus;
 
+    _this._storageLimit = 0.9; // the save storageLimit;
+
     _this._url = runtimeURL + '/storage';
 
     _this._storageManager = storageManager;
+
+    _this.promiseQueue = new PromiseQueue();
 
     _this._hypertyResources = hypertyResources;
 
@@ -32,6 +37,36 @@ class HypertyResourcesStorage {
       }
     });
 
+  }
+
+  /**
+   * check the available storage quota
+   *
+   * @memberof HypertyResourcesStorage
+   */
+  checkStorageQuota() {
+
+    return new Promise((resolve, reject) => {
+
+      if (this._availableQuota && this._usage) {
+        return resolve(availableSpace(this._usage, this._availableQuota));
+      }
+
+      if (navigator) {
+
+        navigator.storage.estimate().then((estimate) => {
+          this._availableQuota = estimate.quota;
+          this._usage = estimate.usage;
+          resolve(availableSpace(this._usage, this._availableQuota));
+
+        }).catch((reason) => {
+          log.error('[HypertyResourcesStorage] CheckStorageQuota error: ', reason);
+          reject(reason);
+        });
+
+      }
+
+    });
 
   }
 
@@ -69,18 +104,105 @@ class HypertyResourcesStorage {
 
     }
 
-    _this._hypertyResources[resourceURL] = content;
+    this._hypertyResources[resourceURL] = content;
 
-    _this._storageManager.set('hypertyResources', 1, _this._hypertyResources).then(() => {
-      let response = {
-        from: message.to,
-        to: message.from,
-        id: message.id,
-        type: 'response',
-        body: { value: resourceURL, code: 200 }
+    this.promiseQueue.add(this._toSave(resourceURL, message, content));
+
+  }
+
+  _toSave(resourceURL, message, content) {
+
+    return new Promise((resolve, reject) => {
+
+      const error = (reason) => {
+        let response = {
+          from: message.to,
+          to: message.from,
+          id: message.id,
+          type: 'response',
+          body: { value: resourceURL, code: 500, description: reason }
+        };
+
+        this._bus.postMessage(response);
+
+        return reject(reason);
       };
 
-      _this._bus.postMessage(response);
+      this.checkStorageQuota().then((result) => {
+
+        if (content.size > result.quota) {
+          const msg = 'The storage do not have space to store that resource';
+          error(msg);
+          throw Error(msg);
+        }
+
+        const spaceAvailable = result.quota;
+        const allocated = result.usage + content.size;
+
+        if (result.percent >= this._storageLimit || allocated > spaceAvailable) {
+          return this._getOlderResources(content.size);
+        } else {
+          return true;
+        }
+
+      }).then(() => {
+        return this._storageManager.set(resourceURL, 1, content);
+      }).then(() => {
+
+        let response = {
+          from: message.to,
+          to: message.from,
+          id: message.id,
+          type: 'response',
+          body: { value: resourceURL, code: 200 }
+        };
+
+        this._bus.postMessage(response);
+
+        log.log('Success');
+
+        return resolve();
+
+      }).catch(error);
+
+    });
+
+  }
+
+  _getOlderResources(size) {
+
+    return new Promise((resolve, reject) => {
+
+      this._storageManager.get().then((result) => {
+
+        const resources = Object.keys(result);
+
+        let total = 0;
+        const reduced = resources.sort((a, b) => result[a].created < result[b].created)
+          .reduce((previousResource, currentResource) => {
+            const current = this._hypertyResources[currentResource];
+
+            log.log('[HypertyResourcesStorage] _getOlderResources: ', total, size, currentResource, this._availableQuota);
+
+            if (total <= size) {
+              total += current.size;
+              previousResource.push(currentResource);
+            }
+
+            return previousResource;
+
+          }, []);
+
+        const deleting = reduced.map(key => this._storageManager.delete(key));
+
+        Promise.all(deleting).then(() => {
+          resolve(true);
+        }).catch((reason) => {
+          reject(reason);
+        });
+
+      });
+
     });
 
   }
@@ -107,25 +229,33 @@ class HypertyResourcesStorage {
       body: {}
     };
 
-    let content = _this._hypertyResources[contentUrl];
+    // let content = _this._hypertyResources[contentUrl];
 
-    if (content) {
+    log.info('[HypertyResourcesStorage._onRead] get resourceURL:', contentUrl);
 
-      if (content.resourceType === 'file') {
-        _this._onReadFile(response, content);
+    this._storageManager.get('resourceURL', contentUrl).then((content) => {
+
+      log.info('[HypertyResourcesStorage._onRead] found content:', content);
+
+      if (content) {
+
+        if (content.resourceType === 'file') {
+          _this._onReadFile(response, content);
+        } else {
+          response.body.code = 200;
+          response.body.p2p = true;
+          response.body.value = content;
+          _this._bus.postMessage(response);
+        }
+
       } else {
-        response.body.code = 200;
-        response.body.p2p = true;
-        response.body.value = content;
+        response.body.code = 404;
+        response.body.desc = 'Content Not Found for ' + contentUrl;
         _this._bus.postMessage(response);
+
       }
 
-    } else {
-      response.body.code = 404;
-      response.body.desc = 'Content Not Found for ' + contentUrl;
-      _this._bus.postMessage(response);
-
-    }
+    });
 
     //response.body.code = 404;
 
@@ -188,13 +318,23 @@ class HypertyResourcesStorage {
       throw new Error('[HypertyResourcesStorage._onDelete] mandatory resource missing: ', message);
     }
 
-    _this._storageManager.set('hypertyResources', 1, _this._hypertyResources).then(() => {
+    _this._storageManager.delete('resourceURL', message.body.resource).then(() => {
       let response = {
         from: message.to,
         to: message.from,
         id: message.id,
         type: 'response',
         body: { code: 200 }
+      };
+
+      _this._bus.postMessage(response);
+    }).catch((reason) => {
+      let response = {
+        from: message.to,
+        to: message.from,
+        id: message.id,
+        type: 'response',
+        body: { code: 400, description: reason }
       };
 
       _this._bus.postMessage(response);

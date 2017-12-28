@@ -244,7 +244,7 @@ class CryptoManager {
   }
 
   encryptMessage(message) {
-    //console.info('encryptMessage:message', message);
+    //log.info('encryptMessage:message', message);
     let _this = this;
 
     log.log('encrypt message ');
@@ -416,7 +416,7 @@ class CryptoManager {
 
           // if not, just send the message
           } else {
-            console.info('The dataObject is not encrypted');
+            log.info('The dataObject is not encrypted');
             return resolve(dataObject);
           }
 
@@ -832,7 +832,7 @@ class CryptoManager {
       let filteredMessage;
       let privateKeyHolder;
 
-      console.info('handshake phase: ', handshakeType);
+      log.info('handshake phase: ', handshakeType);
 
       switch (handshakeType) {
 
