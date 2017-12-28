@@ -124,7 +124,7 @@ describe('Hyperty Resource Storage', function() {
 
   });
 
-  it('should add resources out of limit', function(done) {
+  it.skip('should add resources out of limit', function(done) {
 
     const from = 'hyperty://localhost/' + generateGUID();
     const generatedData = generateData('500MB');
