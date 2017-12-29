@@ -5,13 +5,12 @@ import {chatkeysToStringCloner, encode, decode, decodeToUint8Array, parseToUint8
 
 class HandShakeProtocol {
 
-  constructor(bus, chatKeys, crypto) {
-    this.bus = bus;
+  constructor(chatKeys, crypto) {
     this.chatKeys = chatKeys;
     this.crypto = crypto;
   }
 
-  startHandShake(message, chatKeys) {
+  startHandShake(message, chatKeys, messageBus) {
     let _this = this;
     return new Promise(function(resolve, reject) {
       chatKeys.keys.fromRandom = _this.crypto.generateRandom();
@@ -30,10 +29,10 @@ class HandShakeProtocol {
       // start of the handShakePhase.
 
       if (chatKeys.initialMessage) {
-        resolve({message: startHandShakeMsg, chatKeys: chatKeys});
+        resolve({postToBus: false, message: startHandShakeMsg, chatKeys: chatKeys});
       } else {
         _this.chatKeys[message.from + '<->' + message.to] = chatKeys;
-        _this._messageBus.postMessage(startHandShakeMsg);
+        resolve({postToBus: true, message: startHandShakeMsg});
       }
     });
   }
@@ -324,16 +323,11 @@ class HandShakeProtocol {
               }
             };
 
-            resolve({message: initialMessage, chatKeys: chatKeys});
+            resolve({sendReporterSessionKey: false, message: initialMessage, chatKeys: chatKeys});
 
           //sends the sessionKey to the subscriber hyperty
           } else {
-            _this._sendReporterSessionKey(message, chatKeys).then(value => {
-
-              resolve(value);
-            }).catch(err => {
-              reject('On _doHandShakePhase from receiverFinishedMessage error: ' + err);
-            });
+            resolve({sendReporterSessionKey: true, message: message, chatKeys: chatKeys});
           }
         });
       });

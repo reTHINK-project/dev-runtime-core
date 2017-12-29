@@ -44,12 +44,12 @@ class CryptoManager {
 
     _this._runtimeFactory = runtimeFactory;
     _this._domain = divideURL(_this._runtimeURL).domain;
+    _this.chatKeys = {};
 
     _this.crypto = new Crypto(_this._runtimeFactory);
-    _this.handShakeProtocol = new HandShakeProtocol(_this.crypto);
+    _this.handShakeProtocol = new HandShakeProtocol(_this.chatKeys, _this.crypto);
 
     // hashTable to store all the crypto information between two hyperties
-    _this.chatKeys = {};
 
     // hashTable to store the symmetric keys to be used in the chat group
     _this.dataObjectSessionKeys = {};
@@ -838,7 +838,13 @@ class CryptoManager {
       switch (handshakeType) {
 
         case 'startHandShake':
-          _this.handShakeProtocol.startHandShake(message, chatKeys).then(result => { resolve(result); });
+          _this.handShakeProtocol.startHandShake(message, chatKeys).then(result => {
+            if (result.postToBus) {
+              _this._messageBus.postMessage(result.message);
+            } else {
+              resolve({message: result.message, chatKeys: result.chatKeys});
+            }
+          });
           break;
 
         case 'senderHello':
@@ -855,11 +861,17 @@ class CryptoManager {
             .catch(err => { reject(err); });
           break;
 
-        case 'receiverFinishedMessage': {
-          _this.handShakeProtocol.receiverFinishedMessage(message, chatKeys).then(result => { resolve(result); })
-            .catch(err => { reject(err); });
+        case 'receiverFinishedMessage':
+          _this.handShakeProtocol.receiverFinishedMessage(message, chatKeys).then(result => {
+            if (result.sendReporterSessionKey) {
+              _this._sendReporterSessionKey(result.message, result.chatKeys).then(value => {
+                resolve(value);
+              });
+            } else {
+              resolve({message: result.message, chatKeys: result.chatKeys});
+            }
+          }).catch(err => { reject(err); });
           break;
-        }
 
         case 'reporterSessionKey': {
           _this.handShakeProtocol.reporterSessionKey(message, chatKeys).then(result => { resolve(result); })
