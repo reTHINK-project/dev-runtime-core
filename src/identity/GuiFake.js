@@ -1,3 +1,7 @@
+// Log System
+import * as logger from 'loglevel';
+let log = logger.getLogger('IdentityModule');
+
 /**
 * fake class for the gui to select the identity,
 * TODO replace with the proper identity GUI
@@ -6,7 +10,7 @@
 class GuiFake {
 
   constructor(url, messageBus) {
-    console.log('FakeGUI_deployed');
+    log.log('FakeGUI_deployed');
     let _this = this;
 
     _this._url = url;
@@ -45,7 +49,7 @@ class GuiFake {
           _this._messageBus.postMessage(replyMsg);
         }
       } else {
-        console.log('Ignoring messages not intended to FakeGUI.', msg);
+        log.log('Ignoring messages not intended to FakeGUI.', msg);
       }
     });
   }

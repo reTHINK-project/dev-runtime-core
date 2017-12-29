@@ -19,6 +19,8 @@ export const runtimeConfiguration = {
       'registry:HypertyURLs': 'key,version,value'
     },
     identity: {
+      'idModule:accessTokens': 'key,version,value',
+      'cryptoManager:userAsymmetricKey': 'key,version,value',
       'idModule:identities': 'key,version,value',
       dataObjectSessionKeys: 'key,version,value'
     },
