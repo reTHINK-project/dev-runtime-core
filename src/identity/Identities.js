@@ -56,12 +56,12 @@ class Identities {
   }
 
   get defaultIdentity() {
-    if (this._defaultIdentity) return this.identities[this._defaultIdentity];
+    if (this._defaultIdentity) return Object.assign({}, this.identities[this._defaultIdentity]);
     else return false;
   }
 
   get currentIdentity() {
-    return this.identities[this._currentIdentity];
+    return Object.assign({},this.identities[this._currentIdentity]);
   }
 
   get identifiers() {
@@ -69,7 +69,8 @@ class Identities {
   }
 
   getIdentity(identifier) {
-    return this._identities[identifier];
+    let identity = Object.assign({},this._identities[identifier]);
+    return identity;
   }
 
   loadIdentities() {
