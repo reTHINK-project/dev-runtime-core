@@ -41,7 +41,7 @@
 export function divideURL(url) {
 
   function recurse(value) {
-    const regex = /([a-zA-Z-]*)(:\/\/(?:\.)?|:)([-a-zA-Z0-9@:%._\+~#=]{2,256})([-a-zA-Z0-9@:%._\+~#=\/]*)/gi;
+    const regex = /([a-zA-Z-]*)(:\/\/(?:\.)?|:)([-a-zA-Z0-9@:%._+~#=]{2,256})([-a-zA-Z0-9@:%._+~#=/]*)/gi;
     const subst = '$1,$3,$4';
     let parts = value.replace(regex, subst).split(',');
     return parts;
@@ -346,7 +346,7 @@ export function splitObjectURL(dataObjectURL) {
 
 export function checkAttribute(path) {
 
-  let regex = /((([a-zA-Z]+):\/\/([0-9a-zA-Z][-\w]*[0-9a-zA-Z]\.)+[a-zA-Z]{2,9})\/[a-zA-Z0-9\.]+@[a-zA-Z0-9]+(\-)?[a-zA-Z0-9]+(\.)?[a-zA-Z0-9]{2,10}?\.[a-zA-Z]{2,10})(.+(?=.identity))?/gm;
+  let regex = /((([a-zA-Z]+):\/\/([0-9a-zA-Z][-\w]*[0-9a-zA-Z]\.)+[a-zA-Z]{2,9})\/[a-zA-Z0-9.]+@[a-zA-Z0-9]+(-)?[a-zA-Z0-9]+(\.)?[a-zA-Z0-9]{2,10}?\.[a-zA-Z]{2,10})(.+(?=.identity))?/gm;
 
   let list = [];
   let final = [];
@@ -481,6 +481,15 @@ export function parseMessageURL(URL) {
   } else {
     return splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3] + '/' + splitedToURL[4];
   }
+}
+
+export function availableSpace(usage, quota) {
+  const available = (usage / quota).toFixed(2);
+  return {
+    quota: quota,
+    usage: usage,
+    percent: Number(available)
+  };
 }
 
 /**

@@ -14,7 +14,7 @@ import Rule from '../src/policy/Rule';
 import RuntimeCoreCtx from '../src/policy/context/RuntimeCoreCtx';
 import Policy from '../src/policy/Policy';
 import SubscriptionCondition from '../src/policy/conditions/SubscriptionCondition';
-import { runtimeFactory } from './resources/runtimeFactory';
+import { storages } from '../src/runtime/Storage';
 
 /********** CONDITIONS **********/
 let simpleCondition = new Condition('source', 'equals', 'user1@domain1');
@@ -235,7 +235,7 @@ describe('Policy Engine with Runtime Core context', () => {
       });
     }
   };
-  let storageManager = runtimeFactory.storageManager();
+  let storageManager = storage().policy;
   let policyEngine = new PEP(new RuntimeCoreCtx(identityModule, runtimeRegistry, storageManager, runtimeCapabilities));
 
   describe('initial filtering', () => {

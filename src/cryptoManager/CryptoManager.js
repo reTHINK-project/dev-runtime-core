@@ -247,7 +247,7 @@ class CryptoManager {
   }
 
   encryptMessage(message) {
-    //console.info('encryptMessage:message', message);
+    //log.info('encryptMessage:message', message);
     let _this = this;
 
     log.log('encrypt message ');
@@ -419,7 +419,7 @@ class CryptoManager {
 
           // if not, just send the message
           } else {
-            console.info('The dataObject is not encrypted');
+            log.info('The dataObject is not encrypted');
             return resolve(dataObject);
           }
 
@@ -833,6 +833,7 @@ class CryptoManager {
     return new Promise(function(resolve, reject) {
 
       let handshakeType = message.body.handshakePhase;
+
       console.info('handshake phase: ', handshakeType);
 
       switch (handshakeType) {
@@ -915,12 +916,12 @@ class CryptoManager {
         hypertyFrom:
         {
           hyperty: from,
-          userID: userInfo.assertion.userProfile.userURL,
+          userID: userInfo.userProfile.userURL,
 
           //privateKey: "getMyPublicKey",
           //publicKey: "getMyPrivateKey",
-          assertion: userInfo.assertion.assertion,
-          messageInfo: userInfo.assertion
+          assertion: userInfo.assertion,
+          messageInfo: userInfo
         },
         hypertyTo:
         {

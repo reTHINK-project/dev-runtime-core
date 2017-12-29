@@ -8,6 +8,10 @@ describe('Deliver Messages', function() {
     let msgResult;
 
     let mockRegistry = {
+      isLocal() {
+        return true;
+      },
+
       resolve(url) {
         return new Promise((resolve) => {
           //resolve to the same URL
@@ -37,8 +41,15 @@ describe('Deliver Messages', function() {
   });
 
   it('pipeline msg change', function(done) {
-    let mBus = new MessageBus();
-    mBus.pipeline.handlers = [
+
+    let mockRegistry = {
+      isLocal() {
+        return true;
+      }
+    };
+
+    let mBus = new MessageBus(mockRegistry);
+    mBus.pipelineOut.handlers = [
       function(ctx) {
         ctx.msg.token = '12345678';
         ctx.next();
@@ -57,6 +68,10 @@ describe('Deliver Messages', function() {
     let msgResult;
 
     let mockRegistry = {
+      isLocal() {
+        return true;
+      },
+
       resolve() {
         return new Promise((resolve) => {
           //resolve to default

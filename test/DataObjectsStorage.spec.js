@@ -24,7 +24,7 @@ describe('dataObjectsStorage', function() {
 
   before(() => {
 
-    storageManager = runtimeFactory.storageManager();
+    storageManager = runtimeFactory.storageManager('syncherManager:ObjectURLs');
     dataObjectsStorage = new DataObjectsStorage(storageManager, {});
 
   });
