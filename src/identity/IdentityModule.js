@@ -2,7 +2,7 @@
 import * as logger from 'loglevel';
 let log = logger.getLogger('IdentityModule');
 
-import { secondsSinceEpoch, divideURL, getUserIdentityDomain, parseMessageURL, stringify } from '../utils/utils.js';
+import { secondsSinceEpoch, divideURL, getUserIdentityDomain, parseMessageURL, stringify, deepClone } from '../utils/utils.js';
 import Identities from './Identities';
 import GuiFake from './GuiFake';
 
@@ -336,9 +336,9 @@ class IdentityModule {
   }
 
   /**
-  * Function to remove an identity 
+  * Function to remove an identity
   * @param {String}    userURL      userURL
-  * @return {Promise}  
+  * @return {Promise}
   */
 
   deleteIdentity(userURL) {
@@ -659,7 +659,7 @@ class IdentityModule {
 
           _this._getAccessToken(msg).then((token) => {
             log.log('[IdentityModule.getToken] access token ', token);
-            resolve(token);
+            resolve(deepClone(token));
           }).catch(err => { reject('[IdentityModule.getToken] Access Token error ' + err); });
         } else {
           _this._getValidToken(fromURL).then((token) => {
