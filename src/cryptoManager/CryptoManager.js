@@ -22,7 +22,7 @@ class CryptoManager {
 
   constructor(storageManager) {
     this.storageManager = storageManager;
-    this.userDefaultKeyRef = 'cryptoManager:userAsymmetricKey';
+    this.userDefaultKeyRef = 'userAsymmetricKey';
   }
 
   init(runtimeURL, runtimeCapabilities, storageManager, dataObjectsStorage, registry, coreDiscovery, idm, runtimeFactory) {

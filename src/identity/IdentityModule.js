@@ -2,7 +2,8 @@
 import * as logger from 'loglevel';
 let log = logger.getLogger('IdentityModule');
 
-import { secondsSinceEpoch, divideURL, getUserIdentityDomain, parseMessageURL, stringify } from '../utils/utils.js';
+import { secondsSinceEpoch, divideURL, parseMessageURL, stringify } from '../utils/utils.js';
+import { runtimeConfiguration } from '../runtime/runtimeConfiguration';
 import Identities from './Identities';
 import GuiFake from './GuiFake';
 
@@ -39,16 +40,18 @@ class IdentityModule {
   /**
   * This is the constructor to initialise the Identity Module it does not require any input.
   */
-  constructor(runtimeURL, runtimeCapabilities, storageManager, dataObjectsStorage, cryptoManager) {
+  constructor(runtimeURL, runtimeCapabilities, storageManager, dataObjectsStorage, cryptoManager, runtimeCatalogue) {
     let _this = this;
 
     if (!runtimeURL) throw new Error('runtimeURL is missing.');
     if (!storageManager) throw new Error('storageManager is missing');
     if (!cryptoManager) throw new Error('cryptoManager is missing');
+    if (!runtimeCatalogue) throw new Error('runtimeCatalogue is missing');
 
     _this._runtimeURL = runtimeURL;
 
-    //    _this.storageManager = storageManager;
+    _this._runtimeCatalogue = runtimeCatalogue;
+
     _this.dataObjectsStorage = dataObjectsStorage;
     _this._idmURL = _this._runtimeURL + '/idm';
     _this._guiURL = _this._runtimeURL + '/identity-gui';
@@ -73,6 +76,7 @@ class IdentityModule {
     //stores the association of the dataObject and the Hyperty registered within
     _this.dataObjectsIdentity = {}; // is this needed?
 
+    _this._listOfIdps = [];
 
     // variable to know if the GUI is deployed to choose the identity. if the real GUI is not deployed, a fake gui is deployed instead.
     _this.guiDeployed = false;
@@ -167,6 +171,10 @@ class IdentityModule {
     return _this._identities;
   }
 
+  get idps() {
+    return this._listOfIdps;
+  }
+
   getIdentitiesToChoose() {
     //    let identities = _this.identities.identifiers;
 
@@ -179,14 +187,40 @@ class IdentityModule {
 
     // todo: retrieve available idps from runtime catalogue
     // todo: enable oauth idps
-    let idps = [
-      { domain: 'google.com', type: 'idToken' },
-      { domain: 'microsoft.com', type: 'idToken' },
-      { domain: 'facebook.com', type: 'idToken' },
-      { domain: 'slack.com', type: 'idToken' }
-    ];
+    // let idps = [
+    //   { domain: 'google.com', type: 'idToken' },
+    //   { domain: 'microsoft.com', type: 'idToken' },
+    //   { domain: 'facebook.com', type: 'idToken' },
+    //   { domain: 'slack.com', type: 'idToken' }
+    // ];
 
-    return { identities: this.identities.identifiers, idps: idps };
+    return new Promise((resolve) => {
+
+      const url = runtimeConfiguration.catalogueURLs.idpProxy.prefix + this._domain + runtimeConfiguration.catalogueURLs.idpProxy.suffix;
+
+      Promise.all([
+        this.runtimeCapabilities.isAvailable('browser'),
+        this.runtimeCapabilities.isAvailable('node')])
+        .then((result) => {
+
+          const isBrowser = result[0];
+          const isNode = result[1];
+
+          const constraints = { constraints: {} };
+          constraints.constraints.node = isNode;
+          constraints.constraints.browser = isBrowser;
+
+          this._runtimeCatalogue.getTypeList(url, constraints).then((idps) => {
+            const listOfIdps = idps.map(key => { return {domain: key, type: 'idToken'}; });
+            log.info('[IdentityModule.getIdentityAssertion:getIdentitiesToChoose]', idps, listOfIdps);
+            this._listOfIdps = listOfIdps;
+            return resolve({ defaultIdentity: this.identities.defaultIdentity, identities: this.identities.identities, idps: listOfIdps });
+          });
+
+        });
+
+    });
+
   }
 
   /**
@@ -564,9 +598,10 @@ class IdentityModule {
     let _this = this;
 
     return new Promise((resolve, reject) => {
-      let identitiesInfo = _this.getIdentitiesToChoose();
 
-      _this.requestIdentityToGUI(identitiesInfo.identities, identitiesInfo.idps).then(value => {
+      this.getIdentitiesToChoose().then((identitiesInfo) => {
+        return _this.requestIdentityToGUI(identitiesInfo.identities, identitiesInfo.idps);
+      }).then(value => {
 
         if (value.type === 'identity') {
 
@@ -719,10 +754,10 @@ class IdentityModule {
 
   _getAccessToken(msg) {
     let _this = this;
-    let url = msg.to;
-    let token;
 
     return new Promise((resolve, reject) => {
+      let url = msg.to;
+      let token;
 
       if (!msg.hasOwnProperty('body')) {
         return reject('[IdentityModule._getAccessToken] missing mandatory msg body: ', msg);
@@ -745,7 +780,7 @@ class IdentityModule {
         token = _this.identities.getAccessToken(domainToCheck, resources);
       } catch (e) {
         return reject('[IdentityModule._getAccessToken] Access Token error ' + err);
-      };
+      }
 
       if (!token) {
         _this._getNewAccessToken(domainToCheck, resources).then((token) => {
@@ -759,7 +794,7 @@ class IdentityModule {
 
         log.log('[Identity.IdentityModule.getAccessToken] found  Access Token ', token);
 
-        if (timeNow >= token.expires) return resolve(_this._getNewAccessToken(domain, resources));
+        if (timeNow >= token.expires) return resolve(_this._getNewAccessToken(domainToCheck, resources));
         else return resolve(token);
       }
 
@@ -769,7 +804,7 @@ class IdentityModule {
   _inProgressAccessToken(domain, resources) {
     this.identities.watchingYou.observe('accessTokens', (change) => {
 
-      log.log('[IdentityModule._inProgressAccessToken] accessTokens changed ' + _this.identities.accessTokens);
+      log.log('[IdentityModule._inProgressAccessToken] accessTokens changed ' + this.identities.accessTokens);
 
       let keypath = change.keypath;
 
@@ -789,7 +824,7 @@ class IdentityModule {
   _getNewAccessToken(domain, resources) {
     let _this = this;
 
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
 
       _this.identities.setAccessTokenInProgress(domain);
 
@@ -917,7 +952,7 @@ class IdentityModule {
     log.log('[generateAssertion:idpDomain]', idpDomain);
     let _this = this;
 
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
       log.log('[IdentityModule:sendGenerateMessage:sendGenerateMessage]', usernameHint);
       _this.sendGenerateMessage(contents, origin, usernameHint, idpDomain).then((result) => {
 
@@ -968,7 +1003,7 @@ class IdentityModule {
       }
     };
 
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
       try {
         _this._messageBus.postMessage(message, (result) => {
           if (result.body.code === 200) {
@@ -989,11 +1024,25 @@ class IdentityModule {
     _this._messageBus.addListener(_this._idmURL, (msg) => {
       let funcName = msg.body.method;
 
+      log.log('[IdentityModule:addGUIListeners]', msg, msg.body, funcName);
+
       let returnedValue;
+
       if (funcName === 'deployGUI') {
         returnedValue = _this.deployGUI();
       } else if (funcName === 'getIdentitiesToChoose') {
-        returnedValue = _this.getIdentitiesToChoose();
+        _this.getIdentitiesToChoose().then((result) => {
+          // if the function requested is not a promise
+          let value = { type: 'execute', value: result, code: 200 };
+          let replyMsg = { id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value };
+          try {
+            _this._messageBus.postMessage(replyMsg);
+          } catch (err) {
+            log.error('On addGUIListeners from if storeIdentity method postMessage error: ' + err);
+          }
+        });
+        return;
+
       } else if (funcName === 'unregisterIdentity') {
         let email = msg.body.params.email;
         returnedValue = _this.unregisterIdentity(email);
@@ -1078,7 +1127,7 @@ class IdentityModule {
     log.log('[IdentityModule._getValidToken]:hypertyURL', hypertyURL);
     let _this = this;
     return new Promise((resolve, reject) => {
-      _this.getIdToken(hypertyURL).then(function (assertion) {
+      _this.getIdToken(hypertyURL).then(function(assertion) {
         log.log('[IdentityModule._getValidToken] retrieved IdAssertion', assertion);
         let timeNow = secondsSinceEpoch();
 

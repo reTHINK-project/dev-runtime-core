@@ -37,7 +37,7 @@ import PEP from '../policy/PEP';
 import MessageBus from '../bus/MessageBus';
 import { generateGUID } from '../utils/utils';
 import AddressAllocation from '../allocation/AddressAllocation';
-import * as cryptoManager from '../cryptoManager/CryptoManager';
+import cryptoManager from '../cryptoManager/CryptoManager';
 
 import Loader from './Loader';
 import { storage } from './Storage';
@@ -271,7 +271,7 @@ class RuntimeUA {
         this.loader = new Loader(this.runtimeURL, this.runtimeConfiguration, this.descriptorInstance);
 
         // Instantiate the identity Module
-        this.identityModule = new IdentityModule(this.runtimeURL, this.runtimeCapabilities, this.storages.identity, this._dataObjectsStorage, cryptoManager.default);
+        this.identityModule = new IdentityModule(this.runtimeURL, this.runtimeCapabilities, this.storages.identity, this._dataObjectsStorage, cryptoManager, this.runtimeCatalogue);
 
         // Use the sandbox factory to create an AppSandbox;
         // In the future can be decided by policyEngine if we need
@@ -300,7 +300,7 @@ class RuntimeUA {
         this.identityManager = new IdentityManager(this.identityModule);
 
         // initialise the CryptoManager
-        cryptoManager.default.init(this.runtimeURL, this.runtimeCapabilities, this.storages.identity, this._dataObjectsStorage, this.registry, this.coreDiscovery, this.identityModule, this.runtimeFactory);
+        cryptoManager.init(this.runtimeURL, this.runtimeCapabilities, this.storages.cryptoManager, this._dataObjectsStorage, this.registry, this.coreDiscovery, this.identityModule, this.runtimeFactory);
 
         // Instantiate the Graph Connector
         this.graphConnector = process.env.MODE !== 'light' ? new GraphConnector(this.runtimeURL, this.messageBus, this.storageManager) : null;
@@ -315,7 +315,7 @@ class RuntimeUA {
           this.messageBus.postMessage(msg);
         });
 
-        cryptoManager.default.messageBus = this.messageBus;
+        cryptoManager.messageBus = this.messageBus;
 
         // Register messageBus on Registry
         this.registry.messageBus = this.messageBus;
@@ -370,7 +370,7 @@ class RuntimeUA {
         const prepareComponents = [];
         prepareComponents.push(this.subscriptionManager.init());
         prepareComponents.push(this.identityModule.init());
-        prepareComponents.push(cryptoManager.default.loadSessionKeys());
+        prepareComponents.push(cryptoManager.loadSessionKeys());
 
         Promise.all(prepareComponents).then((result) => {
           if (result.length === 3) {
