@@ -1,16 +1,26 @@
 import * as logger from 'loglevel';
 let log = logger.getLogger('CryptoManager');
 
-import {chatkeysToStringCloner, encode, decode, decodeToUint8Array, parseToUint8Array, filterMessageToHash} from '../utils/utils.js';
+import {chatkeysToStringCloner, encode, decode, decodeToUint8Array,
+        parseToUint8Array, filterMessageToHash} from '../utils/utils.js';
 
+
+/**
+* This class contains the handshake protocol, used to exchange session keys between
+*  two user, after their identity is validate.
+*
+*/
 class HandShakeProtocol {
 
-  constructor(chatKeys, crypto) {
+  constructor(chatKeys, crypto, idm, sessionKeys, storage) {
     this.chatKeys = chatKeys;
     this.crypto = crypto;
+    this.idm = idm;
+    this.dataObjectSessionKeys = sessionKeys;
+    this.storageManager = storage;
   }
 
-  startHandShake(message, chatKeys, messageBus) {
+  startHandShake(message, chatKeys) {
     let _this = this;
     return new Promise(function(resolve, reject) {
       chatKeys.keys.fromRandom = _this.crypto.generateRandom();
@@ -59,20 +69,15 @@ class HandShakeProtocol {
     });
   }
 
-  receiverHello(message, chatKeys) {
+  receiverHello(message, chatKeys, privateKey) {
     let _this = this;
     let value = {};
-    let privateKeyHolder;
     let iv;
     return new Promise(function(resolve, reject) {
       log.log('receiverHello');
-      _this.getMyPrivateKey().then(privateKey =>{
-        privateKeyHolder = privateKey;
+      chatKeys.handshakeHistory.receiverHello = filterMessageToHash(message);
 
-        chatKeys.handshakeHistory.receiverHello = filterMessageToHash(message);
-
-        return _this._idm.validateAssertion(message.body.identity.assertion, undefined, message.body.identity.idp.domain);
-      }).then((value) => {
+      _this.idm.validateAssertion(message.body.identity.assertion, undefined, message.body.identity.idp.domain).then((value) => {
 
       //TODO remove later this verification as soon as all the IdP proxy are updated in the example
         let encodedpublicKey = (typeof value.contents === 'string') ? value.contents : value.contents.nonce;
@@ -141,7 +146,7 @@ class HandShakeProtocol {
         };
 
         let messageToHash = filterMessageToHash(messageStructure, chatKeys.keys.premasterKey, chatKeys.hypertyFrom.messageInfo);
-        return _this.crypto.signRSA(privateKeyHolder, encode(chatKeys.handshakeHistory) + encode(messageToHash));
+        return _this.crypto.signRSA(privateKey, encode(chatKeys.handshakeHistory) + encode(messageToHash));
       }).then(signature => {
 
         value.signature = encode(signature);
@@ -164,22 +169,17 @@ class HandShakeProtocol {
   }
 
 
-  senderCertificate(message, chatKeys) {
+  senderCertificate(message, chatKeys, privateKey) {
     let _this = this;
     let iv;
     let filteredMessage;
-    let privateKeyHolder;
     let value = {};
     return new Promise(function(resolve, reject) {
       log.log('senderCertificate');
 
       let receivedValue = decode(message.body.value);
 
-      _this.getMyPrivateKey().then(privateKey =>{
-        privateKeyHolder = privateKey;
-
-        return _this._idm.validateAssertion(message.body.identity.assertion, undefined, message.body.identity.idp.domain);
-      }).then((value) => {
+      _this.idm.validateAssertion(message.body.identity.assertion, undefined, message.body.identity.idp.domain).then((value) => {
         let encryptedPMS = decodeToUint8Array(receivedValue.assymetricEncryption);
 
         //TODO remove later this verification as soon as all the IdP proxy are updated in the example
@@ -190,7 +190,7 @@ class HandShakeProtocol {
         chatKeys.hypertyTo.publicKey = senderPublicKey;
         chatKeys.hypertyTo.userID    = value.contents.email;
 
-        return _this.crypto.decryptRSA(privateKeyHolder, encryptedPMS);
+        return _this.crypto.decryptRSA(privateKey, encryptedPMS);
 
       }, (error) => {
       // log.log(error);
@@ -290,7 +290,7 @@ class HandShakeProtocol {
 
     let _this = this;
     let iv;
-    let value;
+  let value = {};
     let hash;
     return new Promise(function(resolve, reject) {
 
@@ -338,7 +338,7 @@ class HandShakeProtocol {
 
     let _this = this;
     let iv;
-    let value;
+    let value = {};
     let hash;
     return new Promise(function(resolve, reject) {
 

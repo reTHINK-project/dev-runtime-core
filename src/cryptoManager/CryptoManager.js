@@ -45,23 +45,18 @@ class CryptoManager {
     _this._runtimeFactory = runtimeFactory;
     _this._domain = divideURL(_this._runtimeURL).domain;
     _this.chatKeys = {};
+    _this._idm = idm;
 
-    _this.crypto = new Crypto(_this._runtimeFactory);
-    _this.handShakeProtocol = new HandShakeProtocol(_this.chatKeys, _this.crypto);
-
-    // hashTable to store all the crypto information between two hyperties
-
-    // hashTable to store the symmetric keys to be used in the chat group
     _this.dataObjectSessionKeys = {};
+    _this.crypto = new Crypto(_this._runtimeFactory);
+    _this.handShakeProtocol = new HandShakeProtocol(_this.chatKeys, _this.crypto, _this._idm,
+                                                    _this.dataObjectSessionKeys, _this.storageManager);
 
     //failsafe to enable/disable all the criptographic functions
     _this.isToUseEncryption = true;
 
     _this._registry = registry;
     _this._coreDiscovery = coreDiscovery;
-
-    _this._idm = idm;
-
   }
 
   //******************* GET AND SET METHODS *******************
@@ -853,13 +848,17 @@ class CryptoManager {
           break;
 
         case 'receiverHello':
-          _this.handShakeProtocol.receiverHello(message, chatKeys).then(result => { resolve(result); })
-            .catch(err => { reject(err); });
+          _this.getMyPrivateKey().then(privateKey =>{
+            _this.handShakeProtocol.receiverHello(message, chatKeys, privateKey).then(result => { resolve(result); })
+              .catch(err => { reject(err); });
+          });
           break;
 
         case 'senderCertificate':
-          _this.handShakeProtocol.senderCertificate(message, chatKeys).then(result => { resolve(result); })
-            .catch(err => { reject(err); });
+          _this.getMyPrivateKey().then(privateKey =>{
+            _this.handShakeProtocol.senderCertificate(message, chatKeys, privateKey).then(result => { resolve(result); })
+              .catch(err => { reject(err); });
+          });
           break;
 
         case 'receiverFinishedMessage':
