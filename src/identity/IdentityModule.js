@@ -251,8 +251,6 @@ class IdentityModule {
 
   }
 
-
-
   /**
   * Function that fetch an identityAssertion from a user.
   *
@@ -262,7 +260,7 @@ class IdentityModule {
     log.log('[IdentityModule.getIdentityAssertion:identityBundle]', identityBundle);
     let _this = this;
 
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
 
       //CHECK whether is browser environment or nodejs
       //if it is browser, then create a fake identity
@@ -370,9 +368,9 @@ class IdentityModule {
   }
 
   /**
-  * Function to remove an identity 
+  * Function to remove an identity
   * @param {String}    userURL      userURL
-  * @return {Promise}  
+  * @return {Promise}
   */
 
   deleteIdentity(userURL) {
@@ -385,7 +383,7 @@ class IdentityModule {
   * Function to unregister an identity from the emailsList array and not show in to the GUI
   * @param {String}    email      email
   */
-/*  unregisterIdentity(email) {
+  /*  unregisterIdentity(email) {
     let _this = this;
 
     for (let e in _this.emailsList) {
@@ -407,7 +405,7 @@ class IdentityModule {
     log.log('[IdentityModule.requestIdentityToGUI:idps]', idps);
 
     let _this = this;
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
 
       //condition to check if the real GUI is deployed. If not, deploys a fake gui
       if (_this.guiDeployed === false) {
@@ -475,7 +473,7 @@ class IdentityModule {
         } else {
           reject('Error on obtaining Identity');
         }
-      }).catch(function (err) {
+      }).catch(function(err) {
         log.log(err);
         reject(err);
 
@@ -493,7 +491,7 @@ class IdentityModule {
       let publicKey;
 
       //generates the RSA key pair
-      _this._crypto.getMyPublicKey().then(function (key) {
+      _this._crypto.getMyPublicKey().then(function(key) {
 
         log.log('[callNodeJsGenerateMethods:key]', key);
 
@@ -503,18 +501,18 @@ class IdentityModule {
         log.log('generateAssertion:no_hint');
         return _this.generateAssertion(publicKey, origin, '', idp);
 
-      }).then(function (url) {
+      }).then(function(url) {
         _this.myHint = url;
         log.log('generateAssertion:hint');
         return _this.generateAssertion(publicKey, origin, url, idp);
 
-      }).then(function (value) {
+      }).then(function(value) {
         if (value) {
           resolve(value);
         } else {
           reject('Error on obtaining Identity');
         }
-      }).catch(function (err) {
+      }).catch(function(err) {
         log.error(err);
         reject(err);
       });
@@ -563,7 +561,7 @@ class IdentityModule {
     return new Promise((resolve, reject) => {
 
       //generates the RSA key pair
-      _this._crypto.getMyPublicKey().then(function (key) {
+      _this._crypto.getMyPublicKey().then(function(key) {
         let publicKey = stringify(key);
 
         _this.sendGenerateMessage(publicKey, origin, idHint, idp).then((response) => {
@@ -632,8 +630,6 @@ class IdentityModule {
   }
 
 
-
-
   callIdentityModuleFunc(methodName, parameters) {
     log.log('[callIdentityModuleFunc:methodName]', methodName);
     log.log('[callIdentityModuleFunc:parameters]', parameters);
@@ -672,7 +668,7 @@ class IdentityModule {
     let _this = this;
     let fromURL = msg.from;
     let toUrl = msg.to;
-    if ( msg.hasOwnProperty('body') && msg.body.hasOwnProperty('source')) {
+    if (msg.hasOwnProperty('body') && msg.body.hasOwnProperty('source')) {
       fromURL = msg.body.source;
     }
 
@@ -684,11 +680,11 @@ class IdentityModule {
       fromURL = msg.body.subscriber;
     }
 
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
       log.log('[IdentityModule.getToken] for msg ', msg);
 
       //log.log('toUrl', toUrl);
-      _this.registry.isLegacy(toUrl).then(function (result) {
+      _this.registry.isLegacy(toUrl).then(function(result) {
         // log.log('[Identity.IdentityModule.getToken] isLEGACY: ', result);
         if (result) {
 
@@ -706,7 +702,6 @@ class IdentityModule {
   }
 
 
-
   /**
   * get an Id Token for a HypertyURL
   * @param  {String}  hypertyURL     the Hyperty address
@@ -715,7 +710,7 @@ class IdentityModule {
   getIdToken(hypertyURL) {
     log.info('getIdToken:hypertyURL ', hypertyURL);
     let _this = this;
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
       let splitURL = hypertyURL.split('://');
       let userURL;
       if (splitURL[0] !== 'hyperty') { // it is a Data Object URL
@@ -840,8 +835,9 @@ class IdentityModule {
 
       //let's first get the authorisation URL from the Idp Proxy
       _this._messageBus.postMessage(message, (res) => {
-        if (res.body.code > 299)
+        if (res.body.code > 299) {
           return reject('[IdentityModule._getNewAccessToken] Error on getAccessTokenAuthorisationEndpoint from IdP Proxy: ', res.body.desc);
+        }
 
         // let's ask the user for authorisation
         _this.callIdentityModuleFunc('openPopup', { urlreceived: res.body.value }).then((authorisation) => {
@@ -1178,7 +1174,7 @@ class IdentityModule {
         } else {
           resolve(assertion);
         }
-      }).catch(function (error) {
+      }).catch(function(error) {
         log.error('[IdentityModule.getValidToken] error on getIdToken', error);
         reject(error);
       });
@@ -1194,7 +1190,7 @@ class IdentityModule {
     log.info('_getHypertyFromDataObject:dataObjectURL', dataObjectURL);
     let _this = this;
 
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
 
       let splitedURL = divideURL(dataObjectURL);
       let domain = splitedURL.domain;
