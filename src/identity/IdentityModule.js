@@ -2,8 +2,9 @@
 import * as logger from 'loglevel';
 let log = logger.getLogger('IdentityModule');
 
-import { secondsSinceEpoch, divideURL, parseMessageURL, stringify } from '../utils/utils.js';
+import { secondsSinceEpoch, divideURL, parseMessageURL, stringify, deepClone } from '../utils/utils.js';
 import { runtimeConfiguration } from '../runtime/runtimeConfiguration';
+
 import Identities from './Identities';
 import GuiFake from './GuiFake';
 
@@ -690,7 +691,7 @@ class IdentityModule {
 
           _this._getAccessToken(msg).then((token) => {
             log.log('[IdentityModule.getToken] access token ', token);
-            resolve(token);
+            resolve(deepClone(token));
           }).catch(err => { reject('[IdentityModule.getToken] Access Token error ' + err); });
         } else {
           _this._getValidToken(fromURL).then((token) => {
