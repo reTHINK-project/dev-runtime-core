@@ -32,7 +32,7 @@ import AddressAllocation from '../allocation/AddressAllocation';
 import HypertyInstance from './HypertyInstance';
 import P2PConnectionResolve from './P2PConnectionResolve';
 
-import { divideURL, isHypertyURL, isURL, isUserURL, generateGUID, getUserIdentityDomain, isBackendServiceURL, deepClone } from '../utils/utils.js';
+import { divideURL, isHypertyURL, isURL, isUserURL, generateGUID, getUserIdentityDomain, isBackendServiceURL, deepClone, removePathFromURL } from '../utils/utils.js';
 
 import 'proxy-observe';
 import { WatchingYou } from 'service-framework/dist/Utils';
@@ -240,10 +240,29 @@ class Registry {
       let hyperty = _this.hypertiesList[index];
 
       if (hyperty.hypertyURL === hypertyURL) {
-        userURL = hyperty.user.userURL;
+        return hyperty.user.userURL;
       }
     }
     return userURL;
+  }
+
+  /**
+  * This function returns the user associated to the hyperty URL
+  * @param    {String}    dataObjectURL      dataObjectURL URL
+  * @return   {String}    userURL         user URL
+  */
+  getDataObjectReporter(dataObjectURL) {
+
+    let _this = this;
+    let DOurl = removePathFromURL(dataObjectURL);
+    for (let index in _this.dataObjectList) {
+      let dataObject = _this.dataObjectList[index];
+
+      if (dataObject.url === DOurl) {
+        return dataObject.reporter;
+      }
+    }
+    return null;
   }
 
   /**
@@ -902,7 +921,9 @@ class Registry {
                         log.error(e);
                         reject(e);
                       }
-                    } else throw new Error('Failed to register an Hyperty: ', reply);
+                    } else {
+                      throw new Error('Failed to register an Hyperty: ', reply);
+                    }
 
                   });
 
