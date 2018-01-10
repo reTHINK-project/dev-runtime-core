@@ -173,6 +173,110 @@ class PEP {
 
     });
   }
+  authoriseSync(message) {
+    let result;
+    message.body = message.body || {};
+    if (this._isToVerify(message)) {
+      let isIncoming = this._isIncomingMessage(message);
+      message = this.context.prepareForEvaluation(message, isIncoming);
+      result = this.pdp.evaluatePolicies(message, isIncoming);
+      if (result === 'Not Applicable') {
+        result = this.context.defaultBehaviour;
+        message.body.auth = false;
+      }
+      this.actionsService.enforcePolicies(message, isIncoming);
+      message = this.context.prepareToForward(message, isIncoming, result);
+      if (result) {
+        message.body.auth = (message.body.auth === undefined) ? true : message.body.auth;
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      result = this.context.defaultBehaviour;
+      if (result) {
+        message.body.auth = false;
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }
+
+  _isIncomingMessage(message) {
+    let from;
+
+    if (message.type === 'forward') {
+      log.info('[PEP - isIncomingMessage] - message.type: ', message.type);
+      from = message.body.from;
+    } else if (message.body.hasOwnProperty('source') && message.body.source) {
+      log.info('[PEP - isIncomingMessage] - message.body.source: ', message.body.source);
+      from = message.body.source;
+    } else if (message.body.hasOwnProperty('subscriber') && message.body.subscriber) {
+      //TODO: this subscriber validation should not exist, because is outdated
+      //TODO: the syncher and syncher manager not following the correct spec;
+      log.info('[PEP - isIncomingMessage] - message.body.subscriber: ', message.body.subscriber);
+      from = message.body.subscriber;
+    }  else if (message.body.hasOwnProperty('reporter') && message.body.reporter) {
+      //TODO: this subscriber validation should not exist, because is outdated
+      //TODO: the syncher and syncher manager not following the correct spec;
+      log.info('[PEP - isIncomingMessage] - message.body.reporter: ', message.body.reporter);
+      from = message.body.reporter;
+    } else {
+      log.info('[PEP - isIncomingMessage] - message.from ', message.from);
+      from = message.from;
+    }
+
+    log.info('[PEP - isIncomingMessage] - check if isLocal: ', from);
+    return !this.context.isLocal(from);
+  }
+
+  /**
+  * Identifies the messages to be verified by the Policy Engine
+  * @param    {Message}   message
+  * @returns  {boolean}   returns true if the message requires encryption/decryption
+  *                       or if its type equals 'handshake'; false otherwise
+  */
+  _isToVerify(message) {
+    let schemasToIgnore = ['domain', 'domain-idp', 'global', 'hyperty-runtime', 'runtime'];
+    let splitFrom = (message.from).split('://');
+    let fromSchema = splitFrom[0];
+    let splitTo = (message.to).split('://');
+    let toSchema =  splitTo[0];
+    let from = message.from;
+    let to = message.to;
+
+    // Signalling messages between P2P Stubs don't have to be verified. FFS
+
+    if (message.body && message.body.source) {
+      from = message.body.source;
+    }
+
+    if (message.body && message.body.subscriber) {
+      from = message.body.subscriber;
+    }
+
+    if (from.indexOf('/p2phandler/') !== -1 || from.indexOf('/p2prequester/') !== -1 || to.indexOf('/p2phandler/') !== -1 || to.indexOf('/p2prequester/') !== -1) {
+      return false;
+    }
+
+    // hack to disable Identity verification for messages coming from legacy domains while solution is not implemented
+
+    if (this.context.isInterworkingProtoStub(from)) {
+      return false;
+    }
+
+    if (message.from === fromSchema || message.to === toSchema || message.type === 'read' || message.type === 'response' || (isHypertyURL(message.from) && message.type === 'delete')) {
+      return false;
+    } else {
+      return schemasToIgnore.indexOf(fromSchema) === -1 || schemasToIgnore.indexOf(toSchema) === -1;
+    }
+  }
+
+
+
+
+
 
 
   removePolicy(source, key) {
