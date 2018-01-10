@@ -151,25 +151,25 @@ class PEP {
       message.body = message.body || {};
       let _this = this;
 
-          let result = _this.pdp.evaluatePolicies(message, isIncoming);
-          if (result === 'Not Applicable') {
-            result = _this.context.defaultBehaviour;
-            message.body.auth = false;
+      let result = _this.pdp.evaluatePolicies(message, isIncoming);
+      if (result === 'Not Applicable') {
+        result = _this.context.defaultBehaviour;
+        message.body.auth = false;
+      }
+      _this.actionsService.enforcePolicies(message, isIncoming).then(messages => {
+        for (let i in messages) {
+          message = messages[i];
+          if (result) {
+            message.body.auth = (message.body.auth === undefined) ? true : message.body.auth;
+            resolve(message);
+          } else {
+            let errorMessage = { body: { code: 403, description: 'Blocked by policy' }, from: message.to, to: message.from, type: 'response' };
+            reject(errorMessage);
           }
-          _this.actionsService.enforcePolicies(message, isIncoming).then(messages => {
-            for (let i in messages) {
-              message = messages[i];
-                if (result) {
-                  message.body.auth = (message.body.auth === undefined) ? true : message.body.auth;
-                  resolve(message);
-                } else {
-                  let errorMessage = { body: { code: 403, description: 'Blocked by policy' }, from: message.to, to: message.from, type: 'response' };
-                  reject(errorMessage);
-                }
-            }
-          }, (error) => {
-            reject(error);
-          });
+        }
+      }, (error) => {
+        reject(error);
+      });
 
     });
   }
@@ -181,16 +181,9 @@ class PEP {
       message = this.context.prepareForEvaluation(message, isIncoming);
       result = this.pdp.evaluatePolicies(message, isIncoming);
       if (result === 'Not Applicable') {
-        result = this.context.defaultBehaviour;
-        message.body.auth = false;
-      }
-      this.actionsService.enforcePolicies(message, isIncoming);
-      message = this.context.prepareToForward(message, isIncoming, result);
-      if (result) {
-        message.body.auth = (message.body.auth === undefined) ? true : message.body.auth;
-        return true;
-      } else {
         return false;
+      } else {
+        return true;
       }
     } else {
       result = this.context.defaultBehaviour;
@@ -272,11 +265,6 @@ class PEP {
       return schemasToIgnore.indexOf(fromSchema) === -1 || schemasToIgnore.indexOf(toSchema) === -1;
     }
   }
-
-
-
-
-
 
 
   removePolicy(source, key) {
