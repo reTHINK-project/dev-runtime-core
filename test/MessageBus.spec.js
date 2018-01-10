@@ -13,6 +13,9 @@ describe('MessageBus', function() {
           //resolve to the same URL
           resolve(url);
         });
+      },
+      isLocal() {
+        return true;
       }
     };
 
@@ -37,20 +40,28 @@ describe('MessageBus', function() {
   });
 
   it('pipeline msg change', function(done) {
-    let mBus = new MessageBus();
-    mBus.pipeline.handlers = [
+
+    let mockRegistry = {
+      isLocal() {
+        return false;
+      }
+    };
+
+    let mBus = new MessageBus(mockRegistry);
+    mBus.pipelineIn.handlers = [
       function(ctx) {
         ctx.msg.token = '12345678';
         ctx.next();
       }
     ];
 
-    mBus.addListener('hyper-2', (msg) => {
-      expect(msg).to.eql({ id: 1, type: 'ping', token: '12345678', from: 'hyper-1', to: 'hyper-2' });
+    mBus.addListener('hyperty://456', (msg) => {
+      console.log('[MessageBus Test] pipeline msg change: ',msg);
+      expect(msg).to.eql({ id: 1, type: 'ping', token: '12345678', from: 'hyperty://123', to: 'hyperty://456' });
       done();
     });
 
-    mBus.postMessage({ type: 'ping', from: 'hyper-1', to: 'hyper-2' });
+    mBus.postMessage({ type: 'ping', from: 'hyperty://123', to: 'hyperty://456' });
   });
 
   it('sending using external system', function(done) {
@@ -62,6 +73,9 @@ describe('MessageBus', function() {
           //resolve to default
           resolve('protostub');
         });
+      },
+      isLocal() {
+        return false;
       }
     };
 
@@ -89,7 +103,13 @@ describe('MessageBus', function() {
   it('publish unique messages', function(done) {
     let result = { obj1: 0, obj2: 0 };
 
-    let msgBus = new MessageBus();
+    let mockRegistry = {
+      isLocal() {
+        return true;
+      }
+    };
+
+    let msgBus = new MessageBus(mockRegistry);
     msgBus._onPostMessage = (msg) => {
       console.log(msg);
       result[msg.to]++;
@@ -109,5 +129,34 @@ describe('MessageBus', function() {
         done();
       });
     });
+  });
+  it('sending without callback and without pipeline processing', function(done) {
+    let mockRegistry = {
+      resolve() {
+        return new Promise((resolve) => {
+          //resolve to default
+          resolve('error');
+        });
+      },
+      isLocal() {
+        return true;
+      }
+    };
+
+    let mBus = new MessageBus(mockRegistry);
+
+    let msg = { type: 'create', from: 'runtime://local/123/idm', to: 'runtime://local/123/identity-gui' };
+
+    mBus.addListener('runtime://local/123/identity-gui', (msg) => {
+
+      mBus.postMessage({type: 'response', id: msg.id, from: msg.to, to: msg.from, body: {code: 200}});
+    });
+
+    mBus.postMessage(msg, (reply) => {
+       console.log('[MessageBus.test sending without callback and without pipeline processing] reply:', reply);
+       mBus.removeResponseListener(msg.to, reply.id);
+      expect(reply).to.eql({ id: 1, type: 'response', from: 'runtime://local/123/identity-gui', to: 'runtime://local/123/idm' , body: {code: 200}});
+      done();
+    }, false);
   });
 });

@@ -39,11 +39,11 @@ class MiniBus extends Bus {
    * @param  {Callback} responseCallback Optional callback if a response is expected from the request. A response will be always sent, even if it is a "Timeout".
    * @return {number}                  the Message id
    */
-  postMessage(inMsg, responseCallback) {
+  postMessage(inMsg, responseCallback, timeout) {
     let _this = this;
 
     _this._genId(inMsg);
-    _this._responseCallback(inMsg, responseCallback);
+    _this._responseCallback(inMsg, responseCallback, timeout);
 
     //always send to external (to core MessageBus)
     _this._onPostMessage(inMsg);

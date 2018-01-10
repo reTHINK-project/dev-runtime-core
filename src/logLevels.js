@@ -20,12 +20,15 @@ const q = log.getLogger('ObserverObject');
 const r = log.getLogger('ReporterObject');
 const s = log.getLogger('SynSubscription');
 const t = log.getLogger('SyncherManager');
+const u = log.getLogger('IdentityManager');
+const v = log.getLogger('CryptoManager');
+const x = log.getLogger('Pipeline');
 
 
 export { log };
 
 /**
-  5 actual logging methods, ordered and available as:
+  0 actual logging methods, ordered and available as:
 
       0 - log.trace(msg)
       1 - log.debug(msg)
@@ -45,10 +48,10 @@ export { log };
 
 
 // address-allocation
-a.setLevel(5);
+a.setLevel(3);
 
 // Bus
-b.setLevel(0);
+b.setLevel(3);
 
 // MessageBus
 c.setLevel(0);
@@ -60,46 +63,55 @@ d.setLevel(5);
 e.setLevel(5);
 
 // HypertyResourcesStorage
-f.setLevel(0);
+f.setLevel(3);
 
 // IdentityModule
-g.setLevel(1);
+g.setLevel(0);
 
 // PEP
-h.setLevel(5);
+h.setLevel(3);
 
 // P2PConnectionResolve
-i.setLevel(0);
+i.setLevel(3);
 
 // Registry
-j.setLevel(0);
+j.setLevel(3);
 
 // RuntimeUA
-k.setLevel(0);
+k.setLevel(3);
 
 // Loader
-l.setLevel(0);
+l.setLevel(3);
 
 // Descriptors
-m.setLevel(0);
+m.setLevel(3);
 
 // DataObjectsStorage
-n.setLevel(5);
+n.setLevel(3);
 
 // Subscription
-o.setLevel(5);
+o.setLevel(3);
 
 // SubscriptionManager
-p.setLevel(5);
+p.setLevel(3);
 
 // ObserverObject
-q.setLevel(1);
+q.setLevel(3);
 
 // ReporterObject
-r.setLevel(1);
+r.setLevel(3);
 
 // SynSubscription
-s.setLevel(1);
+s.setLevel(3);
 
 // SyncherManager
-t.setLevel(1);
+t.setLevel(3);
+
+// IdentityManager
+u.setLevel(3);
+
+// CryptoManager
+v.setLevel(3);
+
+// Pipeline
+x.setLevel(3);

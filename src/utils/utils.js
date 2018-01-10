@@ -41,7 +41,7 @@
 export function divideURL(url) {
 
   function recurse(value) {
-    const regex = /([a-zA-Z-]*)(:\/\/(?:\.)?|:)([-a-zA-Z0-9@:%._\+~#=]{2,256})([-a-zA-Z0-9@:%._\+~#=\/]*)/gi;
+    const regex = /([a-zA-Z-]*)(:\/\/(?:\.)?|:)([-a-zA-Z0-9@:%._+~#=]{2,256})([-a-zA-Z0-9@:%._+~#=/]*)/gi;
     const subst = '$1,$3,$4';
     let parts = value.replace(regex, subst).split(',');
     return parts;
@@ -63,13 +63,13 @@ export function divideURL(url) {
     return result;
   }
 
-	// check if the url has the scheme and includes an @
+  // check if the url has the scheme and includes an @
   if (parts[0] === url && parts[0].includes('@')) {
     let scheme = parts[0] === url ? 'smtp' : parts[0];
     parts = recurse(scheme + '://' + parts[0]);
   }
 
-	// if the domain includes an @, divide it to domain and identity respectively
+  // if the domain includes an @, divide it to domain and identity respectively
   if (parts[1].includes('@')) {
     parts[2] = parts[0] + '://' + parts[1];
     parts[1] = parts[1].substr(parts[1].indexOf('@') + 1);
@@ -95,6 +95,11 @@ export function divideURL(url) {
 export function emptyObject(object) {
   return Object.keys(object).length > 0 ? false : true;
 }
+
+export function secondsSinceEpoch() {
+  return Math.floor(Date.now() / 1000);
+}
+
 
 /**
  * Make a COPY of the original data
@@ -341,7 +346,7 @@ export function splitObjectURL(dataObjectURL) {
 
 export function checkAttribute(path) {
 
-  let regex = /((([a-zA-Z]+):\/\/([0-9a-zA-Z][-\w]*[0-9a-zA-Z]\.)+[a-zA-Z]{2,9})\/[a-zA-Z0-9\.]+@[a-zA-Z0-9]+(\-)?[a-zA-Z0-9]+(\.)?[a-zA-Z0-9]{2,10}?\.[a-zA-Z]{2,10})(.+(?=.identity))?/gm;
+  let regex = /((([a-zA-Z]+):\/\/([0-9a-zA-Z][-\w]*[0-9a-zA-Z]\.)+[a-zA-Z]{2,9})\/[a-zA-Z0-9.]+@[a-zA-Z0-9]+(-)?[a-zA-Z0-9]+(\.)?[a-zA-Z0-9]{2,10}?\.[a-zA-Z]{2,10})(.+(?=.identity))?/gm;
 
   let list = [];
   let final = [];
@@ -430,4 +435,153 @@ export function isEmpty(obj) {
   }
 
   return JSON.stringify(obj) === JSON.stringify({});
+}
+
+export function chatkeysToStringCloner(sessionKeys) {
+  let dataObjectSessionKeysClone = {};
+  let fields = Object.keys(sessionKeys);
+  if (fields) {
+    try {
+      for (let i = 0; i <  fields.length; i++) {
+        let field = fields[i];
+        dataObjectSessionKeysClone[field] = {};
+        dataObjectSessionKeysClone[field].sessionKey = sessionKeys[field].sessionKey.toString();
+        dataObjectSessionKeysClone[field].isToEncrypt = sessionKeys[field].isToEncrypt;
+      }
+    } catch (err) {
+      console.error('_chatkeysToStringCloner:err', err);
+    }
+  }
+  return dataObjectSessionKeysClone;
+}
+
+export function chatkeysToArrayCloner(sessionKeys) {
+  let dataObjectSessionKeysClone = {};
+  let fields = Object.keys(sessionKeys);
+  if (fields) {
+    try {
+      for (let i = 0; i <  fields.length; i++) {
+        let field = fields[i];
+        dataObjectSessionKeysClone[field] = {};
+        let arrayValues = JSON.parse('[' + sessionKeys[field].sessionKey + ']');
+        dataObjectSessionKeysClone[field].sessionKey = new Uint8Array(arrayValues);
+        dataObjectSessionKeysClone[field].isToEncrypt = sessionKeys[field].isToEncrypt;
+      }
+    } catch (err) {
+      console.error('_chatkeysToArrayCloner:err', err);
+    }
+  }
+  return dataObjectSessionKeysClone;
+}
+
+export function parseMessageURL(URL) {
+  let splitedToURL = URL.split('/');
+  if (splitedToURL.length <= 6) {
+    return splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3];
+  } else {
+    return splitedToURL[0] + '//' + splitedToURL[2] + '/' + splitedToURL[3] + '/' + splitedToURL[4];
+  }
+}
+
+export function availableSpace(usage, quota) {
+  const available = (usage / quota).toFixed(2);
+  return {
+    quota: quota,
+    usage: usage,
+    percent: Number(available)
+  };
+}
+
+/**
+* Encodes a JS object to base 64 encode
+* @param   {Object}    value    byteArray value
+* @return  {string}   encoded value
+*/
+export function encode(value) {
+  try {
+    let stringValue = stringify(value);
+    return btoa(stringValue);
+  } catch (err) {
+    console.error('[Utils.encode:err] ' + err);
+    throw err;
+  }
+}
+
+/**
+  * Decode a base64 string to object
+  * @param   {string_b64}    value    value encoded in base 64
+  * @return  {Object} decodedValue
+  */
+export function decode(value) {
+  try {
+    return JSON.parse(atob(value));
+  } catch (err) {
+    console.log('[Utils.decode:err] ' + err);
+    throw err;
+  }
+}
+
+/**
+* Decode a base64 string to Uint8Array
+* @param   {string_b64}    value    byteArray value
+* @return  {Uint8Array}   encoded value
+*/
+export function decodeToUint8Array(value) {
+  try {
+    return new Uint8Array(decode(value));
+  } catch (err) {
+    console.error('[Utils.decodeToUint8Array:err] ' + err);
+    throw err;
+  }
+}
+
+/**
+* Converts a JS object to string
+* NOTE: Special conversion for Uint8Arrays
+* @param   {Object}    value    byteArray value
+* @return  {Uint8Array}   encoded value
+*/
+export function stringify(value) {
+  try {
+    let stringValue;
+    if (value.constructor === Uint8Array) {
+      stringValue = '[' + value.toString() + ']'; // the [] is for JSON.parse compatibility
+    } else {
+      stringValue = JSON.stringify(value);
+    }
+    return stringValue;
+  } catch (err) {
+    console.error('[Utils.stringify:err] ' + err);
+    throw err;
+  }
+}
+
+/**
+* Converts a stringified object to object
+* @param   {String}    value    byteArray value
+* @return  {Object}   encoded value
+*/
+export function parse(value) {
+  try {
+    return JSON.parse(value);
+  } catch (err) {
+    console.error('[Utils.parse:err]' + err);
+    console.trace();
+    console.error('That that cause the error:', value);
+    throw err;
+  }
+}
+
+/**
+* Converts a stringified object to object
+* @param   {String}    value    byteArray value
+* @return  {Uint8Array}   encoded value
+*/
+export function parseToUint8Array(value) {
+  try {
+    return new Uint8Array(parse(value));
+  } catch (err) {
+    console.error('[Utils.parseToUint8Array:err]' + err);
+    throw err;
+  }
 }

@@ -31,6 +31,7 @@ import { schemaValidation } from '../utils/schemaValidation';
 import AddressAllocation from '../allocation/AddressAllocation';
 import ReporterObject from './ReporterObject';
 import ObserverObject from './ObserverObject';
+import * as cryptoManager from '../cryptoManager/CryptoManager';
 
 /**
  * @author micaelpedrosa@gmail.com
@@ -268,7 +269,8 @@ class SyncherManager {
               interworking = true;
             }
           } else {
-            interworking = true;
+            userURL = _this._registry.getHypertyOwner(msg.from);
+            if (!userURL) interworking = true;
           }
 
           // should we use the msg.body.value instead?
@@ -428,7 +430,7 @@ class SyncherManager {
 
               log.log('[SyncherManager._decryptChildrens] createdBy ',  owner, ' object: ', child.value);
 
-              let decrypted = _this._identityModule.decryptDataObject(JSON.parse(child.value), storedObject.url);
+              let decrypted = cryptoManager.default.decryptDataObject(JSON.parse(child.value), storedObject.url);
 
               listOfDecryptedObjects.push(decrypted);
             }
@@ -656,7 +658,8 @@ class SyncherManager {
                   interworking = true;
                 }
               } else {
-                interworking = true;
+                userURL = _this._registry.getHypertyOwner(msg.from);
+                if (!userURL) interworking = true;
               }
 
               let metadata = deepClone(reply.body.value);

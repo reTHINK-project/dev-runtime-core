@@ -23,12 +23,16 @@ import { runtimeFactory } from './resources/runtimeFactory';
 
 import AddressAllocation from '../src/allocation/AddressAllocation';
 
+import { storage } from '../src/runtime/Storage';
+
 // Testing Registry
 let runtimeURL = 'runtime://ua.pt';
 let p2pHandlerURL;
 
 let sandboxDummyCapabilities = {browser: true};
-let storageManager = runtimeFactory.storageManager();
+
+const storages = storage(runtimeFactory);
+let storageManager = storages.registry;
 let appSandbox = runtimeFactory.createAppSandbox();
 appSandbox.type = 'app';
 
@@ -71,17 +75,13 @@ describe('Registry', function() {
       }*/
     };
 
-
-//    sandboxDummy.sandbox = sandbox;
-
-    let msgbus = new MessageBus(registry);
-
-    new AddressAllocation(runtimeURL, msgbus);
-
-    p2pHandlerURL = runtimeURL + '/p2phandler/' + generateGUID();
     let remoteRegistry = '';
+    p2pHandlerURL = runtimeURL + '/p2phandler/' + generateGUID();
 
     registry = new Registry(runtimeURL, appSandbox, identityModule, runtimeCatalogue, 'runtimeCapabilities', storageManager, p2pHandlerURL, remoteRegistry);
+
+    let msgbus = new MessageBus(registry);
+    new AddressAllocation(runtimeURL, msgbus);
 
     // Prepare the on instance to handle with the fallbacks and runtimeCatalogue;
     let descriptorInstance = new Descriptors(runtimeURL, runtimeCatalogue, {});
@@ -117,7 +117,6 @@ describe('Registry', function() {
       msgbus.postMessage(responseMessage);
     });
 
-    console.log('registry ', descriptorInstance);
     sinon.stub(descriptorInstance, 'getHypertyDescriptor').callsFake((hypertyURL) => {
       return getDescriptor(hypertyURL);
     });
@@ -197,18 +196,8 @@ describe('Registry', function() {
   describe('discoverProtostub(url)', function() {
 
     it('should discover a ProtocolStub', function(done) {
-
-  /*    let Stub = {
-        status: 'live',
-        url: 'runtime://ua.pt/protostub/1234'
-      };*/
-
       let domain = 'ua.pt';
-
       registry.protostubsList[domain].status = 'live';
-
-    //  registry.protostubsList[domain] = Stub;
-
       expect(registry.discoverProtostub(domain)).to.have.property('url').contain('runtime://ua.pt/protostub/');
       done();
     });

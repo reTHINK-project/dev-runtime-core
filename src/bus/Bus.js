@@ -146,7 +146,7 @@ class Bus {
     });
   }
 
-  _responseCallback(inMsg, responseCallback) {
+  _responseCallback(inMsg, responseCallback, timeout = true) {
     let _this = this;
 
     //automatic management of response handlers
@@ -154,19 +154,22 @@ class Bus {
       let responseId = inMsg.from + inMsg.id;
       _this._responseCallbacks[responseId] = responseCallback;
 
-      setTimeout(() => {
-        let responseFun = _this._responseCallbacks[responseId];
-        delete _this._responseCallbacks[responseId];
+      if (timeout) {
+        setTimeout(() => {
+          let responseFun = _this._responseCallbacks[responseId];
+          delete _this._responseCallbacks[responseId];
 
-        if (responseFun) {
-          let errorMsg = {
-            id: inMsg.id, type: 'response',
-            body: { code: 408, desc: 'Response timeout!', value: inMsg }
-          };
+          if (responseFun) {
+            let errorMsg = {
+              id: inMsg.id, type: 'response',
+              body: { code: 408, desc: 'Response timeout!', value: inMsg }
+            };
 
-          responseFun(errorMsg);
-        }
-      }, _this._responseTimeOut);
+            responseFun(errorMsg);
+          }
+        }, _this._responseTimeOut);
+      }
+
     }
   }
 

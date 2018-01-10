@@ -4,12 +4,19 @@ import SyncherManager from '../src/syncher/SyncherManager';
 import DataObjectsStorage from '../src//store-objects/DataObjectsStorage';
 import MessageBus from '../src/bus/MessageBus';
 
+
 import PEP from '../src/policy/PEP';
+import IdentityManager from '../src/identity/IdentityManager';
+import * as cryptoManager from '../src/cryptoManager/CryptoManager';
 import RuntimeCoreCtx from '../src/policy/context/RuntimeCoreCtx';
+
+import MsgBusHandlers from '../src/runtime/MsgBusHandlers';
 
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import sinonChai from 'sinon-chai';
+
+import { storage } from '../src/runtime/Storage';
 
 chai.config.truncateThreshold = 0;
 
@@ -18,8 +25,10 @@ chai.use(chaiAsPromised);
 chai.use(sinonChai);
 
 describe('SyncherManager', function() {
-  let storageManager = runtimeFactory.storageManager();
-  let dataObjectsStorage = new DataObjectsStorage(storageManager, {});
+
+  const storages = storage(runtimeFactory);
+
+  let dataObjectsStorage = new DataObjectsStorage(storages.syncherManager, {});
 
   let schemaURL = 'schema://fake-schema-url';
   let runtimeURL = 'hyperty-runtime://fake-runtime';
@@ -98,6 +107,11 @@ describe('SyncherManager', function() {
       return true;
     },
 
+    getHypertyOwner: (hypertyURL) => {
+      console.log('Hyperty', hypertyURL);
+      return 'user@domain.com';
+    },
+
     getPreAuthSubscribers: () => {
       return ['hyperty://domain/hyperty-instance'];
     },
@@ -149,8 +163,6 @@ describe('SyncherManager', function() {
             }
           }}};
 
-          console.log();
-
           resolve(result);
         } else {
           reject('No schema provided');
@@ -159,48 +171,72 @@ describe('SyncherManager', function() {
     }
   };
 
-  let runtimeCoreCtx = new RuntimeCoreCtx(runtimeURL, identityModule, registry, storageManager, runtimeFactory.runtimeCapabilities());
+  let runtimeCapabilities =  runtimeFactory.runtimeCapabilities();
+
+  let runtimeCoreCtx = new RuntimeCoreCtx(runtimeURL, identityModule, registry, storages.policy, runtimeCapabilities);
   let policyEngine = new PEP(runtimeCoreCtx);
 
-  let handlers = [
+  let identityManager = new IdentityManager(identityModule);
 
-    // Policy message authorise
-    function(ctx) {
-      policyEngine.authorise(ctx.msg).then(function(changedMgs) {
+  let handlers = new MsgBusHandlers(policyEngine, identityManager, cryptoManager.default);
 
-        changedMgs.body.identity = {
-          userProfile: {
-            userURL: 'user://user@domain.pt'
-          }
-        };
+  // // Instantiate the IdentityManager
+  // let identityManager = new IdentityManager(identityModule);
 
-        ctx.msg = changedMgs;
-        ctx.next();
-      }).catch(function(reason) {
-        console.error(reason);
-        ctx.fail(reason);
-      });
-    }
-  ];
+  // let cryptoManager = {
 
-  it.skip('reporter read', function(done) {
+  // };
 
-    bus = new MessageBus();
-    bus.pipeline.handlers = handlers;
+  // let handlers = new MsgBusHandlers(policyEngine, identityManager, cryptoManager);
+
+  // // handlers.idmHandler((ctx) => { console.log('CTX: ', ctx); });
+
+  // console.log('Handlers:', handlers);
+
+  // let handlers = [
+
+  //   // Policy message authorisereporter read
+  //   function(ctx) {
+  //     console.log('PEP:', ctx);
+
+  //     policyEngine.authorise(ctx.msg).then(function(changedMgs) {
+
+  //       console.log('PEP:', changedMgs);
+
+  //       changedMgs.body.identity = {reporter read
+  //         userProfile: {
+  //           userURL: 'user://user@domain.pt'
+  //         }
+  //       };
+
+  //       ctx.msg = changedMgs;
+  //       ctx.next();
+
+  //     }).catch(function(reason) {
+  //       console.log('PEP: Error', reason);
+  //       ctx.fail(reason);
+  //     });
+  //   }
+  // ];
+
+  it('reporter read', function(done) {
+
+    bus = new MessageBus(registry);
+    bus.pipelineOut.handlers = [handlers.idmHandler];
 
     bus._onPostMessage = (msg) => {
       console.log('_onPostMessage: ', msg);
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storages.syncherManager, allocator, dataObjectsStorage, identityModule);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
     sync1.create(schemaURL, [], initialData).then((dor) => {
       console.log('on-create-reply', dor.onRead);
       dor.onRead((event) => {
-        console.log('on-read');
+        console.log('on-read', event);
         event.accept();
       });
 
@@ -208,14 +244,15 @@ describe('SyncherManager', function() {
         console.log('on-read-reply', data);
         expect(data.data).to.contain.all.keys({ communication: { name: 'chat-x' }, x: 10, y: 10 });
         done();
-      });
+      })
+
     });
 
   });
 
-  it.skip('reporter observer integration', function(done) {
-    bus = new MessageBus();
-    bus.pipeline.handlers = handlers;
+  it('reporter observer integration', function(done) {
+    bus = new MessageBus(registry);
+    bus.pipelineOut.handlers = [handlers.idmHandler];
 
     bus._onPostMessage = (msg) => {
       console.log('[reporter observer integration - onPostMessage]: ', msg);
@@ -223,7 +260,7 @@ describe('SyncherManager', function() {
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storages.syncherManager, allocator, dataObjectsStorage, identityModule);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
@@ -270,9 +307,9 @@ describe('SyncherManager', function() {
     });
   });
 
-  it.skip('should resume observers', function(done) {
+  it('should resume observers', function(done) {
 
-    bus = new MessageBus();
+    bus = new MessageBus(registry);
     bus._onMessage((a) => {
       console.log('BUS:', a);
     });
@@ -282,7 +319,7 @@ describe('SyncherManager', function() {
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storages.syncherManager, allocator, dataObjectsStorage, identityModule);
 
     let a;
 
@@ -332,16 +369,16 @@ describe('SyncherManager', function() {
 
   });
 
-  it.skip('should resume reporters', function(done) {
+  it('should resume reporters', function(done) {
 
-    bus = new MessageBus();
+    bus = new MessageBus(registry);
 
     bus._onPostMessage = (msg) => {
       console.log('_onPostMessage: ', msg);
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storages.syncherManager, allocator, dataObjectsStorage, identityModule);
 
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
     sync1.resumeReporters({}).then((dors) => {
@@ -554,8 +591,8 @@ describe('SyncherManager', function() {
     //BEGIN: skip message system (already tested in previous units) and manually create a reporter and subscription, this should not be done in real code.
     let sync = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
 
-        /*
-        input.syncher ? _this._syncher = input.syncher : throwMandatoryParmMissingError('syncher');
+    /*
+    input.syncher ? _this._syncher = input.syncher : throwMandatoryParmMissingError('syncher');
     input.url ?  _this._url = input.url : throwMandatoryParmMissingError('url');
     input.created ? _this._created = input.created : throwMandatoryParmMissingError('created');
     input.reporter ? _this._reporter = input.reporter : throwMandatoryParmMissingError('reporter');
@@ -763,14 +800,15 @@ describe('SyncherManager', function() {
         */
       }
 
-      /*
+      /*deleteMessageToHyperty
       if (seq === 11) {
         expect(event).to.contain.all.keys({ cType: 'remove', oType: 'array', field: '1.arr.1', data: 2 });
       }
 
       if (seq === 12) {
         expect(event).to.contain.all.keys({ cType: 'add', oType: 'array', field: '1.arr.1', data: [10, 11, 12] });
-      }
+      }+ service-framework@0.7.4
+
 
       if (seq === 13) {
         expect(event).to.contain.all.keys({ cType: 'update', oType: 'object', field: '1.arr.5.x', data: 10 });
@@ -791,7 +829,8 @@ describe('SyncherManager', function() {
 
         //verify changes...
         expect(data).to.contain.all.keys({
-          1: { name: 'Micael Pedrosa', birthdate: '28-02-1981', email: 'micael-xxx@gmail.com', phone: 911000000, obj1: { name: 'XPTO' }, arr: [1, 10, 11, 12, 3] }
+          1: { name: 'Micael Pedrosa', birthdate: '+ service-framework@0.7.4
+28-02-1981', email: 'micael-xxx@gmail.com', phone: 911000000, obj1: { name: 'XPTO' }, arr: [1, 10, 11, 12, 3] }
         });
 
         done();
@@ -829,14 +868,14 @@ describe('SyncherManager', function() {
     });
   });
 
-  it.skip('reporter addChild', function(done) {
-    bus = new MessageBus();
+  it('reporter addChild', function(done) {
+    bus = new MessageBus(registry);
     bus._onPostMessage = (msg) => {
       console.log('5-_onPostMessage: ', msg);
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storages.syncherManager, allocator, dataObjectsStorage, identityModule);
 
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
     sync1.create(schemaURL, [], initialData).then((dor) => {
@@ -848,15 +887,15 @@ describe('SyncherManager', function() {
     });
   });
 
-  it.skip('observer addChild', function(done) {
-    bus = new MessageBus();
+  it('observer addChild', function(done) {
+    bus = new MessageBus(registry);
 
     bus._onPostMessage = (msg) => {
       console.log('6-_onPostMessage: ', msg);
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storages.syncherManager, allocator, dataObjectsStorage, identityModule);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
 
@@ -902,15 +941,15 @@ describe('SyncherManager', function() {
   });
 
   it('children deltas generate and process', function(done) {
-    bus = new MessageBus();
-    bus.pipeline.handlers = handlers;
+    bus = new MessageBus(registry);
+    bus.pipelineOut.handlers = [handlers.idmHandler];
 
     bus._onPostMessage = (msg) => {
       console.log('7-_onPostMessage: ', msg);
       msgNodeResponseFunc(bus, msg);
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storages.syncherManager, allocator, dataObjectsStorage, identityModule);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
@@ -950,8 +989,11 @@ describe('SyncherManager', function() {
   it.skip('create and delete', function(done) {
     let deleted = false;
 
-    bus = new MessageBus();
-    bus.pipeline.handlers = handlers;
+    bus = new MessageBus(registry);
+    bus.pipelineOut.handlers = [handlers.idmHandler];
+  //  bus.pipelineIn.handlers = [handlers.decryptHandler, handlers.pepInHandler];
+
+    // console.log(bus.pipelineIn.handlers);
 
     bus._onPostMessage = (msg) => {
       console.log('8-_onPostMessage: ', msg);
@@ -973,7 +1015,7 @@ describe('SyncherManager', function() {
       }
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storages.syncherManager, allocator, dataObjectsStorage, identityModule);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
@@ -991,7 +1033,7 @@ describe('SyncherManager', function() {
     });
 
     let sync1 = new Syncher(hyperURL1, bus, { runtimeURL: runtimeURL });
-    sync1.create(schemaURL, [hyperURL2], initialData).then((dor) => {
+    sync1.create(schemaURL, [hyperURL2], initialData, false, false).then((dor) => {
       console.log('create: ', dor.url);
       dor.onSubscription((subscribeEvent) => {
         console.log('onSubscription: ', subscribeEvent);
@@ -1009,9 +1051,9 @@ describe('SyncherManager', function() {
     });
   });
 
-  it.skip('subscribe and unsubscribe', function(done) {
-    bus = new MessageBus();
-    bus.pipeline.handlers = handlers;
+  it('subscribe and unsubscribe', function(done) {
+    bus = new MessageBus(registry);
+    bus.pipelineOut.handlers = [handlers.idmHandler];
 
     bus._onPostMessage = (msg) => {
       console.log('8-_onPostMessage: ', msg);
@@ -1021,7 +1063,7 @@ describe('SyncherManager', function() {
           body: { code: 200 }
         });
       } else if (msg.type === 'unsubscribe') {
-        //expect delete message to msg-no  it('de
+        //expect delete message to msg-no  it.skip('de
         expect(msg.from).to.eql(runtimeURL + '/sm');
         expect(msg.to).to.eql('domain://msg-node.h2.domain/sm');
         expect(msg.body.resource).to.eql(objURL);
@@ -1029,7 +1071,7 @@ describe('SyncherManager', function() {
       }
     };
 
-    new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
+    new SyncherManager(runtimeURL, bus, registry, catalog, storages.syncherManager, allocator, dataObjectsStorage, identityModule);
 
     let sync2 = new Syncher(hyperURL2, bus, { runtimeURL: runtimeURL });
     sync2.onNotification((notifyEvent) => {
@@ -1063,10 +1105,10 @@ describe('SyncherManager', function() {
     // let sync2DataObjectObserver;
     // let sync3DataObjectObserver;
 
-    it.skip('should save the url on storageManager', function(done) {
+    it('should save the url on storageManager', function(done) {
 
-      bus = new MessageBus();
-      bus.pipeline.handlers = handlers;
+      bus = new MessageBus(registry);
+      bus.pipelineOut.handlers = [handlers.idmHandler];
 
       bus._onPostMessage = function(msg)  {
         console.log('8-_onPostMessage: ', msg);
@@ -1100,7 +1142,7 @@ describe('SyncherManager', function() {
         }
       };
 
-      new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
+      new SyncherManager(runtimeURL, bus, registry, catalog, storages.syncherManager, allocator, dataObjectsStorage, identityModule);
 
       let hypertyURL3 = 'hyperty://h1.domain/' + guid();
       hyperties.h3 = hypertyURL3;
@@ -1134,10 +1176,10 @@ describe('SyncherManager', function() {
       });
     });
 
-    it.skip('should resume the url stored on storageManager', (done) => {
+    it('should resume the url stored on storageManager', (done) => {
 
-      bus = new MessageBus();
-      bus.pipeline.handlers = handlers;
+      bus = new MessageBus(registry);
+      bus.pipelineOut.handlers = [handlers.idmHandler];
       bus._onPostMessage = (msg) => {
         console.log('10-_onPostMessage: ', msg);
 
@@ -1168,7 +1210,7 @@ describe('SyncherManager', function() {
         }
       };
 
-      new SyncherManager(runtimeURL, bus, registry, catalog, storageManager, allocator, dataObjectsStorage, identityModule);
+      new SyncherManager(runtimeURL, bus, registry, catalog, storages.syncherManager, allocator, dataObjectsStorage, identityModule);
 
       let sync3 = new Syncher(hyperties.h3, bus, { runtimeURL: runtimeURL });
       sync3.onNotification((notifyEvent) => {
