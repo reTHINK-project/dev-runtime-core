@@ -1,5 +1,5 @@
 // version: 0.11.0
-// date: Wed Jan 10 2018 16:31:02 GMT+0000 (WET)
+// date: Wed Jan 10 2018 16:54:02 GMT+0000 (WET)
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -26,7 +26,7 @@
 
 
 // version: 0.11.0
-// date: Wed Jan 10 2018 16:31:02 GMT+0000 (WET)
+// date: Wed Jan 10 2018 16:54:02 GMT+0000 (WET)
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -133,17 +133,17 @@ var r=e.exports="undefined"!=typeof window&&window.Math==Math?window:"undefined"
 /***/
 function(e,t,r){var n=r(28)("wks"),o=r(19),i=r(1).Symbol,u="function"==typeof i;(e.exports=function(e){return n[e]||(n[e]=u&&i[e]||(u?i:o)("Symbol."+e))}).store=n},/* 3 */
 /***/
-function(e,t,r){var n=r(1),o=r(0),i=r(14),u=r(8),a=function(e,t,r){var s,c,f,l=e&a.F,p=e&a.G,d=e&a.S,v=e&a.P,y=e&a.B,h=e&a.W,b=p?o:o[t]||(o[t]={}),_=b.prototype,m=p?n:d?n[t]:(n[t]||{}).prototype;p&&(r=t);for(s in r)
+function(e,t,r){var n=r(1),o=r(0),i=r(14),u=r(8),a=function(e,t,r){var s,c,f,l=e&a.F,p=e&a.G,d=e&a.S,v=e&a.P,y=e&a.B,h=e&a.W,_=p?o:o[t]||(o[t]={}),g=_.prototype,m=p?n:d?n[t]:(n[t]||{}).prototype;p&&(r=t);for(s in r)
 // contains in native
-(c=!l&&m&&void 0!==m[s])&&s in b||(
+(c=!l&&m&&void 0!==m[s])&&s in _||(
 // export native or passed
 f=c?m[s]:r[s],
 // prevent global pollution for namespaces
-b[s]=p&&"function"!=typeof m[s]?r[s]:y&&c?i(f,n):h&&m[s]==f?function(e){var t=function(t,r,n){if(this instanceof e){switch(arguments.length){case 0:return new e;case 1:return new e(t);case 2:return new e(t,r)}return new e(t,r,n)}return e.apply(this,arguments)};return t.prototype=e.prototype,t}(f):v&&"function"==typeof f?i(Function.call,f):f,
+_[s]=p&&"function"!=typeof m[s]?r[s]:y&&c?i(f,n):h&&m[s]==f?function(e){var t=function(t,r,n){if(this instanceof e){switch(arguments.length){case 0:return new e;case 1:return new e(t);case 2:return new e(t,r)}return new e(t,r,n)}return e.apply(this,arguments)};return t.prototype=e.prototype,t}(f):v&&"function"==typeof f?i(Function.call,f):f,
 // export proto methods to core.%CONSTRUCTOR%.methods.%NAME%
-v&&((b.virtual||(b.virtual={}))[s]=f,
+v&&((_.virtual||(_.virtual={}))[s]=f,
 // export proto methods to core.%CONSTRUCTOR%.prototype.%NAME%
-e&a.R&&_&&!_[s]&&u(_,s,f)))};
+e&a.R&&g&&!g[s]&&u(g,s,f)))};
 // type bitmap
 a.F=1,// forced
 a.G=2,// global
@@ -276,19 +276,19 @@ function(e,t,r){"use strict";var n=r(67)(!0);
 r(44)(String,"String",function(e){this._t=String(e),// target
 this._i=0},function(){var e,t=this._t,r=this._i;return r>=t.length?{value:void 0,done:!0}:(e=n(t,r),this._i+=e.length,{value:e,done:!1})})},/* 44 */
 /***/
-function(e,t,r){"use strict";var n=r(23),o=r(3),i=r(45),u=r(8),a=r(9),s=r(16),c=r(68),f=r(24),l=r(47),p=r(2)("iterator"),d=!([].keys&&"next"in[].keys()),v=function(){return this};e.exports=function(e,t,r,y,h,b,_){c(r,t,y);var m,g,w,x=function(e){if(!d&&e in S)return S[e];switch(e){case"keys":case"values":return function(){return new r(this,e)}}return function(){return new r(this,e)}},P=t+" Iterator",R="values"==h,O=!1,S=e.prototype,L=S[p]||S["@@iterator"]||h&&S[h],k=!d&&L||x(h),A=h?R?x("entries"):k:void 0,E="Array"==t?S.entries||L:L;if(
+function(e,t,r){"use strict";var n=r(23),o=r(3),i=r(45),u=r(8),a=r(9),s=r(16),c=r(68),f=r(24),l=r(47),p=r(2)("iterator"),d=!([].keys&&"next"in[].keys()),v=function(){return this};e.exports=function(e,t,r,y,h,_,g){c(r,t,y);var m,b,w,x=function(e){if(!d&&e in S)return S[e];switch(e){case"keys":case"values":return function(){return new r(this,e)}}return function(){return new r(this,e)}},R=t+" Iterator",P="values"==h,O=!1,S=e.prototype,L=S[p]||S["@@iterator"]||h&&S[h],k=!d&&L||x(h),A=h?P?x("entries"):k:void 0,E="Array"==t?S.entries||L:L;if(
 // Fix native
 E&&(w=l(E.call(new e)))!==Object.prototype&&w.next&&(
 // Set @@toStringTag to native iterators
-f(w,P,!0),
+f(w,R,!0),
 // fix for some old engines
 n||a(w,p)||u(w,p,v)),
 // fix Array#{values, @@iterator}.name in V8 / FF
-R&&L&&"values"!==L.name&&(O=!0,k=function(){return L.call(this)}),
+P&&L&&"values"!==L.name&&(O=!0,k=function(){return L.call(this)}),
 // Define iterator
-n&&!_||!d&&!O&&S[p]||u(S,p,k),
+n&&!g||!d&&!O&&S[p]||u(S,p,k),
 // Plug for library
-s[t]=k,s[P]=v,h)if(m={values:R?k:x("values"),keys:b?k:x("keys"),entries:A},_)for(g in m)g in S||i(S,g,m[g]);else o(o.P+o.F*(d||O),t,m);return m}},/* 45 */
+s[t]=k,s[R]=v,h)if(m={values:P?k:x("values"),keys:_?k:x("keys"),entries:A},g)for(b in m)b in S||i(S,b,m[b]);else o(o.P+o.F*(d||O),t,m);return m}},/* 45 */
 /***/
 function(e,t,r){e.exports=r(8)},/* 46 */
 /***/
@@ -308,15 +308,15 @@ function(e,t,r){
 // 7.3.20 SpeciesConstructor(O, defaultConstructor)
 var n=r(4),o=r(17),i=r(2)("species");e.exports=function(e,t){var r,u=n(e).constructor;return void 0===u||void 0==(r=n(u)[i])?t:o(r)}},/* 51 */
 /***/
-function(e,t,r){var n,o,i,u=r(14),a=r(79),s=r(46),c=r(25),f=r(1),l=f.process,p=f.setImmediate,d=f.clearImmediate,v=f.MessageChannel,y=f.Dispatch,h=0,b={},_=function(){var e=+this;
+function(e,t,r){var n,o,i,u=r(14),a=r(79),s=r(46),c=r(25),f=r(1),l=f.process,p=f.setImmediate,d=f.clearImmediate,v=f.MessageChannel,y=f.Dispatch,h=0,_={},g=function(){var e=+this;
 // eslint-disable-next-line no-prototype-builtins
-if(b.hasOwnProperty(e)){var t=b[e];delete b[e],t()}},m=function(e){_.call(e.data)};
+if(_.hasOwnProperty(e)){var t=_[e];delete _[e],t()}},m=function(e){g.call(e.data)};
 // Node.js 0.9+ & IE10+ has setImmediate, otherwise:
-p&&d||(p=function(e){for(var t=[],r=1;arguments.length>r;)t.push(arguments[r++]);return b[++h]=function(){
+p&&d||(p=function(e){for(var t=[],r=1;arguments.length>r;)t.push(arguments[r++]);return _[++h]=function(){
 // eslint-disable-next-line no-new-func
-a("function"==typeof e?e:Function(e),t)},n(h),h},d=function(e){delete b[e]},
+a("function"==typeof e?e:Function(e),t)},n(h),h},d=function(e){delete _[e]},
 // Node.js 0.8-
-"process"==r(15)(l)?n=function(e){l.nextTick(u(_,e,1))}:y&&y.now?n=function(e){y.now(u(_,e,1))}:v?(o=new v,i=o.port2,o.port1.onmessage=m,n=u(i.postMessage,i,1)):f.addEventListener&&"function"==typeof postMessage&&!f.importScripts?(n=function(e){f.postMessage(e+"","*")},f.addEventListener("message",m,!1)):n="onreadystatechange"in c("script")?function(e){s.appendChild(c("script")).onreadystatechange=function(){s.removeChild(this),_.call(e)}}:function(e){setTimeout(u(_,e,1),0)}),e.exports={set:p,clear:d}},/* 52 */
+"process"==r(15)(l)?n=function(e){l.nextTick(u(g,e,1))}:y&&y.now?n=function(e){y.now(u(g,e,1))}:v?(o=new v,i=o.port2,o.port1.onmessage=m,n=u(i.postMessage,i,1)):f.addEventListener&&"function"==typeof postMessage&&!f.importScripts?(n=function(e){f.postMessage(e+"","*")},f.addEventListener("message",m,!1)):n="onreadystatechange"in c("script")?function(e){s.appendChild(c("script")).onreadystatechange=function(){s.removeChild(this),g.call(e)}}:function(e){setTimeout(u(g,e,1),0)}),e.exports={set:p,clear:d}},/* 52 */
 /***/
 function(e,t){e.exports=function(e){try{return{e:!1,v:e()}}catch(e){return{e:!0,v:e}}}},/* 53 */
 /***/
@@ -390,21 +390,21 @@ function(e,t){e.exports=function(){}},/* 72 */
 /***/
 function(e,t){e.exports=function(e,t){return{value:t,done:!!e}}},/* 73 */
 /***/
-function(e,t,r){"use strict";var n,o,i,u,a=r(23),s=r(1),c=r(14),f=r(49),l=r(3),p=r(6),d=r(17),v=r(74),y=r(75),h=r(50),b=r(51).set,_=r(80)(),m=r(32),g=r(52),w=r(53),x=s.TypeError,P=s.process,R=s.Promise,O="process"==f(P),S=function(){},L=o=m.f,k=!!function(){try{
+function(e,t,r){"use strict";var n,o,i,u,a=r(23),s=r(1),c=r(14),f=r(49),l=r(3),p=r(6),d=r(17),v=r(74),y=r(75),h=r(50),_=r(51).set,g=r(80)(),m=r(32),b=r(52),w=r(53),x=s.TypeError,R=s.process,P=s.Promise,O="process"==f(R),S=function(){},L=o=m.f,k=!!function(){try{
 // correct subclassing with @@species support
-var e=R.resolve(1),t=(e.constructor={})[r(2)("species")]=function(e){e(S,S)};
+var e=P.resolve(1),t=(e.constructor={})[r(2)("species")]=function(e){e(S,S)};
 // unhandled rejections tracking support, NodeJS Promise without it fails @@species test
-return(O||"function"==typeof PromiseRejectionEvent)&&e.then(S)instanceof t}catch(e){}}(),A=function(e){var t;return!(!p(e)||"function"!=typeof(t=e.then))&&t},E=function(e,t){if(!e._n){e._n=!0;var r=e._c;_(function(){for(var n=e._v,o=1==e._s,i=0;r.length>i;)!function(t){var r,i,u=o?t.ok:t.fail,a=t.resolve,s=t.reject,c=t.domain;try{u?(o||(2==e._h&&D(e),e._h=1),!0===u?r=n:(c&&c.enter(),r=u(n),c&&c.exit()),r===t.promise?s(x("Promise-chain cycle")):(i=A(r))?i.call(r,a,s):a(r)):s(n)}catch(e){s(e)}}(r[i++]);// variable length - can't use forEach
-e._c=[],e._n=!1,t&&!e._h&&U(e)})}},U=function(e){b.call(s,function(){var t,r,n,o=e._v,i=M(e);if(i&&(t=g(function(){O?P.emit("unhandledRejection",o,e):(r=s.onunhandledrejection)?r({promise:e,reason:o}):(n=s.console)&&n.error&&n.error("Unhandled promise rejection",o)}),
+return(O||"function"==typeof PromiseRejectionEvent)&&e.then(S)instanceof t}catch(e){}}(),A=function(e){var t;return!(!p(e)||"function"!=typeof(t=e.then))&&t},E=function(e,t){if(!e._n){e._n=!0;var r=e._c;g(function(){for(var n=e._v,o=1==e._s,i=0;r.length>i;)!function(t){var r,i,u=o?t.ok:t.fail,a=t.resolve,s=t.reject,c=t.domain;try{u?(o||(2==e._h&&M(e),e._h=1),!0===u?r=n:(c&&c.enter(),r=u(n),c&&c.exit()),r===t.promise?s(x("Promise-chain cycle")):(i=A(r))?i.call(r,a,s):a(r)):s(n)}catch(e){s(e)}}(r[i++]);// variable length - can't use forEach
+e._c=[],e._n=!1,t&&!e._h&&U(e)})}},U=function(e){_.call(s,function(){var t,r,n,o=e._v,i=D(e);if(i&&(t=b(function(){O?R.emit("unhandledRejection",o,e):(r=s.onunhandledrejection)?r({promise:e,reason:o}):(n=s.console)&&n.error&&n.error("Unhandled promise rejection",o)}),
 // Browsers should not trigger `rejectionHandled` event if it was handled here, NodeJS - should
-e._h=O||M(e)?2:1),e._a=void 0,i&&t.e)throw t.v})},M=function(e){return 1!==e._h&&0===(e._a||e._c).length},D=function(e){b.call(s,function(){var t;O?P.emit("rejectionHandled",e):(t=s.onrejectionhandled)&&t({promise:e,reason:e._v})})},j=function(e){var t=this;t._d||(t._d=!0,t=t._w||t,// unwrap
+e._h=O||D(e)?2:1),e._a=void 0,i&&t.e)throw t.v})},D=function(e){return 1!==e._h&&0===(e._a||e._c).length},M=function(e){_.call(s,function(){var t;O?R.emit("rejectionHandled",e):(t=s.onrejectionhandled)&&t({promise:e,reason:e._v})})},j=function(e){var t=this;t._d||(t._d=!0,t=t._w||t,// unwrap
 t._v=e,t._s=2,t._a||(t._a=t._c.slice()),E(t,!0))},q=function(e){var t,r=this;if(!r._d){r._d=!0,r=r._w||r;// unwrap
-try{if(r===e)throw x("Promise can't be resolved itself");(t=A(e))?_(function(){var n={_w:r,_d:!1};// wrap
+try{if(r===e)throw x("Promise can't be resolved itself");(t=A(e))?g(function(){var n={_w:r,_d:!1};// wrap
 try{t.call(e,c(q,n,1),c(j,n,1))}catch(e){j.call(n,e)}}):(r._v=e,r._s=1,E(r,!1))}catch(e){j.call({_w:r,_d:!1},e)}}};
 // constructor polyfill
 k||(
 // 25.4.3.1 Promise(executor)
-R=function(e){v(this,R,"Promise","_h"),d(e),n.call(this);try{e(c(q,this,1),c(j,this,1))}catch(e){j.call(this,e)}},
+P=function(e){v(this,P,"Promise","_h"),d(e),n.call(this);try{e(c(q,this,1),c(j,this,1))}catch(e){j.call(this,e)}},
 // eslint-disable-next-line no-unused-vars
 n=function(e){this._c=[],// <- awaiting reactions
 this._a=void 0,// <- checked in isUnhandled reactions
@@ -412,27 +412,27 @@ this._s=0,// <- state
 this._d=!1,// <- done
 this._v=void 0,// <- value
 this._h=0,// <- rejection state, 0 - default, 1 - handled, 2 - unhandled
-this._n=!1},n.prototype=r(81)(R.prototype,{
+this._n=!1},n.prototype=r(81)(P.prototype,{
 // 25.4.5.3 Promise.prototype.then(onFulfilled, onRejected)
-then:function(e,t){var r=L(h(this,R));return r.ok="function"!=typeof e||e,r.fail="function"==typeof t&&t,r.domain=O?P.domain:void 0,this._c.push(r),this._a&&this._a.push(r),this._s&&E(this,!1),r.promise},
+then:function(e,t){var r=L(h(this,P));return r.ok="function"!=typeof e||e,r.fail="function"==typeof t&&t,r.domain=O?R.domain:void 0,this._c.push(r),this._a&&this._a.push(r),this._s&&E(this,!1),r.promise},
 // 25.4.5.1 Promise.prototype.catch(onRejected)
-catch:function(e){return this.then(void 0,e)}}),i=function(){var e=new n;this.promise=e,this.resolve=c(q,e,1),this.reject=c(j,e,1)},m.f=L=function(e){return e===R||e===u?new i(e):o(e)}),l(l.G+l.W+l.F*!k,{Promise:R}),r(24)(R,"Promise"),r(82)("Promise"),u=r(0).Promise,
+catch:function(e){return this.then(void 0,e)}}),i=function(){var e=new n;this.promise=e,this.resolve=c(q,e,1),this.reject=c(j,e,1)},m.f=L=function(e){return e===P||e===u?new i(e):o(e)}),l(l.G+l.W+l.F*!k,{Promise:P}),r(24)(P,"Promise"),r(82)("Promise"),u=r(0).Promise,
 // statics
 l(l.S+l.F*!k,"Promise",{
 // 25.4.4.5 Promise.reject(r)
 reject:function(e){var t=L(this);return(0,t.reject)(e),t.promise}}),l(l.S+l.F*(a||!k),"Promise",{
 // 25.4.4.6 Promise.resolve(x)
-resolve:function(e){return w(a&&this===u?R:this,e)}}),l(l.S+l.F*!(k&&r(83)(function(e){R.all(e).catch(S)})),"Promise",{
+resolve:function(e){return w(a&&this===u?P:this,e)}}),l(l.S+l.F*!(k&&r(83)(function(e){P.all(e).catch(S)})),"Promise",{
 // 25.4.4.1 Promise.all(iterable)
-all:function(e){var t=this,r=L(t),n=r.resolve,o=r.reject,i=g(function(){var r=[],i=0,u=1;y(e,!1,function(e){var a=i++,s=!1;r.push(void 0),u++,t.resolve(e).then(function(e){s||(s=!0,r[a]=e,--u||n(r))},o)}),--u||n(r)});return i.e&&o(i.v),r.promise},
+all:function(e){var t=this,r=L(t),n=r.resolve,o=r.reject,i=b(function(){var r=[],i=0,u=1;y(e,!1,function(e){var a=i++,s=!1;r.push(void 0),u++,t.resolve(e).then(function(e){s||(s=!0,r[a]=e,--u||n(r))},o)}),--u||n(r)});return i.e&&o(i.v),r.promise},
 // 25.4.4.4 Promise.race(iterable)
-race:function(e){var t=this,r=L(t),n=r.reject,o=g(function(){y(e,!1,function(e){t.resolve(e).then(r.resolve,n)})});return o.e&&n(o.v),r.promise}})},/* 74 */
+race:function(e){var t=this,r=L(t),n=r.reject,o=b(function(){y(e,!1,function(e){t.resolve(e).then(r.resolve,n)})});return o.e&&n(o.v),r.promise}})},/* 74 */
 /***/
 function(e,t){e.exports=function(e,t,r,n){if(!(e instanceof t)||void 0!==n&&n in e)throw TypeError(r+": incorrect invocation!");return e}},/* 75 */
 /***/
-function(e,t,r){var n=r(14),o=r(76),i=r(77),u=r(4),a=r(38),s=r(78),c={},f={},t=e.exports=function(e,t,r,l,p){var d,v,y,h,b=p?function(){return e}:s(e),_=n(r,l,t?2:1),m=0;if("function"!=typeof b)throw TypeError(e+" is not iterable!");
+function(e,t,r){var n=r(14),o=r(76),i=r(77),u=r(4),a=r(38),s=r(78),c={},f={},t=e.exports=function(e,t,r,l,p){var d,v,y,h,_=p?function(){return e}:s(e),g=n(r,l,t?2:1),m=0;if("function"!=typeof _)throw TypeError(e+" is not iterable!");
 // fast case for arrays with default iterator
-if(i(b)){for(d=a(e.length);d>m;m++)if((h=t?_(u(v=e[m])[0],v[1]):_(e[m]))===c||h===f)return h}else for(y=b.call(e);!(v=y.next()).done;)if((h=o(y,_,v.value,t))===c||h===f)return h};t.BREAK=c,t.RETURN=f},/* 76 */
+if(i(_)){for(d=a(e.length);d>m;m++)if((h=t?g(u(v=e[m])[0],v[1]):g(e[m]))===c||h===f)return h}else for(y=_.call(e);!(v=y.next()).done;)if((h=o(y,g,v.value,t))===c||h===f)return h};t.BREAK=c,t.RETURN=f},/* 76 */
 /***/
 function(e,t,r){
 // call something on iterator step with safe closing on error
@@ -534,9 +534,9 @@ function(e,t,r){r(93),r(42),r(98),r(99),e.exports=r(0).Symbol},/* 93 */
 /***/
 function(e,t,r){"use strict";
 // ECMAScript 6 symbols shim
-var n=r(1),o=r(9),i=r(5),u=r(3),a=r(45),s=r(94).KEY,c=r(13),f=r(28),l=r(24),p=r(19),d=r(2),v=r(33),y=r(34),h=r(95),b=r(96),_=r(4),m=r(6),g=r(10),w=r(26),x=r(18),P=r(31),R=r(97),O=r(40),S=r(7),L=r(20),k=O.f,A=S.f,E=R.f,U=n.Symbol,M=n.JSON,D=M&&M.stringify,j=d("_hidden"),q=d("toPrimitive"),T={}.propertyIsEnumerable,C=f("symbol-registry"),F=f("symbols"),N=f("op-symbols"),I=Object.prototype,G="function"==typeof U,B=n.QObject,H=!B||!B.prototype||!B.prototype.findChild,z=i&&c(function(){return 7!=P(A({},"a",{get:function(){return A(this,"a",{value:7}).a}})).a})?function(e,t,r){var n=k(I,t);n&&delete I[t],A(e,t,r),n&&e!==I&&A(I,t,n)}:A,V=function(e){var t=F[e]=P(U.prototype);return t._k=e,t},Z=G&&"symbol"==typeof U.iterator?function(e){return"symbol"==typeof e}:function(e){return e instanceof U},W=function(e,t,r){return e===I&&W(N,t,r),_(e),t=w(t,!0),_(r),o(F,t)?(r.enumerable?(o(e,j)&&e[j][t]&&(e[j][t]=!1),r=P(r,{enumerable:x(0,!1)})):(o(e,j)||A(e,j,x(1,{})),e[j][t]=!0),z(e,t,r)):A(e,t,r)},J=function(e,t){_(e);for(var r,n=h(t=g(t)),o=0,i=n.length;i>o;)W(e,r=n[o++],t[r]);return e},K=function(e,t){return void 0===t?P(e):J(P(e),t)},Y=function(e){var t=T.call(this,e=w(e,!0));return!(this===I&&o(F,e)&&!o(N,e))&&(!(t||!o(this,e)||!o(F,e)||o(this,j)&&this[j][e])||t)},$=function(e,t){if(e=g(e),t=w(t,!0),e!==I||!o(F,t)||o(N,t)){var r=k(e,t);return!r||!o(F,t)||o(e,j)&&e[j][t]||(r.enumerable=!0),r}},Q=function(e){for(var t,r=E(g(e)),n=[],i=0;r.length>i;)o(F,t=r[i++])||t==j||t==s||n.push(t);return n},X=function(e){for(var t,r=e===I,n=E(r?N:g(e)),i=[],u=0;n.length>u;)!o(F,t=n[u++])||r&&!o(I,t)||i.push(F[t]);return i};
+var n=r(1),o=r(9),i=r(5),u=r(3),a=r(45),s=r(94).KEY,c=r(13),f=r(28),l=r(24),p=r(19),d=r(2),v=r(33),y=r(34),h=r(95),_=r(96),g=r(4),m=r(6),b=r(10),w=r(26),x=r(18),R=r(31),P=r(97),O=r(40),S=r(7),L=r(20),k=O.f,A=S.f,E=P.f,U=n.Symbol,D=n.JSON,M=D&&D.stringify,j=d("_hidden"),q=d("toPrimitive"),T={}.propertyIsEnumerable,C=f("symbol-registry"),F=f("symbols"),N=f("op-symbols"),I=Object.prototype,G="function"==typeof U,B=n.QObject,H=!B||!B.prototype||!B.prototype.findChild,z=i&&c(function(){return 7!=R(A({},"a",{get:function(){return A(this,"a",{value:7}).a}})).a})?function(e,t,r){var n=k(I,t);n&&delete I[t],A(e,t,r),n&&e!==I&&A(I,t,n)}:A,V=function(e){var t=F[e]=R(U.prototype);return t._k=e,t},Z=G&&"symbol"==typeof U.iterator?function(e){return"symbol"==typeof e}:function(e){return e instanceof U},W=function(e,t,r){return e===I&&W(N,t,r),g(e),t=w(t,!0),g(r),o(F,t)?(r.enumerable?(o(e,j)&&e[j][t]&&(e[j][t]=!1),r=R(r,{enumerable:x(0,!1)})):(o(e,j)||A(e,j,x(1,{})),e[j][t]=!0),z(e,t,r)):A(e,t,r)},J=function(e,t){g(e);for(var r,n=h(t=b(t)),o=0,i=n.length;i>o;)W(e,r=n[o++],t[r]);return e},K=function(e,t){return void 0===t?R(e):J(R(e),t)},Y=function(e){var t=T.call(this,e=w(e,!0));return!(this===I&&o(F,e)&&!o(N,e))&&(!(t||!o(this,e)||!o(F,e)||o(this,j)&&this[j][e])||t)},$=function(e,t){if(e=b(e),t=w(t,!0),e!==I||!o(F,t)||o(N,t)){var r=k(e,t);return!r||!o(F,t)||o(e,j)&&e[j][t]||(r.enumerable=!0),r}},Q=function(e){for(var t,r=E(b(e)),n=[],i=0;r.length>i;)o(F,t=r[i++])||t==j||t==s||n.push(t);return n},X=function(e){for(var t,r=e===I,n=E(r?N:b(e)),i=[],u=0;n.length>u;)!o(F,t=n[u++])||r&&!o(I,t)||i.push(F[t]);return i};
 // 19.4.1.1 Symbol([description])
-G||(U=function(){if(this instanceof U)throw TypeError("Symbol is not a constructor!");var e=p(arguments.length>0?arguments[0]:void 0),t=function(r){this===I&&t.call(N,r),o(this,j)&&o(this[j],e)&&(this[j][e]=!1),z(this,e,x(1,r))};return i&&H&&z(I,e,{configurable:!0,set:t}),V(e)},a(U.prototype,"toString",function(){return this._k}),O.f=$,S.f=W,r(56).f=R.f=Q,r(35).f=Y,r(55).f=X,i&&!r(23)&&a(I,"propertyIsEnumerable",Y,!0),v.f=function(e){return V(d(e))}),u(u.G+u.W+u.F*!G,{Symbol:U});for(var ee="hasInstance,isConcatSpreadable,iterator,match,replace,search,species,split,toPrimitive,toStringTag,unscopables".split(","),te=0;ee.length>te;)d(ee[te++]);for(var re=L(d.store),ne=0;re.length>ne;)y(re[ne++]);u(u.S+u.F*!G,"Symbol",{
+G||(U=function(){if(this instanceof U)throw TypeError("Symbol is not a constructor!");var e=p(arguments.length>0?arguments[0]:void 0),t=function(r){this===I&&t.call(N,r),o(this,j)&&o(this[j],e)&&(this[j][e]=!1),z(this,e,x(1,r))};return i&&H&&z(I,e,{configurable:!0,set:t}),V(e)},a(U.prototype,"toString",function(){return this._k}),O.f=$,S.f=W,r(56).f=P.f=Q,r(35).f=Y,r(55).f=X,i&&!r(23)&&a(I,"propertyIsEnumerable",Y,!0),v.f=function(e){return V(d(e))}),u(u.G+u.W+u.F*!G,{Symbol:U});for(var ee="hasInstance,isConcatSpreadable,iterator,match,replace,search,species,split,toPrimitive,toStringTag,unscopables".split(","),te=0;ee.length>te;)d(ee[te++]);for(var re=L(d.store),ne=0;re.length>ne;)y(re[ne++]);u(u.S+u.F*!G,"Symbol",{
 // 19.4.2.1 Symbol.for(key)
 for:function(e){return o(C,e+="")?C[e]:C[e]=U(e)},
 // 19.4.2.5 Symbol.keyFor(sym)
@@ -554,12 +554,12 @@ getOwnPropertyNames:Q,
 // 19.1.2.8 Object.getOwnPropertySymbols(O)
 getOwnPropertySymbols:X}),
 // 24.3.2 JSON.stringify(value [, replacer [, space]])
-M&&u(u.S+u.F*(!G||c(function(){var e=U();
+D&&u(u.S+u.F*(!G||c(function(){var e=U();
 // MS Edge converts symbol values to JSON as {}
 // WebKit converts symbol values to JSON as null
 // V8 throws on boxed symbols
-return"[null]"!=D([e])||"{}"!=D({a:e})||"{}"!=D(Object(e))})),"JSON",{stringify:function(e){for(var t,r,n=[e],o=1;arguments.length>o;)n.push(arguments[o++]);if(r=t=n[1],(m(t)||void 0!==e)&&!Z(e))// IE8 returns string on undefined
-return b(t)||(t=function(e,t){if("function"==typeof r&&(t=r.call(this,e,t)),!Z(t))return t}),n[1]=t,D.apply(M,n)}}),
+return"[null]"!=M([e])||"{}"!=M({a:e})||"{}"!=M(Object(e))})),"JSON",{stringify:function(e){for(var t,r,n=[e],o=1;arguments.length>o;)n.push(arguments[o++]);if(r=t=n[1],(m(t)||void 0!==e)&&!Z(e))// IE8 returns string on undefined
+return _(t)||(t=function(e,t){if("function"==typeof r&&(t=r.call(this,e,t)),!Z(t))return t}),n[1]=t,M.apply(D,n)}}),
 // 19.4.3.4 Symbol.prototype[@@toPrimitive](hint)
 U.prototype[q]||r(8)(U.prototype,q,U.prototype.valueOf),
 // 19.4.3.5 Symbol.prototype[@@toStringTag]
@@ -818,7 +818,7 @@ return o.stringify.apply(o,arguments)}},/* 115 */
 ,/* 117 */
 ,/* 118 */
 /***/
-function(e,t,r){"use strict";function _interopRequireDefault(e){return e&&e.__esModule?e:{default:e}}Object.defineProperty(t,"__esModule",{value:!0});var n=r(41),o=_interopRequireDefault(n),i=r(11),u=_interopRequireDefault(i),a=r(12),s=_interopRequireDefault(a),c=r(86),f=function(e){if(e&&e.__esModule)return e;var t={};if(null!=e)for(var r in e)Object.prototype.hasOwnProperty.call(e,r)&&(t[r]=e[r]);return t.default=e,t}(c),l=r(119),p=_interopRequireDefault(l),d=r(120),v=_interopRequireDefault(d),y=r(121),h=_interopRequireDefault(y),b=r(110),_=f.getLogger("PEP"),m=function(){/**
+function(e,t,r){"use strict";function _interopRequireDefault(e){return e&&e.__esModule?e:{default:e}}Object.defineProperty(t,"__esModule",{value:!0});var n=r(41),o=_interopRequireDefault(n),i=r(11),u=_interopRequireDefault(i),a=r(12),s=_interopRequireDefault(a),c=r(86),f=function(e){if(e&&e.__esModule)return e;var t={};if(null!=e)for(var r in e)Object.prototype.hasOwnProperty.call(e,r)&&(t[r]=e[r]);return t.default=e,t}(c),l=r(119),p=_interopRequireDefault(l),d=r(120),v=_interopRequireDefault(d),y=r(121),h=_interopRequireDefault(y),_=(r(110),f.getLogger("PEP"),function(){/**
   * Creates a Policy Enforcement Point (PEP) instance
   * @param    {Object}    context
   */
@@ -828,24 +828,16 @@ e.loadConfigurations()}/**
   * return the messageBus in this Registry
   * @param {MessageBus}           messageBus
   */
-return(0,s.default)(PEP,[{key:"addGUIListeners",value:function(){var e=this;e.context.messageBus.addListener(e.context.pepURL,function(t){var r=t.body.method,n=void 0;if("addToGroup"===r){var o=t.body.params.groupName,i=t.body.params.userEmail;n=e.context.addToGroup(o,i)}else if("createGroup"===r){var u=t.body.params.groupName;n=e.context.createGroup(u)}else if("addPolicy"===r){var a=t.body.params.source,s=t.body.params.key,c=t.body.params.policy,f=t.body.params.combiningAlgorithm;n=e.addPolicy(a,s,c,f)}else if("deleteGroup"===r){var l=t.body.params.groupName;n=e.context.deleteGroup(l)}else if("removePolicy"===r){var p=t.body.params.source,d=t.body.params.key;n=e.removePolicy(p,d)}else if("savePolicies"===r){var v=t.body.params.source;n=e.context.savePolicies(v)}else if("userPolicies"===r)n=e.context.userPolicies;else if("activeUserPolicy"===r){var y=t.body.params.userPolicy;y&&(e.context.activeUserPolicy=y),n=e.context.activeUserPolicy}else if("userPolicy"===r){var h=t.body.params.key;n=e.context.userPolicies[h]}else"saveActivePolicy"===r?n=e.context.saveActivePolicy():"getMyEmails"===r?n=e.context.getMyEmails():"getMyHyperties"===r?n=e.context.getMyHyperties():"groups"===r?n=e.context.groups:"getGroupsNames"===r&&(n=e.context.getGroupsNames());if("removeFromGroup"===r){var b=t.body.params.groupName,_=t.body.params.userEmail;n=e.context.removeFromGroup(b,_)}var m={type:"execute",value:n,code:200},g={id:t.id,type:"response",to:t.from,from:t.to,body:m};e.context.messageBus.postMessage(g)})}},{key:"addPolicy",value:function(e,t,r,n){if(!e)throw new Error("source is not defined");if(!t)throw new Error("key is not defined");switch(void 0===r?r=new h.default(t,[],[],n):r instanceof h.default||(r=new h.default(r.key,r.rules,r.actions,r.combiningAlgorithm)),e){case"SERVICE_PROVIDER":this.context.savePolicies(e,r,t);break;case"USER":this.context.userPolicies[t]=r,this.context.savePolicies(e);break;default:throw Error("Unknown policy source: "+e)}}},{key:"authorise",value:function(e,t){var r=this;
+return(0,s.default)(PEP,[{key:"addGUIListeners",value:function(){var e=this;e.context.messageBus.addListener(e.context.pepURL,function(t){var r=t.body.method,n=void 0;if("addToGroup"===r){var o=t.body.params.groupName,i=t.body.params.userEmail;n=e.context.addToGroup(o,i)}else if("createGroup"===r){var u=t.body.params.groupName;n=e.context.createGroup(u)}else if("addPolicy"===r){var a=t.body.params.source,s=t.body.params.key,c=t.body.params.policy,f=t.body.params.combiningAlgorithm;n=e.addPolicy(a,s,c,f)}else if("deleteGroup"===r){var l=t.body.params.groupName;n=e.context.deleteGroup(l)}else if("removePolicy"===r){var p=t.body.params.source,d=t.body.params.key;n=e.removePolicy(p,d)}else if("savePolicies"===r){var v=t.body.params.source;n=e.context.savePolicies(v)}else if("userPolicies"===r)n=e.context.userPolicies;else if("activeUserPolicy"===r){var y=t.body.params.userPolicy;y&&(e.context.activeUserPolicy=y),n=e.context.activeUserPolicy}else if("userPolicy"===r){var h=t.body.params.key;n=e.context.userPolicies[h]}else"saveActivePolicy"===r?n=e.context.saveActivePolicy():"getMyEmails"===r?n=e.context.getMyEmails():"getMyHyperties"===r?n=e.context.getMyHyperties():"groups"===r?n=e.context.groups:"getGroupsNames"===r&&(n=e.context.getGroupsNames());if("removeFromGroup"===r){var _=t.body.params.groupName,g=t.body.params.userEmail;n=e.context.removeFromGroup(_,g)}var m={type:"execute",value:n,code:200},b={id:t.id,type:"response",to:t.from,from:t.to,body:m};e.context.messageBus.postMessage(b)})}},{key:"addPolicy",value:function(e,t,r,n){if(!e)throw new Error("source is not defined");if(!t)throw new Error("key is not defined");switch(void 0===r?r=new h.default(t,[],[],n):r instanceof h.default||(r=new h.default(r.key,r.rules,r.actions,r.combiningAlgorithm)),e){case"SERVICE_PROVIDER":this.context.savePolicies(e,r,t);break;case"USER":this.context.userPolicies[t]=r,this.context.savePolicies(e);break;default:throw Error("Unknown policy source: "+e)}}},{key:"authorise",value:function(e,t){var r=this;
 // log.log('[Policy.PEP Authorise] ', message);
 // log.log(message);
-if(!e)throw new Error("message is not defined");if(!e.from)throw new Error("message.from is not defined");if(!e.to)throw new Error("message.to is not defined");if(!e.type)throw new Error("message.type is not defined");return e.body=e.body||{},new o.default(function(n,o){e.body=e.body||{};var i=r,u=i.pdp.evaluatePolicies(e,t);"Not Applicable"===u&&(u=i.context.defaultBehaviour,e.body.auth=!1),i.actionsService.enforcePolicies(e,t).then(function(t){for(var r in t)if(e=t[r],u)e.body.auth=void 0===e.body.auth||e.body.auth,n(e);else{var i={body:{code:403,description:"Blocked by policy"},from:e.to,to:e.from,type:"response"};o(i)}},function(e){o(e)})})}},{key:"authoriseSync",value:function(e){if(e.body=e.body||{},this._isToVerify(e)){var t=this._isIncomingMessage(e);return e=this.context.prepareForEvaluation(e,t),"Not Applicable"!==this.pdp.evaluatePolicies(e,t)}return!!this.context.defaultBehaviour&&(e.body.auth=!1,!0)}},{key:"_isIncomingMessage",value:function(e){var t=void 0;
-//TODO: this subscriber validation should not exist, because is outdated
-//TODO: the syncher and syncher manager not following the correct spec;
-//TODO: this subscriber validation should not exist, because is outdated
-//TODO: the syncher and syncher manager not following the correct spec;
-return"forward"===e.type?(_.info("[PEP - isIncomingMessage] - message.type: ",e.type),t=e.body.from):e.body.hasOwnProperty("source")&&e.body.source?(_.info("[PEP - isIncomingMessage] - message.body.source: ",e.body.source),t=e.body.source):e.body.hasOwnProperty("subscriber")&&e.body.subscriber?(_.info("[PEP - isIncomingMessage] - message.body.subscriber: ",e.body.subscriber),t=e.body.subscriber):e.body.hasOwnProperty("reporter")&&e.body.reporter?(_.info("[PEP - isIncomingMessage] - message.body.reporter: ",e.body.reporter),t=e.body.reporter):(_.info("[PEP - isIncomingMessage] - message.from ",e.from),t=e.from),_.info("[PEP - isIncomingMessage] - check if isLocal: ",t),!this.context.isLocal(t)}},{key:"_isToVerify",value:function(e){var t=["domain","domain-idp","global","hyperty-runtime","runtime"],r=e.from.split("://"),n=r[0],o=e.to.split("://"),i=o[0],u=e.from,a=e.to;
-// Signalling messages between P2P Stubs don't have to be verified. FFS
-// hack to disable Identity verification for messages coming from legacy domains while solution is not implemented
-return e.body&&e.body.source&&(u=e.body.source),e.body&&e.body.subscriber&&(u=e.body.subscriber),-1===u.indexOf("/p2phandler/")&&-1===u.indexOf("/p2prequester/")&&-1===a.indexOf("/p2phandler/")&&-1===a.indexOf("/p2prequester/")&&(!this.context.isInterworkingProtoStub(u)&&(!(e.from===n||e.to===i||"read"===e.type||"response"===e.type||(0,b.isHypertyURL)(e.from)&&"delete"===e.type)&&(-1===t.indexOf(n)||-1===t.indexOf(i))))}},{key:"removePolicy",value:function(e,t){if(!e)throw new Error("source is not defined");if("*"!==e&&!t)throw new Error("key is not defined");switch(e){case"*":this.context.serviceProviderPolicy={},this.context.userPolicies={},this.context.activeUserPolicy=void 0,this.context.savePolicies("USER"),this.context.savePolicies("SERVICE_PROVIDER"),this.context.saveActivePolicy();break;case"SERVICE_PROVIDER":delete this.context.serviceProviderPolicy[t],this.context.savePolicies();break;case"USER":delete this.context.userPolicies[t],t===this.context.activeUserPolicy&&(this.context.activeUserPolicy=void 0,this.context.saveActivePolicy()),this.context.savePolicies("USER");break;default:throw Error("Unknown policy source: "+e)}}},{key:"messageBus",get:function(){return this.context.messageBus},set:function(e){var t=this;t.context.messageBus=e,t.addGUIListeners()}}]),PEP}();t.default=m,e.exports=t.default},/* 119 */
+if(!e)throw new Error("message is not defined");if(!e.from)throw new Error("message.from is not defined");if(!e.to)throw new Error("message.to is not defined");if(!e.type)throw new Error("message.type is not defined");return e.body=e.body||{},new o.default(function(n,o){e.body=e.body||{};var i=r,u=i.pdp.evaluatePolicies(e,t);"Not Applicable"===u&&(u=i.context.defaultBehaviour,e.body.auth=!1),i.actionsService.enforcePolicies(e,t).then(function(t){for(var r in t)if(e=t[r],u)e.body.auth=void 0===e.body.auth||e.body.auth,n(e);else{var i={body:{code:403,description:"Blocked by policy"},from:e.to,to:e.from,type:"response"};o(i)}},function(e){o(e)})})}},{key:"authoriseSync",value:function(e){var t=void 0;return e.body=e.body||{},t=this.pdp.evaluatePolicies(e,!0),"Not Applicable"===t&&(t=this.context.defaultBehaviour),t}},{key:"removePolicy",value:function(e,t){if(!e)throw new Error("source is not defined");if("*"!==e&&!t)throw new Error("key is not defined");switch(e){case"*":this.context.serviceProviderPolicy={},this.context.userPolicies={},this.context.activeUserPolicy=void 0,this.context.savePolicies("USER"),this.context.savePolicies("SERVICE_PROVIDER"),this.context.saveActivePolicy();break;case"SERVICE_PROVIDER":delete this.context.serviceProviderPolicy[t],this.context.savePolicies();break;case"USER":delete this.context.userPolicies[t],t===this.context.activeUserPolicy&&(this.context.activeUserPolicy=void 0,this.context.saveActivePolicy()),this.context.savePolicies("USER");break;default:throw Error("Unknown policy source: "+e)}}},{key:"messageBus",get:function(){return this.context.messageBus},set:function(e){var t=this;t.context.messageBus=e,t.addGUIListeners()}}]),PEP}());t.default=_,e.exports=t.default},/* 119 */
 /***/
 function(e,t,r){"use strict";function _interopRequireDefault(e){return e&&e.__esModule?e:{default:e}}Object.defineProperty(t,"__esModule",{value:!0});var n=r(41),o=_interopRequireDefault(n),i=r(11),u=_interopRequireDefault(i),a=r(12),s=_interopRequireDefault(a),c=function(){function ActionsService(e){(0,u.default)(this,ActionsService),this.context=e}return(0,s.default)(ActionsService,[{key:"enforcePolicies",value:function(e,t){var r=this;return new o.default(function(n,o){var i=r.context.getPolicies(e,t);void 0!==i?void 0!==i.serviceProviderPolicy?i.serviceProviderPolicy.enforceActions(r.context,e).then(function(e){n(e)},function(e){o(e)}):void 0!==i.userPolicy?i.userPolicy.enforceActions(r.context,e).then(function(e){n(e)},function(e){o(e)}):n([e]):n([e])})}},{key:"forwardToID",value:function(e,t){var r=this;if(!r.context.runtimeRegistry)throw new Error("forward message to given ID is unsupported in this environment");return new o.default(function(n,o){if(r.context.runtimeRegistry.hypertiesList[0].hypertyURL===e.to){"runtime"!==e.to.split("://")[0]?r.context.runtimeRegistry.discoverHypertyPerUser(t).then(function(t){e.to=t.hypertyURL,e.body.via=void 0,n(e),r.context.runtimeRegistry._messageBus.postMessage(e)},function(e){o(e)}):n(e)}else n(e)})}},{key:"forwardToHyperty",value:function(e,t){var r=this;if(!r.context.runtimeRegistry)throw new Error("forward message to given ID is unsupported in this environment");return new o.default(function(n){if(r.context.runtimeRegistry.hypertiesList[0].hypertyURL===e.to){"runtime"!==e.to.split("://")[0]?(e.to=t,e.body.via=void 0,n(e),r.context.runtimeRegistry._messageBus.postMessage(e)):n(e)}else n(e)})}},{key:"sendAutomaticMessage",value:function(e,t){var r=this;return new o.default(function(n){var o={from:e.to,to:e.from,body:{value:t},type:e.type};n(e),r.context.runtimeRegistry._messageBus.postMessage(o)})}}]),ActionsService}();t.default=c,e.exports=t.default},/* 120 */
 /***/
 function(e,t,r){"use strict";function _interopRequireDefault(e){return e&&e.__esModule?e:{default:e}}Object.defineProperty(t,"__esModule",{value:!0});var n=r(11),o=_interopRequireDefault(n),i=r(12),u=_interopRequireDefault(i),a=r(111),s=_interopRequireDefault(a),c=function(){function PDP(e){(0,o.default)(this,PDP),this.context=e,this.operators=new s.default}return(0,u.default)(PDP,[{key:"evaluatePolicies",value:function(e,t){var r=this.context.getPolicies(e,t),n="Not Applicable";if(void 0!==r&&((n=this.evaluatePolicy(e,r.serviceProviderPolicy,t))||"Not Applicable"===n)){var o=this.evaluatePolicy(e,r.userPolicy,t);"Not Applicable"!==o&&(n=o)}return n}},{key:"evaluatePolicy",value:function(e,t,r){var n="Not Applicable";return t&&(n=t.evaluateRules(this.context,e,r)),n}}]),PDP}();t.default=c,e.exports=t.default},/* 121 */
 /***/
-function(e,t,r){"use strict";function _interopRequireDefault(e){return e&&e.__esModule?e:{default:e}}Object.defineProperty(t,"__esModule",{value:!0});var n=r(41),o=_interopRequireDefault(n),i=r(11),u=_interopRequireDefault(i),a=r(12),s=_interopRequireDefault(a),c=r(122),f=_interopRequireDefault(c),l=r(123),p=_interopRequireDefault(l),d=r(124),v=_interopRequireDefault(d),y=r(125),h=_interopRequireDefault(y),b=function(){function Policy(e,t,r,n){if((0,u.default)(this,Policy),!e)throw new Error("key is not defined");if(!r)throw new Error("actions are not defined");this.actions=r,this.key=e,this._setRules(t),this._setCombiningAlgorithm(n)}return(0,s.default)(Policy,[{key:"addAction",value:function(e,t){this.actions.push({method:e,param:t})}},{key:"createRule",value:function(e,t,r,n,o){void 0===o&&(o=this.getLastPriority()+1);var i=new h.default(e,t,r,n,o);this.rules.push(i)}},{key:"deleteRule",value:function(e){var t=this.rules.indexOf(e);this.rules.splice(t,1)}},{key:"enforceActions",value:function(e,t){var r=this;return new o.default(function(n,i){var u=[];if(0!==r.actions.length){for(var a in r.actions){var s=e.pep.actionsService[r.actions[a].method](t,r.actions[a].param);u.push(s)}o.default.all(u).then(function(e){n(e)},function(e){i(e)})}else n([t])})}},{key:"evaluateRules",value:function(e,t,r){var n=[];for(var o in this.rules)n.push(this.rules[o].evaluate(e,t,r));return this.combiningAlgorithm.combine(n)}},{key:"getLastPriority",value:function(){var e=[];if(0!==this.rules.length){for(var t in this.rules)e.push(this.rules[t].priority);return Math.max.apply(Math,e)}return-1}},{key:"getRuleByPriority",value:function(e){for(var t in this.rules)if(String(this.rules[t].priority)===String(e))return this.rules[t];throw Error("Rule with priority "+e+" does not exist!")}},{key:"_setCombiningAlgorithm",value:function(e){switch(e||(e="blockOverrides"),e){case"blockOverrides":this.combiningAlgorithm=new p.default;break;case"allowOverrides":this.combiningAlgorithm=new f.default;break;case"firstApplicable":this.combiningAlgorithm=new v.default;break;default:throw Error("Unknown algorithm: "+e)}}},{key:"_setRules",value:function(e){this.rules=[];for(var t in e){var r=e[t];void 0===r.priority&&(r.priority=this.getLastPriority()+1),r instanceof h.default||(r=new h.default(r.decision,r.condition,r.scope,r.target,r.priority)),this.rules.push(r)}}},{key:"sortRules",value:function(){return this.rules.sort(function(e,t){var r=e.priority,n=t.priority;return r<n?-1:r>n?1:0})}}]),Policy}();t.default=b,e.exports=t.default},/* 122 */
+function(e,t,r){"use strict";function _interopRequireDefault(e){return e&&e.__esModule?e:{default:e}}Object.defineProperty(t,"__esModule",{value:!0});var n=r(41),o=_interopRequireDefault(n),i=r(11),u=_interopRequireDefault(i),a=r(12),s=_interopRequireDefault(a),c=r(122),f=_interopRequireDefault(c),l=r(123),p=_interopRequireDefault(l),d=r(124),v=_interopRequireDefault(d),y=r(125),h=_interopRequireDefault(y),_=function(){function Policy(e,t,r,n){if((0,u.default)(this,Policy),!e)throw new Error("key is not defined");if(!r)throw new Error("actions are not defined");this.actions=r,this.key=e,this._setRules(t),this._setCombiningAlgorithm(n)}return(0,s.default)(Policy,[{key:"addAction",value:function(e,t){this.actions.push({method:e,param:t})}},{key:"createRule",value:function(e,t,r,n,o){void 0===o&&(o=this.getLastPriority()+1);var i=new h.default(e,t,r,n,o);this.rules.push(i)}},{key:"deleteRule",value:function(e){var t=this.rules.indexOf(e);this.rules.splice(t,1)}},{key:"enforceActions",value:function(e,t){var r=this;return new o.default(function(n,i){var u=[];if(0!==r.actions.length){for(var a in r.actions){var s=e.pep.actionsService[r.actions[a].method](t,r.actions[a].param);u.push(s)}o.default.all(u).then(function(e){n(e)},function(e){i(e)})}else n([t])})}},{key:"evaluateRules",value:function(e,t,r){var n=[];for(var o in this.rules)n.push(this.rules[o].evaluate(e,t,r));return this.combiningAlgorithm.combine(n)}},{key:"getLastPriority",value:function(){var e=[];if(0!==this.rules.length){for(var t in this.rules)e.push(this.rules[t].priority);return Math.max.apply(Math,e)}return-1}},{key:"getRuleByPriority",value:function(e){for(var t in this.rules)if(String(this.rules[t].priority)===String(e))return this.rules[t];throw Error("Rule with priority "+e+" does not exist!")}},{key:"_setCombiningAlgorithm",value:function(e){switch(e||(e="blockOverrides"),e){case"blockOverrides":this.combiningAlgorithm=new p.default;break;case"allowOverrides":this.combiningAlgorithm=new f.default;break;case"firstApplicable":this.combiningAlgorithm=new v.default;break;default:throw Error("Unknown algorithm: "+e)}}},{key:"_setRules",value:function(e){this.rules=[];for(var t in e){var r=e[t];void 0===r.priority&&(r.priority=this.getLastPriority()+1),r instanceof h.default||(r=new h.default(r.decision,r.condition,r.scope,r.target,r.priority)),this.rules.push(r)}}},{key:"sortRules",value:function(){return this.rules.sort(function(e,t){var r=e.priority,n=t.priority;return r<n?-1:r>n?1:0})}}]),Policy}();t.default=_,e.exports=t.default},/* 122 */
 /***/
 function(e,t,r){"use strict";function _interopRequireDefault(e){return e&&e.__esModule?e:{default:e}}Object.defineProperty(t,"__esModule",{value:!0});var n=r(11),o=_interopRequireDefault(n),i=r(12),u=_interopRequireDefault(i),a=function(){function AllowOverrides(){(0,o.default)(this,AllowOverrides)}return(0,u.default)(AllowOverrides,[{key:"combine",/**
     * Given an array of individual authorization decisions, prioritizes a positive one.
@@ -872,7 +864,7 @@ function(e,t,r){"use strict";function _interopRequireDefault(e){return e&&e.__es
 /***/
 function(e,t,r){"use strict";function _interopRequireDefault(e){return e&&e.__esModule?e:{default:e}}Object.defineProperty(t,"__esModule",{value:!0});var n=r(11),o=_interopRequireDefault(n),i=r(12),u=_interopRequireDefault(i),a=r(112),s=_interopRequireDefault(a),c=r(111),f=_interopRequireDefault(c),l=r(127),p=_interopRequireDefault(l),d=function(){function AdvancedCondition(e){(0,o.default)(this,AdvancedCondition),this.operators=new f.default,void 0!==e.operators&&(e=e.condition),e=this.buildCondition(e),this.condition=e}return(0,u.default)(AdvancedCondition,[{key:"buildCondition",value:function(e){return Array.isArray(e[1])?e[1]=this.buildCondition(e[1]):"subscription"===e[1].attribute?e[1]=new p.default(e[1].attribute,e[1].operator,e[1].params):e[1]=new s.default(e[1].attribute,e[1].operator,e[1].params),void 0!==e[2]&&(Array.isArray(e[2])?e[2]=this.buildCondition(e[2]):"subscription"===e[2].attribute?e[2]=new p.default(e[2].attribute,e[2].operator,e[2].params):e[2]=new s.default(e[2].attribute,e[2].operator,e[2].params)),e}},{key:"isApplicable",value:function(e,t,r,n,o,i,u){for(o||(o=this.condition[0],i=this.condition[1],u=this.condition[2]);!(i instanceof s.default)&!(i instanceof p.default)&"boolean"!=typeof i;)i=this.isApplicable(e,t,r,n,i[0],i[1],i[2]);if(void 0!==u)for(;!(u instanceof s.default)&!(u instanceof p.default)&"boolean"!=typeof u;)u=this.isApplicable(e,t,r,n,u[0],u[1],u[2]);var a="boolean"==typeof i?i:i.isApplicable(e,t,r,n),c=void 0;return void 0!==u&&(c="boolean"==typeof u?u:u.isApplicable(e,t,r,n)),this.operators[o]([a,c])}}]),AdvancedCondition}();t.default=d,e.exports=t.default},/* 127 */
 /***/
-function(e,t,r){"use strict";function _interopRequireDefault(e){return e&&e.__esModule?e:{default:e}}Object.defineProperty(t,"__esModule",{value:!0});var n=r(63),o=_interopRequireDefault(n),i=r(11),u=_interopRequireDefault(i),a=r(12),s=_interopRequireDefault(a),c=r(64),f=_interopRequireDefault(c),l=r(128),p=_interopRequireDefault(l),d=r(65),v=_interopRequireDefault(d),y=r(112),h=_interopRequireDefault(y),b=function(e){/**
+function(e,t,r){"use strict";function _interopRequireDefault(e){return e&&e.__esModule?e:{default:e}}Object.defineProperty(t,"__esModule",{value:!0});var n=r(63),o=_interopRequireDefault(n),i=r(11),u=_interopRequireDefault(i),a=r(12),s=_interopRequireDefault(a),c=r(64),f=_interopRequireDefault(c),l=r(128),p=_interopRequireDefault(l),d=r(65),v=_interopRequireDefault(d),y=r(112),h=_interopRequireDefault(y),_=function(e){/**
   * Creates a new SubscriptionCondition.
   * @class
   * @param  {string}  attribute
@@ -906,7 +898,7 @@ return(0,v.default)(SubscriptionCondition,e),(0,s.default)(SubscriptionCondition
                         * See the License for the specific language governing permissions and
                         * limitations under the License.
                         **/
-t.default=b,e.exports=t.default},/* 128 */
+t.default=_,e.exports=t.default},/* 128 */
 /***/
 function(e,t,r){"use strict";function _interopRequireDefault(e){return e&&e.__esModule?e:{default:e}}t.__esModule=!0;var n=r(63),o=_interopRequireDefault(n),i=r(129),u=_interopRequireDefault(i);t.default=function get(e,t,r){null===e&&(e=Function.prototype);var n=(0,u.default)(e,t);if(void 0===n){var i=(0,o.default)(e);return null===i?void 0:get(i,t,r)}if("value"in n)return n.value;var a=n.get;if(void 0!==a)return a.call(r)}},/* 129 */
 /***/
