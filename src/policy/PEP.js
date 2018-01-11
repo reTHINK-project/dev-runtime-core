@@ -151,29 +151,38 @@ class PEP {
       message.body = message.body || {};
       let _this = this;
 
-          let result = _this.pdp.evaluatePolicies(message, isIncoming);
-          if (result === 'Not Applicable') {
-            result = _this.context.defaultBehaviour;
-            message.body.auth = false;
+      let result = _this.pdp.evaluatePolicies(message, isIncoming);
+      if (result === 'Not Applicable') {
+        result = _this.context.defaultBehaviour;
+        message.body.auth = false;
+      }
+      _this.actionsService.enforcePolicies(message, isIncoming).then(messages => {
+        for (let i in messages) {
+          message = messages[i];
+          if (result) {
+            message.body.auth = (message.body.auth === undefined) ? true : message.body.auth;
+            resolve(message);
+          } else {
+            let errorMessage = { body: { code: 403, description: 'Blocked by policy' }, from: message.to, to: message.from, type: 'response' };
+            reject(errorMessage);
           }
-          _this.actionsService.enforcePolicies(message, isIncoming).then(messages => {
-            for (let i in messages) {
-              message = messages[i];
-                if (result) {
-                  message.body.auth = (message.body.auth === undefined) ? true : message.body.auth;
-                  resolve(message);
-                } else {
-                  let errorMessage = { body: { code: 403, description: 'Blocked by policy' }, from: message.to, to: message.from, type: 'response' };
-                  reject(errorMessage);
-                }
-            }
-          }, (error) => {
-            reject(error);
-          });
+        }
+      }, (error) => {
+        reject(error);
+      });
 
     });
   }
+  authoriseSync(message) {
+    let result;
+    message.body = message.body || {};
+    result = this.pdp.evaluatePolicies(message, true);
+    if (result === 'Not Applicable') {
+      result = this.context.defaultBehaviour;
+    }
+    return result;
 
+  }
 
   removePolicy(source, key) {
     if (!source) throw new Error('source is not defined');
