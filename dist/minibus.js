@@ -1,5 +1,5 @@
-// version: 0.11.0
-// date: Wed Jan 10 2018 16:54:02 GMT+0000 (WET)
+// version: 0.11.1
+// date: Fri Jan 12 2018 12:42:38 GMT+0000 (WET)
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -25,8 +25,8 @@
 **/
 
 
-// version: 0.11.0
-// date: Wed Jan 10 2018 16:54:02 GMT+0000 (WET)
+// version: 0.11.1
+// date: Fri Jan 12 2018 12:42:38 GMT+0000 (WET)
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
