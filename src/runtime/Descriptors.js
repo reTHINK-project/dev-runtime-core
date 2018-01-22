@@ -98,9 +98,10 @@ class Descriptors {
       let originDividedURL = divideURL(this.runtimeURL);
       let originDomain = originDividedURL.domain;
       let constraints = this.constraints;
-      constraints.onlyAccessToken = true;
-      constraints.onlyIdAssertionValidation = true;
 
+      constraints.constraints.onlyAccessToken = true;
+      constraints.constraints.onlyIdAssertionValidation = true;
+      console.log('LOG HERE', constraints);
       if (idpProxyURL.includes('://')) {
         let dividedURL = divideURL(idpProxyURL);
         domain = dividedURL.domain;
