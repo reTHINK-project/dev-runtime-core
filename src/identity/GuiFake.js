@@ -33,7 +33,7 @@ class GuiFake {
         if (identities[0] !== undefined) {
           value = {type: 'identity', value: identities[0], code: 200};
         } else {
-          value = {type: 'idp', value: idps[0].domain, code: 200};
+          value = {type: 'idp', value: idps[1].domain, code: 200};
         }
 
         let replyMsg = {id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value};

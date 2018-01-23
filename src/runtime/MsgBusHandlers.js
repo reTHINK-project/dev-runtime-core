@@ -70,7 +70,7 @@ class MsgBusHandlers {
   get encryptHandler() {
     let _this = this;
     return (ctx) => {
-      _this.cryptoManager.default.encryptMessage(ctx.msg).then((changedMgs) => {
+      _this.cryptoManager.encryptMessage(ctx.msg).then((changedMgs) => {
         ctx.msg = changedMgs;
         ctx.next();
       }).catch((reason) => {
@@ -86,7 +86,7 @@ class MsgBusHandlers {
   get decryptHandler() {
     let _this = this;
     return (ctx) => {
-      _this.cryptoManager.default.decryptMessage(ctx.msg).then((changedMgs) => {
+      _this.cryptoManager.decryptMessage(ctx.msg).then((changedMgs) => {
         ctx.msg = changedMgs;
         ctx.next();
       }).catch((reason) => {

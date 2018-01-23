@@ -18,11 +18,13 @@ export const runtimeConfiguration = {
       'registry:DataObjectURLs': 'key,version,value',
       'registry:HypertyURLs': 'key,version,value'
     },
-    identity: {
-      'idModule:accessTokens': 'key,version,value',
-      'cryptoManager:userAsymmetricKey': 'key,version,value',
-      'idModule:identities': 'key,version,value',
+    cryptoManager: {
+      userAsymmetricKey: 'key,version,value',
       dataObjectSessionKeys: 'key,version,value'
+    },
+    identity: {
+      accessTokens: 'key,version,value',
+      identities: 'userURL, userProfile.email, userProfile.userURL, userProfile.name'
     },
     runtimeCatalogue: {
       runtimeCatalogue: '&cguid, accessControlPolicy, constraints, dataObjects, hypertyType, objectName, sourcePackage, version'

@@ -47,7 +47,7 @@ class Identities {
 
   set defaultIdentity(identifier) {
     if (this.identities[identifier]) this._defaultIdentity = identifier;
-    else throw new Error('[Identities.set defaultIdentity ] Error: identity does not exist here: ', identity);
+    else throw new Error('[Identities.set defaultIdentity ] Error: identity does not exist here: ', identifier);
   }
 
   set currentIdentity(identifier) {
@@ -56,12 +56,12 @@ class Identities {
   }
 
   get defaultIdentity() {
-    if (this._defaultIdentity) return this.identities[this._defaultIdentity];
+    if (this._defaultIdentity) return Object.assign({}, this.identities[this._defaultIdentity]);
     else return false;
   }
 
   get currentIdentity() {
-    return this.identities[this._currentIdentity];
+    return Object.assign({}, this.identities[this._currentIdentity]);
   }
 
   get identifiers() {
@@ -69,14 +69,16 @@ class Identities {
   }
 
   getIdentity(identifier) {
-    return this._identities[identifier];
+    return Object.assign({}, this._identities[identifier]);
   }
 
   loadIdentities() {
     let _this = this;
     return new Promise((resolve) => {
 
-      _this._storageManager.get('idModule:identities').then((identities) => {
+      _this._storageManager.get(null, null, 'identities').then((identities) => {
+
+        log.info('[Identities.Load Identities] identities: ', identities);
 
         if (identities) {
           _this._identities = identities;
@@ -88,7 +90,7 @@ class Identities {
             let identity = _this._identities[id];
             let expires = identity.expires;
 
-            //            if (!identity.hasOwnProperty('interworking') 
+            //            if (!identity.hasOwnProperty('interworking')
             //            || !identity.interworking) {
             _this.defaultIdentity = id;
 
@@ -96,10 +98,10 @@ class Identities {
               _this.defaultIdentity.expires = parseInt(expires);
               _this.currentIdentity = id;
             }
-            //            }
 
           });
         }
+
         resolve();
       });
     });
@@ -109,7 +111,7 @@ class Identities {
     let _this = this;
     return new Promise((resolve) => {
 
-      _this._storageManager.get('idModule:accessTokens').then((accessTokens) => {
+      _this._storageManager.get('accessTokens').then((accessTokens) => {
 
         if (accessTokens) _this._accessTokens = accessTokens;
         resolve();
@@ -163,8 +165,9 @@ class Identities {
       delete _this.identities[userUrl];
 
       _this._store().then(() => {
-        resolve(assertion);
+        resolve();
       });
+
     });
 
   }
@@ -294,8 +297,11 @@ class Identities {
 
     return new Promise((resolve, reject) => {
 
+      const store = Object.keys(this._identities).map((userURL) => {
+        return _this._storageManager.set(userURL, 0, this._identities[userURL], 'identities');
+      });
 
-      _this._storageManager.set('idModule:identities', 0, _this._identities).then(() => {
+      Promise.all(store).then(() => {
         resolve();
       }).catch(err => {
         reject('On _sendReporterSessionKey from method storeIdentity error: ' + err);
@@ -310,7 +316,7 @@ class Identities {
 
       let accessTokens = deepClone(_this._accessTokens);
 
-      _this._storageManager.set('idModule:accessTokens', 0, accessTokens).then(() => {
+      _this._storageManager.set('accessTokens', 0, accessTokens).then(() => {
         resolve();
       }).catch(err => {
         reject('On _sendReporterSessionKey from method storeIdentity error: ' + err);

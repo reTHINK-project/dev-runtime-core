@@ -97,7 +97,11 @@ class Descriptors {
 
       let originDividedURL = divideURL(this.runtimeURL);
       let originDomain = originDividedURL.domain;
+      let constraints = this.constraints;
 
+      constraints.constraints.onlyAccessToken = true;
+      constraints.constraints.onlyIdAssertionValidation = true;
+      console.log('LOG HERE', constraints);
       if (idpProxyURL.includes('://')) {
         let dividedURL = divideURL(idpProxyURL);
         domain = dividedURL.domain;
@@ -118,7 +122,7 @@ class Descriptors {
 
       idpProxyURL = resource.prefix + domain + resource.suffix + idpproxy;
       // log.log('Load Idp Proxy for domain, ' + domain + ' : ', idpProxyURL);
-      return this.catalogue.getIdpProxyDescriptor(idpProxyURL, true, this.constraints).then((result) => {
+      return this.catalogue.getIdpProxyDescriptor(idpProxyURL, true, constraints).then((result) => {
 
         resolve(result);
 
@@ -130,7 +134,7 @@ class Descriptors {
         idpProxyURL = buildURL(this.runtimeConfiguration, 'catalogueURLs', 'idpProxy', idpproxy);
 
         // log.log('Load Idp Proxy for domain, ' + domain + ' : ', idpProxyURL);
-        return this.catalogue.getIdpProxyDescriptor(idpProxyURL, true, this.constraints);
+        return this.catalogue.getIdpProxyDescriptor(idpProxyURL, true, constraints);
       }).then((result) => {
         resolve(result);
       }).catch((reason) => {
