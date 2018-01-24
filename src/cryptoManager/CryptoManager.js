@@ -5,6 +5,7 @@ import HandShakeProtocol from './HandShakeProtocol';
 
 import {divideURL, isDataObjectURL, isLegacy, chatkeysToStringCloner, chatkeysToArrayCloner, parseMessageURL,
   parse, stringify, encode, decode, decodeToUint8Array, filterMessageToHash} from '../utils/utils.js';
+//import MessageEncryptionHandling from './MessageEncryptionHandling.js';
 
 import Crypto from './Crypto';
 
@@ -50,13 +51,15 @@ class CryptoManager {
     _this.dataObjectSessionKeys = {};
     _this.crypto = new Crypto(_this._runtimeFactory);
     _this.handShakeProtocol = new HandShakeProtocol(_this.chatKeys, _this.crypto, _this._idm,
-                                                    _this.dataObjectSessionKeys, _this.storageManager);
+      _this.dataObjectSessionKeys, _this.storageManager);
 
     //failsafe to enable/disable all the criptographic functions
     _this.isToUseEncryption = true;
 
     _this._registry = registry;
     _this._coreDiscovery = coreDiscovery;
+
+  //  _this._messageEncryptionHandling = new MessageEncryptionHandling(registry, _this.chatKeys, _this.crypto, this._idm);
   }
 
   //******************* GET AND SET METHODS *******************
@@ -175,71 +178,6 @@ class CryptoManager {
 
 
   //******************* ENCRYPTION METHODS *******************
-  /**
-* Identifies the messages to be encrypted
-* @param {Message}    message
-* @returns {boolean}  returns true if the message requires encryption
-*/
-
-  _isToEncrypt(message) {
-    log.info('[CryptoManager.istoChyperModule]', message);
-    let isCreate = message.type === 'create';
-    let isFromHyperty = message.from.includes('hyperty://');
-    let isToHyperty = message.to.includes('hyperty://');
-    let isToDataObject = isDataObjectURL(message.to);
-
-    let doMutualAuthentication = message.body.hasOwnProperty('mutual') ? message.body.mutual : true;
-
-    if (!doMutualAuthentication) return false;
-
-    //if is not to apply encryption, then returns resolve
-    if (!this.isToUseEncryption && !(message.type === 'handshake')) {
-      log.info('not handshake: encryption disabled');
-      return false;
-    }
-
-    if (message.type === 'update') {
-      log.info('update:encryption disabled');
-      return false;
-    }
-
-    if (isLegacy(message.to)) return false;
-
-    return ((isCreate && isFromHyperty && isToHyperty) || (isCreate && isFromHyperty && isToDataObject && doMutualAuthentication) || message.type === 'handshake' || (message.type === 'update' && doMutualAuthentication));
-  }
-
-
-  _isToDecrypt(message) {
-    let _this = this;
-
-
-    return new Promise((resolve, reject) => {
-      // For sybscribe message let's start the mutualAuthentication
-      let isSubscription = message.type === 'subscribe';
-      let isFromRemoteSM = _this._isFromRemoteSM(message.from);
-
-      if (isSubscription & isFromRemoteSM) {
-        log.log('_doMutualAuthenticationPhase1');
-
-        _this._doMutualAuthenticationPhase1(message).then(() => {
-          resolve(false);
-        }, (error) => {
-          reject(error);
-        });
-
-      } else if (message.hasOwnProperty('body') && message.body.hasOwnProperty('value') && typeof message.body.value === 'string') {
-        log.log('_isToDecrypt:true');
-        resolve(true);
-      } else {
-        log.log('_isToDecrypt:false');
-        resolve(false);
-      }
-
-    }).catch((error) => {
-      log.error('[CryptoManager._isToDecrypt]', error);
-    });
-
-  }
 
   encryptMessage(message) {
     //log.info('encryptMessage:message', message);
@@ -248,8 +186,6 @@ class CryptoManager {
     log.log('encrypt message ');
 
     return new Promise(function(resolve, reject) {
-
-      let isHandShakeType = message.type === 'handshake';
 
       //if is not to apply encryption, then returns resolve
       if (!_this._isToEncrypt(message)) {
@@ -269,56 +205,23 @@ class CryptoManager {
         return resolve(message);
       }
 
+      //------------> Needs tests!
       if (isToLegacyIdentity) {
         resolve(message);
       } else if (isFromHyperty && isToHyperty) {
-        let userURL = _this._registry.getHypertyOwner(message.from);
-        if (userURL) {
-
-          // check if exists any keys between two users
-          let chatKeys = _this.chatKeys[message.from + '<->' + message.to];
-          if (!chatKeys) {
-            chatKeys = _this._newChatCrypto(message, userURL);
-
-            //log.log('createChatKey encrypt', message.from + message.to);
-            _this.chatKeys[message.from + '<->' + message.to] = chatKeys;
-            message.body.handshakePhase = 'startHandShake';
-          }
-
-          if (chatKeys.authenticated && !isHandShakeType) {
-
-            let iv = _this.crypto.generateIV();
-            _this.crypto.encryptAES(chatKeys.keys.hypertyFromSessionKey, stringify(message.body.value), iv).then(encryptedValue => {
-
-              let filteredMessage = filterMessageToHash(message, stringify(message.body.value) +
-                                                                        stringify(iv), chatKeys.hypertyFrom.messageInfo);
-
-              _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, filteredMessage).then(hash => {
-                //log.log('result of hash ', hash);
-                let value = {iv: encode(iv), value: encode(encryptedValue), hash: encode(hash)};
-                message.body.value = encode(value);
-
-                resolve(message);
-              });
-            });
-
-            // if is a handshake message, just resolve it
-          } else if (isHandShakeType) {
-            resolve(message);
-
-            // else, starts a new handshake protocol
+        /*    _this._messageEncryptionHandling.betweenHyperties(message).then(result => {
+          if (result.isHandShakeNeeded) {
+            resolve(result.message);
           } else {
-            _this._doHandShakePhase(message, chatKeys).then(function(value) {
+            _this._doHandShakePhase(result.message, _this.chatKeys).then(function(value) {
               _this.chatKeys[message.from + '<->' + message.to] = value.chatKeys;
 
               _this._messageBus.postMessage(value.message);
               reject('encrypt handshake protocol phase ');
             });
           }
-        } else {
-          reject('In encryptMessage: Hyperty owner URL was not found');
-        }
-
+        });
+*/
       //if from hyperty to a dataObjectURL
       } else if (isFromHyperty && isToDataObject) {
 
@@ -1029,6 +932,71 @@ class CryptoManager {
         reject(err);
       });
     });
+  }
+
+
+  _isToDecrypt(message) {
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+      // For sybscribe message let's start the mutualAuthentication
+      let isSubscription = message.type === 'subscribe';
+      let isFromRemoteSM = _this._isFromRemoteSM(message.from);
+
+      if (isSubscription & isFromRemoteSM) {
+        log.log('_doMutualAuthenticationPhase1');
+
+        _this._doMutualAuthenticationPhase1(message).then(() => {
+          resolve(false);
+        }, (error) => {
+          reject(error);
+        });
+
+      } else if (message.hasOwnProperty('body') && message.body.hasOwnProperty('value') && typeof message.body.value === 'string') {
+        log.log('_isToDecrypt:true');
+        resolve(true);
+      } else {
+        log.log('_isToDecrypt:false');
+        resolve(false);
+      }
+
+    }).catch((error) => {
+      log.error('[CryptoManager._isToDecrypt]', error);
+    });
+
+  }
+
+  /**
+    * Identifies the messages to be encrypted
+    * @param {Message}    message
+    * @returns {boolean}  returns true if the message requires encryption
+    */
+
+  _isToEncrypt(message) {
+    log.info('[CryptoManager.istoChyperModule]', message);
+    let isCreate = message.type === 'create';
+    let isFromHyperty = message.from.includes('hyperty://');
+    let isToHyperty = message.to.includes('hyperty://');
+    let isToDataObject = isDataObjectURL(message.to);
+
+    let doMutualAuthentication = message.body.hasOwnProperty('mutual') ? message.body.mutual : true;
+
+    if (!doMutualAuthentication) return false;
+
+    //if is not to apply encryption, then returns resolve
+    if (!this.isToUseEncryption && !(message.type === 'handshake')) {
+      log.info('not handshake: encryption disabled');
+      return false;
+    }
+
+    if (message.type === 'update') {
+      log.info('update:encryption disabled');
+      return false;
+    }
+
+    if (isLegacy(message.to)) return false;
+
+    return ((isCreate && isFromHyperty && isToHyperty) || (isCreate && isFromHyperty && isToDataObject && doMutualAuthentication) || message.type === 'handshake' || (message.type === 'update' && doMutualAuthentication));
   }
 
 }

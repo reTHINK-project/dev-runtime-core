@@ -8,7 +8,6 @@ import {chatkeysToStringCloner, encode, decode, decodeToUint8Array,
 /**
 * This class contains the handshake protocol, used to exchange session keys between
 *  two user, after their identity is validate.
-*
 */
 class HandShakeProtocol {
 
@@ -290,7 +289,7 @@ class HandShakeProtocol {
 
     let _this = this;
     let iv;
-  let value = {};
+    let value = {};
     let hash;
     return new Promise(function(resolve, reject) {
 
