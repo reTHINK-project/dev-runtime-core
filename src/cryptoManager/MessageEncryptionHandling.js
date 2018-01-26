@@ -53,7 +53,7 @@ class MessageEncryptionHandling {
 
           // else, starts a new handshake protocol
         } else {
-          resolve({ message: message, isHandShakeNeeded: true});
+          resolve({ message: message, isHandShakeNeeded: true, chatKeys: chatKeys});
 
 /*
           _this._doHandShakePhase(message, chatKeys).then(function(value) {

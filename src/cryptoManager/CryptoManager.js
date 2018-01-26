@@ -212,10 +212,10 @@ class CryptoManager {
         resolve(message);
       } else if (isFromHyperty && isToHyperty) {
         _this._messageEncryptionHandling.betweenHyperties(message).then(result => {
-          if (result.isHandShakeNeeded) {
+          if (!result.isHandShakeNeeded) {
             resolve(result.message);
           } else {
-            _this._doHandShakePhase(result.message, _this.chatKeys).then(function(value) {
+            _this._doHandShakePhase(result.message, result.chatKeys).then(function(value) {
               _this.chatKeys[message.from + '<->' + message.to] = value.chatKeys;
 
               _this._messageBus.postMessage(value.message);
