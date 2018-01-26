@@ -5,7 +5,7 @@ import HandShakeProtocol from './HandShakeProtocol';
 
 import {divideURL, isDataObjectURL, isLegacy, chatkeysToStringCloner, chatkeysToArrayCloner, parseMessageURL,
   parse, stringify, encode, decode, decodeToUint8Array, filterMessageToHash} from '../utils/utils.js';
-//import MessageEncryptionHandling from './MessageEncryptionHandling.js';
+import MessageEncryptionHandling from './MessageEncryptionHandling.js';
 
 import Crypto from './Crypto';
 
@@ -30,6 +30,8 @@ class CryptoManager {
 
   init(runtimeURL, runtimeCapabilities, storageManager, dataObjectsStorage, registry, coreDiscovery, idm, runtimeFactory) {
     let _this = this;
+
+    console.log('xxx');
 
     if (!runtimeURL) throw new Error('[] runtimeURL is missing.');
     if (!storageManager) throw new Error('storageManager is missing');
@@ -59,7 +61,7 @@ class CryptoManager {
     _this._registry = registry;
     _this._coreDiscovery = coreDiscovery;
 
-  //  _this._messageEncryptionHandling = new MessageEncryptionHandling(registry, _this.chatKeys, _this.crypto, this._idm);
+    _this._messageEncryptionHandling = new MessageEncryptionHandling(registry, _this.chatKeys, _this.crypto, this._idm);
   }
 
   //******************* GET AND SET METHODS *******************
@@ -209,7 +211,7 @@ class CryptoManager {
       if (isToLegacyIdentity) {
         resolve(message);
       } else if (isFromHyperty && isToHyperty) {
-        /*    _this._messageEncryptionHandling.betweenHyperties(message).then(result => {
+        _this._messageEncryptionHandling.betweenHyperties(message).then(result => {
           if (result.isHandShakeNeeded) {
             resolve(result.message);
           } else {
@@ -221,7 +223,6 @@ class CryptoManager {
             });
           }
         });
-*/
       //if from hyperty to a dataObjectURL
       } else if (isFromHyperty && isToDataObject) {
 

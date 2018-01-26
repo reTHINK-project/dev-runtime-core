@@ -13,7 +13,7 @@ class MessageEncryptionHandling {
 
   betweenHyperties(message) {
     let _this = this;
-
+    console.log('xxx2');
     return new Promise((resolve, reject) => {
 
       let userURL = _this.registry.getHypertyOwner(message.from);
@@ -25,7 +25,7 @@ class MessageEncryptionHandling {
         if (!chatKeys) {
           chatKeys = _this._newChatCrypto(message, userURL);
 
-          //log.log('createChatKey encrypt', message.from + message.to);
+          //console.log('createChatKey encrypt', message.from + message.to);
           _this.chatKeys[message.from + '<->' + message.to] = chatKeys;
           message.body.handshakePhase = 'startHandShake';
         }
@@ -39,7 +39,7 @@ class MessageEncryptionHandling {
                                                                   stringify(iv), chatKeys.hypertyFrom.messageInfo);
 
             _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, filteredMessage).then(hash => {
-              //log.log('result of hash ', hash);
+              //console.log('result of hash ', hash);
               let value = {iv: encode(iv), value: encode(encryptedValue), hash: encode(hash)};
               message.body.value = encode(value);
 
@@ -55,14 +55,15 @@ class MessageEncryptionHandling {
         } else {
           resolve({ message: message, isHandShakeNeeded: true});
 
-          /*
+/*
           _this._doHandShakePhase(message, chatKeys).then(function(value) {
             _this.chatKeys[message.from + '<->' + message.to] = value.chatKeys;
 
             _this._messageBus.postMessage(value.message);
             reject('encrypt handshake protocol phase ');
+
           });
-          */
+*/
         }
       } else {
         reject('In encryptMessage: Hyperty owner URL was not found');
@@ -72,10 +73,10 @@ class MessageEncryptionHandling {
 
   /*
   encryptMessage(message) {
-    //log.info('encryptMessage:message', message);
+    //console.info('encryptMessage:message', message);
     let _this = this;
 
-    log.log('encrypt message ');
+    console.log('encrypt message ');
 
     return new Promise(function(resolve, reject) {
 
@@ -83,7 +84,7 @@ class MessageEncryptionHandling {
 
       //if is not to apply encryption, then returns resolve
       if (!_this._isToEncrypt(message)) {
-        // log.log('decryption disabled');
+        // console.log('decryption disabled');
         return resolve(message);
       }
 
@@ -95,7 +96,7 @@ class MessageEncryptionHandling {
       let isToHyperty = divideURL(message.to).type === 'hyperty';
 
       if (message.type === 'update') {
-        log.log('encrypt message: message type update');
+        console.log('encrypt message: message type update');
         return resolve(message);
       }
 
@@ -110,7 +111,7 @@ class MessageEncryptionHandling {
           if (!chatKeys) {
             chatKeys = _this._newChatCrypto(message, userURL);
 
-            //log.log('createChatKey encrypt', message.from + message.to);
+            //console.log('createChatKey encrypt', message.from + message.to);
             _this.chatKeys[message.from + '<->' + message.to] = chatKeys;
             message.body.handshakePhase = 'startHandShake';
           }
@@ -124,7 +125,7 @@ class MessageEncryptionHandling {
                                                                         stringify(iv), chatKeys.hypertyFrom.messageInfo);
 
               _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, filteredMessage).then(hash => {
-                //log.log('result of hash ', hash);
+                //console.log('result of hash ', hash);
                 let value = {iv: encode(iv), value: encode(encryptedValue), hash: encode(hash)};
                 message.body.value = encode(value);
 
@@ -152,8 +153,8 @@ class MessageEncryptionHandling {
       //if from hyperty to a dataObjectURL
       } else if (isFromHyperty && isToDataObject) {
 
-        //log.log('dataObject value to encrypt: ', message.body.value);
-        //log.log('IdentityModule - encrypt from hyperty to dataobject ', message);
+        //console.log('dataObject value to encrypt: ', message.body.value);
+        //console.log('IdentityModule - encrypt from hyperty to dataobject ', message);
 
         _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
           sessionKeys = chatkeysToArrayCloner(sessionKeys || {});
@@ -192,7 +193,7 @@ class MessageEncryptionHandling {
                   let filteredMessage = filterMessageToHash(message, stringifiedMessageBody + stringifiedIV);
 
                   _this.crypto.hashHMAC(dataObjectKey.sessionKey, filteredMessage).then(hash => {
-                    // log.log('hash ', hash);
+                    // console.log('hash ', hash);
 
                     let newValue = {value: encode(encryptedValue), iv: encode(iv), hash: encode(hash)};
 
@@ -221,7 +222,7 @@ class MessageEncryptionHandling {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
-      log.info('dataObject value to encrypt: ', dataObject);
+      console.info('dataObject value to encrypt: ', dataObject);
 
       let dataObjectURL = parseMessageURL(sender);
 
@@ -239,13 +240,13 @@ class MessageEncryptionHandling {
             _this.crypto.encryptAES(dataObjectKey.sessionKey, stringify(dataObject), iv).then(encryptedValue => {
               let newValue = { value: encode(encryptedValue), iv: encode(iv) };
 
-              //log.log('encrypted dataObject', newValue);
+              //console.log('encrypted dataObject', newValue);
               return resolve(newValue);
             }).catch(err => { reject('On encryptDataObject from method encryptAES error: ' + err); });
 
           // if not, just send the message
           } else {
-            log.info('The dataObject is not encrypted');
+            console.info('The dataObject is not encrypted');
             return resolve(dataObject);
           }
 
@@ -260,7 +261,7 @@ class MessageEncryptionHandling {
   decryptMessage(message) {
     let _this = this;
 
-    //  log.log('decryptMessage:message', message);
+    //  console.log('decryptMessage:message', message);
 
     return new Promise(function(resolve, reject) {
       let isHandShakeType = message.type === 'handshake';
@@ -282,7 +283,7 @@ class MessageEncryptionHandling {
 
         //is is hyperty to hyperty communication
         if (isFromHyperty && isToHyperty) {
-          // log.log('decrypt hyperty to hyperty');
+          // console.log('decrypt hyperty to hyperty');
           let userURL = _this.registry.getHypertyOwner(message.to);
           if (userURL) {
 
@@ -298,13 +299,13 @@ class MessageEncryptionHandling {
               let data = decodeToUint8Array(value.value);
               let hash = decodeToUint8Array(value.hash);
               _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, data, iv).then(decryptedData => {
-                // log.log('decrypted value ', decryptedData);
+                // console.log('decrypted value ', decryptedData);
                 message.body.value = decryptedData;
 
                 let filteredMessage = filterMessageToHash(message, decryptedData + iv);
 
                 _this.crypto.verifyHMAC(chatKeys.keys.hypertyToHashKey, filteredMessage, hash).then(result => {
-                  log.log('Result of hash verification in decryptMessage: ', result);
+                  console.log('Result of hash verification in decryptMessage: ', result);
                   message.body.assertedIdentity = true;
                   resolve(message);
                 }).chatch(err => {
@@ -337,7 +338,7 @@ class MessageEncryptionHandling {
 
           //if from hyperty to a dataObjectURL
         } else if (isFromHyperty && isToDataObject) {
-          // log.log('dataObject value to decrypt: ', message.body);
+          // console.log('dataObject value to decrypt: ', message.body);
 
           _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
             sessionKeys = chatkeysToArrayCloner(sessionKeys || {});
@@ -355,13 +356,13 @@ class MessageEncryptionHandling {
                 _this.crypto.decryptAES(dataObjectKey.sessionKey, encryptedValue, iv).then(decryptedValue => {
                   let parsedValue = parse(decryptedValue);
 
-                  // log.log('decrypted Value,', parsedValue);
+                  // console.log('decrypted Value,', parsedValue);
                   message.body.value = parsedValue;
 
                   let filteredMessage = filterMessageToHash(message, stringify(parsedValue) + stringify(iv));
 
                   _this.crypto.verifyHMAC(dataObjectKey.sessionKey, filteredMessage, hash).then(result => {
-                    log.log('Received message HMAC result', result);
+                    console.log('Received message HMAC result', result);
 
                     message.body.assertedIdentity = true;
                     resolve(message);
@@ -396,13 +397,13 @@ class MessageEncryptionHandling {
     return new Promise(function(resolve, reject) {
       //if is not to apply encryption, then returns resolve
       if (!_this.isToUseEncryption) {
-        // log.log('decryption disabled');
+        // console.log('decryption disabled');
         return resolve(dataObject);
       }
 
       let dataObjectURL = parseMessageURL(sender);
 
-      // log.log('dataObject value to decrypt: ', dataObject);
+      // console.log('dataObject value to decrypt: ', dataObject);
 
       _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
         sessionKeys = chatkeysToArrayCloner(sessionKeys);
@@ -419,14 +420,14 @@ class MessageEncryptionHandling {
               let parsedValue = parse(decryptedValue);
               let newValue = { value: parsedValue, iv: encode(iv) };
 
-              // log.log('decrypted dataObject,', newValue);
+              // console.log('decrypted dataObject,', newValue);
 
               return resolve(newValue);
             }).catch(err => { reject('On decryptDataObject from method encryptAES error: ' + err); });
 
           //if not, just return the dataObject
           } else {
-            // log.log('The dataObject is not encrypted');
+            // console.log('The dataObject is not encrypted');
             return resolve(dataObject);
           }
 
@@ -447,6 +448,7 @@ class MessageEncryptionHandling {
 * @param {boolean} receiver(Optional)  indicates if is the sender or the receiver that creates a new chat crypto
 * @return {JSON} newChatCrypto  new JSON structure for the chat crypto
 */
+
   _newChatCrypto(message, userURL, receiver) {
     let _this = this;
 
@@ -504,15 +506,15 @@ class MessageEncryptionHandling {
   }
 }
 
-/*
+
 /**
   * Identifies the messages to be encrypted
   * @param {Message}    message
   * @returns {boolean}  returns true if the message requires encryption
   */
-/*
+
 export function isToEncrypt(message) {
-  log.info('[CryptoManager.istoChyperModule]', message);
+  console.info('[CryptoManager.istoChyperModule]', message);
   let isCreate = message.type === 'create';
   let isFromHyperty = message.from.includes('hyperty://');
   let isToHyperty = message.to.includes('hyperty://');
@@ -524,12 +526,12 @@ export function isToEncrypt(message) {
 
   //if is not to apply encryption, then returns resolve
   if (!this.isToUseEncryption && !(message.type === 'handshake')) {
-    log.info('not handshake: encryption disabled');
+    console.info('not handshake: encryption disabled');
     return false;
   }
 
   if (message.type === 'update') {
-    log.info('update:encryption disabled');
+    console.info('update:encryption disabled');
     return false;
   }
 
@@ -538,7 +540,7 @@ export function isToEncrypt(message) {
   return ((isCreate && isFromHyperty && isToHyperty) || (isCreate && isFromHyperty && isToDataObject && doMutualAuthentication) || message.type === 'handshake' || (message.type === 'update' && doMutualAuthentication));
 }
 
-/*
+
 export function isToDecrypt(message) {
   let _this = this;
 
@@ -548,7 +550,7 @@ export function isToDecrypt(message) {
     let isFromRemoteSM = _this._isFromRemoteSM(message.from);
 
     if (isSubscription & isFromRemoteSM) {
-      log.log('_doMutualAuthenticationPhase1');
+      console.log('_doMutualAuthenticationPhase1');
 
       _this._doMutualAuthenticationPhase1(message).then(() => {
         resolve(false);
@@ -557,17 +559,16 @@ export function isToDecrypt(message) {
       });
 
     } else if (message.hasOwnProperty('body') && message.body.hasOwnProperty('value') && typeof message.body.value === 'string') {
-      log.log('_isToDecrypt:true');
+      console.log('_isToDecrypt:true');
       resolve(true);
     } else {
-      log.log('_isToDecrypt:false');
+      console.log('_isToDecrypt:false');
       resolve(false);
     }
 
   }).catch((error) => {
-    log.error('[CryptoManager._isToDecrypt]', error);
+    console.error('[CryptoManager._isToDecrypt]', error);
   });
 }
-*/
 
-export default new MessageEncryptionHandling();
+module.exports = MessageEncryptionHandling;
