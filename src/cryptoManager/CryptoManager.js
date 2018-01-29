@@ -61,7 +61,9 @@ class CryptoManager {
     _this._registry = registry;
     _this._coreDiscovery = coreDiscovery;
 
-    _this._messageEncryptionHandling = new MessageEncryptionHandling(registry, _this.chatKeys, _this.crypto, this._idm);
+    _this._messageEncryptionHandling = new
+      MessageEncryptionHandling(_this._registry, _this.chatKeys, _this.crypto,
+                                _this._idm, _this.storageManager, _this.dataObjectsStorage);
   }
 
   //******************* GET AND SET METHODS *******************
@@ -196,7 +198,6 @@ class CryptoManager {
       }
 
       let dataObjectURL = parseMessageURL(message.to);
-
       let isToDataObject = isDataObjectURL(dataObjectURL);
       let isToLegacyIdentity = isLegacy(message.to);
       let isFromHyperty = divideURL(message.from).type === 'hyperty';
@@ -210,8 +211,9 @@ class CryptoManager {
       //------------> Needs tests!
       if (isToLegacyIdentity) {
         resolve(message);
+
       } else if (isFromHyperty && isToHyperty) {
-        _this._messageEncryptionHandling.betweenHyperties(message).then(result => {
+        _this._messageEncryptionHandling.encryptBetweenHyperties(message).then(result => {
           if (!result.isHandShakeNeeded) {
             resolve(result.message);
           } else {
@@ -223,72 +225,20 @@ class CryptoManager {
             });
           }
         });
+
       //if from hyperty to a dataObjectURL
       } else if (isFromHyperty && isToDataObject) {
 
         //log.log('dataObject value to encrypt: ', message.body.value);
         //log.log('IdentityModule - encrypt from hyperty to dataobject ', message);
 
-        _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
-          sessionKeys = chatkeysToArrayCloner(sessionKeys || {});
-          let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
-
-          _this.dataObjectsStorage.getDataObject(dataObjectURL).then((isHypertyReporter) => {
-            //if no key exists, create a new one if is the reporter of dataObject
-            if (!dataObjectKey) {
-              // if the hyperty is the reporter of the dataObject then generates a session key
-              if (isHypertyReporter.reporter && isHypertyReporter.reporter === message.from) {
-
-                let sessionKey = _this.crypto.generateRandom();
-                _this.dataObjectSessionKeys[dataObjectURL] = {sessionKey: sessionKey, isToEncrypt: true};
-                let dataObjectSessionKeysClone = chatkeysToStringCloner(_this.dataObjectSessionKeys);
-
-                //TODO: check if this does not need to be stored
-                _this.storageManager.set('dataObjectSessionKeys', 0, dataObjectSessionKeysClone).catch(err => {
-                  reject('On encryptMessage from method storageManager.set error: ' + err);
-                });
-                dataObjectKey = _this.dataObjectSessionKeys[dataObjectURL];
-              }
-            }
-
-            //check if there is already a session key for the chat room
-            if (dataObjectKey) {
-
-              // and if is to apply encryption, encrypt the messages
-              if (dataObjectKey.isToEncrypt) {
-                let iv = _this.crypto.generateIV();
-                let stringifiedIV = stringify(iv);
-                let stringifiedMessageBody = stringify(message.body.value);
-
-                _this.crypto.encryptAES(dataObjectKey.sessionKey, stringifiedMessageBody, iv).then(encryptedValue => {
-                  delete message.body.identity.assertion; //TODO: Check why assertion is comming on the message!
-                  delete message.body.identity.expires; //TODO: Check why expires is comming on the message!
-                  let filteredMessage = filterMessageToHash(message, stringifiedMessageBody + stringifiedIV);
-
-                  _this.crypto.hashHMAC(dataObjectKey.sessionKey, filteredMessage).then(hash => {
-                    // log.log('hash ', hash);
-
-                    let newValue = {value: encode(encryptedValue), iv: encode(iv), hash: encode(hash)};
-
-                    message.body.value = stringify(newValue);
-                    resolve(message);
-                  });
-                });
-
-              // if not, just send the message
-              } else {
-                resolve(message);
-              }
-
-              // start the generation of a new session Key
-            } else {
-              reject('Data object key could not be defined: Failed to decrypt message ');
-            }
-          }).catch(err => { reject('On encryptMessage from method dataObjectsStorage.getDataObject error: ' + err); });
-        }).catch(err => { reject('On encryptMessage from method storageManager.get error: ' + err); });
+        _this._messageEncryptionHandling.encryptoBetweenHypertyDataObject(message).then(result =>{
+          resolve(result)
+        }).catch(err => { reject('On encryptMessage from method _messageEncryptionHandling error: ' + err); });
       }
     });
   }
+
 
   encryptDataObject(dataObject, sender) {
     let _this = this;
