@@ -193,7 +193,6 @@ class CryptoManager {
 
       //if is not to apply encryption, then returns resolve
       if (!_this._isToEncrypt(message)) {
-        // log.log('decryption disabled');
         return resolve(message);
       }
 
@@ -228,11 +227,7 @@ class CryptoManager {
 
       //if from hyperty to a dataObjectURL
       } else if (isFromHyperty && isToDataObject) {
-
-        //log.log('dataObject value to encrypt: ', message.body.value);
-        //log.log('IdentityModule - encrypt from hyperty to dataobject ', message);
-
-        _this._messageEncryptionHandling.encryptoBetweenHypertyDataObject(message).then(result =>{
+        _this._messageEncryptionHandling.encryptBetweenHypertyDataObject(message).then(result =>{
           resolve(result)
         }).catch(err => { reject('On encryptMessage from method _messageEncryptionHandling error: ' + err); });
       }
@@ -305,40 +300,12 @@ class CryptoManager {
 
         //is is hyperty to hyperty communication
         if (isFromHyperty && isToHyperty) {
-          // log.log('decrypt hyperty to hyperty');
-          let userURL = _this._registry.getHypertyOwner(message.to);
-          if (userURL) {
 
-            let chatKeys = _this.chatKeys[message.to + '<->' + message.from];
-            if (!chatKeys) {
-              chatKeys = _this._newChatCrypto(message, userURL, 'decrypt');
-              _this.chatKeys[message.to + '<->' + message.from] = chatKeys;
-            }
-
-            if (chatKeys.authenticated && !isHandShakeType) {
-              let value = decode(message.body.value);
-              let iv = decodeToUint8Array(value.iv);
-              let data = decodeToUint8Array(value.value);
-              let hash = decodeToUint8Array(value.hash);
-              _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, data, iv).then(decryptedData => {
-                // log.log('decrypted value ', decryptedData);
-                message.body.value = decryptedData;
-
-                let filteredMessage = filterMessageToHash(message, decryptedData + iv);
-
-                _this.crypto.verifyHMAC(chatKeys.keys.hypertyToHashKey, filteredMessage, hash).then(result => {
-                  log.log('Result of hash verification in decryptMessage: ', result);
-                  message.body.assertedIdentity = true;
-                  resolve(message);
-                }).chatch(err => {
-                  console.log('decryptMessage HMAC failed:', err);
-                  throw err;
-                });
-              });
-
-            } else if (isHandShakeType) {
-              _this._doHandShakePhase(message, chatKeys).then(function(value) {
-
+          _this._messageEncryptionHandling.decryptBetweenHyperties(message).then(result => {
+            if (!result.isHandShakeNeeded) {
+              resolve(result.message);
+            } else {
+              _this._doHandShakePhase(result.message, result.chatKeys).then(function(value) {
                 //if it was started by doMutualAuthentication then ends the protocol
                 if (value === 'handShakeEnd') {
                   //reject('decrypt handshake protocol phase');
@@ -348,63 +315,18 @@ class CryptoManager {
                   _this.chatKeys[message.to + '<->' + message.from] = value.chatKeys;
                   _this._messageBus.postMessage(value.message);
 
-                  //reject('decrypt handshake protocol phase ');
+                  //reject('decrypt handshake protocol phase '); TODO: Check why is this commented?
                 }
-              });
-            } else {
-              reject('wrong message do decrypt');
+              }).catch(err => { reject('Error on decrypting message handshake in decryptBetweenHyperties: ', err); });
             }
-          } else {
-            reject('error on decrypt message');
-          }
+          }).catch(err => { reject('Error on decrypting message in decryptBetweenHyperties: ', err); });
 
           //if from hyperty to a dataObjectURL
         } else if (isFromHyperty && isToDataObject) {
           // log.log('dataObject value to decrypt: ', message.body);
-
-          _this.storageManager.get('dataObjectSessionKeys').then((sessionKeys) => {
-            sessionKeys = chatkeysToArrayCloner(sessionKeys || {});
-            let dataObjectKey = sessionKeys ? sessionKeys[dataObjectURL] : null;
-
-            if (dataObjectKey) {
-
-              //check if is to apply encryption
-              if (dataObjectKey.isToEncrypt) {
-                let parsedValue = parse(message.body.value);
-                let iv = decodeToUint8Array(parsedValue.iv);
-                let encryptedValue = decodeToUint8Array(parsedValue.value);
-                let hash = decodeToUint8Array(parsedValue.hash);
-
-                _this.crypto.decryptAES(dataObjectKey.sessionKey, encryptedValue, iv).then(decryptedValue => {
-                  let parsedValue = parse(decryptedValue);
-
-                  // log.log('decrypted Value,', parsedValue);
-                  message.body.value = parsedValue;
-
-                  let filteredMessage = filterMessageToHash(message, stringify(parsedValue) + stringify(iv));
-
-                  _this.crypto.verifyHMAC(dataObjectKey.sessionKey, filteredMessage, hash).then(result => {
-                    log.log('Received message HMAC result', result);
-
-                    message.body.assertedIdentity = true;
-                    resolve(message);
-                  }).catch(err => { reject('Message HMAC is invalid: ' + err); });
-                });
-
-                //if not, just return the message
-              } else {
-                message.body.assertedIdentity = true;
-                resolve(message);
-              }
-
-            } else {
-              message.body.assertedIdentity = true;
-              resolve(message);
-
-              //reject('no sessionKey for chat room found');
-            }
-          });
-
+          _this._messageEncryptionHandling.decryptBetweenHypertyDataObject(message).then(result => {
+            resolve(result);
+          }).catch(err => { reject('Error on decrypting message in decryptBetweenHyperties: ', err); });
         } else {
           reject('wrong message to decrypt');
         }
