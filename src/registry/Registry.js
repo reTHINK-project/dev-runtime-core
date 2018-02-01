@@ -1140,7 +1140,7 @@ class Registry {
         }
       } else {
         console.log(descriptor);
-        if (descriptor._interworking) {
+        if (descriptor.hasOwnProperty('_interworking') && descriptor._interworking) {
           runtimeProtoStubURL = 'runtime://' + stubID + '/protostub/' + 'scheme1';
         } else {
           runtimeProtoStubURL = 'runtime://' + stubID + '/protostub/' + generateGUID();
