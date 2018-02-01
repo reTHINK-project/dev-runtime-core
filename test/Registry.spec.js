@@ -423,8 +423,9 @@ describe('Registry', function() {
       };
 
       expect(registry.checkRegisteredURLs(info).then(function(response) {
+        console.log('checkRegisteredURLs should return a previously registered Data Object URL', response);
         return response;
-      })).to.be.fulfilled.and.eventually.to.be.eql('comm://localhost/9303b707-f301-4929-ad7d-65a89a356871').and.notify(done);
+      })).to.be.fulfilled.and.eventually.to.be.eql(['comm://localhost/9303b707-f301-4929-ad7d-65a89a356871']).and.notify(done);
 
     });
 
