@@ -1139,8 +1139,9 @@ class Registry {
           resolve(_this.p2pRequesterStub[stubID]);
         }
       } else {
-        console.log(descriptor);
-        if (descriptor.hasOwnProperty('_interworking') && descriptor._interworking) {
+        console.log('[Registry - registerStub - Normal Stub] descriptor', descriptor);
+
+        if ( !typeof(descriptor) === 'string' && descriptor.hasOwnProperty('_interworking') && descriptor._interworking) {
           runtimeProtoStubURL = 'runtime://' + stubID + '/protostub/' + 'scheme1';
         } else {
           runtimeProtoStubURL = 'runtime://' + stubID + '/protostub/' + generateGUID();
