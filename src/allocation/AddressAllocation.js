@@ -120,8 +120,9 @@ class AddressAllocation {
 
     return new Promise((resolve, reject) => {
 
+      console.log('REUSETEST -  _reuseAllocatedAddress', domain, number, info, scheme, reuseURL);
       this._registry.checkRegisteredURLs(info, reuseURL).then((urls) => {
-
+        console.log('REUSETEST -  registeredurls', urls);
         if (urls) {
           log.info('[AddressAllocation - ' + scheme + '] - Reuse URL');
           let value = {newAddress: false, address: urls};

@@ -685,7 +685,7 @@ class Registry {
       if (typeof(reuseURL) === 'string') {
         objectType = reuseURL && divideURL(reuseURL).type !== 'hyperty' ? 'registry:DataObjectURLs' : 'registry:HypertyURLs';
       }
-
+      //debugger;
       _this.storageManager.get(objectType).then((urlsList) => {
 
         if (!urlsList) {
@@ -724,7 +724,13 @@ class Registry {
 
           if (urlsList[characteristics]) {
             // log.log('[Registry] reusage of dataObject URL');
-            return resolve(urlsList[characteristics]);
+            if (typeof(urlsList[characteristics]) === 'string') {
+              let arrayToResolve = [];
+              arrayToResolve.push(urlsList[characteristics]);
+              return resolve(arrayToResolve);
+            } else {
+              return resolve(urlsList[characteristics]);
+            }
           } else {
             // log.log('[Registry] no dataObject URL was previously registered');
             return resolve(undefined);
@@ -1133,7 +1139,12 @@ class Registry {
           resolve(_this.p2pRequesterStub[stubID]);
         }
       } else {
-        runtimeProtoStubURL = 'runtime://' + stubID + '/protostub/' + generateGUID();
+        console.log(descriptor);
+        if (descriptor._interworking) {
+          runtimeProtoStubURL = 'runtime://' + stubID + '/protostub/' + 'scheme1';
+        } else {
+          runtimeProtoStubURL = 'runtime://' + stubID + '/protostub/' + generateGUID();
+        }
 
         log.info('[Registry - registerStub - Normal Stub] - ', stubID);
 
