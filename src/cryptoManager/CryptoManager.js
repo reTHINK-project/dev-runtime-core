@@ -4,7 +4,7 @@ let log = logger.getLogger('CryptoManager');
 import HandShakeProtocol from './HandShakeProtocol';
 
 import {divideURL, isDataObjectURL, isLegacy, chatkeysToStringCloner, chatkeysToArrayCloner, parseMessageURL,
-  parse, stringify, encode, decode, decodeToUint8Array, filterMessageToHash} from '../utils/utils.js';
+  parse, stringify, encode, decodeToUint8Array, filterMessageToHash} from '../utils/utils.js';
 import MessageEncryptionHandling from './MessageEncryptionHandling.js';
 
 import Crypto from './Crypto';
@@ -30,8 +30,6 @@ class CryptoManager {
 
   init(runtimeURL, runtimeCapabilities, storageManager, dataObjectsStorage, registry, coreDiscovery, idm, runtimeFactory) {
     let _this = this;
-
-    console.log('xxx');
 
     if (!runtimeURL) throw new Error('[] runtimeURL is missing.');
     if (!storageManager) throw new Error('storageManager is missing');
@@ -61,9 +59,8 @@ class CryptoManager {
     _this._registry = registry;
     _this._coreDiscovery = coreDiscovery;
 
-    _this._messageEncryptionHandling = new
-      MessageEncryptionHandling(_this._registry, _this.chatKeys, _this.crypto,
-                                _this._idm, _this.storageManager, _this.dataObjectsStorage);
+    _this._messageEncryptionHandling = new MessageEncryptionHandling(_this._registry,
+      _this.chatKeys, _this.crypto, _this.storageManager, _this.dataObjectsStorage);
   }
 
   //******************* GET AND SET METHODS *******************
@@ -228,7 +225,7 @@ class CryptoManager {
       //if from hyperty to a dataObjectURL
       } else if (isFromHyperty && isToDataObject) {
         _this._messageEncryptionHandling.encryptBetweenHypertyDataObject(message).then(result =>{
-          resolve(result)
+          resolve(result);
         }).catch(err => { reject('On encryptMessage from method _messageEncryptionHandling error: ' + err); });
       }
     });
@@ -281,8 +278,6 @@ class CryptoManager {
     //  log.log('decryptMessage:message', message);
 
     return new Promise(function(resolve, reject) {
-      let isHandShakeType = message.type === 'handshake';
-
       _this._isToDecrypt(message).then((isToDecrypt) => {
 
         //if is not to apply encryption, then returns resolve
@@ -605,7 +600,7 @@ class CryptoManager {
 
       let handshakeType = message.body.handshakePhase;
 
-      console.info('handshake phase: ', handshakeType);
+      log.info('handshake phase: ', handshakeType);
 
       switch (handshakeType) {
 
@@ -676,60 +671,10 @@ class CryptoManager {
   * @return {JSON} newChatCrypto  new JSON structure for the chat crypto
   */
   _newChatCrypto(message, userURL, receiver) {
-    let _this = this;
-
-    //check whether is the sender or the receiver to create a new chatCrypto
-    //to mantain consistency on the keys if the receiver create a new chatCrypto,
-    //then invert the fields
-    let from = (receiver) ? message.to : message.from;
-    let to = (receiver) ? message.from : message.to;
-
-    let userInfo = _this._idm.getIdentity(userURL);
-
-    let newChatCrypto =
-      {
-        hypertyFrom:
-        {
-          hyperty: from,
-          userID: userInfo.userProfile.userURL,
-
-          //privateKey: "getMyPublicKey",
-          //publicKey: "getMyPrivateKey",
-          assertion: userInfo.assertion,
-          messageInfo: userInfo
-        },
-        hypertyTo:
-        {
-          hyperty: to,
-          userID: undefined,
-          publicKey: undefined,
-          assertion: undefined
-        },
-        keys:
-        {
-          hypertyToSessionKey: undefined,
-          hypertyFromSessionKey: undefined,
-          hypertyToHashKey: undefined,
-          hypertyFromHashKey: undefined,
-          toRandom: undefined,
-          fromRandom: undefined,
-          premasterKey: undefined,
-          masterKey: undefined
-        },
-        handshakeHistory: {
-          senderHello: undefined,
-          receiverHello: undefined,
-          senderCertificate: undefined,
-          receiverFinishedMessage: undefined
-        },
-        initialMessage: (message.body.ignore) ? undefined : message,
-        callback: message.callback,
-        authenticated: false,
-        dataObjectURL: message.dataObjectURL
-      };
-
-    return newChatCrypto;
+    let userInfo = this._idm.getIdentity(userURL);
+    return this._messageEncryptionHandling.newChatCrypto(message, userURL, receiver, userInfo);
   }
+
 
   /**
   * Retrieves a public keys given a user refrence. If no key is found,

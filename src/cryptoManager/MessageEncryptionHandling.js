@@ -1,21 +1,28 @@
-import {divideURL, isDataObjectURL, isLegacy, chatkeysToStringCloner, chatkeysToArrayCloner, parseMessageURL,
+import {chatkeysToStringCloner, chatkeysToArrayCloner, parseMessageURL,
   parse, stringify, encode, decode, decodeToUint8Array, filterMessageToHash} from '../utils/utils.js';
 
+import * as logger from 'loglevel';
+let log = logger.getLogger('CryptoManager');
 
+/*
+* This class provides some of the encryption and decryption logic of the messages,
+* incoming and outgoing messages.
+* NOTE: This class sould be threated (for now) as a internal class of CryptoManager, since it
+* receives and changes fields of that tsame class, but its on a sepetare file to
+* ease code organization.
+*/
 class MessageEncryptionHandling {
 
-  constructor(registry, chatKeys, crypto, idm, storageManager, dataObjectsStorage) {
+  constructor(registry, chatKeys, crypto, storageManager, dataObjectsStorage) {
     this.registry = registry;
     this.chatKeys = chatKeys;
     this.crypto = crypto;
-    this.idm = idm;
     this.storageManager = storageManager;
     this.dataObjectsStorage = dataObjectsStorage;
   }
 
   encryptBetweenHyperties(message) {
     let _this = this;
-    console.log('xxx2');
     return new Promise((resolve, reject) => {
 
       let userURL = _this.registry.getHypertyOwner(message.from);
@@ -25,9 +32,9 @@ class MessageEncryptionHandling {
         // check if exists any keys between two users
         let chatKeys = _this.chatKeys[message.from + '<->' + message.to];
         if (!chatKeys) {
-          chatKeys = _this._newChatCrypto(message, userURL);
+          chatKeys = _this.newChatCrypto(message, userURL);
 
-          //console.log('createChatKey encrypt', message.from + message.to);
+          //log.log('createChatKey encrypt', message.from + message.to);
           _this.chatKeys[message.from + '<->' + message.to] = chatKeys;
           message.body.handshakePhase = 'startHandShake';
         }
@@ -41,7 +48,7 @@ class MessageEncryptionHandling {
                                                                   stringify(iv), chatKeys.hypertyFrom.messageInfo);
 
             _this.crypto.hashHMAC(chatKeys.keys.hypertyFromHashKey, filteredMessage).then(hash => {
-              //console.log('result of hash ', hash);
+              //log.log('result of hash ', hash);
               let value = {iv: encode(iv), value: encode(encryptedValue), hash: encode(hash)};
               message.body.value = encode(value);
 
@@ -105,8 +112,6 @@ class MessageEncryptionHandling {
                 let filteredMessage = filterMessageToHash(message, stringifiedMessageBody + stringifiedIV);
 
                 _this.crypto.hashHMAC(dataObjectKey.sessionKey, filteredMessage).then(hash => {
-                  // console.log('hash ', hash);
-
                   let newValue = {value: encode(encryptedValue), iv: encode(iv), hash: encode(hash)};
 
                   message.body.value = stringify(newValue);
@@ -139,7 +144,7 @@ class MessageEncryptionHandling {
 
         let chatKeys = _this.chatKeys[message.to + '<->' + message.from];
         if (!chatKeys) {
-          chatKeys = _this._newChatCrypto(message, userURL, 'decrypt');
+          chatKeys = _this.newChatCrypto(message, userURL, 'decrypt');
           _this.chatKeys[message.to + '<->' + message.from] = chatKeys;
         }
 
@@ -149,17 +154,17 @@ class MessageEncryptionHandling {
           let data = decodeToUint8Array(value.value);
           let hash = decodeToUint8Array(value.hash);
           _this.crypto.decryptAES(chatKeys.keys.hypertyToSessionKey, data, iv).then(decryptedData => {
-            // console.log('decrypted value ', decryptedData);
+            // log.log('decrypted value ', decryptedData);
             message.body.value = decryptedData;
 
             let filteredMessage = filterMessageToHash(message, decryptedData + iv);
 
             _this.crypto.verifyHMAC(chatKeys.keys.hypertyToHashKey, filteredMessage, hash).then(result => {
-              console.log('Result of hash verification in decryptMessage: ', result);
+              log.log('Result of hash verification in decryptMessage: ', result);
               message.body.assertedIdentity = true;
               resolve({message: message, isHandShakeNeeded: false});
             }).chatch(err => {
-              console.log('decryptMessage HMAC failed:', err);
+              log.log('decryptMessage HMAC failed:', err);
               throw err;
             });
           });
@@ -195,15 +200,11 @@ class MessageEncryptionHandling {
 
             _this.crypto.decryptAES(dataObjectKey.sessionKey, encryptedValue, iv).then(decryptedValue => {
               let parsedValue = parse(decryptedValue);
-
-              // console.log('decrypted Value,', parsedValue);
               message.body.value = parsedValue;
-
               let filteredMessage = filterMessageToHash(message, stringify(parsedValue) + stringify(iv));
 
               _this.crypto.verifyHMAC(dataObjectKey.sessionKey, filteredMessage, hash).then(result => {
-                console.log('Received message HMAC result', result);
-
+                log.log('Received message HMAC result', result);
                 message.body.assertedIdentity = true;
                 resolve(message);
               }).catch(err => { reject('Message HMAC is invalid: ' + err); });
@@ -226,8 +227,7 @@ class MessageEncryptionHandling {
   }
 
 
-
-  /**
+/**
 * generates the initial structure for the keys between two users
 * @param {JSON}    message              initial message that triggers the mutual authentication
 * @param {String}  userURL              userURL
@@ -235,16 +235,13 @@ class MessageEncryptionHandling {
 * @return {JSON} newChatCrypto  new JSON structure for the chat crypto
 */
 
-  _newChatCrypto(message, userURL, receiver) {
-    let _this = this;
+  newChatCrypto(message, userURL, receiver, userInfo) {
 
     //check whether is the sender or the receiver to create a new chatCrypto
     //to mantain consistency on the keys if the receiver create a new chatCrypto,
     //then invert the fields
     let from = (receiver) ? message.to : message.from;
     let to = (receiver) ? message.from : message.to;
-
-    let userInfo = _this.idm.getIdentity(userURL);
 
     let newChatCrypto =
     {
@@ -293,68 +290,4 @@ class MessageEncryptionHandling {
 }
 
 
-/**
-  * Identifies the messages to be encrypted
-  * @param {Message}    message
-  * @returns {boolean}  returns true if the message requires encryption
-  */
-
-export function isToEncrypt(message) {
-  console.info('[CryptoManager.istoChyperModule]', message);
-  let isCreate = message.type === 'create';
-  let isFromHyperty = message.from.includes('hyperty://');
-  let isToHyperty = message.to.includes('hyperty://');
-  let isToDataObject = isDataObjectURL(message.to);
-
-  let doMutualAuthentication = message.body.hasOwnProperty('mutual') ? message.body.mutual : true;
-
-  if (!doMutualAuthentication) return false;
-
-  //if is not to apply encryption, then returns resolve
-  if (!this.isToUseEncryption && !(message.type === 'handshake')) {
-    console.info('not handshake: encryption disabled');
-    return false;
-  }
-
-  if (message.type === 'update') {
-    console.info('update:encryption disabled');
-    return false;
-  }
-
-  if (isLegacy(message.to)) return false;
-
-  return ((isCreate && isFromHyperty && isToHyperty) || (isCreate && isFromHyperty && isToDataObject && doMutualAuthentication) || message.type === 'handshake' || (message.type === 'update' && doMutualAuthentication));
-}
-
-
-export function isToDecrypt(message) {
-  let _this = this;
-
-  return new Promise((resolve, reject) => {
-    // For sybscribe message let's start the mutualAuthentication
-    let isSubscription = message.type === 'subscribe';
-    let isFromRemoteSM = _this._isFromRemoteSM(message.from);
-
-    if (isSubscription & isFromRemoteSM) {
-      console.log('_doMutualAuthenticationPhase1');
-
-      _this._doMutualAuthenticationPhase1(message).then(() => {
-        resolve(false);
-      }, (error) => {
-        reject(error);
-      });
-
-    } else if (message.hasOwnProperty('body') && message.body.hasOwnProperty('value') && typeof message.body.value === 'string') {
-      console.log('_isToDecrypt:true');
-      resolve(true);
-    } else {
-      console.log('_isToDecrypt:false');
-      resolve(false);
-    }
-
-  }).catch((error) => {
-    console.error('[CryptoManager._isToDecrypt]', error);
-  });
-}
-
-module.exports = MessageEncryptionHandling;
+export default MessageEncryptionHandling;
