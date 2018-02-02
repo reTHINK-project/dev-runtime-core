@@ -72,7 +72,7 @@ class SyncherManager {
     _this._observers = {};
 
     _this._dataObjectsStorage = storeDataObjects;
-
+    console.log('[NOTSAVING] storeDataObjects', storeDataObjects);
     //TODO: this should not be hardcoded!
     _this._domain = divideURL(runtimeURL).domain;
 
@@ -264,16 +264,20 @@ class SyncherManager {
 
           // Store for each reporter hyperty the dataObject
           let userURL;
-          let interworking = false;
+          // let interworking = false;
 
           if (msg.body.hasOwnProperty('identity') && msg.body.identity.userProfile && msg.body.identity.userProfile.userURL) {
             userURL = msg.body.identity.userProfile.userURL;
-            if (!userURL.includes('user://')) {
-              interworking = true;
-            }
+
+            // if (!userURL.includes('user://')) {
+            //   interworking = true;
+            // }
           } else {
             userURL = _this._registry.getHypertyOwner(msg.from);
-            if (!userURL) interworking = true;
+
+            // if (!userURL) {
+            //   interworking = true;
+            // }
           }
 
           // should we use the msg.body.value instead?
@@ -284,17 +288,18 @@ class SyncherManager {
 
           // Store the dataObject information
 
-          if (!interworking) {
-            //debugger;
-            _this._dataObjectsStorage.set(metadata);
+          //if (!interworking) {
 
-            if (msg.body.hasOwnProperty('store') && msg.body.store) {
-              reporter.isToSaveData = true;
-              _this._dataObjectsStorage.update(true, objectRegistration.url, 'isToSaveData', true);
+          _this._dataObjectsStorage.set(metadata);
 
-              if (msg.body.value.data) { _this._dataObjectsStorage.saveData(true, objectRegistration.url, null, msg.body.value.data); }
-            }
+          if (msg.body.hasOwnProperty('store') && msg.body.store) {
+            reporter.isToSaveData = true;
+            _this._dataObjectsStorage.update(true, objectRegistration.url, 'isToSaveData', true);
+
+            if (msg.body.value.data) { _this._dataObjectsStorage.saveData(true, objectRegistration.url, null, msg.body.value.data); }
           }
+
+          //}
 
           // adding listeners to forward to reporter
 
