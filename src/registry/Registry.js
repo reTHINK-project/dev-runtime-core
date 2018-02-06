@@ -1857,6 +1857,10 @@ class Registry {
 
     let _this = this;
 
+    if (typeof runtimeProtostubURL === 'boolean') {
+      return false;
+    }
+
     if (!(runtimeProtostubURL.includes('/protostub/'))) {
       return false;
     }
