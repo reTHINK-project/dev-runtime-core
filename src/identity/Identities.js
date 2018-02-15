@@ -128,6 +128,7 @@ class Identities {
       if (_this._isValid(identity)) {
         let id = identity.identifiers[0];
         Object.assign(this._identities[id], identity);
+        //TODO: WARNING: This does not exist!
         this._storeIdentity(identity).then(() => {
           this._identities[id].status = 'created';
           resolve();

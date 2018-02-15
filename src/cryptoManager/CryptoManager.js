@@ -60,7 +60,7 @@ class CryptoManager {
     _this._coreDiscovery = coreDiscovery;
 
     _this._messageEncryptionHandling = new MessageEncryptionHandling(_this._registry,
-      _this.chatKeys, _this.crypto, _this.storageManager, _this.dataObjectsStorage);
+      _this.chatKeys, _this.crypto, _this.storageManager, _this.dataObjectsStorage, _this._idm);
   }
 
   //******************* GET AND SET METHODS *******************
@@ -436,7 +436,7 @@ class CryptoManager {
           msg.callback = resolved;
           msg.dataObjectURL = dataObjectURL;
 
-          chatKeys = _this._newChatCrypto(msg, userURL);
+          chatKeys = _this._messageEncryptionHandling.newChatCrypto(msg, userURL);
           _this.chatKeys[sender + '<->' + receiver] = chatKeys;
         }
 
@@ -661,20 +661,6 @@ class CryptoManager {
       }
     });
   }
-
-
-  /**
-  * generates the initial structure for the keys between two users
-  * @param {JSON}    message              initial message that triggers the mutual authentication
-  * @param {String}  userURL              userURL
-  * @param {boolean} receiver(Optional)  indicates if is the sender or the receiver that creates a new chat crypto
-  * @return {JSON} newChatCrypto  new JSON structure for the chat crypto
-  */
-  _newChatCrypto(message, userURL, receiver) {
-    let userInfo = this._idm.getIdentity(userURL);
-    return this._messageEncryptionHandling.newChatCrypto(message, userURL, receiver, userInfo);
-  }
-
 
   /**
   * Retrieves a public keys given a user refrence. If no key is found,

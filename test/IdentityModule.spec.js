@@ -8,7 +8,7 @@ import DataObjectsStorage from '../src/store-objects/DataObjectsStorage';
 import PEP from '../src/policy/PEP';
 import RuntimeCoreCtx from '../src/policy/context/RuntimeCoreCtx';
 import Crypto from '../src/cryptoManager/Crypto';
-import * as cryptoManager from '../src/cryptoManager/CryptoManager';
+import CryptoManager from '../src/cryptoManager/CryptoManager';
 
 chai.config.truncateThreshold = 0;
 chai.use(chaiAsPromised);
@@ -55,16 +55,6 @@ describe('Crypto tests', function() {
     console.log(crypto);
   });
 
-  //note: new TextEncoder('utf-8').encode(s);
-  //      new TextDecoder('utf-8').decode(s);
-
-  it.skip('Code and encode test', function() {
-    let value = new Uint8Array([10, 15, 25, 55, 18, 4, 6]);
-    let encodedValue = crypto.encode(value);
-    let decodedValue = crypto.decode(encodedValue);
-    console.log(value, decodedValue);
-    expect(value).to.be.equalTo(decodedValue);
-  });
 
   it('Test generated IVs', function() {
     let IV_1 = crypto.generateIV();
@@ -75,11 +65,11 @@ describe('Crypto tests', function() {
   });
 
   it('Test generated random values', function() {
-    let rand_1 = crypto.generateRandom();
-    let rand_2 = crypto.generateRandom();
-    expect(rand_1).to.be.ofSize(RANDOM_VALUE_SIZE);
-    expect(rand_2).to.be.ofSize(RANDOM_VALUE_SIZE);
-    expect(rand_1).not.to.be.equalTo(rand_2);
+    let rand1 = crypto.generateRandom();
+    let rand2 = crypto.generateRandom();
+    expect(rand1).to.be.ofSize(RANDOM_VALUE_SIZE);
+    expect(rand2).to.be.ofSize(RANDOM_VALUE_SIZE);
+    expect(rand1).not.to.be.equalTo(rand2);
   });
 
   it('Test generatePMS key', function() {
@@ -102,17 +92,17 @@ describe('Crypto tests', function() {
           expect(key2).to.be.ofSize(PMS_SIZE);
           expect(key1).to.be.equalTo(key2);
         })
-        .then( function() { done() });
+        .then(function() { done(); });
     });
   });
 
   it('Test concatPMSwithRandoms key', function() {
     let PMSKey = crypto.generatePMS();
-    let rand1 = crypto.generateRandom();
+    let newChatCrypto = crypto.generateRandom();
     let rand2 = crypto.generateRandom();
-    let totalSize = PMSKey.length + rand1.length + rand2.length;
-    let concat1 = crypto.concatPMSwithRandoms(PMSKey, rand1, rand2);
-    let concat2 = crypto.concatPMSwithRandoms(PMSKey, rand1, rand2);
+    let totalSize = PMSKey.length + newChatCrypto.length + rand2.length;
+    let concat1 = crypto.concatPMSwithRandoms(PMSKey, newChatCrypto, rand2);
+    let concat2 = crypto.concatPMSwithRandoms(PMSKey, newChatCrypto, rand2);
     expect(concat1).to.be.ofSize(totalSize);
     expect(concat2).to.be.ofSize(totalSize);
     expect(concat1).to.be.equalTo(concat2);
@@ -137,7 +127,7 @@ describe('Crypto tests', function() {
           expect(key2[3]).to.be.ofSize(RANDOM_VALUE_SIZE);
           expect(key1).not.to.be.equalTo(key2);
         })
-        .then( function() { done() });
+        .then(function() { done(); });
     });
   });
 
@@ -150,7 +140,7 @@ describe('Crypto tests', function() {
           .then(decryptedData => {
             expect(data).to.be.equalTo(decryptedData);
           })
-          .then( function() { done() });
+          .then(function() { done(); });
       });
     });
   });
@@ -167,24 +157,21 @@ describe('Crypto tests', function() {
         .then(decryptedData => {
           expect(data).to.equal(decryptedData);
         })
-        .then( function() { done() });
+        .then(function() { done(); });
     });
   });
 
-  //NOTE: encryptRSA and signRSA use different encode types (_utf8Encode vs. Uint8Array)
-  it.skip('Test genereated keys pair, signRSA and verifyRSA', function(done) {
+  it('Test genereated keys pair, signRSA and verifyRSA', function(done) {
     crypto.generateRSAKeyPair().then(keyPair => {
-      //			log(keyPair.private)
-      let data = new Uint8Array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+      let data = 'test';
       crypto.signRSA(keyPair.private, data).then(signedData => {
-        crypto
-          .verifyRSA(keyPair.public, data, signedData)
+        crypto.verifyRSA(keyPair.public, data, signedData)
           .then(verificationResult => {
             assert.isTrue(verificationResult, 'The signitured is different');
           })
-          .then( function() { done() });
-      });
-    });
+          .then(function() { done(); });
+      }).catch(err => { console.log(err); });
+    }).catch(err => { console.log(err); });
   });
 
   it('Test hashHMAC and verifyHMAC', function(done) {
@@ -196,12 +183,13 @@ describe('Crypto tests', function() {
         .then(verificationResult => {
           assert.isTrue(verificationResult, 'HMAC is different');
         })
-        .then( function() { done() });
+        .then(function() { done(); });
     });
   });
 });
 
-describe.skip('Identity Module tests', function() {
+
+describe('Identity Module tests', function() {
 
   before('Init structures once before all tests', function() {
     crypto = new Crypto(runtimeFactory);
@@ -239,12 +227,14 @@ describe.skip('Identity Module tests', function() {
   });
 
   beforeEach('Init structures before each test', function() {
-    bus = new MessageBus();
+    bus = new MessageBus(registryPopulate);
     bus.pipeline = {};
     bus.pipeline.handlers = handlersPopulate;
     bus._onPostMessage = msg => {
       msgNodeResponseFunc(bus, msg);
     };
+
+    let cryptoManager = CryptoManager;
 
     let dataObjectsStorage = new DataObjectsStorage(storageManager, {});
     identityModule = new IdentityModule(
@@ -252,7 +242,8 @@ describe.skip('Identity Module tests', function() {
       runtimeCapabilities,
       storageManager,
       dataObjectsStorage,
-      runtimeFactory
+      cryptoManager,
+      runtimeFactory.createRuntimeCatalogue()
     );
     identityModule.messageBus = bus;
     identityModule.registry = registryPopulate;
@@ -269,14 +260,16 @@ describe.skip('Identity Module tests', function() {
   });
 
   it('Check GUI deployment', function() {
-    identityModule.deployGUI(runtimeFactory);
+    identityModule.deployGUI();
     assert(identityModule.guiDeployed, 'IDM is not deployed');
   });
 
   it('Check Identities to Choose', function() {
-    let idsToChoose = identityModule.getIdentitiesToChoose();
-    expect(idsToChoose).to.have.property('identities');
-    expect(idsToChoose).to.have.property('idps');
+    identityModule.getIdentitiesToChoose().then(result => {
+      expect(result).to.have.property('defaultIdentity');
+      expect(result).to.have.property('identities');
+      expect(result).to.have.property('idps');
+    });
   });
 
   it('Check messageBus', function() {
@@ -305,20 +298,12 @@ describe.skip('Identity Module tests', function() {
     );
   });
 
-  it('setCurrentIdentity/getCurrentIdentity', function() {
-    identityModule.setCurrentIdentity(exampleIdentityBundle);
-    assert.equal(
-      exampleIdentityBundle,
-      identityModule.getCurrentIdentity(),
-      '(SET/GET)CurrentIdentity content is different'
-    );
-  });
-
-  it('test sendGenerateMessage', function(done) {
+  it.skip('test sendGenerateMessage', function(done) {
     let contents = 'BASE64_CONTENT';
     let origin = hyperURL1;
 
     bus._onPostMessage = msg => {
+      console.log('asdf');
       let result =
         msg.type === 'execute' &&
         msg.to === idpDomainURL &&
@@ -341,14 +326,13 @@ describe.skip('Identity Module tests', function() {
           'Received message is not OK'
         );
       })
-      .then( function() { done() });
+      .then(function() { done(); });
   });
 
   it('test requestIdentityToGUI', function(done) {
     let identities = identityModule.getIdentitiesToChoose().identities;
     let idps = identityModule.getIdentitiesToChoose().idps;
 
-    let that = this;
     bus._onPostMessage = msg => {
       let result =
         msg.type === 'create' &&
@@ -365,10 +349,11 @@ describe.skip('Identity Module tests', function() {
       .then(resMsg => {
         assert.equal(resMsg.value, userEmail, 'Expected email was not found');
       })
-      .then( function() { done() });
+      .then(function() { done(); });
   });
 
-  it('test getIdentities', function(done) {
+  //Does not exist any more
+  it.skip('test getIdentities', function(done) {
     let returnedAssertionValue = returnedAssertionValuePopulate;
     crypto.generateRSAKeyPair().then(keyPair => {
       identityModule
@@ -380,11 +365,11 @@ describe.skip('Identity Module tests', function() {
             'Identity was not found'
           );
         })
-        .then( function() { done() });
+        .then(function() { done(); });
     });
   });
 
-  it('test storeIdentity', function(done) {
+  it.skip('test storeIdentity', function(done) {
     let returnedAssertionValue = returnedAssertionValuePopulate;
     crypto.generateRSAKeyPair().then(keyPair => {
       identityModule
@@ -407,54 +392,28 @@ describe.skip('Identity Module tests', function() {
           );
           assert.equal(identityModule.emailsList, userEmail);
         })
-        .then( function() { done() });
+        .then(function() { done(); });
     });
   });
 
-  it('test getIdentity', function(done) {
-    let returnedAssertionValue = returnedAssertionValuePopulate;
-    crypto.generateRSAKeyPair().then(keyPair => {
-      identityModule
-        .storeIdentity(returnedAssertionValue, keyPair)
-        .then(result => {
-          let retrivedID = identityModule.getIdentity(userURL);
-          assert.equal(
-            result.assertion,
-            retrivedID.assertion,
-            'Retrived ID is not the same'
-          );
-        })
-        .then( function() { done() });
-    });
+  it('test getIdentity', function() {
+    identityModule.identities.addAssertion(sendGenerateMessageResponse);
+    let retrivedID = identityModule.getIdentity(userURL);
+    assert.equal(
+      sendGenerateMessageResponse.assertion,
+      retrivedID.assertion,
+      'Retrived ID is not the same'
+    );
   });
 
-  it('test unregisterIdentity', function(done) {
-    let returnedAssertionValue = returnedAssertionValuePopulate;
-    crypto.generateRSAKeyPair().then(keyPair => {
-      identityModule
-        .storeIdentity(returnedAssertionValue, keyPair)
-        .then(result => {
-          assert.equal(identityModule.emailsList, userEmail);
-          identityModule.unregisterIdentity(userEmail);
-          assert.isEmpty(identityModule.emailsList, 'Identity was not removed');
-        })
-        .then( function() { done() });
-    });
+
+  it('test deleteIdentity', function() {
+    identityModule.identities.addAssertion(sendGenerateMessageResponse);
+    identityModule.deleteIdentity(userURL);
+    let retrivedID = identityModule.getIdentity(userURL);
+    assert.isEmpty(retrivedID, 'Identity was not removed');
   });
 
-  it('test deleteIdentity', function(done) {
-    let returnedAssertionValue = returnedAssertionValuePopulate;
-    crypto.generateRSAKeyPair().then(keyPair => {
-      identityModule
-        .storeIdentity(returnedAssertionValue, keyPair)
-        .then(result => {
-          assert.equal(identityModule.emailsList, userEmail);
-          identityModule.deleteIdentity(userURL);
-          assert.isEmpty(identityModule.identities, 'Identity was not removed');
-        })
-        .then( function() { done() });
-    });
-  });
 
   it('test callIdentityModuleFunc', function(done) {
     let methodName = 'openPopup';
@@ -478,15 +437,15 @@ describe.skip('Identity Module tests', function() {
       .then(resCode => {
         assert.equal(resCode, loginUrl, 'message content is not the exepected');
       })
-      .then( function() { done() });
+      .then(function() { done(); });
   });
 
-  it('test generateAssertion', function(done) {
-    crypto.generateRSAKeyPair().then(keyPair => {
-      let contents = btoa(keyPair.public);
-      let origin = 'undefined';
-      bus._onPostMessage = msg => {
-        let result =
+  it.skip('test generateAssertion', function(done) {
+    let contents = '[1,2,3,4,5,6,7,8,9]';
+    let origin = 'undefined';
+    bus._onPostMessage = msg => {
+      console.log('ASDFFFFF', msg);
+      let result =
           msg.type === 'execute' &&
           msg.to === idpDomainURL &&
           msg.from === idmURL &&
@@ -495,33 +454,32 @@ describe.skip('Identity Module tests', function() {
           msg.body.params.contents === contents &&
           msg.body.params.origin === origin &&
           msg.body.params.usernameHint === loginUrl;
-        assert(result, 'message content is not the expected');
-        msgNodeResponseFunc(bus, msg);
-      };
+      assert(result, 'message content is not the expected');
+      msgNodeResponseFunc(bus, msg);
+    };
 
-      identityModule
-        .generateAssertion(contents, origin, loginUrl, keyPair, idpDomain)
-        .then(result => {
-          let hasRequiredFields =
+    identityModule
+      .generateAssertion(contents, origin, loginUrl, idpDomain)
+      .then(result => {
+        let hasRequiredFields =
             result.hasOwnProperty('userProfile') &&
             result.hasOwnProperty('idp') &&
             result.hasOwnProperty('assertion');
 
-          let hasRequiredData =
+        let hasRequiredData =
             result.userProfile.username === userEmail &&
             result.userProfile.cn === cn &&
             result.userProfile.userURL === userURL;
 
-          assert(
-            hasRequiredFields && hasRequiredData,
-            'Received data has not the requiered properties'
-          );
-        })
-        .then( function() { done() });
-    });
+        assert(
+          hasRequiredFields && hasRequiredData,
+          'Received data has not the requiered properties'
+        );
+      })
+      .then(function() { done(); });
   });
 
-  it('test callGenerateMethods', function(done) {
+  it.skip('test callGenerateMethods', function(done) {
     identityModule
       .callGenerateMethods(idpDomain)
       .then(result => {
@@ -540,7 +498,7 @@ describe.skip('Identity Module tests', function() {
           'Received data has not the requiered properties'
         );
       })
-      .then( function() { done() });
+      .then(function() { done(); });
   });
 
   it('test validateAssertion', function(done) {
@@ -553,7 +511,7 @@ describe.skip('Identity Module tests', function() {
           'Received data is not the expected'
         );
       })
-      .then( function() { done() });
+      .then(function() { done(); });
   });
 
   it('test loginSelectedIdentity', function(done) {
@@ -569,11 +527,11 @@ describe.skip('Identity Module tests', function() {
         .then(result => {
           assert.equal(result, 'Login was successfull', 'Login failed');
         })
-        .then( function() { done() });
+        .then(function() { done(); });
     });
   });
 
-  it('test generateSelectedIdentity', function(done) {
+  it.skip('test generateSelectedIdentity', function(done) {
     crypto.generateRSAKeyPair().then(keyPair => {
       identityModule
         .generateSelectedIdentity(
@@ -589,11 +547,11 @@ describe.skip('Identity Module tests', function() {
             'Result does not have the required fields'
           );
         })
-        .then( function() { done() });
+        .then(function() { done(); });
     });
   });
 
-  it('test selectIdentityFromGUI', function(done) {
+  it.skip('test selectIdentityFromGUI', function(done) {
     identityModule
       .selectIdentityFromGUI(undefined)
       .then(result => {
@@ -602,7 +560,7 @@ describe.skip('Identity Module tests', function() {
           'result does not have the required fields'
         );
       })
-      .then( function() { done() });
+      .then(function() { done(); });
   });
 
   it.skip('test selectIdentityForHyperty', function(done) {
@@ -620,7 +578,7 @@ describe.skip('Identity Module tests', function() {
       .then(done);
   });
 
-  it('test encryptDataObject/decryptDataObject', function(done) {
+  it.skip('test encryptDataObject/decryptDataObject', function(done) {
     let sender = 'comm://localhost/5f8d87fd-c56b-47fc-ad47-28d55f01e23a';
     let sessionKey = crypto.generateRandom();
     let dataObjectSessionKeys = {};
@@ -648,7 +606,7 @@ describe.skip('Identity Module tests', function() {
       });
   });
 
-  it('test getIdentityAssertion', function(done) {
+  it.skip('test getIdentityAssertion', function(done) {
     identityModule.runtimeCapabilities.isAvailable = runtimeCapabilitiesPopulate;
     identityModule
       .getIdentityAssertion(undefined)
@@ -658,10 +616,10 @@ describe.skip('Identity Module tests', function() {
           'Result does not contain the expected fields'
         );
       })
-      .then( function() { done() });
+      .then(function() { done(); });
   });
 
-  it('test getIdToken', function(done) {
+  it.skip('test getIdToken', function(done) {
     let returnedAssertionValue = returnedAssertionValuePopulate;
     crypto.generateRSAKeyPair().then(keyPair => {
       identityModule
@@ -676,12 +634,12 @@ describe.skip('Identity Module tests', function() {
                 'Result does not contain the expected fields'
               );
             })
-            .then( function() { done() });
+            .then(function() { done(); });
         });
     });
   });
 
-  it('test _getValidToken', function(done) {
+  it.skip('test _getValidToken', function(done) {
     let returnedAssertionValue = returnedAssertionValuePopulate;
     crypto.generateRSAKeyPair().then(keyPair => {
       identityModule
@@ -696,12 +654,12 @@ describe.skip('Identity Module tests', function() {
                 'Result does not contain the expected fields'
               );
             })
-            .then( function() { done() });
+            .then(function() { done(); });
         });
     });
   });
 
-  it('test getToken', function(done) {
+  it.skip('test getToken', function(done) {
     let returnedAssertionValue = returnedAssertionValuePopulate;
     crypto.generateRSAKeyPair().then(keyPair => {
       identityModule
@@ -719,7 +677,7 @@ describe.skip('Identity Module tests', function() {
                 'Result does not contain the expected fields'
               );
             })
-            .then( function() { done() });
+            .then(function() { done(); });
         });
     });
   });
@@ -738,7 +696,7 @@ describe.skip('Identity Module tests', function() {
     );
   });
 
-  it('test _filterMessageToHash', function() {
+  it.skip('test _filterMessageToHash', function() {
     let message = messageToBeHashedPopulate;
     let decryptedValue = 'decryptedValue';
     let identity = hyperURL1;
@@ -761,7 +719,7 @@ describe.skip('Identity Module tests', function() {
     assert(valueVerificationResult, 'Received message is not the expected');
   });
 
-  it('test _newChatCrypto', function(done) {
+  it.skip('test _newChatCrypto', function(done) {
     let message = messageForNewChatCrypto;
     let receiver = false;
 
@@ -775,11 +733,11 @@ describe.skip('Identity Module tests', function() {
 					newChatCrypto.dataObjectURL === message.dataObjectURL;
 
         assert(valueVerificationResult, 'Generated chat crypto messege is not the expected one');
-      }).then( function() { done() });
+      }).then(function() { done(); });
     });
   });
 
-  it('test _sendReporterSessionKey', function(done) {
+  it.skip('test _sendReporterSessionKey', function(done) {
     let message = {
       from: hyperURL1, to: hyperURL2
     };
@@ -807,11 +765,11 @@ describe.skip('Identity Module tests', function() {
 
 
       assert(assertFields, 'Result has not the required fields or values');
-    }).then( function() { done() });
+    }).then(function() { done(); });
   });
 
   //test isFromHyperty to isToHyperty communication -> handshake + update //TODO incomplete cases
-  it('test encryptMessage - startHandShake and update', function(done) {
+  it.skip('test encryptMessage - startHandShake and update', function(done) {
     let returnedAssertionValue = returnedAssertionValuePopulate;
     let chatKeys = chatKeysPopulate;
     let helloMessage = messageForNewChatCrypto;
@@ -849,7 +807,7 @@ describe.skip('Identity Module tests', function() {
 
               cryptoManager.default.decryptMessage(encryptedMessage).then(decryptedMessage => {
                 assert.equal(decryptedMessage.body.value, encryptMessagePopulate.body.value, 'Encryption failed');
-              }).then( function() { done() });
+              }).then(function() { done(); });
             });
           });
         });
@@ -859,7 +817,7 @@ describe.skip('Identity Module tests', function() {
   });
 
 
-  it('test _doHandShakePhase - startHandShake', function(done) {
+  it.skip('test _doHandShakePhase - startHandShake', function(done) {
     let message = messageForNewChatCrypto;
     message.body.handshakePhase = 'startHandShake';
     let chatKeys = chatKeysPopulate;
@@ -869,11 +827,11 @@ describe.skip('Identity Module tests', function() {
         result.hasOwnProperty('chatKeys') &&
         result.message.type === 'handshake';
       assert(assertFields, 'Result has not the expected values');
-    }).then( function() { done() });
+    }).then(function() { done(); });
   });
 
 
-  it('test _doHandShakePhase - senderHello', function(done) {
+  it.skip('test _doHandShakePhase - senderHello', function(done) {
     let message = senderHelloMessagePopulate;
     let chatKeys = chatKeysPopulate;
     cryptoManager.default._doHandShakePhase(message, chatKeys).then(resultMessage => {
@@ -882,10 +840,10 @@ describe.skip('Identity Module tests', function() {
         resultMessage.hasOwnProperty('chatKeys') &&
         resultMessage.hasOwnProperty('message');
       assert(assertFields, 'Result has not the expected values');
-    }).then( function() { done() });
+    }).then(function() { done(); });
   });
 
-  it('test _doHandShakePhase - receiverHello', function(done) {
+  it.skip('test _doHandShakePhase - receiverHello', function(done) {
     let message = receiverHelloMessagePopulate;
 
     //let cloneOfA = JSON.parse(JSON.stringify(object));
@@ -899,11 +857,11 @@ describe.skip('Identity Module tests', function() {
         resultMessage.hasOwnProperty('chatKeys') &&
         resultMessage.hasOwnProperty('message');
         assert(assertFields, 'Result has not the expected values');
-      }).then( function() { done() });
+      }).then(function() { done(); });
     });
   });
 
-  it('test _doHandShakePhase - senderCertificate', function(done) {
+  it.skip('test _doHandShakePhase - senderCertificate', function(done) {
     let chatKeys = chatKeysPopulate;
     let message = senderCertificateMessagePopulate;
     let receivedValue = JSON.parse(atob(message.body.value));
@@ -945,7 +903,7 @@ describe.skip('Identity Module tests', function() {
    		 resultMessage.hasOwnProperty('chatKeys') &&
    		 resultMessage.hasOwnProperty('message');
                     assert(assertFields, 'Result has not the expected values');
-                  }).then( function() { done() });
+                  }).then(function() { done(); });
                 });
               });
             });
@@ -955,7 +913,7 @@ describe.skip('Identity Module tests', function() {
     });
   });
 
-  it('test _doHandShakePhase - receiverFinishedMessage', function(done) {
+  it.skip('test _doHandShakePhase - receiverFinishedMessage', function(done) {
     let chatKeys = chatKeysPopulate;
     let message = receiverFinishedMessagePopulate;
     let receivedValue = JSON.parse(atob(message.body.value));
@@ -988,7 +946,7 @@ describe.skip('Identity Module tests', function() {
                  resultMessage.hasOwnProperty('chatKeys') &&
                  resultMessage.hasOwnProperty('message');
               assert(assertFields, 'Result has not the expected values');
-            }).then( function() { done() });
+            }).then(function() { done(); });
 
           });
         });
@@ -1038,7 +996,7 @@ describe.skip('Identity Module tests', function() {
 
             identityModule._doHandShakePhase(message, chatKeys).then(resultMessage => {
               assert.equal(resultMessage, 'handShakeEnd', 'Result has not the expected values');
-            }).then( function() { done() });
+            }).then(function() { done(); });
 
           });
 
@@ -1049,7 +1007,7 @@ describe.skip('Identity Module tests', function() {
 
   });
 
-  it('test doMutualAuthentication', function(done) {
+  it.skip('test doMutualAuthentication', function(done) {
     let sender = hyperURL1;
     let receiver = hyperURL2;
 
@@ -1067,7 +1025,9 @@ describe.skip('Identity Module tests', function() {
   });
 });
 
+
 let msgNodeResponseFuncPopulate = (bus, msg) => {
+  console.log('BUS RESPONSE');
   if (msg.type === 'subscribe') {
     log('msgNodeResponse subscribe: ' + msg);
     if (msg.id === 2) {
@@ -1109,7 +1069,7 @@ let msgNodeResponseFuncPopulate = (bus, msg) => {
       // 	resMsg.body.value = {loginUrl: loginUrl};
       // }else{
       log('msgNodeResponseFunc assertion_val');
-      resMsg.body.value = returnedAssertionValuePopulate;
+      resMsg.body.value = sendGenerateMessageResponse;
 
       //			}
     } else if (msg.body.method === 'openPopup') {
@@ -1119,8 +1079,8 @@ let msgNodeResponseFuncPopulate = (bus, msg) => {
       if (msg.body.method === 'validateAssertion') {
         log('msgNodeResponseFunc validateAssertion');
         resMsg.body.value = validateAssertionValuePopulate;
-      }else {
- log('msgNodeResponseFunc identity');
+      } else {
+        log('msgNodeResponseFunc identity');
         resMsg.body.value = sendGenerateMessageResponse;
 			 }
     }
@@ -1168,7 +1128,7 @@ let registryPopulate = {
     return 'HypertyChat';
   },
   isDataObjectURL: dataObjectURL => {
-    let splitURL = dataObjectURL.split.skip('://');
+    let splitURL = dataObjectURL.split('://');
     return splitURL[0] === 'comm';
   },
   registerSubscribedDataObject: () => {},
@@ -1207,6 +1167,7 @@ let handlersPopulate = [
     policyEngine
       .authorise(ctx.msg)
       .then(function(changedMgs) {
+        console.log('Authorized');
         changedMgs.body.identity = {
           userProfile: {
             userURL: userURL
@@ -1216,6 +1177,8 @@ let handlersPopulate = [
         ctx.next();
       })
       .catch(function(reason) {
+        console.log('FAIL!');
+
         console.error(reason);
         ctx.fail(reason);
       });
@@ -1270,42 +1233,23 @@ let returnedAssertionValuePopulate = {
   }
 };
 
-let sendGenerateMessageResponse = {
-  assertion: 'eyJ0b2tlbklEIjoiZXlKaGJHY2lPaUpTVXpJMU5pSXNJbXRwWkNJNklqZGxZMkkxTkdObE56RmtOakU0WWpJNE16QmpZMlZqT1RreE9EZ3hPR1UzTXpneE1EQm1NbUVpZlEuZXlKaGVuQWlPaUk0TURnek1qazFOall3TVRJdGRIRnlPSEZ2YURFeE1UazBNbWRrTW10bk1EQTNkREJ6T0dZeU56ZHliMmt1WVhCd2N5NW5iMjluYkdWMWMyVnlZMjl1ZEdWdWRDNWpiMjBpTENKaGRXUWlPaUk0TURnek1qazFOall3TVRJdGRIRnlPSEZ2YURFeE1UazBNbWRrTW10bk1EQTNkREJ6T0dZeU56ZHliMmt1WVhCd2N5NW5iMjluYkdWMWMyVnlZMjl1ZEdWdWRDNWpiMjBpTENKemRXSWlPaUl4TVRjNU5Ua3hNRFV5T1RVM05qRTJPRGM0T0RraUxDSmxiV0ZwYkNJNkluUmxjM1JoYm1SMGFHbHVhekV5TTBCbmJXRnBiQzVqYjIwaUxDSmxiV0ZwYkY5MlpYSnBabWxsWkNJNmRISjFaU3dpWVhSZmFHRnphQ0k2SW1Ka2FHVjJkVU0zU0RaNVpuSkpWakZEVURsdmFIY2lMQ0p1YjI1alpTSTZJazVFWjNOTlZFMTNURVJGYzAxNlVYTk9SR2R6VFZSTmMwNXBkelZNUkZGNVRFUkZlazVEZHpOTmFYZDRUWHBSYzAxcVVUTk1SRVY2VEVSRmMwMVRkM2hNUkZWelRVTjNla3hFUlhwTlEzZDRURVJGTVV4RVFYTk9SR2R6VFZSTmQweEVSWE5OVkVGelRXbDNlRTE2UVhOTlUzZDRURVJCYzAxVVZURk1SRWwzVFVOM2VFMXBkelZPUTNkNFQwUkZjMDFxUlRSTVJFVXlUbmwzZUUxVVozTk9SRkZ6VGxSUmMwMTZZM05OYWsxM1RFUkplVTVUZHpGUFEzZDRUMVJGYzAxVVdUUk1SRTB5VEVSTk1VeEVSVEZPVTNjMVRubDNNazlUZDNsTmFsVnpUVlJKZVV4RVozbE1SRVY2VFhsM01reEVTVEJPVTNkNlRYbDNlazE1ZDNsT1ZGRnpUVlJWZVV4RVJUVk5hWGQ0VFVSamMwMVVZek5NUkVWNlRtbDNNRTVwZDNwTVJHTnpUMVJuYzA1cVFYTk5la0Z6VGtSSmMwMXFRVFZNUkVVeVRsTjNlVTFVVlhOTlZGVXdURVJGTUUxNWQzaE9hbGx6VGtSQmMwNXFTWE5OVkVVelRFUlJla3hFU1RKTVJFbDVUbmwzTVU1RGQzaE5lbGx6VG1wVmMwOVVZM05OYVhjMFRubDNlRTE2WTNOT2VsRnpUVlJyZVV4RVdUUk1SRWwzVGtOM2VFOUVaM05OYWxGNlRFUkZkMDVEZDNoTmFrbHpUMVJqYzAxVVl6Tk1SRVY2VFZOM2VFOUVSWE5OVkdNMVRFUm5lRXhFVlhsTVJFVXhUa04zZVU1cGR6Sk1SRlY2VEVSamVFeEVhekZNUkVWNVRVTjNlVTFxV1hOTlZFRjNURVJKZVUxRGQzbE5SR3R6VFZSck1VeEVSVE5OVTNjeFRubDNlRTlFVFhOTmVsbHpUVlJaTlV4RVJUQk9VM2MxVDBOM2VFMUVXWE5OVkdkelRXcEJNa3hFUlRSTlEzZDRUVVJCYzAxVVdUTk1SRmw0VEVSRmQwNTVkekJOVTNkNlRrTjNlVXhFU1RCT2VYZDVUa1JSYzAxVVZYZE1SRVV5VG5sM2VVMUVVWE5OYWtVeVRFUlZOVXhFU1hsT2VYYzBURVJKTWt4RVZUTk1SRVUwVDFOM2VFNUVSWE5OVkdjMFRFUm5Na3hFU1hsT1UzZDRUVlJuYzAxVVJYaE1SRVV6VG5sM2VFOUVTWE5OVkdONFRFUkZOVXhFV1hkTVJFVTBUbmwzZUUxNlRYTk5hbEZ6VFZSWk1FeEVSVEJQUTNkNFQwUnJjMDlFVlhOTlZHTjZURVJGTlUxVGQzbE5WRWx6VFdwUk0weEVTWGROVTNkNFQwUkZjMDU2UlhOUFJHZHpUVlJGZVV4RVJUSlBRM2Q0VFhwRmMwMVVZekJNUkZrelRFUlpNRXhFUlRGUFUzZDVUVVJaYzAxVVVUTk1SRlV3VEVSVk1FeEVSVEJPZVhjMFRtbDNNVTlEZDNsTmFsVnpUV3ByYzAxNlFYTk5WRWwzVEVSSk1FNXBkM2hPYW1OelRucG5jMDU2UlhOTlZGRjVURVJKZVU5RGR6Uk5VM2Q1VFhwbmMwMVVRWHBNUkZsNVRFUkpNRTE1ZDNsT1JFVnpUV3BKTWt4RVJURk5hWGN5VFhsM2VFNXBkelZQUTNkNFRucE5jMDE2WTNOTlZHc3lURVJWZVV4RVZUUk1SRkUxVEVSRk5FMVRkekJPYVhkNFRrUnJjMDFVUVRSTVJFVXdUMU4zTUU5VGR6Tk1SR2Q2VEVSRmVFOURkM2xOYW10elRXcFZNRXhFU1hoT2VYZDRUbXBqYzAxVVdUTk1SRWw1VEVSSk1FNTVkM2hQVkZWelRWUkZlVXhFUlhoT1UzZDVUbFJCYzAxRGQzaE9WR056VFdwVmVFeEVSVE5QUTNkNVRVUnJjMDU2U1hOTlZGVTFURVJGZVU1NWQzaFBSRVZ6VFZSRmVVeEVUWGRNUkdNeFRFUnJjMDFxVFRKTVJFbDVURVJGZVUxcGR6Sk5RM2N4VDBOM2VFeEVSWGxPVTNkNVRXcEJjMDFxVFRGTVJFbDVUbE4zZVUxcVozTk5hbEY2VEVSSk1FNURkM2xOVkZselRWUkpkMHhFUlhkT2VYZDRUbXBCYzAxcVJYbE1SRVY1VGtOM2VVMXFWWE5PZWtWelRWUnJNMHhFVFRSTVJFVXpUVU4zZUUxcVRYTk5WRmswVEVSTk5VeEVUVEJNUkVVeVQxTjNlRTlFVVhOT1ZHZHpUVlJGZVV4RVozZE1SR014VEVSRk5VMURkM2xOUkdOelRWUmplVXhFU1hoTmVYZDVURVJOYzAxVGQzZE1SRVU5SWl3aWFYTnpJam9pYUhSMGNITTZMeTloWTJOdmRXNTBjeTVuYjI5bmJHVXVZMjl0SWl3aWFXRjBJam94TlRBMU5Ea3hOelF5TENKbGVIQWlPakUxTURVME9UVXpOREo5LktHYWp6N0NjamtPUnIxS055TFgwRHFXaVRRM2s3d2Q0NDRsU0RiSFYtRV9adHY0bzhDdVlTTVJQRU12eGtncG5PaDBGd241OWROd2F5LXdqSkFZZWhCVWpCdllQZHgzejMzZDF0Uk5OcTlBUV9NQXJqZGVqQnkxcFpkR1FaY1diRUpMSUtPYXZuNGs2LS1mb0M4OUdkXzI2aU9tV1A1ZE9BcjRRU0tyVlZyRURlNDNnQXZ0Mms5anVpaGFnX1B5U0ROMjZXbVJDTVY4N2lFY3lzS3JfTTlXVExYS3k2NWU5czloNEpQYmdqMzZvSllrX3Bpbmk0YlJ6MERCd0lOLVI5TlAtZmkyT2VlRFptbXd4YzJXdnd1c05yaFJZamxGMmNkMjZwUFhaeTlMWlZPTU1fRERoTVpsMVVMclJvZnVFT1BMVXEtWFZZV3lmUXRMZnBPRkthdyIsInRva2VuSURKU09OIjp7ImF6cCI6IjgwODMyOTU2NjAxMi10cXI4cW9oMTExOTQyZ2Qya2cwMDd0MHM4ZjI3N3JvaS5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsImF1ZCI6IjgwODMyOTU2NjAxMi10cXI4cW9oMTExOTQyZ2Qya2cwMDd0MHM4ZjI3N3JvaS5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsInN1YiI6IjExNzk1OTEwNTI5NTc2MTY4Nzg4OSIsImVtYWlsIjoidGVzdGFuZHRoaW5rMTIzQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjoidHJ1ZSIsImF0X2hhc2giOiJiZGhldnVDN0g2eWZySVYxQ1A5b2h3Iiwibm9uY2UiOiJORGdzTVRNd0xERXNNelFzTkRnc01UTXNOaXc1TERReUxERXpOQ3czTWl3eE16UXNNalEzTERFekxERXNNU3d4TERVc01Dd3pMREV6TUN3eExERTFMREFzTkRnc01UTXdMREVzTVRBc01pd3hNekFzTVN3eExEQXNNVFUxTERJd01Dd3hNaXc1TkN3eE9ERXNNakU0TERFMk55d3hNVGdzTkRRc05UUXNNemNzTWpNd0xESXlOU3cxT0N3eE9URXNNVFk0TERNMkxETTFMREUxTlN3NU55dzJPU3d5TWpVc01USXlMRGd5TERFek15dzJMREkwTlN3ek15d3pNeXd5TlRRc01UVXlMREU1TWl3eE1EY3NNVGMzTERFek5pdzBOaXd6TERjc09UZ3NOakFzTXpBc05ESXNNakE1TERFMk5Td3lNVFVzTVRVMExERTBNeXd4TmpZc05EQXNOaklzTVRFM0xEUXpMREkyTERJeU55dzFOQ3d4TXpZc05qVXNPVGNzTWl3NE55d3hNemNzTnpRc01Ua3lMRFk0TERJd05Dd3hPRGdzTWpRekxERXdOQ3d4TWpJc09UY3NNVGMzTERFek1Td3hPREVzTVRjNUxEZ3hMRFV5TERFMU5Dd3lOaXcyTERVekxEY3hMRGsxTERFeU1Dd3lNallzTVRBd0xESXlNQ3d5TURrc01UazFMREUzTVN3MU55d3hPRE1zTXpZc01UWTVMREUwTlN3NU9Dd3hNRFlzTVRnc01qQTJMREU0TUN3eE1EQXNNVFkzTERZeExERXdOeXcwTVN3ek5Dd3lMREkwTnl3eU5EUXNNVFV3TERFMk55d3lNRFFzTWpFMkxEVTVMREl5Tnl3NExESTJMRFUzTERFNE9Td3hOREVzTVRnNExEZzJMREl5TlN3eE1UZ3NNVEV4TERFM055d3hPRElzTVRjeExERTVMRFl3TERFNE55d3hNek1zTWpRc01UWTBMREUwT0N3eE9Ea3NPRFVzTVRjekxERTVNU3d5TVRJc01qUTNMREl3TVN3eE9ERXNOekVzT0Rnc01URXlMREUyT0N3eE16RXNNVGMwTERZM0xEWTBMREUxT1N3eU1EWXNNVFEzTERVMExEVTBMREUwTnl3NE5pdzFPQ3d5TWpVc01qa3NNekFzTVRJd0xESTBOaXd4Tmpjc056Z3NOekVzTVRReUxESXlPQ3c0TVN3eU16Z3NNVEF6TERZeUxESTBNeXd5TkRFc01qSTJMREUxTWl3Mk15d3hOaXc1T0N3eE56TXNNemNzTVRrMkxEVXlMRFU0TERRNUxERTRNU3cwTml3eE5Ea3NNVEE0TERFME9TdzBPU3czTERnekxERXhPQ3d5TWprc01qVTBMREl4Tnl3eE5qY3NNVFkzTERJeUxESTBOeXd4T1RVc01URXlMREV4TlN3eU5UQXNNQ3d4TlRjc01qVXhMREUzT0N3eU1Ea3NOeklzTVRVNUxERXlOeXd4T0RFc01URXlMRE13TERjMUxEa3NNak0yTERJeUxERXlNaXcyTUN3MU9Dd3hMREV5TlN3eU1qQXNNak0xTERJeU5Td3lNamdzTWpRekxESTBOQ3d5TVRZc01USXdMREV3Tnl3eE5qQXNNakV5TERFeU5Dd3lNalVzTnpFc01UazNMRE00TERFM01Dd3hNak1zTVRZNExETTVMRE0wTERFMk9Td3hPRFFzTlRnc01URXlMRGd3TERjMUxERTVNQ3d5TURjc01UY3lMREl4TXl3eUxETXNNU3d3TERFPSIsImlzcyI6Imh0dHBzOi8vYWNjb3VudHMuZ29vZ2xlLmNvbSIsImlhdCI6IjE1MDU0OTE3NDIiLCJleHAiOiIxNTA1NDk1MzQyIiwiYWxnIjoiUlMyNTYiLCJraWQiOiI3ZWNiNTRjZTcxZDYxOGIyODMwY2NlYzk5MTg4MThlNzM4MTAwZjJhIn19',
-  idp: { domain: 'google.com', protocol: 'OIDC' },
-  info: {
-    accessToken: 'ya29.GlvSBDbUICOGwVGCW4IJz1wS3e5HBDW9sXnuGFgWPKHPHsU6zFIbNL8Z31CoCd93gav7cKQ8axhIASk1DdsA1MCxABFnJDTz1aXLmdyGFtLa9bO9JTNLv2DLawdr',
-    idToken: 'eyJhbGciOiJSUzI1NiIsImtpZCI6IjNiMGZjMTE5NjJhZDE2ZTQ5ZDU1YTI2ODE2YzVhZDBkM2Y2YjhhODMifQ.eyJhenAiOiI4MDgzMjk1NjYwMTItdHFyOHFvaDExMTk0MmdkMmtnMDA3dDBzOGYyNzdyb2kuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJhdWQiOiI4MDgzMjk1NjYwMTItdHFyOHFvaDExMTk0MmdkMmtnMDA3dDBzOGYyNzdyb2kuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMTc5NTkxMDUyOTU3NjE2ODc4ODkiLCJlbWFpbCI6InRlc3RhbmR0aGluazEyM0BnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiYXRfaGFzaCI6ImtnNkpEdTJyMDRpNVZHSlBkSWlnUFEiLCJub25jZSI6Ik5EZ3NNVE13TERFc016UXNORGdzTVRNc05pdzVMRFF5TERFek5DdzNNaXd4TXpRc01qUTNMREV6TERFc01Td3hMRFVzTUN3ekxERXpNQ3d4TERFMUxEQXNORGdzTVRNd0xERXNNVEFzTWl3eE16QXNNU3d4TERBc01UY3lMREU1TkN3eU16Y3NNakV5TERFek5DdzROU3d5TWpFc01qRXlMREV4Tnl3eE16TXNNVGN3TERnMExESXdOaXcyT1N3eE5ERXNNemNzTWpVMExESXhOaXd4Tmprc016RXNOak1zT1RFc01URTFMREV6T1N3MU1pd3lNVFlzTWpJNUxESXlOaXd4TXl3NU9Td3hOamNzTVRnMUxERXlNQ3d5TVRNc01USXlMREl5Tml3eU1UQXNNVEUwTERJME1Td3hOak1zTVRBMkxERXhNQ3d5TXpjc05ETXNNak16TERreExESTFNQ3d5TWpNc01qSTFMREV3Tml3NE1pd3hOVFVzTlN3eU16WXNNVGsyTERFMU1Dd3lNakVzTVRjc01USTRMREl6TERFNE5Dd3hNekVzT1RRc01Ua3dMRFU0TERJME9Td3hOemdzTVRBM0xERTVNaXd6TlN3NE5Td3hPRE1zTWpFeUxESTBPU3d5TkRFc01qUTJMRFV3TERBc016Y3NNVEkyTERFeE1pd3hOaXd5TXpBc01qRXlMREl6TERFek9Td3hPVGdzTnpRc01qRTRMREUxTXl3eE56Z3NNVFF3TERReExERTROaXd5TXpJc05qUXNNakk1TERRc01qSXhMRFkxTERFMExERTRNQ3d6TlN3eE16VXNOamtzTVRNc01qTXhMREk0TERJeE1DdzFNeXd4TVRnc01UWTRMREUyTVN3ek9DdzBNaXd4TkRjc01UUTFMRGcyTERJd055d3lOQ3c1TUN3eU1qWXNNVFVzTWpBNUxEZzVMREU0TXl3eE1EY3NNVFkwTERFMUxESXdNaXd5TkRJc056SXNNVGd4TERJeU5Td3lOVEFzTVRJeUxERTFPQ3c1TUN3eE5qa3NNak0xTERFek5DdzBOQ3d4TWl3MU1Td3lORFVzTVRRd0xEa3lMRGMxTERFeU9TdzNPU3d5TXpBc01qTTNMREUyTVN3eE9UTXNNVFF5TERFMU1pdzVMREl5TVN3ME1pd3hOelFzT1Rjc01qQTVMREV4Tnl3eE9UTXNNVElzT1RNc01UWXhMREl4Tnl3eU5ERXNNVGs0TERFd09Dd3hPRFlzTWprc01Ua3pMREV5TVN3NE15d3hNRGtzTWpJMkxERTVNeXd4TlRBc01UZ3pMRE0wTERFNUxEazFMREV4TWl3M05Dd3lNekFzT1RRc01UQTJMREUxTVN3ME1Dd3lNak1zTWpFNExESXlPQ3d6TERJMU15d3lNVGtzTmpZc09Dd3hPVEVzTkRjc01UTXdMREl3TUN3eU1qWXNNVE0zTERreUxESXdNaXd4TURJc05EY3NNakF3TERFeE15dzJOeXd4TlRZc09ETXNNVGsxTERJd01Td3lNeklzTWpJMUxEazJMREl3TXl3NE1Td3lNVE1zTVRJd0xEZzVMREV4TWl3eE9UTXNNalFzTnpjc01UWXpMREUzTkN3eUxESXdNU3d4TXpBc01UY3dMREl4T0N3Mk5pd3hNak1zTVRFNUxEZ3pMREl4T1N3d0xETXlMRFl4TERVd0xESXpNQ3d4TWpjc01qa3NNakE0TERJeE1Dd3lNamNzTWpFM0xEZzVMREUxTkN3eU16QXNOVGdzTnprc01pd3pMREVzTUN3eCIsImlzcyI6Imh0dHBzOi8vYWNjb3VudHMuZ29vZ2xlLmNvbSIsImlhdCI6MTUwNjQ0NzA0NywiZXhwIjoxNTA2NDUwNjQ3fQ.pY0BZZHSMWyL4UE8sclEb-FglzmOuh8kHykFkGTUfxgdb7bAY7bVtTQWlN05dhMs5QncAjsKExEuoLoH0vqYKOWEsXM_oTnu59NY2JPiEYZOo-v5wsc7on3G_CF0E5BGYhG-fDpbmi3qbin-i-drDyOjWMC3jK1CngMT7G1ElW_x2W8-UfrcfGkIzdW11Iul-79prZ1OzNMoPI06aaAtxyd5-6_O2-jaKlKGGfqIGlV_cFnMuIW6tWONzmSY-XnKtUKMPOctLVGLYJI9l8e2D4e7NmXVZz7lum7KmCzJvrRq0T4dOy5j_CaSmyA26SJcmRbRn940THU7S5BuavBCjQ',
-    refreshToken: undefined,
-    tokenType: 'Bearer',
-    infoToken: {
-      sub: '117959105295761687889',
-      name: 'test think',
-      given_name: 'test',
-      family_name: 'think',
-      picture: 'https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/photo.jpg',
-      email: 'testandthink123@gmail.com',
-      email_verified: true,
-      locale: 'en'
-    },
-    tokenIDJSON: {
-      azp: '808329566012-tqr8qoh111942gd2kg007t0s8f277roi.apps.googleusercontent.com',
-      aud: '808329566012-tqr8qoh111942gd2kg007t0s8f277roi.apps.googleusercontent.com',
-      sub: '117959105295761687889',
-      email: 'testandthink123@gmail.com',
-      email_verified: 'true',
-      at_hash: 'kg6JDu2r04i5VGJPdIigPQ',
-      nonce: 'NDgsMTMwLDEsMzQsNDgsMTMsNiw5LDQyLDEzNCw3MiwxMzQsMjQ3LDEzLDEsMSwxLDUsMCwzLDEzMCwxLDE1LDAsNDgsMTMwLDEsMTAsMiwxMzAsMSwxLDAsMTcyLDE5NCwyMzcsMjEyLDEzNCw4NSwyMjEsMjEyLDExNywxMzMsMTcwLDg0LDIwNiw2OSwxNDEsMzcsMjU0LDIxNiwxNjksMzEsNjMsOTEsMTE1LDEzOSw1MiwyMTYsMjI5LDIyNiwxMyw5OSwxNjcsMTg1LDEyMCwyMTMsMTIyLDIyNiwyMTAsMTE0LDI0MSwxNjMsMTA2LDExMCwyMzcsNDMsMjMzLDkxLDI1MCwyMjMsMjI1LDEwNiw4MiwxNTUsNSwyMzYsMTk2LDE1MCwyMjEsMTcsMTI4LDIzLDE4NCwxMzEsOTQsMTkwLDU4LDI0OSwxNzgsMTA3LDE5MiwzNSw4NSwxODMsMjEyLDI0OSwyNDEsMjQ2LDUwLDAsMzcsMTI2LDExMiwxNiwyMzAsMjEyLDIzLDEzOSwxOTgsNzQsMjE4LDE1MywxNzgsMTQwLDQxLDE4NiwyMzIsNjQsMjI5LDQsMjIxLDY1LDE0LDE4MCwzNSwxMzUsNjksMTMsMjMxLDI4LDIxMCw1MywxMTgsMTY4LDE2MSwzOCw0MiwxNDcsMTQ1LDg2LDIwNywyNCw5MCwyMjYsMTUsMjA5LDg5LDE4MywxMDcsMTY0LDE1LDIwMiwyNDIsNzIsMTgxLDIyNSwyNTAsMTIyLDE1OCw5MCwxNjksMjM1LDEzNCw0NCwxMiw1MSwyNDUsMTQwLDkyLDc1LDEyOSw3OSwyMzAsMjM3LDE2MSwxOTMsMTQyLDE1Miw5LDIyMSw0MiwxNzQsOTcsMjA5LDExNywxOTMsMTIsOTMsMTYxLDIxNywyNDEsMTk4LDEwOCwxODYsMjksMTkzLDEyMSw4MywxMDksMjI2LDE5MywxNTAsMTgzLDM0LDE5LDk1LDExMiw3NCwyMzAsOTQsMTA2LDE1MSw0MCwyMjMsMjE4LDIyOCwzLDI1MywyMTksNjYsOCwxOTEsNDcsMTMwLDIwMCwyMjYsMTM3LDkyLDIwMiwxMDIsNDcsMjAwLDExMyw2NywxNTYsODMsMTk1LDIwMSwyMzIsMjI1LDk2LDIwMyw4MSwyMTMsMTIwLDg5LDExMiwxOTMsMjQsNzcsMTYzLDE3NCwyLDIwMSwxMzAsMTcwLDIxOCw2NiwxMjMsMTE5LDgzLDIxOSwwLDMyLDYxLDUwLDIzMCwxMjcsMjksMjA4LDIxMCwyMjcsMjE3LDg5LDE1NCwyMzAsNTgsNzksMiwzLDEsMCwx',
-      iss: 'https://accounts.google.com',
-      iat: '1506447047',
-      exp: '1506450647',
-      alg: 'RS256',
-      kid: '3b0fc11962ad16e49d55a26816c5ad0d3f6b8a83'
-    },
-    expires: '1506450647',
-    email: 'testandthink123@gmail.com'
-  }
-};
+let sendGenerateMessageResponse =
+{assertion: 'eyJ0b2tlbklEIjoiZXlKaGJHY2lPaUpTVXpJMU5pSXNJbXRwWkNJNkltSmhOR1JsWkRkbU5XRTVNalF5T1dZeU16TTFOakZoTXpabVpqWXhNMlZrTXpnM05qSmpNMlFpZlEuZXlKaGVuQWlPaUk0TURnek1qazFOall3TVRJdGRIRnlPSEZ2YURFeE1UazBNbWRrTW10bk1EQTNkREJ6T0dZeU56ZHliMmt1WVhCd2N5NW5iMjluYkdWMWMyVnlZMjl1ZEdWdWRDNWpiMjBpTENKaGRXUWlPaUk0TURnek1qazFOall3TVRJdGRIRnlPSEZ2YURFeE1UazBNbWRrTW10bk1EQTNkREJ6T0dZeU56ZHliMmt1WVhCd2N5NW5iMjluYkdWMWMyVnlZMjl1ZEdWdWRDNWpiMjBpTENKemRXSWlPaUl4TVRjNU5Ua3hNRFV5T1RVM05qRTJPRGM0T0RraUxDSmxiV0ZwYkNJNkluUmxjM1JoYm1SMGFHbHVhekV5TTBCbmJXRnBiQzVqYjIwaUxDSmxiV0ZwYkY5MlpYSnBabWxsWkNJNmRISjFaU3dpWVhSZmFHRnphQ0k2SWpGemREbExibEZsZWxWMVVqSXRObVJEUTFseVFrRWlMQ0p1YjI1alpTSTZJbHMwT0N3eE16QXNNU3d6TkN3ME9Dd3hNeXcyTERrc05ESXNNVE0wTERjeUxERXpOQ3d5TkRjc01UTXNNU3d4TERFc05Td3dMRE1zTVRNd0xERXNNVFVzTUN3ME9Dd3hNekFzTVN3eE1Dd3lMREV6TUN3eExERXNNQ3d4T1RBc01qUTRMREl5TWl3eE1qWXNNVEk0TERFM015d3lNRElzTVRNNExERTVNeXd4T0RJc01UZ3hMRFV5TERFeE1Td3hOVFVzTWpBeUxEWTRMREl3TERReExERXlNU3cyTVN3MU1DdzROeXcxTWl3eE56a3NPVEVzTkRFc01qUTRMREU0Tml3eU16Y3NPREFzTWpBMkxEa3dMREUzTXl3eE9EWXNNVFEwTERFMk9Td3hORFFzTWpFMExESXhNaXd5TVRBc01UZzVMREV5TkN3NU1pd3lORElzTVRBNUxESXdNaXd4TkRBc01qRXNNVE0yTERFMU9Td3lMRFl6TERBc01UVXlMREUyTml3eE9EWXNNVFkwTERFNE55d3hNVFlzTmpBc01UTTBMREkwTWl3eE1Ua3NNakUzTERZd0xERTRNaXd4TmpFc01UZ3dMRE0xTERnNExEYzBMREUxTnl3NU1pd3lNVEFzTWpRMUxEWTVMREV6Tml3eE56TXNOamNzTVRJNUxEZzBMREl3TERFM01pdzBPQ3d4TlRVc01USTVMREUwTERJeU9Td3hORGdzT1RVc01URXpMREV4Tnl3eU1UQXNNemNzTVRJNExERTNNU3d4TnpVc05UQXNNVGd6TERJMU5DdzVPU3czT1N3eE5UZ3NNVEl6TERVMUxERTRNQ3d5T1N3NU15d3hPRGtzT1Rrc09UTXNNVGt3TERZekxERTFNaXcwTUN3eU1EVXNNVGN5TERFM01pd3hPRGNzTUN3eU5USXNNVEk0TERFMk5Dd3lORFFzT0RBc016WXNPVE1zTVRnekxEUTVMREl3TVN3eE1Td3pPU3d4TWl3eE5UZ3NNQ3d5TkN3eE5UY3NNVGd6TERJeU5pd3lORElzTWpBekxERTJPU3d5TkRrc01UQTVMREV6T0N3eE1UQXNOakFzTVRjNUxERTVNQ3d4TWpVc01qUTFMREU1TERFMU9TdzBNaXd4TlRRc01qQTVMREUwTlN3eU5EQXNPVGdzTlRZc09USXNNakkzTERnc01UQTJMREV4TlN3eE1qY3NNalF4TERJMkxETXlMREUwTVN3eE9EZ3NOemtzTXpBc01UTXhMRFlzTVRZd0xESXpNaXczTlN3eU16TXNNalEwTERnd0xEVXhMREVzTlRJc01UTTNMREl3TUN3eU1URXNNemtzTVRVMkxERTBOaXd5TkRZc01qVXpMRFkxTERFeU5pdzVOQ3d4TVRjc01UVXhMREkxTWl3eU1qUXNNak0zTERZNUxERXdNQ3d4TURnc01qTXpMREl4TkN3eU1pd3lNakFzTVRNMkxERTBNU3d6Tnl3NU5pd3hOeXd5TVRJc01qQTJMREkxTERFeE9Dd3lNRGtzT1RZc01UUXlMREV4TERJeU1Dd3hPRFVzTWpFNExEUTJMREV5TlN3ek9DdzBPQ3d4TWpRc05EY3NNak1zTVRJNUxERXdPU3d5TURZc01UQTBMREl4TERJd05Dd3lNVGdzTWpBeUxERXpMREV6T0N3eE56VXNNVEUwTERFM05Td3lORGtzTlRRc05qWXNNVE16TERFMk55dzJOU3d4TkRJc05qZ3NNVFExTERFNE5Dd3hPU3d4Tnl3M015d3lMRE1zTVN3d0xERmRJaXdpWlhod0lqb3hOVEU0TVRBeU1qTXpMQ0pwYzNNaU9pSmhZMk52ZFc1MGN5NW5iMjluYkdVdVkyOXRJaXdpYW5ScElqb2laakE0WWpGa1pXVmpNbVEwWkdabE4yWXlNV1k0WkRjeE5ERmlOalZoTVROaFlUbGpNak0zTUNJc0ltbGhkQ0k2TVRVeE9EQTVPRFl6TTMwLlpSV1JXbkZTMmlkdHlKWnZYX0gyMHZkZ2FBYlllV3lQYzVIc2N0bzhrRVo3Z0VENDJDb1NjbS1WQ0l6SUF3R2J4V0F6ZG1xWFBFSDFNd1JfSWNJY2pZMGdRY0NKZVpkZy0xTFhZME5NWFVhZmNVQWdlcjdIeGJVNzU2b0tyQXZDQWdiRlJUenk3QW1qNDNPVkdYdDR5MXY4alpoWlRpLVU2cWJaOVBaOE1Ka1gwNExPUzMxQVRvZ1RnTURRWHRyV3N1dno3RHhKZ0U2djVBbkozemgyT0xCUHlJcWw0N0R4SGRhSURCcGsxQklMR19hRnJuc09oUTFRbWtqRDA2d0diUFNKVWtBdUVYbDNRYUFTY0QxLW9vTlNjREtxcDI2MkJ4Q2otVlFfMXpEY3NCd0s3UHp3TnBfVVpWVkVtRzYxcUVhMDZLdkJ6anllQzdiNjY0SUl0QSIsInRva2VuSURKU09OIjp7ImF6cCI6IjgwODMyOTU2NjAxMi10cXI4cW9oMTExOTQyZ2Qya2cwMDd0MHM4ZjI3N3JvaS5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsImF1ZCI6IjgwODMyOTU2NjAxMi10cXI4cW9oMTExOTQyZ2Qya2cwMDd0MHM4ZjI3N3JvaS5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsInN1YiI6IjExNzk1OTEwNTI5NTc2MTY4Nzg4OSIsImVtYWlsIjoidGVzdGFuZHRoaW5rMTIzQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjoidHJ1ZSIsImF0X2hhc2giOiIxc3Q5S25RZXpVdVIyLTZkQ0NZckJBIiwibm9uY2UiOiJbNDgsMTMwLDEsMzQsNDgsMTMsNiw5LDQyLDEzNCw3MiwxMzQsMjQ3LDEzLDEsMSwxLDUsMCwzLDEzMCwxLDE1LDAsNDgsMTMwLDEsMTAsMiwxMzAsMSwxLDAsMTkwLDI0OCwyMjIsMTI2LDEyOCwxNzMsMjAyLDEzOCwxOTMsMTgyLDE4MSw1MiwxMTEsMTU1LDIwMiw2OCwyMCw0MSwxMjEsNjEsNTAsODcsNTIsMTc5LDkxLDQxLDI0OCwxODYsMjM3LDgwLDIwNiw5MCwxNzMsMTg2LDE0NCwxNjksMTQ0LDIxNCwyMTIsMjEwLDE4OSwxMjQsOTIsMjQyLDEwOSwyMDIsMTQwLDIxLDEzNiwxNTksMiw2MywwLDE1MiwxNjYsMTg2LDE2NCwxODcsMTE2LDYwLDEzNCwyNDIsMTE5LDIxNyw2MCwxODIsMTYxLDE4MCwzNSw4OCw3NCwxNTcsOTIsMjEwLDI0NSw2OSwxMzYsMTczLDY3LDEyOSw4NCwyMCwxNzIsNDgsMTU1LDEyOSwxNCwyMjksMTQ4LDk1LDExMywxMTcsMjEwLDM3LDEyOCwxNzEsMTc1LDUwLDE4MywyNTQsOTksNzksMTU4LDEyMyw1NSwxODAsMjksOTMsMTg5LDk5LDkzLDE5MCw2MywxNTIsNDAsMjA1LDE3MiwxNzIsMTg3LDAsMjUyLDEyOCwxNjQsMjQ0LDgwLDM2LDkzLDE4Myw0OSwyMDEsMTEsMzksMTIsMTU4LDAsMjQsMTU3LDE4MywyMjYsMjQyLDIwMywxNjksMjQ5LDEwOSwxMzgsMTEwLDYwLDE3OSwxOTAsMTI1LDI0NSwxOSwxNTksNDIsMTU0LDIwOSwxNDUsMjQwLDk4LDU2LDkyLDIyNyw4LDEwNiwxMTUsMTI3LDI0MSwyNiwzMiwxNDEsMTg4LDc5LDMwLDEzMSw2LDE2MCwyMzIsNzUsMjMzLDI0NCw4MCw1MSwxLDUyLDEzNywyMDAsMjExLDM5LDE1NiwxNDYsMjQ2LDI1Myw2NSwxMjYsOTQsMTE3LDE1MSwyNTIsMjI0LDIzNyw2OSwxMDAsMTA4LDIzMywyMTQsMjIsMjIwLDEzNiwxNDEsMzcsOTYsMTcsMjEyLDIwNiwyNSwxMTgsMjA5LDk2LDE0MiwxMSwyMjAsMTg1LDIxOCw0NiwxMjUsMzgsNDgsMTI0LDQ3LDIzLDEyOSwxMDksMjA2LDEwNCwyMSwyMDQsMjE4LDIwMiwxMywxMzgsMTc1LDExNCwxNzUsMjQ5LDU0LDY2LDEzMywxNjcsNjUsMTQyLDY4LDE0NSwxODQsMTksMTcsNzMsMiwzLDEsMCwxXSIsImV4cCI6IjE1MTgxMDIyMzMiLCJpc3MiOiJhY2NvdW50cy5nb29nbGUuY29tIiwianRpIjoiZjA4YjFkZWVjMmQ0ZGZlN2YyMWY4ZDcxNDFiNjVhMTNhYTljMjM3MCIsImlhdCI6IjE1MTgwOTg2MzMiLCJhbGciOiJSUzI1NiIsImtpZCI6ImJhNGRlZDdmNWE5MjQyOWYyMzM1NjFhMzZmZjYxM2VkMzg3NjJjM2QifX0=',
+  idp: {
+    domain: 'google.com',
+    protocol: 'OIDC'},
+  expires: '1518102233',
+  userProfile: {
+    sub: '117959105295761687889',
+    name: 'test think',
+    given_name: 'test',
+    family_name: 'think',
+    picture: 'https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/photo.jpg',
+    email: 'testandthink123@gmail.com',
+    email_verified: true,
+    locale: 'en',
+    userURL: 'user://google.com/testandthink123@gmail.com',
+    preferred_username: 'testandthink123'}};
 
 let dataObjectPopulate = {
   url: 'hyperty://h1.domain/h1',
@@ -1538,3 +1482,8 @@ let getHypertyOwnerPopulate = arg => {
 let coreDiscoveryPopulate = function(arg1, arg2) {
   return Promise.resolve({ dataObject: 'hyperty://h1.domain/h1' });
 };
+
+
+function log(x, y) {
+  console.log(x, y);
+}

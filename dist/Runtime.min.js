@@ -1,4 +1,1219 @@
 // version: 0.11.1
+// date: Thu Feb 08 2018 14:02:26 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Thu Feb 08 2018 14:02:26 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Wed Feb 07 2018 19:36:24 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Wed Feb 07 2018 19:36:24 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Wed Feb 07 2018 17:25:52 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Wed Feb 07 2018 17:25:52 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Wed Feb 07 2018 17:25:19 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Wed Feb 07 2018 16:12:03 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Wed Feb 07 2018 16:12:03 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Thu Feb 01 2018 14:44:48 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Thu Feb 01 2018 14:44:48 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Mon Jan 29 2018 19:26:41 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Mon Jan 29 2018 19:26:42 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Mon Jan 29 2018 19:24:48 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Mon Jan 29 2018 19:24:48 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Mon Jan 29 2018 19:23:43 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Mon Jan 29 2018 19:23:43 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Mon Jan 29 2018 19:18:42 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Mon Jan 29 2018 19:18:42 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Mon Jan 29 2018 19:14:37 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Mon Jan 29 2018 19:14:37 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Mon Jan 29 2018 19:09:28 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Mon Jan 29 2018 19:09:28 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Mon Jan 29 2018 19:01:18 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Mon Jan 29 2018 19:01:18 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Mon Jan 29 2018 18:53:54 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Mon Jan 29 2018 18:53:54 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Mon Jan 29 2018 18:47:19 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Mon Jan 29 2018 18:47:19 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Mon Jan 29 2018 18:35:04 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Mon Jan 29 2018 18:35:04 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Mon Jan 29 2018 18:31:49 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Mon Jan 29 2018 18:31:49 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Mon Jan 29 2018 18:27:58 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Mon Jan 29 2018 18:27:58 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Fri Jan 26 2018 19:08:07 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Fri Jan 26 2018 19:08:07 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Fri Jan 26 2018 19:05:15 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Fri Jan 26 2018 19:05:15 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Fri Jan 26 2018 19:02:18 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Fri Jan 26 2018 19:02:18 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Fri Jan 26 2018 18:20:45 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Fri Jan 26 2018 18:20:45 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Fri Jan 26 2018 17:20:05 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
+// date: Fri Jan 26 2018 17:20:05 GMT+0000 (WET)
+// licence: 
+/**
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+
+
+// version: 0.11.1
 // date: Thu Jan 18 2018 13:05:27 GMT+0000 (WET)
 // licence: 
 /**

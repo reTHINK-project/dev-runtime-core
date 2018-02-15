@@ -13,12 +13,13 @@ let log = logger.getLogger('CryptoManager');
 */
 class MessageEncryptionHandling {
 
-  constructor(registry, chatKeys, crypto, storageManager, dataObjectsStorage) {
+  constructor(registry, chatKeys, crypto, storageManager, dataObjectsStorage, idm) {
     this.registry = registry;
     this.chatKeys = chatKeys;
     this.crypto = crypto;
     this.storageManager = storageManager;
     this.dataObjectsStorage = dataObjectsStorage;
+    this.idm = idm;
   }
 
   encryptBetweenHyperties(message) {
@@ -227,19 +228,20 @@ class MessageEncryptionHandling {
   }
 
 
-/**
-* generates the initial structure for the keys between two users
-* @param {JSON}    message              initial message that triggers the mutual authentication
-* @param {String}  userURL              userURL
-* @param {boolean} receiver(Optional)  indicates if is the sender or the receiver that creates a new chat crypto
-* @return {JSON} newChatCrypto  new JSON structure for the chat crypto
-*/
-
-  newChatCrypto(message, userURL, receiver, userInfo) {
+  /**
+  * generates the initial structure for the keys between two users
+  * @param {JSON}    message              initial message that triggers the mutual authentication
+  * @param {String}  userURL              userURL
+  * @param {boolean} receiver(Optional)  indicates if is the sender or the receiver that creates a new chat crypto
+  * @return {JSON} newChatCrypto  new JSON structure for the chat crypto
+  */
+  newChatCrypto(message, userURL, receiver) {
 
     //check whether is the sender or the receiver to create a new chatCrypto
     //to mantain consistency on the keys if the receiver create a new chatCrypto,
     //then invert the fields
+    let userInfo = this.idm.getIdentity(userURL);
+
     let from = (receiver) ? message.to : message.from;
     let to = (receiver) ? message.from : message.to;
 
