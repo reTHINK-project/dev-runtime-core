@@ -145,7 +145,7 @@ class SubscriptionManager {
   _createSubscription(domain, resources, subscriber, identity) {
 
     let _this = this;
-
+    //debugger;
     return new Promise((resolve) => {
       //FLOW-OUT: subscribe message to the msg-node, registering listeners on the broker
 

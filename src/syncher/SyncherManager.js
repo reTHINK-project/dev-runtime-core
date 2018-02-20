@@ -107,6 +107,7 @@ class SyncherManager {
     // check if message is to save new childrenObjects in the local storage
     // TODO: check if message is to store new child in the local storage and call storeChild. How to distinguish from others?
 
+    //debugger;
     if (msg.body.attribute) { this._storeChildrens(msg); } else {
 
       if (!msg.body.hasOwnProperty('resume') || (msg.body.hasOwnProperty('resume') && !msg.body.resume)) {
@@ -227,7 +228,7 @@ class SyncherManager {
       //debugger;
       //request address allocation of a new object from the msg-node
       //_this._allocator.create(domain, numOfAddress, objectInfo, scheme, reuseDataObject).then((allocated) => {
-      _this._allocator.create(domain, numOfAddress, objectInfo, scheme, true).then((allocated) => {
+      _this._allocator.create(domain, numOfAddress, objectInfo, scheme, reuseDataObject).then((allocated) => {
 
         let objectRegistration = deepClone(msg.body.value);
         objectRegistration.url = allocated.address[0];
