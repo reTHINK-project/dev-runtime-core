@@ -184,15 +184,21 @@ class CryptoManager {
 */
 
   _isToEncrypt(message) {
+    let _this = this;
     log.info('[CryptoManager.istoChyperModule]', message);
     let isCreate = message.type === 'create';
     let isFromHyperty = message.from.includes('hyperty://');
     let isToHyperty = message.to.includes('hyperty://');
     let isToDataObject = isDataObjectURL(message.to);
+    let reporter = _this.registry.getDataObjectReporter(message.to);
+
 
     let doMutualAuthentication = message.body.hasOwnProperty('mutual') ? message.body.mutual : true;
 
     if (!doMutualAuthentication) return false;
+    if (reporter !== null && isLegacy(reporter)) {
+      return false;
+    }
 
     //if is not to apply encryption, then returns resolve
     if (!this.isToUseEncryption && !(message.type === 'handshake')) {
@@ -222,6 +228,11 @@ class CryptoManager {
 
       if (isSubscription & isFromRemoteSM) {
         log.log('_doMutualAuthenticationPhase1');
+        console.log('istoDecrypt', message);
+        let reporter = _this.registry.getDataObjectReporter(message.to);
+        if (reporter !== null && isLegacy(reporter)) {
+          return resolve(false);
+        }
 
         _this._doMutualAuthenticationPhase1(message).then(() => {
           resolve(false);

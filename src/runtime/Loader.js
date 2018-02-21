@@ -236,6 +236,7 @@ class Loader {
           _hypertySandbox = sandbox;
 
           let numberOfAddresses = 1;
+          //debugger;
           return this._addressAllocation.create(this._registry._domain, numberOfAddresses, _hypertyDescriptor, 'hyperty', reuseURL);
         }, handleError)
         .then((addresses) => {

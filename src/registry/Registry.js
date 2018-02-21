@@ -32,7 +32,7 @@ import AddressAllocation from '../allocation/AddressAllocation';
 import HypertyInstance from './HypertyInstance';
 import P2PConnectionResolve from './P2PConnectionResolve';
 
-import { divideURL, isHypertyURL, isURL, isUserURL, generateGUID, getUserIdentityDomain, isBackendServiceURL, deepClone } from '../utils/utils.js';
+import { divideURL, isHypertyURL, isURL, isUserURL, generateGUID, getUserIdentityDomain, isBackendServiceURL, deepClone, removePathFromURL } from '../utils/utils.js';
 
 import 'proxy-observe';
 import { WatchingYou } from 'service-framework/dist/Utils';
@@ -240,10 +240,29 @@ class Registry {
       let hyperty = _this.hypertiesList[index];
 
       if (hyperty.hypertyURL === hypertyURL) {
-        userURL = hyperty.user.userURL;
+        return hyperty.user.userURL;
       }
     }
     return userURL;
+  }
+
+  /**
+  * This function returns the user associated to the hyperty URL
+  * @param    {String}    dataObjectURL      dataObjectURL URL
+  * @return   {String}    userURL         user URL
+  */
+  getDataObjectReporter(dataObjectURL) {
+
+    let _this = this;
+    let DOurl = removePathFromURL(dataObjectURL);
+    for (let index in _this.dataObjectList) {
+      let dataObject = _this.dataObjectList[index];
+
+      if (dataObject.url === DOurl) {
+        return dataObject.reporter;
+      }
+    }
+    return null;
   }
 
   /**
@@ -666,7 +685,7 @@ class Registry {
       if (typeof(reuseURL) === 'string') {
         objectType = reuseURL && divideURL(reuseURL).type !== 'hyperty' ? 'registry:DataObjectURLs' : 'registry:HypertyURLs';
       }
-
+      //debugger;
       _this.storageManager.get(objectType).then((urlsList) => {
 
         if (!urlsList) {
@@ -705,7 +724,13 @@ class Registry {
 
           if (urlsList[characteristics]) {
             // log.log('[Registry] reusage of dataObject URL');
-            return resolve(urlsList[characteristics]);
+            if (typeof(urlsList[characteristics]) === 'string') {
+              let arrayToResolve = [];
+              arrayToResolve.push(urlsList[characteristics]);
+              return resolve(arrayToResolve);
+            } else {
+              return resolve(urlsList[characteristics]);
+            }
           } else {
             // log.log('[Registry] no dataObject URL was previously registered');
             return resolve(undefined);
@@ -902,7 +927,9 @@ class Registry {
                         log.error(e);
                         reject(e);
                       }
-                    } else throw new Error('Failed to register an Hyperty: ', reply);
+                    } else {
+                      throw new Error('Failed to register an Hyperty: ', reply);
+                    }
 
                   });
 
@@ -1112,7 +1139,13 @@ class Registry {
           resolve(_this.p2pRequesterStub[stubID]);
         }
       } else {
-        runtimeProtoStubURL = 'runtime://' + stubID + '/protostub/' + generateGUID();
+        console.log('[Registry - registerStub - Normal Stub] descriptor', descriptor);
+
+        if ( !typeof(descriptor) === 'string' && descriptor.hasOwnProperty('_interworking') && descriptor._interworking) {
+          runtimeProtoStubURL = 'runtime://' + stubID + '/protostub/' + 'scheme1';
+        } else {
+          runtimeProtoStubURL = 'runtime://' + stubID + '/protostub/' + generateGUID();
+        }
 
         log.info('[Registry - registerStub - Normal Stub] - ', stubID);
 
@@ -1823,6 +1856,10 @@ class Registry {
   isInterworkingProtoStub(runtimeProtostubURL) {
 
     let _this = this;
+
+    if (typeof runtimeProtostubURL === 'boolean') {
+      return false;
+    }
 
     if (!(runtimeProtostubURL.includes('/protostub/'))) {
       return false;

@@ -72,7 +72,7 @@ class SyncherManager {
     _this._observers = {};
 
     _this._dataObjectsStorage = storeDataObjects;
-
+    console.log('[NOTSAVING] storeDataObjects', storeDataObjects);
     //TODO: this should not be hardcoded!
     _this._domain = divideURL(runtimeURL).domain;
 
@@ -107,6 +107,7 @@ class SyncherManager {
     // check if message is to save new childrenObjects in the local storage
     // TODO: check if message is to store new child in the local storage and call storeChild. How to distinguish from others?
 
+    //debugger;
     if (msg.body.attribute) { this._storeChildrens(msg); } else {
 
       if (!msg.body.hasOwnProperty('resume') || (msg.body.hasOwnProperty('resume') && !msg.body.resume)) {
@@ -224,8 +225,11 @@ class SyncherManager {
       let reuseDataObject = msg.body.value.resource;
       let numOfAddress = 1;
 
+      //debugger;
       //request address allocation of a new object from the msg-node
+      //_this._allocator.create(domain, numOfAddress, objectInfo, scheme, reuseDataObject).then((allocated) => {
       _this._allocator.create(domain, numOfAddress, objectInfo, scheme, reuseDataObject).then((allocated) => {
+
         let objectRegistration = deepClone(msg.body.value);
         objectRegistration.url = allocated.address[0];
         objectRegistration.authorise = msg.body.authorise;
@@ -261,16 +265,20 @@ class SyncherManager {
 
           // Store for each reporter hyperty the dataObject
           let userURL;
-          let interworking = false;
+          // let interworking = false;
 
           if (msg.body.hasOwnProperty('identity') && msg.body.identity.userProfile && msg.body.identity.userProfile.userURL) {
             userURL = msg.body.identity.userProfile.userURL;
-            if (!userURL.includes('user://')) {
-              interworking = true;
-            }
+
+            // if (!userURL.includes('user://')) {
+            //   interworking = true;
+            // }
           } else {
             userURL = _this._registry.getHypertyOwner(msg.from);
-            if (!userURL) interworking = true;
+
+            // if (!userURL) {
+            //   interworking = true;
+            // }
           }
 
           // should we use the msg.body.value instead?
@@ -281,16 +289,18 @@ class SyncherManager {
 
           // Store the dataObject information
 
-          if (!interworking) {
-            _this._dataObjectsStorage.set(metadata);
+          //if (!interworking) {
 
-            if (msg.body.hasOwnProperty('store') && msg.body.store) {
-              reporter.isToSaveData = true;
-              _this._dataObjectsStorage.update(true, objectRegistration.url, 'isToSaveData', true);
+          _this._dataObjectsStorage.set(metadata);
 
-              if (msg.body.value.data) { _this._dataObjectsStorage.saveData(true, objectRegistration.url, null, msg.body.value.data); }
-            }
+          if (msg.body.hasOwnProperty('store') && msg.body.store) {
+            reporter.isToSaveData = true;
+            _this._dataObjectsStorage.update(true, objectRegistration.url, 'isToSaveData', true);
+
+            if (msg.body.value.data) { _this._dataObjectsStorage.saveData(true, objectRegistration.url, null, msg.body.value.data); }
           }
+
+          //}
 
           // adding listeners to forward to reporter
 
@@ -610,6 +620,7 @@ class SyncherManager {
       //subscribe in msg-node
       _this._bus.postMessage(nodeSubscribeMsg, (reply) => {
         log.log('node-subscribe-response(observer): ', reply);
+        console.log('REUSETEST SyncherManager - node-subscribe-response(observer): ', reply);
         if (reply.body.code === 200) {
 
           //FLOW-OUT: reply with provisional response
@@ -627,14 +638,15 @@ class SyncherManager {
           //TODO: For Further Study
           if (msg.body.hasOwnProperty('mutual')) objSubscribeMsg.body.mutual = msg.body.mutual;
           log.log('[SyncherManager._newSubscription]', objSubscribeMsg, msg);
-
+          console.log('REUSETEST SyncherManager - [SyncherManager._newSubscription]', objSubscribeMsg, msg);
           //subscribe to reporter SM
           _this._bus.postMessage(objSubscribeMsg, (reply) => {
             log.log('reporter-subscribe-response-new: ', reply);
+            console.log('REUSETEST SyncherManager - reporter-subscribe-response-new: ', reply);
             if (reply.body.code === 200) {
 
               log.log('[SyncherManager._newSubscription] - observers: ', _this._observers, objURL, _this._observers[objURL]);
-
+              console.log('REUSETEST SyncherManager - 200 code[SyncherManager._newSubscription] - observers: ', _this._observers, objURL, _this._observers[objURL]);
               let observer = _this._observers[objURL];
               if (!observer) {
                 observer = new ObserverObject(_this, objURL, childrens);
@@ -676,6 +688,7 @@ class SyncherManager {
 
               if (!interworking) {
                 //_this._dataObjectsStorage.set(objURL, false, msg.body.schema, 'on', reply.body.owner, hypertyURL, childrens, userURL);
+                //debugger;
                 _this._dataObjectsStorage.set(metadata);
                 if ((metadata.hasOwnProperty('store') && metadata.store) || (metadata.hasOwnProperty('isToSaveData') && metadata.isToSaveData)) {
                   observer.isToSaveData = true;

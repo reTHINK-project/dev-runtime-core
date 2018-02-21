@@ -90,7 +90,7 @@ class AddressAllocation {
   create(domain, number, info, scheme, reuseURL) {
 
     // // console.log('typeof(reuseURL)', typeof(reuseURL), reuseURL);
-
+    //debugger;
     if (reuseURL) {
 
       if (typeof(reuseURL) === 'boolean') {
@@ -104,7 +104,11 @@ class AddressAllocation {
       }
 
       if (typeof(reuseURL) === 'string' && isURL(reuseURL)) {
-        return this._reuseAllocatedAddress(domain, number, info, scheme, reuseURL);
+        //return this._reuseAllocatedAddress(domain, number, info, scheme, reuseURL);
+        return new Promise((resolve, reject) => {
+          let value = { newAddress: false, address: [reuseURL] };
+          return resolve(value);
+        });
       }
 
     } else {
@@ -120,8 +124,9 @@ class AddressAllocation {
 
     return new Promise((resolve, reject) => {
 
+      console.log('REUSETEST -  _reuseAllocatedAddress', domain, number, info, scheme, reuseURL);
       this._registry.checkRegisteredURLs(info, reuseURL).then((urls) => {
-
+        console.log('REUSETEST -  registeredurls', urls);
         if (urls) {
           log.info('[AddressAllocation - ' + scheme + '] - Reuse URL');
           let value = {newAddress: false, address: urls};

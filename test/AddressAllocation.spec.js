@@ -121,7 +121,7 @@ describe('AddressAllocation', function() {
     };
 
     expect(aa.create(domain, number, info, scheme, 'hyperty://' + domain + '/' + guid))
-    .eventually.to.eql({newAddress: false, address: 'hyperty://' + domain + '/' + guid})
+    .eventually.to.eql({newAddress: false, address: ['hyperty://' + domain + '/' + guid]})
     .notify(done);
 
   });
