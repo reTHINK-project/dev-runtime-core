@@ -194,13 +194,10 @@ describe('RuntimeUA', function() {
       let hypertyDescriptorURL = 'hyperty-catalogue://catalogue.sp.domain/.well-known/hyperty/HelloHyperty';
       let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL, 'hyperty://sp.domain/1');
       console.log('wtf', loadHyperty);
-      let hypertyResolved = {
-        runtimeHypertyURL: 'hyperty://sp.domain/1',
-        status: 'deployed'
-      };
+      let hypertyResolved = ['runtimeHypertyURL', 'status'];
 
-      expect(loadHyperty).to.eventually.to.deep.equal(hypertyResolved)
-        .and.to.be.fulfilled
+      expect(loadHyperty).to.be.fulfilled
+        .and.eventually.to.have.all.keys(hypertyResolved)
         .and.notify(done);
 
     });
