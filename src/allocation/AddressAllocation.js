@@ -106,7 +106,7 @@ class AddressAllocation {
       if (typeof(reuseURL) === 'string' && isURL(reuseURL)) {
         //return this._reuseAllocatedAddress(domain, number, info, scheme, reuseURL);
         return new Promise((resolve, reject) => {
-          let value = { address: [reuseURL] };
+          let value = { newAddress: false, address: [reuseURL] };
           return resolve(value);
         });
       }
