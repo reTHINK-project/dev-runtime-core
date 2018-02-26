@@ -23,8 +23,7 @@ class CryptoManager {
   * The init() must called in order to set mandatories attributes
   */
 
-  constructor(storageManager) {
-    this.storageManager = storageManager;
+  constructor() {
     this.userDefaultKeyRef = 'userAsymmetricKey';
   }
 
