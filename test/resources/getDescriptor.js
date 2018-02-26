@@ -3,7 +3,6 @@ import { descriptors } from './descriptors.js';
 import { divideURL } from '../../src/utils/utils';
 
 export const getDescriptor = function(url) {
-
   return new Promise(function(resolve, reject) {
 
     let dividedURL = divideURL(url);

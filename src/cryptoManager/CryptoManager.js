@@ -178,6 +178,82 @@ class CryptoManager {
 
 
   //******************* ENCRYPTION METHODS *******************
+  /**
+* Identifies the messages to be encrypted
+* @param {Message}    message
+* @returns {boolean}  returns true if the message requires encryption
+*/
+
+  _isToEncrypt(message) {
+    let _this = this;
+    log.info('[CryptoManager.istoChyperModule]', message);
+    let isCreate = message.type === 'create';
+    let isFromHyperty = message.from.includes('hyperty://');
+    let isToHyperty = message.to.includes('hyperty://');
+    let isToDataObject = isDataObjectURL(message.to);
+    let reporter = _this.registry.getDataObjectReporter(message.to);
+
+
+    let doMutualAuthentication = message.body.hasOwnProperty('mutual') ? message.body.mutual : true;
+
+    if (!doMutualAuthentication) return false;
+    if (reporter !== null && isLegacy(reporter)) {
+      return false;
+    }
+
+    //if is not to apply encryption, then returns resolve
+    if (!this.isToUseEncryption && !(message.type === 'handshake')) {
+      log.info('not handshake: encryption disabled');
+      return false;
+    }
+
+    if (message.type === 'update') {
+      log.info('update:encryption disabled');
+      return false;
+    }
+
+    if (isLegacy(message.to)) return false;
+
+    return ((isCreate && isFromHyperty && isToHyperty) || (isCreate && isFromHyperty && isToDataObject && doMutualAuthentication) || message.type === 'handshake' || (message.type === 'update' && doMutualAuthentication));
+  }
+
+
+  _isToDecrypt(message) {
+    let _this = this;
+
+
+    return new Promise((resolve, reject) => {
+      // For sybscribe message let's start the mutualAuthentication
+      let isSubscription = message.type === 'subscribe';
+      let isFromRemoteSM = _this._isFromRemoteSM(message.from);
+
+      if (isSubscription & isFromRemoteSM) {
+        log.log('_doMutualAuthenticationPhase1');
+        console.log('istoDecrypt', message);
+        let reporter = _this.registry.getDataObjectReporter(message.to);
+        if (reporter !== null && isLegacy(reporter)) {
+          return resolve(false);
+        }
+
+        _this._doMutualAuthenticationPhase1(message).then(() => {
+          resolve(false);
+        }, (error) => {
+          reject(error);
+        });
+
+      } else if (message.hasOwnProperty('body') && message.body.hasOwnProperty('value') && typeof message.body.value === 'string') {
+        log.log('_isToDecrypt:true');
+        resolve(true);
+      } else {
+        log.log('_isToDecrypt:false');
+        resolve(false);
+      }
+
+    }).catch((error) => {
+      log.error('[CryptoManager._isToDecrypt]', error);
+    });
+
+  }
 
   encryptMessage(message) {
     //log.info('encryptMessage:message', message);
