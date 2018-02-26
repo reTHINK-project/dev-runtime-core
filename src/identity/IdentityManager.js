@@ -27,6 +27,10 @@ class IdentityManager {
       _from = message.body.subscriber;
     }
 
+    if (message.type === 'forward') {
+      return false;
+    }
+
     // Signalling Messages between P2P Stubs don't have Identities. FFS
     if (_from.includes('/p2prequester/') || _from.includes('/p2phandler/')) {
       return false;
