@@ -536,7 +536,7 @@ class SyncherManager {
 
   //FLOW-IN: message received from local Syncher -> subscribe
   _onLocalSubscribe(msg) {
-
+    //debugger;
     this._dataObjectsStorage.getResourcesByCriteria(msg, false).then((result) => {
 
       log.info('[SyncherManager - Subscribe] - ResourcesByCriteria | Message: ', msg, ' result: ', result);
@@ -662,6 +662,8 @@ class SyncherManager {
 
               let interworking = false;
 
+              //debugger;
+
               // Store for each reporter hyperty the dataObject
               let userURL;
               if (msg.body.hasOwnProperty('identity') && msg.body.identity.userProfile && msg.body.identity.userProfile.userURL) {
@@ -687,8 +689,7 @@ class SyncherManager {
               metadata.subscriberHyperty = hypertyURL;
 
               if (!interworking) {
-                //_this._dataObjectsStorage.set(objURL, false, msg.body.schema, 'on', reply.body.owner, hypertyURL, childrens, userURL);
-                //debugger;
+              //_this._dataObjectsStorage.set(objURL, false, msg.body.schema, 'on', reply.body.owner, hypertyURL, childrens, userURL);
                 _this._dataObjectsStorage.set(metadata);
                 if ((metadata.hasOwnProperty('store') && metadata.store) || (metadata.hasOwnProperty('isToSaveData') && metadata.isToSaveData)) {
                   observer.isToSaveData = true;
