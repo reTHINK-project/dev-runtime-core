@@ -435,8 +435,12 @@ class RuntimeUA {
    * Used to close all the runtime; Unregister all hyperties;
    * @return {Promise<Boolean>} result of the close method, with true or false to the operation success;
    */
-  close() {
+  close(logOut) {
+    console.log('Runtime core logout: ', logOut);
     let _this = this;
+    if (logOut === true) {
+      this.identityManager.reset();
+    }
 
     log.info('Unregister all hyperties');
     return new Promise(function(resolve, reject) {

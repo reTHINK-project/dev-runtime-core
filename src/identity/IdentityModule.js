@@ -172,6 +172,11 @@ class IdentityModule {
     return _this._identities;
   }
 
+  set identities(identities) {
+    let _this = this;
+    _this._identities = identities;
+  }
+
   get idps() {
     return this._listOfIdps;
   }

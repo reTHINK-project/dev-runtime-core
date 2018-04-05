@@ -3,6 +3,7 @@
 *
 */
 import * as logger from 'loglevel';
+import Identities from './Identities';
 let log = logger.getLogger('IdentityManager');
 
 class IdentityManager {
@@ -12,6 +13,14 @@ class IdentityManager {
 
     _this._idm = idm;
 
+  }
+
+  reset() {
+    console.log('IM reset');
+
+    // this._idm.identities.reset();
+    this._idm.identities = new Identities(this._idm.identities._type, this._idm.identities._storageManager);
+    console.log(this._idm.identities);
   }
 
   _isToSetID(message) {
@@ -46,13 +55,13 @@ class IdentityManager {
   processMessage(message) {
     log.log('[IdentityManager.processMessage] ', message);
 
-    return new Promise((resolve,reject) => {
+    return new Promise((resolve, reject) => {
 
       // skip messages that don't need identity tokens in the body
 
       if (!this._isToSetID(message)) return resolve(message);
 
-/*      let from = message.from;
+      /*      let from = message.from;
       let sourceURL = undefined;
       if ( message.hasOwnProperty('body') && message.body.hasOwnProperty('source')) {
         from = message.body.source;
