@@ -242,13 +242,20 @@ class IdentityModule {
     let _this = this;
     return new Promise((resolve) => {
       _this._identities.loadIdentities().then(() => {
-        _this._crypto.getMyPublicKey().then((key) => {
-          let guid = 'user-guid://' + stringify(key);
-          _this.identities.guid = guid;
-          _this._identities.loadAccessTokens().then(() => {
 
-            resolve();
+        _this._crypto.getMyPublicKey().then((key) => {
+          let hash = _this._crypto.crypto._sha256(stringify(key)).then((hash) => {
+
+            let guid = 'user-guid://' + hash;
+            _this.identities.guid = guid;
+            _this._identities.loadAccessTokens().then(() => {
+
+              resolve();
+            });
+          }).catch((error) =>  {
+            console.log('[IdentityModule] error', error);
           });
+
         });
 
       });
@@ -313,6 +320,7 @@ class IdentityModule {
 
               _this.identities.defaultIdentity = assertion.userProfile.userURL;
               return resolve(assertion);
+
             }, (err) => {
               return reject(err);
             });
