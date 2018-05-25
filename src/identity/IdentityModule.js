@@ -909,6 +909,52 @@ class IdentityModule {
 
   }
 
+  getAccessToken(idpDomain, resources, login) {
+    log.log('[getAccessToken:idpDomain]', idpDomain);
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+
+      let domain = _this._resolveDomain(idpDomain);
+      let message;
+
+      message = {
+        type: 'execute', to: domain, from: _this._idmURL, body: { resource: 'identity', method: 'getAccessToken', params: { resources: resources, login: login } }
+      };
+      try {
+        _this._messageBus.postMessage(message, (res) => {
+          let result = res.body.value;
+          resolve(result);
+        });
+      } catch (err) {
+        reject('In sendRefreshMessage on postMessage error: ' + err);
+      }
+    });
+  }
+
+  getAccessTokenAuthorisationEndpoint(scope, idpDomain) {
+    log.log('[getAccessTokenAuthorisationEndpoint:idpDomain]', idpDomain);
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+
+      let domain = _this._resolveDomain(idpDomain);
+      let message;
+
+      message = {
+        type: 'execute', to: domain, from: _this._idmURL, body: { resource: 'identity', method: 'getAccessTokenAuthorisationEndpoint', params: { resources: scope } }
+      };
+      try {
+        _this._messageBus.postMessage(message, (res) => {
+          let result = res.body.value;
+          resolve(result);
+        });
+      } catch (err) {
+        reject('In sendRefreshMessage on postMessage error: ' + err);
+      }
+    });
+  }
+
   sendGenerateMessage(contents, origin, usernameHint, idpDomain) {
     log.log('[sendGenerateMessage:contents]', contents);
     log.log('[sendGenerateMessage:origin]', origin);
@@ -1068,6 +1114,51 @@ class IdentityModule {
         let usernameHint = msg.body.params.usernameHint;
         let idpDomain = msg.body.params.idpDomain;
         _this.sendGenerateMessage(contents, origin, usernameHint, idpDomain).then((returnedValue) => {
+          let value = { type: 'execute', value: returnedValue, code: 200 };
+          let replyMsg = { id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value };
+          try {
+            _this._messageBus.postMessage(replyMsg);
+          } catch (err) {
+            log.error('On addGUIListeners from if sendGenerateMessage method postMessage error: ' + err);
+          }
+
+        });
+        return;
+      } else if (funcName === 'getAccessTokenAuthorisationEndpoint') {
+        let scope = msg.body.params.scope;
+        let idpDomain = msg.body.params.idpDomain;
+        _this.getAccessTokenAuthorisationEndpoint(scope, idpDomain).then((returnedValue) => {
+          let value = { type: 'execute', value: returnedValue, code: 200 };
+          let replyMsg = { id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value };
+          try {
+            _this._messageBus.postMessage(replyMsg);
+          } catch (err) {
+            log.error('On addGUIListeners from if sendGenerateMessage method postMessage error: ' + err);
+          }
+
+        });
+        return;
+      } else if (funcName === 'addAccessToken') {
+        let accessToken = msg.body.params;
+
+        _this.identities.addAccessToken(accessToken).then((returnedValue) => {
+          let value = { type: 'execute', value: returnedValue, code: 200 };
+          let replyMsg = { id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value };
+          try {
+            _this._messageBus.postMessage(replyMsg);
+          } catch (err) {
+            log.error('On addGUIListeners from if storeIdentity method postMessage error: ' + err);
+          }
+
+        });
+        return;
+      } else if (funcName === 'getAccessToken') {
+
+        let domain = msg.body.params.idpDomain;
+        let resources = msg.body.params.resources;
+        let login = msg.body.params.login;
+
+        _this.getAccessToken(domain, resources, login).then((returnedValue) => {
           let value = { type: 'execute', value: returnedValue, code: 200 };
           let replyMsg = { id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value };
           try {
