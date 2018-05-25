@@ -149,9 +149,8 @@ class Identities {
 
     return new Promise((resolve, reject) => {
       if (_this._isValid(assertion)) {
-
+        assertion.userProfile.guid = _this._guid;
         let userUrl = assertion.userProfile.userURL;
-
         if (!_this.identities[userUrl]) _this._identities[userUrl] = assertion;
         else _this.identities[userUrl] = assertion;
 
