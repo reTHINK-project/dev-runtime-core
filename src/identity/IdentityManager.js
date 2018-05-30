@@ -3,6 +3,7 @@
 *
 */
 import * as logger from 'loglevel';
+import Identities from './Identities';
 let log = logger.getLogger('IdentityManager');
 
 class IdentityManager {
@@ -12,6 +13,14 @@ class IdentityManager {
 
     _this._idm = idm;
 
+  }
+
+  reset() {
+    console.log('IM reset');
+
+    // this._idm.identities.reset();
+    this._idm.identities = new Identities(this._idm.identities._type, this._idm.identities._storageManager);
+    console.log(this._idm.identities);
   }
 
   _isToSetID(message) {

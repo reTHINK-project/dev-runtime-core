@@ -447,7 +447,6 @@ class Loader {
 
             // step 14 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
             return this._runtimeFactory.createSandbox(stubCapabilities).then((sandbox) => {
-
               sandbox.addListener('*', (msg) => {
                 this.messageBus.postMessage(msg);
               });

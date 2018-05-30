@@ -2,7 +2,7 @@
 import * as logger from 'loglevel';
 let log = logger.getLogger('DataObjectsStorage');
 
-import { assign, deepClone } from '../utils/utils';
+import { assign, deepClone, divideURL } from '../utils/utils';
 
 class DataObjectsStorage {
 
@@ -313,9 +313,9 @@ class DataObjectsStorage {
         let result = [];
         let hasSubscription = this._hasSubscription(storedDataObjects[type], msg.from);
         let isOwner = this._searchOwner(storedDataObjects[type], msg.from);
-
+        let isToProtoStubResume = this._checkProtostubResume(storedDataObjects, msg);
         log.log('[StoredDataObjects - getResourcesByCriteria]:', storedDataObjects, msg, hasSubscription, isOwner);
-        if (msg.hasOwnProperty('from') && hasSubscription || isOwner) {
+        if (msg.hasOwnProperty('from') && hasSubscription || isOwner || isToProtoStubResume) {
           let resource;
 
           if (isOwner) {
@@ -345,6 +345,21 @@ class DataObjectsStorage {
           // you can pass as arrays as you want.. it will be merged in on place
           // removed duplicates;
           result = this._intersection(resource, identityFoundData, schemaFoundData, dataFound, metadataFound);
+
+          if (result.length == 0 && isToProtoStubResume && type == 'observers' && msg.from.split('protostub').length > 0) {
+            let storedObservers = storedDataObjects[type];
+            let fromDomain = divideURL(msg.from).domain;
+            Object.keys(storedObservers).filter((objectURL) => {
+              let subscriptions = storedObservers[objectURL].subscriptions;
+              let hasSubscription = false;
+              subscriptions.forEach(function(subscription) {
+                let subscriptionDomain = divideURL(subscription).domain;
+                if (subscriptionDomain == fromDomain) {
+                  result.push(objectURL);
+                }
+              });
+            })
+          }
         } else {
           return resolve(null);
         }
@@ -480,6 +495,44 @@ class DataObjectsStorage {
     return Object.keys(storedData).filter((objectURL) => {
       return storedData[objectURL].reporter === from;
     }).length > 0 ? true : false;
+  }
+
+  /**
+   * @private
+   * @todo documentation
+   */
+  _checkProtostubResume(storedDataObjects, msg) {
+
+    if (!storedDataObjects) return false;
+
+    if (msg.hasOwnProperty('body') && msg.body.hasOwnProperty('value') && msg.body.value.hasOwnProperty('reporter')) {
+      let reporter = msg.body.value.reporter;
+      if (storedDataObjects.hasOwnProperty('reporters')) {
+        let reportersStored = storedDataObjects.reporters;
+        return Object.keys(reportersStored).filter((objectURL) => {
+          return reportersStored[objectURL].reporter === reporter;
+        }).length > 0 ? true : false;
+      } else {
+        return false;
+      }
+    } else if (storedDataObjects.hasOwnProperty('observers')) {
+      let storedObservers = storedDataObjects.observers;
+      let fromDomain = divideURL(msg.from).domain;
+
+      return Object.keys(storedObservers).filter((objectURL) => {
+        let subscriptions = storedObservers[objectURL].subscriptions;
+        let hasSubscription = false;
+        subscriptions.forEach(function(subscription) {
+          let subscriptionDomain = divideURL(subscription).domain;
+          if (subscriptionDomain == fromDomain) {
+            hasSubscription = true;
+          }
+        });
+        if (hasSubscription) {
+          return true;
+        }
+      }).length > 0 ? true : false;
+    }
   }
 
   /**
