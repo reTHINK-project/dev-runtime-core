@@ -38,6 +38,7 @@ let userURL = undefined;
 let cn = undefined;
 let loginUrl = undefined;
 let assertionVal = undefined;
+let idps = undefined;
 
 
 describe('Identity Module tests', function() {
