@@ -212,6 +212,17 @@ describe('CryptoManager tests', function() {
 
     cryptoManager = new CryptoManager();
 
+    cryptoManager.init(
+      runtimeURL,
+      runtimeCapabilities,
+      storageManager,
+      registryPopulate,
+      coreDiscoveryPopulate,
+      dataObjectsStorage,
+      identityModule,
+      runtimeFactory.createRuntimeCatalogue()
+    );
+
     let dataObjectsStorage = new DataObjectsStorage(storageManager, {});
 
     identityModule = new IdentityModule(
@@ -226,17 +237,6 @@ describe('CryptoManager tests', function() {
     identityModule.registry = registryPopulate;
     identityModule.coreDiscovery = coreDiscovery;
 
-    cryptoManager.init(
-      runtimeURL,
-      runtimeCapabilities,
-      storageManager,
-      registryPopulate,
-      coreDiscoveryPopulate,
-      dataObjectsStorage,
-      identityModule,
-      runtimeFactory.createRuntimeCatalogue()
-    );
-
     let runtimeCoreCtx = new RuntimeCoreCtx(
       runtimeURL,
       identityModule,
@@ -247,7 +247,7 @@ describe('CryptoManager tests', function() {
     policyEngine = new PEP(runtimeCoreCtx);
   });
 
-  it.skip('test encryptDataObject/decryptDataObject', function(done) {
+  it('test encryptDataObject/decryptDataObject', function(done) {
     let sender = 'comm://localhost/5f8d87fd-c56b-47fc-ad47-28d55f01e23a';
     let sessionKey = crypto.generateRandom();
     let dataObjectSessionKeys = {};
@@ -274,7 +274,7 @@ describe('CryptoManager tests', function() {
       });
   });
 
-  it.skip('test _filterMessageToHash', function() {
+  it('test _filterMessageToHash', function() {
     let message = messageToBeHashedPopulate;
     let decryptedValue = 'decryptedValue';
     let identity = hyperURL1;
@@ -297,7 +297,7 @@ describe('CryptoManager tests', function() {
     assert(valueVerificationResult, 'Received message is not the expected');
   });
 
-  it.skip('test _newChatCrypto', function(done) {
+  it('test _newChatCrypto', function(done) {
     let message = messageForNewChatCrypto;
     let receiver = false;
 
@@ -316,7 +316,7 @@ describe('CryptoManager tests', function() {
   });
 
 
-  it.skip('test _sendReporterSessionKey', function(done) {
+  it('test _sendReporterSessionKey', function(done) {
     let message = {
       from: hyperURL1, to: hyperURL2
     };
@@ -348,7 +348,7 @@ describe('CryptoManager tests', function() {
 
 
   //test isFromHyperty to isToHyperty communication -> handshake + update //TODO incomplete cases
-  it.skip('test encryptMessage - startHandShake and update', function(done) {
+  it('test encryptMessage - startHandShake and update', function(done) {
     let chatKeys = chatKeysPopulate;
     let helloMessage = messageForNewChatCrypto;
     let keyPair = {
@@ -392,7 +392,7 @@ describe('CryptoManager tests', function() {
   });
 
 
-  it.skip('test _doHandShakePhase - startHandShake', function(done) {
+  it('test _doHandShakePhase - startHandShake', function(done) {
     let message = messageForNewChatCrypto;
     message.body.handshakePhase = 'startHandShake';
     let chatKeys = chatKeysPopulate;
@@ -406,7 +406,7 @@ describe('CryptoManager tests', function() {
   });
 
 
-  it.skip('test _doHandShakePhase - senderHello', function(done) {
+  it('test _doHandShakePhase - senderHello', function(done) {
     let message = senderHelloMessagePopulate;
     let chatKeys = chatKeysPopulate;
     cryptoManager.default._doHandShakePhase(message, chatKeys).then(resultMessage => {
@@ -418,7 +418,7 @@ describe('CryptoManager tests', function() {
     }).then(function() { done(); });
   });
 
-  it.skip('test _doHandShakePhase - receiverHello', function(done) {
+  it('test _doHandShakePhase - receiverHello', function(done) {
     let message = receiverHelloMessagePopulate;
 
     //let cloneOfA = JSON.parse(JSON.stringify(object));
@@ -436,7 +436,7 @@ describe('CryptoManager tests', function() {
     });
   });
 
-  it.skip('test _doHandShakePhase - senderCertificate', function(done) {
+  it('test _doHandShakePhase - senderCertificate', function(done) {
     let chatKeys = chatKeysPopulate;
     let message = senderCertificateMessagePopulate;
     let receivedValue = JSON.parse(atob(message.body.value));
@@ -488,7 +488,7 @@ describe('CryptoManager tests', function() {
     });
   });
 
-  it.skip('test _doHandShakePhase - receiverFinishedMessage', function(done) {
+  it('test _doHandShakePhase - receiverFinishedMessage', function(done) {
     let chatKeys = chatKeysPopulate;
     let message = receiverFinishedMessagePopulate;
     let receivedValue = JSON.parse(atob(message.body.value));
@@ -529,7 +529,7 @@ describe('CryptoManager tests', function() {
     });
   });
 
-  it.skip('test _doHandShakePhase - reporterSessionKey', function(done) {
+  it('test _doHandShakePhase - reporterSessionKey', function(done) {
     let chatKeys = chatKeysPopulate;
     let message = receiverAcknowledgeMessagePopulate;
     let receivedValue = JSON.parse(atob(message.body.value));
@@ -582,7 +582,7 @@ describe('CryptoManager tests', function() {
 
   });
 
-  it.skip('test doMutualAuthentication', function(done) {
+  it('test doMutualAuthentication', function(done) {
     let sender = hyperURL1;
     let receiver = hyperURL2;
 
@@ -601,7 +601,7 @@ describe('CryptoManager tests', function() {
 
 
   //test isFromHyperty to isToHyperty communication -> handshake + update //TODO incomplete cases
-  it.skip('test encryptMessage - startHandShake and update', function(done) {
+  it('test encryptMessage - startHandShake and update', function(done) {
     let chatKeys = chatKeysPopulate;
     let helloMessage = messageForNewChatCrypto;
     let keyPair = {
@@ -645,7 +645,7 @@ describe('CryptoManager tests', function() {
   });
 
 
-  it.skip('test _doHandShakePhase - startHandShake', function(done) {
+  it('test _doHandShakePhase - startHandShake', function(done) {
     let message = messageForNewChatCrypto;
     message.body.handshakePhase = 'startHandShake';
     let chatKeys = chatKeysPopulate;
@@ -659,7 +659,7 @@ describe('CryptoManager tests', function() {
   });
 
 
-  it.skip('test _doHandShakePhase - senderHello', function(done) {
+  it('test _doHandShakePhase - senderHello', function(done) {
     let message = senderHelloMessagePopulate;
     let chatKeys = chatKeysPopulate;
     cryptoManager.default._doHandShakePhase(message, chatKeys).then(resultMessage => {
@@ -671,7 +671,7 @@ describe('CryptoManager tests', function() {
     }).then(function() { done(); });
   });
 
-  it.skip('test _doHandShakePhase - receiverHello', function(done) {
+  it('test _doHandShakePhase - receiverHello', function(done) {
     let message = receiverHelloMessagePopulate;
 
     //let cloneOfA = JSON.parse(JSON.stringify(object));
@@ -689,7 +689,7 @@ describe('CryptoManager tests', function() {
     });
   });
 
-  it.skip('test _doHandShakePhase - senderCertificate', function(done) {
+  it('test _doHandShakePhase - senderCertificate', function(done) {
     let chatKeys = chatKeysPopulate;
     let message = senderCertificateMessagePopulate;
     let receivedValue = JSON.parse(atob(message.body.value));
@@ -741,7 +741,7 @@ describe('CryptoManager tests', function() {
     });
   });
 
-  it.skip('test _doHandShakePhase - receiverFinishedMessage', function(done) {
+  it('test _doHandShakePhase - receiverFinishedMessage', function(done) {
     let chatKeys = chatKeysPopulate;
     let message = receiverFinishedMessagePopulate;
     let receivedValue = JSON.parse(atob(message.body.value));
@@ -782,7 +782,7 @@ describe('CryptoManager tests', function() {
     });
   });
 
-  it.skip('test _doHandShakePhase - reporterSessionKey', function(done) {
+  it('test _doHandShakePhase - reporterSessionKey', function(done) {
     let chatKeys = chatKeysPopulate;
     let message = receiverAcknowledgeMessagePopulate;
     let receivedValue = JSON.parse(atob(message.body.value));
@@ -835,7 +835,7 @@ describe('CryptoManager tests', function() {
 
   });
 
-  it.skip('test doMutualAuthentication', function(done) {
+  it('test doMutualAuthentication', function(done) {
     let sender = hyperURL1;
     let receiver = hyperURL2;
 
