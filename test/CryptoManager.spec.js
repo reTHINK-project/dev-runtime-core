@@ -9,6 +9,7 @@ import PEP from '../src/policy/PEP';
 import RuntimeCoreCtx from '../src/policy/context/RuntimeCoreCtx';
 import Crypto from '../src/cryptoManager/Crypto';
 import CryptoManager from '../src/cryptoManager/CryptoManager';
+import Registry from '../src/registry/Registry';
 
 chai.config.truncateThreshold = 0;
 chai.use(chaiAsPromised);
@@ -38,6 +39,10 @@ let userEmail = undefined;
 let userURL = undefined;
 let loginUrl = undefined;
 let cryptoManager = undefined;
+let registry = undefined;
+let appSandbox = undefined;
+let runtimeCatalogue = undefined;
+let dataObjectsStorage = undefined;
 
 
 describe('Crypto tests', function() {
@@ -203,7 +208,13 @@ describe('CryptoManager tests', function() {
   });
 
   beforeEach('Init structures before each test', function() {
-    bus = new MessageBus(registryPopulate);
+
+    appSandbox = runtimeFactory.createAppSandbox();
+    runtimeCatalogue = runtimeFactory.createRuntimeCatalogue();
+    registry = new Registry(runtimeURL, appSandbox, identityModule, runtimeCatalogue, runtimeCapabilities, storageManager);
+    dataObjectsStorage = new DataObjectsStorage(storageManager, {});
+
+    bus = new MessageBus(registry);
     bus.pipeline = {};
     bus.pipeline.handlers = handlersPopulate;
     bus._onPostMessage = msg => {
@@ -216,15 +227,14 @@ describe('CryptoManager tests', function() {
       runtimeURL,
       runtimeCapabilities,
       storageManager,
-      registryPopulate,
+      registry,
       coreDiscoveryPopulate,
       dataObjectsStorage,
       identityModule,
-      runtimeFactory.createRuntimeCatalogue()
+      runtimeCatalogue
     );
 
-    let dataObjectsStorage = new DataObjectsStorage(storageManager, {});
-
+/*
     identityModule = new IdentityModule(
       runtimeURL,
       runtimeCapabilities,
@@ -233,18 +243,20 @@ describe('CryptoManager tests', function() {
       cryptoManager,
       runtimeFactory.createRuntimeCatalogue()
     );
+
     identityModule.messageBus = bus;
-    identityModule.registry = registryPopulate;
+    identityModule.registry = registry;
     identityModule.coreDiscovery = coreDiscovery;
 
     let runtimeCoreCtx = new RuntimeCoreCtx(
       runtimeURL,
       identityModule,
-      registryPopulate,
+      registry,
       storageManager,
       runtimeFactory.runtimeCapabilities()
     );
     policyEngine = new PEP(runtimeCoreCtx);
+    */
   });
 
   it('test encryptDataObject/decryptDataObject', function(done) {
