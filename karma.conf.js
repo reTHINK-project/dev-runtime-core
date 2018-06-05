@@ -3,7 +3,7 @@ module.exports = function(config) {
     basePath: '',
     frameworks: ['mocha', 'chai', 'sinon'],
     files: [
-      './test/*.spec.js'
+      './test/CryptoManager.spec.js'
     ],
     exclude: [
       './test/GraphConnector.spec.js',
@@ -87,6 +87,6 @@ module.exports = function(config) {
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
-    singleRun: true
+    singleRun: false
   });
 };

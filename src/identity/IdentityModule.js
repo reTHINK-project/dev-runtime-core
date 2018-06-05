@@ -296,7 +296,7 @@ class IdentityModule {
             log.log('[IdentityModule] Identity selected by hyperty.');
             return resolve(assertion);
           }, (err) => { // if it got an error then just select identity from GUI
-            // log.error('[IdentityModule] Could not select identity from hyperty.');
+            log.error('[IdentityModule] Could not select identity from hyperty:', err);
             _this.selectIdentityFromGUI().then((newAssertion) => {
               log.log('[IdentityModule] Identity selected by hyperty.');
               return resolve(newAssertion);
@@ -964,11 +964,11 @@ class IdentityModule {
   }
 
   sendGenerateMessage(contents, origin, usernameHint, idpDomain) {
-    log.log('[sendGenerateMessage:contents]', contents);
-    log.log('[sendGenerateMessage:origin]', origin);
-    log.log('[sendGenerateMessage:usernameHint]', usernameHint);
-    log.log('[sendGenerateMessage:idpDomain]', idpDomain);
-    log.log('sendGenerateMessage_hint');
+    console.log('[sendGenerateMessage:contents]', contents);
+    console.log('[sendGenerateMessage:origin]', origin);
+    console.log('[sendGenerateMessage:usernameHint]', usernameHint);
+    console.log('[sendGenerateMessage:idpDomain]', idpDomain);
+    console.log('sendGenerateMessage_hint');
     let _this = this;
 
     return new Promise((resolve, reject) => {
@@ -980,7 +980,9 @@ class IdentityModule {
         type: 'execute', to: domain, from: _this._idmURL, body: { resource: 'identity', method: 'generateAssertion', params: { contents: contents, origin: origin, usernameHint: usernameHint } }
       };
       try {
+
         _this._messageBus.postMessage(message, (res) => {
+
           let result = res.body.value;
           resolve(result);
         });
@@ -1011,11 +1013,12 @@ class IdentityModule {
     return new Promise(function(resolve, reject) {
       log.log('[IdentityModule:sendGenerateMessage:sendGenerateMessage]', usernameHint);
       _this.sendGenerateMessage(contents, origin, usernameHint, idpDomain).then((result) => {
+        console.log('generateAssertion.sendGenerateMessage result: ', JSON.stringify(result));
 
         if (result.loginUrl) {
 
           _this.callIdentityModuleFunc('openPopup', { urlreceived: result.loginUrl }).then((value) => {
-            log.log('[IdentityModule:callIdentityModuleFunc:openPopup]', usernameHint);
+            console.log('[generateAssertion.callIdentityModuleFunc:openPopup]', value);
 
             resolve(value);
           }, (err) => {
@@ -1024,6 +1027,7 @@ class IdentityModule {
         } else if (result) {
 
           _this.identities.addAssertion(result).then((value) => {
+            console.log('addAssertion', value);
             resolve(result);
           }, (err) => {
             reject(err);

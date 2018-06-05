@@ -101,7 +101,6 @@ class Crypto {
 
     return new Promise(function(resolve, reject) {
       _this._importRSAsignKey(privKey).then(function(privateKey) {
-
         _this._crypto.subtle.sign(
           {
             name: 'RSASSA-PKCS1-v1_5'
@@ -119,7 +118,7 @@ class Crypto {
             reject(err);
           });
 
-      });
+      }).catch(err => { console.log(err); });
 
     });
   }
