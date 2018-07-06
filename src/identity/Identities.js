@@ -156,6 +156,9 @@ class Identities {
 
         _this._store().then(() => {
           this._identities[userUrl].status = 'created';
+          if (_this.defaultIdentity == false) {
+            _this.defaultIdentity = userUrl;
+          }
           resolve(assertion);
         });
       } else { reject('[Identities.addAssertion] invalid IdAssertion: ', assertion); }
