@@ -757,13 +757,6 @@ class Registry {
 
     return new Promise(function(resolve, reject) {
 
-      //assuming descriptor come in this format, the service-provider-domain url is retrieved by a split instruction
-      //hyperty-catalogue://<service-provider-domain>/<catalogue-object-identifier>
-      let domainUrl = divideURL(descriptorURL).domain;
-
-      if (domainUrl.includes('catalogue')) {
-        domainUrl = domainUrl.replace('catalogue.', '');
-      }
 
       _this.idModule.getIdentityAssertion(IdpConstraint).then(function(result) {
 
@@ -794,7 +787,6 @@ class Registry {
               urlsList[hypertyCapabilities.resources + hypertyCapabilities.dataSchema + hypertyCapabilities.name] = addressURL.address;
               _this.storageManager.set('registry:HypertyURLs', 0, urlsList).then(() => {
 
-                _this.registryDomain = domainUrl;
 
                 //check whether the received sanbox e ApplicationSandbox or a normal sandbox
                 if (sandbox.type === 'app') {
@@ -807,152 +799,23 @@ class Registry {
 
                 let p2pHandler;
                 let p2pRequester;
-
+            
                 if (Object.keys(_this.p2pHandlerStub).length !== 0) {
                   p2pHandler = _this.p2pHandlerStub[_this.runtimeURL].url;
                   p2pRequester = runtimeUtils.runtimeDescriptor.p2pRequesterStub;
                 }
 
-                let runtime = _this.runtimeURL;
-                let status = 'live';
-
-                let hyperty = new HypertyInstance(_this.identifier, _this.registryURL, descriptorURL, descriptor, addressURL.address[0], userProfile, 'guid', _this.runtimeURL, 'ctx', p2pHandler, p2pRequester, hypertyCapabilities.dataSchema, hypertyCapabilities.resources);
-
+                let hyperty = new HypertyInstance(_this.identifier, _this.registryURL, descriptorURL, descriptor, 
+                  addressURL.address[0], userProfile, 'guid', _this.runtimeURL, 'ctx', p2pHandler,
+                 p2pRequester, hypertyCapabilities.dataSchema, hypertyCapabilities.resources);
+            
                 _this.hypertiesList.push(hyperty);
+            
+                /*--- start here move p2p and domain registry related features to a separated function.-------..*/
 
-                //message to register the new hyperty, within the domain registry
-                let messageValue;
-                let message;
-                let registrationExpires = _this.expiresTime;
+                _DomainRegistration(hyperty).then(()=> {});
 
-                // set a different expires value if configured in the Hyperty descriptor
-
-                if (descriptor.configuration && descriptor.configuration.expires) registrationExpires = descriptor.configuration.expires;
-
-                if (addressURL.newAddress) {
-                  // log.log('[Registry registerHyperty] registering new Hyperty URL', addressURL.address[0]);
-
-                  messageValue = {
-                    user: emailURL,
-                    descriptor: descriptorURL,
-                    url: addressURL.address[0],
-                    expires: registrationExpires,
-                    resources: hypertyCapabilities.resources,
-                    dataSchemes: hypertyCapabilities.dataSchema,
-                    runtime: runtime,
-                    status: status
-                  };
-
-                  // set a different expires if defined in the hyperty configuration
-
-                  if (p2pHandler) {
-                    messageValue.p2pHandler = p2pHandler;
-                    messageValue.p2pRequester = p2pRequester;
-                  }
-
-                  // log.log('[Registry registerHyperty] registering new Hyperty at domain registry ', messageValue);
-
-                  message = {type: 'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain, body: {value: messageValue, policy: 'policy'}};
-
-                } else {
-                  // log.log('[Registry registerHyperty] registering previously registered Hyperty URL', addressURL.address[0]);
-
-                  message = {
-                    type: 'update',
-                    to: 'domain://registry.' + _this.registryDomain,
-                    from: _this.registryURL,
-                    body: {resource: addressURL.address[0], value: { status: 'live', user: emailURL }}
-                  };
-
-                  if (p2pHandler) {
-                    message.body.value.p2pHandler = p2pHandler;
-                    message.body.value.p2pRequester = p2pRequester;
-                  }
-                }
-
-                // log.log('[Registry registerHyperty] Hyperty registration at domain registry  - ', message);
-
-                try {
-                  _this._messageBus.postMessageWithRetries(message, _this.registrationRetries, (reply) => {
-                    // log.log('[Registry registerHyperty] Hyperty registration response: ', reply);
-
-                    if (reply.body.code === 200) {
-                      let result = { url: addressURL.address[0]};
-                      if (p2pHandler) {
-                        result.p2pHandler = p2pHandler;
-                        result.p2pRequester = p2pRequester;
-                      }
-
-                      resolve(result);
-                    } else if (reply.body.code === 404) {
-                      // log.log('[Registry registerHyperty] The update was not possible. Registering new Hyperty at domain registry');
-
-                      messageValue = {
-                        user: emailURL,
-                        descriptor: descriptorURL,
-                        url: addressURL.address[0],
-                        expires: registrationExpires,
-                        resources: hypertyCapabilities.resources,
-                        dataSchemes: hypertyCapabilities.dataSchema,
-                        runtime: runtime,
-                        status: status
-                      };
-
-                      if (p2pHandler) {
-                        messageValue.p2pHandler = p2pHandler;
-                        messageValue.p2pRequester = p2pRequester;
-                      }
-
-                      message = {type: 'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain, body: {value: messageValue, policy: 'policy'}};
-
-                      try {
-                        _this._messageBus.postMessageWithRetries(message, _this.registrationRetries, (reply) =>{
-                          // log.log('[Registry registerHyperty] Hyperty registration update response: ', reply);
-
-                          if (reply.body.code === 200) {
-                            let result = { url: addressURL.address[0]};
-                            if (p2pHandler) {
-                              result.p2pHandler = p2pHandler;
-                              result.p2pRequester = p2pRequester;
-                            }
-
-                            resolve(result);
-
-                          } else {
-                            throw new Error('Failed to register an Hyperty: ' + reply);
-                          }
-
-                        });
-                      } catch (e) {
-                        log.error(e);
-                        reject(e);
-                      }
-                    } else {
-                      throw new Error('Failed to register an Hyperty: ', reply);
-                    }
-
-                  });
-
-                } catch (e) {
-                  log.error(e);
-                  reject(e);
-                }
-
-                //timer to keep the registration alive
-                // the time is defined by a little less than half of the expires time defined
-                let keepAliveTimer = setInterval(function() {
-
-                  let message = {
-                    type: 'update',
-                    from: _this.registryURL,
-                    to: 'domain://registry.' + _this.registryDomain,
-                    body: { resource: addressURL.address[0], value: {status: 'live'}, method: 'refresh' }};
-
-                  _this._messageBus.postMessage(message, (reply) => {
-                    // log.log('[Registry registerHyperty] KeepAlive Reply: ', reply);
-                  });
-                }, (((registrationExpires / 1.1) / 2) * 1000));
-
+             /*------------------- END HERE MOVE DOMAIN REGISTRY ------------------*/
               }).catch(function(reason) {
                 // log.log('[Registry registerHyperty] Error: ', reason);
                 reject(reason);
@@ -965,6 +828,153 @@ class Registry {
       });
     });
   }
+
+  /**
+  * To process registration of Hyperties at Domain level
+  */
+
+  _DomainRegistration(hyperty){
+
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+
+    //assuming descriptor come in this format, the service-provider-domain url is retrieved by a split instruction
+      //hyperty-catalogue://<service-provider-domain>/<catalogue-object-identifier>
+      let domainUrl = divideURL(hyperty.descriptorURL).domain;
+
+      if (domainUrl.includes('catalogue')) {
+        domainUrl = domainUrl.replace('catalogue.', '');
+      }
+      _this.registryDomain = domainUrl;
+
+
+    let runtime = _this.runtimeURL;
+    let status = 'live';
+
+    //message to register the new hyperty, within the domain registry
+    let message;
+    let registrationExpires = _this.expiresTime;
+
+    let messageValue = {
+      user: hyperty.userProfile.emailURL,
+      descriptor: hyperty.descriptorURL,
+      url: hyperty.addressURL.address[0],
+      expires: registrationExpires,
+      resources: hyperty.hypertyCapabilities.resources,
+      dataSchemes: hyperty.hypertyCapabilities.dataSchema,
+      runtime: runtime,
+      status: status
+    };
+
+    // set a different expires if defined in the hyperty configuration
+
+    if (hyperty.p2pHandler) {
+      messageValue.p2pHandler = hyperty.p2pHandler;
+      messageValue.p2pRequester = hyperty.p2pRequester;
+    }
+
+    // set a different expires value if configured in the Hyperty descriptor
+
+    if (hyperty.descriptor.configuration && hyperty.descriptor.configuration.expires) registrationExpires = hyperty.descriptor.configuration.expires;
+
+    if (hyperty.addressURL.newAddress) {
+      // log.log('[Registry registerHyperty] registering new Hyperty URL', addressURL.address[0]);
+
+
+      // set a different expires if defined in the hyperty configuration
+
+
+      // log.log('[Registry registerHyperty] registering new Hyperty at domain registry ', messageValue);
+
+      message = {type: 'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain, body: {value: messageValue, policy: 'policy'}};
+
+    } else {
+      // log.log('[Registry registerHyperty] registering previously registered Hyperty URL', addressURL.address[0]);
+
+      message = {
+        type: 'update',
+        to: 'domain://registry.' + _this.registryDomain,
+        from: _this.registryURL,
+        body: {resource: hyperty.addressURL.address[0], value: { status: 'live', user: hyperty.userProfile.emailURL }}
+      };
+
+      if (hyperty.p2pHandler) {
+        message.body.value.p2pHandler = hyperty.p2pHandler;
+        message.body.value.p2pRequester = hyperty.p2pRequester;
+      }
+    }
+
+    // log.log('[Registry registerHyperty] Hyperty registration at domain registry  - ', message);
+
+      try {
+        _this._messageBus.postMessageWithRetries(message, _this.registrationRetries, (reply) => {
+          // log.log('[Registry registerHyperty] Hyperty registration response: ', reply);
+
+          if (reply.body.code === 200) {
+            let result = { url: hyperty.addressURL.address[0]};
+            if (hyperty.p2pHandler) {
+              result.p2pHandler = hyperty.p2pHandler;
+              result.p2pRequester = hyperty.p2pRequester;
+            }
+
+            resolve(result);
+          } else if (reply.body.code === 404) {
+            // log.log('[Registry registerHyperty] The update was not possible. Registering new Hyperty at domain registry');
+
+            message = {type: 'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain, body: {value: messageValue, policy: 'policy'}};
+
+            try {
+              _this._messageBus.postMessageWithRetries(message, _this.registrationRetries, (reply) =>{
+                // log.log('[Registry registerHyperty] Hyperty registration update response: ', reply);
+
+                if (reply.body.code === 200) {
+                  let result = { url: addressURL.address[0]};
+                  if (hyperty.p2pHandler) {
+                    result.p2pHandler = hyperty.p2pHandler;
+                    result.p2pRequester = hyperty.p2pRequester;
+                  }
+        
+                  resolve(result);
+
+                } else {
+                  throw new Error('Failed to register an Hyperty: ' + reply);
+                }
+
+              });
+            } catch (e) {
+              log.error(e);
+              reject(e);
+            }
+          } else {
+            throw new Error('Failed to register an Hyperty to domain: ', reply);
+          }
+
+        });
+
+      } catch (e) {
+        log.error(e);
+        reject(e);
+      }
+
+      //timer to keep the registration alive
+      // the time is defined by a little less than half of the expires time defined
+      let keepAliveTimer = setInterval(function() {
+
+        let message = {
+          type: 'update',
+          from: _this.registryURL,
+          to: 'domain://registry.' + _this.registryDomain,
+          body: { resource: hyperty.addressURL.address[0], value: {status: 'live'}, method: 'refresh' }};
+
+        _this._messageBus.postMessage(message, (reply) => {
+          // log.log('[Registry registerHyperty] KeepAlive Reply: ', reply);
+        });
+      }, (((registrationExpires / 1.1) / 2) * 1000));
+    });
+
+  }
+
 
   /**
   * To unregister a previously registered Hyperty
