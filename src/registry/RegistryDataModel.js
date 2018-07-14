@@ -50,7 +50,7 @@ class RegistryDataModel {
     return _this._url;
   }
 
-  get descriptor() {
+  get descriptorURL() {
     let _this = this;
     return _this._descriptorURL;
   }

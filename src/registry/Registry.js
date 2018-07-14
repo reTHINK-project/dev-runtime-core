@@ -415,7 +415,7 @@ class Registry {
   }
 
   /**
-  *  function to unregister an hypertyInstance in the Domain Registry
+  *  function to unregister a Data Object in the Domain Registry
   *  @param   {String}      hypertyInstance   HypertyInsntance url
   *
   */
@@ -519,9 +519,8 @@ class Registry {
 
     return new Promise(function(resolve, reject) {
 
-      let dataScheme = [];
-      let filteredDataScheme = registration.url.split(':');
-      dataScheme.push(filteredDataScheme[0]);
+
+      _this.dataObjectList[objectRegistration.url] = objectRegistration;
 
       _this.storageManager.get('registry:DataObjectURLs').then((urlsList) => {
 
@@ -532,99 +531,114 @@ class Registry {
         //update the list with the new elements
         urlsList[objectRegistration.name + objectRegistration.schema + objectRegistration.resources + objectRegistration.reporter] = objectRegistration.url;
 
-        let p2pHandler;
-        let p2pRequester;
-
-        if (Object.keys(_this.p2pHandlerStub).length !== 0) {
-          p2pHandler = _this.p2pHandlerStub[_this.runtimeURL].url;
-          p2pRequester = runtimeUtils.runtimeDescriptor.p2pRequesterStub;
-        }
-
-        registration.startingTime = registration.created;
-
-        delete registration.authorise;
-        delete registration.created;
-        delete registration.mutual;
-        delete registration.resume;
-
-        if (!registration.expires) registration.expires = _this.expiresTime;
-
-        registration.dataSchemes = dataScheme;
-
-        if (p2pHandler) {
-          registration.p2pHandler = p2pHandler;
-          registration.p2pRequester = p2pRequester;
-        }
-
-        if (_this.isInterworkingProtoStub(registration.reporter)) {
-          registration.interworking = true;
-        }
-
-        registration.status = 'live';
-
-        let message;
-
-        if (!objectRegistration.resume) {
-
-          log.log('[Registry.registerDataObject] registering new data object URL', registration);
-
-          message = {type: 'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain, body: {value: registration, policy: 'policy'}};
-
-        } else {
-
-          log.log('[Registry.registerDataObject] registering previously registered data object URL', registration);
-
-          message = {
-            type: 'update',
-            to: 'domain://registry.' + _this.registryDomain,
-            from: _this.registryURL,
-            body: {resource: registration.url, value: {status: 'live'} }
-          };
-
-        }
-
-        _this.dataObjectList[registration.url] = objectRegistration;
-
         // step to obtain the list of all URL registered to updated with the new one.
         _this.storageManager.set('registry:DataObjectURLs', 0, urlsList).then(() => {
-
-          try {
-            _this._messageBus.postMessageWithRetries(message, _this._registrationRetries, (reply) => {
-              // log.log('[Registry.registerDataObject] ===> registerDataObject Reply: ', reply);
-              if (reply.body.code === 200) {
-                resolve(registration);
-              } else {
-                reject('error on register DataObject');
-              }
-            });
-          } catch (e) {
-            log.error(e);
-            reject(e);
-          }
-
-
-          //timer to keep the registration alive
-          // the time is defined by a little less than half of the expires time defined
-          let keepAliveTimer = setInterval(function() {
-
-            let message = {
-              type: 'update',
-              from: _this.registryURL,
-              to: 'domain://registry.' + _this.registryDomain,
-              body: { resource: registration.url, value: {status: 'live'}, method: 'refresh' }
-            };
-
-            _this._messageBus.postMessage(message, (reply) => {
-              // log.log('[Registry.registerDataObject] KeepAlive Reply: ', reply);
-            });
-          }, (((registration.expires / 1.1) / 2) * 1000));
+          _this._registerDataObjectAtDomain(registration,objectRegistration.resume).then(( registered ) =>{ resolve(registered) });
 
         }).catch(function(reason) {
-          log.error('[Registry registerHyperty] Error: ', reason);
+          log.error('[Registry registerDataObject] Error: ', reason);
           reject(reason);
         });
       });
     });
+  }
+
+  _registerDataObjectAtDomain(registration, resume) {
+
+    let _this = this;
+
+    let p2pHandler;
+    let p2pRequester;
+
+    return new Promise(function(resolve, reject) {
+
+      let dataScheme = [];
+      let filteredDataScheme = registration.url.split(':');
+      dataScheme.push(filteredDataScheme[0]);
+
+      if (Object.keys(_this.p2pHandlerStub).length !== 0) {
+      p2pHandler = _this.p2pHandlerStub[_this.runtimeURL].url;
+      p2pRequester = runtimeUtils.runtimeDescriptor.p2pRequesterStub;
+    }
+
+    registration.startingTime = registration.created;
+
+    delete registration.authorise;
+    delete registration.created;
+    delete registration.mutual;
+    delete registration.resume;
+
+    if (!registration.expires) registration.expires = _this.expiresTime;
+
+    registration.dataSchemes = dataScheme;
+
+    if (p2pHandler) {
+      registration.p2pHandler = p2pHandler;
+      registration.p2pRequester = p2pRequester;
+    }
+
+    if (_this.isInterworkingProtoStub(registration.reporter)) {
+      registration.interworking = true;
+    }
+
+    registration.status = 'live';
+
+
+    let message;
+
+    if (!resume) {
+
+      log.log('[Registry.registerDataObject] registering new data object URL', registration);
+
+      message = { type: 'create', from: _this.registryURL, to: 'domain://registry.' + _this.registryDomain, body: { value: registration, policy: 'policy' } };
+
+    } else {
+
+      log.log('[Registry.registerDataObject] registering previously registered data object URL', registration);
+
+      message = {
+        type: 'update',
+        to: 'domain://registry.' + _this.registryDomain,
+        from: _this.registryURL,
+        body: { resource: registration.url, value: { status: 'live' } }
+      };
+
+    }
+
+    try {
+      _this._messageBus.postMessageWithRetries(message, _this._registrationRetries, (reply) => {
+        // log.log('[Registry.registerDataObject] ===> registerDataObject Reply: ', reply);
+        if (reply.body.code === 200) {
+          resolve(registration);
+        } else {
+          reject('error on register DataObject');
+        }
+      });
+    } catch (e) {
+      log.error(e);
+      reject(e);
+    }
+
+
+    //timer to keep the registration alive
+    // the time is defined by a little less than half of the expires time defined
+    let keepAliveTimer = setInterval(function () {
+
+      let message = {
+        type: 'update',
+        from: _this.registryURL,
+        to: 'domain://registry.' + _this.registryDomain,
+        body: { resource: registration.url, value: { status: 'live' }, method: 'refresh' }
+      };
+
+      _this._messageBus.postMessage(message, (reply) => {
+        // log.log('[Registry.registerDataObject] KeepAlive Reply: ', reply);
+      });
+    }, (((registration.expires / 1.1) / 2) * 1000));
+
+  });
+
+
   }
 
   _getResourcesAndSchemes(descriptor) {
@@ -763,7 +777,6 @@ class Registry {
         let userProfile = result.userProfile;
 
         // log.log('[Registry registerHyperty] userProfile', userProfile);
-        let emailURL = userProfile.userURL;
 
         if (_this._messageBus === undefined) {
           reject('[Registry registerHyperty] MessageBus is undefined');
@@ -813,7 +826,7 @@ class Registry {
             
                 /*--- start here move p2p and domain registry related features to a separated function.-------..*/
 
-                _DomainRegistration(hyperty).then(()=> {});
+                _this._registerHypertyAtDomain(hyperty, addressURL.newAddress).then((registered)=> {resolve(registered)});
 
              /*------------------- END HERE MOVE DOMAIN REGISTRY ------------------*/
               }).catch(function(reason) {
@@ -833,7 +846,7 @@ class Registry {
   * To process registration of Hyperties at Domain level
   */
 
-  _DomainRegistration(hyperty){
+  _registerHypertyAtDomain(hyperty, resume){
 
     let _this = this;
 
@@ -857,12 +870,12 @@ class Registry {
     let registrationExpires = _this.expiresTime;
 
     let messageValue = {
-      user: hyperty.userProfile.emailURL,
+      user: hyperty.user.email,
       descriptor: hyperty.descriptorURL,
-      url: hyperty.addressURL.address[0],
+      url: hyperty.hypertyURL,
       expires: registrationExpires,
-      resources: hyperty.hypertyCapabilities.resources,
-      dataSchemes: hyperty.hypertyCapabilities.dataSchema,
+      resources: hyperty.resources,
+      dataSchemes: hyperty.dataSchemes,
       runtime: runtime,
       status: status
     };
@@ -878,7 +891,7 @@ class Registry {
 
     if (hyperty.descriptor.configuration && hyperty.descriptor.configuration.expires) registrationExpires = hyperty.descriptor.configuration.expires;
 
-    if (hyperty.addressURL.newAddress) {
+    if (!resume) {
       // log.log('[Registry registerHyperty] registering new Hyperty URL', addressURL.address[0]);
 
 
@@ -896,7 +909,7 @@ class Registry {
         type: 'update',
         to: 'domain://registry.' + _this.registryDomain,
         from: _this.registryURL,
-        body: {resource: hyperty.addressURL.address[0], value: { status: 'live', user: hyperty.userProfile.emailURL }}
+        body: {resource: hyperty.hypertyURL, value: { status: 'live', user: hyperty.user.email }}
       };
 
       if (hyperty.p2pHandler) {
@@ -912,7 +925,7 @@ class Registry {
           // log.log('[Registry registerHyperty] Hyperty registration response: ', reply);
 
           if (reply.body.code === 200) {
-            let result = { url: hyperty.addressURL.address[0]};
+            let result = { url: hyperty.hypertyURL};
             if (hyperty.p2pHandler) {
               result.p2pHandler = hyperty.p2pHandler;
               result.p2pRequester = hyperty.p2pRequester;
@@ -929,7 +942,7 @@ class Registry {
                 // log.log('[Registry registerHyperty] Hyperty registration update response: ', reply);
 
                 if (reply.body.code === 200) {
-                  let result = { url: addressURL.address[0]};
+                  let result = { url: hyperty.hypertyURL};
                   if (hyperty.p2pHandler) {
                     result.p2pHandler = hyperty.p2pHandler;
                     result.p2pRequester = hyperty.p2pRequester;
@@ -965,7 +978,7 @@ class Registry {
           type: 'update',
           from: _this.registryURL,
           to: 'domain://registry.' + _this.registryDomain,
-          body: { resource: hyperty.addressURL.address[0], value: {status: 'live'}, method: 'refresh' }};
+          body: { resource: hyperty.hypertyURL, value: {status: 'live'}, method: 'refresh' }};
 
         _this._messageBus.postMessage(message, (reply) => {
           // log.log('[Registry registerHyperty] KeepAlive Reply: ', reply);
