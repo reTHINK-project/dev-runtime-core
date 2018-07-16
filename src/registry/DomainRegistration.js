@@ -52,7 +52,7 @@ class DomainRegistration {
 
     _this.registryURL = registryURL;
     _this.runtimeURL = runtimeURL;
-    _this.registrationRetries = 5;// number of attempts to register Hyperties and DataObjects when errors occurs
+    _this._registrationRetries = 5;// number of attempts to register Hyperties and DataObjects when errors occurs
 
     // the expires in 3600, represents 1 hour
     //the expires is in seconds, unit of measure received by the domain registry
@@ -319,7 +319,7 @@ class DomainRegistration {
     // log.log('[Registry registerHyperty] Hyperty registration at domain registry  - ', message);
 
       try {
-        _this._messageBus.postMessageWithRetries(message, _this.registrationRetries, (reply) => {
+        _this._messageBus.postMessageWithRetries(message, _this._registrationRetries, (reply) => {
           // log.log('[Registry registerHyperty] Hyperty registration response: ', reply);
 
           if (reply.body.code === 200) {
@@ -336,7 +336,7 @@ class DomainRegistration {
             message = {type: 'create', from: _this.registryURL, to: 'domain://registry.' + _this._domain, body: {value: messageValue, policy: 'policy'}};
 
             try {
-              _this._messageBus.postMessageWithRetries(message, _this.registrationRetries, (reply) =>{
+              _this._messageBus.postMessageWithRetries(message, _this._registrationRetries, (reply) =>{
                 // log.log('[Registry registerHyperty] Hyperty registration update response: ', reply);
 
                 if (reply.body.code === 200) {
