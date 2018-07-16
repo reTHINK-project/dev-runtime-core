@@ -487,7 +487,14 @@ class Registry {
             registration.interworking = true;
           }
 
-          _this._domainRegistration.registerDataObject(registration,objectRegistration.resume, _this.p2pHandlerStub).then(( registered ) =>{ resolve(registered) });
+          let domainRegistration = true;
+
+          if (registration.hasOwnProperty("domain_registration"))
+          domainRegistration = registration.domain_registration;
+
+          if (domainRegistration)
+            _this._domainRegistration.registerDataObject(registration,objectRegistration.resume, _this.p2pHandlerStub).then(( registered ) =>{ resolve(registered) });
+          else resolve(registration);
 
         }).catch(function(reason) {
           log.error('[Registry registerDataObject] Error: ', reason);
@@ -683,7 +690,14 @@ class Registry {
             
                 /*--- start here move p2p and domain registry related features to a separated function.-------..*/
 
-                _this._domainRegistration.registerHyperty(hyperty, addressURL.newAddress).then((registered)=> {resolve(registered)});
+                let registrationAtdomain = true;
+
+                if ( descriptor.configuration.hasOwnProperty("domain_registration")) {
+                  registrationAtdomain = descriptor.configuration.domain_registration;
+                  }
+
+                  if (registrationAtdomain) _this._domainRegistration.registerHyperty(hyperty, addressURL.newAddress).then((registered)=> {resolve(registered)});
+                  else resolve({ url: hyperty.hypertyURL});
 
              /*------------------- END HERE MOVE DOMAIN REGISTRY ------------------*/
               }).catch(function(reason) {
