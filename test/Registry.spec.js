@@ -228,7 +228,7 @@ describe('Registry', function() {
     });
   });
 
-  describe.skip('registerHyperty(sandbox, descriptorURL, descriptor)', function() {
+  describe('registerHyperty(sandbox, descriptorURL, descriptor)', function() {
 
     it('should register an Hyperty', function(done) {
 
