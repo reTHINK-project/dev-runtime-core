@@ -803,8 +803,14 @@ class IdentityModule {
 
         log.log('[Identity.IdentityModule.getAccessToken] found  Access Token ', token);
 
-        if (timeNow >= token.expires) return resolve(_this._getNewAccessToken(domainToCheck, resources));
-        else return resolve(token);
+        if (timeNow >= token.expires) {
+          if (token.hasOwnProperty("refresh")) {
+            _this._refreshAccessToken(token).then((newToken)=>{
+            return resolve(identities.updateAccessToken(newToken));
+          });
+        } else return resolve(_this._getNewAccessToken(domainToCheck, resources));
+
+        } else return resolve(token);
       }
 
     });
@@ -887,6 +893,33 @@ class IdentityModule {
   }
 
 
+  _refreshAccessToken(outdatedToken) {
+    let _this = this;
+
+    //    let domain = _this._resolveDomain(oldIdentity.idp);
+    //    let message;
+    //    let assertion = _this.getIdentity(oldIdentity.userProfile.userURL);
+
+    log.log('IdentityModule._refreshAccessToken:outdatedToken', outdatedToken);
+
+    return new Promise((resolve, reject) => {
+      let domain = outdatedToken.domain;
+      let message;
+
+      message = { type: 'execute', to: domain, from: _this._idmURL, body: { method: 'refreshAccessToken', params: { token: outdatedToken } } };
+      try {
+        _this._messageBus.postMessage(message, (res) => {
+          let result = res.body.value;
+          resolve(result);
+        });
+      } catch (err) {
+        reject('In IdentityModule._refreshAccessToken on postMessage error: ' + err);
+      }
+
+    });
+
+  }
+
   sendRefreshMessage(oldIdentity) {
     let _this = this;
 
@@ -935,7 +968,7 @@ class IdentityModule {
           resolve(result);
         });
       } catch (err) {
-        reject('In sendRefreshMessage on postMessage error: ' + err);
+        reject('IdentityModule.In getAccessToken: ' + err);
       }
     });
   }
@@ -958,7 +991,7 @@ class IdentityModule {
           resolve(result);
         });
       } catch (err) {
-        reject('In sendRefreshMessage on postMessage error: ' + err);
+        reject('In getAccessTokenAuthorisationEndpoint: ' + err);
       }
     });
   }
@@ -985,7 +1018,7 @@ class IdentityModule {
           resolve(result);
         });
       } catch (err) {
-        reject('In sendRefreshMessage on postMessage error: ' + err);
+        reject('In sendGenerateMessage: ' + err);
       }
     });
   }
