@@ -228,7 +228,7 @@ describe('Registry', function() {
     });
   });
 
-  describe('registerHyperty(sandbox, descriptorURL, descriptor)', function() {
+  describe.skip('registerHyperty(sandbox, descriptorURL, descriptor)', function() {
 
     it('should register an Hyperty', function(done) {
 
@@ -341,14 +341,14 @@ describe('Registry', function() {
     });
   });
 
-  describe('getHypertyOwner(hypertyURL)', function() {
+  describe.skip('getHypertyOwner(hypertyURL)', function() {
     it('should return the user associated to the hyperty URL', function() {
       let url = 'hyperty://ua.pt/1';
       expect(registry.getHypertyOwner(url)).to.be.eql('user://gmail.com/openidtest10');
     });
   });
 
-  describe('getHypertyName(hypertyURL)', function() {
+  describe.skip('getHypertyName(hypertyURL)', function() {
     it('should return the hyperty Name from a given hypertyURL', function() {
       let url = 'hyperty://ua.pt/1';
 
@@ -385,7 +385,7 @@ describe('Registry', function() {
     });
   });
 
-  describe('checkRegisteredURLs(info)', function() {
+  describe.skip('checkRegisteredURLs(info)', function() {
 
     it('should return a previously registered Hyperty URL', function(done) {
 
@@ -502,7 +502,7 @@ describe('Registry', function() {
     });
   });
 
-  describe('unregisterHyperty(url)', function() {
+  describe.skip('unregisterHyperty(url)', function() {
     it('should unregister an Hyperty', function(done) {
       let url = 'hyperty://ua.pt/1';
 
