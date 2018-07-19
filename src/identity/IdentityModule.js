@@ -804,9 +804,10 @@ class IdentityModule {
         log.log('[Identity.IdentityModule.getAccessToken] found  Access Token ', token);
 
         if (timeNow >= token.expires) {
+//        if (true) {
           if (token.hasOwnProperty("refresh")) {
             _this._refreshAccessToken(token).then((newToken)=>{
-            return resolve(identities.updateAccessToken(newToken));
+            return resolve(_this.identities.updateAccessToken(newToken));
           });
         } else return resolve(_this._getNewAccessToken(domainToCheck, resources));
 
