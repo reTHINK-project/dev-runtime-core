@@ -26,7 +26,7 @@ import * as logger from 'loglevel';
 let log = logger.getLogger('SyncherManager');
 
 import { divideURL, deepClone } from '../utils/utils';
-import { schemaValidation } from '../utils/schemaValidation';
+//import { schemaValidation } from '../utils/schemaValidation';
 
 import AddressAllocation from '../allocation/AddressAllocation';
 import ReporterObject from './ReporterObject';
@@ -212,7 +212,7 @@ class SyncherManager {
 
       // Do schema validation
       // TODO: check if is need to handle with the result of validation
-      schemaValidation(scheme, descriptor, msg.body.value);
+//      schemaValidation(scheme, descriptor, msg.body.value);
 
       let objectInfo = {
         name: msg.body.value.name,
@@ -359,7 +359,7 @@ class SyncherManager {
 
         // Do schema validation
         // TODO: check if is need to handle with the result of validation
-        schemaValidation(scheme, descriptor, initialData);
+//        schemaValidation(scheme, descriptor, initialData);
 
         let objectRegistration = deepClone(msg.body.value);
         objectRegistration.url = storedObject.url;

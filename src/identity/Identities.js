@@ -233,6 +233,26 @@ class Identities {
 
   }
 
+  updateAccessToken(accessToken) {
+    let _this = this;
+    log.info('[Identities.updateAccessToken] ', accessToken);
+
+    return new Promise((resolve, reject) => {
+
+      if (_this._isValidAccessToken(accessToken)) {
+
+        _this._accessTokens[accessToken.domain].expires = accessToken.expires;
+        _this._accessTokens[accessToken.domain].accessToken = accessToken.accessToken;
+
+        _this._storeAccessTokens().then(() => {
+          _this._accessTokens[accessToken.domain].status = 'created';
+          resolve(accessToken);
+        });
+      } else { reject('[Identities.updateAccessToken] invalid AccessToken: ', accessToken); }
+    });
+
+  }
+
   addIdAssertion(identifier, assertion, idp, scope) {
     let _this = this;
 
