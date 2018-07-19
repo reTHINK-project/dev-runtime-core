@@ -692,7 +692,7 @@ class Registry {
 
                 let registrationAtdomain = true;
 
-                if ( descriptor.hasOwnProperty("configuration") && descriptor.configuration.hasOwnProperty("domain_registration")) {
+                if ( descriptor.hasOwnProperty("_configuration") && descriptor.configuration.hasOwnProperty("domain_registration")) {
                   registrationAtdomain = descriptor.configuration.domain_registration;
                   }
 
