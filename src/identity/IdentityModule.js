@@ -904,7 +904,8 @@ class IdentityModule {
     log.log('IdentityModule._refreshAccessToken:outdatedToken', outdatedToken);
 
     return new Promise((resolve, reject) => {
-      let domain = outdatedToken.domain;
+
+      let domain = _this._resolveDomain(outdatedToken.domain);
       let message;
 
       message = { type: 'execute', to: domain, from: _this._idmURL, body: { method: 'refreshAccessToken', params: { token: outdatedToken } } };
