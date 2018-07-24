@@ -23,6 +23,7 @@
 import SandboxRegistry from '../sandbox/SandboxRegistry';
 import MiniBus from '../bus/MiniBus';
 
+
 export let SandboxType = {APP: 'app', NORMAL: 'normal', WINDOW: 'window'};
 
 /**
@@ -38,6 +39,7 @@ class Sandbox extends MiniBus {
     let _this = this;
 
     if (capabilities)      { _this.capabilities = capabilities; }
+
 
   }
 
