@@ -457,6 +457,39 @@ class RuntimeUA {
 
   }
 
+  /**
+   * Used to reset the runtime by deleting all data from the storage manager;
+   * @return {Promise<Boolean>} result of the reset method, with true or false to the operation success;
+   */
+  reset() {
+    console.log('RuntimeUA.Runtime core reset: ');
+
+    let reseting = [];
+
+    //TODO: delegate db reset operation to each component
+
+    reseting.push(this.storages.capabilities.delete('capabilities'));
+    reseting.push(this.storages.cryptoManager.delete('userAsymmetricKey'));
+    reseting.push(this.storages.hypertyResources.delete('hypertyResources'));
+    reseting.push(this.storages.identity.delete('accessTokens'));
+    reseting.push(this.storages.registry.delete('registry:DataObjectURLs'));
+    reseting.push(this.storages.runtime.delete('p2pHandler:URL'));
+    reseting.push(this.storages.runtimeCatalogue.delete('runtimeCatalogue'));
+    reseting.push(this.storages.subscriptions.delete('subscriptions'));
+    reseting.push(this.storages.syncherManager.delete('syncherManager:ObjectURLs'));
+
+    return Promise.all(reseting).then((result)=> {
+
+        log.info('All DBs were reset with Success:', result);
+        resolve(true);
+      }).catch(function(reason) {
+        log.error('Failed to reset all DBs', reason);
+        reject(false);
+      });
+
+
+  }
+
 }
 
 export default RuntimeUA;
