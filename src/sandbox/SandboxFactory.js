@@ -20,9 +20,28 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 **/
-import Sandbox from './sandbox/Sandbox';
-import {SandboxType} from './sandbox/Sandbox';
-import SandboxRegistry from './sandbox/SandboxRegistry';
-import SandboxFactory from './sandbox/SandboxFactory';
+import {Syncher} from 'service-framework/dist/Syncher';
 
-export {Sandbox, SandboxType, SandboxRegistry, SandboxFactory};
+/**
+ * Internal component to instantiate framework functionalities.
+ */
+class SandboxFactory {
+  /* private
+  _components: <url: instance>
+  */
+
+  constructor(bus) {
+    let _this = this;
+    _this._bus = bus;  
+  }
+
+  createSyncher(owner, config) { 
+    let _this = this;
+    return new Syncher(owner, _this._bus, config);
+   }
+
+
+}
+
+
+export default SandboxFactory;
