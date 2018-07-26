@@ -54,7 +54,7 @@ a.setLevel(3);
 b.setLevel(3);
 
 // MessageBus
-c.setLevel(0);
+c.setLevel(3);
 
 // CoreDiscovery
 d.setLevel(5);
@@ -66,7 +66,7 @@ e.setLevel(5);
 f.setLevel(3);
 
 // IdentityModule
-g.setLevel(0);
+g.setLevel(3);
 
 // PEP
 h.setLevel(3);
@@ -78,7 +78,7 @@ i.setLevel(3);
 j.setLevel(3);
 
 // RuntimeUA
-k.setLevel(3);
+k.setLevel(0);
 
 // Loader
 l.setLevel(3);

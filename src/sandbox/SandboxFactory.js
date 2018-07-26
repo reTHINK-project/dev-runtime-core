@@ -35,9 +35,9 @@ class SandboxFactory {
     _this._bus = bus;  
   }
 
-  createSyncher(owner, config) { 
+  createSyncher(owner, bus, config) { 
     let _this = this;
-    return new Syncher(owner, _this._bus, config);
+    return new Syncher(owner, bus, config);
    }
 
 
