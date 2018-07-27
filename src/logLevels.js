@@ -96,19 +96,19 @@ o.setLevel(3);
 p.setLevel(3);
 
 // ObserverObject
-q.setLevel(3);
+q.setLevel(0);
 
 // ReporterObject
-r.setLevel(3);
+r.setLevel(0);
 
 // SynSubscription
 s.setLevel(3);
 
 // SyncherManager
-t.setLevel(3);
+t.setLevel(0);
 
 // IdentityManager
-u.setLevel(0);
+u.setLevel(3);
 
 // CryptoManager
 v.setLevel(3);
