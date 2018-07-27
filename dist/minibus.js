@@ -1,5 +1,5 @@
 // version: 0.12.0
-// date: Wed Jul 25 2018 16:51:31 GMT+0100 (WEST)
+// date: Fri Jul 27 2018 14:40:15 GMT+0100 (Western European Summer Time)
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -26,7 +26,7 @@
 
 
 // version: 0.12.0
-// date: Wed Jul 25 2018 16:51:31 GMT+0100 (WEST)
+// date: Fri Jul 27 2018 14:40:15 GMT+0100 (Western European Summer Time)
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -675,7 +675,7 @@ function(t,e,n){"use strict";function _interopRequireDefault(t){return t&&t.__es
    _responseTimeOut: number
   _responseCallbacks: <url+id: (msg) => void>
    */
-function Bus(){(0,u.default)(this,Bus);var t=this;t._msgId=0,t._subscriptions={},t._responseTimeOut=15e3,//default to 3s
+function Bus(){(0,u.default)(this,Bus);var t=this;t._msgId=0,t._subscriptions={},t._responseTimeOut=3e4,//default to 3s
 t._responseCallbacks={},t._registerExternalListener()}/**
   * Register listener to receive message when "msg.to === url".
   * Special url "*" for default listener is accepted to intercept all messages.
