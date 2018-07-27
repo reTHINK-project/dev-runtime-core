@@ -377,11 +377,6 @@ class SyncherManager {
         // TODO: check if is need to handle with the result of validation
         //        schemaValidation(scheme, descriptor, initialData);
 
-        let objectRegistration = deepClone(msg.body.value);
-        objectRegistration.url = storedObject.url;
-        objectRegistration.expires = storedObject.expires;
-
-        delete objectRegistration.data;
 
         //all OK -> create reporter and register listeners
         let reporter;
@@ -396,30 +391,9 @@ class SyncherManager {
 
         if (domainRegistration) {
           reporter.forwardSubscribe([storedObject.url]).then(() => {
-            reporter.addChildrens(childrens).then(() => {
-
-              reporter.resumeSubscriptions(storedObject.subscriptions);
-
-              _this._reporters[resource] = reporter;
-
-              log.info('[SyncherManager - resume create] - resolved resumed: ', storedObject);
-
-              return _this._decryptChildrens(storedObject, childrens);
-            }).then((decryptedObject) => {
-
-              // log.log('result of previous promise');
-              resolve(decryptedObject);
-            }).catch((reason) => {
-              log.error('[SyncherManager - resume create] - fail on addChildrens: ', reason);
-              resolve(false);
-            });
-          });
-        }
-        log.info('[SyncherManager._resumeCreate] Register Object: ', objectRegistration);
-        _this._registry.registerDataObject(objectRegistration).then((resolve) => {
-          log.log('[SyncherManager._resumeCreate] DataObject registration successfully updated', resolve);
-
+            resolve(_this._resumeReporterSubscriptions(msg, storedObject, reporter, childrens, domainRegistration));
         });
+      } else resolve(_this._resumeReporterSubscriptions(msg, storedObject, reporter, childrens, domainRegistration));
 
         //  resolve();
       }).catch((reason) => {
@@ -427,6 +401,46 @@ class SyncherManager {
         resolve(false);
       });
     });
+  }
+
+  _resumeReporterSubscriptions(msg, storedObject, reporter, childrens, domainRegistration){
+    let _this = this;
+    let resource = storedObject.url;
+    let objectRegistration = deepClone(msg.body.value);
+    objectRegistration.url = storedObject.url;
+    objectRegistration.expires = storedObject.expires;
+    objectRegistration.domain_registration = domainRegistration;
+
+    delete objectRegistration.data;
+
+    return new Promise((resolve) => {
+
+
+    reporter.addChildrens(childrens).then(() => {
+
+      reporter.resumeSubscriptions(storedObject.subscriptions);
+
+      _this._reporters[resource] = reporter;
+
+      log.info('[SyncherManager - resume create] - resolved resumed: ', storedObject);
+
+      return _this._decryptChildrens(storedObject, childrens);
+    }).then((decryptedObject) => {
+
+      log.info('[SyncherManager._resumeCreate] Register Object: ', objectRegistration);
+      _this._registry.registerDataObject(objectRegistration).then((registered) => {
+        log.log('[SyncherManager._resumeCreate] DataObject registration successfully updated', registered);
+        resolve(decryptedObject);
+
+      });
+
+      // log.log('result of previous promise');
+    }).catch((reason) => {
+      log.error('[SyncherManager - resume create] - fail on addChildrens: ', reason);
+      resolve(false);
+    });
+  });
+
   }
 
   // to decrypt DataChildObjects if they are encrypted
