@@ -21,6 +21,10 @@
 * limitations under the License.
 **/
 import {Syncher} from 'service-framework/dist/Syncher';
+import {divideURL} from '../utils/utils';
+import IdentityManager from 'service-framework/dist/IdentityManager';
+import { Discovery } from 'service-framework/dist/Discovery';
+import Search from '../utils/Search';
 
 /**
  * Internal component to instantiate framework functionalities.
@@ -32,12 +36,32 @@ class SandboxFactory {
 
   constructor(bus) {
     let _this = this;
-    _this._bus = bus;  
+    _this._bus = bus;
+    _this._divideURL = divideURL;
+
   }
 
   createSyncher(owner, bus, config) { 
-    let _this = this;
     return new Syncher(owner, bus, config);
+   }
+
+   createIdentityManager(hypertyURL, runtimeURL, bus) { 
+    let _this = this;
+    return new IdentityManager(hypertyURL, runtimeURL, bus);
+   }
+
+   createDiscovery(hypertyURL, runtimeURL, bus) { 
+    let _this = this;
+    return new Discovery(hypertyURL, runtimeURL, bus);
+   }
+
+   createSearch(discovery, identityManager) { 
+    let _this = this;
+    return new Search(discovery, identityManager);
+   }
+
+   get divideURL(){
+     return this._divideURL;
    }
 
 
