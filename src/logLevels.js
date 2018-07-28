@@ -54,7 +54,7 @@ a.setLevel(3);
 b.setLevel(3);
 
 // MessageBus
-c.setLevel(0);
+c.setLevel(3);
 
 // CoreDiscovery
 d.setLevel(5);
@@ -66,7 +66,7 @@ e.setLevel(5);
 f.setLevel(3);
 
 // IdentityModule
-g.setLevel(0);
+g.setLevel(3);
 
 // PEP
 h.setLevel(3);
@@ -96,16 +96,16 @@ o.setLevel(3);
 p.setLevel(3);
 
 // ObserverObject
-q.setLevel(0);
+q.setLevel(3);
 
 // ReporterObject
-r.setLevel(0);
+r.setLevel(3);
 
 // SynSubscription
 s.setLevel(3);
 
 // SyncherManager
-t.setLevel(0);
+t.setLevel(3);
 
 // IdentityManager
 u.setLevel(3);
