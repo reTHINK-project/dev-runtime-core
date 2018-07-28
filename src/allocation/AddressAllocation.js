@@ -26,7 +26,7 @@ import * as logger from 'loglevel';
 let log = logger.getLogger('address-allocation');
 
 
-import {isURL} from '../utils/utils';
+import {isURL, generateGUID} from '../utils/utils';
 
 // TODO: this could not be the best way to do a Singleton but at this moment it works;
 
@@ -153,7 +153,18 @@ class AddressAllocation {
 
     return new Promise((resolve, reject) => {
 
-      let msg = {
+      let addresses = [];
+      var i;
+
+      for (i=0; i< number; i++) {
+        addresses.push(scheme+'://' + domain + '/' + generateGUID())
+      }
+
+      let result = {newAddress: true, address: addresses};
+      resolve(result);
+
+
+/*      let msg = {
         type: 'create', from: this._url, to: 'domain://msg-node.' + domain + '/address-allocation',
         body: {value: { number: number } }
       };
@@ -169,7 +180,7 @@ class AddressAllocation {
         } else {
           reject(reply.body.desc);
         }
-      });
+      });*/
 
     });
 
@@ -186,7 +197,9 @@ class AddressAllocation {
 
     return new Promise((resolve, reject) => {
 
-      let message = {
+      resolve(200);
+
+/*      let message = {
         type: 'delete', from: _this._url, to: 'domain://msg-node.' + domain + '/address-allocation',
         body: {childrenResources: addresses}
       };
@@ -197,7 +210,7 @@ class AddressAllocation {
         } else {
           reject(reply.body.desc);
         }
-      });
+      });*/
     });
 
   }
