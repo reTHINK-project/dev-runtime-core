@@ -760,14 +760,12 @@ class IdentityModule {
   * @param  {String}  url     the external url
   * @return {JSON}    token    Access token to be added to the message
   */
+   _getAccessToken(msg) {
+    let url = msg.to;
 
-  _getAccessToken(msg) {
     let _this = this;
 
-    return new Promise((resolve, reject) => {
-      let url = msg.to;
-      let token;
-
+    return new Promise((resolve) => {
       if (!msg.hasOwnProperty('body')) {
         return reject('[IdentityModule._getAccessToken] missing mandatory msg body: ', msg);
       }
@@ -778,40 +776,56 @@ class IdentityModule {
         return reject('[IdentityModule._getAccessToken] missing mandatory msg body value resources: ', msg);
       }
       let domainToCheck = divideURL(url).domain;
-
+  
       if (url.includes('protostub')) {
         domainToCheck = domainToCheck.replace(domainToCheck.split('.')[0] + '.', '');
       }
-
+  
       let resources = msg.body.value.resources;
+  
+      _this._getAccessTokenForDomain(domainToCheck, resources).then((token)=>{
+        resolve(token);
+      });
+  
+    });
+
+
+
+   }
+
+  _getAccessTokenForDomain(domainToCheck, resources) {
+    let _this = this;
+    let token;
+
+    return new Promise((resolve, reject) => {
 
       try {
         token = _this.identities.getAccessToken(domainToCheck, resources);
       } catch (e) {
-        return reject('[IdentityModule._getAccessToken] Access Token error ' + err);
+        return reject('[IdentityModule._getAccessTokenForDomain] Access Token error ' + err);
       }
 
       if (!token) {
         _this._getNewAccessToken(domainToCheck, resources).then((token) => {
-          log.log('[Identity.IdentityModule.getAccessToken] new Access Token ', token);
+          log.log('[Identity.IdentityModule._getAccessTokenForDomain] new Access Token ', token);
           return resolve(token);
-        }).catch(err => { reject('[IdentityModule._getAccessToken] on getNewAccessToken ' + err); });
+        }).catch(err => { reject('[IdentityModule._getAccessTokenForDomain] on getNewAccessToken ' + err); });
       } else if (token.status === 'in-progress') {
         return resolve(_this._inProgressAccessToken(domainToCheck, resources));
       } else {
         let timeNow = secondsSinceEpoch();
 
-        log.log('[Identity.IdentityModule.getAccessToken] found  Access Token ', token);
+        log.log('[Identity.IdentityModule._getAccessTokenForDomain] found  Access Token ', token);
 
         if (timeNow >= token.expires) {
 //        if (true) {
           if (token.hasOwnProperty("refresh")) {
-            _this._refreshAccessToken(token).then((newToken)=>{
+            _this._refreshAccessToken(deepClone(token)).then((newToken)=>{
             return resolve(_this.identities.updateAccessToken(newToken));
           });
         } else return resolve(_this._getNewAccessToken(domainToCheck, resources));
 
-        } else return resolve(token);
+        } else return resolve(deepClone(token));
       }
 
     });
@@ -1227,7 +1241,30 @@ class IdentityModule {
 
         });
         return;
-      } /*else if (funcName === 'selectIdentityForHyperty') {
+      } else if (funcName === 'refreshAccessToken') {
+        let domain = msg.body.params.domain;
+        let resources = msg.body.params.resources;
+
+        _this._getAccessTokenForDomain(domain, resources).then((token)=> {
+          let replyMsg = { 
+            id: msg.id, 
+            type: 'response', 
+            to: msg.from, 
+            from: msg.to, 
+            body: {
+              value: token.accessToken,
+              code: 200
+            } 
+          };
+          try {
+            _this._messageBus.postMessage(replyMsg);
+          } catch (err) {
+            log.error('On addGUIListeners for refreshAccessToken request: ' + err);
+          }
+
+        });
+        return;
+      }/*else if (funcName === 'selectIdentityForHyperty') {
         let origin = msg.body.params.origin;
         let idp = msg.body.params.idp;
         let idHint = msg.body.params.idHint;
