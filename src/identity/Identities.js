@@ -220,7 +220,7 @@ class Identities {
     let _this = this;
 
     return new Promise((resolve) => {
-      let userUrl = assertion.userProfile.userUrl;
+      let userUrl = assertion.userProfile.userURL;
 
       if (!_this.identities[userUrl]) { return reject('[Identities.updateAssertion] Identity not found for ', userUrl); } else {
         _this.identities[userUrl] = assertion;

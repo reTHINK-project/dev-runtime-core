@@ -946,7 +946,7 @@ class IdentityModule {
     log.log('sendRefreshMessage:oldIdentity', oldIdentity);
 
     return new Promise((resolve, reject) => {
-      let domain = _this._resolveDomain(oldIdentity.idp);
+      let domain = _this._resolveDomain(oldIdentity.idp.domain);
       let message;
       let assertion = _this.getIdentity(oldIdentity.userProfile.userURL);
 
@@ -1330,8 +1330,12 @@ class IdentityModule {
         log.log('[Identity.IdentityModule.getValidToken] time now:', timeNow);
 
         if (timeNow >= expirationDate) {
-          if (assertion.hasOwnProperty('refresh')) {
+//        if (timeNow >= 0) {
+            if (assertion.hasOwnProperty('refresh')) {
+              log.log('[Identity.IdentityModule.getValidToken] refreshing assertion: ', assertion);
+            
             _this.sendRefreshMessage(assertion).then((newAssertion) => {
+                log.log('[Identity.IdentityModule.getValidToken] refreshed assertion: ', newAssertion);
               _this.identities.updateAssertion(newAssertion).then(() => {
                 resolve(newAssertion);
               }, (err) => {
