@@ -196,6 +196,8 @@ class SyncherManager {
       domain = divideURL(_this.runtimeURL).domain;
     }
 
+    let domainRegistration = msg.body.value.hasOwnProperty('domain_registration') ? msg.body.value.domain_registration : true;
+
     // Process invitation message to observers
 
     /*if (msg.body.authorise) {
@@ -212,7 +214,7 @@ class SyncherManager {
 
       // Do schema validation
       // TODO: check if is need to handle with the result of validation
-//      schemaValidation(scheme, descriptor, msg.body.value);
+      //      schemaValidation(scheme, descriptor, msg.body.value);
 
       let objectInfo = {
         name: msg.body.value.name,
@@ -301,24 +303,37 @@ class SyncherManager {
           }
 
           //}
+          let responseMsg = {
+            id: msg.id, type: 'response', from: msg.to, to: owner,
+            body: { code: 200, resource: objectRegistration.url, childrenResources: childrens }
+          };
 
           // adding listeners to forward to reporter
 
-          reporter.forwardSubscribe([objectRegistration.url, subscriptionURL]).then(() => {
+          if (domainRegistration) {
+
+            reporter.forwardSubscribe([objectRegistration.url, subscriptionURL]).then(() => {
+              reporter.addChildrens(childrens).then(() => {
+                _this._reporters[objectRegistration.url] = reporter;
+
+
+                //FLOW-OUT: message response to Syncher -> create
+                _this._bus.postMessage(responseMsg);
+
+              });
+            });
+          } else {
             reporter.addChildrens(childrens).then(() => {
               _this._reporters[objectRegistration.url] = reporter;
 
-              let responseMsg = {
-                id: msg.id, type: 'response', from: msg.to, to: owner,
-                body: { code: 200, resource: objectRegistration.url, childrenResources: childrens }
-              };
 
               //FLOW-OUT: message response to Syncher -> create
               _this._bus.postMessage(responseMsg);
 
             });
-          });
-        }, function(error) {
+
+          }
+        }, function (error) {
           log.error(error);
         });
 
@@ -344,6 +359,7 @@ class SyncherManager {
       let owner = msg.from;
       let schema = storedObject.schema;
       let resource = storedObject.url;
+      let domainRegistration = storedObject.hasOwnProperty('domain_registration') ? storedObject.domain_registration : true;
       let initialData = storedObject.data;
 
       log.log('[SyncherManager] - resume create', msg, storedObject);
@@ -359,13 +375,8 @@ class SyncherManager {
 
         // Do schema validation
         // TODO: check if is need to handle with the result of validation
-//        schemaValidation(scheme, descriptor, initialData);
+        //        schemaValidation(scheme, descriptor, initialData);
 
-        let objectRegistration = deepClone(msg.body.value);
-        objectRegistration.url = storedObject.url;
-        objectRegistration.expires = storedObject.expires;
-
-        delete objectRegistration.data;
 
         //all OK -> create reporter and register listeners
         let reporter;
@@ -378,37 +389,58 @@ class SyncherManager {
 
         reporter.isToSaveData = storedObject.isToSaveData;
 
-        reporter.forwardSubscribe([storedObject.url]).then(() => {
-          reporter.addChildrens(childrens).then(() => {
-
-            reporter.resumeSubscriptions(storedObject.subscriptions);
-
-            _this._reporters[resource] = reporter;
-
-            log.info('[SyncherManager - resume create] - resolved resumed: ', storedObject);
-
-            return _this._decryptChildrens(storedObject, childrens);
-          }).then((decryptedObject) => {
-
-            // log.log('result of previous promise');
-            resolve(decryptedObject);
-          }).catch((reason) => {
-            log.error('[SyncherManager - resume create] - fail on addChildrens: ', reason);
-            resolve(false);
-          });
+        if (domainRegistration) {
+          reporter.forwardSubscribe([storedObject.url]).then(() => {
+            resolve(_this._resumeReporterSubscriptions(msg, storedObject, reporter, childrens, domainRegistration));
         });
-        log.info('[SyncherManager._resumeCreate] Register Object: ', objectRegistration);
-        _this._registry.registerDataObject(objectRegistration).then((resolve) => {
-          log.log('[SyncherManager._resumeCreate] DataObject registration successfully updated', resolve);
+      } else resolve(_this._resumeReporterSubscriptions(msg, storedObject, reporter, childrens, domainRegistration));
 
-        });
-
-      //  resolve();
+        //  resolve();
       }).catch((reason) => {
         log.error('[SyncherManager - resume create] - fail on getDataSchemaDescriptor: ', reason);
         resolve(false);
       });
     });
+  }
+
+  _resumeReporterSubscriptions(msg, storedObject, reporter, childrens, domainRegistration){
+    let _this = this;
+    let resource = storedObject.url;
+    let objectRegistration = deepClone(msg.body.value);
+    objectRegistration.url = storedObject.url;
+    objectRegistration.expires = storedObject.expires;
+    objectRegistration.domain_registration = domainRegistration;
+
+    delete objectRegistration.data;
+
+    return new Promise((resolve) => {
+
+
+    reporter.addChildrens(childrens).then(() => {
+
+      reporter.resumeSubscriptions(storedObject.subscriptions);
+
+      _this._reporters[resource] = reporter;
+
+      log.info('[SyncherManager - resume create] - resolved resumed: ', storedObject);
+
+      return _this._decryptChildrens(storedObject, childrens);
+    }).then((decryptedObject) => {
+
+      log.info('[SyncherManager._resumeCreate] Register Object: ', objectRegistration);
+      _this._registry.registerDataObject(objectRegistration).then((registered) => {
+        log.log('[SyncherManager._resumeCreate] DataObject registration successfully updated', registered);
+        resolve(decryptedObject);
+
+      });
+
+      // log.log('result of previous promise');
+    }).catch((reason) => {
+      log.error('[SyncherManager - resume create] - fail on addChildrens: ', reason);
+      resolve(false);
+    });
+  });
+
   }
 
   // to decrypt DataChildObjects if they are encrypted
@@ -424,7 +456,7 @@ class SyncherManager {
           resolve(storedObject);
         }
 
-        childrens.forEach((children)=>{
+        childrens.forEach((children) => {
 
           let childObjects = storedObject.childrenObjects[children];
 
@@ -432,13 +464,13 @@ class SyncherManager {
 
           let listOfDecryptedObjects = [];
 
-          Object.keys(childObjects).forEach((childId)=>{
+          Object.keys(childObjects).forEach((childId) => {
             let child = childObjects[childId];
             let owner = childId.split('#')[0];
 
             if (typeof child.value === 'string') {
 
-              log.log('[SyncherManager._decryptChildrens] createdBy ',  owner, ' object: ', child.value);
+              log.log('[SyncherManager._decryptChildrens] createdBy ', owner, ' object: ', child.value);
 
               let decrypted = cryptoManager.default.decryptDataObject(JSON.parse(child.value), storedObject.url);
 
@@ -595,7 +627,7 @@ class SyncherManager {
 
     let hypertyURL = msg.from;
     let domain = divideURL(objURL).domain;
-    let objURLSubscription = objURL + '/subscription';
+    let domainSubscription = msg.body.hasOwnProperty('domain_subscription') ? msg.body.domain_subscription : true;
 
     let childBaseURL = objURL + '/children/';
 
@@ -611,7 +643,7 @@ class SyncherManager {
 
       //children addresses
 
-      //FLOW-OUT: subscribe message to the msg-node, registering listeners on the broker
+      if (domainSubscription) {  //FLOW-OUT: subscribe message to the msg-node, registering listeners on the broker
       let nodeSubscribeMsg = {
         type: 'subscribe', from: _this._url, to: 'domain://msg-node.' + domain + '/sm',
         body: { identity: msg.body.identity, resources: subscriptions, source: hypertyURL }
@@ -622,6 +654,27 @@ class SyncherManager {
         log.log('node-subscribe-response(observer): ', reply);
         console.log('REUSETEST SyncherManager - node-subscribe-response(observer): ', reply);
         if (reply.body.code === 200) {
+          _this._newReporterSubscribe(msg, hypertyURL, objURL, childrens);
+        } else {
+          //listener rejected
+          _this._bus.postMessage({
+            id: msg.id, type: 'response', from: msg.to, to: hypertyURL,
+            body: reply.body
+          });
+        }
+      });
+    } else _this._newReporterSubscribe(msg, hypertyURL, objURL, childrens);
+
+
+    });
+
+  }
+
+  _newReporterSubscribe(msg, hypertyURL, objURL, childrens){
+
+    let _this = this;
+
+    let objURLSubscription = objURL + '/subscription';
 
           //FLOW-OUT: reply with provisional response
           _this._bus.postMessage({
@@ -632,7 +685,7 @@ class SyncherManager {
           //FLOW-OUT: subscribe message to remote ReporterObject -> _onRemoteSubscribe
           let objSubscribeMsg = {
             type: 'subscribe', from: _this._url, to: objURLSubscription,
-            body: { identity: nodeSubscribeMsg.body.identity, subscriber: hypertyURL }
+            body: { identity: msg.body.identity, subscriber: hypertyURL }
           };
 
           //TODO: For Further Study
@@ -689,7 +742,7 @@ class SyncherManager {
               metadata.subscriberHyperty = hypertyURL;
 
               if (!interworking) {
-              //_this._dataObjectsStorage.set(objURL, false, msg.body.schema, 'on', reply.body.owner, hypertyURL, childrens, userURL);
+                //_this._dataObjectsStorage.set(objURL, false, msg.body.schema, 'on', reply.body.owner, hypertyURL, childrens, userURL);
                 _this._dataObjectsStorage.set(metadata);
                 if ((metadata.hasOwnProperty('store') && metadata.store) || (metadata.hasOwnProperty('isToSaveData') && metadata.isToSaveData)) {
                   observer.isToSaveData = true;
@@ -712,19 +765,7 @@ class SyncherManager {
               this._bus.postMessage(reply);
 
             }
-          });
-
-        } else {
-          //listener rejected
-          _this._bus.postMessage({
-            id: msg.id, type: 'response', from: msg.to, to: hypertyURL,
-            body: reply.body
-          });
-        }
-      });
-
-    });
-
+          });    
   }
 
   _resumeSubscription(msg, storedObject) {
