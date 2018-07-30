@@ -54,7 +54,7 @@ a.setLevel(3);
 b.setLevel(3);
 
 // MessageBus
-c.setLevel(0);
+c.setLevel(3);
 
 // CoreDiscovery
 d.setLevel(5);
@@ -66,7 +66,7 @@ e.setLevel(5);
 f.setLevel(3);
 
 // IdentityModule
-g.setLevel(0);
+g.setLevel(3);
 
 // PEP
 h.setLevel(3);
@@ -108,7 +108,7 @@ s.setLevel(3);
 t.setLevel(3);
 
 // IdentityManager
-u.setLevel(0);
+u.setLevel(3);
 
 // CryptoManager
 v.setLevel(3);
