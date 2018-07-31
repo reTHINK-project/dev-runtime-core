@@ -1,5 +1,9 @@
 // version: 0.12.0
+<<<<<<< HEAD
 // date: Tue Jul 31 2018 13:35:41 GMT+0100 (GMT Daylight Time)
+=======
+// date: Tue Jul 31 2018 12:14:27 GMT+0100 (Western European Summer Time)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -26,7 +30,11 @@
 
 
 // version: 0.12.0
+<<<<<<< HEAD
 // date: Tue Jul 31 2018 13:35:41 GMT+0100 (GMT Daylight Time)
+=======
+// date: Tue Jul 31 2018 12:14:27 GMT+0100 (Western European Summer Time)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -53,7 +61,11 @@
 
 
 // version: 0.12.0
+<<<<<<< HEAD
 // date: Tue Jul 31 2018 09:46:00 GMT+0100 (GMT Daylight Time)
+=======
+// date: Tue Jul 31 2018 12:13:41 GMT+0100 (Western European Summer Time)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -80,6 +92,7 @@
 
 
 // version: 0.12.0
+<<<<<<< HEAD
 // date: Tue Jul 31 2018 09:46:00 GMT+0100 (GMT Daylight Time)
 // licence: 
 /**
@@ -297,6 +310,9 @@
 
 // version: 0.12.0
 // date: Tue Jul 31 2018 09:19:01 GMT+0100 (GMT Daylight Time)
+=======
+// date: Tue Jul 31 2018 12:13:41 GMT+0100 (Western European Summer Time)
+>>>>>>> develop
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
