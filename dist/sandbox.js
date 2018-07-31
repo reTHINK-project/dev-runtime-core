@@ -1,5 +1,5 @@
 // version: 0.12.0
-// date: Tue Jul 31 2018 12:14:27 GMT+0100 (Western European Summer Time)
+// date: Tue Jul 31 2018 14:02:34 GMT+0100 (GMT Daylight Time)
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -26,7 +26,7 @@
 
 
 // version: 0.12.0
-// date: Tue Jul 31 2018 12:14:27 GMT+0100 (Western European Summer Time)
+// date: Tue Jul 31 2018 14:02:34 GMT+0100 (GMT Daylight Time)
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -677,9 +677,9 @@ t.default=y,e.exports=t.default},/* 117 */
 function(e,t,n){"use strict";function _interopRequireDefault(e){return e&&e.__esModule?e:{default:e}}Object.defineProperty(t,"__esModule",{value:!0});var r=n(41),o=_interopRequireDefault(r),i=n(11),u=_interopRequireDefault(i),s=n(12),c=_interopRequireDefault(s),a=n(87),f=function(e){if(e&&e.__esModule)return e;var t={};if(null!=e)for(var n in e)Object.prototype.hasOwnProperty.call(e,n)&&(t[n]=e[n]);return t.default=e,t}(a),l=f.getLogger("Bus"),p=function(){/* private
   _msgId: number;
   _subscriptions: <url: MsgListener[]>
-   _responseTimeOut: number
+    _responseTimeOut: number
   _responseCallbacks: <url+id: (msg) => void>
-   */
+    */
 function Bus(){(0,u.default)(this,Bus);var e=this;e._msgId=0,e._subscriptions={},e._responseTimeOut=3e4,//default to 3s
 e._responseCallbacks={},e._registerExternalListener()}/**
   * Register listener to receive message when "msg.to === url".

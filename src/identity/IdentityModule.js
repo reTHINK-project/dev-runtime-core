@@ -292,31 +292,52 @@ class IdentityModule {
           let origin = identityBundle.hasOwnProperty('origin') ? identityBundle.origin : 'origin';
           let idHint = identityBundle.hasOwnProperty('idHint') ? identityBundle.idHint : '';
 
-          _this.selectIdentityForHyperty(origin, idp, idHint).then((assertion) => {
-            log.log('[IdentityModule] Identity selected by hyperty.');
-            return resolve(assertion);
-          }, (err) => { // if it got an error then just select identity from GUI
-            // log.error('[IdentityModule] Could not select identity from hyperty.');
-            _this.selectIdentityFromGUI().then((newAssertion) => {
-              log.log('[IdentityModule] Identity selected by hyperty.');
-              return resolve(newAssertion);
-            }, (err) => {
-              return reject(err);
-            });
-          });
-        } else {
+          if (_this.identities.defaultIdentity) {
+            let assertion = _this.identities.defaultIdentity;
 
-          if (_this.identities.defaultIdentity && _this.identities.defaultIdentity.expires > secondsSinceEpoch()) {
-            return resolve(_this.identities.defaultIdentity);
+            if (assertion.expires > secondsSinceEpoch()) {
+              return resolve(assertion);
+            } else if (assertion.hasOwnProperty('refresh')) {
+              log.log('[Identity.IdentityModule.getIdentityAssertion] refreshing assertion: ', assertion);
+
+              _this._refreshIdAssertion().then((newAssertion)=>{
+                log.log('[IdentityModule.getIdentityAssertion] refreshed assertion.', newAssertion);
+                return resolve(newAssertion);
+              });
+
           } else {
+            _this._getIdAssertionForDomain(origin, idp, idHint).then((assertion)=> {
+              resolve(assertion);
+            }, (error)=>{
+              reject(error);
+            });
+          } 
+        } else {
+          _this._getIdAssertionForDomain(origin, idp, idHint).then((assertion)=> {
+            resolve(assertion);
+          }, (error)=>{
+            reject(error);
+          });
+        }
+
+        } else if (_this.identities.defaultIdentity) {
+          let assertion = _this.identities.defaultIdentity;
+
+          if (assertion.expires > secondsSinceEpoch()) {
+            return resolve(assertion);
+          } else if (assertion.hasOwnProperty('refresh')) {
+            log.log('[Identity.IdentityModule.getValidToken] refreshing assertion: ', assertion);
+          
+            _this._refreshIdAssertion(assertion).then((newAssertion)=>{
+              log.log('[IdentityModule.getIdentityAssertion] refreshed assertion.', newAssertion);
+              return resolve(newAssertion);
+
+            });
+
+        } else  {
             _this.selectIdentityFromGUI().then((assertion) => {
 
               log.log('[IdentityModule] Identity selected from GUI.');
-
-              /*
-                _this.identities.defaultIdentity = assertion.userProfile.userURL;
-                return resolve(assertion);
-              }*/
 
               _this.identities.defaultIdentity = assertion.userProfile.userURL;
               return resolve(assertion);
@@ -325,6 +346,18 @@ class IdentityModule {
               return reject(err);
             });
           }
+        } else {
+          _this.selectIdentityFromGUI().then((assertion) => {
+
+            log.log('[IdentityModule] Identity selected from GUI.');
+
+            _this.identities.defaultIdentity = assertion.userProfile.userURL;
+            return resolve(assertion);
+
+          }, (err) => {
+            return reject(err);
+          });
+
         }
       }).catch(error => {
         log.error('Error on identity acquisition ', error);
@@ -358,6 +391,49 @@ class IdentityModule {
     });
   }
 
+  _getIdAssertionForDomain(origin, idp, idHint) {
+
+    let _this = this;
+
+    return new Promise((resolve, reject)=> {
+      _this.selectIdentityForHyperty(origin, idp, idHint).then((assertion) => {
+        log.log('[IdentityModule._getIdAssertionForDomain] Identity selected by hyperty.');
+        return resolve(assertion);
+      }, (err) => { // if it got an error then just select identity from GUI
+        // log.error('[IdentityModule] Could not select identity from hyperty.');
+        
+        _this.selectIdentityFromGUI().then((newAssertion) => {
+          log.log('[IdentityModule._getIdAssertionForDomain] Identity selected by hyperty.');
+          return resolve(newAssertion);
+        }, (err) => {
+          return reject(err);
+        });
+      });
+  
+    });
+
+  }
+
+  _refreshIdAssertion(assertion) {
+    let _this = this;
+
+    return new Promise((resolve, reject)=>{
+      _this.sendRefreshMessage(assertion).then((newAssertion) => {
+        log.log('[Identity.IdentityModule.getValidToken] refreshed assertion: ', newAssertion);
+      _this.identities.updateAssertion(newAssertion).then(() => {
+        resolve(newAssertion);
+      }, (err) => {
+        log.error('[IdentityModule.getValidToken] error updating the assertion ', err);
+        reject(err);
+      });
+    }, (err) => {
+      log.error('[IdentityModule.getValidToken] error refreshing the assertion ', err);
+      reject(err);
+    });    
+  
+    });
+  }
+  
 
   /**
   * Function to return all the users URLs registered within a session
