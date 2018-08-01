@@ -1,6 +1,6 @@
 {
   "name": "runtime-core",
-  "version": "0.11.1",
+  "version": "0.12.0",
   "description": "core runtime development",
   "files": [
     "dist"
@@ -38,7 +38,7 @@
   "homepage": "https://rethink-project.eu/",
   "dependencies": {
     "loglevel": "^1.5.1",
-    "service-framework": "github:rethink-project/dev-service-framework#v0.8.0"
+    "service-framework": "github:rethink-project/dev-service-framework#v0.9.0"
   },
   "devDependencies": {
     "babel-loader": "^7.1.2",
@@ -64,7 +64,7 @@
     "karma": "^1.7.1",
     "karma-chai": "^0.1.0",
     "karma-chrome-launcher": "^2.2.0",
-    "karma-coverage": "^1.1.1",
+    "karma-coverage": "^1.1.2",
     "karma-firefox-launcher": "^1.1.0",
     "karma-html-reporter": "^0.2.7",
     "karma-htmlfile-reporter": "^0.3.5",

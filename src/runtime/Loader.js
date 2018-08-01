@@ -236,6 +236,7 @@ class Loader {
           _hypertySandbox = sandbox;
 
           let numberOfAddresses = 1;
+          //debugger;
           return this._addressAllocation.create(this._registry._domain, numberOfAddresses, _hypertyDescriptor, 'hyperty', reuseURL);
         }, handleError)
         .then((addresses) => {
@@ -446,7 +447,6 @@ class Loader {
 
             // step 14 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
             return this._runtimeFactory.createSandbox(stubCapabilities).then((sandbox) => {
-
               sandbox.addListener('*', (msg) => {
                 this.messageBus.postMessage(msg);
               });

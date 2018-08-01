@@ -25,6 +25,13 @@ class Identities {
 
   }
 
+  reset() {
+    this._identities = {};
+    console.log(this);
+    this.currentIdentity = undefined;
+    this.defaultIdentity = undefined;
+  }
+
   get identities() {
     return this._identities;
   }
@@ -132,7 +139,7 @@ class Identities {
           this._identities[id].status = 'created';
           resolve();
         });
-      } else reject('[Identities.addIdentity] invalid IdAssertion');
+      } else { reject('[Identities.addIdentity] invalid IdAssertion'); }
     });
 
   }
@@ -142,17 +149,19 @@ class Identities {
 
     return new Promise((resolve, reject) => {
       if (_this._isValid(assertion)) {
-
+        assertion.userProfile.guid = _this._guid;
         let userUrl = assertion.userProfile.userURL;
-
         if (!_this.identities[userUrl]) _this._identities[userUrl] = assertion;
         else _this.identities[userUrl] = assertion;
 
         _this._store().then(() => {
           this._identities[userUrl].status = 'created';
+          if (_this.defaultIdentity == false) {
+            _this.defaultIdentity = userUrl;
+          }
           resolve(assertion);
         });
-      } else reject('[Identities.addAssertion] invalid IdAssertion: ', assertion);
+      } else { reject('[Identities.addAssertion] invalid IdAssertion: ', assertion); }
     });
 
   }
@@ -188,7 +197,7 @@ class Identities {
           _this._accessTokens[accessToken.domain].status = 'created';
           resolve(accessToken);
         });
-      } else reject('[Identities.addIdentity] invalid AccessToken: ', accessToken);
+      } else { reject('[Identities.addIdentity] invalid AccessToken: ', accessToken); }
     });
 
   }
@@ -202,12 +211,8 @@ class Identities {
   getAccessToken(domain, resources) {
     let accessToken = this._accessTokens[domain];
 
-    if (!accessToken) return undefined;
-    else if (
-      resources.every((i) => { return accessToken.resources.indexOf(i) != -1; }))
-      return this._accessTokens[domain];
-    else
-      return new Error('[Identities.getAccessToken] Not found for ', domain);
+    if (!accessToken) { return undefined; } else if (
+      resources.every((i) => { return accessToken.resources.indexOf(i) != -1; })) { return this._accessTokens[domain]; } else { return new Error('[Identities.getAccessToken] Not found for ', domain); }
 
   }
 
@@ -215,16 +220,35 @@ class Identities {
     let _this = this;
 
     return new Promise((resolve) => {
-      let userUrl = assertion.userProfile.userUrl;
+      let userUrl = assertion.userProfile.userURL;
 
-      if (!_this.identities[userUrl]) return reject('[Identities.updateAssertion] Identity not found for ', userUrl);
-      else {
+      if (!_this.identities[userUrl]) { return reject('[Identities.updateAssertion] Identity not found for ', userUrl); } else {
         _this.identities[userUrl] = assertion;
         _this._store().then(() => {
           resolve();
         });
       }
 
+    });
+
+  }
+
+  updateAccessToken(accessToken) {
+    let _this = this;
+    log.info('[Identities.updateAccessToken] ', accessToken);
+
+    return new Promise((resolve, reject) => {
+
+      if (_this._isValidAccessToken(accessToken)) {
+
+        _this._accessTokens[accessToken.domain].expires = accessToken.expires;
+        _this._accessTokens[accessToken.domain].accessToken = accessToken.accessToken;
+
+        _this._storeAccessTokens().then(() => {
+          _this._accessTokens[accessToken.domain].status = 'created';
+          resolve(accessToken);
+        });
+      } else { reject('[Identities.updateAccessToken] invalid AccessToken: ', accessToken); }
     });
 
   }

@@ -86,13 +86,13 @@ class RuntimeUA {
     if (!domain) throw new Error('You need the domain of runtime');
 
     // Configuration object with information related with servers
-    this.runtimeConfiguration = Object.assign({domain: domain}, runtimeConfiguration);
+    this.runtimeConfiguration = Object.assign({ domain: domain }, runtimeConfiguration);
     this.runtimeFactory = runtimeFactory;
 
     this.log = log;
     this.logLevels = logLevels;
 
-    if (runtimeDescriptor.p2pHandlerStub && typeof runtimeDescriptor.p2pHandlerStub  === 'string' && runtimeDescriptor.p2pHandlerStub.includes('://')) {
+    if (runtimeDescriptor.p2pHandlerStub && typeof runtimeDescriptor.p2pHandlerStub === 'string' && runtimeDescriptor.p2pHandlerStub.includes('://')) {
       this.p2p = true;
     } else {
       this.p2p = false;
@@ -156,7 +156,7 @@ class RuntimeUA {
           this.runtimeURL = results[0] ? results[0].runtimeURL : results[0];
           if (!this.runtimeURL) {
             this.runtimeURL = 'runtime://' + this.domain + '/' + generateGUID();
-            this.storages.runtime.set('runtime:URL', 1, {runtimeURL: this.runtimeURL});
+            this.storages.runtime.set('runtime:URL', 1, { runtimeURL: this.runtimeURL });
           }
 
 
@@ -172,7 +172,7 @@ class RuntimeUA {
             this.p2pHandlerURL = this.runtimeURL + '/p2phandler/' + generateGUID();
             log.info('[RuntimeUA - init] P2PHandlerURL: ', this.p2pHandlerURL);
 
-            this.storages.runtime.set('p2pHandler:URL', 1, {p2pHandlerURL: this.p2pHandlerURL});
+            this.storages.runtime.set('p2pHandler:URL', 1, { p2pHandlerURL: this.p2pHandlerURL });
           }
 
           return this._loadComponents();
@@ -435,16 +435,20 @@ class RuntimeUA {
    * Used to close all the runtime; Unregister all hyperties;
    * @return {Promise<Boolean>} result of the close method, with true or false to the operation success;
    */
-  close() {
+  close(logOut) {
+    console.log('Runtime core logout: ', logOut);
     let _this = this;
+    if (logOut === true) {
+      this.identityManager.reset();
+    }
 
     log.info('Unregister all hyperties');
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
 
-      _this.registry.unregisterAllHyperties().then(function(result) {
+      _this.registry.unregisterAllHyperties().then(function (result) {
         log.info('All the hyperties are unregisted with Success:', result);
         resolve(true);
-      }).catch(function(reason) {
+      }).catch(function (reason) {
         log.error('Failed to unregister the hyperties', reason);
         reject(false);
       });
@@ -453,6 +457,52 @@ class RuntimeUA {
 
   }
 
+  /**
+   * Used to reset the runtime by deleting all data from the storage manager;
+   * @return {Promise<Boolean>} result of the reset method, with true or false to the operation success;
+   */
+  reset() {
+    console.log('RuntimeUA.Runtime core reset: ');
+
+    let reseting = [];
+    let _this = this;
+
+    return new Promise((resolve, reject) => {
+      //TODO: delegate db reset operation to each component
+      //    this.identityManager.reset();
+
+      this.storages.identity.get(false, false, 'identities').then((identities) => {
+        let identitiesKeys = Object.keys(identities);
+
+        identitiesKeys.forEach((key) => {
+          reseting.push(this.storages.identity.delete(key, false, 'identities'));
+
+        });
+
+        reseting.push(this.storages.capabilities.delete('capabilities'));
+        reseting.push(this.storages.cryptoManager.delete('userAsymmetricKey'));
+        reseting.push(this.storages.hypertyResources.delete('hypertyResources'));
+        reseting.push(this.storages.identity.delete('accessTokens'));
+        reseting.push(this.storages.registry.delete('registry:DataObjectURLs'));
+        reseting.push(this.storages.registry.delete('registry:HypertyURLs'));
+        reseting.push(this.storages.runtime.delete('p2pHandler:URL'));
+        reseting.push(this.storages.runtime.delete('runtime:URL'));
+        //    reseting.push(this.storages.runtimeCatalogue.delete('runtimeCatalogue'));
+        reseting.push(this.storages.subscriptions.delete('subscriptions'));
+        reseting.push(this.storages.syncherManager.delete('syncherManager:ObjectURLs'));
+
+        Promise.all(reseting).then((result) => {
+
+          log.info('All DBs were reset with Success:', result);
+          resolve(true);
+        }).catch(function (reason) {
+          log.error('Failed to reset all DBs', reason);
+          resolve(false);
+        });
+      });
+    });
+
+  }
 }
 
 export default RuntimeUA;

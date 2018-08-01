@@ -11,7 +11,7 @@ describe('Sandbox', function() {
   let externalURL = 'hyperty-runtime://sandbox/external';
   let internalURL = 'hyperty-runtime://sandbox/internal';
 
-  it('deploy and undeploy', function(done) {
+  it.skip('deploy and undeploy', function(done) {
     let deploySend;
 
     let sb = new Sandbox();
