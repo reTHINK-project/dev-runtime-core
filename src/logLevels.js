@@ -66,7 +66,7 @@ e.setLevel(5);
 f.setLevel(3);
 
 // IdentityModule
-g.setLevel(0);
+g.setLevel(3);
 
 // PEP
 h.setLevel(3);
