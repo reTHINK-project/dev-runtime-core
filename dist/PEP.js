@@ -1,5 +1,5 @@
 // version: 0.12.0
-// date: Wed Aug 01 2018 09:48:10 GMT+0100 (Western European Summer Time)
+// date: Wed Aug 01 2018 14:41:21 GMT+0100 (WEST)
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
@@ -26,7 +26,7 @@
 
 
 // version: 0.12.0
-// date: Wed Aug 01 2018 09:48:10 GMT+0100 (Western European Summer Time)
+// date: Wed Aug 01 2018 14:41:21 GMT+0100 (WEST)
 // licence: 
 /**
 * Copyright 2016 PT Inovação e Sistemas SA
