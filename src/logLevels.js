@@ -108,7 +108,7 @@ s.setLevel(3);
 t.setLevel(3);
 
 // IdentityManager
-u.setLevel(0);
+u.setLevel(3);
 
 // CryptoManager
 v.setLevel(3);

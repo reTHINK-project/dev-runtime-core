@@ -41,6 +41,7 @@ function getModeConfig() {
     }
   }));
 
+
   if (process.env.MODE === 'prod' || process.env.MODE === 'light') {
 
     plugins.push(new webpack.optimize.UglifyJsPlugin({
@@ -54,7 +55,7 @@ function getModeConfig() {
       },
 
       // Eliminate commentsecma: 6,
-      comments: true,
+      comments: false,
 
       compress: {
         screw_ie8: true,
@@ -63,7 +64,7 @@ function getModeConfig() {
         dead_code: true,
 
         // remove warnings
-        warnings: true,
+        warnings: false,
 
         // Drop console statements
         drop_console: true
