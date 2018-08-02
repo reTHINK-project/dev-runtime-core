@@ -23,5 +23,6 @@
 import Sandbox from './sandbox/Sandbox';
 import {SandboxType} from './sandbox/Sandbox';
 import SandboxRegistry from './sandbox/SandboxRegistry';
+import SandboxFactory from './sandbox/SandboxFactory';
 
-export {Sandbox, SandboxType, SandboxRegistry};
+export {Sandbox, SandboxType, SandboxRegistry, SandboxFactory};
