@@ -78,7 +78,7 @@ i.setLevel(3);
 j.setLevel(3);
 
 // RuntimeUA
-k.setLevel(0);
+k.setLevel(3);
 
 // Loader
 l.setLevel(3);
