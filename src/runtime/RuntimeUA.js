@@ -287,8 +287,11 @@ class RuntimeUA {
         // Instantiate the Message Bus
         this.messageBus = new MessageBus(this.registry);
 
+        // Instanciate the SubscriptionManager;
+        this.subscriptionManager = new SubscriptionManager(this.runtimeURL, this.messageBus, this.storages.subscriptions);
+
         // Prepare the address allocation instance;
-        this.addressAllocation = new AddressAllocation(this.runtimeURL, this.messageBus, this.registry);
+        this.addressAllocation = new AddressAllocation(this.runtimeURL, this.messageBus, this.registry, this.subscriptionManager);
 
         // Instantiate the Policy Engine
         this.policyEngine = new PEP(new RuntimeCoreCtx(this.runtimeURL, this.identityModule, this.registry, this.storages.policy, this.runtimeCapabilities));
@@ -360,8 +363,6 @@ class RuntimeUA {
         //   });
         // }, 2000);
 
-        // Instanciate the SubscriptionManager;
-        this.subscriptionManager = new SubscriptionManager(this.runtimeURL, this.messageBus, this.storages.subscriptions);
 
         // this.subscriptionManager.init().then(()=>{
         //   resolve(true);

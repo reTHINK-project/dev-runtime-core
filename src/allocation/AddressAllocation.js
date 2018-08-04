@@ -46,12 +46,13 @@ class AddressAllocation {
    * @param  {URL.URL}      url - url from who is sending the message
    * @param  {MiniBus}      bus - MiniBus used for address allocation
    */
-  constructor(url, bus, registry) {
+  constructor(url, bus, registry, subscriptionManager) {
 
     if (!instance) {
       this._url = url + '/address-allocation';
       this._bus = bus;
       this._registry = registry;
+      this._subscriptionManager = subscriptionManager;
       instance = this;
     } else {
       return instance;
@@ -150,6 +151,7 @@ class AddressAllocation {
   }
 
   _allocateNewAddress(domain, scheme, number) {
+    let _this = this;
 
     return new Promise((resolve, reject) => {
 
@@ -161,7 +163,12 @@ class AddressAllocation {
       }
 
       let result = {newAddress: true, address: addresses};
-      resolve(result);
+      if (scheme === 'hyperty') {
+        _this._subscriptionManager.createSubscription(domain,addresses, _this._url).then(()=>{
+          resolve(result);
+        });
+
+      } else resolve(result);
 
 
 /*      let msg = {
