@@ -7,7 +7,8 @@ module.exports = {
     ReThinkCtx: './src/policy/ReThinkCtx.js',
     sandbox: './src/sandbox.js',
     minibus: './src/minibus.js',
-    StorageManager: './src/storage-manager/StorageManager.js'
+    StorageManager: './src/storage-manager/StorageManager.js',
+    RuntimeCatalogue: './src/runtime-catalogue/RuntimeCatalogue.js'
   },
   output: {
     path: path.join(__dirname, '..', 'dist'),
