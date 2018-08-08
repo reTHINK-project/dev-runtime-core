@@ -20,7 +20,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 **/
-import SandboxRegistry from '../sandbox/SandboxRegistry';
+import SandboxRegistry from './SandboxRegistry';
 import MiniBus from '../bus/MiniBus';
 
 
@@ -50,7 +50,7 @@ class Sandbox extends MiniBus {
    * @param  {Config} configuration Config parameters of the component
    * @return {Promise<string>} return deployed if successful, or any other string with an error
    */
-  deployComponent(componentSourceCode, componentURL, configuration, framework) {
+  deployComponent(componentSourceCode, componentURL, configuration) {
 
     let _this = this;
 
@@ -60,7 +60,7 @@ class Sandbox extends MiniBus {
       //FLOW-OUT: deploy message for the internal SandboxRegistry -> _onDeploy
       let deployMessage = {
         type: 'create', from: SandboxRegistry.ExternalDeployAddress, to: SandboxRegistry.InternalDeployAddress,
-        body: { url: componentURL, sourceCode: componentSourceCode, config: configuration, libs: framework }
+        body: { url: componentURL, sourceCode: componentSourceCode, config: configuration }
       };
 
       //send message into the sandbox internals and wait for reply

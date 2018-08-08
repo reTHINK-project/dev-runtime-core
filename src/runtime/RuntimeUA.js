@@ -26,13 +26,13 @@
 import { log as logLevels } from '../logLevels';
 
 // Log System
-import * as logger from 'loglevel';
+import * as logger from '../../../../Users/4023742/AppData/Local/Microsoft/TypeScript/2.9/node_modules/@types/loglevel';
 let log = logger.getLogger('RuntimeUA');
 
 //Main dependecies
 import Registry from '../registry/Registry';
 import IdentityModule from '../identity/IdentityModule';
-import IdentityManager from '../identity/IdentityManager';
+import IdentityHandler from '../identity/IdentityHandler';
 import PEP from '../policy/PEP';
 import MessageBus from '../bus/MessageBus';
 import { generateGUID } from '../utils/utils';
@@ -52,7 +52,7 @@ import GraphConnector from '../graphconnector/GraphConnector';
 import CoreDiscovery from '../discovery/CoreDiscovery';
 
 import DataObjectsStorage from '../store-objects/DataObjectsStorage';
-import HypertyResourcesStorage from '../hyperty-resources-storage/HypertyResourcesStorage';
+import HypertyResourcesStorage from '../hyperty-resource/HypertyResourcesStorage';
 import SyncherManager from '../syncher/SyncherManager';
 import SubscriptionManager from '../subscriptionManager/SubscriptionManager';
 import RuntimeCoreCtx from '../policy/context/RuntimeCoreCtx';
@@ -299,8 +299,8 @@ class RuntimeUA {
         // Instantiate Discovery
         this.coreDiscovery = new CoreDiscovery(this.runtimeURL, this.messageBus, this.graphConnector, this.runtimeFactory, this.registry);
 
-        // Instantiate the IdentityManager
-        this.identityManager = new IdentityManager(this.identityModule);
+        // Instantiate the identityHandler
+        this.identityHandler = new IdentityHandler(this.identityModule);
 
         // initialise the CryptoManager
         cryptoManager.init(this.runtimeURL, this.runtimeCapabilities, this.storages.cryptoManager, this._dataObjectsStorage, this.registry, this.coreDiscovery, this.identityModule, this.runtimeFactory);
@@ -308,7 +308,7 @@ class RuntimeUA {
         // Instantiate the Graph Connector
         this.graphConnector = process.env.MODE !== 'light' ? new GraphConnector(this.runtimeURL, this.messageBus, this.storageManager) : null;
 
-        this.handlers = new MsgBusHandlers(this.policyEngine, this.identityManager, cryptoManager);
+        this.handlers = new MsgBusHandlers(this.policyEngine, this.identityHandler, cryptoManager);
 
         this.messageBus.pipelineOut.handlers = [this.handlers.idmHandler, this.handlers.pepOutHandler, this.handlers.encryptHandler];
         this.messageBus.pipelineIn.handlers = [this.handlers.decryptHandler, this.handlers.pepInHandler];
@@ -440,7 +440,7 @@ class RuntimeUA {
     console.log('Runtime core logout: ', logOut);
     let _this = this;
     if (logOut === true) {
-      this.identityManager.reset();
+      this.identityHandler.reset();
     }
 
     log.info('Unregister all hyperties');
