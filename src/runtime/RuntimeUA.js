@@ -26,14 +26,14 @@
 import { log as logLevels } from '../logLevels';
 
 // Log System
-import * as logger from '../../../../Users/4023742/AppData/Local/Microsoft/TypeScript/2.9/node_modules/@types/loglevel';
+import * as logger from 'loglevel';
 let log = logger.getLogger('RuntimeUA');
 
 //Main dependecies
 import Registry from '../registry/Registry';
 import IdentityModule from '../identity/IdentityModule';
 import IdentityHandler from '../identity/IdentityHandler';
-import PEP from '../policy/PEP';
+//import PEP from '../policy/PEP';
 import MessageBus from '../bus/MessageBus';
 import { generateGUID } from '../utils/utils';
 import AddressAllocation from '../allocation/AddressAllocation';
@@ -47,7 +47,7 @@ import { runtimeConfiguration } from './runtimeConfiguration';
 import MsgBusHandlers from './MsgBusHandlers';
 import { runtimeUtils } from './runtimeUtils';
 
-import GraphConnector from '../graphconnector/GraphConnector';
+//import GraphConnector from '../graphconnector/GraphConnector';
 
 import CoreDiscovery from '../discovery/CoreDiscovery';
 
@@ -56,6 +56,7 @@ import HypertyResourcesStorage from '../hyperty-resource/HypertyResourcesStorage
 import SyncherManager from '../syncher/SyncherManager';
 import SubscriptionManager from '../subscriptionManager/SubscriptionManager';
 import RuntimeCoreCtx from '../policy/context/RuntimeCoreCtx';
+import RuntimeCatalogue from '../runtime-catalogue/RuntimeCatalogue';
 
 /**
  * Runtime User Agent Interface will process all the dependecies of the core runtime;
@@ -103,17 +104,21 @@ class RuntimeUA {
 
     this.storages = {};
 
-    if (typeof runtimeFactory.createRuntimeCatalogue === 'function') {
+/*    if (typeof runtimeFactory.createRuntimeCatalogue === 'function') {
       this.runtimeCatalogue = runtimeFactory.createRuntimeCatalogue();
     } else {
       throw new Error('Check your Runtime Factory because it needs the Runtime Catalogue implementation');
-    }
+    }*/
 
-    if (typeof runtimeFactory.persistenceManager === 'function') {
+    this.runtimeCatalogue = new RuntimeCatalogue(runtimeFactory);
+
+
+
+/*    if (typeof runtimeFactory.persistenceManager === 'function') {
       this.persistenceManager = runtimeFactory.persistenceManager();
     } else {
       throw new Error('Check your Runtime Factory because it needs the Persistence Manager implementation');
-    }
+    }*/
 
     if (typeof runtimeFactory.storageManager === 'function') {
 

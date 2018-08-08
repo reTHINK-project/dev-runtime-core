@@ -6,7 +6,8 @@ module.exports = {
     PEP: './src/policy/PEP.js',
     ReThinkCtx: './src/policy/ReThinkCtx.js',
     sandbox: './src/sandbox.js',
-    minibus: './src/minibus.js'
+    minibus: './src/minibus.js',
+    StorageManager: './src/storage-manager/StorageManager.js'
   },
   output: {
     path: path.join(__dirname, '..', 'dist'),
