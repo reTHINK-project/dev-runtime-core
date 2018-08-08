@@ -23,7 +23,7 @@
 import Syncher from '../syncher/Syncher';
 import {divideURL} from '../utils/utils';
 import IdentityManager from '../identity/IdentityManager';
-import { Discovery } from '../discovery/Discovery';
+import Discovery from '../discovery/Discovery';
 import Search from '../utils/Search';
 
 /**

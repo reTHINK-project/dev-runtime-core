@@ -25,7 +25,7 @@ import {SandboxType} from './sandbox/Sandbox';
 import SandboxRegistry from './sandbox/SandboxRegistry';
 import SandboxFactory from './sandbox/SandboxFactory';
 import Syncher from './syncher/Syncher';
-import IdentityManager from './identity/IdentityManager';
 import Discovery from './discovery/Discovery';
+import IdentityManager from './identity/IdentityManager';
 
-export {Sandbox, SandboxType, SandboxRegistry, SandboxFactory, Syncher, IdentityManager, Discovery};
+export {Sandbox, SandboxType, SandboxRegistry, SandboxFactory, Syncher, Discovery, IdentityManager};
