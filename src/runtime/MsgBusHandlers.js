@@ -2,7 +2,7 @@
  *  Class where message bus handlers are built. To be used by the RuntimeUA to initialise the runtime UA.
  */
 
-import { log as logLevels } from '../logLevels';
+//import { log as logLevels } from '../logLevels';
 
 // Log System
 import * as logger from 'loglevel';
