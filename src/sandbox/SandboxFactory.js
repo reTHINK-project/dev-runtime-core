@@ -20,7 +20,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 **/
-import {Syncher} from '../syncher/Syncher';
+import Syncher from '../syncher/Syncher';
 import {divideURL} from '../utils/utils';
 import IdentityManager from '../identity/IdentityManager';
 import { Discovery } from '../discovery/Discovery';

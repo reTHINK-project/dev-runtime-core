@@ -33,7 +33,7 @@ let log = logger.getLogger('RuntimeUA');
 import Registry from '../registry/Registry';
 import IdentityModule from '../identity/IdentityModule';
 import IdentityHandler from '../identity/IdentityHandler';
-//import PEP from '../policy/PEP';
+import PEP from '../policy/PEP';
 import MessageBus from '../bus/MessageBus';
 import { generateGUID } from '../utils/utils';
 import AddressAllocation from '../allocation/AddressAllocation';
@@ -311,7 +311,7 @@ class RuntimeUA {
         cryptoManager.init(this.runtimeURL, this.runtimeCapabilities, this.storages.cryptoManager, this._dataObjectsStorage, this.registry, this.coreDiscovery, this.identityModule, this.runtimeFactory);
 
         // Instantiate the Graph Connector
-        this.graphConnector = process.env.MODE !== 'light' ? new GraphConnector(this.runtimeURL, this.messageBus, this.storageManager) : null;
+//        this.graphConnector = process.env.MODE !== 'light' ? new GraphConnector(this.runtimeURL, this.messageBus, this.storageManager) : null;
 
         this.handlers = new MsgBusHandlers(this.policyEngine, this.identityHandler, cryptoManager);
 
