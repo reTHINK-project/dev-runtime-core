@@ -27,5 +27,6 @@ import SandboxFactory from './sandbox/SandboxFactory';
 import Syncher from './syncher/Syncher';
 import Discovery from './discovery/Discovery';
 import IdentityManager from './identity/IdentityManager';
+import ContextObserver from './contextManager/ContextObserver';
 
-export {Sandbox, SandboxType, SandboxRegistry, SandboxFactory, Syncher, Discovery, IdentityManager};
+export {Sandbox, SandboxType, SandboxRegistry, SandboxFactory, Syncher, Discovery, IdentityManager, ContextObserver};

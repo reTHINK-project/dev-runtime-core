@@ -60,6 +60,11 @@ class SandboxFactory {
     return new Search(discovery, identityManager);
    }
 
+   createContextObserver(hypertyURL, bus, config, schemes) { 
+    let _this = this;
+    return new Search(hypertyURL, bus, config, schemes, this);
+   }
+
    get divideURL(){
      return this._divideURL;
    }
