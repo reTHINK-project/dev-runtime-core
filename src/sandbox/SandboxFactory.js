@@ -25,6 +25,8 @@ import {divideURL} from '../utils/utils';
 import IdentityManager from '../identity/IdentityManager';
 import Discovery from '../discovery/Discovery';
 import Search from '../utils/Search';
+import ContextObserver from '../contextManager/ContextObserver';
+import ContextReporter from '../contextManager/ContextReporter';
 
 /**
  * Internal component to instantiate framework functionalities.
@@ -61,8 +63,12 @@ class SandboxFactory {
    }
 
    createContextObserver(hypertyURL, bus, config, schemes) { 
+    return new ContextObserver(hypertyURL, bus, config, schemes, this);
+   }
+
+   createContextReporter(hypertyURL, bus, config) { 
     let _this = this;
-    return new Search(hypertyURL, bus, config, schemes, this);
+    return new ContextReporter(hypertyURL, bus, config, this);
    }
 
    get divideURL(){
