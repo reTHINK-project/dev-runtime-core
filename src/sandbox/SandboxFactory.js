@@ -21,12 +21,14 @@
 * limitations under the License.
 **/
 import Syncher from '../syncher/Syncher';
+import NotificationHandler from '../syncher/NotificationHandler';
 import {divideURL} from '../utils/utils';
 import IdentityManager from '../identity/IdentityManager';
 import Discovery from '../discovery/Discovery';
 import Search from '../utils/Search';
 import ContextObserver from '../contextManager/ContextObserver';
 import ContextReporter from '../contextManager/ContextReporter';
+import MessageBodyIdentity from '../identity/MessageBodyIdentity';
 
 /**
  * Internal component to instantiate framework functionalities.
@@ -69,6 +71,15 @@ class SandboxFactory {
    createContextReporter(hypertyURL, bus, config) { 
     let _this = this;
     return new ContextReporter(hypertyURL, bus, config, this);
+   }
+
+   createNotificationHandler(bus) { 
+    let _this = this;
+    return new NotificationHandler(bus);
+   }
+
+   createMessageBodyIdentity(username, userURL, picture, name, locale, idp, assertion, profile) { 
+    return new MessageBodyIdentity(username, userURL, picture, name, locale, idp, assertion, profile);
    }
 
    get divideURL(){
