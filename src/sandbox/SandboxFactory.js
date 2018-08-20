@@ -25,10 +25,13 @@ import NotificationHandler from '../syncher/NotificationHandler';
 import {divideURL} from '../utils/utils';
 import IdentityManager from '../identity/IdentityManager';
 import Discovery from '../discovery/Discovery';
+import RegistrationStatus from '../discovery/RegistrationStatus';
 import Search from '../utils/Search';
 import ContextObserver from '../contextManager/ContextObserver';
 import ContextReporter from '../contextManager/ContextReporter';
 import MessageBodyIdentity from '../identity/MessageBodyIdentity';
+import ChatManager from '../chatManager/ChatManager';
+import ChatController from '../chatManager/ChatController';
 
 /**
  * Internal component to instantiate framework functionalities.
@@ -82,14 +85,22 @@ class SandboxFactory {
     return new MessageBodyIdentity(username, userURL, picture, name, locale, idp, assertion, profile);
    }
 
+   createChatManager(hypertyURL, bus, configuration, syncher) { 
+    return new ChatManager(hypertyURL, bus, configuration, syncher, this);
+   }
+
+   createChatController(syncher, discovery, domain, search, identity, manager) { 
+    return new ChatController(syncher, discovery, domain, search, identity, manager);
+   }
+
    get divideURL(){
      return this._divideURL;
    }
 
    createRegistrationStatus(observer, runtimeURL, chatUrl, bus) {
-     return new RegistrationStatus(observer, runtimeURL, chatUrl, bus);
+    return new RegistrationStatus(observer, runtimeURL, chatUrl, bus);
 
-   }
+  }
 
 
 

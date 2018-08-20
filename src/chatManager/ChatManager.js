@@ -44,7 +44,7 @@ import { UserInfo } from './UserInfo';
 */
 class ChatManager {
 
-  constructor(myUrl, bus, configuration, factory, syncher) {
+  constructor(myUrl, bus, configuration, syncher, factory) {
     if (!myUrl) throw new Error('[ChatManager.constructor] The myUrl is a needed parameter');
     if (!bus) throw new Error('[ChatManager.constructor] The MiniBus is a needed parameter');
     if (!configuration) throw new Error('[ChatManager.constructor] The configuration is a needed parameter');
