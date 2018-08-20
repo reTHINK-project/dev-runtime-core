@@ -86,6 +86,12 @@ class SandboxFactory {
      return this._divideURL;
    }
 
+   createRegistrationStatus(observer, runtimeURL, chatUrl, bus) {
+     return new RegistrationStatus(observer, runtimeURL, chatUrl, bus);
+
+   }
+
+
 
 }
 
