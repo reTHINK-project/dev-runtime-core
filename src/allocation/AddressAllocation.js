@@ -165,12 +165,15 @@ class AddressAllocation {
       let result = {newAddress: true, address: addresses};
 
       if (scheme === 'hyperty' ) {
-        let domainRouting = info._configuration.hasOwnProperty('domain_routing') ? info.configuration.domain_routing : true;
-        if (domainRouting) {
-          _this._subscriptionManager.createSubscription(domain,addresses, _this._url).then(()=>{
-            resolve(result);
-          });
+        if (info.hasOwnProperty('_configuration')) {
+          let domainRouting = info._configuration.hasOwnProperty('domain_routing') ? info.configuration.domain_routing : true;
+          if (domainRouting) {
+            _this._subscriptionManager.createSubscription(domain,addresses, _this._url).then(()=>{
+              resolve(result);
+            });
+          } else resolve(result);
         } else resolve(result);
+
 
       } else resolve(result);
 
