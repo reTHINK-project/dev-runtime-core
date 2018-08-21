@@ -113,11 +113,11 @@ class ChatManager {
 
 
       for (let url in this._reportersControllers) {
-        this._reportersControllers[url].closeEvent(event);
+        this._reportersControllers[url].close(event);
       }
 
       for (let url in this._observersControllers) {
-        this._observersControllers[url].closeEvent(event);
+        this._observersControllers[url].close(event);
       }
 
     }
@@ -292,7 +292,7 @@ class ChatManager {
       console.info('invitationURL', invitationURL);
       _this.myIdentity(identity).then((identity) => {
         myIdentity = identity;
-        return syncher.subscribe(_this._objectDescURL, invitationURL, true, false, mutual, identity);
+        return syncher.subscribe(_this._objectDescURL, invitationURL, true, false, mutual, true, identity);
 
       }).then(function(dataObjectObserver) {
         console.info('Data Object Observer: ', dataObjectObserver);
