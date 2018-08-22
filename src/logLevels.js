@@ -20,7 +20,7 @@ const q = log.getLogger('ObserverObject');
 const r = log.getLogger('ReporterObject');
 const s = log.getLogger('SynSubscription');
 const t = log.getLogger('SyncherManager');
-const u = log.getLogger('IdentityManager');
+const u = log.getLogger('IdentityHandler');
 const v = log.getLogger('CryptoManager');
 const x = log.getLogger('Pipeline');
 
@@ -107,7 +107,7 @@ s.setLevel(3);
 // SyncherManager
 t.setLevel(3);
 
-// IdentityManager
+// IdentityHandler
 u.setLevel(3);
 
 // CryptoManager

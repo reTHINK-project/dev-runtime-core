@@ -1,9 +1,9 @@
 import SandboxBrowser from './sandboxes/SandboxBrowser';
 import AppSandboxBrowser from './sandboxes/AppSandboxBrowser';
 import Request from './Request';
-import {RuntimeCatalogue} from 'service-framework/dist/RuntimeCatalogue';
-import PersistenceManager from 'service-framework/dist/PersistenceManager';
-import StorageManager from 'service-framework/dist/StorageManager';
+/*import {RuntimeCatalogue} from 'service-framework/dist/RuntimeCatalogue';
+import PersistenceManager from 'service-framework/dist/PersistenceManager';*/
+import StorageManager from '../../dist/StorageManager';
 
 import Dexie from 'dexie';
 
@@ -30,10 +30,10 @@ export const runtimeFactory = Object.create({
     return atob(b64);
   },
 
-  persistenceManager() {
+/*  persistenceManager() {
     let localStorage = window.localStorage;
     return new PersistenceManager(localStorage);
-  },
+  },*/
 
   storageManager(name, schemas) {
 
@@ -89,10 +89,10 @@ export const runtimeFactory = Object.create({
   },
 
   // TODO optimize the parameter was passed to inside the RuntimeCatalogue
-  createRuntimeCatalogue() {
+/*  createRuntimeCatalogue() {
     let _this = this;
     return new RuntimeCatalogue(_this);
-  },
+  },*/
 
   removeSandbox() {
 

@@ -8,7 +8,8 @@ module.exports = function(config) {
     exclude: [
       './test/GraphConnector.spec.js',
       './test/PolicyEngine.spec.js',
-      './test/HypertyResourceStorage.spec.js'
+      './test/HypertyResourceStorage.spec.js',
+      './test/RuntimeCatalogue.spec.js'
 
     ],
     preprocessors: {
