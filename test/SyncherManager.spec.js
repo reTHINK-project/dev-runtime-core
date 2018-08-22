@@ -8,7 +8,7 @@ import MessageBus from '../src/bus/MessageBus';
 
 
 import PEP from '../src/policy/PEP';
-import IdentityManager from '../src/identity/IdentityManager';
+import IdentityManager from '../src/identity/IdentityHandler';
 import * as cryptoManager from '../src/cryptoManager/CryptoManager';
 import RuntimeCoreCtx from '../src/policy/context/RuntimeCoreCtx';
 
@@ -174,7 +174,7 @@ describe('SyncherManager', function() {
   };
 
   let runtimeCapabilities =  runtimeFactory.runtimeCapabilities();
-
+  debugger;
   let runtimeCoreCtx = new RuntimeCoreCtx(runtimeURL, identityModule, registry, storages.policy, runtimeCapabilities);
   let policyEngine = new PEP(runtimeCoreCtx);
 

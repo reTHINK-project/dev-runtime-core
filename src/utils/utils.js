@@ -43,6 +43,7 @@ export function divideURL(url) {
   function recurse(value) {
     const regex = /([a-zA-Z-]*)(:\/\/(?:\.)?|:)([-a-zA-Z0-9@:%._+~#=]{2,256})([-a-zA-Z0-9@:%._+~#=/]*)/gi;
     const subst = '$1,$3,$4';
+    debugger;
     let parts = value.replace(regex, subst).split(',');
     return parts;
   }
