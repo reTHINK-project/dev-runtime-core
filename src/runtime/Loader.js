@@ -290,6 +290,11 @@ class Loader {
             _hypertySandbox.postMessage(msg);
           });
 
+          // Add the message bus listener to the appSandbox or hypertSandbox;
+          this.messageBus.addListener(this.runtimeURL+'/status', (msg) => {
+            _hypertySandbox.postMessage(msg);
+          });
+
           // we have completed step 20 of https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
           let hyperty = {
             runtimeHypertyURL: _hypertyURL,
