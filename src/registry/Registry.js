@@ -943,6 +943,9 @@ class Registry {
     if (!msg.to.includes('/status')) {
       log.error('[Registry onProtostubStatusEvent] Not Status Event: ', msg);
       return;
+    } else {// broadcast Protostub status event to all Hyperties
+      msg.from = _this.runtimeURL;
+      _this._messageBus.postMessage(msg);
     }
 
     // process status events from message node protostubs
