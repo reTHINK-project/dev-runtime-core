@@ -583,7 +583,7 @@ class IdentityModule {
       //generates the RSA key pair
       _this._crypto.getMyPublicKey().then(function(key) {
 
-        log.log('[callNodeJsGenerateMethods:key]', key);
+        log.log('[callGenerateMethods:key]', key);
 
         publicKey = stringify(key);
 
@@ -607,7 +607,7 @@ class IdentityModule {
         reject(err);
       });
     });
-  }
+}
 
 
   loginSelectedIdentity(publicKey, origin, idp, loginUrl) {
@@ -1056,8 +1056,11 @@ class IdentityModule {
       };
       try {
         _this._messageBus.postMessage(message, (res) => {
-          let result = res.body.value;
-          resolve(result);
+
+          if (res.body.code < 299) {
+            let result = res.body.value;
+            resolve(result);
+          } else resolve(res.body);
         });
       } catch (err) {
         reject('IdentityModule.In getAccessToken: ' + err);
@@ -1106,8 +1109,9 @@ class IdentityModule {
       };
       try {
         _this._messageBus.postMessage(message, (res) => {
-          let result = res.body.value;
-          resolve(result);
+
+          if (res.body.code < 300) resolve(res.body.value);
+          else reject(res.body);
         });
       } catch (err) {
         reject('In sendGenerateMessage: ' + err);
@@ -1137,16 +1141,7 @@ class IdentityModule {
       log.log('[IdentityModule:sendGenerateMessage:sendGenerateMessage]', usernameHint);
       _this.sendGenerateMessage(contents, origin, usernameHint, idpDomain).then((result) => {
 
-        if (result.loginUrl) {
-
-          _this.callIdentityModuleFunc('openPopup', { urlreceived: result.loginUrl }).then((value) => {
-            log.log('[IdentityModule:callIdentityModuleFunc:openPopup]', usernameHint);
-
-            resolve(value);
-          }, (err) => {
-            reject(err);
-          });
-        } else if (result) {
+       if (result) {
 
           _this.identities.addAssertion(result).then((value) => {
             resolve(result);
@@ -1158,6 +1153,19 @@ class IdentityModule {
           reject('error on obtaining identity information');
         }
 
+      }, (error)=> {
+        if (error.hasOwnProperty('description') && error.description.hasOwnProperty('loginUrl')) {
+          _this.callIdentityModuleFunc('openPopup', { urlreceived: error.description.loginUrl }).then((value) => {
+            log.log('[IdentityModule:callIdentityModuleFunc:openPopup]', usernameHint);
+  
+            resolve(value);
+          }, (err) => {
+            reject(err);
+          });
+        } else {
+          log.error('[IdentityModule:sendGenerateMessage] generate assertion with hint error ', error);
+          reject(error);
+        }
       }).catch(err => { reject('On generateAssertion from method sendGenerateMessage error: ' + err); });
     });
   }
@@ -1246,14 +1254,20 @@ class IdentityModule {
         let origin = msg.body.params.origin;
         let usernameHint = msg.body.params.usernameHint;
         let idpDomain = msg.body.params.idpDomain;
+        let replyMsg = { id: msg.id, type: 'response', to: msg.from, from: msg.to };
         _this.sendGenerateMessage(contents, origin, usernameHint, idpDomain).then((returnedValue) => {
           let value = { type: 'execute', value: returnedValue, code: 200 };
-          let replyMsg = { id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value };
+          replyMsg.body = value;
           try {
             _this._messageBus.postMessage(replyMsg);
           } catch (err) {
-            log.error('On addGUIListeners from if sendGenerateMessage method postMessage error: ' + err);
+            log.error('IdentityModule.addGUIListeners sendGenerateMessage error: ' + err);
           }
+
+        }, (err)=> {
+          log.info('IDPProxy generateAssertion reply error ' + err);
+          replyMsg.body = err;
+          _this._messageBus.postMessage(replyMsg);
 
         });
         return;
@@ -1290,11 +1304,20 @@ class IdentityModule {
         let domain = msg.body.params.idpDomain;
         let resources = msg.body.params.resources;
         let login = msg.body.params.login;
+        let replyMsg = { id: msg.id, type: 'response', to: msg.from, from: msg.to};
 
         _this.getAccessToken(domain, resources, login).then((returnedValue) => {
           let value = { type: 'execute', value: returnedValue, code: 200 };
-          let replyMsg = { id: msg.id, type: 'response', to: msg.from, from: msg.to, body: value };
+          replyMsg.body = value;
           try {
+            _this._messageBus.postMessage(replyMsg);
+          } catch (err) {
+            log.error('On addGUIListeners from if sendGenerateMessage method postMessage error: ' + err);
+          }
+
+        }, (error) => {
+          try {
+            replyMsg.body = error;
             _this._messageBus.postMessage(replyMsg);
           } catch (err) {
             log.error('On addGUIListeners from if sendGenerateMessage method postMessage error: ' + err);
