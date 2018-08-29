@@ -185,7 +185,7 @@ class ContextObserver extends EventEmitter {
    * @return {<Promise> DataObjectObserver}      It returns as a Promise the UserAvailability Data Object Observer.
    */
 
-  observe(hyperty) {
+  observe(hyperty, domainSubscription = true) {
     let _this = this;
     if (!_this._observePromises[hyperty.hypertyID]) {
       _this._observePromises[hyperty.hypertyID] = new Promise(function(resolve, reject) {
@@ -208,7 +208,7 @@ class ContextObserver extends EventEmitter {
             }
           });
           if (last != 0 && url) {
-            resolve(_this._subscribeContext(hyperty, url));
+            resolve(_this._subscribeContext(hyperty, url, domainSubscription));
           } else {
             reject('[ContextObserver.observe] discovered DataObjecs are invalid', dataObjects);
           }
@@ -218,7 +218,7 @@ class ContextObserver extends EventEmitter {
     return _this._observePromises[hyperty.hypertyID];
   }
 
-  _subscribeContext(hyperty, url) {
+  _subscribeContext(hyperty, url, domainSubscription = true) {
     let _this = this;
 
     // avoid duplicated subscriptions
@@ -228,7 +228,7 @@ class ContextObserver extends EventEmitter {
         if (Context.url === url) return resolve(Context);
       });
 
-      _this._syncher.subscribe(_this._objectDescURL, url, null, null, null, false).then((Context) => {
+      _this._syncher.subscribe(_this._objectDescURL, url, null, null, null, domainSubscription).then((Context) => {
         console.log('[ContextObserver._subscribeContext] observer object', Context);
 
         //let newUserAvailability = new UserAvailabilityController(Context, userID);
