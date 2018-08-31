@@ -3,6 +3,7 @@
 import runtimeFactory from './runtimeFactory';
 
 import MiniBus from '../../dist/minibus';
+import RuntimeCatalogue from '../../src/runtime-catalogue/RuntimeCatalogue';
 
 import IdentitiesGUI from './IdentitiesGUI';
 
@@ -94,7 +95,7 @@ const rethink = {
 
       console.log('Install configuration: ', development, domain, runtimeURL);
 
-      let catalogue = runtimeFactory.createRuntimeCatalogue(development);
+      let catalogue = new RuntimeCatalogue(runtimeFactory);
       let runtimeDescriptor;
 
       catalogue.getRuntimeDescriptor(runtimeURL).then((descriptor) => {

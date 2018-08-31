@@ -3,7 +3,7 @@ import * as logger from 'loglevel';
 let log = logger.getLogger('IdentityModule');
 
 import { decode, secondsSinceEpoch, deepClone } from '../utils/utils.js';
-import { WatchingYou } from 'service-framework/dist/Utils';
+import { WatchingYou } from '../Utils';
 
 
 /**

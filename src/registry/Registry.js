@@ -36,7 +36,7 @@ import P2PConnectionResolve from './P2PConnectionResolve';
 import { divideURL, isHypertyURL, isURL, isUserURL, generateGUID, getUserIdentityDomain, isBackendServiceURL, deepClone, removePathFromURL } from '../utils/utils.js';
 
 import 'proxy-observe';
-import { WatchingYou } from 'service-framework/dist/Utils';
+import { WatchingYou } from '../Utils';
 
 // import DiscoveryServiceFramework from './DiscoveryServiceFramework';
 
@@ -676,18 +676,18 @@ class Registry {
 
                 let p2pHandler;
                 let p2pRequester;
-            
+
                 if (Object.keys(_this.p2pHandlerStub).length !== 0) {
                   p2pHandler = _this.p2pHandlerStub[_this.runtimeURL].url;
                   p2pRequester = runtimeUtils.runtimeDescriptor.p2pRequesterStub;
                 }
 
-                let hyperty = new HypertyInstance(_this.identifier, _this.registryURL, descriptorURL, descriptor, 
+                let hyperty = new HypertyInstance(_this.identifier, _this.registryURL, descriptorURL, descriptor,
                   addressURL.address[0], userProfile, 'guid', _this.runtimeURL, 'ctx', p2pHandler,
                  p2pRequester, hypertyCapabilities.dataSchema, hypertyCapabilities.resources);
-            
+
                 _this.hypertiesList.push(hyperty);
-            
+
                 /*--- start here move p2p and domain registry related features to a separated function.-------..*/
 
                 let registrationAtdomain = true;
@@ -943,6 +943,12 @@ class Registry {
     if (!msg.to.includes('/status')) {
       log.error('[Registry onProtostubStatusEvent] Not Status Event: ', msg);
       return;
+    } else {// broadcast Protostub status event to all Hyperties
+      let from =  msg.from;
+      msg.from = _this.runtimeURL;
+      msg.to = _this.runtimeURL+'/status';
+      msg.body.resource = from;
+      _this._messageBus.postMessage(msg);
     }
 
     // process status events from message node protostubs

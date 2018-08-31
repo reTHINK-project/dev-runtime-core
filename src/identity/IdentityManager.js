@@ -1,97 +1,113 @@
 /**
-* Provides an API to manage identities from msg bus pipeline
+* Copyright 2016 PT Inovação e Sistemas SA
+* Copyright 2016 INESC-ID
+* Copyright 2016 QUOBIS NETWORKS SL
+* Copyright 2016 FRAUNHOFER-GESELLSCHAFT ZUR FOERDERUNG DER ANGEWANDTEN FORSCHUNG E.V
+* Copyright 2016 ORANGE SA
+* Copyright 2016 Deutsche Telekom AG
+* Copyright 2016 Apizee
+* Copyright 2016 TECHNISCHE UNIVERSITAT BERLIN
 *
-*/
-import * as logger from 'loglevel';
-import Identities from './Identities';
-let log = logger.getLogger('IdentityManager');
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+**/
+import {divideURL} from '../utils/utils';
 
+/**
+* Core IdentityManager interface
+* Class to allow applications to search for Identities registered in runtime-core
+*/
 class IdentityManager {
 
-  constructor(idm) {
+  /**
+  * To initialise the IdentityManager, which will provide the support for hyperties to
+  * query about identities registered
+  * @param  {String}          owner            owner
+  * @param  {String}          runtimeURL            runtimeURL
+  * @param  {MessageBus}          msgbus                msgbus
+  */
+  constructor(owner, runtimeURL, msgBus) {
+    let _this = this;
+    _this.messageBus = msgBus;
+
+    _this.domain = divideURL(owner).domain;
+    _this.owner = owner;
+    _this.runtimeURL = runtimeURL;
+  }
+
+  /**
+  * Function to query the runtime registry about the identity to which the hyperty was associated
+  * @param {String}       type (Optional)         type of user info required
+  * @param {String}       owner (Optional)   owner to search for
+  * @return {Promise}     userURL       userURL associated to the hyperty
+  */
+  discoverUserRegistered(type, hyperty) {
     let _this = this;
 
-    _this._idm = idm;
+    return new Promise(function(resolve, reject) {
 
-  }
+      let activeHypertyURL;
 
-  reset() {
-    console.log('IM reset');
+      // if any type of search is selected query for that type, otherwise query for default user info
+      let searchType = (type) ? type : '.';
 
-    // this._idm.identities.reset();
-    this._idm.identities = new Identities(this._idm.identities._type, this._idm.identities._storageManager);
-    console.log(this._idm.identities);
-  }
-
-  _isToSetID(message) {
-    let schemasToIgnore = ['domain-idp', 'runtime', 'domain'];
-
-    let _from = message.from;
-
-    if (message.body && message.body.hasOwnProperty('source')) {
-      _from = message.body.source;
-    }
-
-    if (message.body && message.body.hasOwnProperty('subscriber')) {
-      _from = message.body.subscriber;
-    }
-
-    if (message.type === 'forward') {
-      return false;
-    }
-
-    // Signalling Messages between P2P Stubs don't have Identities. FFS
-    if (_from.includes('/p2prequester/') || _from.includes('/p2phandler/')) {
-      return false;
-    }
-
-    let splitFrom = (_from).split('://');
-    let fromSchema = splitFrom[0];
-    let isToIgnore = schemasToIgnore.indexOf(fromSchema) === -1;
-
-    return isToIgnore;
-  }
-
-  processMessage(message) {
-    log.log('[IdentityManager.processMessage] ', message);
-
-    return new Promise((resolve, reject) => {
-
-      // skip messages that don't need identity tokens in the body
-
-      if (!this._isToSetID(message)) return resolve(message);
-
-      /*      let from = message.from;
-      let sourceURL = undefined;
-      if ( message.hasOwnProperty('body') && message.body.hasOwnProperty('source')) {
-        from = message.body.source;
+      if (!hyperty) {
+        activeHypertyURL = _this.owner;
+      } else {
+        activeHypertyURL = hyperty;
       }
 
-      if (message.type === 'forward') {
-        from = message.body.from;
-      }
+      let msg = {
+        type: 'read', from: activeHypertyURL, to: _this.runtimeURL + '/registry/', body: { resource: searchType, criteria: activeHypertyURL}
+      };
 
-      if (message.hasOwnProperty('body') && message.body.hasOwnProperty('subscriber')) {
-        from = message.body.subscriber;
-      }*/
+      _this.messageBus.postMessage(msg, (reply) => {
 
-      this._idm.getToken(message).then((identity) => {
+        let userURL = reply.body.resource;
 
-        if (!message.hasOwnProperty('body')) message.body = {};
-
-        message.body.identity = identity;
-        resolve(message);
-      }).catch((reason) => {
-        log.error(reason);
-        reject(reason);
+        if (userURL && reply.body.code === 200) {
+          resolve(userURL);
+        } else {
+          reject('code: ' + reply.body.code + ' No user was found');
+        }
       });
-
     });
-
-
   }
 
+  /**
+  * Function to query the Identity Module about authenticated identities from a certain domain
+  * @param {String}       idp idp domain of the identity to be discovered
+  * @return {Promise}     identity
+  */
 
+  discoverIdentityPerIdP(idp) {
+    let _this = this;
+
+    return new Promise(function(resolve, reject) {
+
+      let msg = {
+        type: 'read', from: this.owner, to: _this.runtimeURL + '/idm', body: { resource: idp, criteria: 'idp'}
+      };
+
+      _this.messageBus.postMessage(msg, (reply) => {
+
+        if (reply.body.code === 200) {
+          resolve(reply.body.value);
+        } else {
+          reject(reply.body.code + ' ' + reply.body.desc);
+        }
+      });
+    });
+  }
 }
 
 export default IdentityManager;

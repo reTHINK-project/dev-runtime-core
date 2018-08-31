@@ -1,12 +1,14 @@
 import { runtimeFactory } from './resources/runtimeFactory';
-import { Syncher, DataObjectReporter, DataObjectObserver } from 'service-framework/dist/Syncher';
+import Syncher from '../src/syncher/Syncher';
+import DataObjectReporter from '../src/syncher/DataObjectReporter';
+import DataObjectObserver from '../src/syncher/DataObjectObserver';
 import SyncherManager from '../src/syncher/SyncherManager';
-import DataObjectsStorage from '../src//store-objects/DataObjectsStorage';
+import DataObjectsStorage from '../src/store-objects/DataObjectsStorage';
 import MessageBus from '../src/bus/MessageBus';
 
 
 import PEP from '../src/policy/PEP';
-import IdentityManager from '../src/identity/IdentityManager';
+import IdentityManager from '../src/identity/IdentityHandler';
 import * as cryptoManager from '../src/cryptoManager/CryptoManager';
 import RuntimeCoreCtx from '../src/policy/context/RuntimeCoreCtx';
 
@@ -172,7 +174,7 @@ describe('SyncherManager', function() {
   };
 
   let runtimeCapabilities =  runtimeFactory.runtimeCapabilities();
-
+  debugger;
   let runtimeCoreCtx = new RuntimeCoreCtx(runtimeURL, identityModule, registry, storages.policy, runtimeCapabilities);
   let policyEngine = new PEP(runtimeCoreCtx);
 

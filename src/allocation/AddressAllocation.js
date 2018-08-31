@@ -46,12 +46,13 @@ class AddressAllocation {
    * @param  {URL.URL}      url - url from who is sending the message
    * @param  {MiniBus}      bus - MiniBus used for address allocation
    */
-  constructor(url, bus, registry) {
+  constructor(url, bus, registry, subscriptionManager) {
 
     if (!instance) {
       this._url = url + '/address-allocation';
       this._bus = bus;
       this._registry = registry;
+      this._subscriptionManager = subscriptionManager;
       instance = this;
     } else {
       return instance;
@@ -98,7 +99,7 @@ class AddressAllocation {
         if (reuseURL) {
           return this._reuseAllocatedAddress(domain, number, info, scheme, reuseURL);
         } else {
-          return this._allocateNewAddress(domain, scheme, number);
+          return this._allocateNewAddress(domain, scheme, number, info);
         }
 
       }
@@ -115,7 +116,7 @@ class AddressAllocation {
       log.info('[AddressAllocation] - new address will be allocated');
 
       // if there is no URL saved request a new URL
-      return this._allocateNewAddress(domain, scheme, number);
+      return this._allocateNewAddress(domain, scheme, number, info);
     }
 
   }
@@ -137,7 +138,7 @@ class AddressAllocation {
             log.info('[AddressAllocation - reuseURL] - Object ' + reuseURL + ' not found');
             reject('URL Not Found');
           } else if (typeof(reuseURL) === 'boolean') {
-            this._allocateNewAddress(domain, scheme, number).then(resolve).catch(reject);
+            this._allocateNewAddress(domain, scheme, number, info).then(resolve).catch(reject);
           } else {
             reject('URL Not Found');
           }
@@ -149,7 +150,8 @@ class AddressAllocation {
     });
   }
 
-  _allocateNewAddress(domain, scheme, number) {
+  _allocateNewAddress(domain, scheme, number, info) {
+    let _this = this;
 
     return new Promise((resolve, reject) => {
 
@@ -161,7 +163,19 @@ class AddressAllocation {
       }
 
       let result = {newAddress: true, address: addresses};
-      resolve(result);
+
+      if (scheme === 'hyperty' ) {
+        if (info.hasOwnProperty('_configuration')) {
+          let domainRouting = info._configuration.hasOwnProperty('domain_routing') ? info.configuration.domain_routing : true;
+          if (domainRouting) {
+            _this._subscriptionManager.createSubscription(domain,addresses, _this._url).then(()=>{
+              resolve(result);
+            });
+          } else resolve(result);
+        } else resolve(result);
+
+
+      } else resolve(result);
 
 
 /*      let msg = {

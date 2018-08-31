@@ -24,6 +24,7 @@
  * @author micaelpedrosa@gmail.com
  * Base class to implement internal deploy manager of components.
  */
+import SandboxFactory from './SandboxFactory';
 
 /**
  * @author micaelpedrosa@gmail.com
@@ -39,10 +40,11 @@ class SandboxRegistry {
     let _this = this;
 
     _this._bus = bus;
+    _this._factory = new SandboxFactory(bus);
     _this._components = {};
 
     bus.addListener(SandboxRegistry.InternalDeployAddress, (msg) => {
-      //console.log('SandboxRegistry-RCV: ', msg);
+      console.log('SandboxRegistry-RCV: ', msg);
       // let responseMsg = {
       //   id: msg.id, type: 'response', from: SandboxRegistry.InternalDeployAddress, to: SandboxRegistry.ExternalDeployAddress
       // };
@@ -92,7 +94,8 @@ class SandboxRegistry {
 
     if (!_this._components.hasOwnProperty(componentURL)) {
       try {
-        _this._components[componentURL] = _this._create(componentURL, sourceCode, config);
+      console.log('SandboxRegistry-onDeploy: ', msg);
+      _this._components[componentURL] = _this._create(componentURL, sourceCode, config, _this._factory );
         responseCode = 200;
       } catch (error) {
         responseCode = 500;
@@ -136,7 +139,7 @@ class SandboxRegistry {
    * @param  {Config} config Configuration parameters
    * @return {Object} Returns instance of the component or throw an error "throw 'error message'"
    */
-  _create(url, sourceCode, config) {
+  _create(url, sourceCode, config, factory) {
     //implementation specific
     /* example code:
       eval(sourceCode);

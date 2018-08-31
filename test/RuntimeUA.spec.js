@@ -128,7 +128,7 @@ describe('RuntimeUA', function() {
       expect(runtime.messageBus).to.be.instanceof(MessageBus);
     });
 
-    it('should throw when given no arguments', function() {
+    it.skip('should throw when given no arguments', function() {
       expect(runtime).to.have.property('runtimeFactory');
       expect(runtime.runtimeFactory).to.have.property('atob');
       expect(runtime.runtimeFactory).to.have.property('persistenceManager');

@@ -25,7 +25,7 @@
 import * as logger from 'loglevel';
 let log = logger.getLogger('Registry');
 
-import { runtimeUtils } from '../runtime/runtimeUtils';
+import { runtimeUtils  } from '../runtime/runtimeUtils';
 
 import HypertyInstance from './HypertyInstance';
 
@@ -328,6 +328,8 @@ class DomainRegistration {
               result.p2pHandler = hyperty.p2pHandler;
               result.p2pRequester = hyperty.p2pRequester;
             }
+
+
 
             resolve(result);
           } else if (reply.body.code === 404) {

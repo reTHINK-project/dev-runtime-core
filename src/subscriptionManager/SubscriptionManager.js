@@ -79,7 +79,7 @@ class SubscriptionManager {
           _this._subscriptionsStorage = subscriptions;
 
           Object.values(subscriptions).forEach((subscription)=>{
-            _this._createSubscription(subscription.domain, subscription.resources, subscription.subscriber, subscription.identity);
+            _this.createSubscription(subscription.domain, subscription.resources, subscription.subscriber, subscription.identity);
 
           });
 
@@ -107,7 +107,7 @@ class SubscriptionManager {
 
     let identity = msg.body.identity;
 
-    _this._createSubscription(domain, resources, subscriber, identity).then((reply)=>{
+    _this.createSubscription(domain, resources, subscriber, identity).then((reply)=>{
       //forward to hyperty:
       reply.id = msg.id;
       reply.from = _this._url;
@@ -142,7 +142,7 @@ class SubscriptionManager {
     });
   }
 
-  _createSubscription(domain, resources, subscriber, identity) {
+  createSubscription(domain, resources, subscriber, identity) {
 
     let _this = this;
     //debugger;

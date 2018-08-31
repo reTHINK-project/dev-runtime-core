@@ -32,7 +32,7 @@ let log = logger.getLogger('RuntimeUA');
 //Main dependecies
 import Registry from '../registry/Registry';
 import IdentityModule from '../identity/IdentityModule';
-import IdentityManager from '../identity/IdentityManager';
+import IdentityHandler from '../identity/IdentityHandler';
 import PEP from '../policy/PEP';
 import MessageBus from '../bus/MessageBus';
 import { generateGUID } from '../utils/utils';
@@ -47,15 +47,16 @@ import { runtimeConfiguration } from './runtimeConfiguration';
 import MsgBusHandlers from './MsgBusHandlers';
 import { runtimeUtils } from './runtimeUtils';
 
-import GraphConnector from '../graphconnector/GraphConnector';
+//import GraphConnector from '../graphconnector/GraphConnector';
 
 import CoreDiscovery from '../discovery/CoreDiscovery';
 
 import DataObjectsStorage from '../store-objects/DataObjectsStorage';
-import HypertyResourcesStorage from '../hyperty-resources-storage/HypertyResourcesStorage';
+import HypertyResourcesStorage from '../hyperty-resource/HypertyResourcesStorage';
 import SyncherManager from '../syncher/SyncherManager';
 import SubscriptionManager from '../subscriptionManager/SubscriptionManager';
 import RuntimeCoreCtx from '../policy/context/RuntimeCoreCtx';
+import RuntimeCatalogue from '../runtime-catalogue/RuntimeCatalogue';
 
 /**
  * Runtime User Agent Interface will process all the dependecies of the core runtime;
@@ -103,17 +104,21 @@ class RuntimeUA {
 
     this.storages = {};
 
-    if (typeof runtimeFactory.createRuntimeCatalogue === 'function') {
+/*    if (typeof runtimeFactory.createRuntimeCatalogue === 'function') {
       this.runtimeCatalogue = runtimeFactory.createRuntimeCatalogue();
     } else {
       throw new Error('Check your Runtime Factory because it needs the Runtime Catalogue implementation');
-    }
+    }*/
 
-    if (typeof runtimeFactory.persistenceManager === 'function') {
+    this.runtimeCatalogue = new RuntimeCatalogue(runtimeFactory);
+
+
+
+/*    if (typeof runtimeFactory.persistenceManager === 'function') {
       this.persistenceManager = runtimeFactory.persistenceManager();
     } else {
       throw new Error('Check your Runtime Factory because it needs the Persistence Manager implementation');
-    }
+    }*/
 
     if (typeof runtimeFactory.storageManager === 'function') {
 
@@ -287,8 +292,11 @@ class RuntimeUA {
         // Instantiate the Message Bus
         this.messageBus = new MessageBus(this.registry);
 
+        // Instanciate the SubscriptionManager;
+        this.subscriptionManager = new SubscriptionManager(this.runtimeURL, this.messageBus, this.storages.subscriptions);
+
         // Prepare the address allocation instance;
-        this.addressAllocation = new AddressAllocation(this.runtimeURL, this.messageBus, this.registry);
+        this.addressAllocation = new AddressAllocation(this.runtimeURL, this.messageBus, this.registry, this.subscriptionManager);
 
         // Instantiate the Policy Engine
         this.policyEngine = new PEP(new RuntimeCoreCtx(this.runtimeURL, this.identityModule, this.registry, this.storages.policy, this.runtimeCapabilities));
@@ -296,16 +304,16 @@ class RuntimeUA {
         // Instantiate Discovery
         this.coreDiscovery = new CoreDiscovery(this.runtimeURL, this.messageBus, this.graphConnector, this.runtimeFactory, this.registry);
 
-        // Instantiate the IdentityManager
-        this.identityManager = new IdentityManager(this.identityModule);
+        // Instantiate the identityHandler
+        this.identityHandler = new IdentityHandler(this.identityModule);
 
         // initialise the CryptoManager
         cryptoManager.init(this.runtimeURL, this.runtimeCapabilities, this.storages.cryptoManager, this._dataObjectsStorage, this.registry, this.coreDiscovery, this.identityModule, this.runtimeFactory);
 
         // Instantiate the Graph Connector
-        this.graphConnector = process.env.MODE !== 'light' ? new GraphConnector(this.runtimeURL, this.messageBus, this.storageManager) : null;
+//        this.graphConnector = process.env.MODE !== 'light' ? new GraphConnector(this.runtimeURL, this.messageBus, this.storageManager) : null;
 
-        this.handlers = new MsgBusHandlers(this.policyEngine, this.identityManager, cryptoManager);
+        this.handlers = new MsgBusHandlers(this.policyEngine, this.identityHandler, cryptoManager);
 
         this.messageBus.pipelineOut.handlers = [this.handlers.idmHandler, this.handlers.pepOutHandler, this.handlers.encryptHandler];
         this.messageBus.pipelineIn.handlers = [this.handlers.decryptHandler, this.handlers.pepInHandler];
@@ -360,8 +368,6 @@ class RuntimeUA {
         //   });
         // }, 2000);
 
-        // Instanciate the SubscriptionManager;
-        this.subscriptionManager = new SubscriptionManager(this.runtimeURL, this.messageBus, this.storages.subscriptions);
 
         // this.subscriptionManager.init().then(()=>{
         //   resolve(true);
@@ -439,7 +445,7 @@ class RuntimeUA {
     console.log('Runtime core logout: ', logOut);
     let _this = this;
     if (logOut === true) {
-      this.identityManager.reset();
+      this.identityHandler.reset();
     }
 
     log.info('Unregister all hyperties');

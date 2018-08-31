@@ -13,6 +13,7 @@ import { buildURL } from '../src/utils/utils';
 import { runtimeConfiguration } from './resources/runtimeConfiguration';
 import { runtimeFactory } from './resources/runtimeFactory';
 import Descriptors from '../src/runtime/Descriptors';
+import RuntimeCatalogue from '../src/runtime-catalogue/RuntimeCatalogue';
 
 describe('Should get configuration and parse to Descriptors', () => {
 
@@ -24,7 +25,7 @@ describe('Should get configuration and parse to Descriptors', () => {
   runtimeConfiguration.domain = domain;
 
   before(()=> {
-    let catalogue = runtimeFactory.createRuntimeCatalogue();
+    let catalogue = new RuntimeCatalogue(runtimeFactory);
     descriptorsInstance = new Descriptors(runtimeURL, catalogue, runtimeConfiguration);
 
     
