@@ -9,7 +9,8 @@ module.exports = function(config) {
       './test/GraphConnector.spec.js',
       './test/PolicyEngine.spec.js',
       './test/HypertyResourceStorage.spec.js',
-      './test/RuntimeCatalogue.spec.js'
+      './test/RuntimeCatalogue.spec.js',
+      './test/PersistenceManager.spec.js'
 
     ],
     preprocessors: {
