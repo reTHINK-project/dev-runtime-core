@@ -16,13 +16,32 @@ class StorageManager {
       stores[storageName] = 'key,version,value';
     }
 
-    db.version(version).stores(stores);
+//    db.version(version).stores(stores);
     db.open().then((db) => {
       log.info('Found database name ' + db.name + ' with version no: ' + db.verno);
     }).catch(log.error);
 
     this.db = db;
     this.storageName = storageName;
+    this._remote = false;
+  }
+
+  // set remote backup server URL
+
+  set remote(remote) {
+    this._remote = remote;
+  }
+
+  // start sync with remote server. Returns a promise that resolves if connection is performed otherwise it is rejected
+
+  connect() {
+    return this.db.connect(this._remote);
+  }
+
+  // stop sync with remote server. Returns promise 
+  
+  disconnect() {
+    return this.db.disconnect(this._remote);
   }
 
   _checkKey(key) {
