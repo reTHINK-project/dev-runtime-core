@@ -33,6 +33,10 @@ class DataObjectsStorage {
 
     let storeDataObject = this._storeDataObject;
     let type = this._getTypeOfObject(metadata.isReporter);
+
+    let backup = metadata.hasOwnProperty('backup') ? metadata.backup : false;
+    let db = backup ? metadata.url : 'syncherManager:ObjectURLs';
+
     if (!storeDataObject.hasOwnProperty(type)) storeDataObject[type] = {};
 
     if (!storeDataObject[type].hasOwnProperty(metadata.url)) {
@@ -46,6 +50,8 @@ class DataObjectsStorage {
     Object.assign(storeDataObject[type][metadata.url], metadata);
     delete storeDataObject[type][metadata.url].subscriberUser;
     delete storeDataObject[type][metadata.url].subscriberHyperty;
+
+    storeDataObject[type][metadata.url].backup = backup;
 
     /*if (schema) storeDataObject[type][metadata.url].schema = schema;
     if (status) storeDataObject[type][metadata.url].status = status;
@@ -64,7 +70,7 @@ class DataObjectsStorage {
     }
 
     this._storeDataObject = storeDataObject;
-    this._storageManager.set('syncherManager:ObjectURLs', 1, storeDataObject);
+    this._storageManager.set(db, 1, storeDataObject[type][metadata.url], db, backup);
     return storeDataObject[type][metadata.url];
   }
 
@@ -103,7 +109,8 @@ class DataObjectsStorage {
     }
 
     this._storeDataObject = storeDataObject;
-    this._storageManager.set('syncherManager:ObjectURLs', 1, storeDataObject);
+    let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
+    this._storageManager.set(db, 1, storeDataObject[type][metadata.url], db, backup);
     return storeDataObject[type][resource];
   }
 
@@ -127,7 +134,9 @@ class DataObjectsStorage {
     }
 
     this._storeDataObject = storeDataObject;
-    this._storageManager.set('syncherManager:ObjectURLs', 1, storeDataObject);
+    let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
+    this._storageManager.set(db, 1, storeDataObject[type][metadata.url], db, backup);
+
     return storeDataObject[type][resource];
   }
 
@@ -167,7 +176,8 @@ class DataObjectsStorage {
       }
 
       this._storeDataObject = storeDataObject;
-      this._storageManager.set('syncherManager:ObjectURLs', 1, storeDataObject);
+      let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
+      this._storageManager.set(db, 1, storeDataObject[type][metadata.url], db, backup);
       return storeDataObject[type][resource];
     }
   }
@@ -199,7 +209,8 @@ class DataObjectsStorage {
       }
 
       this._storeDataObject = storeDataObject;
-      this._storageManager.set('syncherManager:ObjectURLs', 1, storeDataObject);
+      let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
+      this._storageManager.set( db, 1, storeDataObject[type][resource], db, storeDataObject[type][resource].backup);
 
       return storeDataObject[type][resource];
     }
@@ -220,14 +231,16 @@ class DataObjectsStorage {
 
           if (tmp.hasOwnProperty('observers') && tmp.observers.hasOwnProperty(resource)) {
             delete tmp.observers[resource];
-            this._storageManager.set('syncherManager:ObjectURLs', 1, tmp);
+            let db = tmp.observers[resource].backup ? tmp.observers[resource].url : 'syncherManager:ObjectURLs';
+            this._storageManager.delete(db, 1, resource);
             this._storeDataObject = tmp;
             return resolve(tmp.observers[resource]);
           }
 
           if (tmp.hasOwnProperty('reporters') && tmp.reporters.hasOwnProperty(resource)) {
             delete tmp.reporters[resource];
-            this._storageManager.set('syncherManager:ObjectURLs', 1, tmp);
+            let db = tmp.reporters[resource].backup ? tmp.reporters[resource].url : 'syncherManager:ObjectURLs';
+            this._storageManager.delete(db, 1, resource);
             this._storeDataObject = tmp;
             return resolve(tmp.reporters[resource]);
           }
@@ -245,7 +258,8 @@ class DataObjectsStorage {
   }
 
   getAll() {
-    return this._storageManager.get('syncherManager:ObjectURLs');
+    return this._storeDataObject;
+//    return this._storageManager.get('syncherManager:ObjectURLs');
   }
 
   /**
@@ -259,26 +273,30 @@ class DataObjectsStorage {
 
     return new Promise((resolve, reject) => {
 
-      this._storageManager.get('syncherManager:ObjectURLs').then((storedDataObject) => {
+      this._storageManager.get(resource, true).then((dataObject)=> {
+        return resolve(dataObject);
+      } , () => {
+        this._storageManager.get('syncherManager:ObjectURLs', false).then((storedDataObject) => {
 
-        let observers = storedDataObject.hasOwnProperty('observers') ? storedDataObject.observers : {};
-        let reporters = storedDataObject.hasOwnProperty('reporters') ? storedDataObject.reporters : {};
-
-        let currentReporter = Object.keys(reporters).find((value) => { return value === resource; });
-        let currentObserver = Object.keys(observers).find((value) => { return value === resource; });
-        let dataObject;
-
-        if (currentObserver) { dataObject = storedDataObject.observers[currentObserver]; }
-        if (currentReporter) { dataObject = storedDataObject.reporters[currentReporter]; }
-
-        log.info('[StoreDataObjects - getDataObject] - for observer: ', currentObserver);
-        log.info('[StoreDataObjects - getDataObject] - for reporters: ', currentReporter);
-
-        log.info('[StoreDataObjects - getDataObject] - resolve: ', dataObject);
-        return dataObject ? resolve(dataObject) : reject('No dataObject was found');
+          let observers = storedDataObject.hasOwnProperty('observers') ? storedDataObject.observers : {};
+          let reporters = storedDataObject.hasOwnProperty('reporters') ? storedDataObject.reporters : {};
+  
+          let currentReporter = Object.keys(reporters).find((value) => { return value === resource; });
+          let currentObserver = Object.keys(observers).find((value) => { return value === resource; });
+          let dataObject;
+  
+          if (currentObserver) { dataObject = storedDataObject.observers[currentObserver]; }
+          if (currentReporter) { dataObject = storedDataObject.reporters[currentReporter]; }
+  
+          log.info('[StoreDataObjects - getDataObject] - for observer: ', currentObserver);
+          log.info('[StoreDataObjects - getDataObject] - for reporters: ', currentReporter);
+  
+          log.info('[StoreDataObjects - getDataObject] - resolve: ', dataObject);
+          return dataObject ? resolve(dataObject) : reject('No dataObject was found');
+  
+        });
 
       });
-
     });
 
   }
