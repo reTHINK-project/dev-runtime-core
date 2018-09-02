@@ -4,7 +4,7 @@ const a = log.getLogger('address-allocation');
 const b = log.getLogger('Bus');
 const c = log.getLogger('MessageBus');
 const d = log.getLogger('CoreDiscovery');
-const e = log.getLogger('GraphConnector');
+const e = log.getLogger('StorageManager');
 const f = log.getLogger('HypertyResourcesStorage');
 const g = log.getLogger('IdentityModule');
 const h = log.getLogger('PEP');
@@ -59,8 +59,8 @@ c.setLevel(3);
 // CoreDiscovery
 d.setLevel(5);
 
-// GraphConnector
-e.setLevel(5);
+// StorageManager
+e.setLevel(0);
 
 // HypertyResourcesStorage
 f.setLevel(3);
@@ -78,7 +78,7 @@ i.setLevel(3);
 j.setLevel(3);
 
 // RuntimeUA
-k.setLevel(3);
+k.setLevel(0);
 
 // Loader
 l.setLevel(3);
@@ -87,7 +87,7 @@ l.setLevel(3);
 m.setLevel(3);
 
 // DataObjectsStorage
-n.setLevel(3);
+n.setLevel(0);
 
 // Subscription
 o.setLevel(3);

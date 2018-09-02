@@ -21,6 +21,6 @@ export function createSyncDB(key, runtimeFactory, schema, url = false) {
 
   let remote = url ? url : runtimeConfiguration.remoteStorage;
 
-  return runtimeFactory.storageManager(key, runtimeConfiguration.storageSchemas[schema], remote);
+  return runtimeFactory.storageManager(key, schema, remote);
 
 }

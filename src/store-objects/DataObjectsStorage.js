@@ -8,7 +8,7 @@ import { createSyncDB } from '../runtime/Storage';
 
 class DataObjectsStorage {
 
-  constructor(storageManager, storedDataObjects, factory) {
+  constructor(storageManager, storedDataObjects = false, factory) {
     if (!storageManager) throw new Error('[Store Data Objects] - Needs the storageManager component');
 
     this._storageManager = storageManager;
@@ -19,6 +19,8 @@ class DataObjectsStorage {
     this._createSyncDB = createSyncDB; // to create Data Objects to be synched with remote storages
     this._remotes = {}; // List of DO synched with remote storages
     this._factory = factory;
+    this._table = 'syncherManager:ObjectURLs';
+    this._remoteStorageTable = 'dataObjectStorage';
   }
 
   // load Data Objects synched with remote Storages
@@ -28,12 +30,13 @@ class DataObjectsStorage {
     return new Promise ((resolve, reject) => {
         let loading = [];
 
-        _this._storeDataObject.remotes.forEach((remote) => {
-          _this._remotes[remote] = createSyncDB(remote, 'syncherManager', _this._factory);
-          loading.push(_this._remotes[remote].get(remote));
-        });
+        if (_this._storeDataObject && _this._storeDataObject.hasOwnProperty('remotes')) {
+          _this._storeDataObject.remotes.forEach((remote) => {
+            _this._remotes[remote] = createSyncDB(remote, _this._factory, 'remoteDataObjectStorage' );
+            loading.push(_this._remotes[remote].get(remote));
+          });
 
-        Promise.all(loading).then(() => {
+          Promise.all(loading).then(() => {
             log.log('[StoreDataObjects.loadRemote] loaded. Starting init');
             //TODO: init this._storeDataObject with loaded data objects
           _this._storeDataObject.remotes.forEach((remote) => {
@@ -47,6 +50,11 @@ class DataObjectsStorage {
           });
             resolve()
           } , (error) => {reject(error)});
+
+  
+        }
+
+        resolve();
 
     });
   }
@@ -67,7 +75,7 @@ class DataObjectsStorage {
 
   set(metadata) {
 
-    let storeDataObject = this._storeDataObject;
+    let storeDataObject = this._storeDataObject ? this._storeDataObject : {};
     let type = this._getTypeOfObject(metadata.isReporter);
 
 
@@ -106,24 +114,27 @@ class DataObjectsStorage {
     this._storeDataObject = storeDataObject;
 
     let backup = metadata.hasOwnProperty('backup') ? metadata.backup : false;
-    let db = backup ? metadata.url : 'syncherManager:ObjectURLs';
+    let db = backup ? metadata.url : this._table;
+    let table = backup ? db.split('/')[3] : this._table;
     if (backup && !this._remotes[db]) {
-      this._remotes[db] = createSyncDB(db, 'syncherManager', _this._factory);
+      let schema = {};
+      schema[table] = 'key,version,value';
+      this._remotes[db] = createSyncDB(db, this._factory, schema);
     }
 
     let storage = backup ? this._remotes[db] : this._storageManager;
 
     if (metadata.isReporter && backup) {// lets connect to remote storage to enable sync
       storage.connect().then(()=> {
-        storage.set(db, 1, storeDataObject[type][metadata.url], db);
+        storage.set(db, 1, storeDataObject[type][metadata.url], table);
         return storeDataObject[type][metadata.url];
       }, (error) => {
         log.error('[DataObjectStorage.set] failed to connect with remote storage: ', error);
-        storage.set(db, 1, storeDataObject[type][metadata.url], db);
-        return storeDataObject[type][metadata.url];
+        storage.set(db, 1, storeDataObject[type][metadata.url], table);
       });
+        return storeDataObject[type][metadata.url];
     } else {
-      storage.set(db, 1, storeDataObject[type][metadata.url], db);
+      storage.set(db, 1, storeDataObject[type][metadata.url], table);
       return storeDataObject[type][metadata.url];
     }
 
@@ -165,8 +176,9 @@ class DataObjectsStorage {
 
     this._storeDataObject = storeDataObject;
     let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
-    let storage = backup ? this._remotes[db] : this._storageManager;
-    storage.set(db, 1, storeDataObject[type][metadata.url], db);
+    let storage = storeDataObject[type][resource].backup ? this._remotes[db] : this._storageManager;
+    let table = storeDataObject[type][resource].backup ? db.split('/')[3] : this._table;
+    storage.set(db, 1, storeDataObject[type][metadata.url], table);
     return storeDataObject[type][resource];
   }
 
@@ -191,8 +203,9 @@ class DataObjectsStorage {
 
     this._storeDataObject = storeDataObject;
     let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
-    let storage = backup ? this._remotes[db] : this._storageManager;
-    storage.set(db, 1, storeDataObject[type][metadata.url], db);
+    let storage = storeDataObject[type][resource].backup ? this._remotes[db] : this._storageManager;
+    let table = storeDataObject[type][resource].backup ? db.split('/')[3] : this._table;
+    storage.set(db, 1, storeDataObject[type][metadata.url], table);
 
     return storeDataObject[type][resource];
   }
@@ -234,8 +247,9 @@ class DataObjectsStorage {
 
       this._storeDataObject = storeDataObject;
       let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
-      let storage = backup ? this._remotes[db] : this._storageManager;
-      storage.set(db, 1, storeDataObject[type][metadata.url], db);
+      let storage = storeDataObject[type][resource].backup ? this._remotes[db] : this._storageManager;
+      let table = storeDataObject[type][resource].backup ? db.split('/')[3] : this._table;
+      storage.set(db, 1, storeDataObject[type][resource], table);
       return storeDataObject[type][resource];
     }
   }
@@ -268,8 +282,9 @@ class DataObjectsStorage {
 
       this._storeDataObject = storeDataObject;
       let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
-      let storage = backup ? this._remotes[db] : this._storageManager;
-      storage.set( db, 1, storeDataObject[type][resource], db);
+      let storage = storeDataObject[type][resource].backup ? this._remotes[db] : this._storageManager;
+      let table = storeDataObject[type][resource].backup ? db.split('/')[3] : this._table;
+      storage.set( db, 1, storeDataObject[type][resource], table);
 
       return storeDataObject[type][resource];
     }
@@ -291,7 +306,7 @@ class DataObjectsStorage {
           if (tmp.hasOwnProperty('observers') && tmp.observers.hasOwnProperty(resource)) {
             delete tmp.observers[resource];
             let db = tmp.observers[resource].backup ? tmp.observers[resource].url : 'syncherManager:ObjectURLs';
-            let storage = backup ? this._remotes[db] : this._storageManager;
+            let storage = tmp.observers[resource].backup ? this._remotes[db] : this._storageManager;
             storage.delete(db, 1, resource);
             this._storeDataObject = tmp;
             return resolve(tmp.observers[resource]);
@@ -300,7 +315,7 @@ class DataObjectsStorage {
           if (tmp.hasOwnProperty('reporters') && tmp.reporters.hasOwnProperty(resource)) {
             delete tmp.reporters[resource];
             let db = tmp.reporters[resource].backup ? tmp.reporters[resource].url : 'syncherManager:ObjectURLs';
-            let storage = backup ? this._remotes[db] : this._storageManager;
+            let storage = tmp.reporters[resource].backup ? this._remotes[db] : this._storageManager;
             storage.delete(db, 1, resource);
             this._storeDataObject = tmp;
             return resolve(tmp.reporters[resource]);
@@ -319,7 +334,17 @@ class DataObjectsStorage {
   }
 
   getAll() {
-    return this._storeDataObject;
+
+    return new Promise((resolve, reject) => {
+      this._storeDataObject = this._storageManager.get('syncherManager:ObjectURLs').then((objects) => {
+        this._storeDataObject = objects;
+        this.loadRemote().then(()=>{
+          resolve(this._storeDataObject);
+        });
+
+      });
+
+    });
 //    return this._storageManager.get('syncherManager:ObjectURLs');
   }
 

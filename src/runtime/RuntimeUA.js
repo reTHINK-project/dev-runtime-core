@@ -149,6 +149,8 @@ class RuntimeUA {
 
       this.domain = this.runtimeConfiguration.domain;
 
+      log.info('[RuntimeUA - init] Starting ');
+
       try {
         let getCapabilities = this.runtimeCapabilities.getRuntimeCapabilities();
         let getRuntimeURL = this.storages.runtime.get('runtime:URL');
@@ -180,7 +182,9 @@ class RuntimeUA {
             this.storages.runtime.set('p2pHandler:URL', 1, { p2pHandlerURL: this.p2pHandlerURL });
           }
 
+          log.info('[RuntimeUA - init] dataObjectsStorage remote load starting');
           this._dataObjectsStorage.loadRemote().then(()=> {
+            log.info('[RuntimeUA - init] dataObjectsStorage remote load concluded');
             return this._loadComponents();
 
           });
