@@ -4,15 +4,51 @@ let log = logger.getLogger('DataObjectsStorage');
 
 import { assign, deepClone, divideURL } from '../utils/utils';
 
+import { createSyncDB } from '../runtime/Storage';
+
 class DataObjectsStorage {
 
-  constructor(storageManager, storedDataObjects) {
+  constructor(storageManager, storedDataObjects, factory) {
     if (!storageManager) throw new Error('[Store Data Objects] - Needs the storageManager component');
 
     this._storageManager = storageManager;
     this._storeDataObject = storedDataObjects;
 
     this._cache = {};
+
+    this._createSyncDB = createSyncDB; // to create Data Objects to be synched with remote storages
+    this._remotes = {}; // List of DO synched with remote storages
+    this._factory = factory;
+  }
+
+  // load Data Objects synched with remote Storages
+
+  loadRemote() {
+    let _this = this;
+    return new Promise ((resolve, reject) => {
+        let loading = [];
+
+        _this._storeDataObject.remotes.forEach((remote) => {
+          _this._remotes[remote] = createSyncDB(remote, 'syncherManager', _this._factory);
+          loading.push(_this._remotes[remote].get(remote));
+        });
+
+        Promise.all(loading).then(() => {
+            log.log('[StoreDataObjects.loadRemote] loaded. Starting init');
+            //TODO: init this._storeDataObject with loaded data objects
+          _this._storeDataObject.remotes.forEach((remote) => {
+            let dO = _this._remotes[remote].get();
+            log.log('[StoreDataObjects.loadRemote] loaded remote ', dO);
+
+            let type = this._getTypeOfObject(dO.isReporter);
+
+            _this._storeDataObject[type][remote] = dO;
+            
+          });
+            resolve()
+          } , (error) => {reject(error)});
+
+    });
   }
 
   /**
@@ -34,8 +70,6 @@ class DataObjectsStorage {
     let storeDataObject = this._storeDataObject;
     let type = this._getTypeOfObject(metadata.isReporter);
 
-    let backup = metadata.hasOwnProperty('backup') ? metadata.backup : false;
-    let db = backup ? metadata.url : 'syncherManager:ObjectURLs';
 
     if (!storeDataObject.hasOwnProperty(type)) storeDataObject[type] = {};
 
@@ -70,8 +104,29 @@ class DataObjectsStorage {
     }
 
     this._storeDataObject = storeDataObject;
-    this._storageManager.set(db, 1, storeDataObject[type][metadata.url], db, backup);
-    return storeDataObject[type][metadata.url];
+
+    let backup = metadata.hasOwnProperty('backup') ? metadata.backup : false;
+    let db = backup ? metadata.url : 'syncherManager:ObjectURLs';
+    if (backup && !this._remotes[db]) {
+      this._remotes[db] = createSyncDB(db, 'syncherManager', _this._factory);
+    }
+
+    let storage = backup ? this._remotes[db] : this._storageManager;
+
+    if (metadata.isReporter && backup) {// lets connect to remote storage to enable sync
+      storage.connect().then(()=> {
+        storage.set(db, 1, storeDataObject[type][metadata.url], db);
+        return storeDataObject[type][metadata.url];
+      }, (error) => {
+        log.error('[DataObjectStorage.set] failed to connect with remote storage: ', error);
+        storage.set(db, 1, storeDataObject[type][metadata.url], db);
+        return storeDataObject[type][metadata.url];
+      });
+    } else {
+      storage.set(db, 1, storeDataObject[type][metadata.url], db);
+      return storeDataObject[type][metadata.url];
+    }
+
   }
 
   /**
@@ -110,7 +165,8 @@ class DataObjectsStorage {
 
     this._storeDataObject = storeDataObject;
     let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
-    this._storageManager.set(db, 1, storeDataObject[type][metadata.url], db, backup);
+    let storage = backup ? this._remotes[db] : this._storageManager;
+    storage.set(db, 1, storeDataObject[type][metadata.url], db);
     return storeDataObject[type][resource];
   }
 
@@ -135,7 +191,8 @@ class DataObjectsStorage {
 
     this._storeDataObject = storeDataObject;
     let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
-    this._storageManager.set(db, 1, storeDataObject[type][metadata.url], db, backup);
+    let storage = backup ? this._remotes[db] : this._storageManager;
+    storage.set(db, 1, storeDataObject[type][metadata.url], db);
 
     return storeDataObject[type][resource];
   }
@@ -177,7 +234,8 @@ class DataObjectsStorage {
 
       this._storeDataObject = storeDataObject;
       let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
-      this._storageManager.set(db, 1, storeDataObject[type][metadata.url], db, backup);
+      let storage = backup ? this._remotes[db] : this._storageManager;
+      storage.set(db, 1, storeDataObject[type][metadata.url], db);
       return storeDataObject[type][resource];
     }
   }
@@ -210,7 +268,8 @@ class DataObjectsStorage {
 
       this._storeDataObject = storeDataObject;
       let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
-      this._storageManager.set( db, 1, storeDataObject[type][resource], db, storeDataObject[type][resource].backup);
+      let storage = backup ? this._remotes[db] : this._storageManager;
+      storage.set( db, 1, storeDataObject[type][resource], db);
 
       return storeDataObject[type][resource];
     }
@@ -232,7 +291,8 @@ class DataObjectsStorage {
           if (tmp.hasOwnProperty('observers') && tmp.observers.hasOwnProperty(resource)) {
             delete tmp.observers[resource];
             let db = tmp.observers[resource].backup ? tmp.observers[resource].url : 'syncherManager:ObjectURLs';
-            this._storageManager.delete(db, 1, resource);
+            let storage = backup ? this._remotes[db] : this._storageManager;
+            storage.delete(db, 1, resource);
             this._storeDataObject = tmp;
             return resolve(tmp.observers[resource]);
           }
@@ -240,7 +300,8 @@ class DataObjectsStorage {
           if (tmp.hasOwnProperty('reporters') && tmp.reporters.hasOwnProperty(resource)) {
             delete tmp.reporters[resource];
             let db = tmp.reporters[resource].backup ? tmp.reporters[resource].url : 'syncherManager:ObjectURLs';
-            this._storageManager.delete(db, 1, resource);
+            let storage = backup ? this._remotes[db] : this._storageManager;
+            storage.delete(db, 1, resource);
             this._storeDataObject = tmp;
             return resolve(tmp.reporters[resource]);
           }
@@ -273,10 +334,10 @@ class DataObjectsStorage {
 
     return new Promise((resolve, reject) => {
 
-      this._storageManager.get(resource, true).then((dataObject)=> {
+      this._remotes[resource].get().then((dataObject)=> {
         return resolve(dataObject);
       } , () => {
-        this._storageManager.get('syncherManager:ObjectURLs', false).then((storedDataObject) => {
+        this._storageManager.get('syncherManager:ObjectURLs').then((storedDataObject) => {
 
           let observers = storedDataObject.hasOwnProperty('observers') ? storedDataObject.observers : {};
           let reporters = storedDataObject.hasOwnProperty('reporters') ? storedDataObject.reporters : {};

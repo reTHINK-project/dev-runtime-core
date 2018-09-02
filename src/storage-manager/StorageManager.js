@@ -4,7 +4,7 @@ let log = logger.getLogger('StorageManager');
 
 class StorageManager {
 
-  constructor(db, storageName, schemas, version = 1) {
+  constructor(db, storageName, schemas, version = 1, remoteStorage = false) {
     if (!db) throw Error('The Storage Manager needs the database instance');
     if (!storageName) throw Error('The Storage Manager needs the storage name');
 
@@ -23,25 +23,25 @@ class StorageManager {
 
     this.db = db;
     this.storageName = storageName;
-    this._remote = false;
+    this._remoteStorage = remoteStorage;
   }
 
-  // set remote backup server URL
+  // set remoteStorage backup server URL
 
-  set remote(remote) {
-    this._remote = remote;
+  set remoteStorage(remoteStorage) {
+    this._remoteStorage = remoteStorage;
   }
 
-  // start sync with remote server. Returns a promise that resolves if connection is performed otherwise it is rejected
+  // start sync with remoteStorage server. Returns a promise that resolves if connection is performed otherwise it is rejected
 
   connect() {
-    return this.db.connect(this._remote);
+    return this.db.connect(this._remoteStorage);
   }
 
-  // stop sync with remote server. Returns promise 
-  
+  // stop sync with remoteStorage server. Returns promise 
+
   disconnect() {
-    return this.db.disconnect(this._remote);
+    return this.db.disconnect(this._remoteStorage);
   }
 
   _checkKey(key) {

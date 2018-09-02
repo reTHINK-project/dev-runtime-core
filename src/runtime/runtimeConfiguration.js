@@ -92,5 +92,6 @@ export const runtimeConfiguration = {
     prefix: 'domain://registry.',
     suffix: ''
   },
-  globalRegistryURL: 'global://registry.'
+  globalRegistryURL: 'global://registry.',
+  remoteStorage: 'http://localhost:3000'
 };

@@ -168,7 +168,7 @@ class RuntimeUA {
           this.capabilities = results[1];
           Object.assign(runtimeUtils.runtimeCapabilities.constraints, results[1]);
 
-          this._dataObjectsStorage = new DataObjectsStorage(this.storages.syncherManager, results[2] || {});
+          this._dataObjectsStorage = new DataObjectsStorage(this.storages.syncherManager, results[2] || {}, this.runtimeFactory );
 
           this._hypertyResources = results[3] || {};
 
@@ -180,7 +180,11 @@ class RuntimeUA {
             this.storages.runtime.set('p2pHandler:URL', 1, { p2pHandlerURL: this.p2pHandlerURL });
           }
 
-          return this._loadComponents();
+          this._dataObjectsStorage.loadRemote().then(()=> {
+            return this._loadComponents();
+
+          });
+
 
         }).then((status) => {
 
