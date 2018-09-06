@@ -91,12 +91,63 @@ class SyncherManager {
         case 'delete': _this._onDelete(msg); break;
         case 'subscribe': _this._onLocalSubscribe(msg); break;
         case 'unsubscribe': _this._onLocalUnSubscribe(msg); break;
+        case 'read': _this._onRead(msg); break;
       }
     });
 
   }
 
   get url() { return this._url; }
+
+    //FLOW-IN: message received from Syncher -> read
+    _onRead(msg) {
+
+      let _this = this;
+
+      let reply = {
+        type: 'response',
+        from: msg.to,
+        to: msg.from,
+        id: msg.id
+      }
+      log.info('[SyncherManager.onRead] new message', msg);
+
+      if (msg.hasOwnProperty('body') && msg.body.hasOwnProperty('resource')) {
+        _this._dataObjectsStorage.sync(msg.body.resource, true).then((dataObject)=>{
+          reply.body = {
+            code: 200,
+            value: dataObject
+          };
+  
+          log.info('[SyncherManager.onRead] found object: ', dataObject);
+  
+          _this._bus.postMessage(reply);
+        }, (error)=>{
+          reply.body = {
+            code: 400,
+            desc: error
+          };
+  
+          log.error('[SyncherManager.onRead] error: ', error);
+  
+          _this._bus.postMessage(reply);
+  
+        });
+
+      } else {
+        reply.body = {
+          code: 400,
+          desc: 'missing body or body resource mandatory fields'
+        };
+
+        log.error('[SyncherManager.onRead] error. Missing body or body resource mandatory fields', msg);
+
+        _this._bus.postMessage(reply);
+
+
+      }
+
+    }
 
   //FLOW-IN: message received from Syncher -> create
   _onCreate(msg) {

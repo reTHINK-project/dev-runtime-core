@@ -93,7 +93,7 @@ class DataObjectsStorage {
     delete storeDataObject[type][metadata.url].subscriberUser;
     delete storeDataObject[type][metadata.url].subscriberHyperty;
 
-    storeDataObject[type][metadata.url].backup = backup;
+    storeDataObject[type][metadata.url].backup = metadata.hasOwnProperty('backup') ? metadata.backup : false;
 
     /*if (schema) storeDataObject[type][metadata.url].schema = schema;
     if (status) storeDataObject[type][metadata.url].status = status;
@@ -178,7 +178,7 @@ class DataObjectsStorage {
     let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
     let storage = storeDataObject[type][resource].backup ? this._remotes[db] : this._storageManager;
     let table = storeDataObject[type][resource].backup ? db.split('/')[3] : this._table;
-    storage.set(db, 1, storeDataObject[type][metadata.url], table);
+    storage.set(db, 1, storeDataObject[type][resource], table);
     return storeDataObject[type][resource];
   }
 
@@ -348,7 +348,32 @@ class DataObjectsStorage {
 //    return this._storageManager.get('syncherManager:ObjectURLs');
   }
 
-  /**
+  sync(resource) {
+
+    return new Promise((resolve, reject) => {
+
+      if (this._remotes[resource]) {
+
+        this._remotes[resource].connect().then(()=> {
+          this._remotes[resource].get().then((dataObject)=>{
+            this._remotes[resource].disconnect().then(()=> {
+              return resolve(dataObject);
+            },(error)=> {
+              log.error('[DataObjectStorage.sync] Error disconnecting from remote storage');
+              return resolve(dataObject);
+            });
+          })
+        } , (error) => {reject(error)});
+        } else {
+          let error = '[DataObjectStorage.sync] Error: ' + resource + ' is not synched with remote storage.'
+          log.error(error);
+          reject(error);
+      }
+
+    });
+  }
+
+        /**
    * @description should look for a specific dataObjectURL
    *
    * @param {DataObjectURL} resource - the dataObjectURL will be searched

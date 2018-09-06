@@ -225,6 +225,72 @@ class Syncher {
   read(objURL) {
     let _this = this;
 
+    return new Promise((resolve, reject) => {
+    _this._readReporter(objURL).then((result)=> {
+      resolve(result);
+    }, (error)=> {
+     // in case the object is synched in a remote storage, lets sync with it
+      if (_this._observers[objURL] && _this._observers[objURL].hasOwnProperty('backup' && _this._observers[objURL].backup)) {
+        let readMsg = {
+          type: 'read', from: _this._owner, to: _this._subURL, 
+          body: { resource: objURL}
+        };
+
+          let callback = (reply) => {
+            return _this.__readCallBack(reply, resolve, reject);
+          };
+    
+          _this._bus.postMessage(readMsg, callback, false);
+    
+      } else reject(error);
+
+    });
+
+    });
+
+  }
+
+  _readCallBack(reply, resolve,reject) {
+      log.log('[Syncher.read] reply: ', reply);
+
+      let childrens = {};
+      let value = {};
+      let n = 0;
+
+      if (reply.body.code < 300) {
+        if (!reply.body.value.hasOwnProperty('responses')) {
+          _this._bus.removeResponseListener(readMsg.from, reply.id);
+          resolve(reply.body.value);
+        } else { //data object is sent in separated messages
+          if (n === 0) { //initial response without childrens
+            value = reply.body.value;
+            ++n;
+          } else { // received response contains childrens
+            delete reply.body.value.responses;
+            let children;
+            for (children in reply.body.value) {
+              if (!childrens.hasOwnProperty(children)) childrens[children] = {};
+              Object.assign(childrens[children], reply.body.value[children]);
+            }
+            ++n;
+            if (n === value.responses) {
+              value.childrenObjects = childrens;
+              delete value.responses;
+              _this._bus.removeResponseListener(readMsg.from, reply.id);
+              resolve(value);
+            }
+          }
+        }
+      } else {
+
+      reject(reply.body.desc);
+      }
+
+  }
+
+  _readReporter(objURL) {
+    let _this = this;
+
     //FLOW-OUT: this message will be sent directly to reporter object (maybe there is no listener available, so it will be resolved with MessageBus -> resolve)
     //will reach the remote object in DataObjectReporter -> _onRead
     let readMsg = {
@@ -233,43 +299,10 @@ class Syncher {
 
     return new Promise((resolve, reject) => {
       let callback = (reply) => {
-        log.log('[Syncher.read] reply: ', reply);
-
-        let childrens = {};
-        let value = {};
-        let n = 0;
-
-        if (reply.body.code < 300) {
-          if (!reply.body.value.hasOwnProperty('responses')) {
-            _this._bus.removeResponseListener(readMsg.from, reply.id);
-            resolve(reply.body.value);
-          } else { //data object is sent in separated messages
-            if (n === 0) { //initial response without childrens
-              value = reply.body.value;
-              ++n;
-            } else { // received response contains childrens
-              delete reply.body.value.responses;
-              let children;
-              for (children in reply.body.value) {
-                if (!childrens.hasOwnProperty(children)) childrens[children] = {};
-                Object.assign(childrens[children], reply.body.value[children]);
-              }
-              ++n;
-              if (n === value.responses) {
-                value.childrenObjects = childrens;
-                delete value.responses;
-                _this._bus.removeResponseListener(readMsg.from, reply.id);
-                resolve(value);
-              }
-            }
-          }
-        } else {
-          reject(reply.body.desc);
-        }
+        return _this.__readCallBack(reply, resolve, reject);
       };
 
       let id = _this._bus.postMessage(readMsg, callback, false);
-
 
     });
   }
