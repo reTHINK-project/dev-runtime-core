@@ -8,7 +8,7 @@ import { createSyncDB } from '../runtime/Storage';
 
 class DataObjectsStorage {
 
-  constructor(storageManager, storedDataObjects = false, factory) {
+  constructor(storageManager, storedDataObjects = {}, factory) {
     if (!storageManager) throw new Error('[Store Data Objects] - Needs the storageManager component');
 
     this._storageManager = storageManager;
@@ -30,31 +30,49 @@ class DataObjectsStorage {
     return new Promise ((resolve, reject) => {
         let loading = [];
 
-        if (_this._storeDataObject && _this._storeDataObject.hasOwnProperty('remotes')) {
-          _this._storeDataObject.remotes.forEach((remote) => {
-            _this._remotes[remote] = createSyncDB(remote, _this._factory, 'remoteDataObjectStorage' );
-            loading.push(_this._remotes[remote].get(remote));
+        _this._storageManager.get(null,null,'remotes').then((remotes)=>{
+
+          _this._remotes = remotes;
+
+          log.info('[StoreDataObjects.loadRemote] loading: ', _this._remotes);
+
+          Object.keys(_this._remotes).forEach((db) => {
+            let schema = {};
+            let table = db.split('/')[3];
+            schema[table] = 'key,version,value';
+            this._remotes[db] = createSyncDB(db, this._factory, schema);
+      //            _this._remotes[remote] = createSyncDB(remote, _this._factory, 'remoteDataObjectStorage' );
+            loading.push(_this._remotes[db].get(null,null,table));
           });
 
           Promise.all(loading).then(() => {
             log.log('[StoreDataObjects.loadRemote] loaded. Starting init');
             //TODO: init this._storeDataObject with loaded data objects
-          _this._storeDataObject.remotes.forEach((remote) => {
-            let dO = _this._remotes[remote].get();
-            log.log('[StoreDataObjects.loadRemote] loaded remote ', dO);
+            Object.keys(_this._remotes).forEach((remote) => {
+              let table = remote.split('/')[3];
+            _this._remotes[remote].get(null,null,table).then((dO) => {
+              log.log('[StoreDataObjects.loadRemote] loaded remote ', dO);
 
-            let type = this._getTypeOfObject(dO.isReporter);
+              let type = this._getTypeOfObject(dO.isReporter);
 
-            _this._storeDataObject[type][remote] = dO;
+              if (!_this._storeDataObject.hasOwnProperty(type)) _this._storeDataObject[type] = {};
+
+              _this._storeDataObject[type][remote] = dO[remote].value;
+              log.log('[StoreDataObjects.loadRemote] storeDataObject updated: ', _this._storeDataObject);
+  
+            });
             
           });
             resolve()
           } , (error) => {reject(error)});
 
   
-        }
-
         resolve();
+        }, (error) => {
+          reject(error);
+        });
+
+    resolve();
 
     });
   }
@@ -126,16 +144,22 @@ class DataObjectsStorage {
 
     if (metadata.isReporter && backup) {// lets connect to remote storage to enable sync
       storage.connect().then(()=> {
-        storage.set(db, 1, storeDataObject[type][metadata.url], table);
-        return storeDataObject[type][metadata.url];
+        storage.set(db, 0, storeDataObject[type][metadata.url], table).then(() => {
+          this._storageManager.set( metadata.url, 0, metadata.url, 'remotes').then(()=>{
+            return storeDataObject[type][metadata.url];
+          });
+        });
       }, (error) => {
         log.error('[DataObjectStorage.set] failed to connect with remote storage: ', error);
         storage.set(db, 1, storeDataObject[type][metadata.url], table);
       });
         return storeDataObject[type][metadata.url];
     } else {
-      storage.set(db, 1, storeDataObject[type][metadata.url], table);
-      return storeDataObject[type][metadata.url];
+      storage.set(db, 1, storeDataObject[type][metadata.url], table).then(()=>{
+        this._storageManager.set( metadata.url, 0, metadata.url, 'remotes').then(()=>{
+          return storeDataObject[type][metadata.url];
+        });
+      });
     }
 
   }

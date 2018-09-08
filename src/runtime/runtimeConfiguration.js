@@ -36,7 +36,8 @@ export const runtimeConfiguration = {
       'rethink:spPolicies': 'key,version,value'
     },
     syncherManager: {
-      'syncherManager:ObjectURLs': 'key,version,value'
+      'syncherManager:ObjectURLs': 'key,version,value',
+      'remotes': 'key,version,value'
     },
     hypertyResources: {
       hypertyResources: '&resourceURL, name, contentUrl, content, created, reporter, resourceType'

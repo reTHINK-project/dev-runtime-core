@@ -157,6 +157,7 @@ class RuntimeUA {
         let getStoredDataObjects = this.storages.syncherManager.get('syncherManager:ObjectURLs');
         let getHypertyStorageObjects = this.storages.hypertyResources.get();
         let getP2PHandlerURL = this.storages.runtime.get('p2pHandler:URL');
+//        let getRemotes = this.storages.syncherManager.get('remotes');
 
         Promise.all([getRuntimeURL, getCapabilities, getStoredDataObjects, getHypertyStorageObjects, getP2PHandlerURL]).then((results) => {
 

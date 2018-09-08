@@ -237,7 +237,7 @@ class Syncher {
         };
 
           let callback = (reply) => {
-            return _this.__readCallBack(reply, resolve, reject);
+            return _this._readCallBack(reply, resolve, reject);
           };
     
           _this._bus.postMessage(readMsg, callback, false);
