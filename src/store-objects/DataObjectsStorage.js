@@ -21,6 +21,7 @@ class DataObjectsStorage {
     this._factory = factory;
     this._table = 'syncherManager:ObjectURLs';
     this._remoteStorageTable = 'dataObjectStorage';
+    this._remoteSchema = 'url';
   }
 
   // load Data Objects synched with remote Storages
@@ -39,7 +40,7 @@ class DataObjectsStorage {
           Object.keys(_this._remotes).forEach((db) => {
             let schema = {};
             let table = db.split('/')[3];
-            schema[table] = 'key,version,value';
+            schema[table] = this._remoteSchema;
             this._remotes[db] = createSyncDB(db, this._factory, schema);
       //            _this._remotes[remote] = createSyncDB(remote, _this._factory, 'remoteDataObjectStorage' );
             loading.push(_this._remotes[db].get(null,null,table));
@@ -57,7 +58,7 @@ class DataObjectsStorage {
 
               if (!_this._storeDataObject.hasOwnProperty(type)) _this._storeDataObject[type] = {};
 
-              _this._storeDataObject[type][remote] = dO[remote].value;
+              _this._storeDataObject[type][remote] = dO[remote];
               log.log('[StoreDataObjects.loadRemote] storeDataObject updated: ', _this._storeDataObject);
   
             });
@@ -136,7 +137,7 @@ class DataObjectsStorage {
     let table = backup ? db.split('/')[3] : this._table;
     if (backup && !this._remotes[db]) {
       let schema = {};
-      schema[table] = 'key,version,value';
+      schema[table] = this._remoteSchema;
       this._remotes[db] = createSyncDB(db, this._factory, schema);
     }
 
@@ -202,8 +203,12 @@ class DataObjectsStorage {
     let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
     let storage = storeDataObject[type][resource].backup ? this._remotes[db] : this._storageManager;
     let table = storeDataObject[type][resource].backup ? db.split('/')[3] : this._table;
-    storage.set(db, 1, storeDataObject[type][resource], table);
-    return storeDataObject[type][resource];
+    storage.set(db, 1, storeDataObject[type][resource], table).then(() => {
+      return storeDataObject[type][resource];
+    }, (error)=>{
+      console.error(error);
+      return storeDataObject[type][resource];
+    });
   }
 
   saveChildrens(isReporter, resource, attribute, value) {

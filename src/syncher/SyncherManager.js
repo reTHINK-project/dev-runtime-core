@@ -344,14 +344,18 @@ class SyncherManager {
 
           //if (!interworking) {
 
-          _this._dataObjectsStorage.set(metadata);
-
           if (msg.body.hasOwnProperty('store') && msg.body.store) {
             reporter.isToSaveData = true;
-            _this._dataObjectsStorage.update(true, objectRegistration.url, 'isToSaveData', true);
+            metadata.isToSaveData = true;
+            if (msg.body.value.data) { 
+              metadata.data = deepClone(msg.body.value.data);
+//              _this._dataObjectsStorage.saveData(true, objectRegistration.url, null, msg.body.value.data); }
+//            _this._dataObjectsStorage.update(true, objectRegistration.url, 'isToSaveData', true);
 
-            if (msg.body.value.data) { _this._dataObjectsStorage.saveData(true, objectRegistration.url, null, msg.body.value.data); }
+//            if (msg.body.value.data) { _this._dataObjectsStorage.saveData(true, objectRegistration.url, null, msg.body.value.data); }
+            }
           }
+          _this._dataObjectsStorage.set(metadata);
 
           //}
           let responseMsg = {
