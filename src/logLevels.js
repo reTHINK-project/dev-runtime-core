@@ -23,6 +23,8 @@ const t = log.getLogger('SyncherManager');
 const u = log.getLogger('IdentityHandler');
 const v = log.getLogger('CryptoManager');
 const x = log.getLogger('Pipeline');
+const f1 = log.getLogger('Syncher');
+const f2 = log.getLogger('DataObjectObserver');
 
 
 export { log };
@@ -115,3 +117,9 @@ v.setLevel(3);
 
 // Pipeline
 x.setLevel(3);
+
+// Syncher
+f1.setLevel(0);
+
+// Syncher DataObjectObserver
+f1.setLevel(0);

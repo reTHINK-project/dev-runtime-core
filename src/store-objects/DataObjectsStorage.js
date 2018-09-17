@@ -382,14 +382,16 @@ class DataObjectsStorage {
     return new Promise((resolve, reject) => {
 
       if (this._remotes[resource]) {
+        //split('/')[3]
 
         this._remotes[resource].connect().then(()=> {
-          this._remotes[resource].get().then((dataObject)=>{
-            this._remotes[resource].disconnect().then(()=> {
-              return resolve(dataObject);
+          this._remotes[resource].get(null,null,resource.split('/')[3]).then((dataObject)=>{
+//          this._remotes[resource].get().then((dataObject)=>{
+              this._remotes[resource].disconnect().then(()=> {
+              return resolve(dataObject[resource]);
             },(error)=> {
               log.error('[DataObjectStorage.sync] Error disconnecting from remote storage');
-              return resolve(dataObject);
+              return resolve(dataObject[resource]);
             });
           })
         } , (error) => {reject(error)});
@@ -455,7 +457,8 @@ class DataObjectsStorage {
 
       let type = this._getTypeOfObject(isReporter);
 
-      this.getAll().then((storedDataObjects) => {
+//      this.getAll().then((storedDataObjects) => {
+      let storedDataObjects = this._storeDataObject;
 
         if (!storedDataObjects) {
           log.log('[DataObjectsStorage.getResourcesByCriteria] don\'t have stored data objects');
@@ -532,7 +535,7 @@ class DataObjectsStorage {
         log.log('[Store Data Objects] - ', init);
 
         resolve(init);
-      });
+//      });
 
     });
 

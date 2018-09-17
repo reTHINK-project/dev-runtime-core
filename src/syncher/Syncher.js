@@ -224,13 +224,12 @@ class Syncher {
   */
   read(objURL) {
     let _this = this;
+    console.log('[Syncher.read] ', objURL);
 
     return new Promise((resolve, reject) => {
-    _this._readReporter(objURL).then((result)=> {
-      resolve(result);
-    }, (error)=> {
      // in case the object is synched in a remote storage, lets sync with it
-      if (_this._observers[objURL] && _this._observers[objURL].hasOwnProperty('backup' && _this._observers[objURL].backup)) {
+      if (_this._observers[objURL] && _this._observers[objURL].metadata.hasOwnProperty('backup') && _this._observers[objURL].metadata.backup) {
+
         let readMsg = {
           type: 'read', from: _this._owner, to: _this._subURL, 
           body: { resource: objURL}
@@ -242,16 +241,20 @@ class Syncher {
     
           _this._bus.postMessage(readMsg, callback, false);
     
-      } else reject(error);
-
-    });
+      } else {
+        _this._readReporter(objURL).then((result)=> {
+        resolve(result);
+      });
+    }
 
     });
 
   }
 
   _readCallBack(reply, resolve,reject) {
-      log.log('[Syncher.read] reply: ', reply);
+    let _this = this;
+
+      console.log('[Syncher.read] reply: ', reply);
 
       let childrens = {};
       let value = {};
@@ -259,7 +262,7 @@ class Syncher {
 
       if (reply.body.code < 300) {
         if (!reply.body.value.hasOwnProperty('responses')) {
-          _this._bus.removeResponseListener(readMsg.from, reply.id);
+          _this._bus.removeResponseListener(reply.from, reply.id);
           resolve(reply.body.value);
         } else { //data object is sent in separated messages
           if (n === 0) { //initial response without childrens
@@ -276,7 +279,7 @@ class Syncher {
             if (n === value.responses) {
               value.childrenObjects = childrens;
               delete value.responses;
-              _this._bus.removeResponseListener(readMsg.from, reply.id);
+              _this._bus.removeResponseListener(reply.from, reply.id);
               resolve(value);
             }
           }
@@ -298,11 +301,10 @@ class Syncher {
     };
 
     return new Promise((resolve, reject) => {
-      let callback = (reply) => {
-        return _this.__readCallBack(reply, resolve, reject);
-      };
 
-      let id = _this._bus.postMessage(readMsg, callback, false);
+      _this._bus.postMessage(readMsg, (reply) => {
+        return _this._readCallBack(reply, resolve, reject);
+      }, false);
 
     });
   }

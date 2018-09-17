@@ -46,7 +46,7 @@ class Bus {
     _this._msgId = 0;
     _this._subscriptions = {};
 
-    _this._responseTimeOut = 30000; //default to 3s
+    _this._responseTimeOut = 15000; //default to 3s
     _this._responseCallbacks = {};
 
     _this._registerExternalListener();
