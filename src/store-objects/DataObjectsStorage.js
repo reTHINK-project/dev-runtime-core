@@ -144,7 +144,8 @@ class DataObjectsStorage {
     let storage = backup ? this._remotes[db] : this._storageManager;
 
     if (metadata.isReporter && backup) {// lets connect to remote storage to enable sync
-      storage.connect().then(()=> {
+      let options = {table: table};
+      storage.connect(options).then(()=> {
         storage.set(db, 0, storeDataObject[type][metadata.url], table).then(() => {
           this._storageManager.set( metadata.url, 0, metadata.url, 'remotes').then(()=>{
             return storeDataObject[type][metadata.url];
@@ -382,10 +383,11 @@ class DataObjectsStorage {
     return new Promise((resolve, reject) => {
 
       if (this._remotes[resource]) {
-        //split('/')[3]
+        let table = resource.split('/')[3];
+        let options = {table: table};
 
-        this._remotes[resource].connect().then(()=> {
-          this._remotes[resource].get(null,null,resource.split('/')[3]).then((dataObject)=>{
+        this._remotes[resource].connect(options).then(()=> {
+          this._remotes[resource].get(null,null,table).then((dataObject)=>{
 //          this._remotes[resource].get().then((dataObject)=>{
               this._remotes[resource].disconnect().then(()=> {
               return resolve(dataObject[resource]);

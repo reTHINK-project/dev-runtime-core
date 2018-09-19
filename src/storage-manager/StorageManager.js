@@ -34,8 +34,8 @@ class StorageManager {
 
   // start sync with remoteStorage server. Returns a promise that resolves if connection is performed otherwise it is rejected
 
-  connect() {
-    return this.db.connect(this._remoteStorage);
+  connect(options) {
+    return this.db.connect(this._remoteStorage, options);
   }
 
   // stop sync with remoteStorage server. Returns promise 
