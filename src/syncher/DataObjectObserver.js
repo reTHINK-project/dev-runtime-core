@@ -128,13 +128,13 @@ class DataObjectObserver extends DataObject /* implements SyncStatus */ {
     //TODO: to be sent to HypertyResourceStorage when ready to handle Chat Messages
 
     Object.keys(_this._childrenObjects).forEach((childrenResource) => {
-      let children = _this._childrenObjects[childrenResource];
-      childrens[childrenResource] = {};
+      let children = _this._childrenObjects;
+//      childrens[childrenResource] = {};
 
       Object.keys(children).forEach((childId) => {
-        childrens[childrenResource][childId] = {};
-        childrens[childrenResource][childId].value = children[childId].metadata;
-        childrens[childrenResource][childId].identity = children[childId].identity;
+        childrens[childId] = {};
+        childrens[childId].value = children[childId].metadata;
+        childrens[childId].identity = children[childId].identity;
       });
     });
 

@@ -258,7 +258,8 @@ class ReporterObject {
     let objectURLResource = msg.body.resource;
     let attribute = resource;
 
-    if (objectURLResource) attribute += '.' + objectURLResource;
+//    if (objectURLResource) attribute += '.' + objectURLResource;
+    if (objectURLResource) attribute = objectURLResource;
 
     // this identity data is not needed to be stored
     delete value.identity.assertion;
@@ -340,7 +341,6 @@ class ReporterObject {
           }
         }
 
-        //TODO: atualizar mutual no storage e tb na sessionKeys
 
         // Store for each reporter hyperty the dataObject
         let userURL;
@@ -349,13 +349,15 @@ class ReporterObject {
           _this._parent._dataObjectsStorage.update(true, _this._url, 'subscriberUsers', userURL);
         }
 
-        if (msg.body.hasOwnProperty('mutual')) {
+        //TODO: mutual and sessionkeys updates were removed. FFS
+
+        /*        if (msg.body.hasOwnProperty('mutual')) {
 //          _this._parent._identityModule.updateIsToEncryptForDataObjectSessionKey(_this._url, msg.body.mutual).then(()=>{
             _this._parent._dataObjectsStorage.update(true, _this._url, 'mutual', msg.body.mutual);
 //          });
         }
 
-        _this._parent._dataObjectsStorage.update(true, _this._url, 'subscriptions', hypertyURL);
+        _this._parent._dataObjectsStorage.update(true, _this._url, 'subscriptions', hypertyURL);*/
 
         reply.body.owner = _this._owner;
 

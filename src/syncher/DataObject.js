@@ -185,28 +185,29 @@ class DataObject {
 
     //setup childrens data from subscription
     Object.keys(childrens).forEach((childrenResource) => {
-      let children = childrens[childrenResource];
+//      let children = childrens[childrenResource];
+      let children = childrens;
 
       //_this._childrenObjects[childrenResource] = {};
       Object.keys(children).forEach((childId) => {
         let newChild = false;
 
-        if (!_this._childrenObjects.hasOwnProperty(childrenResource))
-          _this._childrenObjects[childrenResource] = {};
+/*        if (!_this._childrenObjects.hasOwnProperty(childrenResource))
+          _this._childrenObjects[childrenResource] = {};*/
 
-        if (children[childId].value.resourceType && !_this._childrenObjects[childrenResource].hasOwnProperty(childId)) {
-          _this._childrenObjects[childrenResource][childId] = _this._resumeHypertyResource(children[childId]);
+        if (children[childId].value.resourceType && !_this._childrenObjects.hasOwnProperty(childId)) {
+          _this._childrenObjects[childId] = _this._resumeHypertyResource(children[childId]);
           newChild = true;
-        } else if (!_this._childrenObjects[childrenResource].hasOwnProperty(childId)) {
+        } else if (!_this._childrenObjects.hasOwnProperty(childId)) {
 
-          _this._childrenObjects[childrenResource][childId] = _this._resumeChild(children[childId]);
-          log.log('[DataObject.resumeChildrens] new DataObjectChild: ', _this._childrenObjects[childrenResource][childId]);
+          _this._childrenObjects[childId] = _this._resumeChild(children[childId]);
+          log.log('[DataObject.resumeChildrens] new DataObjectChild: ', _this._childrenObjects[childId]);
           newChild = true;
         }
 
         if (newChild && childId > childIdString) {
           childIdString = childId;
-          log.log('[DataObjectReporter.resumeChildrens] - resuming: ', this._childrenObjects[childrenResource][childId]);
+          log.log('[DataObjectReporter.resumeChildrens] - resuming: ', this._childrenObjects[childId]);
         }
 
       });

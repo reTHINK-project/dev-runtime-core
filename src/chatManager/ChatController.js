@@ -132,7 +132,7 @@ class ChatController {
 
   get messages() {
 
-    return this.controllerMode === 'reporter' ? this._dataObjectReporter._childrenObjects['resources'] : this._dataObjectObserver._childrenObjects['resources'];
+    return this.controllerMode === 'reporter' ? this._dataObjectReporter._childrenObjects : this._dataObjectObserver._childrenObjects;
   }
 
   set dataObjectObserver(dataObjectObserver) {
@@ -232,7 +232,7 @@ class ChatController {
       domain: event.domain,
       identity: identity
     }
-    let userURL = event.identity.userProfile.userURL;
+    let userURL = event.identity.userProfile.guid;
 
     console.log('[ChatManager.ChatController.onSubscribe]  new participant', userInfo);
     if (event.identity.legacy) {

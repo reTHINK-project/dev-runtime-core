@@ -355,8 +355,7 @@ class SyncherManager {
 //            if (msg.body.value.data) { _this._dataObjectsStorage.saveData(true, objectRegistration.url, null, msg.body.value.data); }
             }
           }
-          _this._dataObjectsStorage.set(metadata);
-
+          _this._dataObjectsStorage.set(metadata).then((storeObject) => {
           //}
           let responseMsg = {
             id: msg.id, type: 'response', from: msg.to, to: owner,
@@ -388,6 +387,11 @@ class SyncherManager {
             });
 
           }
+          }, (error)=> {
+            log.error(error);
+          });
+
+
         }, function (error) {
           log.error(error);
         });
@@ -513,7 +517,8 @@ class SyncherManager {
 
         childrens.forEach((children) => {
 
-          let childObjects = storedObject.childrenObjects[children];
+//          let childObjects = storedObject.childrenObjects[children];
+          let childObjects = storedObject.childrenObjects;
 
           log.log('[SyncherManager._decryptChildrens] dataObjectChilds to decrypt ', childObjects);
 
@@ -539,7 +544,7 @@ class SyncherManager {
 
             decryptedObjects.forEach((decryptedObject) => {
               const childId = decryptedObject.value.url;
-              storedObject.childrenObjects[children][childId].value = decryptedObject.value;
+              storedObject.childrenObjects[childId].value = decryptedObject.value;
             });
 
             log.log('[SyncherManager._decryptChildrens] storedObject ', storedObject);

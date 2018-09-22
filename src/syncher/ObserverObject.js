@@ -133,7 +133,8 @@ class ObserverObject {
     let objectURLResource = msg.body.resource;
     let attribute = resource;
 
-    if (objectURLResource) attribute += '.' + objectURLResource;
+//    if (objectURLResource) attribute += '.' + objectURLResource;
+    if (objectURLResource) attribute = objectURLResource;
 
     log.log('[SyncherManager.ObserverObject._storeChildObject] : ', url, attribute, value);
 
