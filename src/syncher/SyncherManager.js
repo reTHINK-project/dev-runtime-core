@@ -154,6 +154,7 @@ class SyncherManager {
 
     let from = msg.from;
     let to = msg.to;
+    let _this = this;
 
     // check if message is to save new childrenObjects in the local storage
     // TODO: check if message is to store new child in the local storage and call storeChild. How to distinguish from others?
@@ -185,13 +186,16 @@ class SyncherManager {
             let listOfReporters = [];
 
             Object.keys(result).forEach((objURL) => {
-              listOfReporters.push(this._resumeCreate(msg, result[objURL]));
+
+              listOfReporters.push(
+                  _this._resumeCreate(msg, result[objURL])
+                );
             });
 
             Promise.all(listOfReporters).then((resumedReporters) => {
               log.log('[SyncherManager - Create Resumed]', resumedReporters);
 
-              // TODO: shoud send the information if some object was fail;
+              // TODO: shoud send the information if some object was failing;
               let successfullyResumed = Object.values(resumedReporters).filter((reporter) => {
                 return reporter !== false;
               });
@@ -201,8 +205,14 @@ class SyncherManager {
               //FLOW-OUT: message response to Syncher -> create resume
               this._bus.postMessage({
                 id: msg.id, type: 'response', from: to, to: from,
-                body: { code: 200, value: successfullyResumed }
+                body: { code: 200, value: deepClone(successfullyResumed) }
               });
+
+              /*successfullyResumed.forEach((reporter) => {
+                if (reporter.backup) {
+                  this._dataObjectsStorage.sync(reporter.url);
+                }
+              });*/
 
             });
 
@@ -450,7 +460,11 @@ class SyncherManager {
 
         if (domainRegistration) {
           reporter.forwardSubscribe([storedObject.url]).then(() => {
-            resolve(_this._resumeReporterSubscriptions(msg, storedObject, reporter, childrens, domainRegistration));
+            log.log('[SyncherManager._resumeCreate] resumingReporterSubscription ', storedObject);
+            _this._resumeReporterSubscriptions(msg, storedObject, reporter, childrens, domainRegistration).then((resumeObject)=>{
+              log.log('[SyncherManager._resumeCreate] resolved resumed object ', resumeObject);
+              resolve(resumeObject);
+            });
         });
       } else resolve(_this._resumeReporterSubscriptions(msg, storedObject, reporter, childrens, domainRegistration));
 
@@ -486,9 +500,10 @@ class SyncherManager {
       return _this._decryptChildrens(storedObject, childrens);
     }).then((decryptedObject) => {
 
-      log.info('[SyncherManager._resumeCreate] Register Object: ', objectRegistration);
+      log.info('[SyncherManager._resumeReporterSubscriptions] Register Object: ', objectRegistration);
       _this._registry.registerDataObject(objectRegistration).then((registered) => {
-        log.log('[SyncherManager._resumeCreate] DataObject registration successfully updated', registered);
+        log.log('[SyncherManager._resumeReporterSubscriptions] DataObject registration successfully updated', registered);
+        log.log('[SyncherManager._resumeReporterSubscriptions] resolving object', decryptedObject);
         resolve(decryptedObject);
 
       });
@@ -504,8 +519,10 @@ class SyncherManager {
 
   // to decrypt DataChildObjects if they are encrypted
 
-  _decryptChildrens(storedObject, childrens) {
+  _decryptChildrens(encryptedObject, childrens) {
     let _this = this;
+
+    let storedObject = deepClone(encryptedObject);
     return new Promise((resolve) => {
 
       if (!childrens) { resolve(storedObject); } else {
@@ -637,7 +654,7 @@ class SyncherManager {
 
         let listOfObservers = [];
 
-        // TODO: should reuse the storaged information
+        // TODO: should reuse the stored information
         Object.keys(result).forEach((objURL) => {
           log.log('[SyncherManager - resume Subscribe] - reuse current object url: ', result[objURL]);
           listOfObservers.push(this._resumeSubscription(msg, result[objURL]));
@@ -646,7 +663,7 @@ class SyncherManager {
         Promise.all(listOfObservers).then((resumedObservers) => {
           log.log('[SyncherManager - Observers Resumed]', resumedObservers);
 
-          // TODO: shoud send the information if some object was fail;
+          // TODO: shoud send the information if some object is failing;
           let successfullyResumed = Object.values(resumedObservers).filter((observer) => {
             return observer !== false;
           });

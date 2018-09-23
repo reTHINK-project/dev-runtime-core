@@ -54,7 +54,12 @@ class ReporterObject {
         log.log('[SyncherManager.ReporterObject ] SyncherManager - save data: ', msg);
         _this._parent._dataObjectsStorage.update(true, _this._url, 'version', msg.body.version);
         _this._parent._dataObjectsStorage.update(true, _this._url, 'lastModified', msg.body.lastModified);
-        _this._parent._dataObjectsStorage.saveData(true, _this._url, msg.body.attribute, msg.body.value);
+        _this._parent._dataObjectsStorage.saveData(true, _this._url, msg.body.attribute, msg.body.value).then((storedObject)=> {
+          if (storedObject.backupRevision) {
+            //TODO: broadcast to observers new backup revision
+            console.log('[SyncManager.ReporterObject] new backup revision ', storedObject.backupRevision);
+          }
+        })
       }
     });
   }
@@ -355,9 +360,9 @@ class ReporterObject {
 //          _this._parent._identityModule.updateIsToEncryptForDataObjectSessionKey(_this._url, msg.body.mutual).then(()=>{
             _this._parent._dataObjectsStorage.update(true, _this._url, 'mutual', msg.body.mutual);
 //          });
-        }
+        }*/
 
-        _this._parent._dataObjectsStorage.update(true, _this._url, 'subscriptions', hypertyURL);*/
+        _this._parent._dataObjectsStorage.update(true, _this._url, 'subscriptions', hypertyURL);
 
         reply.body.owner = _this._owner;
 

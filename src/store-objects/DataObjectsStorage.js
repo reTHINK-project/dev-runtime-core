@@ -147,15 +147,21 @@ class DataObjectsStorage {
       if (metadata.isReporter && backup) {// lets connect to remote storage to enable sync
         let options = {table: table};
         storage.connect(options).then(()=> {
-          storage.set(db, 0, storeDataObject[type][metadata.url], table).then(() => {
+          storage.set(db, 0, storeDataObject[type][metadata.url], table).then((revision) => {
+            storeDataObject[type][metadata.url].backupRevision = revision;
             this._storageManager.set( metadata.url, 0, metadata.url, 'remotes').then(()=>{
               resolve(storeDataObject[type][metadata.url]);
             });
           });
         }, (error) => {
-          log.error('[DataObjectStorage.set] failed to connect with remote storage: ', error);
-          storage.set(db, 1, storeDataObject[type][metadata.url], table);
+          log.error('[DataObjectStorage.set] failed to connect with remote storage: ', error, ' trying again...');
+          storage.connect(options).then(()=> {
+            storage.set(db, 1, storeDataObject[type][metadata.url], table);
           resolve(storeDataObject[type][metadata.url]);
+          }, (error) => {
+            log.error('[DataObjectStorage.set] failed to connect with remote storage: ', error);
+            reject(error);
+          });
         });
 //          return storeDataObject[type][metadata.url];
       } else {
@@ -209,7 +215,8 @@ class DataObjectsStorage {
     let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
     let storage = storeDataObject[type][resource].backup ? this._remotes[db] : this._storageManager;
     let table = storeDataObject[type][resource].backup ? db.split('/')[3] : this._table;
-    storage.set(db, 1, storeDataObject[type][resource], table).then(() => {
+    storage.set(db, 1, storeDataObject[type][resource], table).then((revision) => {
+      if (revision) storeDataObject[type][resource].backupRevision = revision;
       return storeDataObject[type][resource];
     }, (error)=>{
       console.error(error);
@@ -244,9 +251,12 @@ class DataObjectsStorage {
     let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
     let storage = storeDataObject[type][resource].backup ? this._remotes[db] : this._storageManager;
     let table = storeDataObject[type][resource].backup ? db.split('/')[3] : this._table;
-    storage.set(db, 1, storeDataObject[type][resource], table);
+    storage.set(db, 1, storeDataObject[type][resource], table).then((revision)=>{
+      if (revision) storeDataObject[type][resource].backupRevision = revision;
 
-    return storeDataObject[type][resource];
+      return storeDataObject[type][resource];
+    });
+
   }
 
   /**
@@ -288,8 +298,11 @@ class DataObjectsStorage {
       let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
       let storage = storeDataObject[type][resource].backup ? this._remotes[db] : this._storageManager;
       let table = storeDataObject[type][resource].backup ? db.split('/')[3] : this._table;
-      storage.set(db, 1, storeDataObject[type][resource], table);
-      return storeDataObject[type][resource];
+      storage.set(db, 1, storeDataObject[type][resource], table).then((revision)=>{
+        if (revision) storeDataObject[type][resource].backupRevision = revision;
+
+        return storeDataObject[type][resource];
+      });
     }
   }
 
@@ -388,28 +401,34 @@ class DataObjectsStorage {
   }
 
   sync(resource, observer = false) {
+    let _this= this;
 
     return new Promise((resolve, reject) => {
 
-      if (this._remotes[resource]) {
-        let table = resource.split('/')[3];
-        let options = {table: table, observer: observer};
 
-        this._remotes[resource].connect(options).then(()=> {
-          this._remotes[resource].get(null,null,table).then((dataObject)=>{
+      if (_this._remotes[resource]) {
+        let type = observer ? 'observers' : 'reporters';
+        let lastRevision = _this._storeDataObject[type][resource].backupRevision;
+
+        let table = resource.split('/')[3];
+        let options = {table: table, observer: observer, baseRevision: lastRevision, syncedRevision: lastRevision};
+
+        _this._remotes[resource].connect(options).then(()=> {
+          if (observer) _this._remotes[resource].disconnect();
+
+          _this._remotes[resource].get(null,null,table).then((dataObject)=>{
 //          this._remotes[resource].get().then((dataObject)=>{
-              this._remotes[resource].disconnect().then(()=> {
-              return resolve(dataObject[resource]);
+              log.info('[DataObjectStorage.sync] returning synched DO: ', dataObject);
+                return resolve(dataObject[resource]);
             },(error)=> {
               log.error('[DataObjectStorage.sync] Error disconnecting from remote storage');
-              return resolve(dataObject[resource]);
+              reject; 
             });
-          })
         } , (error) => {reject(error)});
         } else {
-          let error = '[DataObjectStorage.sync] Error: ' + resource + ' is not synched with remote storage.'
-          log.error(error);
-          reject(error);
+          let info = '[DataObjectStorage.sync] Info: ' + resource + ' is not synched with remote storage.'
+          log.info(info);
+          reject(info);
       }
 
     });
@@ -470,7 +489,7 @@ class DataObjectsStorage {
 
       let type = this._getTypeOfObject(isReporter);
 
-//      this.getAll().then((storedDataObjects) => {
+//      this.getAll(isReporter).then((storedDataObjects) => {
       let storedDataObjects = this._storeDataObject;
 
         if (!storedDataObjects) {
@@ -548,9 +567,9 @@ class DataObjectsStorage {
         log.log('[Store Data Objects] - ', init);
 
         resolve(init);
-//      });
+      });
 
-    });
+//    });
 
   }
 

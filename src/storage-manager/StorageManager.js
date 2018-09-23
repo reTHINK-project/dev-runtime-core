@@ -44,6 +44,21 @@ class StorageManager {
     return this.db.disconnect(this._remoteStorage);
   }
 
+  // to retrieve the last revision stored in the backup server
+
+  backupRevision() {
+    return new Promise((resolve,reject)=> {
+      this.db._syncNodes.get({type: 'remote'}).then((status)=> {
+        console.log('[StorageManager.synchedVersion] retrieved status: ', status);
+        if (status && status.hasOwnProperty('appliedRemoteRevision')) {
+          if (status.appliedRemoteRevision === null) status.appliedRemoteRevision = 0;
+          resolve(status.appliedRemoteRevision);
+        } 
+        else reject('StorageManager.synchedVersion not available: ', status);
+    }, (error) => {reject(error)});
+  });
+}
+
   _checkKey(key) {
     if (typeof key !== 'string') return key.toString();
     return key;
@@ -83,28 +98,48 @@ class StorageManager {
    * @memberof StorageManager
    */
   set(key, version, value, table) {
-    log.info('[StorageManager] - set ', key, value);
-    table = table ? table : key;
-    const name = this._getTable(table);
-    const primaryKey = this._getPrimaryKey(name);
 
-    // Object.assign(value, {version: version});
+    return new Promise ((resolve, reject)=> {
+      log.info('[StorageManager] - set ', key, value);
+      table = table ? table : key;
+      const name = this._getTable(table);
+      const primaryKey = this._getPrimaryKey(name);
+  
+      // Object.assign(value, {version: version});
+  
+      let data = value;
+  
+      if (this._isDefaultSchema(table)) {
+        data = {
+          key: key,
+          version: version,
+          value: value
+        };
+      } else {
+        const tmp = {};
+        tmp[primaryKey] = key;
+        Object.assign(data, tmp);
+      }
+  
+       this.db[name].put(data).then(()=>{
+      if (data.backup) {
+        this.backupRevision().then((version)=> {
+          console.log('[StorageManager.set] backupRevision: ', version);
+          data.backupRevision = version;
+          this.db[name].put(data);
+          resolve(version);
+        },()=>{
+          data.backupRevision = 3;
+          this.db[name].put(data);
+          resolve(version);
+        });
+      } else resolve();
 
-    let data = value;
+       });
 
-    if (this._isDefaultSchema(table)) {
-      data = {
-        key: key,
-        version: version,
-        value: value
-      };
-    } else {
-      const tmp = {};
-      tmp[primaryKey] = key;
-      Object.assign(data, tmp);
-    }
+    });
 
-    return this.db[name].put(data);
+
   }
 
   /**
