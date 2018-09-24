@@ -621,39 +621,57 @@ class ChatController {
    * Only available to Chat Group Reporters i.e. the Hyperty instance that created the Group Chat.
    * @return {<Promise>Boolean} It returns as a Promise true if successfully closed or false otherwise.
    */
-  close() {
-    // TODO: the dataObjectReporter.delete should be an Promise;
+  close(del = false) {
+    // TODO: the dataObjectReporter.delete should be a Promise;
 
     let _this = this;
+    
 
     return new Promise(function(resolve, reject) {
 
       if (_this.controllerMode === 'reporter') {
           _this._invitationsHandler.cleanInvitations(_this.dataObjectReporter).then(() => {
-            try {
-              delete _this._manager._reportersControllers[_this.dataObjectReporter.url];
-              _this.dataObjectReporter.delete();
+            if (!del) {
+              _this.dataObjectReporter.communication.status = 'closed';
+              console.log('[saving]:', _this.dataObjectReporter);
               resolve(true);
-              if (_this._onClose) _this._onClose({
-                code: 200,
-                desc: 'deleted',
-                url: _this.dataObjectReporter.url
-              })
-            } catch (e) {
-              console.error(e);
-              reject(false);
             }
+            else{
+
+              try {
+              
+                  delete _this._manager._reportersControllers[_this.dataObjectReporter.url];
+                _this.dataObjectReporter.delete();
+                resolve(true);
+                if (_this._onClose) _this._onClose({
+                  code: 200,
+                  desc: 'deleted',
+                  url: _this.dataObjectReporter.url
+                })
+              } catch (e) {
+                console.error(e);
+                reject(false);
+              }
+            }
+
           });
 
       } else {
-        try {
-          delete _this._manager._observersControllers[_this.dataObjectObserver.url];
-          _this.dataObjectObserver.unsubscribe();
-          resolve(true);
-        } catch (e) {
-          console.error(e);
-          reject(false);
+        if(del){
+          try {
+            delete _this._manager._observersControllers[_this.dataObjectObserver.url];
+            _this.dataObjectObserver.unsubscribe();
+            resolve(true);
+          } catch (e) {
+            console.error(e);
+            reject(false);
+          }
         }
+        else{
+          // TODO: send message 
+          resolve(true);
+        } 
+        
       }
     });
 
