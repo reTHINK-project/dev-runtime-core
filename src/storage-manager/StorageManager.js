@@ -4,7 +4,7 @@ let log = logger.getLogger('StorageManager');
 
 class StorageManager {
 
-  constructor(db, storageName, schemas, version = 1, remoteStorage = false) {
+  constructor(db, storageName, schemas, runtimeUA, version = 1, remoteStorage = false) {
     if (!db) throw Error('The Storage Manager needs the database instance');
     if (!storageName) throw Error('The Storage Manager needs the storage name');
 
@@ -24,6 +24,7 @@ class StorageManager {
     this.db = db;
     this.storageName = storageName;
     this._remoteStorage = remoteStorage;
+    this._runtimeUA = runtimeUA;
   }
 
   // set remoteStorage backup server URL
@@ -46,16 +47,23 @@ class StorageManager {
 
   // to retrieve the last revision stored in the backup server
 
-  backupRevision() {
-    return new Promise((resolve,reject)=> {
+  _updateBackupRevision(resource) {
+
+    return new Promise((resolve)=> {
       this.db._syncNodes.get({type: 'remote'}).then((status)=> {
         console.log('[StorageManager.synchedVersion] retrieved status: ', status);
         if (status && status.hasOwnProperty('appliedRemoteRevision')) {
           if (status.appliedRemoteRevision === null) status.appliedRemoteRevision = 0;
+
+          this._runtimeUA._updateRuntimeStatus(
+            {
+              resource: resource,
+              value: { backupRevision: status.appliedRemoteRevision }
+            }
+          )
           resolve(status.appliedRemoteRevision);
         } 
-        else reject('StorageManager.synchedVersion not available: ', status);
-    }, (error) => {reject(error)});
+    });
   });
 }
 
@@ -122,16 +130,9 @@ class StorageManager {
       }
   
        this.db[name].put(data).then(()=>{
-      if (data.backup) {
-        this.backupRevision().then((version)=> {
-          console.log('[StorageManager.set] backupRevision: ', version);
-          data.backupRevision = version;
-          this.db[name].put(data);
-          resolve(version);
-        },()=>{
-          data.backupRevision = 3;
-          this.db[name].put(data);
-          resolve(version);
+      if (data.backup && data.url) {
+        this._updateBackupRevision(data.url).then(()=> {
+          resolve();
         });
       } else resolve();
 

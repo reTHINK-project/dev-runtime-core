@@ -81,6 +81,19 @@ class DataObjectReporter extends DataObject /* implements SyncStatus */ {
         case 'create': _this._onChildCreate(msg); break;// to create child objects that were sent whenn offline
       }
     });
+
+    _this._runtimeStatusListener = _this._bus.addListener(_this._syncher._runtimeUrl+'/status' , (evt) => {
+      console.log('[Syncher.DataObjectReporter] runtime status event received ' + evt);
+
+      if (evt.body && evt.body.resource && evt.body.resource === _this._url && 
+        evt.body.value && evt.body.value.backupRevision ) {
+          // broadcast backupRevision update
+
+          _this.data.backupRevision = evt.body.value.backupRevision;
+          console.log('[Syncher.DataObjectReporter] DO updated with backup revision ' + _this.data);
+        }
+    });
+
   }
 
   _releaseListeners() {

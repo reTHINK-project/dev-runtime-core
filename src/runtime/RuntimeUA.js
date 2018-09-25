@@ -122,7 +122,7 @@ class RuntimeUA {
 
     if (typeof runtimeFactory.storageManager === 'function') {
 
-      this.storages = storage(runtimeFactory);
+      this.storages = storage(runtimeFactory, this);
 
     } else {
       throw new Error('Check your Runtime Factory because it needs the Storage Manager implementation');
@@ -171,7 +171,7 @@ class RuntimeUA {
           this.capabilities = results[1];
           Object.assign(runtimeUtils.runtimeCapabilities.constraints, results[1]);
 
-          this._dataObjectsStorage = new DataObjectsStorage(this.storages.syncherManager, results[2] || {}, this.runtimeFactory );
+          this._dataObjectsStorage = new DataObjectsStorage(this.storages.syncherManager, results[2] || {}, this.runtimeFactory, this );
 
           this._hypertyResources = results[3] || {};
 
@@ -217,6 +217,18 @@ class RuntimeUA {
 
     });
 
+  }
+
+  _updateRuntimeStatus(event) {
+
+    let _this = this;
+
+    _this.messageBus.postMessage({
+      from: this.runtimeURL,
+      to: this.runtimeURL+'/status',
+      type: 'update',
+      body: event
+    });
   }
 
   _loadP2PHandler() {

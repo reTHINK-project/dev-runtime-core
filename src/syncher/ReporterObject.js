@@ -49,17 +49,12 @@ class ReporterObject {
 
       log.info('[SyncherManager.ReporterObject ] SyncherManager-' + changeURL + '-RCV: ', msg);
 
-      //TODO: what todo here? Save changes?
-      if (this._isToSaveData && msg.body.attribute) {
+      //do not save changes to backupRevision to avoid infinite loops
+      if (this._isToSaveData && msg.body.attribute && msg.body.attribute !== 'backupRevision') {
         log.log('[SyncherManager.ReporterObject ] SyncherManager - save data: ', msg);
         _this._parent._dataObjectsStorage.update(true, _this._url, 'version', msg.body.version);
         _this._parent._dataObjectsStorage.update(true, _this._url, 'lastModified', msg.body.lastModified);
-        _this._parent._dataObjectsStorage.saveData(true, _this._url, msg.body.attribute, msg.body.value).then((storedObject)=> {
-          if (storedObject.backupRevision) {
-            //TODO: broadcast to observers new backup revision
-            console.log('[SyncManager.ReporterObject] new backup revision ', storedObject.backupRevision);
-          }
-        })
+        _this._parent._dataObjectsStorage.saveData(true, _this._url, msg.body.attribute, msg.body.value);
       }
     });
   }

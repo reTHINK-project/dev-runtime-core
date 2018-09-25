@@ -8,7 +8,7 @@ import { createSyncDB } from '../runtime/Storage';
 
 class DataObjectsStorage {
 
-  constructor(storageManager, storedDataObjects = {}, factory) {
+  constructor(storageManager, storedDataObjects = {}, factory, runtimeStatusUpdate) {
     if (!storageManager) throw new Error('[Store Data Objects] - Needs the storageManager component');
 
     this._storageManager = storageManager;
@@ -22,6 +22,7 @@ class DataObjectsStorage {
     this._table = 'syncherManager:ObjectURLs';
     this._remoteStorageTable = 'dataObjectStorage';
     this._remoteSchema = 'url';
+    this._runtimeStatusUpdate = runtimeStatusUpdate;
   }
 
   // load Data Objects synched with remote Storages
@@ -41,7 +42,7 @@ class DataObjectsStorage {
             let schema = {};
             let table = db.split('/')[3];
             schema[table] = this._remoteSchema;
-            this._remotes[db] = createSyncDB(db, this._factory, schema);
+            this._remotes[db] = createSyncDB(db, this._factory, schema, this._runtimeStatusUpdate);
       //            _this._remotes[remote] = createSyncDB(remote, _this._factory, 'remoteDataObjectStorage' );
             loading.push(_this._remotes[db].get(null,null,table));
           });
@@ -139,7 +140,7 @@ class DataObjectsStorage {
       if (backup && !this._remotes[db]) {
         let schema = {};
         schema[table] = this._remoteSchema;
-        this._remotes[db] = createSyncDB(db, this._factory, schema);
+        this._remotes[db] = createSyncDB(db, this._factory, schema, this._runtimeStatusUpdate);
       }
   
       let storage = backup ? this._remotes[db] : this._storageManager;
@@ -147,8 +148,7 @@ class DataObjectsStorage {
       if (metadata.isReporter && backup) {// lets connect to remote storage to enable sync
         let options = {table: table};
         storage.connect(options).then(()=> {
-          storage.set(db, 0, storeDataObject[type][metadata.url], table).then((revision) => {
-            storeDataObject[type][metadata.url].backupRevision = revision;
+          storage.set(db, 0, storeDataObject[type][metadata.url], table).then(() => {
             this._storageManager.set( metadata.url, 0, metadata.url, 'remotes').then(()=>{
               resolve(storeDataObject[type][metadata.url]);
             });
@@ -215,8 +215,7 @@ class DataObjectsStorage {
     let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
     let storage = storeDataObject[type][resource].backup ? this._remotes[db] : this._storageManager;
     let table = storeDataObject[type][resource].backup ? db.split('/')[3] : this._table;
-    storage.set(db, 1, storeDataObject[type][resource], table).then((revision) => {
-      if (revision) storeDataObject[type][resource].backupRevision = revision;
+    storage.set(db, 1, storeDataObject[type][resource], table).then(() => {
       return storeDataObject[type][resource];
     }, (error)=>{
       console.error(error);
@@ -251,9 +250,7 @@ class DataObjectsStorage {
     let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
     let storage = storeDataObject[type][resource].backup ? this._remotes[db] : this._storageManager;
     let table = storeDataObject[type][resource].backup ? db.split('/')[3] : this._table;
-    storage.set(db, 1, storeDataObject[type][resource], table).then((revision)=>{
-      if (revision) storeDataObject[type][resource].backupRevision = revision;
-
+    storage.set(db, 1, storeDataObject[type][resource], table).then(()=>{
       return storeDataObject[type][resource];
     });
 
@@ -298,9 +295,7 @@ class DataObjectsStorage {
       let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
       let storage = storeDataObject[type][resource].backup ? this._remotes[db] : this._storageManager;
       let table = storeDataObject[type][resource].backup ? db.split('/')[3] : this._table;
-      storage.set(db, 1, storeDataObject[type][resource], table).then((revision)=>{
-        if (revision) storeDataObject[type][resource].backupRevision = revision;
-
+      storage.set(db, 1, storeDataObject[type][resource], table).then(()=>{
         return storeDataObject[type][resource];
       });
     }
@@ -408,24 +403,31 @@ class DataObjectsStorage {
 
       if (_this._remotes[resource]) {
         let type = observer ? 'observers' : 'reporters';
-        let lastRevision = _this._storeDataObject[type][resource].backupRevision;
+        let lastRevision = _this._storeDataObject[type][resource].data.backupRevision;
 
         let table = resource.split('/')[3];
         let options = {table: table, observer: observer, baseRevision: lastRevision, syncedRevision: lastRevision};
 
         _this._remotes[resource].connect(options).then(()=> {
-          if (observer) _this._remotes[resource].disconnect();
+          _this._remotes[resource].disconnect().then(()=>{
 
           _this._remotes[resource].get(null,null,table).then((dataObject)=>{
 //          this._remotes[resource].get().then((dataObject)=>{
               log.info('[DataObjectStorage.sync] returning synched DO: ', dataObject);
-                return resolve(dataObject[resource]);
+                resolve(dataObject[resource]);
             },(error)=> {
-              log.error('[DataObjectStorage.sync] Error disconnecting from remote storage');
-              reject; 
+              log.error('[DataObjectStorage.sync] Error synching with remote storage');
+              reject(error);
             });
-        } , (error) => {reject(error)});
-        } else {
+        } , (error) => {
+          log.error('[DataObjectStorage.sync] Error disconnecting from remote storage');
+          reject(error)
+        });
+      }, (error) => {
+        log.error('[DataObjectStorage.sync] Error connecting to remote storage');
+        reject(error)
+      });
+      } else {
           let info = '[DataObjectStorage.sync] Info: ' + resource + ' is not synched with remote storage.'
           log.info(info);
           reject(info);
