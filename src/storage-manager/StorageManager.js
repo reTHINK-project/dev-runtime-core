@@ -42,8 +42,14 @@ class StorageManager {
   // stop sync with remoteStorage server. Returns promise 
 
   disconnect() {
-    return this.db.disconnect(this._remoteStorage);
-  }
+   return new Promise((resolve,reject) => {
+      this.db.disconnect(this._remoteStorage).then(()=> {
+        resolve();
+      }, (error) => {
+      reject(error);
+    });
+  });
+}
 
   // to retrieve the last revision stored in the backup server
 
@@ -105,7 +111,7 @@ class StorageManager {
    * otherwise it is rejected with an error.
    * @memberof StorageManager
    */
-  set(key, version, value, table) {
+  set(key, version, value, table, updateRuntimeStatus = true) {
 
     return new Promise ((resolve, reject)=> {
       log.info('[StorageManager] - set ', key, value);
@@ -130,16 +136,17 @@ class StorageManager {
       }
   
        this.db[name].put(data).then(()=>{
-      if (data.backup && data.url) {
+      if (updateRuntimeStatus && data.backup && data.url) {
         this._updateBackupRevision(data.url).then(()=> {
           resolve();
         });
       } else resolve();
 
+       }, ()=> {
+         resolve();
        });
 
     });
-
 
   }
 

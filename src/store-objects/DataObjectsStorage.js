@@ -142,16 +142,18 @@ class DataObjectsStorage {
         schema[table] = this._remoteSchema;
         this._remotes[db] = createSyncDB(db, this._factory, schema, this._runtimeStatusUpdate);
       }
-  
+
+      // Save Data Object URL at remotes table to support resumes
+
+      if (backup) this._storageManager.set( metadata.url, 0, metadata.url, 'remotes');
+
       let storage = backup ? this._remotes[db] : this._storageManager;
   
       if (metadata.isReporter && backup) {// lets connect to remote storage to enable sync
         let options = {table: table};
         storage.connect(options).then(()=> {
           storage.set(db, 0, storeDataObject[type][metadata.url], table).then(() => {
-            this._storageManager.set( metadata.url, 0, metadata.url, 'remotes').then(()=>{
               resolve(storeDataObject[type][metadata.url]);
-            });
           });
         }, (error) => {
           log.error('[DataObjectStorage.set] failed to connect with remote storage: ', error, ' trying again...');
@@ -166,9 +168,7 @@ class DataObjectsStorage {
 //          return storeDataObject[type][metadata.url];
       } else {
         storage.set(db, 1, storeDataObject[type][metadata.url], table).then(()=>{
-          this._storageManager.set( metadata.url, 0, metadata.url, 'remotes').then(()=>{
             resolve(storeDataObject[type][metadata.url]);
-          });
         });
       }
     });
@@ -185,7 +185,7 @@ class DataObjectsStorage {
    * @param {String} attribute - attribute inside the data which will be saved
    * @param {any} data - value will be saved inside the attribute;
    */
-  saveData(isReporter, resource, attribute, value) {
+  saveData(isReporter, resource, attribute, value, updateRuntimeStatus) {
 
     let storeDataObject = this._storeDataObject;
     let type = this._getTypeOfObject(isReporter);
@@ -215,7 +215,7 @@ class DataObjectsStorage {
     let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
     let storage = storeDataObject[type][resource].backup ? this._remotes[db] : this._storageManager;
     let table = storeDataObject[type][resource].backup ? db.split('/')[3] : this._table;
-    storage.set(db, 1, storeDataObject[type][resource], table).then(() => {
+    storage.set(db, 1, storeDataObject[type][resource], table, updateRuntimeStatus).then(() => {
       return storeDataObject[type][resource];
     }, (error)=>{
       console.error(error);
@@ -264,7 +264,7 @@ class DataObjectsStorage {
    * @param {String} attribute - attribute inside the data which will be saved
    * @param {any} data - value will be saved inside the attribute;
    */
-  update(isReporter, resource, attribute, value) {
+  update(isReporter, resource, attribute, value, updateRuntimeStatus) {
 
     let storeDataObject = this._storeDataObject;
     let type = this._getTypeOfObject(isReporter);
@@ -295,7 +295,7 @@ class DataObjectsStorage {
       let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
       let storage = storeDataObject[type][resource].backup ? this._remotes[db] : this._storageManager;
       let table = storeDataObject[type][resource].backup ? db.split('/')[3] : this._table;
-      storage.set(db, 1, storeDataObject[type][resource], table).then(()=>{
+      storage.set(db, 1, storeDataObject[type][resource], table, updateRuntimeStatus).then(()=>{
         return storeDataObject[type][resource];
       });
     }
@@ -409,11 +409,12 @@ class DataObjectsStorage {
         let options = {table: table, observer: observer, baseRevision: lastRevision, syncedRevision: lastRevision};
 
         _this._remotes[resource].connect(options).then(()=> {
-          _this._remotes[resource].disconnect().then(()=>{
 
           _this._remotes[resource].get(null,null,table).then((dataObject)=>{
 //          this._remotes[resource].get().then((dataObject)=>{
               log.info('[DataObjectStorage.sync] returning synched DO: ', dataObject);
+              _this._remotes[resource].disconnect().then(()=>{
+                log.info('[DataObjectStorage.sync] disconnected ');
                 resolve(dataObject[resource]);
             },(error)=> {
               log.error('[DataObjectStorage.sync] Error synching with remote storage');
