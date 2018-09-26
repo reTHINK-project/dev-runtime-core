@@ -420,7 +420,10 @@ class DataObject {
     let childInput  = Object.assign({}, input);
 
     _this._childId++;
-    childInput.url = _this._owner + '#' + _this._childId;
+
+    //removing domain from childId to avoid backup issues with '.'
+
+    childInput.url = _this._owner.split('/')[3] + '#' + _this._childId;
 
     childInput.parentObject = _this;
     childInput.reporter = _this._owner;
