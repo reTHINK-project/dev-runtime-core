@@ -338,39 +338,53 @@ class DataObjectsStorage {
   }
 
   /**
-   * TODO: check if this process is viable because the storage manager ability to delete
-   * now the storageManager only can delete an specific key, but not the specific value inside that key;
+   * Delete Data Object from the storage
    */
+
   deleteResource(resource) {
 
     return new Promise((resolve, reject) => {
 
       if (resource) {
+//        return this.getAll().then((storedDataObjects) => {
+          log.info('[DataObjectStorage.deleteResource] deleting: ', resource);
 
-        return this.getAll().then((storedDataObjects) => {
-          let tmp = Object.assign(storedDataObjects, this._storeDataObject || {});
+//          let this._storeDataObject = Object.assign(this._storeDataObject || {});
 
-          if (tmp.hasOwnProperty('observers') && tmp.observers.hasOwnProperty(resource)) {
-            delete tmp.observers[resource];
-            let db = tmp.observers[resource].backup ? tmp.observers[resource].url : 'syncherManager:ObjectURLs';
-            let storage = tmp.observers[resource].backup ? this._remotes[db] : this._storageManager;
-            storage.delete(db, 1, resource);
-            this._storeDataObject = tmp;
-            return resolve(tmp.observers[resource]);
+          let backup;
+          let db;
+          let storage;
+
+          if (this._storeDataObject.hasOwnProperty('observers') && this._storeDataObject.observers.hasOwnProperty(resource)) {
+            backup = (this._storeDataObject.observers[resource].backup) ? true : false;
+
+            db = backup ? this._storeDataObject.observers[resource].url : 'syncherManager:ObjectURLs';
+            storage = backup ? this._remotes[db] : this._storageManager;
+            delete this._storeDataObject.observers[resource];
           }
 
-          if (tmp.hasOwnProperty('reporters') && tmp.reporters.hasOwnProperty(resource)) {
-            delete tmp.reporters[resource];
-            let db = tmp.reporters[resource].backup ? tmp.reporters[resource].url : 'syncherManager:ObjectURLs';
-            let storage = tmp.reporters[resource].backup ? this._remotes[db] : this._storageManager;
-            storage.delete(db, 1, resource);
-            this._storeDataObject = tmp;
-            return resolve(tmp.reporters[resource]);
+          if (this._storeDataObject.hasOwnProperty('reporters') && this._storeDataObject.reporters.hasOwnProperty(resource)) {
+            backup = (this._storeDataObject.reporters[resource].backup) ? true : false;
+
+            db = backup ? this._storeDataObject.reporters[resource].url : 'syncherManager:ObjectURLs';
+            storage = backup ? this._remotes[db] : this._storageManager;
+            delete this._storeDataObject.reporters[resource];
           }
 
-          resolve('The ' + resource + ' dosen\t exists, nothing was deleted');
+//          this._storeDataObject = this._storeDataObject;
 
-        });
+          if (backup && storage) {
+            storage.delete().then(() => {
+              delete this._remotes[db];
+              this._storageManager.delete( resource, null, 'remotes');
+            });
+          } else {
+            storage.delete(db, 1, resource);
+          }
+
+          return resolve();
+
+//        });
 
       } else {
         reject(new Error('[StoreDataObjects] - Can\'t delete this ' + resource));
@@ -394,6 +408,8 @@ class DataObjectsStorage {
     });
 //    return this._storageManager.get('syncherManager:ObjectURLs');
   }
+
+  // To sync local storage with remote storage server
 
   sync(resource, observer = false) {
     let _this= this;

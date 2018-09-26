@@ -277,7 +277,7 @@ class StorageManager {
   }
 
   /**
-   * Delete a entry from the database for a given key.
+   * Delete a entry from the database for a given key or the full DB in case the key is not provided.
    * @param {!string} key - key that was stored using {@link storageManager.set}
    * @param {!any} value - the value which sould be used to find the storage resource
    * @param {!string} table - table which should be looking for
@@ -285,20 +285,24 @@ class StorageManager {
    * @memberof StorageManager
    */
   delete(key, value, table) {
-    table = table ? table : key;
-    const name = this._getTable(table);
-    const primaryKey = this._getPrimaryKey(name);
 
-    let data = value;
-
-    if (!value) {
-      data = key;
-    }
-
-    return this.db[name]
-      .where(primaryKey)
-      .equals(data)
-      .delete();
+    if (key) {
+      table = table ? table : key;
+      const name = this._getTable(table);
+      const primaryKey = this._getPrimaryKey(name);
+  
+      let data = value;
+  
+      if (!value) {
+        data = key;
+      }
+  
+      return this.db[name]
+        .where(primaryKey)
+        .equals(data)
+        .delete();
+    } else return this.db.delete();
+  
   }
 
 }
