@@ -411,7 +411,7 @@ class DataObjectsStorage {
 
   // To sync local storage with remote storage server
 
-  sync(resource, observer = false) {
+  sync(resource, observer = false, once = true) {
     let _this= this;
 
     return new Promise((resolve, reject) => {
@@ -429,7 +429,8 @@ class DataObjectsStorage {
           _this._remotes[resource].get(null,null,table).then((dataObject)=>{
 //          this._remotes[resource].get().then((dataObject)=>{
               log.info('[DataObjectStorage.sync] returning synched DO: ', dataObject);
-              _this._remotes[resource].disconnect().then(()=>{
+
+              if (once) _this._remotes[resource].disconnect().then(()=>{
                 log.info('[DataObjectStorage.sync] disconnected ');
                 resolve(dataObject[resource]);
             },(error)=> {
@@ -451,6 +452,12 @@ class DataObjectsStorage {
       }
 
     });
+  }
+
+  stopSync(resource) {
+
+    if (_this._remotes[resource]) _this._remotes[resource].disconnect();
+
   }
 
         /**

@@ -109,7 +109,6 @@ class DataObject {
       _this._metadata.lastModified = _this._metadata.created;
     }
 
-
     delete _this._metadata.data;
     delete _this._metadata.syncher;
     delete _this._metadata.authorise;
@@ -117,6 +116,9 @@ class DataObject {
     _this._hypertyResourceFactory = new HypertyResourceFactory();
     _this._childrenObjects = {};
     _this._sharedChilds = []; //childObjects that were not sent yet to Reporters
+
+    if (input.backup && _this._childrens) 
+      _this._heartBeat(_this._bus, input.url, input.runtime, this, 60);
   }
 
   _getLastChildId() {

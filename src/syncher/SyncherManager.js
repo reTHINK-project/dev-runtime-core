@@ -92,12 +92,57 @@ class SyncherManager {
         case 'subscribe': _this._onLocalSubscribe(msg); break;
         case 'unsubscribe': _this._onLocalUnSubscribe(msg); break;
         case 'read': _this._onRead(msg); break;
+        case 'execute': _this._onExecute(msg); break;
       }
     });
 
   }
 
   get url() { return this._url; }
+
+      //FLOW-IN: message received from Syncher -> read
+      _onExecute(msg) {
+
+        let _this = this;
+  
+        let reply = {
+          type: 'response',
+          from: msg.to,
+          to: msg.from,
+          id: msg.id
+        }
+
+        log.info('[SyncherManager.onExecute] new message', msg);
+  
+        if (msg.hasOwnProperty('body') && msg.body.hasOwnProperty('method') && msg.body.hasOwnProperty('params')) {
+
+        switch (msg.body.method) {
+          case 'sync': _this._dataObjectsStorage.sync(msg.body.params[0], true, false);
+           break;
+          case 'stopSync': _this._dataObjectsStorage.stopSync(msg.body.params[0]);
+           break;
+        }
+
+            reply.body = {
+              code: 200,
+              value: dataObject
+            };
+    
+            _this._bus.postMessage(reply);
+          } else {
+          reply.body = {
+            code: 400,
+            desc: 'missing body or body method / params mandatory fields'
+          };
+  
+          log.error('[SyncherManager.onExecute] error. Missing body or body method / params mandatory fields', msg);
+  
+          _this._bus.postMessage(reply);
+  
+  
+        }
+  
+      }
 
     //FLOW-IN: message received from Syncher -> read
     _onRead(msg) {
