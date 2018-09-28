@@ -212,7 +212,7 @@ class ReporterObject {
                 if (!msg.body.hasOwnProperty('mutual')) msg.body.mutual = true;
 
                 //remove false when mutualAuthentication is enabled
-                if (!typeof msg.body.value === 'string' && msg.body.mutual) {
+                if (!(typeof msg.body.value === 'string') && msg.body.mutual) {
 
                   log.log('[SyncherManager.ReporterObject] encrypting received data ', msg.body.value);
 
@@ -254,10 +254,8 @@ class ReporterObject {
     let url = splitedReporterURL.url;
 
     let resource = splitedReporterURL.resource;
-/*    let value = {
-//      identity: msg.body.identity,
-      value: data
-    };*/
+    let value;
+    
 
 /*    if (msg.body.identity) {
       value.identity = msg.body.identity;
@@ -268,15 +266,21 @@ class ReporterObject {
     let objectURLResource = msg.body.resource;
     let attribute = resource;
 
+    if (objectURLResource === 'heartbeat' ) value = data;
+    else value = {
+      identity: msg.body.identity,
+      value: data
+    };
+
 //    if (objectURLResource) attribute += '.' + objectURLResource;
     if (objectURLResource) attribute = objectURLResource;
 
     // this identity data is not needed to be stored
 
 
-    console.log('[SyncherManager.ReporterObject._storeChildObject] : ', url, attribute, data);
+    console.log('[SyncherManager.ReporterObject._storeChildObject] : ', url, attribute, value);
 
-    _this._parent._dataObjectsStorage.saveChildrens(true, url, attribute, data);
+    _this._parent._dataObjectsStorage.saveChildrens(true, url, attribute, value);
   }
 
   delete() {

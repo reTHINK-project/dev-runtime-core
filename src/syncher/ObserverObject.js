@@ -84,7 +84,7 @@ class ObserverObject {
             if (!msg.body.hasOwnProperty('mutual')) msg.body.mutual = true;
 
             //remove false when mutualAuthentication is enabled
-            if (!typeof msg.body.value === 'string' && msg.body.mutual) {
+            if (!(typeof msg.body.value === 'string') && msg.body.mutual) {
 
               log.log('[SyncherManager.ObserverObject] encrypting received data ', msg.body.value);
 
@@ -123,6 +123,8 @@ class ObserverObject {
     let url = splitedReporterURL.url;
 
     let resource = splitedReporterURL.resource;
+    let value;
+
 /*    let value = {
       identity: msg.body.identity,
       value: data
@@ -134,6 +136,12 @@ class ObserverObject {
 
     let objectURLResource = msg.body.resource;
     let attribute = resource;
+
+    if (objectURLResource === 'heartbeat' ) value = data;
+    else value = {
+      identity: msg.body.identity,
+      value: data
+    };
 
 //    if (objectURLResource) attribute += '.' + objectURLResource;
     if (objectURLResource) attribute = objectURLResource;

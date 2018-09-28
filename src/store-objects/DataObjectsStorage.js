@@ -61,9 +61,14 @@ class DataObjectsStorage {
 
               _this._storeDataObject[type][remote] = dO[remote];
               log.log('[StoreDataObjects.loadRemote] storeDataObject updated: ', _this._storeDataObject);
-              _this._remotes[remote].disconnect();
+              _this._remotes[remote].disconnect().then(()=>{
+                log.info('[DataObjectStorage.loadRemote] disconnected ');
   
+            },(error)=> {
+              log.error('[DataObjectStorage.sync] Error synching with remote storage');
+              reject(error);
             });
+          });
             
           });
             resolve()
