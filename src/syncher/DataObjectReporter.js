@@ -299,6 +299,13 @@ class DataObjectReporter extends DataObject /* implements SyncStatus */ {
           _this.data.mutual = false;
         }
 
+        if (_this._heartBeat) {
+          sendMsg.body.value.childrenObjects = {};
+          sendMsg.body.value.childrenObjects.heartbeat = _this._heartBeat.heartbeat;
+        }
+
+        console.log('[DataObjectReporter._onSubscribe.accept] sending response: ', sendMsg)
+
         //send ok response message
         _this._bus.postMessage(sendMsg);
 

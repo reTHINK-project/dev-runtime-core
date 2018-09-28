@@ -200,6 +200,7 @@ class ReporterObject {
               //TODO: what todo here? Save childrens?
               log.log('[SyncherManager.ReporterObject received]', msg);
 
+
               if (msg.type === 'create' && msg.to.includes('children') && this._isToSaveData) {
 
                 // if the value is not encrypted lets encrypt it
@@ -208,8 +209,10 @@ class ReporterObject {
 
                 let url = splitedReporterURL.url;
 
+                if (!msg.body.hasOwnProperty('mutual')) msg.body.mutual = true;
+
                 //remove false when mutualAuthentication is enabled
-                if (!(typeof msg.body.value === 'string')) {
+                if (!typeof msg.body.value === 'string' && msg.body.mutual) {
 
                   log.log('[SyncherManager.ReporterObject] encrypting received data ', msg.body.value);
 
@@ -251,10 +254,16 @@ class ReporterObject {
     let url = splitedReporterURL.url;
 
     let resource = splitedReporterURL.resource;
-    let value = {
-      identity: msg.body.identity,
+/*    let value = {
+//      identity: msg.body.identity,
       value: data
-    };
+    };*/
+
+/*    if (msg.body.identity) {
+      value.identity = msg.body.identity;
+      delete value.identity.assertion;
+      delete value.identity.expires;
+    }*/
 
     let objectURLResource = msg.body.resource;
     let attribute = resource;
@@ -263,13 +272,11 @@ class ReporterObject {
     if (objectURLResource) attribute = objectURLResource;
 
     // this identity data is not needed to be stored
-    delete value.identity.assertion;
-    delete value.identity.expires;
 
 
-    console.log('[SyncherManager.ReporterObject._storeChildObject] : ', url, attribute, value);
+    console.log('[SyncherManager.ReporterObject._storeChildObject] : ', url, attribute, data);
 
-    _this._parent._dataObjectsStorage.saveChildrens(true, url, attribute, value);
+    _this._parent._dataObjectsStorage.saveChildrens(true, url, attribute, data);
   }
 
   delete() {

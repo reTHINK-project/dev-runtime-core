@@ -222,7 +222,7 @@ class Syncher {
   * @param {ObjectURL} objURL - URL of the reporter object to be read
   * @return {Promise<Object>} Return Promise to last available data of the reporter
   */
-  read(objURL) {
+  read(objURL, criteria) {
     let _this = this;
     console.log('[Syncher.read] ', objURL);
 
@@ -234,6 +234,8 @@ class Syncher {
           type: 'read', from: _this._owner, to: _this._subURL, 
           body: { resource: objURL}
         };
+
+        if (criteria) readMsg.body.criteria = criteria;
 
           let callback = (reply) => {
             return _this._readCallBack(reply, resolve, reject);

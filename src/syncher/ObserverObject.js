@@ -81,8 +81,10 @@ class ObserverObject {
 
             let url = splitedReporterURL.url;
 
+            if (!msg.body.hasOwnProperty('mutual')) msg.body.mutual = true;
+
             //remove false when mutualAuthentication is enabled
-            if (!(typeof msg.body.value === 'string')) {
+            if (!typeof msg.body.value === 'string' && msg.body.mutual) {
 
               log.log('[SyncherManager.ObserverObject] encrypting received data ', msg.body.value);
 
@@ -121,14 +123,14 @@ class ObserverObject {
     let url = splitedReporterURL.url;
 
     let resource = splitedReporterURL.resource;
-    let value = {
+/*    let value = {
       identity: msg.body.identity,
       value: data
-    };
+    };*/
 
     // this identity data is not needed to be stored
-    delete value.identity.assertion;
-    delete value.identity.expires;
+/*    delete value.identity.assertion;
+    delete value.identity.expires;*/
 
     let objectURLResource = msg.body.resource;
     let attribute = resource;
@@ -136,9 +138,9 @@ class ObserverObject {
 //    if (objectURLResource) attribute += '.' + objectURLResource;
     if (objectURLResource) attribute = objectURLResource;
 
-    log.log('[SyncherManager.ObserverObject._storeChildObject] : ', url, attribute, value);
+    log.log('[SyncherManager.ObserverObject._storeChildObject] : ', url, attribute, data);
 
-    _this._parent._dataObjectsStorage.saveChildrens(false, url, attribute, value);
+    _this._parent._dataObjectsStorage.saveChildrens(false, url, attribute, data);
   }
 
   removeSubscription(msg) {

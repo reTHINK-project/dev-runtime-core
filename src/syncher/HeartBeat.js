@@ -1,6 +1,8 @@
 
 
 import { secondsSinceEpoch } from '../utils/utils.js';
+//import DataObjectReporter from './DataObjectReporter';
+//import DataObjectChild from './DataObjectChild.js';
 
 /**
  * Class to handle Children Data Object Heart beats 
@@ -15,7 +17,7 @@ class HeartBeat {
    * @ignore
    * Should not be used directly by Hyperties. It's called by the DataObject constructor
    */
-  constructor(bus, hypertyUrl, runtimeUrl, dataObject, heartBeatRate = 60) {
+  constructor(bus, hypertyUrl, runtimeUrl, dataObject, heartBeatRate = 60, lastHeartbeat = 0) {
     let _this = this;
 
     function throwMandatoryParmMissingError(par) {
@@ -25,60 +27,104 @@ class HeartBeat {
     bus ?  _this._bus = bus : throwMandatoryParmMissingError('bus');
     dataObject ?  _this._dataObject = dataObject : throwMandatoryParmMissingError('dataObject');
     heartBeatRate ?  _this._heartBeatRate = heartBeatRate : throwMandatoryParmMissingError('heartBeatRate');
-    runtimeUrl ?  _this._syncManagerUrl = runtimeUrl + '/sm' : throwMandatoryParmMissingError('runtimeUrl');
+    runtimeUrl ?  _this._runtimeUrl = runtimeUrl : throwMandatoryParmMissingError('runtimeUrl');
     hypertyUrl ?  _this._hypertyUrl = hypertyUrl : throwMandatoryParmMissingError('hypertyUrl');
+    this.heartbeat = lastHeartbeat;
+
+/*    let input = {}
+
+    input.parent = dataObject.url;
+    input.url = "heartbeat";
+    input.created = (new Date).toISOString();
+    input.reporter = hypertyUrl;
+    input.runtime = runtimeUrl;
+    input.schema = 'heartbeat';
+    input.parentObject = dataObject;
+    input.children = 'resources';
+
+    this._heartBeat = new DataObjectChild(input);*/
 
     console.log('[HeartBeat] starting ... ');
 
-    _this._type = dataObject instanceof DataObjectReporter ? 'reporter' : 'observer';
+/*    _this._type = dataObject instanceof DataObjectReporter ? 'reporter' : 'observer';
 
     //  if reporter start Reporter heart beat 
     if (dataObject instanceof DataObjectReporter) this._startHeartBeat(_this._type, heartBeatRate);
-     else {
-      let isObserverHeartBeatActive = isHeartBeatActive(dataObject.data._observerHeartBeat, heartBeatRate);
-      let isReporterHeartBeatActive = isHeartBeatActive(dataObject.data._reporterHeartBeat, heartBeatRate);
+     else {*/
+//      let isObserverHeartBeatActive = _this._isHeartBeatActive(dataObject.data._observerHeartBeat, heartBeatRate);
 
-      if (!isObserverHeartBeatActive && !isReporterHeartBeatActive) {
-        console.log('[HeartBeat] heart beats are disabled for ', dataObject);
+      let isHeartBeatActive = _this._isHeartBeatActive(this.heartBeat, heartBeatRate);
+
+//      if (!isObserverHeartBeatActive && !isReporterHeartBeatActive) {
+      if (!isHeartBeatActive) {
+          console.log('[HeartBeat] heart beats are disabled for ', dataObject);
 
         // both observer and reporter are disabled: lets start observer heart beat and start synching with remote storage server
-      this._startHeartBeat('observer', heartBeatRate);
-      this._startSync().then((stopSync)=>{
-        console.log('[HeartBeat] observer ', hypertyUrl , ' started synching with remote storage server');
-        this._watchHeartBeat('reporter', heartBeatRate, true, stopSync );
-      });
+        this._startHeartBeat( heartBeatRate);
+        console.log('[HeartBeat]  ', hypertyUrl , ' started synching with remote storage server');
+        let stopSync = this._startSync();
+//        this._watchHeartBeat( heartBeatRate, true, stopSync );
 
-      } else if (isReporterHeartBeatActive && !isObserverHeartBeatActive) {
+/*      } else if (isReporterHeartBeatActive && !isObserverHeartBeatActive) {
       // only observer HeartBeat is disabled: lets start observer heart beat and watch reporter heart beat
       // _startHeartBeat(observer) e chama _watchHeartBeat(reporter, _startSync)
       this._startHeartBeat('observer', heartBeatRate);
         console.log('[HeartBeat] observer ', hypertyUrl , ' started synching with remote storage server');
-        this._watchHeartBeat('reporter', this._startSync());
-
+        this._watchHeartBeat('reporter', this._startObserverSync());
+*/
       } else {
       // both reporter and observer heart beat are active or only the observer is active, 
       // it means the data object is already being synchronised with remote storage server
       // we only need to watch the observer heart beat and try to replace it in case it fails.
-        this._watchHeartBeat('reporter', this._onObserverHertbeat());
+        this._watchHeartBeat(heartBeatRate,true, this._onHertbeatStopped);
 
       }
-    }
   }
 
+get heartBeat() {
+  if (this.heartbeat) 
+     return this.heartbeat;
+  else return 0;
+}
 
-_isHeartBeatActive(value, expiresTime) {
-  return (secondsSinceEpoch() - value > expiresTime);
+onNewHeartbeat(heartbeat) {
+  this.heartbeat = heartbeat;
+}
+
+_isHeartBeatActive(lastHeartbeat, maxHeartBeatInterval) {
+  console.log('[HeartBeat._isHeartBeatActive] now - lastHeartBeat', secondsSinceEpoch() - lastHeartbeat);
+
+  console.log('[HeartBeat._isHeartBeatActive] ', !(secondsSinceEpoch() - lastHeartbeat > maxHeartBeatInterval));
+  return (!(secondsSinceEpoch() - lastHeartbeat > maxHeartBeatInterval));
 }
 
 
-_startHeartBeat(type, rate) {
-    //timer to keep the registration alive
-    // the time is defined by a little less than half of the expires time defined
-    let id = setInterval(function () {
+_startHeartBeat(rate) {
+  let _this = this;
 
-      _this._dataObject.data[type+'HeartBeat'] = secondsSinceEpoch();
+  let msg = {
+    from: this._hypertyUrl,
+    to: _this._dataObject.url + '/children/resources',
+    type: 'create',
+    body: {
+      resource: 'heartbeat',
+      mutual: false,
+      value: secondsSinceEpoch(),
+    }
+  }
+  console.log('[HeartBeat._startObserverSync] starting observer sync ');
 
-    }, rate);
+  this._bus.postMessage(msg);
+
+  this.heartbeat = secondsSinceEpoch();
+
+  let id = setInterval(function () {
+
+    msg.body.value = secondsSinceEpoch();
+    _this._bus.postMessage(msg);
+    this.heartbeat = secondsSinceEpoch();
+  
+    }, rate * 1000);
 
   // returns function to stop the heart beat
 
@@ -87,18 +133,18 @@ _startHeartBeat(type, rate) {
     }
 }
 
- _startObserverSync() {
+ _startSync() {
 
     let msg = {
       from: this._hypertyUrl,
-      to: this._syncManagerUrl,
+      to: this._runtimeUrl+'/sm',
       type: 'execute',
       body: {
         method: 'sync',
-        params: [_this._dataObject.url]
+        params: [this._dataObject.url]
       }
     }
-    console.log('[HeartBeat._startObserverSync] starting observer sync ');
+    console.log('[HeartBeat._startSync] starting observer sync ');
 
     this._bus.postMessage(msg);
 
@@ -110,42 +156,39 @@ _startHeartBeat(type, rate) {
     }
  }
 
- _watchHeartBeat( type, rate, onWatchingIsEnabled, callback) {
+ _watchHeartBeat( rate, onWatchingIsEnabled, callback) {
 //  qdo o heartBeat terminar chama callback 
 // usa heartBeat Rating para iniciar timer no respectivo 
 // campo do DO chamando isHeartBeatActive()
+let _this = this;
 
-let heartBeat = type + 'HeartBeat';
+let syncFun = callback;
+console.log('[HeartBeat._watchHeartBeat] started watching ', _this.heartBeat);
+
+//let heartBeat = type + 'HeartBeat';
 
 let watcher = setInterval(function () {
 
-  if (onWatchingIsEnabled && this._isHeartBeatActive(this._dataObject.data[heartBeat])) {
-    console.log('[HeartBeat._watchHeartBeat] has changed to enabled ', this._dataObject.data);
+  if (onWatchingIsEnabled && !_this._isHeartBeatActive(_this.heartBeat, _this._heartBeatRate)) {
+    console.log('[HeartBeat._watchHeartBeat] has stopped ', _this._dataObject.data);
 
     clearInterval(watcher);
-    callback;
-  } else if (!onWatchingIsEnabled && !this._isHeartBeatActive(this._dataObject.data[heartBeat])) {
-    console.log('[HeartBeat._watchHeartBeat] has changed to disabled ', this._dataObject.data);
+    syncFun(_this);
+  } else if (!onWatchingIsEnabled && this._isHeartBeatActive(_this.heartBeat, _this._heartBeatRate)) {
+    console.log('[HeartBeat._watchHeartBeat] has changed to disabled ', _this._dataObject.data);
 
     clearInterval(watcher);
-    callback;
+    syncFun();
   }
 
-
-}, rate);
+}, rate * 1000 * 2);
 
  }
 
- _onObserverHeartbeat() {
-/*
- : chama _startHeartBeat(observe) e faz DO.onChanges(  ) 
- caso receba uma alteração ao observerHeartBeat de outro observer 
- com um timestamp inferior stop ao heartBeat iniciado. 
+ _onHertbeatStopped(_this) {
 
-*/
-
-this._startHeartBeat('observer', this._heartBeatRate);
-
+  _this._startHeartBeat( _this._heartBeatRate);
+  _this._startSync();
  }
 
 

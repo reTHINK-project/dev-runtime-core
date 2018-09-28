@@ -27,6 +27,7 @@ let log = logger.getLogger('DataObject');
 
 import SyncObject, {ChangeType, ObjectType} from './ProxyObject';
 import DataObjectChild from './DataObjectChild';
+import HeartBeat from './HeartBeat';
 import { deepClone, divideURL } from '../utils/utils.js';
 import HypertyResourceFactory from '../hyperty-resource/HypertyResourceFactory.js';
 
@@ -117,8 +118,13 @@ class DataObject {
     _this._childrenObjects = {};
     _this._sharedChilds = []; //childObjects that were not sent yet to Reporters
 
-    if (input.backup && _this._childrens) 
-      _this._heartBeat(_this._bus, input.url, input.runtime, this, 60);
+    if (input.backup && _this._childrens) {
+      let lastHeartbeat = 
+        (input.hasOwnProperty('childrenObjects') && input.childrenObjects.hasOwnProperty('heartbeat')) ?
+        input.childrenObjects.heartbeat : 0;
+      _this._heartBeat = new HeartBeat(_this._bus, _this._owner, _this._syncher._runtimeUrl, this, 60, lastHeartbeat);
+
+    }
   }
 
   _getLastChildId() {
@@ -197,7 +203,10 @@ class DataObject {
 /*        if (!_this._childrenObjects.hasOwnProperty(childrenResource))
           _this._childrenObjects[childrenResource] = {};*/
 
-        if (children[childId].value.resourceType && !_this._childrenObjects.hasOwnProperty(childId)) {
+        // check if it is the last heartbeat
+
+        if (childId === 'heartbeat') _this._heartBeat.onNewHeartbeat(children[childId].value);
+        else if (children[childId].value.resourceType && !_this._childrenObjects.hasOwnProperty(childId)) {
           _this._childrenObjects[childId] = _this._resumeHypertyResource(children[childId]);
           newChild = true;
         } else if (!_this._childrenObjects.hasOwnProperty(childId)) {
@@ -489,23 +498,33 @@ class DataObject {
   _onChildCreate(msg) {
     let _this = this;
 
-    log.log('[DataObject._onChildCreate] receivedBy ' + _this._owner + ' : ', msg);
+//    console.log('[DataObject._onChildCreate] receivedBy ' + _this._owner + ' : ', msg);
 
-    let response = {
-      from: msg.to,
-      to: msg.from,
-      type: 'response',
-      id: msg.id,
-      body: {
-        code: 100
+    // if this is an heartbeat msg foward it to heatbeat handler
+
+    if (msg.body.resource === 'heartbeat') {
+      console.log('[DataObject._onChildCreate] new heartbeat received ' + msg);
+      this._heartBeat.onNewHeartbeat(msg.body.value);
+    } else {
+      console.log('[DataObject._onChildCreate] new child receivedBy ' + _this._owner + ' : ', msg);
+      let response = {
+        from: msg.to,
+        to: msg.from,
+        type: 'response',
+        id: msg.id,
+        body: {
+          code: 100
+        }
       }
+  
+      _this._bus.postMessage(response);
+  
+      if (msg.body.value.resourceType) {
+        _this._onHypertyResourceAdded(msg);
+      } else _this._onChildAdded(msg);
+  
     }
 
-    _this._bus.postMessage(response);
-
-    if (msg.body.value.resourceType) {
-      _this._onHypertyResourceAdded(msg);
-    } else _this._onChildAdded(msg);
   }
 
   _onChildAdded(msg) {

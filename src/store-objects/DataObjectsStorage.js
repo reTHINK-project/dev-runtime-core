@@ -61,6 +61,7 @@ class DataObjectsStorage {
 
               _this._storeDataObject[type][remote] = dO[remote];
               log.log('[StoreDataObjects.loadRemote] storeDataObject updated: ', _this._storeDataObject);
+              _this._remotes[remote].disconnect();
   
             });
             
@@ -411,18 +412,18 @@ class DataObjectsStorage {
 
   // To sync local storage with remote storage server
 
-  sync(resource, observer = false, once = true) {
+  sync(resource, backupRevision, once = true) {
     let _this= this;
 
     return new Promise((resolve, reject) => {
 
 
       if (_this._remotes[resource]) {
-        let type = observer ? 'observers' : 'reporters';
-        let lastRevision = _this._storeDataObject[type][resource].data.backupRevision;
+//        let type = observer ? 'observers' : 'reporters';
+//        let lastRevision = _this._storeDataObject[type][resource].data.backupRevision;
 
         let table = resource.split('/')[3];
-        let options = {table: table, observer: observer, baseRevision: lastRevision, syncedRevision: lastRevision};
+        let options = {table: table, observer: true, baseRevision: backupRevision, syncedRevision: backupRevision};
 
         _this._remotes[resource].connect(options).then(()=> {
 

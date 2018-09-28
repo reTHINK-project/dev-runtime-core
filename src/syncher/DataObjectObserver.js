@@ -77,7 +77,11 @@ class DataObjectObserver extends DataObject /* implements SyncStatus */ {
 
     return new Promise((resolve, reject) => {
 
-      _this._syncher.read(_this._metadata.url).then((value)=>{
+      let criteria = {};
+
+      if (this.metadata.backupRevision) criteria.backupRevision = this.metadata.backupRevision;
+
+      _this._syncher.read(_this._metadata.url, criteria).then((value)=>{
         log.info('[DataObjectObserver_sync] value to sync: ', value);
 
         Object.assign(_this.data, deepClone(value.data));

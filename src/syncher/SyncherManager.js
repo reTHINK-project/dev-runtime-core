@@ -117,15 +117,14 @@ class SyncherManager {
         if (msg.hasOwnProperty('body') && msg.body.hasOwnProperty('method') && msg.body.hasOwnProperty('params')) {
 
         switch (msg.body.method) {
-          case 'sync': _this._dataObjectsStorage.sync(msg.body.params[0], true, false);
+          case 'sync': _this._dataObjectsStorage.sync(msg.body.params[0], msg.body.params[1], false);
            break;
           case 'stopSync': _this._dataObjectsStorage.stopSync(msg.body.params[0]);
            break;
         }
 
             reply.body = {
-              code: 200,
-              value: dataObject
+              code: 200
             };
     
             _this._bus.postMessage(reply);
@@ -158,7 +157,7 @@ class SyncherManager {
       log.info('[SyncherManager.onRead] new message', msg);
 
       if (msg.hasOwnProperty('body') && msg.body.hasOwnProperty('resource')) {
-        _this._dataObjectsStorage.sync(msg.body.resource, true).then((dataObject)=>{
+        _this._dataObjectsStorage.sync(msg.body.resource, criteria.backupRevision, true).then((dataObject)=>{
           reply.body = {
             code: 200,
             value: dataObject
