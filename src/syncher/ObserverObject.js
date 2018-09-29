@@ -123,7 +123,7 @@ class ObserverObject {
     let url = splitedReporterURL.url;
 
     let resource = splitedReporterURL.resource;
-    let value;
+    let value = {};
 
 /*    let value = {
       identity: msg.body.identity,
@@ -134,21 +134,22 @@ class ObserverObject {
 /*    delete value.identity.assertion;
     delete value.identity.expires;*/
 
-    let objectURLResource = deepClone(msg.body.resource);
+    let objectURLResource = msg.body.resource;
     let attribute = resource;
 
-    if (objectURLResource === 'heartbeat' ) value = data;
-    else value = {
-      identity: msg.body.identity,
-      value: data
-    };
+    if (objectURLResource === 'heartbeat') {
+      value = data;
+    } else {
+      value.identity= msg.body.identity;
+      value.data = data;
+    } 
 
 //    if (objectURLResource) attribute += '.' + objectURLResource;
     if (objectURLResource) attribute = objectURLResource;
 
-    log.log('[SyncherManager.ObserverObject._storeChildObject] : ', url, attribute, data);
+    log.log('[SyncherManager.ObserverObject._storeChildObject] : ', url, attribute, value);
 
-    _this._parent._dataObjectsStorage.saveChildrens(false, url, attribute, data);
+    _this._parent._dataObjectsStorage.saveChildrens(false, url, attribute, value);
   }
 
   removeSubscription(msg) {
