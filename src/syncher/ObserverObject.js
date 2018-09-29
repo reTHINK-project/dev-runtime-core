@@ -141,7 +141,7 @@ class ObserverObject {
       value = data;
     } else {
       value.identity= msg.body.identity;
-      value.data = data;
+      value.value = data;
     } 
 
 //    if (objectURLResource) attribute += '.' + objectURLResource;
