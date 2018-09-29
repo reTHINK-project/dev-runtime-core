@@ -286,7 +286,10 @@ class SyncherManager {
     let resource = msg.body.resource;
     let attribute = msg.body.attribute;
 
-    if (attribute === 'childrenObjects') { _this._dataObjectsStorage.saveChildrens(false, resource, undefined, msg.body.value); } else { _this._dataObjectsStorage.saveChildrens(true, resource, attribute, msg.body.value); }
+    if (attribute === 'childrenObjects') { 
+      _this._dataObjectsStorage.saveChildrens(false, resource, undefined, msg.body.value); 
+    } else { _this._dataObjectsStorage.saveChildrens(true, resource, attribute, msg.body.value);
+       }
 
   }
 
@@ -421,7 +424,7 @@ class SyncherManager {
           if (domainRegistration) {
 
             reporter.forwardSubscribe([objectRegistration.url, subscriptionURL]).then(() => {
-              reporter.addChildrens(childrens).then(() => {
+              reporter.addChildrens().then(() => {
                 _this._reporters[objectRegistration.url] = reporter;
 
 
@@ -431,7 +434,7 @@ class SyncherManager {
               });
             });
           } else {
-            reporter.addChildrens(childrens).then(() => {
+            reporter.addChildrens().then(() => {
               _this._reporters[objectRegistration.url] = reporter;
 
 
@@ -533,7 +536,7 @@ class SyncherManager {
     return new Promise((resolve) => {
 
 
-    reporter.addChildrens(childrens).then(() => {
+    reporter.addChildrens().then(() => {
 
       reporter.resumeSubscriptions(storedObject.subscriptions);
 
@@ -760,7 +763,8 @@ class SyncherManager {
       let subscriptions = [];
       subscriptions.push(objURL + '/changes');
 
-      childrens.forEach((child) => subscriptions.push(childBaseURL + child));
+//      childrens.forEach((child) => subscriptions.push(childBaseURL + child));
+      subscriptions.push(childBaseURL);
 
       //children addresses
 
@@ -823,7 +827,7 @@ class SyncherManager {
               console.log('REUSETEST SyncherManager - 200 code[SyncherManager._newSubscription] - observers: ', _this._observers, objURL, _this._observers[objURL]);
               let observer = _this._observers[objURL];
               if (!observer) {
-                observer = new ObserverObject(_this, objURL, childrens);
+                observer = new ObserverObject(_this, objURL);
                 log.log('[SyncherManager._newSubscription] - observers: create new ObserverObject: ', observer);
                 _this._observers[objURL] = observer;
 
@@ -831,7 +835,7 @@ class SyncherManager {
                 observer.addSubscription(hypertyURL);
 
                 // add childrens and listeners to save data if necessary
-                observer.addChildrens(childrens);
+                observer.addChildrens();
               }
 
               let interworking = false;
@@ -913,7 +917,8 @@ class SyncherManager {
         //children addresses
         let subscriptions = [];
         subscriptions.push(objURL + '/changes');
-        childrens.forEach((child) => subscriptions.push(childBaseURL + child));
+//        childrens.forEach((child) => subscriptions.push(childBaseURL + child));
+        subscriptions.push(childBaseURL);
 
         //FLOW-OUT: reply with provisional response
         this._bus.postMessage({
@@ -932,14 +937,14 @@ class SyncherManager {
 
         let observer = this._observers[objURL];
         if (!observer) {
-          observer = new ObserverObject(this, objURL, childrens);
+          observer = new ObserverObject(this, objURL);
           observer.isToSaveData = storedObject.isToSaveData;
           this._observers[objURL] = observer;
         }
 
         //register new hyperty subscription
         observer.addSubscription(hypertyURL);
-        observer.addChildrens(childrens);
+        observer.addChildrens();
 
         // Object.assign(storedObject.data, reply.body.value.data);
         // Object.assign(storedObject.childrens, reply.body.value.childrens);

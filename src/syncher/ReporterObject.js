@@ -97,7 +97,7 @@ class ReporterObject {
       log.log('[SyncherManager.ReporterObject] - resume subscriptions', _this, hypertyURL, _this._childrens);
 
       if (!_this._subscriptions[hypertyURL]) {
-        _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, _this._childrens, true);
+        _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, true);
       }
     });
 
@@ -155,21 +155,21 @@ class ReporterObject {
    * @param  {string[]} childrens - channels to register
    * @return {Promise} Return Promise OK or error
    */
-  addChildrens(childrens) {
+  addChildrens() {
     let _this = this;
 
     return new Promise((resolve, reject) => {
-      if (childrens.length === 0) {
+/*      if (childrens.length === 0) {
         resolve();
         return;
-      }
+    }*/
 
       let childBaseURL = _this._url + '/children/';
-      log.log('[SyncherManager.ReporterObject - addChildrens] - childrens: ', childrens, childBaseURL);
+      log.log('[SyncherManager.ReporterObject - addChildrens] - childrens: ', childBaseURL);
 
-      childrens.forEach((child) => {
+  /*    childrens.forEach((child) => {
         _this._childrens.push(child);
-      });
+      });*/
 
       /*
       _this._childrens.forEach((child) => {
@@ -180,7 +180,8 @@ class ReporterObject {
       });*/
 
       let subscriptions = [];
-      childrens.forEach((child) => subscriptions.push(childBaseURL + child));
+//      childrens.forEach((child) => subscriptions.push(childBaseURL + child));
+      subscriptions.push(childBaseURL );
 
       //_this._storageSubscriptions[_this._objSubscriptorURL] = {url: _this._url, owner: _this._owner, childrens: _this._childrens};
 
@@ -349,7 +350,7 @@ class ReporterObject {
         if (reply.body.code === 200) {
           if (!_this._subscriptions[hypertyURL]) {
             log.log('[SyncherManager.ReporterObject] - _onRemoteSubscribe:', _this._childrens);
-            _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, _this._childrens, true);
+            _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, true);
           }
         }
 

@@ -74,7 +74,7 @@ _startHeartBeat(rate) {
 
   let msg = {
     from: _this._hypertyUrl,
-    to: _this._dataObject.url + '/children/resources',
+    to: _this._dataObject.url + '/children/',
     type: 'create',
     body: {
       resource: 'heartbeat',
@@ -92,7 +92,7 @@ _startHeartBeat(rate) {
 
     let msg = {
       from: _this._hypertyUrl,
-      to: _this._dataObject.url + '/children/resources',
+      to: _this._dataObject.url + '/children/',
       type: 'create',
       body: {
         resource: 'heartbeat',
