@@ -73,7 +73,7 @@ _startHeartBeat(rate) {
   let _this = this;
 
   let msg = {
-    from: this._hypertyUrl,
+    from: _this._hypertyUrl,
     to: _this._dataObject.url + '/children/resources',
     type: 'create',
     body: {
@@ -90,7 +90,17 @@ _startHeartBeat(rate) {
 
   let id = setInterval(function () {
 
-    msg.body.value = secondsSinceEpoch();
+    let msg = {
+      from: _this._hypertyUrl,
+      to: _this._dataObject.url + '/children/resources',
+      type: 'create',
+      body: {
+        resource: 'heartbeat',
+        mutual: false,
+        value: secondsSinceEpoch(),
+      }
+    }
+    console.log('[HeartBeat] ', msg);
     _this._bus.postMessage(msg);
     this.heartbeat = secondsSinceEpoch();
   

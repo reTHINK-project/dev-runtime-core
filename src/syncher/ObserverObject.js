@@ -2,7 +2,7 @@
 import * as logger from 'loglevel';
 let log = logger.getLogger('ObserverObject');
 
-import { divideURL, splitObjectURL } from '../utils/utils';
+import { divideURL, splitObjectURL, deepClone } from '../utils/utils';
 import Subscription from './Subscription';
 import * as cryptoManager from '../cryptoManager/CryptoManager';
 
@@ -134,7 +134,7 @@ class ObserverObject {
 /*    delete value.identity.assertion;
     delete value.identity.expires;*/
 
-    let objectURLResource = msg.body.resource;
+    let objectURLResource = deepClone(msg.body.resource);
     let attribute = resource;
 
     if (objectURLResource === 'heartbeat' ) value = data;
