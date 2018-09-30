@@ -420,42 +420,50 @@ class DataObjectsStorage {
   sync(resource, backupRevision, once = true) {
     let _this= this;
 
-    return new Promise((resolve, reject) => {
-
-
       if (_this._remotes[resource]) {
-//        let type = observer ? 'observers' : 'reporters';
-//        let lastRevision = _this._storeDataObject[type][resource].data.backupRevision;
 
         let table = resource.split('/')[3];
-        let options = {table: table, observer: true, baseRevision: backupRevision, syncedRevision: backupRevision};
 
-        _this._remotes[resource].connect(options).then(()=> {
-
-          _this._remotes[resource].get(null,null,table).then((dataObject)=>{
-//          this._remotes[resource].get().then((dataObject)=>{
-              log.info('[DataObjectStorage.sync] returning synched DO: ', dataObject);
-
-              if (once) _this._remotes[resource].disconnect().then(()=>{
-                log.info('[DataObjectStorage.sync] disconnected ');
-                resolve(dataObject[resource]);
-            },(error)=> {
-              log.error('[DataObjectStorage.sync] Error synching with remote storage');
-              reject(error);
-            });
-        } , (error) => {
-          log.error('[DataObjectStorage.sync] Error disconnecting from remote storage');
-          reject(error)
-        });
-      }, (error) => {
-        log.error('[DataObjectStorage.sync] Error connecting to remote storage');
-        reject(error)
-      });
+        if (backupRevision) return _this._sync(resource, backupRevision, once, table);
+        else _this._remotes[resource].getBackupRevision(resource).then((backupRevision)=> {
+          return _this._sync(resource, backupRevision, once, table);
+          
+       });
       } else {
           let info = '[DataObjectStorage.sync] Info: ' + resource + ' is not synched with remote storage.'
           log.info(info);
           reject(info);
       }
+  }
+
+  _sync(resource, backupRevision, once, table) {
+    let _this= this;
+
+    return new Promise((resolve, reject) => {
+
+      let options = {table: table, observer: true, baseRevision: backupRevision, syncedRevision: backupRevision};
+
+          _this._remotes[resource].connect(options).then(()=> {
+  
+            _this._remotes[resource].get(null,null,table).then((dataObject)=>{
+  //          this._remotes[resource].get().then((dataObject)=>{
+                log.info('[DataObjectStorage.sync] returning synched DO: ', dataObject);
+  
+                if (once) _this._remotes[resource].disconnect().then(()=>{
+                  log.info('[DataObjectStorage.sync] disconnected ');
+                  resolve(dataObject[resource]);
+              },(error)=> {
+                log.error('[DataObjectStorage.sync] Error synching with remote storage');
+                reject(error);
+              });
+          } , (error) => {
+            log.error('[DataObjectStorage.sync] Error disconnecting from remote storage');
+            reject(error)
+          });
+        }, (error) => {
+          log.error('[DataObjectStorage.sync] Error connecting to remote storage');
+          reject(error)
+        });
 
     });
   }

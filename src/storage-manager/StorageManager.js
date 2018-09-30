@@ -50,14 +50,30 @@ class StorageManager {
     });
   });
 }
+  // to retrieve the last revision stored in the backup server
+
+  getBackupRevision(resource) {
+
+    return new Promise((resolve)=> {
+      this.db._syncNodes.get({type: 'remote'}).then((status)=> {
+        console.log('[StorageManager.getBackupRevision] retrieved status: ', status);
+        if (status && status.hasOwnProperty('appliedRemoteRevision')) {
+          if (status.appliedRemoteRevision === null) status.appliedRemoteRevision = 0;
+
+          resolve(status.appliedRemoteRevision);
+        } 
+    });
+  });
+}
 
   // to retrieve the last revision stored in the backup server
+  // and broadcast it
 
   _updateBackupRevision(resource) {
 
     return new Promise((resolve)=> {
       this.db._syncNodes.get({type: 'remote'}).then((status)=> {
-        console.log('[StorageManager.synchedVersion] retrieved status: ', status);
+        console.log('[StorageManager._updateBackupRevision] retrieved status: ', status);
         if (status && status.hasOwnProperty('appliedRemoteRevision')) {
           if (status.appliedRemoteRevision === null) status.appliedRemoteRevision = 0;
 

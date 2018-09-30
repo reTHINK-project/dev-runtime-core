@@ -90,7 +90,7 @@ class DataObjectReporter extends DataObject /* implements SyncStatus */ {
           // broadcast backupRevision update
 
           _this.data.backupRevision = evt.body.value.backupRevision;
-          console.log('[Syncher.DataObjectReporter] DO updated with backup revision ' + _this.data);
+          console.log('[Syncher.DataObjectReporter] DO updated with backup revision ' + _this.data.backupRevision);
         }
     });
 

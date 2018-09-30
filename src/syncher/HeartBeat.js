@@ -115,16 +115,20 @@ _startHeartBeat(rate) {
 
  _startSync() {
 
-    let msg = {
+  console.log('[HeartBeat._startSync] starting observer sync ', this._dataObject.data);
+  let backupRevision = this._dataObject.data.backupRevision;
+  console.log('[HeartBeat._startSync] backupRevision ', backupRevision);
+  let msg = {
       from: this._hypertyUrl,
       to: this._runtimeUrl+'/sm',
       type: 'execute',
       body: {
         method: 'sync',
-        params: [this._dataObject.url]
+        params: [this._dataObject.url, backupRevision]
       }
     }
-    console.log('[HeartBeat._startSync] starting observer sync ');
+
+    console.log('[HeartBeat._startSync] sending msg ', msg);
 
     this._bus.postMessage(msg);
 
