@@ -441,7 +441,7 @@ class DataObjectsStorage {
 
     return new Promise((resolve, reject) => {
 
-      let options = {table: table, observer: true, baseRevision: backupRevision, syncedRevision: backupRevision};
+      let options = {table: table, observer: true, baseRevision: backupRevision+1, syncedRevision: backupRevision+2};
 
           _this._remotes[resource].connect(options).then(()=> {
   

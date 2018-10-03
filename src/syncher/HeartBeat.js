@@ -15,7 +15,7 @@ class HeartBeat {
    * @ignore
    * Should not be used directly by Hyperties. It's called by the DataObject constructor
    */
-  constructor(bus, hypertyUrl, runtimeUrl, dataObject, heartBeatRate = 60, lastHeartbeat = 0) {
+  constructor(bus, hypertyUrl, runtimeUrl, dataObject, heartBeatRate = 10, lastHeartbeat = 0) {
     let _this = this;
 
     function throwMandatoryParmMissingError(par) {
