@@ -122,7 +122,8 @@ class DataObject {
       let lastHeartbeat = 
         (input.hasOwnProperty('childrenObjects') && input.childrenObjects.hasOwnProperty('heartbeat')) ?
         input.childrenObjects.heartbeat : 0;
-      _this._heartBeat = new HeartBeat(_this._bus, _this._owner, _this._syncher._runtimeUrl, this, 10, lastHeartbeat);
+      _this._heartBeat = new HeartBeat(_this._bus, _this._owner, _this._syncher._runtimeUrl, this, 15, lastHeartbeat);
+      if (!_this._resumed) _this._heartBeat.start(lastHeartbeat);
 
     }
   }
@@ -185,6 +186,62 @@ class DataObject {
   }
 
   /**
+   * Sync Data Object Observer with last version of Data Object Reporter. Useful for Resumes
+   */
+  sync() {
+
+    let _this = this;
+    log.info('[DataObject.sync] synchronising ');
+
+    return new Promise((resolve, reject) => {
+
+      let criteria = {};
+
+      if (this.metadata.backupRevision) criteria.backupRevision = this.metadata.backupRevision;
+
+      _this._syncher.read(_this._metadata.url, criteria).then((value)=>{
+        log.info('[DataObject.sync] value to sync: ', value);
+
+        Object.assign(_this.data, deepClone(value.data));
+
+        _this._version = value.version;
+
+        _this._metadata.lastModified = value.lastModified;
+
+        //TODO: check first if there are new childrenObjects to avoid overhead
+
+        if (value.childrenObjects) {
+          _this.resumeChildrens(value.childrenObjects);
+          _this._storeChildrens();
+          resolve(true);
+        } else resolve(true);
+
+
+        /*if (value.version != _this._version) {
+          log.info('[DataObject.sync] updating existing data: ', _this.data);
+
+          Object.assign(_this.data || {}, deepClone(value.data));
+
+          _this._metadata = deepClone(value);
+
+          delete _this._metadata.data;
+
+          _this._version = value.version;
+
+        } else {
+          log.info('[DataObject.sync] existing data is updated: ', value);
+        }*/
+
+      }).catch((reason) => {
+        log.info('[DataObject.sync] sync failed: ', reason);
+        resolve(false);
+      });
+
+    });
+
+
+  }  
+  /**
    *
    */
   resumeChildrens(childrens) {
@@ -206,7 +263,10 @@ class DataObject {
 
         // check if it is the last heartbeat
 
-        if (childId === 'heartbeat') {_this._heartBeat.onNewHeartbeat(children[childId].value);}
+        if (childId === 'heartbeat') {
+//          _this._heartBeat.onNewHeartbeat(children[childId].value);
+          _this._heartBeat.start(children[childId]);
+        }
         else if (children[childId].value.resourceType && !_this._childrenObjects.hasOwnProperty(childId)) {
           _this._childrenObjects[childId] = _this._resumeHypertyResource(children[childId]);
           newChild = true;

@@ -55,23 +55,27 @@ class DataObjectsStorage {
             _this._remotes[remote].get(null,null,table).then((dO) => {
               log.log('[StoreDataObjects.loadRemote] loaded remote ', dO);
 
-              let type = this._getTypeOfObject(dO[remote].isReporter);
+              if (dO[remote].isReporter) {
+                let type = this._getTypeOfObject(dO[remote].isReporter);
 
-              if (!_this._storeDataObject.hasOwnProperty(type)) _this._storeDataObject[type] = {};
-
-              _this._storeDataObject[type][remote] = dO[remote];
-              log.log('[StoreDataObjects.loadRemote] storeDataObject updated: ', _this._storeDataObject);
-
-              setTimeout(function() {
-                _this._remotes[remote].disconnect().then(()=>{
-                  log.info('[DataObjectStorage.loadRemote] disconnected ');
-    
-              },(error)=> {
-                log.error('[DataObjectStorage.sync] Error synching with remote storage');
-                reject(error);
-              });
+                if (!_this._storeDataObject.hasOwnProperty(type)) _this._storeDataObject[type] = {};
   
-              }, 15000);
+                _this._storeDataObject[type][remote] = dO[remote];
+                log.log('[StoreDataObjects.loadRemote] storeDataObject updated: ', _this._storeDataObject);
+  
+                setTimeout(function() {
+                  _this._remotes[remote].disconnect().then(()=>{
+                    log.info('[DataObjectStorage.loadRemote] disconnected ');
+      
+                },(error)=> {
+                  log.error('[DataObjectStorage.sync] Error synching with remote storage');
+                  reject(error);
+                });
+    
+                }, 15000);
+              }
+
+
 
           });
             

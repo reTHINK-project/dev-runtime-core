@@ -15,7 +15,7 @@ class HeartBeat {
    * @ignore
    * Should not be used directly by Hyperties. It's called by the DataObject constructor
    */
-  constructor(bus, hypertyUrl, runtimeUrl, dataObject, heartBeatRate = 10, lastHeartbeat = 0) {
+  constructor(bus, hypertyUrl, runtimeUrl, dataObject, heartBeatRate = 60) {
     let _this = this;
 
     function throwMandatoryParmMissingError(par) {
@@ -27,25 +27,28 @@ class HeartBeat {
     heartBeatRate ?  _this._heartBeatRate = heartBeatRate : throwMandatoryParmMissingError('heartBeatRate');
     runtimeUrl ?  _this._runtimeUrl = runtimeUrl : throwMandatoryParmMissingError('runtimeUrl');
     hypertyUrl ?  _this._hypertyUrl = hypertyUrl : throwMandatoryParmMissingError('hypertyUrl');
+
+  }
+
+  start(lastHeartbeat = 0){
     this.heartbeat = lastHeartbeat;
 
-    console.log('[HeartBeat] starting ... ');
+    console.log('[HeartBeat] starting ... ', lastHeartbeat);
 
-
-      let isHeartBeatActive = _this._isHeartBeatActive(this.heartBeat, heartBeatRate);
+      let isHeartBeatActive = this._isHeartBeatActive(this.heartBeat, this._heartBeatRate);
 
       if (!isHeartBeatActive) {
-          console.log('[HeartBeat] heart beats are disabled for ', dataObject);
+          console.log('[HeartBeat] heart beats are disabled for ', this._dataObject);
 
         // Is disabled: lets start observer heart beat and start synching with remote storage server
-        this._startHeartBeat( heartBeatRate);
-        console.log('[HeartBeat]  ', hypertyUrl , ' started synching with remote storage server');
+        this._startHeartBeat( this._heartBeatRate);
+        console.log('[HeartBeat]  ', this._hypertyUrl , ' started synching with remote storage server');
         let stopSync = this._startSync();
       } else {
       //  heart beat is active, 
       // it means the data object is already being synchronised with remote storage server
       // we only need to watch the heart beat and try to replace it in case it fails.
-        this._watchHeartBeat(heartBeatRate,true, this._onHertbeatStopped);
+        this._watchHeartBeat(this._heartBeatRate,true, this._onHertbeatStopped);
 
       }
   }
@@ -64,8 +67,8 @@ _isHeartBeatActive(lastHeartbeat, maxHeartBeatInterval) {
   let lastHeartPeriodInterval = secondsSinceEpoch() - lastHeartbeat;
   console.log('[HeartBeat._isHeartBeatActive] now - lastHeartBeat', lastHeartPeriodInterval);
 
-  console.log('[HeartBeat._isHeartBeatActive] ', !(secondsSinceEpoch() - lastHeartbeat > maxHeartBeatInterval));
-  return (!(lastHeartPeriodInterval > maxHeartBeatInterval * 1.5));
+  console.log('[HeartBeat._isHeartBeatActive] ', !(lastHeartPeriodInterval > maxHeartBeatInterval * 2));
+  return (!(lastHeartPeriodInterval > maxHeartBeatInterval * 2));
 }
 
 
