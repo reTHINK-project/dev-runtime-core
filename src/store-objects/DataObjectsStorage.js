@@ -61,13 +61,18 @@ class DataObjectsStorage {
 
               _this._storeDataObject[type][remote] = dO[remote];
               log.log('[StoreDataObjects.loadRemote] storeDataObject updated: ', _this._storeDataObject);
-              _this._remotes[remote].disconnect().then(()=>{
-                log.info('[DataObjectStorage.loadRemote] disconnected ');
+
+              setTimeout(function() {
+                _this._remotes[remote].disconnect().then(()=>{
+                  log.info('[DataObjectStorage.loadRemote] disconnected ');
+    
+              },(error)=> {
+                log.error('[DataObjectStorage.sync] Error synching with remote storage');
+                reject(error);
+              });
   
-            },(error)=> {
-              log.error('[DataObjectStorage.sync] Error synching with remote storage');
-              reject(error);
-            });
+              }, 15000);
+
           });
             
           });
@@ -180,6 +185,38 @@ class DataObjectsStorage {
     });
 
 
+
+  }
+
+  // Initial Sync of Observer to avoid later mismatches with sync revisions
+
+  initialObserverSync(resource, backupRevision) {
+    // to be completed
+    let table = resource.split('/')[3];
+
+    let _this = this;
+
+    let options = {table: table, observer: true, baseRevision: backupRevision+1, syncedRevision: backupRevision+1};
+
+    console.log('[DataObjectStorage.initialObserverSync] object: ', resource, ' revision ', backupRevision)
+
+    _this._remotes[resource].connect(options).then(()=> {
+
+      console.log('[DataObjectStorage.initialObserverSync] connected ');
+
+            setTimeout(function() {
+              _this._remotes[resource].disconnect().then(()=>{
+                console.log('[DataObjectStorage.initialObserverSync] disconnected ');
+            },(error)=> {
+              log.error('[DataObjectStorage.initialObserverSync] Error disconnecting with remote storage');
+              reject(error);
+            });
+            }, 15000)
+
+    }, (error) => {
+      log.error('[DataObjectStorage.initialObserverSync] Error connecting to remote storage');
+      reject(error)
+    });
 
   }
 
@@ -441,7 +478,7 @@ class DataObjectsStorage {
 
     return new Promise((resolve, reject) => {
 
-      let options = {table: table, observer: true, baseRevision: backupRevision+1, syncedRevision: backupRevision+2};
+      let options = {table: table, observer: false, baseRevision: backupRevision-1, syncedRevision: backupRevision};
 
           _this._remotes[resource].connect(options).then(()=> {
   
@@ -449,13 +486,17 @@ class DataObjectsStorage {
   //          this._remotes[resource].get().then((dataObject)=>{
                 log.info('[DataObjectStorage.sync] returning synched DO: ', dataObject);
   
-                if (once) _this._remotes[resource].disconnect().then(()=>{
-                  log.info('[DataObjectStorage.sync] disconnected ');
-                  resolve(dataObject[resource]);
-              },(error)=> {
-                log.error('[DataObjectStorage.sync] Error synching with remote storage');
-                reject(error);
-              });
+                if (once) {
+                  setTimeout(function() {
+                    _this._remotes[resource].disconnect().then(()=>{
+                      log.info('[DataObjectStorage.sync] disconnected ');
+                      resolve(dataObject[resource]);
+                  },(error)=> {
+                    log.error('[DataObjectStorage.sync] Error synching with remote storage');
+                    reject(error);
+                  });
+                  }, 15000)
+                }
           } , (error) => {
             log.error('[DataObjectStorage.sync] Error disconnecting from remote storage');
             reject(error)
