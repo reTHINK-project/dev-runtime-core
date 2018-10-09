@@ -35,7 +35,7 @@ class HeartBeat {
 
     console.log('[HeartBeat] starting ... ', lastHeartbeat);
 
-      let isHeartBeatActive = this._isHeartBeatActive(this.heartBeat, this._heartBeatRate);
+      let isHeartBeatActive = this._isHeartBeatActive(this.heartBeat, this._heartBeatRate*2);
 
       if (!isHeartBeatActive) {
           console.log('[HeartBeat] heart beats are disabled for ', this._dataObject);
