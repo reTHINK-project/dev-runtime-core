@@ -505,7 +505,7 @@ class DataObjectsStorage {
 
     return new Promise((resolve, reject) => {
 
-      let options = {table: table, observer: false, syncedRevision: backupRevision+2};
+      let options = {table: table, observer: false, syncedRevision: backupRevision+3};
 
           _this._remotes[resource].connect(options).then(()=> {
   
@@ -522,7 +522,7 @@ class DataObjectsStorage {
                     log.error('[DataObjectStorage.sync] Error synching with remote storage');
                     reject(error);
                   });
-                  }, 15000)
+                  }, 2000)
                 }
                 resolve(dataObject[resource]);
               } , (error) => {
