@@ -200,7 +200,7 @@ class DataObjectsStorage {
 
     let _this = this;
 
-    let options = {table: table, observer: true, baseRevision: backupRevision+1, syncedRevision: backupRevision+1};
+    let options = {table: table, observer: true, baseRevision: backupRevision, syncedRevision: backupRevision};
 
     console.log('[DataObjectStorage.initialObserverSync] object: ', resource, ' revision ', backupRevision)
 
@@ -473,16 +473,18 @@ class DataObjectsStorage {
       } else {
           let info = '[DataObjectStorage.sync] Info: ' + resource + ' is not synched with remote storage.'
           log.info(info);
-          reject(info);
+//          reject(info);
       }
   }
 
   _sync(resource, backupRevision, once, table) {
     let _this= this;
 
+    console.log('[DataObjectStorage._sync] backupRevision: ', backupRevision);
+
     return new Promise((resolve, reject) => {
 
-      let options = {table: table, observer: false, baseRevision: backupRevision-1, syncedRevision: backupRevision};
+      let options = {table: table, observer: false, syncedRevision: backupRevision+5};
 
           _this._remotes[resource].connect(options).then(()=> {
   

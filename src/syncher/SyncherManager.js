@@ -873,7 +873,7 @@ class SyncherManager {
                   observer.isToSaveData = true;
                   _this._dataObjectsStorage.update(false, objURL, 'isToSaveData', true);
                   _this._dataObjectsStorage.saveData(false, objURL, null, reply.body.value.data);
-                  if (childrens) _this._dataObjectsStorage.initialObserverSync(objURL, reply.body.value.data.backupRevision);
+//                  if (childrens) _this._dataObjectsStorage.initialObserverSync(objURL, reply.body.value.data.backupRevision);
                 }
               }
 
