@@ -75,10 +75,12 @@ class DataObjectsStorage {
                   
                       if (!_this._storeDataObject.hasOwnProperty(type)) _this._storeDataObject[type] = {};
 
+//                      let backupRevision 
+
                       let synching = [];
 
                       synching.push(
-                        _this._sync(url, dO[url].backupRevision, true, url.split('/')[3] ).then((synchedObj)=>{
+                        _this._sync(url, dO[url].data.backupRevision, true, url.split('/')[3] ).then((synchedObj)=>{
                           _this._storeDataObject[type][url] = synchedObj;
                           log.log('[StoreDataObjects.loadRemote] storeDataObject updated: ', _this._storeDataObject);
                         })

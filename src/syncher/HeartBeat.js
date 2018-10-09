@@ -85,7 +85,7 @@ _startHeartBeat(rate) {
       value: secondsSinceEpoch(),
     }
   }
-  console.log('[HeartBeat._startObserverSync] starting observer sync ');
+  console.log('[HeartBeat._startHeartBeat] starting ... ');
 
   this._bus.postMessage(msg);
 

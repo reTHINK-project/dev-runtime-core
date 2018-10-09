@@ -79,7 +79,7 @@ class DataObjectObserver extends DataObject /* implements SyncStatus */ {
 
       let criteria = {};
 
-      if (this.metadata.backupRevision) criteria.backupRevision = this.metadata.backupRevision;
+//      if (this.metadata.backupRevision) criteria.backupRevision = this.metadata.backupRevision;
 
       _this._syncher.read(_this._metadata.url, criteria).then((value)=>{
         log.info('[DataObjectObserver_sync] value to sync: ', value);
