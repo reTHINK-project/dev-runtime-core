@@ -626,14 +626,13 @@ class ChatController {
 
     let _this = this;
     
-
     return new Promise(function(resolve, reject) {
-
+      
       if (_this.controllerMode === 'reporter') {
-          _this._invitationsHandler.cleanInvitations(_this.dataObjectReporter).then(() => {
-            if (!del) {
-              _this.dataObjectReporter.communication.status = 'closed';
-              console.log('[saving]:', _this.dataObjectReporter);
+        // reporter
+        _this._invitationsHandler.cleanInvitations(_this.dataObjectReporter).then(() => {
+          if (!del) {
+            _this._manager.communicationObject.status = 'closed';
               resolve(true);
             }
             else{
@@ -657,6 +656,7 @@ class ChatController {
           });
 
       } else {
+        // observer
         if(del){
           try {
             delete _this._manager._observersControllers[_this.dataObjectObserver.url];
