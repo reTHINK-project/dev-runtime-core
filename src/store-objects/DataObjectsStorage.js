@@ -203,7 +203,7 @@ class DataObjectsStorage {
         });
 //          return storeDataObject[type][metadata.url];
       } else {
-        storage.set(db, 1, storeDataObject[type][metadata.url], table).then(()=>{
+        storage.set(db, 1, storeDataObject, table).then(()=>{
             resolve(storeDataObject[type][metadata.url]);
         });
       }
@@ -214,7 +214,8 @@ class DataObjectsStorage {
   }
 
   // Initial Sync of Observer to avoid later mismatches with sync revisions
-
+  // OUtdated: not used anymore
+/*
   initialObserverSync(resource, backupRevision) {
     // to be completed
     let table = resource.split('/')[3];
@@ -243,7 +244,7 @@ class DataObjectsStorage {
       reject(error)
     });
 
-  }
+  }*/
 
   /**
    * @description should save and update the current dataObject data information
@@ -283,7 +284,8 @@ class DataObjectsStorage {
     let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
     let storage = storeDataObject[type][resource].backup ? this._remotes[db] : this._storageManager;
     let table = storeDataObject[type][resource].backup ? db.split('/')[3] : this._table;
-    storage.set(db, 1, storeDataObject[type][resource], table, updateRuntimeStatus).then(() => {
+    let data = storeDataObject[type][resource].backup ? storeDataObject[type][resource] : storeDataObject;
+    storage.set(db, 1, data, table, updateRuntimeStatus).then(() => {
       return storeDataObject[type][resource];
     }, (error)=>{
       console.error(error);
@@ -318,7 +320,8 @@ class DataObjectsStorage {
     let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
     let storage = storeDataObject[type][resource].backup ? this._remotes[db] : this._storageManager;
     let table = storeDataObject[type][resource].backup ? db.split('/')[3] : this._table;
-    storage.set(db, 1, storeDataObject[type][resource], table).then(()=>{
+    let data = storeDataObject[type][resource].backup ? storeDataObject[type][resource] : storeDataObject;
+    storage.set(db, 1, data, table).then(()=>{
       return storeDataObject[type][resource];
     });
 
@@ -363,7 +366,8 @@ class DataObjectsStorage {
       let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
       let storage = storeDataObject[type][resource].backup ? this._remotes[db] : this._storageManager;
       let table = storeDataObject[type][resource].backup ? db.split('/')[3] : this._table;
-      storage.set(db, 1, storeDataObject[type][resource], table, updateRuntimeStatus).then(()=>{
+      let data = storeDataObject[type][resource].backup ? storeDataObject[type][resource] : storeDataObject;
+      storage.set(db, 1, data, table, updateRuntimeStatus).then(()=>{
         return storeDataObject[type][resource];
       });
     }
@@ -399,7 +403,8 @@ class DataObjectsStorage {
       let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
       let storage = storeDataObject[type][resource].backup ? this._remotes[db] : this._storageManager;
       let table = storeDataObject[type][resource].backup ? db.split('/')[3] : this._table;
-      storage.set( db, 1, storeDataObject[type][resource], table);
+      let data = storeDataObject[type][resource].backup ? storeDataObject[type][resource] : storeDataObject;
+      storage.set( db, 1, data, table);
 
       return storeDataObject[type][resource];
     }
@@ -447,7 +452,7 @@ class DataObjectsStorage {
               this._storageManager.delete( resource, null, 'remotes');
             });
           } else {
-            storage.delete(db, 1, resource);
+            storage.set(db, 1, this._storeDataObject);
           }
 
           return resolve();

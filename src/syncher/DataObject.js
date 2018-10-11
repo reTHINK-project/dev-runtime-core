@@ -172,17 +172,21 @@ class DataObject {
   _releaseListeners() {
     let _this = this;
 
-    _this._childrenListener.remove();
+    if (_this._childrenListener) {
+      _this._childrenListener.remove();
 
-    Object.keys(_this._childrenObjects).forEach((child) => {
-/*      if (children === 'resources') {
-        Object.keys(_this._childrenObjects[children]).forEach((child) => {
-          _this._childrenObjects[children][child]._releaseListeners();
-        });
-      } else {*/
-        _this._childrenObjects[child]._releaseListeners();
-//      }
-    });
+      Object.keys(_this._childrenObjects).forEach((child) => {
+  /*      if (children === 'resources') {
+          Object.keys(_this._childrenObjects[children]).forEach((child) => {
+            _this._childrenObjects[children][child]._releaseListeners();
+          });
+        } else {*/
+          _this._childrenObjects[child]._releaseListeners();
+  //      }
+      });
+    }
+
+
   }
 
   /**
