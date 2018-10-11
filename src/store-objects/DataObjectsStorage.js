@@ -469,11 +469,13 @@ class DataObjectsStorage {
 
   getAll() {
 
+    let _this = this;
+
     return new Promise((resolve, reject) => {
-      this._storeDataObject = this._storageManager.get('syncherManager:ObjectURLs').then((objects) => {
-        this._storeDataObject = objects;
-        this.loadRemote(true).then((storedObjects)=>{
-          resolve(storedObjects);
+      _this._storeDataObject = this._storageManager.get('syncherManager:ObjectURLs').then((objects) => {
+        _this._storeDataObject = objects;
+        _this.loadRemote(true).then((storedObjects)=>{
+          resolve(_this._storeDataObject);
         });
 
       });
