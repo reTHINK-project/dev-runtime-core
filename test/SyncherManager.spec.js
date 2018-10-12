@@ -174,7 +174,6 @@ describe('SyncherManager', function() {
   };
 
   let runtimeCapabilities =  runtimeFactory.runtimeCapabilities();
-  debugger;
   let runtimeCoreCtx = new RuntimeCoreCtx(runtimeURL, identityModule, registry, storages.policy, runtimeCapabilities);
   let policyEngine = new PEP(runtimeCoreCtx);
 

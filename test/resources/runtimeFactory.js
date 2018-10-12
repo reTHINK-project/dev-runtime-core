@@ -5,7 +5,15 @@ import Request from './Request';
 import PersistenceManager from 'service-framework/dist/PersistenceManager';*/
 import StorageManager from '../../dist/StorageManager';
 
+
 import Dexie from 'dexie';
+
+// backup synchronisation are not yet supported by tests
+
+/*import 'dexie-observable';
+import 'dexie-syncable';
+
+import SyncClient from 'sync-client/dist/sync-client';*/
 
 export const runtimeFactory = Object.create({
 
@@ -53,7 +61,7 @@ export const runtimeFactory = Object.create({
     }
 
     if (!this.storeManager.hasOwnProperty(name)) {
-      this.storeManager[name] = new StorageManager(this.databases[name], name, schemas);
+      this.storeManager[name] = new StorageManager(this.databases[name], name, schemas, undefined);
     }
 
     return this.storeManager[name];
