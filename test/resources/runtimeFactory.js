@@ -10,10 +10,10 @@ import Dexie from 'dexie';
 
 // backup synchronisation are not yet supported by tests
 
-/*import 'dexie-observable';
+import 'dexie-observable';
 import 'dexie-syncable';
 
-import SyncClient from 'sync-client/dist/sync-client';*/
+import SyncClient from 'sync-client/dist/sync-client';
 
 export const runtimeFactory = Object.create({
 
@@ -43,7 +43,7 @@ export const runtimeFactory = Object.create({
     return new PersistenceManager(localStorage);
   },*/
 
-  storageManager(name, schemas) {
+  storageManager(name, schemas, runtimeUA = undefined, remote = false) {
 
     if (!this.databases) { this.databases = {}; }
     if (!this.storeManager) { this.storeManager = {}; }
@@ -57,12 +57,36 @@ export const runtimeFactory = Object.create({
     // Using the implementation of Service Framework
     // Dexie is the IndexDB Wrapper
     if (!this.databases.hasOwnProperty(name)) {
-      this.databases[name] = new Dexie(name);
+
+      let stores =  {};
+
+      if (schemas) {
+        stores = schemas;
+      } else {
+        stores[name] = 'key,version,value';
+      }
+
+      if (!remote) {
+        this.databases[name] =  new Dexie(name, {addons:[]});
+        this.databases[name].version(1).stores(stores);
+      } else {
+        //in case we use a remote storage server to be synched with
+        // we use SyncClient lib, an extension of Dexie
+
+        let versions = [{
+          version: 1,
+          stores: stores
+        }];
+
+        this.databases[name] =  new SyncClient(name, versions);
+      } 
     }
 
     if (!this.storeManager.hasOwnProperty(name)) {
-      this.storeManager[name] = new StorageManager(this.databases[name], name, schemas, undefined);
+      this.storeManager[name] = new StorageManager(this.databases[name], name, schemas, runtimeUA, 1, remote);
     }
+
+    if (remote) this.storeManager[name].remote = remote;
 
     return this.storeManager[name];
   },
