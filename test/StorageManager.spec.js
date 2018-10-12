@@ -12,7 +12,7 @@ describe('StorageManager', function() {
     let schemas = {};
     schemas[storeName] = 'key,version,value';
 
-    storage = new storageManager(db, storeName);
+    storage = new storageManager(db, storeName, schemas, null);
   });
 
   describe('set', function() {

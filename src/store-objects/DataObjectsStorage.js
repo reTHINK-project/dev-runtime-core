@@ -36,6 +36,10 @@ class DataObjectsStorage {
 
         _this._storageManager.get(null,null,'remotes').then((remotes)=>{
 
+          // in case we don't have any remotes locally stored
+          log.info('[StoreDataObjects.loadRemote] remotes: ', remotes);
+          if (!remotes) resolve();
+
           if (!resume) _this._remotes = remotes;
 
           log.info('[StoreDataObjects.loadRemote] loading: ', _this._remotes);

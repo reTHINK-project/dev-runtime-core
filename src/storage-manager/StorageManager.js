@@ -100,7 +100,12 @@ class StorageManager {
     try {
       name = this.db.table(this.storageName).name;
     } catch (error) {
-      name = this.db.table(key).name;
+//      try {
+        name = this.db.table(key).name;
+/*      } catch (error) {
+        log.error('[StorageManager._getTable] error ', error);
+        name = false;
+      }*/
     }
 
     return name;
@@ -179,6 +184,7 @@ class StorageManager {
     console.info('[StorageManager] - get ', key, value);
     table = table ? table : key;
     const name = this._getTable(table);
+    if (!name) return undefined;
     const primaryKey = this._getPrimaryKey(name);
 
     return this.db.transaction('rw!', this.db[name], () => {

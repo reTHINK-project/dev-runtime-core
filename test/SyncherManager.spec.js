@@ -869,7 +869,7 @@ describe('SyncherManager', function() {
     });
   });
 
-  it('reporter addChild', function(done) {
+  it.skip('reporter addChild', function(done) {
     bus = new MessageBus(registry);
     bus._onPostMessage = (msg) => {
       console.log('5-_onPostMessage: ', msg);
@@ -888,7 +888,7 @@ describe('SyncherManager', function() {
     });
   });
 
-  it('observer addChild', function(done) {
+  it.skip('observer addChild', function(done) {
     bus = new MessageBus(registry);
 
     bus._onPostMessage = (msg) => {
@@ -941,7 +941,7 @@ describe('SyncherManager', function() {
 
   });
 
-  it('children deltas generate and process', function(done) {
+  it.skip('children deltas generate and process', function(done) {
     bus = new MessageBus(registry);
     bus.pipelineOut.handlers = [handlers.idmHandler];
 

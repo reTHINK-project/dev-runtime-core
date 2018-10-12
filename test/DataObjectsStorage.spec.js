@@ -24,6 +24,7 @@ describe('dataObjectsStorage', function() {
 
   before(() => {
 
+//    storageManager = runtimeFactory.storageManager('syncherManager:ObjectURLs');
     storageManager = runtimeFactory.storageManager('syncherManager:ObjectURLs');
     dataObjectsStorage = new DataObjectsStorage(storageManager, {}, runtimeFactory);
     console.log('DataObjectStorageTests ', dataObjectsStorage);
