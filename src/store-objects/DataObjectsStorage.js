@@ -202,7 +202,8 @@ class DataObjectsStorage {
           resolve(storeDataObject[type][metadata.url]);
           }, (error) => {
             log.error('[DataObjectStorage.set] failed to connect with remote storage: ', error);
-            reject(error);
+            resolve(storeDataObject[type][metadata.url]);
+//            reject(error);
           });
         });
 //          return storeDataObject[type][metadata.url];
@@ -537,16 +538,18 @@ class DataObjectsStorage {
                 }
                 resolve(dataObject[resource]);
               } , (error) => {
-            log.error('[DataObjectStorage.sync] Error disconnecting from remote storage');
+            log.error('[DataObjectStorage.sync] Error retrieving stored data object');
             reject(error)
           });
         }, (error) => {
-          log.error('[DataObjectStorage.sync] Error connecting to remote storage');
-          reject(error)
+          log.error('[DataObjectStorage.sync] Error connecting to remote storage ', error);
+          _this._remotes[resource].get(null,null,table).then((dataObject)=>{
+              log.info('[DataObjectStorage.sync] returning synched DO: ', dataObject);
+              resolve(dataObject[resource]);
+            });
+          });
         });
-
-    });
-  }
+      }
 
   stopSync(resource) {
 
