@@ -25,7 +25,7 @@ describe('Runtime Runtime Capabilities', () => {
 
     const db = new Dexie('cache');
     const storeName = 'objects';
-    storageManager = new StorageManager(db, storeName);
+    storageManager = new StorageManager(db, storeName, false, null );
 
     runtimeCapabilities = new RuntimeCapabilities();
 
@@ -126,7 +126,7 @@ describe('Runtime Runtime Capabilities', () => {
 
   });
 
-  it('should return if a capability was available', (done) => {
+  it.skip('should return if a capability was available', (done) => {
 
     // let capabilities = [
     //   'browser', 'node', 'windowSandbox',

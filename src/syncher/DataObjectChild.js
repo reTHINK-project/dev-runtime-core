@@ -111,7 +111,7 @@ class DataObjectChild /* implements SyncStatus */ {
 
       if (reporter) {
         to = _this.metadata.parent;
-      } else to = _this.metadata.parent + '/children/' + _this.metadata.children;
+      } else to = _this.metadata.parent + '/children/';
 
       let childValue = _this.metadata;
       childValue.data = _this.data;

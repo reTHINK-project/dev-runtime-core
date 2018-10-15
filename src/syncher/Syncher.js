@@ -222,7 +222,78 @@ class Syncher {
   * @param {ObjectURL} objURL - URL of the reporter object to be read
   * @return {Promise<Object>} Return Promise to last available data of the reporter
   */
-  read(objURL) {
+  read(objURL, criteria) {
+    let _this = this;
+    console.log('[Syncher.read] ', objURL);
+
+    return new Promise((resolve, reject) => {
+     // in case the object is synched in a remote storage, lets sync with it
+/*      if (_this._observers[objURL] && _this._observers[objURL].metadata.hasOwnProperty('backup') && _this._observers[objURL].metadata.backup) {
+
+        let readMsg = {
+          type: 'read', from: _this._owner, to: _this._subURL, 
+          body: { resource: objURL}
+        };
+
+        if (criteria) readMsg.body.criteria = criteria;
+
+          let callback = (reply) => {
+            return _this._readCallBack(reply, resolve, reject);
+          };
+    
+          _this._bus.postMessage(readMsg, callback, false);
+    
+      } else {*/
+        _this._readReporter(objURL).then((result)=> {
+        resolve(result);
+      });
+//    }
+
+    });
+
+  }
+
+  _readCallBack(reply, resolve,reject) {
+    let _this = this;
+
+      console.log('[Syncher.read] reply: ', reply);
+
+      let childrens = {};
+      let value = {};
+      let n = 0;
+
+      if (reply.body.code < 300) {
+        if (!reply.body.value.hasOwnProperty('responses')) {
+          _this._bus.removeResponseListener(reply.from, reply.id);
+          resolve(reply.body.value);
+        } else { //data object is sent in separated messages
+          if (n === 0) { //initial response without childrens
+            value = reply.body.value;
+            ++n;
+          } else { // received response contains childrens
+            delete reply.body.value.responses;
+            let children;
+            for (children in reply.body.value) {
+              if (!childrens.hasOwnProperty(children)) childrens[children] = {};
+              Object.assign(childrens[children], reply.body.value[children]);
+            }
+            ++n;
+            if (n === value.responses) {
+              value.childrenObjects = childrens;
+              delete value.responses;
+              _this._bus.removeResponseListener(reply.from, reply.id);
+              resolve(value);
+            }
+          }
+        }
+      } else {
+
+      reject(reply.body.desc);
+      }
+
+  }
+
+  _readReporter(objURL) {
     let _this = this;
 
     //FLOW-OUT: this message will be sent directly to reporter object (maybe there is no listener available, so it will be resolved with MessageBus -> resolve)
@@ -232,44 +303,10 @@ class Syncher {
     };
 
     return new Promise((resolve, reject) => {
-      let callback = (reply) => {
-        log.log('[Syncher.read] reply: ', reply);
 
-        let childrens = {};
-        let value = {};
-        let n = 0;
-
-        if (reply.body.code < 300) {
-          if (!reply.body.value.hasOwnProperty('responses')) {
-            _this._bus.removeResponseListener(readMsg.from, reply.id);
-            resolve(reply.body.value);
-          } else { //data object is sent in separated messages
-            if (n === 0) { //initial response without childrens
-              value = reply.body.value;
-              ++n;
-            } else { // received response contains childrens
-              delete reply.body.value.responses;
-              let children;
-              for (children in reply.body.value) {
-                if (!childrens.hasOwnProperty(children)) childrens[children] = {};
-                Object.assign(childrens[children], reply.body.value[children]);
-              }
-              ++n;
-              if (n === value.responses) {
-                value.childrenObjects = childrens;
-                delete value.responses;
-                _this._bus.removeResponseListener(readMsg.from, reply.id);
-                resolve(value);
-              }
-            }
-          }
-        } else {
-          reject(reply.body.desc);
-        }
-      };
-
-      let id = _this._bus.postMessage(readMsg, callback, false);
-
+      _this._bus.postMessage(readMsg, (reply) => {
+        return _this._readCallBack(reply, resolve, reject);
+      }, false);
 
     });
   }
