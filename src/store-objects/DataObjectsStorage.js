@@ -553,7 +553,7 @@ class DataObjectsStorage {
 
   stopSync(resource) {
 
-    if (_this._remotes[resource]) _this._remotes[resource].disconnect();
+    if (this._remotes[resource]) this._remotes[resource].disconnect();
 
   }
 

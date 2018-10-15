@@ -183,6 +183,8 @@ class DataObjectObserver extends DataObject /* implements SyncStatus */ {
   delete() {
     let _this = this;
 
+    if (_this._heartBeat) _this._heartBeat.stop();
+
     _this._deleteChildrens().then(()=>{
       _this.unsubscribe();
       _this._releaseListeners();

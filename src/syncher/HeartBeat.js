@@ -28,6 +28,27 @@ class HeartBeat {
     runtimeUrl ?  _this._runtimeUrl = runtimeUrl : throwMandatoryParmMissingError('runtimeUrl');
     hypertyUrl ?  _this._hypertyUrl = hypertyUrl : throwMandatoryParmMissingError('hypertyUrl');
 
+    _this._stop = {
+      heartBeat: false,
+      sync: function(bus) {
+       let stopSyncMsg = {
+          from: hypertyUrl,
+          to: runtimeUrl+'/sm',
+          type: 'execute',
+          body: {
+            method: 'stopSync',
+            params: [dataObject.url]
+          }
+        };
+
+        console.log('[Heartbeat.stop.sync()] sending msg:', stopSyncMsg);
+
+        bus.postMessage(stopSyncMsg);
+  
+      }
+  
+    };
+
   }
 
   start(lastHeartbeat = 0){
@@ -41,9 +62,9 @@ class HeartBeat {
           console.log('[HeartBeat] heart beats are disabled for ', this._dataObject);
 
         // Is disabled: lets start observer heart beat and start synching with remote storage server
-        this._startHeartBeat( this._heartBeatRate);
+        this._stop.heartBeat = this._startHeartBeat( this._heartBeatRate);
         console.log('[HeartBeat]  ', this._hypertyUrl , ' started synching with remote storage server');
-        let stopSync = this._startSync();
+        this._startSync();
       } else {
       //  heart beat is active, 
       // it means the data object is already being synchronised with remote storage server
@@ -51,6 +72,13 @@ class HeartBeat {
         this._watchHeartBeat(this._heartBeatRate,true, this._onHertbeatStopped);
 
       }
+  }
+
+  stop() {
+    if (this._stop.heartBeat)
+      this._stop.heartBeat();
+
+    this._stop.sync(this._bus);
   }
 
 get heartBeat() {
@@ -135,12 +163,6 @@ _startHeartBeat(rate) {
 
     this._bus.postMessage(msg);
 
-    // return function to stop sync
-
-    return function () {
-      msg.body.method = 'stopSync'
-      this._bus.postMessage(msg);
-    }
  }
 
  _watchHeartBeat( rate, onWatchingIsEnabled, callback) {

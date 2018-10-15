@@ -171,6 +171,8 @@ class DataObjectReporter extends DataObject /* implements SyncStatus */ {
   delete() {
     let _this = this;
 
+   if(_this._heartBeat) _this._heartBeat.stop();
+
     _this._deleteChildrens().then((result)=>{
       log.log(result);
       //FLOW-OUT: this message will be sent to the runtime instance of SyncherManager -> _onDelete
