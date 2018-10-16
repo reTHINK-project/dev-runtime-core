@@ -152,7 +152,11 @@ class DataObjectReporter extends DataObject /* implements SyncStatus */ {
             };
 
             if (result.code < 300) resolve(result);
-            else if (result.code >= 300) reject(result);
+            else if (result.code >= 300) {
+              if (_this.metadata.offline) {
+                resolve(_this._processOfflineInvitation(inviteMsg)); ;
+              } else reject(result);
+            } 
           });
         });
 
@@ -164,6 +168,7 @@ class DataObjectReporter extends DataObject /* implements SyncStatus */ {
 
     }
   }
+
 
   /**
    * Release and delete object data

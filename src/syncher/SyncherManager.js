@@ -821,77 +821,108 @@ class SyncherManager {
           _this._bus.postMessage(objSubscribeMsg, (reply) => {
             log.log('reporter-subscribe-response-new: ', reply);
             console.log('REUSETEST SyncherManager - reporter-subscribe-response-new: ', reply);
-            if (reply.body.code === 200) {
-
-              log.log('[SyncherManager._newSubscription] - observers: ', _this._observers, objURL, _this._observers[objURL]);
-              console.log('REUSETEST SyncherManager - 200 code[SyncherManager._newSubscription] - observers: ', _this._observers, objURL, _this._observers[objURL]);
-              let observer = _this._observers[objURL];
-              if (!observer) {
-                observer = new ObserverObject(_this, objURL);
-                log.log('[SyncherManager._newSubscription] - observers: create new ObserverObject: ', observer);
-                _this._observers[objURL] = observer;
-
-                // register new hyperty subscription
-                observer.addSubscription(hypertyURL);
-
-                // add childrens and listeners to save data if necessary
-                observer.addChildrens();
-              }
-
-              let interworking = false;
-
-              //debugger;
-
-              // Store for each reporter hyperty the dataObject
-              let userURL;
-              if (msg.body.hasOwnProperty('identity') && msg.body.identity.userProfile && msg.body.identity.userProfile.userURL) {
-                userURL = msg.body.identity.userProfile.userURL;
-                if (!userURL.includes('user://')) {
-                  interworking = true;
-                }
-              } else {
-                userURL = _this._registry.getHypertyOwner(msg.from);
-                if (!userURL) interworking = true;
-              }
-
-              let metadata = deepClone(reply.body.value);
-
-              // let childrenObjects = metadata.childrenObjects || {};
-
-              delete metadata.data;
-              delete metadata.childrenObjects;
-
-              metadata.childrens = childrens;
-              metadata.subscriberUser = userURL;
-              metadata.isReporter = false;
-              metadata.subscriberHyperty = hypertyURL;
-
-              if (!interworking) {
-                //_this._dataObjectsStorage.set(objURL, false, msg.body.schema, 'on', reply.body.owner, hypertyURL, childrens, userURL);
-                _this._dataObjectsStorage.set(metadata);
-                if ((metadata.hasOwnProperty('store') && metadata.store) || (metadata.hasOwnProperty('isToSaveData') && metadata.isToSaveData)) {
-                  observer.isToSaveData = true;
-                  _this._dataObjectsStorage.update(false, objURL, 'isToSaveData', true);
-                  _this._dataObjectsStorage.saveData(false, objURL, null, reply.body.value.data);
-//                  if (childrens) _this._dataObjectsStorage.initialObserverSync(objURL, reply.body.value.data.backupRevision);
-                }
-              }
-
-              //forward to hyperty:
-              reply.id = msg.id;
-              reply.from = _this._url;
-              reply.to = hypertyURL;
-              reply.body.schema = msg.body.schema;
-              reply.body.resource = msg.body.resource;
-
-              //TODO: For Further Study
-              if (msg.body.hasOwnProperty('mutual')) reply.body.mutual = msg.body.mutual;
-              log.log('[subscribe] - new subscription: ', msg, reply, observer);
-
-              this._bus.postMessage(reply);
-
+            if (reply.body.code === 200) _this._processSuccessfullSubscription(reply, hypertyURL, objURL, childrens, msg);
+            else if (msg.body.offline) _this._processOfflineSubscription(objSubscribeMsg, msg.body.offline, hypertyURL, objURL, childrens, msg);
+            else {
+              //TODO: send response back to Hyperty with error message received in the reply
             }
           });    
+  }
+
+  _processOfflineSubscription(subscription, redirectTo, hypertyURL, objURL, childrens, msg) {
+    let _this = this;
+
+    let forward = {
+      from: subscription.from,
+      type: 'forward',
+      to: redirectTo,
+      body: subscription
+    };
+
+    console.log('[SyncherManager._processOfflineSubscription] forwading ', forward);
+
+    _this._bus.postMessage(forward, (reply) => {
+      log.log('[SyncherManager._processOfflineSubscription] reply ', reply);
+      if (reply.body.code === 200) _this._processSuccessfullSubscription(reply, hypertyURL, objURL, childrens, msg);
+      else {
+        //TODO: send response back to Hyperty with error message received in the reply
+      }
+    });    
+
+
+  }
+
+  _processSuccessfullSubscription(reply, hypertyURL, objURL, childrens, msg) {
+
+    let _this = this;
+
+    log.log('[SyncherManager._newSubscription] - observers: ', _this._observers, objURL, _this._observers[objURL]);
+    console.log('REUSETEST SyncherManager - 200 code[SyncherManager._newSubscription] - observers: ', _this._observers, objURL, _this._observers[objURL]);
+    let observer = _this._observers[objURL];
+    if (!observer) {
+      observer = new ObserverObject(_this, objURL);
+      log.log('[SyncherManager._newSubscription] - observers: create new ObserverObject: ', observer);
+      _this._observers[objURL] = observer;
+
+      // register new hyperty subscription
+      observer.addSubscription(hypertyURL);
+
+      // add childrens and listeners to save data if necessary
+      observer.addChildrens();
+    }
+
+    let interworking = false;
+
+    //debugger;
+
+    // Store for each reporter hyperty the dataObject
+    let userURL;
+    if (msg.body.hasOwnProperty('identity') && msg.body.identity.userProfile && msg.body.identity.userProfile.userURL) {
+      userURL = msg.body.identity.userProfile.userURL;
+      if (!userURL.includes('user://')) {
+        interworking = true;
+      }
+    } else {
+      userURL = _this._registry.getHypertyOwner(msg.from);
+      if (!userURL) interworking = true;
+    }
+
+    let metadata = deepClone(reply.body.value);
+
+    // let childrenObjects = metadata.childrenObjects || {};
+
+    delete metadata.data;
+    delete metadata.childrenObjects;
+
+    metadata.childrens = childrens;
+    metadata.subscriberUser = userURL;
+    metadata.isReporter = false;
+    metadata.subscriberHyperty = hypertyURL;
+
+    if (!interworking) {
+      //_this._dataObjectsStorage.set(objURL, false, msg.body.schema, 'on', reply.body.owner, hypertyURL, childrens, userURL);
+      _this._dataObjectsStorage.set(metadata);
+      if ((metadata.hasOwnProperty('store') && metadata.store) || (metadata.hasOwnProperty('isToSaveData') && metadata.isToSaveData)) {
+        observer.isToSaveData = true;
+        _this._dataObjectsStorage.update(false, objURL, 'isToSaveData', true);
+        _this._dataObjectsStorage.saveData(false, objURL, null, reply.body.value.data);
+//                  if (childrens) _this._dataObjectsStorage.initialObserverSync(objURL, reply.body.value.data.backupRevision);
+      }
+    }
+
+    //forward to hyperty:
+    reply.id = msg.id;
+    reply.from = _this._url;
+    reply.to = hypertyURL;
+    reply.body.schema = msg.body.schema;
+    reply.body.resource = msg.body.resource;
+
+    //TODO: For Further Study
+    if (msg.body.hasOwnProperty('mutual')) reply.body.mutual = msg.body.mutual;
+    log.log('[subscribe] - new subscription: ', msg, reply, observer);
+
+    this._bus.postMessage(reply);
+
   }
 
   _resumeSubscription(msg, storedObject) {

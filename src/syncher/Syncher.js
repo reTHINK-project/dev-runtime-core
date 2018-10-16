@@ -564,6 +564,30 @@ class Syncher {
       });
     });
   }
+/*
+  _processOfflineSubscription(subscription, redirectTo) {
+    let _this = this;
+
+    let forward = {
+      from: subscription.from,
+      type: 'forward',
+      to: redirectTo,
+      body: subscription
+    };
+
+    console.log('[Syncher._processOfflineSubscription] forwading ', forward);
+
+    _this._bus.postMessage(forward);
+
+    let result = {
+      code: 302,
+      desc: "Found " + redirectTo
+    };
+
+    return(result);
+
+  }*/
+
 
   _resumeSubscribe(criteria) {
     let _this = this;
