@@ -41,6 +41,7 @@ class ReporterObject {
         case 'subscribe': _this._onRemoteSubscribe(msg); break;
         case 'unsubscribe': _this._onRemoteUnSubscribe(msg); break;
         case 'response': _this._onRemoteResponse(msg); break;
+        case 'forward': _this._onForwardedRemoteSubscribe(msg); break;
       }
     });
 
@@ -62,6 +63,12 @@ class ReporterObject {
 
   set isToSaveData(value) {
     this._isToSaveData = value;
+  }
+
+  // To handle subscriptions sent while the reporter was offline ie forwarded by a Offline Subscription Manager service
+
+  _onForwardedRemoteSubscribe(msg) {
+    this._onRemoteSubscribe(msg.body);
   }
 
   _releaseListeners() {
