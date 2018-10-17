@@ -365,8 +365,10 @@ class SyncherManager {
           //all OK -> create reporter and register listeners
           let reporter;
 
+
           if (!this._reporters[objectRegistration.url]) {
-            reporter = new ReporterObject(_this, owner, objectRegistration.url);
+            let offline = objectRegistration.offline ? objectRegistration.offline : false;
+            reporter = new ReporterObject(_this, owner, objectRegistration.url, offline);
           } else {
             reporter = this._reporters[objectRegistration.url];
           }
@@ -688,10 +690,10 @@ class SyncherManager {
     if (object) {
       //TODO: is there any policy verification before delete?
 
-      if (object.metadata.offline) { //register new DataObject at Offline Subscription Manager
+      if (object.offline) { //register new DataObject at Offline Subscription Manager
         let forward = {
           from: msg.to,
-          to: object.metadata.offline + '/register',
+          to: object.offline + '/register',
           type: 'forward',
           body: msg
         };

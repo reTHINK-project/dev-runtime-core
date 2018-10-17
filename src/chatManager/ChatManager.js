@@ -292,7 +292,17 @@ class ChatManager {
       console.info('invitationURL', invitationURL);
       _this.myIdentity(identity).then((identity) => {
         myIdentity = identity;
-        return syncher.subscribe(_this._objectDescURL, invitationURL, true, false, mutual, true, identity);
+        let input = {
+          schema: _this._objectDescURL,
+          resource: invitationURL,
+          store: true,
+          p2p: false,
+          mutual: mutual,
+          domain_subscription: true,
+          identity: identity
+        };
+
+        return syncher.subscribe(input);
 
       }).then(function(dataObjectObserver) {
         console.info('Data Object Observer: ', dataObjectObserver);

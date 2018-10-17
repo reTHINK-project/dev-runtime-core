@@ -180,9 +180,8 @@ class Syncher {
   * @return {Promise<DataObjectObserver>} Return Promise to a new observer. It's associated with the reporter.
   */
 
-  //TODO: use input JSON param with all optional parameters similar to create
-  subscribe(schema, objURL, store = false, p2p = false, mutual = true, domain_subscription = true, identity) {
-    let _this = this;
+  subscribe(input) {
+  /*  let _this = this;
     let criteria = {};
 
     criteria.p2p = p2p;
@@ -198,9 +197,9 @@ class Syncher {
 
     log.log('[syncher - subscribe] - subscribe criteria: ', criteria);
 
-    Object.assign(criteria, {resume: false});
+    Object.assign(criteria, {resume: false});*/
 
-    return _this._subscribe(criteria);
+    return this._subscribe(input);
   }
 
   /**
@@ -483,7 +482,7 @@ class Syncher {
       //FLOW-OUT: this message will be sent to the runtime instance of SyncherManager -> _onLocalSubscribe
       let subscribeMsg = {
         type: 'subscribe', from: _this._owner, to: _this._subURL,
-        body: {}
+        body: input
       };
 
       // Hyperty request to be an Observer
@@ -494,7 +493,7 @@ class Syncher {
 
       // Resume Subscriptions for a certain user and data schema independently of the Hyperty URL.
       // https://github.com/reTHINK-project/specs/blob/master/messages/data-sync-messages.md#resume-subscriptions-for-a-certain-user-and-data-schema-independently-of-the-hyperty-url
-      if (input) {
+/*      if (input) {
         if (input.hasOwnProperty('p2p')) subscribeMsg.body.p2p = input.p2p;
         if (input.hasOwnProperty('store')) subscribeMsg.body.store = input.store;
         if (input.hasOwnProperty('schema')) subscribeMsg.body.schema = input.schema;
@@ -507,7 +506,7 @@ class Syncher {
       subscribeMsg.body.resume = input.resume;
 
       //TODO: For Further Study
-      if (input.hasOwnProperty('mutual')) subscribeMsg.body.mutual = input.mutual;
+      if (input.hasOwnProperty('mutual')) subscribeMsg.body.mutual = input.mutual;*/
 
       log.log('[syncher_subscribe] - subscribe message: ', input, subscribeMsg);
 

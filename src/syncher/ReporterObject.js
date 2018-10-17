@@ -8,7 +8,7 @@ import * as cryptoManager from '../cryptoManager/CryptoManager';
 
 class ReporterObject {
 
-  constructor(parent, owner, url) {
+  constructor(parent, owner, url, offline) {
     let _this = this;
 
     _this._parent = parent;
@@ -29,6 +29,12 @@ class ReporterObject {
     _this._isToSaveData = false;
 
     _this._allocateListeners();
+
+    _this._offline = offline ? offline : false;
+  }
+
+  get offline(){
+    return this._offline;
   }
 
   _allocateListeners() {
