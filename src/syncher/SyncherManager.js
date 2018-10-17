@@ -413,6 +413,25 @@ class SyncherManager {
             }
           }
           _this._dataObjectsStorage.set(metadata).then((storeObject) => {
+
+            if (metadata.offline) { //register new DataObject at Offline Subscription Manager
+              let forward = {
+                from: msg.to,
+                to: metadata.offline + '/register',
+                type: 'forward',
+                body: msg
+              };
+
+              forward.body.body.resource = objectRegistration.url;
+
+              forward.body.body.value = metadata;
+
+              log.log('[SyncherManager.newCreate] registering new object at offline manager ', forward);
+
+              _this._bus.postMessage(forward);
+
+
+            }
           //}
           let responseMsg = {
             id: msg.id, type: 'response', from: msg.to, to: owner,
@@ -669,6 +688,21 @@ class SyncherManager {
     if (object) {
       //TODO: is there any policy verification before delete?
 
+      if (object.metadata.offline) { //register new DataObject at Offline Subscription Manager
+        let forward = {
+          from: msg.to,
+          to: object.metadata.offline + '/register',
+          type: 'forward',
+          body: msg
+        };
+
+        log.log('[SyncherManager._onDelete] unregistering object from offline manager ', forward);
+
+        _this._bus.postMessage(forward);
+
+
+      }
+
       object.delete();
 
       this._dataObjectsStorage.deleteResource(objURL).then((result) => {
@@ -677,6 +711,7 @@ class SyncherManager {
         log.log('[SyncherManager - onDelete] - deleteResource: ', result);
 
         _this._registry.unregisterDataObject(objURL);
+        
 
         //TODO: unregister object?
         _this._bus.postMessage({
