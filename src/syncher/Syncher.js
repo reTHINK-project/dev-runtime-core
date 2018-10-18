@@ -621,13 +621,13 @@ class Syncher {
       let mutual = criteria.mutual;
       if (criteria.hasOwnProperty('mutual')) subscribeMsg.body.mutual = mutual;
 
-      log.log('[syncher] - subscribe message: ', criteria, subscribeMsg);
+      console.log('[syncher] - subscribe message: ', criteria, subscribeMsg);
 
       //request subscription
       //Provisional data is applied to the DataObjectObserver after confirmation. Or discarded if there is no confirmation.
       //for more info see the DataProvisional class documentation.
       _this._bus.postMessage(subscribeMsg, (reply) => {
-        log.log('[syncher] - subscribe-resumed-response: ', reply);
+        console.log('[syncher] - subscribe-resumed-response: ', reply);
 
         let objURL = reply.body.resource;
 
@@ -648,7 +648,7 @@ class Syncher {
           for (let index in listOfObservers) {
 
             let dataObject = listOfObservers[index];
-            log.log('[syncher] - Resume Object Observer: ', reply, dataObject, _this._provisionals);
+            console.log('[syncher] - Resume Object Observer: ', reply, dataObject, _this._provisionals);
 
             if (dataObject.childrenObjects) { dataObject.childrenObjects = deepClone(dataObject.childrenObjects); }
 
@@ -657,7 +657,7 @@ class Syncher {
             dataObject.syncher = _this;
 
             //TODO: mutual For Further Study
-            log.log('[syncher._resumeSubscribe] - create new dataObject: ', dataObject);
+            console.log('[syncher._resumeSubscribe] - create new dataObject: ', dataObject);
             let newObj = new DataObjectObserver(dataObject);
 
             if (dataObject.childrenObjects) { newObj.resumeChildrens(dataObject.childrenObjects); }

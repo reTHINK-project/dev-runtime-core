@@ -752,11 +752,15 @@ class SyncherManager {
             return observer !== false;
           });
 
-          //FLOW-OUT: message response to Syncher -> create
-          this._bus.postMessage({
+          let response = {
             id: msg.id, type: 'response', from: msg.to, to: msg.from,
             body: { code: 200, value: successfullyResumed }
-          });
+          };
+
+          log.log('[SyncherManager - Observers Resumed] replying ', response);
+
+          //FLOW-OUT: message response to Syncher -> create
+          this._bus.postMessage(response);
 
         });
 
