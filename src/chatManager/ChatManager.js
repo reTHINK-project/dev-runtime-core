@@ -86,6 +86,14 @@ class ChatManager {
 
   }
 
+  set offline(offline) {
+    this._offline = offline;
+  }
+
+  get offline() {
+    return this._offline ? this._offline : false;
+  }
+
 
   processNotification(event) {
     let _this = this;
@@ -187,7 +195,6 @@ class ChatManager {
 
         let disconnected = [];
         let live = {};
-        let mutual = true;
 
         users.forEach((user) => {
           let userDiscoveryPromise = _this.discovery.discoverHypertiesDO(user.user, ['comm'], ['chat'], user.domain);
@@ -227,9 +234,12 @@ class ChatManager {
           console.info('[ChatManager] ---------------------- Syncher Create ---------------------- \n');
           console.info('[ChatManager] Selected Hyperties: !!! ', selectedHyperties);
           console.info(`Have ${selectedHyperties.length} users;`);
+          let mutual = extra.mutual ? extra.mutual : true;
 
           let input = Object.assign({resources: ['chat'], mutual: mutual}, extra);
           delete input.name;
+
+          if (_this.offline) input.offline = _this.offline;
 
           console.info('[ChatManager] input data:', input);
           return syncher.create(_this._objectDescURL, selectedHyperties, _this.communicationObject, true, false, name, {}, input);
@@ -301,6 +311,8 @@ class ChatManager {
           domain_subscription: true,
           identity: identity
         };
+
+        if (_this.offline) input.offline = _this.offline;
 
         return syncher.subscribe(input);
 
