@@ -225,10 +225,11 @@ class CryptoManager {
       // For sybscribe message let's start the mutualAuthentication
       let isSubscription = message.type === 'subscribe';
       let isFromRemoteSM = _this._isFromRemoteSM(message.from);
+      let mutual = message.body.hasOwnProperty('mutual') ? message.body.mutual : false;
 
-      if (isSubscription & isFromRemoteSM) {
-        log.log('_doMutualAuthenticationPhase1');
-        console.log('istoDecrypt', message);
+      if (isSubscription && isFromRemoteSM && mutual) {
+        log.log('[CryptoManager._isToDecrypt] _doMutualAuthenticationPhase1');
+        console.log('[CryptoManager._isToDecrypt] ', message);
         let reporter = _this.registry.getDataObjectReporter(message.to);
         if (reporter !== null && isLegacy(reporter)) {
           return resolve(false);
@@ -240,11 +241,11 @@ class CryptoManager {
           reject(error);
         });
 
-      } else if (message.hasOwnProperty('body') && message.body.hasOwnProperty('value') && typeof message.body.value === 'string') {
-        log.log('_isToDecrypt:true');
+      } else if (message.hasOwnProperty('body') && message.body.hasOwnProperty('value') && typeof message.body.value === 'string' && mutual) {
+        log.log('[CryptoManager._isToDecrypt] true');
         resolve(true);
       } else {
-        log.log('_isToDecrypt:false');
+        log.log('[CryptoManager._isToDecrypt] false');
         resolve(false);
       }
 
