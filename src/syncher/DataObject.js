@@ -442,7 +442,7 @@ class DataObject {
 
       newChild.share();
 
-      log.log('[DataObject.addChild] added ', newChild);
+      console.log('[DataObject.addChild] added ', newChild);
 
       newChild.onChange((event) => {
         _this._onChange(event, { path: msgChildPath, childId: childInput.url });
@@ -516,6 +516,7 @@ class DataObject {
     childInput.p2pRequester = _this._syncher._p2pRequester;
     childInput.schema = _this._schema;
     childInput.parent = _this.url;
+    childInput.mutual = _this.metadata.mutual;
 
     return childInput;
   }
