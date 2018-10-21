@@ -185,7 +185,7 @@ class CryptoManager {
 
   _isToEncrypt(message) {
     let _this = this;
-    log.info('[CryptoManager.istoChyperModule]', message);
+    console.log('[CryptoManager._isToEncrypt]', message);
     let isCreate = message.type === 'create';
     let isFromHyperty = message.from.includes('hyperty://');
     let isToHyperty = message.to.includes('hyperty://');
@@ -193,7 +193,7 @@ class CryptoManager {
     let reporter = _this.registry.getDataObjectReporter(message.to);
 
 
-    let doMutualAuthentication = message.body.hasOwnProperty('value') && message.body.value.hasOwnProperty('mutual') ? message.body.value.mutual : true;
+    let doMutualAuthentication = message.hasOwnProperty('body') && message.body.hasOwnProperty('value') && message.body.value.hasOwnProperty('mutual') ? message.body.value.mutual : true;
 
     if (!doMutualAuthentication) return false;
     if (reporter !== null && isLegacy(reporter)) {

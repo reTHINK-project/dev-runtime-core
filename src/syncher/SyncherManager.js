@@ -304,7 +304,8 @@ class SyncherManager {
       domain = divideURL(_this.runtimeURL).domain;
     }
 
-    let domainRegistration = msg.body.value.hasOwnProperty('domain_registration') ? msg.body.value.domain_registration : true;
+//    let domainRegistration = msg.body.value.hasOwnProperty('domain_registration') ? msg.body.value.domain_registration : true;
+    let domainRouting = msg.body.value.hasOwnProperty('domain_routing') ? msg.body.value.domain_routing : true;
 
     // Process invitation message to observers
 
@@ -442,7 +443,7 @@ class SyncherManager {
 
           // adding listeners to forward to reporter
 
-          if (domainRegistration) {
+          if (domainRouting) {
 
             reporter.forwardSubscribe([objectRegistration.url, subscriptionURL]).then(() => {
               reporter.addChildrens().then(() => {

@@ -32,6 +32,8 @@ import ContextReporter from '../contextManager/ContextReporter';
 import MessageBodyIdentity from '../identity/MessageBodyIdentity';
 import ChatManager from '../chatManager/ChatManager';
 import ChatController from '../chatManager/ChatController';
+import SimpleChatManager from '../chatManager/SimpleChatManager';
+import Chat from '../chatManager/Chat';
 
 /**
  * Internal component to instantiate framework functionalities.
@@ -93,6 +95,13 @@ class SandboxFactory {
     return new ChatController(syncher, discovery, domain, search, identity, manager);
    }
 
+   createSimpleChatManager(hypertyURL, bus, configuration, syncher) { 
+    return new SimpleChatManager(hypertyURL, bus, configuration, syncher, this);
+   }
+
+   createChat(syncher, domain, identity, manager) { 
+    return new Chat(syncher, domain, identity, manager);
+   }
    get divideURL(){
      return this._divideURL;
    }
