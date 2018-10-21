@@ -308,9 +308,9 @@ class Chat {
               });
             }*/
 
-            resourceFile.share(true).then(()=>{
+//            resourceFile.share(true).then(()=>{
               resolve(fileSentEvt);
-            });
+//            });
 //            share2Reporter(resourceFile, _this._manager._hypertyURL, fileSentEvt, reporterStatus);
         });
     }).catch(function(reason) {
@@ -389,7 +389,7 @@ class Chat {
           }*/
 
 //          share2Reporter(dataObjectChild, _this._manager._hypertyURL, msg, reporterStatus);
-        dataObjectChild.share(true);
+//        dataObjectChild.share(true);
           resolve(msg);
 
 
