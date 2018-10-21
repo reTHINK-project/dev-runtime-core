@@ -172,10 +172,10 @@ class ReporterObject {
     let _this = this;
 
     return new Promise((resolve, reject) => {
-/*      if (childrens.length === 0) {
+      if (_this._childrens.length === 0) {
         resolve();
         return;
-    }*/
+    }
 
       let childBaseURL = _this._url + '/children/';
       log.log('[SyncherManager.ReporterObject - addChildrens] - childrens: ', childBaseURL);

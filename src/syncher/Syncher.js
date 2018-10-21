@@ -150,7 +150,7 @@ class Syncher {
 
     //Object.assign(createInput, {resume: false});
     //debugger;
-    log.log('[syncher - create] - create Reporter - createInput: ', createInput);
+//    console.log('[syncher - create] - create Reporter - createInput: ', createInput);
 
     return _this._create(createInput);
   }
@@ -360,7 +360,7 @@ class Syncher {
       if (reporterInput.store) requestMsg.body.store = reporterInput.store;
       if (reporterInput.identity) requestMsg.body.identity = reporterInput.identity;
 
-      log.log('[syncher._create]: ', reporterInput, requestMsg);
+      console.log('[syncher._create]: ', reporterInput, requestMsg);
 
       //request create to the allocation system. Can be rejected by the PolicyEngine.
       _this._bus.postMessage(requestMsg, (reply) => {
