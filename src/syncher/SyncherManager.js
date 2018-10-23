@@ -104,7 +104,7 @@ class SyncherManager {
       _onExecute(msg) {
 
         let _this = this;
-  
+
         let reply = {
           type: 'response',
           from: msg.to,
@@ -113,7 +113,7 @@ class SyncherManager {
         }
 
         log.info('[SyncherManager.onExecute] new message', msg);
-  
+
         if (msg.hasOwnProperty('body') && msg.body.hasOwnProperty('method') && msg.body.hasOwnProperty('params')) {
 
         switch (msg.body.method) {
@@ -126,21 +126,21 @@ class SyncherManager {
             reply.body = {
               code: 200
             };
-    
+
             _this._bus.postMessage(reply);
           } else {
           reply.body = {
             code: 400,
             desc: 'missing body or body method / params mandatory fields'
           };
-  
+
           log.error('[SyncherManager.onExecute] error. Missing body or body method / params mandatory fields', msg);
-  
+
           _this._bus.postMessage(reply);
-  
-  
+
+
         }
-  
+
       }
 
     //FLOW-IN: message received from Syncher -> read
@@ -162,20 +162,20 @@ class SyncherManager {
             code: 200,
             value: dataObject
           };
-  
+
           log.info('[SyncherManager.onRead] found object: ', dataObject);
-  
+
           _this._bus.postMessage(reply);
         }, (error)=>{
           reply.body = {
             code: 400,
             desc: error
           };
-  
+
           log.error('[SyncherManager.onRead] error: ', error);
-  
+
           _this._bus.postMessage(reply);
-  
+
         });
 
       } else {
@@ -286,8 +286,8 @@ class SyncherManager {
     let resource = msg.body.resource;
     let attribute = msg.body.attribute;
 
-    if (attribute === 'childrenObjects') { 
-      _this._dataObjectsStorage.saveChildrens(false, resource, undefined, msg.body.value); 
+    if (attribute === 'childrenObjects') {
+      _this._dataObjectsStorage.saveChildrens(false, resource, undefined, msg.body.value);
     } else { _this._dataObjectsStorage.saveChildrens(true, resource, attribute, msg.body.value);
        }
 
@@ -407,7 +407,7 @@ class SyncherManager {
           if (msg.body.hasOwnProperty('store') && msg.body.store) {
             reporter.isToSaveData = true;
             metadata.isToSaveData = true;
-            if (msg.body.value.data) { 
+            if (msg.body.value.data) {
               metadata.data = deepClone(msg.body.value.data);
 //              _this._dataObjectsStorage.saveData(true, objectRegistration.url, null, msg.body.value.data); }
 //            _this._dataObjectsStorage.update(true, objectRegistration.url, 'isToSaveData', true);
@@ -418,6 +418,7 @@ class SyncherManager {
           _this._dataObjectsStorage.set(metadata).then((storeObject) => {
 
             if (metadata.offline) { //register new DataObject at Offline Subscription Manager
+              msg.body.identity.guid = _this._identityModule._identities.guid;
               let forward = {
                 from: msg.to,
                 to: metadata.offline + '/register',
@@ -715,7 +716,7 @@ class SyncherManager {
         log.log('[SyncherManager - onDelete] - deleteResource: ', result);
 
         _this._registry.unregisterDataObject(objURL);
-        
+
 
         //TODO: unregister object?
         _this._bus.postMessage({
@@ -869,7 +870,7 @@ class SyncherManager {
             else {
               //TODO: send response back to Hyperty with error message received in the reply
             }
-          });    
+          });
   }
 
   _processOfflineSubscription(subscription, redirectTo, hypertyURL, objURL, childrens, msg) {
@@ -890,7 +891,7 @@ class SyncherManager {
       else {
         //TODO: send response back to Hyperty with error message received in the reply
       }
-    });    
+    });
 
 
   }
