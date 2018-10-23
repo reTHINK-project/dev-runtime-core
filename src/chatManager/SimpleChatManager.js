@@ -140,12 +140,14 @@ class SimpleChatManager {
 
       if (_this._myUrl.includes('hyperty://')) {
         _this.identityManager.discoverUserRegistered().then((identity) => {
+          _this.currentIdentity = identity;
           resolve(identity);
         }).catch(function(reason) {
           reject(reason);
         });
       } else {
         _this.identityManager.discoverIdentityPerIdP().then((identity) => {
+          _this.currentIdentity = identity;
           resolve(identity);
         }).catch(function(reason) {
           reject(reason);
