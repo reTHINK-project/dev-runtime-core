@@ -187,49 +187,7 @@ class SimpleChatManager {
 
         console.log('[ChatManager.create ] participants: ', _this.communicationObject.participants);
         console.log('[ChatManager.create ] communicationObject', _this.communicationObject);
-//        console.info('[ChatManager.create] searching ' + users);
 
-        //let usersSearch = _this.search.users(users, domains, ['comm'], ['chat']);
-
-/*        let usersDiscovery = [];
-
-        let disconnected = [];
-        let live = {};
-
-        users.forEach((user) => {
-          let userDiscoveryPromise = _this.discovery.discoverHypertiesDO(user.user, ['comm'], ['chat'], user.domain);
-          usersDiscovery.push(userDiscoveryPromise);
-
-          //if (user.user.includes('://')) mutual = false;
-        });
-
-        Promise.all(usersDiscovery).then((userDiscoveryResults) => {
-          console.log('[ChatManager.create] Users Discovery Results->', userDiscoveryResults);
-
-          let selectedHyperties = [];
-
-          userDiscoveryResults.forEach((userDiscoveryResult) => {
-
-            userDiscoveryResult.forEach((discovered)=>{
-              if (discovered.data.status === 'live') {
-                selectedHyperties.push(discovered.data.hypertyID);
-                live[discovered.data.hypertyID] = discovered;
-              } else {
-                // To control the number of subscriptions to disconnected devices
-                 if (disconnected.length < 5) {
-                    disconnected.push(discovered);
-                  }
-              }
-            });
-
-          });
-
-
-          /*        return usersSearch;
-      }).then((hypertiesIDs) => {
-        let selectedHyperties = hypertiesIDs.map((hyperty) => {
-          return hyperty.hypertyID;
-        }); */
 
           console.info('[ChatManager] ---------------------- Syncher Create ---------------------- \n');
           console.info('[ChatManager] Selected Hyperties: !!! ', hyperties);

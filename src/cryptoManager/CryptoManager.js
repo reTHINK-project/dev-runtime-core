@@ -225,10 +225,11 @@ class CryptoManager {
       // For sybscribe message let's start the mutualAuthentication
       let isSubscription = message.type === 'subscribe';
       let isFromRemoteSM = _this._isFromRemoteSM(message.from);
-//      let mutual = message.body.hasOwnProperty('mutual') ? message.body.mutual : false;
+      let mutual = message.body.hasOwnProperty('value') && message.body.value.hasOwnProperty('mutual') ? message.body.value.mutual : true;
+      //      let mutual = message.body.hasOwnProperty('mutual') ? message.body.mutual : false;
 
-//if (isSubscription && isFromRemoteSM && mutual) {
-  if (isSubscription && isFromRemoteSM ) {
+if (isSubscription && isFromRemoteSM && mutual) {
+//  if (isSubscription && isFromRemoteSM ) {
     log.log('[CryptoManager._isToDecrypt] _doMutualAuthenticationPhase1');
         console.log('[CryptoManager._isToDecrypt] ', message);
         let reporter = _this.registry.getDataObjectReporter(message.to);
@@ -242,8 +243,8 @@ class CryptoManager {
           reject(error);
         });
 
-      } else if (message.hasOwnProperty('body') && message.body.hasOwnProperty('value') && typeof message.body.value === 'string') {
-//      } else if (message.hasOwnProperty('body') && message.body.hasOwnProperty('value') && typeof message.body.value === 'string' && mutual) {
+//      } else if (message.hasOwnProperty('body') && message.body.hasOwnProperty('value') && typeof message.body.value === 'string') {
+      } else if (message.hasOwnProperty('body') && message.body.hasOwnProperty('value') && typeof message.body.value === 'string' && mutual) {
         log.log('[CryptoManager._isToDecrypt] true');
         resolve(true);
       } else {
