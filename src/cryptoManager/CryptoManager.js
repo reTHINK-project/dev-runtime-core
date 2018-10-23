@@ -225,7 +225,8 @@ class CryptoManager {
       // For sybscribe message let's start the mutualAuthentication
       let isSubscription = message.type === 'subscribe';
       let isFromRemoteSM = _this._isFromRemoteSM(message.from);
-      let mutual = message.body.hasOwnProperty('value') && message.body.value.hasOwnProperty('mutual') ? message.body.value.mutual : true;
+      let mutual = message.body.hasOwnProperty('value') && message.body.value.hasOwnProperty('mutual') ? message.body.value.mutual : 
+      message.body.hasOwnProperty('mutual') ? message.body.mutual : true;
       //      let mutual = message.body.hasOwnProperty('mutual') ? message.body.mutual : false;
 
 if (isSubscription && isFromRemoteSM && mutual) {
