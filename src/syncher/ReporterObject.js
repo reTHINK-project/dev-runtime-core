@@ -8,7 +8,7 @@ import * as cryptoManager from '../cryptoManager/CryptoManager';
 
 class ReporterObject {
 
-  constructor(parent, owner, url, offline) {
+  constructor(parent, owner, url, childrens, offline) {
     let _this = this;
 
     _this._parent = parent;
@@ -21,7 +21,7 @@ class ReporterObject {
     _this._objSubscriptorURL = _this._url + '/subscription';
 
     _this._subscriptions = {};
-    _this._childrens = [];
+    _this._childrens = childrens;
     _this._childrenListeners = [];
 
     _this._forwards = {};

@@ -369,7 +369,7 @@ class SyncherManager {
 
           if (!this._reporters[objectRegistration.url]) {
             let offline = objectRegistration.offline ? objectRegistration.offline : false;
-            reporter = new ReporterObject(_this, owner, objectRegistration.url, offline);
+            reporter = new ReporterObject(_this, owner, objectRegistration.url, childrens, offline);
           } else {
             reporter = this._reporters[objectRegistration.url];
           }
@@ -520,7 +520,8 @@ class SyncherManager {
         let reporter;
 
         if (!this._reporters[resource]) {
-          reporter = new ReporterObject(_this, owner, resource);
+          let offline = storedObject.offline ? storedObject.offline : false;
+          reporter = new ReporterObject(_this, owner, resource, childrens, offline);
         } else {
           reporter = this._reporters[resource];
         }
@@ -902,7 +903,7 @@ class SyncherManager {
     console.log('REUSETEST SyncherManager - 200 code[SyncherManager._newSubscription] - observers: ', _this._observers, objURL, _this._observers[objURL]);
     let observer = _this._observers[objURL];
     if (!observer) {
-      observer = new ObserverObject(_this, objURL);
+      observer = new ObserverObject(_this, objURL, childrens);
       log.log('[SyncherManager._newSubscription] - observers: create new ObserverObject: ', observer);
       _this._observers[objURL] = observer;
 
@@ -1011,7 +1012,7 @@ class SyncherManager {
 
         let observer = this._observers[objURL];
         if (!observer) {
-          observer = new ObserverObject(this, objURL);
+          observer = new ObserverObject(this, objURL, childrens);
           observer.isToSaveData = storedObject.isToSaveData;
           this._observers[objURL] = observer;
         }
