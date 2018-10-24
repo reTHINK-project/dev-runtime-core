@@ -621,7 +621,7 @@ class ChatController {
    * Only available to Chat Group Reporters i.e. the Hyperty instance that created the Group Chat.
    * @return {<Promise>Boolean} It returns as a Promise true if successfully closed or false otherwise.
    */
-  close(del = false) {
+  close(del = true) {
     // TODO: the dataObjectReporter.delete should be a Promise;
 
     let _this = this;
