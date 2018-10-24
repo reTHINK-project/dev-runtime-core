@@ -122,7 +122,7 @@ class RuntimeUA {
 
     if (typeof runtimeFactory.storageManager === 'function') {
 
-      this.storages = storage(runtimeFactory);
+      this.storages = storage(runtimeFactory, this);
 
     } else {
       throw new Error('Check your Runtime Factory because it needs the Storage Manager implementation');
@@ -149,12 +149,15 @@ class RuntimeUA {
 
       this.domain = this.runtimeConfiguration.domain;
 
+      log.info('[RuntimeUA - init] Starting ');
+
       try {
         let getCapabilities = this.runtimeCapabilities.getRuntimeCapabilities();
         let getRuntimeURL = this.storages.runtime.get('runtime:URL');
         let getStoredDataObjects = this.storages.syncherManager.get('syncherManager:ObjectURLs');
         let getHypertyStorageObjects = this.storages.hypertyResources.get();
         let getP2PHandlerURL = this.storages.runtime.get('p2pHandler:URL');
+//        let getRemotes = this.storages.syncherManager.get('remotes');
 
         Promise.all([getRuntimeURL, getCapabilities, getStoredDataObjects, getHypertyStorageObjects, getP2PHandlerURL]).then((results) => {
 
@@ -168,7 +171,7 @@ class RuntimeUA {
           this.capabilities = results[1];
           Object.assign(runtimeUtils.runtimeCapabilities.constraints, results[1]);
 
-          this._dataObjectsStorage = new DataObjectsStorage(this.storages.syncherManager, results[2] || {});
+          this._dataObjectsStorage = new DataObjectsStorage(this.storages.syncherManager, results[2] || {}, this.runtimeFactory, this );
 
           this._hypertyResources = results[3] || {};
 
@@ -180,7 +183,13 @@ class RuntimeUA {
             this.storages.runtime.set('p2pHandler:URL', 1, { p2pHandlerURL: this.p2pHandlerURL });
           }
 
-          return this._loadComponents();
+/*          log.info('[RuntimeUA - init] dataObjectsStorage remote load starting');
+          this._dataObjectsStorage.loadRemote().then(()=> {
+            log.info('[RuntimeUA - init] dataObjectsStorage remote load concluded');*/
+            return this._loadComponents();
+
+//          });
+
 
         }).then((status) => {
 
@@ -208,6 +217,18 @@ class RuntimeUA {
 
     });
 
+  }
+
+  _updateRuntimeStatus(event) {
+
+    let _this = this;
+
+    _this.messageBus.postMessage({
+      from: this.runtimeURL,
+      to: this.runtimeURL+'/status',
+      type: 'update',
+      body: event
+    });
   }
 
   _loadP2PHandler() {

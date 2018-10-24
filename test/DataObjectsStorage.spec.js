@@ -24,8 +24,10 @@ describe('dataObjectsStorage', function() {
 
   before(() => {
 
+//    storageManager = runtimeFactory.storageManager('syncherManager:ObjectURLs');
     storageManager = runtimeFactory.storageManager('syncherManager:ObjectURLs');
-    dataObjectsStorage = new DataObjectsStorage(storageManager, {});
+    dataObjectsStorage = new DataObjectsStorage(storageManager, {}, runtimeFactory);
+    console.log('DataObjectStorageTests ', dataObjectsStorage);
 
   });
 
@@ -52,10 +54,13 @@ describe('dataObjectsStorage', function() {
     childrenObjects[subscriberHyperty + '#1'] = { message: 'message 2' };
     childrenObjects[metadata.reporter + '#2'] = { message: 'message 3' };
 
-    expect(dataObjectsStorage.set(metadata))
+    expect(dataObjectsStorage.set(metadata).then( function(result) {
+      return result;
+    }))
     .to.have.keys('url', 'isReporter', 'subscriberUsers', 'subscriptions', 'version', 'schema', 'status', 'reporter', 'name', 'childrenObjects', 'data');
 
-    expect(dataObjectsStorage.saveData(true, url, null, data)).to.be.deep.equal({
+    expect(dataObjectsStorage.saveData(true, url, null, data))
+    .to.be.deep.equal({
       url: metadata.url,
       isReporter: metadata.isReporter,
       subscriptions: [],

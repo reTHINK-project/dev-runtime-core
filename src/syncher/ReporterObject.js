@@ -49,12 +49,13 @@ class ReporterObject {
 
       log.info('[SyncherManager.ReporterObject ] SyncherManager-' + changeURL + '-RCV: ', msg);
 
-      //TODO: what todo here? Save changes?
-      if (this._isToSaveData && msg.body.attribute) {
+      //do not save changes to backupRevision to avoid infinite loops
+      if (this._isToSaveData && msg.body.attribute ) {
+        let updateRuntimeStatus = msg.body.attribute !== 'backupRevision' ? true : false;
         log.log('[SyncherManager.ReporterObject ] SyncherManager - save data: ', msg);
-        _this._parent._dataObjectsStorage.update(true, _this._url, 'version', msg.body.version);
-        _this._parent._dataObjectsStorage.update(true, _this._url, 'lastModified', msg.body.lastModified);
-        _this._parent._dataObjectsStorage.saveData(true, _this._url, msg.body.attribute, msg.body.value);
+        _this._parent._dataObjectsStorage.update(true, _this._url, 'version', msg.body.version, updateRuntimeStatus);
+        _this._parent._dataObjectsStorage.update(true, _this._url, 'lastModified', msg.body.lastModified, updateRuntimeStatus);
+        _this._parent._dataObjectsStorage.saveData(true, _this._url, msg.body.attribute, msg.body.value, updateRuntimeStatus);
       }
     });
   }
@@ -96,7 +97,7 @@ class ReporterObject {
       log.log('[SyncherManager.ReporterObject] - resume subscriptions', _this, hypertyURL, _this._childrens);
 
       if (!_this._subscriptions[hypertyURL]) {
-        _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, _this._childrens, true);
+        _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, true);
       }
     });
 
@@ -154,21 +155,21 @@ class ReporterObject {
    * @param  {string[]} childrens - channels to register
    * @return {Promise} Return Promise OK or error
    */
-  addChildrens(childrens) {
+  addChildrens() {
     let _this = this;
 
     return new Promise((resolve, reject) => {
-      if (childrens.length === 0) {
+/*      if (childrens.length === 0) {
         resolve();
         return;
-      }
+    }*/
 
       let childBaseURL = _this._url + '/children/';
-      log.log('[SyncherManager.ReporterObject - addChildrens] - childrens: ', childrens, childBaseURL);
+      log.log('[SyncherManager.ReporterObject - addChildrens] - childrens: ', childBaseURL);
 
-      childrens.forEach((child) => {
+  /*    childrens.forEach((child) => {
         _this._childrens.push(child);
-      });
+      });*/
 
       /*
       _this._childrens.forEach((child) => {
@@ -179,7 +180,8 @@ class ReporterObject {
       });*/
 
       let subscriptions = [];
-      childrens.forEach((child) => subscriptions.push(childBaseURL + child));
+//      childrens.forEach((child) => subscriptions.push(childBaseURL + child));
+      subscriptions.push(childBaseURL );
 
       //_this._storageSubscriptions[_this._objSubscriptorURL] = {url: _this._url, owner: _this._owner, childrens: _this._childrens};
 
@@ -199,6 +201,7 @@ class ReporterObject {
               //TODO: what todo here? Save childrens?
               log.log('[SyncherManager.ReporterObject received]', msg);
 
+
               if (msg.type === 'create' && msg.to.includes('children') && this._isToSaveData) {
 
                 // if the value is not encrypted lets encrypt it
@@ -207,8 +210,10 @@ class ReporterObject {
 
                 let url = splitedReporterURL.url;
 
+                if (!msg.body.hasOwnProperty('mutual')) msg.body.mutual = true;
+
                 //remove false when mutualAuthentication is enabled
-                if (!(typeof msg.body.value === 'string')) {
+                if (!(typeof msg.body.value === 'string') && msg.body.mutual) {
 
                   log.log('[SyncherManager.ReporterObject] encrypting received data ', msg.body.value);
 
@@ -250,19 +255,28 @@ class ReporterObject {
     let url = splitedReporterURL.url;
 
     let resource = splitedReporterURL.resource;
-    let value = {
-      identity: msg.body.identity,
-      value: data
-    };
+    let value;
+    
+
+/*    if (msg.body.identity) {
+      value.identity = msg.body.identity;
+      delete value.identity.assertion;
+      delete value.identity.expires;
+    }*/
 
     let objectURLResource = msg.body.resource;
     let attribute = resource;
 
-    if (objectURLResource) attribute += '.' + objectURLResource;
+    if (objectURLResource === 'heartbeat' ) value = data;
+    else value = {
+      identity: msg.body.identity,
+      value: data
+    };
+
+//    if (objectURLResource) attribute += '.' + objectURLResource;
+    if (objectURLResource) attribute = objectURLResource;
 
     // this identity data is not needed to be stored
-    delete value.identity.assertion;
-    delete value.identity.expires;
 
 
     console.log('[SyncherManager.ReporterObject._storeChildObject] : ', url, attribute, value);
@@ -336,11 +350,10 @@ class ReporterObject {
         if (reply.body.code === 200) {
           if (!_this._subscriptions[hypertyURL]) {
             log.log('[SyncherManager.ReporterObject] - _onRemoteSubscribe:', _this._childrens);
-            _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, _this._childrens, true);
+            _this._subscriptions[hypertyURL] = new Subscription(_this._bus, _this._owner, _this._url, true);
           }
         }
 
-        //TODO: atualizar mutual no storage e tb na sessionKeys
 
         // Store for each reporter hyperty the dataObject
         let userURL;
@@ -349,11 +362,13 @@ class ReporterObject {
           _this._parent._dataObjectsStorage.update(true, _this._url, 'subscriberUsers', userURL);
         }
 
-        if (msg.body.hasOwnProperty('mutual')) {
+        //TODO: mutual and sessionkeys updates were removed. FFS
+
+        /*        if (msg.body.hasOwnProperty('mutual')) {
 //          _this._parent._identityModule.updateIsToEncryptForDataObjectSessionKey(_this._url, msg.body.mutual).then(()=>{
             _this._parent._dataObjectsStorage.update(true, _this._url, 'mutual', msg.body.mutual);
 //          });
-        }
+        }*/
 
         _this._parent._dataObjectsStorage.update(true, _this._url, 'subscriptions', hypertyURL);
 

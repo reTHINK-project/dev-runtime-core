@@ -77,7 +77,11 @@ class DataObjectObserver extends DataObject /* implements SyncStatus */ {
 
     return new Promise((resolve, reject) => {
 
-      _this._syncher.read(_this._metadata.url).then((value)=>{
+      let criteria = {};
+
+//      if (this.metadata.backupRevision) criteria.backupRevision = this.metadata.backupRevision;
+
+      _this._syncher.read(_this._metadata.url, criteria).then((value)=>{
         log.info('[DataObjectObserver_sync] value to sync: ', value);
 
         Object.assign(_this.data, deepClone(value.data));
@@ -127,15 +131,15 @@ class DataObjectObserver extends DataObject /* implements SyncStatus */ {
 
     //TODO: to be sent to HypertyResourceStorage when ready to handle Chat Messages
 
-    Object.keys(_this._childrenObjects).forEach((childrenResource) => {
-      let children = _this._childrenObjects[childrenResource];
-      childrens[childrenResource] = {};
+    Object.keys(_this._childrenObjects).forEach((childId) => {
+      let children = _this._childrenObjects;
+//      childrens[childrenResource] = {};
 
-      Object.keys(children).forEach((childId) => {
-        childrens[childrenResource][childId] = {};
-        childrens[childrenResource][childId].value = children[childId].metadata;
-        childrens[childrenResource][childId].identity = children[childId].identity;
-      });
+//      Object.keys(children).forEach((childId) => {
+        childrens[childId] = {};
+        childrens[childId].value = children[childId].metadata;
+        childrens[childId].identity = children[childId].identity;
+//      });
     });
 
       let msg = {
@@ -178,6 +182,8 @@ class DataObjectObserver extends DataObject /* implements SyncStatus */ {
    */
   delete() {
     let _this = this;
+
+    if (_this._heartBeat) _this._heartBeat.stop();
 
     _this._deleteChildrens().then(()=>{
       _this.unsubscribe();

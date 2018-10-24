@@ -132,7 +132,7 @@ class ChatController {
 
   get messages() {
 
-    return this.controllerMode === 'reporter' ? this._dataObjectReporter._childrenObjects['resources'] : this._dataObjectObserver._childrenObjects['resources'];
+    return this.controllerMode === 'reporter' ? this._dataObjectReporter._childrenObjects : this._dataObjectObserver._childrenObjects;
   }
 
   set dataObjectObserver(dataObjectObserver) {
@@ -232,7 +232,7 @@ class ChatController {
       domain: event.domain,
       identity: identity
     }
-    let userURL = event.identity.userProfile.userURL;
+    let userURL = event.identity.userProfile.guid;
 
     console.log('[ChatManager.ChatController.onSubscribe]  new participant', userInfo);
     if (event.identity.legacy) {
@@ -353,7 +353,7 @@ class ChatController {
       // TODO: change chatmessages to resource - chat, file
       // TODO: change message to hypertyResource - https://github.com/reTHINK-project/dev-service-framework/tree/develop/docs/datamodel/data-objects/hyperty-resource
       // TODO: handle with multiple resources - if the "message" will be different for each type of resources
-      dataObject.addChild('resources', msg, sender).then(function(dataObjectChild) {
+      dataObject.addChild(msg, sender).then(function(dataObjectChild) {
         console.log('[ChatManager.ChatController][addChild - Chat Message]: ', dataObjectChild);
         //resolve(dataObjectChild);
 
@@ -621,39 +621,57 @@ class ChatController {
    * Only available to Chat Group Reporters i.e. the Hyperty instance that created the Group Chat.
    * @return {<Promise>Boolean} It returns as a Promise true if successfully closed or false otherwise.
    */
-  close() {
-    // TODO: the dataObjectReporter.delete should be an Promise;
+  close(del = true) {
+    // TODO: the dataObjectReporter.delete should be a Promise;
 
     let _this = this;
-
+    
     return new Promise(function(resolve, reject) {
-
+      
       if (_this.controllerMode === 'reporter') {
-          _this._invitationsHandler.cleanInvitations(_this.dataObjectReporter).then(() => {
-            try {
-              delete _this._manager._reportersControllers[_this.dataObjectReporter.url];
-              _this.dataObjectReporter.delete();
+        // reporter
+        _this._invitationsHandler.cleanInvitations(_this.dataObjectReporter).then(() => {
+          if (!del) {
+            _this._manager.communicationObject.status = 'closed';
               resolve(true);
-              if (_this._onClose) _this._onClose({
-                code: 200,
-                desc: 'deleted',
-                url: _this.dataObjectReporter.url
-              })
-            } catch (e) {
-              console.error(e);
-              reject(false);
             }
+            else{
+
+              try {
+              
+                  delete _this._manager._reportersControllers[_this.dataObjectReporter.url];
+                _this.dataObjectReporter.delete();
+                resolve(true);
+                if (_this._onClose) _this._onClose({
+                  code: 200,
+                  desc: 'deleted',
+                  url: _this.dataObjectReporter.url
+                })
+              } catch (e) {
+                console.error(e);
+                reject(false);
+              }
+            }
+
           });
 
       } else {
-        try {
-          delete _this._manager._observersControllers[_this.dataObjectObserver.url];
-          _this.dataObjectObserver.unsubscribe();
-          resolve(true);
-        } catch (e) {
-          console.error(e);
-          reject(false);
+        // observer
+        if(del){
+          try {
+            delete _this._manager._observersControllers[_this.dataObjectObserver.url];
+            _this.dataObjectObserver.unsubscribe();
+            resolve(true);
+          } catch (e) {
+            console.error(e);
+            reject(false);
+          }
         }
+        else{
+          // TODO: send message 
+          resolve(true);
+        } 
+        
       }
     });
 

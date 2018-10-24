@@ -91,6 +91,8 @@ class SyncherManager {
         case 'delete': _this._onDelete(msg); break;
         case 'subscribe': _this._onLocalSubscribe(msg); break;
         case 'unsubscribe': _this._onLocalUnSubscribe(msg); break;
+        case 'read': _this._onRead(msg); break;
+        case 'execute': _this._onExecute(msg); break;
       }
     });
 
@@ -98,11 +100,105 @@ class SyncherManager {
 
   get url() { return this._url; }
 
+      //FLOW-IN: message received from Syncher -> read
+      _onExecute(msg) {
+
+        let _this = this;
+  
+        let reply = {
+          type: 'response',
+          from: msg.to,
+          to: msg.from,
+          id: msg.id
+        }
+
+        log.info('[SyncherManager.onExecute] new message', msg);
+  
+        if (msg.hasOwnProperty('body') && msg.body.hasOwnProperty('method') && msg.body.hasOwnProperty('params')) {
+
+        switch (msg.body.method) {
+          case 'sync': _this._dataObjectsStorage.sync(msg.body.params[0], msg.body.params[1], false);
+           break;
+          case 'stopSync': _this._dataObjectsStorage.stopSync(msg.body.params[0]);
+           break;
+        }
+
+            reply.body = {
+              code: 200
+            };
+    
+            _this._bus.postMessage(reply);
+          } else {
+          reply.body = {
+            code: 400,
+            desc: 'missing body or body method / params mandatory fields'
+          };
+  
+          log.error('[SyncherManager.onExecute] error. Missing body or body method / params mandatory fields', msg);
+  
+          _this._bus.postMessage(reply);
+  
+  
+        }
+  
+      }
+
+    //FLOW-IN: message received from Syncher -> read
+    _onRead(msg) {
+
+      let _this = this;
+
+      let reply = {
+        type: 'response',
+        from: msg.to,
+        to: msg.from,
+        id: msg.id
+      }
+      log.info('[SyncherManager.onRead] new message', msg);
+
+      if (msg.hasOwnProperty('body') && msg.body.hasOwnProperty('resource')) {
+        _this._dataObjectsStorage.sync(msg.body.resource, criteria.backupRevision, true).then((dataObject)=>{
+          reply.body = {
+            code: 200,
+            value: dataObject
+          };
+  
+          log.info('[SyncherManager.onRead] found object: ', dataObject);
+  
+          _this._bus.postMessage(reply);
+        }, (error)=>{
+          reply.body = {
+            code: 400,
+            desc: error
+          };
+  
+          log.error('[SyncherManager.onRead] error: ', error);
+  
+          _this._bus.postMessage(reply);
+  
+        });
+
+      } else {
+        reply.body = {
+          code: 400,
+          desc: 'missing body or body resource mandatory fields'
+        };
+
+        log.error('[SyncherManager.onRead] error. Missing body or body resource mandatory fields', msg);
+
+        _this._bus.postMessage(reply);
+
+
+      }
+
+    }
+
   //FLOW-IN: message received from Syncher -> create
   _onCreate(msg) {
 
     let from = msg.from;
     let to = msg.to;
+    let _this = this;
 
     // check if message is to save new childrenObjects in the local storage
     // TODO: check if message is to store new child in the local storage and call storeChild. How to distinguish from others?
@@ -134,13 +230,16 @@ class SyncherManager {
             let listOfReporters = [];
 
             Object.keys(result).forEach((objURL) => {
-              listOfReporters.push(this._resumeCreate(msg, result[objURL]));
+
+              listOfReporters.push(
+                  _this._resumeCreate(msg, result[objURL])
+                );
             });
 
             Promise.all(listOfReporters).then((resumedReporters) => {
               log.log('[SyncherManager - Create Resumed]', resumedReporters);
 
-              // TODO: shoud send the information if some object was fail;
+              // TODO: shoud send the information if some object was failing;
               let successfullyResumed = Object.values(resumedReporters).filter((reporter) => {
                 return reporter !== false;
               });
@@ -150,8 +249,14 @@ class SyncherManager {
               //FLOW-OUT: message response to Syncher -> create resume
               this._bus.postMessage({
                 id: msg.id, type: 'response', from: to, to: from,
-                body: { code: 200, value: successfullyResumed }
+                body: { code: 200, value: deepClone(successfullyResumed) }
               });
+
+              /*successfullyResumed.forEach((reporter) => {
+                if (reporter.backup) {
+                  this._dataObjectsStorage.sync(reporter.url);
+                }
+              });*/
 
             });
 
@@ -181,7 +286,10 @@ class SyncherManager {
     let resource = msg.body.resource;
     let attribute = msg.body.attribute;
 
-    if (attribute === 'childrenObjects') { _this._dataObjectsStorage.saveChildrens(false, resource, undefined, msg.body.value); } else { _this._dataObjectsStorage.saveChildrens(true, resource, attribute, msg.body.value); }
+    if (attribute === 'childrenObjects') { 
+      _this._dataObjectsStorage.saveChildrens(false, resource, undefined, msg.body.value); 
+    } else { _this._dataObjectsStorage.saveChildrens(true, resource, attribute, msg.body.value);
+       }
 
   }
 
@@ -293,15 +401,18 @@ class SyncherManager {
 
           //if (!interworking) {
 
-          _this._dataObjectsStorage.set(metadata);
-
           if (msg.body.hasOwnProperty('store') && msg.body.store) {
             reporter.isToSaveData = true;
-            _this._dataObjectsStorage.update(true, objectRegistration.url, 'isToSaveData', true);
+            metadata.isToSaveData = true;
+            if (msg.body.value.data) { 
+              metadata.data = deepClone(msg.body.value.data);
+//              _this._dataObjectsStorage.saveData(true, objectRegistration.url, null, msg.body.value.data); }
+//            _this._dataObjectsStorage.update(true, objectRegistration.url, 'isToSaveData', true);
 
-            if (msg.body.value.data) { _this._dataObjectsStorage.saveData(true, objectRegistration.url, null, msg.body.value.data); }
+//            if (msg.body.value.data) { _this._dataObjectsStorage.saveData(true, objectRegistration.url, null, msg.body.value.data); }
+            }
           }
-
+          _this._dataObjectsStorage.set(metadata).then((storeObject) => {
           //}
           let responseMsg = {
             id: msg.id, type: 'response', from: msg.to, to: owner,
@@ -313,7 +424,7 @@ class SyncherManager {
           if (domainRegistration) {
 
             reporter.forwardSubscribe([objectRegistration.url, subscriptionURL]).then(() => {
-              reporter.addChildrens(childrens).then(() => {
+              reporter.addChildrens().then(() => {
                 _this._reporters[objectRegistration.url] = reporter;
 
 
@@ -323,7 +434,7 @@ class SyncherManager {
               });
             });
           } else {
-            reporter.addChildrens(childrens).then(() => {
+            reporter.addChildrens().then(() => {
               _this._reporters[objectRegistration.url] = reporter;
 
 
@@ -333,6 +444,11 @@ class SyncherManager {
             });
 
           }
+          }, (error)=> {
+            log.error(error);
+          });
+
+
         }, function (error) {
           log.error(error);
         });
@@ -391,7 +507,11 @@ class SyncherManager {
 
         if (domainRegistration) {
           reporter.forwardSubscribe([storedObject.url]).then(() => {
-            resolve(_this._resumeReporterSubscriptions(msg, storedObject, reporter, childrens, domainRegistration));
+            log.log('[SyncherManager._resumeCreate] resumingReporterSubscription ', storedObject);
+            _this._resumeReporterSubscriptions(msg, storedObject, reporter, childrens, domainRegistration).then((resumeObject)=>{
+              log.log('[SyncherManager._resumeCreate] resolved resumed object ', resumeObject);
+              resolve(resumeObject);
+            });
         });
       } else resolve(_this._resumeReporterSubscriptions(msg, storedObject, reporter, childrens, domainRegistration));
 
@@ -416,7 +536,7 @@ class SyncherManager {
     return new Promise((resolve) => {
 
 
-    reporter.addChildrens(childrens).then(() => {
+    reporter.addChildrens().then(() => {
 
       reporter.resumeSubscriptions(storedObject.subscriptions);
 
@@ -427,9 +547,10 @@ class SyncherManager {
       return _this._decryptChildrens(storedObject, childrens);
     }).then((decryptedObject) => {
 
-      log.info('[SyncherManager._resumeCreate] Register Object: ', objectRegistration);
+      log.info('[SyncherManager._resumeReporterSubscriptions] Register Object: ', objectRegistration);
       _this._registry.registerDataObject(objectRegistration).then((registered) => {
-        log.log('[SyncherManager._resumeCreate] DataObject registration successfully updated', registered);
+        log.log('[SyncherManager._resumeReporterSubscriptions] DataObject registration successfully updated', registered);
+        log.log('[SyncherManager._resumeReporterSubscriptions] resolving object', decryptedObject);
         resolve(decryptedObject);
 
       });
@@ -445,8 +566,10 @@ class SyncherManager {
 
   // to decrypt DataChildObjects if they are encrypted
 
-  _decryptChildrens(storedObject, childrens) {
+  _decryptChildrens(encryptedObject, childrens) {
     let _this = this;
+
+    let storedObject = deepClone(encryptedObject);
     return new Promise((resolve) => {
 
       if (!childrens) { resolve(storedObject); } else {
@@ -458,7 +581,8 @@ class SyncherManager {
 
         childrens.forEach((children) => {
 
-          let childObjects = storedObject.childrenObjects[children];
+//          let childObjects = storedObject.childrenObjects[children];
+          let childObjects = storedObject.childrenObjects;
 
           log.log('[SyncherManager._decryptChildrens] dataObjectChilds to decrypt ', childObjects);
 
@@ -484,7 +608,7 @@ class SyncherManager {
 
             decryptedObjects.forEach((decryptedObject) => {
               const childId = decryptedObject.value.url;
-              storedObject.childrenObjects[children][childId].value = decryptedObject.value;
+              storedObject.childrenObjects[childId].value = decryptedObject.value;
             });
 
             log.log('[SyncherManager._decryptChildrens] storedObject ', storedObject);
@@ -577,7 +701,7 @@ class SyncherManager {
 
         let listOfObservers = [];
 
-        // TODO: should reuse the storaged information
+        // TODO: should reuse the stored information
         Object.keys(result).forEach((objURL) => {
           log.log('[SyncherManager - resume Subscribe] - reuse current object url: ', result[objURL]);
           listOfObservers.push(this._resumeSubscription(msg, result[objURL]));
@@ -586,7 +710,7 @@ class SyncherManager {
         Promise.all(listOfObservers).then((resumedObservers) => {
           log.log('[SyncherManager - Observers Resumed]', resumedObservers);
 
-          // TODO: shoud send the information if some object was fail;
+          // TODO: shoud send the information if some object is failing;
           let successfullyResumed = Object.values(resumedObservers).filter((observer) => {
             return observer !== false;
           });
@@ -639,7 +763,8 @@ class SyncherManager {
       let subscriptions = [];
       subscriptions.push(objURL + '/changes');
 
-      childrens.forEach((child) => subscriptions.push(childBaseURL + child));
+//      childrens.forEach((child) => subscriptions.push(childBaseURL + child));
+      subscriptions.push(childBaseURL);
 
       //children addresses
 
@@ -702,7 +827,7 @@ class SyncherManager {
               console.log('REUSETEST SyncherManager - 200 code[SyncherManager._newSubscription] - observers: ', _this._observers, objURL, _this._observers[objURL]);
               let observer = _this._observers[objURL];
               if (!observer) {
-                observer = new ObserverObject(_this, objURL, childrens);
+                observer = new ObserverObject(_this, objURL);
                 log.log('[SyncherManager._newSubscription] - observers: create new ObserverObject: ', observer);
                 _this._observers[objURL] = observer;
 
@@ -710,7 +835,7 @@ class SyncherManager {
                 observer.addSubscription(hypertyURL);
 
                 // add childrens and listeners to save data if necessary
-                observer.addChildrens(childrens);
+                observer.addChildrens();
               }
 
               let interworking = false;
@@ -748,6 +873,7 @@ class SyncherManager {
                   observer.isToSaveData = true;
                   _this._dataObjectsStorage.update(false, objURL, 'isToSaveData', true);
                   _this._dataObjectsStorage.saveData(false, objURL, null, reply.body.value.data);
+//                  if (childrens) _this._dataObjectsStorage.initialObserverSync(objURL, reply.body.value.data.backupRevision);
                 }
               }
 
@@ -792,7 +918,8 @@ class SyncherManager {
         //children addresses
         let subscriptions = [];
         subscriptions.push(objURL + '/changes');
-        childrens.forEach((child) => subscriptions.push(childBaseURL + child));
+//        childrens.forEach((child) => subscriptions.push(childBaseURL + child));
+        subscriptions.push(childBaseURL);
 
         //FLOW-OUT: reply with provisional response
         this._bus.postMessage({
@@ -811,14 +938,14 @@ class SyncherManager {
 
         let observer = this._observers[objURL];
         if (!observer) {
-          observer = new ObserverObject(this, objURL, childrens);
+          observer = new ObserverObject(this, objURL);
           observer.isToSaveData = storedObject.isToSaveData;
           this._observers[objURL] = observer;
         }
 
         //register new hyperty subscription
         observer.addSubscription(hypertyURL);
-        observer.addChildrens(childrens);
+        observer.addChildrens();
 
         // Object.assign(storedObject.data, reply.body.value.data);
         // Object.assign(storedObject.childrens, reply.body.value.childrens);

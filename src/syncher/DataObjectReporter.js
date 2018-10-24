@@ -81,6 +81,19 @@ class DataObjectReporter extends DataObject /* implements SyncStatus */ {
         case 'create': _this._onChildCreate(msg); break;// to create child objects that were sent whenn offline
       }
     });
+
+    _this._runtimeStatusListener = _this._bus.addListener(_this._syncher._runtimeUrl+'/status' , (evt) => {
+      console.log('[Syncher.DataObjectReporter] runtime status event received ' + evt);
+
+      if (evt.body && evt.body.resource && evt.body.resource === _this._url && 
+        evt.body.value && evt.body.value.backupRevision ) {
+          // broadcast backupRevision update
+
+          _this.data.backupRevision = evt.body.value.backupRevision;
+          console.log('[Syncher.DataObjectReporter] DO updated with backup revision ' + _this.data.backupRevision);
+        }
+    });
+
   }
 
   _releaseListeners() {
@@ -157,6 +170,8 @@ class DataObjectReporter extends DataObject /* implements SyncStatus */ {
    */
   delete() {
     let _this = this;
+
+   if(_this._heartBeat) _this._heartBeat.stop();
 
     _this._deleteChildrens().then((result)=>{
       log.log(result);
@@ -286,6 +301,13 @@ class DataObjectReporter extends DataObject /* implements SyncStatus */ {
           _this.data.mutual = false;
         }
 
+        if (_this._heartBeat) {
+          sendMsg.body.value.childrenObjects = {};
+          sendMsg.body.value.childrenObjects.heartbeat = _this._heartBeat.heartbeat;
+        }
+
+        console.log('[DataObjectReporter._onSubscribe.accept] sending response: ', sendMsg)
+
         //send ok response message
         _this._bus.postMessage(sendMsg);
 
@@ -397,17 +419,17 @@ class DataObjectReporter extends DataObject /* implements SyncStatus */ {
     let _this = this;
     let childrens = {};
 
-    let children;
+//    let children;
 
-    for (children in _this._childrenObjects) {
+//    for (children in _this._childrenObjects) {
       let child;
-      childrens[children] = {};
-      for (child in _this._childrenObjects[children]) {
-        childrens[children][child] = {};
-        childrens[children][child].value = _this._childrenObjects[children][child].metadata;
-        childrens[children][child].identity = _this._childrenObjects[children][child].identity;
+//      childrens[children] = {};
+      for (child in _this._childrenObjects) {
+        childrens[child] = {};
+        childrens[child].value = _this._childrenObjects[child].metadata;
+        childrens[child].identity = _this._childrenObjects[child].identity;
       }
-    }
+//    }
 
     return childrens;
   }
@@ -451,20 +473,20 @@ class DataObjectReporter extends DataObject /* implements SyncStatus */ {
     let values = []; // array of values to be sent in separated responses
     let childrenValue = {}; // value to be used in each response
 
-    for (children in _this._childrenObjects) {
-      let child;
-      childrenValue[children] = {};
-      for (child in _this._childrenObjects[children]) {
+    for (child in _this._childrenObjects) {
+//      let child;
+      childrenValue[child] = {};
+//      for (child in _this._childrenObjects[children]) {
         if (JSON.stringify(childrenValue).length > _this._childrenSizeThreshold) {
           //childrenValue big enough to be sent in a response message
           values.push(childrenValue);
-          childrenValue = {};
-          childrenValue[children] = {};
+//          childrenValue = {};
+//          childrenValue[child] = {};
         }
-        childrenValue[children][child] = {};
-        childrenValue[children][child].value = _this._childrenObjects[children][child].metadata;
-        childrenValue[children][child].identity = _this._childrenObjects[children][child].identity;
-      }
+        childrenValue[child] = {};
+        childrenValue[child].value = _this._childrenObjects[child].metadata;
+        childrenValue[child].identity = _this._childrenObjects[child].identity;
+//      }
     }
 
     values.push(childrenValue);

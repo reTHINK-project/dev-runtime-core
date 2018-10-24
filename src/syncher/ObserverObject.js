@@ -2,18 +2,18 @@
 import * as logger from 'loglevel';
 let log = logger.getLogger('ObserverObject');
 
-import { divideURL, splitObjectURL } from '../utils/utils';
+import { divideURL, splitObjectURL, deepClone } from '../utils/utils';
 import Subscription from './Subscription';
 import * as cryptoManager from '../cryptoManager/CryptoManager';
 
 class ObserverObject {
 
-  constructor(parent, url, childrens) {
+  constructor(parent, url) {
     let _this = this;
 
     _this._parent = parent;
     _this._url = url;
-    _this._childrens = childrens;
+//    _this._childrens = childrens;
 
     _this._bus = parent._bus;
 
@@ -49,7 +49,7 @@ class ObserverObject {
     let subscription = _this._subscriptions[hyperty];
     log.log('[Observer Object - new subscription] - ',  _this._subscriptions, hyperty, _this._subscriptions.hasOwnProperty(hyperty));
     if (!subscription) {
-      _this._subscriptions[hyperty] = new Subscription(_this._bus, hyperty, _this._url, _this._childrens, false);
+      _this._subscriptions[hyperty] = new Subscription(_this._bus, hyperty, _this._url, false);
     }
   }
 
@@ -59,20 +59,17 @@ class ObserverObject {
     _this._newSubscription(hyperty);
   }
 
-  addChildrens(childrens) {
+  addChildrens() {
     let _this = this;
 
     return new Promise((resolve) => {
-      if (childrens.length === 0) {
-        return resolve();
-      }
 
       let childBaseURL = _this._url + '/children/';
-      log.log('[SyncherManager.ObserverObject - addChildrens] - childrens: ', childrens, childBaseURL);
+      log.log('[SyncherManager.ObserverObject - addChildrens] - childrens: ', childBaseURL);
 
-      childrens.forEach((child) => {
+//      childrens.forEach((child) => {
 
-        let childListener = _this._bus.addListener(childBaseURL + child, (msg) => {
+        let childListener = _this._bus.addListener(childBaseURL, (msg) => {
           //TODO: what todo here? Save childrens?
           log.log('[SyncherManager.ObserverObject received]', msg);
 
@@ -81,8 +78,10 @@ class ObserverObject {
 
             let url = splitedReporterURL.url;
 
+            if (!msg.body.hasOwnProperty('mutual')) msg.body.mutual = true;
+
             //remove false when mutualAuthentication is enabled
-            if (!(typeof msg.body.value === 'string')) {
+            if (!(typeof msg.body.value === 'string') && msg.body.mutual) {
 
               log.log('[SyncherManager.ObserverObject] encrypting received data ', msg.body.value);
 
@@ -108,7 +107,7 @@ class ObserverObject {
 
       });
 
-    });
+//    });
   }
 
   // store childObject
@@ -121,19 +120,29 @@ class ObserverObject {
     let url = splitedReporterURL.url;
 
     let resource = splitedReporterURL.resource;
-    let value = {
+    let value = {};
+
+/*    let value = {
       identity: msg.body.identity,
       value: data
-    };
+    };*/
 
     // this identity data is not needed to be stored
-    delete value.identity.assertion;
-    delete value.identity.expires;
+/*    delete value.identity.assertion;
+    delete value.identity.expires;*/
 
     let objectURLResource = msg.body.resource;
     let attribute = resource;
 
-    if (objectURLResource) attribute += '.' + objectURLResource;
+    if (objectURLResource === 'heartbeat') {
+      value = data;
+    } else {
+      value.identity= msg.body.identity;
+      value.value = data;
+    } 
+
+//    if (objectURLResource) attribute += '.' + objectURLResource;
+    if (objectURLResource) attribute = objectURLResource;
 
     log.log('[SyncherManager.ObserverObject._storeChildObject] : ', url, attribute, value);
 
@@ -160,7 +169,7 @@ class ObserverObject {
       //FLOW-OUT: message sent to msg-node SubscriptionManager component
       _this._bus.postMessage({
         type: 'unsubscribe', from: _this._parent._url, to: 'domain://msg-node.' + domain + '/sm',
-        body: { resource: _this._url, childrenResources: _this._childrens }
+        body: { resource: _this._url, resources: [_this._url + '/children/'] }
       });
 
       subscription._releaseListeners();

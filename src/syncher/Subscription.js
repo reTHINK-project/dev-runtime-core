@@ -4,7 +4,7 @@ let log = logger.getLogger('SynSubscription');
 
 class Subscription {
 
-  constructor(bus, owner, url, childrens, isReporter) {
+  constructor(bus, owner, url, isReporter) {
     let _this = this;
     let childBaseURL = url + '/children/';
     let changeURL = url + '/changes';
@@ -38,22 +38,22 @@ class Subscription {
     }
 
     _this._childrenListeners = [];
-    log.log('[Subscription] - childID', childrens);
-    childrens.forEach((child) => {
-      let childId = childBaseURL + child;
+//    log.log('[Subscription] - childID', childrens);
+//    childrens.forEach((child) => {
+//    let childId = childBaseURL + child;
 
-      log.log('[Subscription] - childID', childBaseURL, childId, child);
+//      log.log('[Subscription] - childID', childBaseURL);
 
       //add children publish address
-      let childrenForward = bus.addPublish(childId);
+      let childrenForward = bus.addPublish(childBaseURL);
       _this._childrenListeners.push(childrenForward);
 
       //add self forward if an observer
       if (!isReporter) {
-        let selfForward = bus.addForward(childId, owner);
+        let selfForward = bus.addForward(childBaseURL, owner);
         _this._childrenListeners.push(selfForward);
       }
-    });
+//    });
   }
 
   _releaseListeners() {

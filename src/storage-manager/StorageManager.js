@@ -4,7 +4,7 @@ let log = logger.getLogger('StorageManager');
 
 class StorageManager {
 
-  constructor(db, storageName, schemas, version = 1) {
+  constructor(db, storageName, schemas, runtimeUA, version = 1, remoteStorage = false) {
     if (!db) throw Error('The Storage Manager needs the database instance');
     if (!storageName) throw Error('The Storage Manager needs the storage name');
 
@@ -16,14 +16,78 @@ class StorageManager {
       stores[storageName] = 'key,version,value';
     }
 
-    db.version(version).stores(stores);
+//    db.version(version).stores(stores);
     db.open().then((db) => {
       log.info('Found database name ' + db.name + ' with version no: ' + db.verno);
     }).catch(log.error);
 
     this.db = db;
     this.storageName = storageName;
+    this._remoteStorage = remoteStorage;
+    this._runtimeUA = runtimeUA;
   }
+
+  // set remoteStorage backup server URL
+
+  set remoteStorage(remoteStorage) {
+    this._remoteStorage = remoteStorage;
+  }
+
+  // start sync with remoteStorage server. Returns a promise that resolves if connection is performed otherwise it is rejected
+
+  connect(options) {
+    return this.db.connect(this._remoteStorage, options);
+  }
+
+  // stop sync with remoteStorage server. Returns promise 
+
+  disconnect() {
+   return new Promise((resolve,reject) => {
+      this.db.disconnect(this._remoteStorage).then(()=> {
+        resolve();
+      }, (error) => {
+      reject(error);
+    });
+  });
+}
+  // to retrieve the last revision stored in the backup server
+
+  getBackupRevision(resource) {
+
+    return new Promise((resolve)=> {
+      this.db._syncNodes.get({type: 'remote'}).then((status)=> {
+        console.log('[StorageManager.getBackupRevision] retrieved status: ', status);
+        if (status && status.hasOwnProperty('appliedRemoteRevision')) {
+          if (status.appliedRemoteRevision === null) status.appliedRemoteRevision = 0;
+
+          resolve(status.appliedRemoteRevision);
+        } 
+    });
+  });
+}
+
+  // to retrieve the last revision stored in the backup server
+  // and broadcast it
+
+  _updateBackupRevision(resource) {
+
+    return new Promise((resolve)=> {
+      this.db._syncNodes.get({type: 'remote'}).then((status)=> {
+        console.log('[StorageManager._updateBackupRevision] retrieved status: ', status);
+        if (status && status.hasOwnProperty('appliedRemoteRevision')) {
+          if (status.appliedRemoteRevision === null) status.appliedRemoteRevision = 0;
+
+          this._runtimeUA._updateRuntimeStatus(
+            {
+              resource: resource,
+              value: { backupRevision: status.appliedRemoteRevision }
+            }
+          )
+          resolve(status.appliedRemoteRevision);
+        } 
+    });
+  });
+}
 
   _checkKey(key) {
     if (typeof key !== 'string') return key.toString();
@@ -36,7 +100,12 @@ class StorageManager {
     try {
       name = this.db.table(this.storageName).name;
     } catch (error) {
-      name = this.db.table(key).name;
+//      try {
+        name = this.db.table(key).name;
+/*      } catch (error) {
+        log.error('[StorageManager._getTable] error ', error);
+        name = false;
+      }*/
     }
 
     return name;
@@ -63,29 +132,43 @@ class StorageManager {
    * otherwise it is rejected with an error.
    * @memberof StorageManager
    */
-  set(key, version, value, table) {
-    log.info('[StorageManager] - set ', key, value);
-    table = table ? table : key;
-    const name = this._getTable(table);
-    const primaryKey = this._getPrimaryKey(name);
+  set(key, version, value, table, updateRuntimeStatus = true) {
 
-    // Object.assign(value, {version: version});
+    return new Promise ((resolve, reject)=> {
+      log.info('[StorageManager] - set ', key, value);
+      table = table ? table : key;
+      const name = this._getTable(table);
+      const primaryKey = this._getPrimaryKey(name);
+  
+      // Object.assign(value, {version: version});
+  
+      let data = value;
+  
+      if (this._isDefaultSchema(table)) {
+        data = {
+          key: key,
+          version: version,
+          value: value
+        };
+      } else {
+        const tmp = {};
+        tmp[primaryKey] = key;
+        Object.assign(data, tmp);
+      }
+  
+       this.db[name].put(data).then(()=>{
+      if (updateRuntimeStatus && data.backup && data.url) {
+        this._updateBackupRevision(data.url).then(()=> {
+          resolve();
+        });
+      } else resolve();
 
-    let data = value;
+       }, ()=> {
+         resolve();
+       });
 
-    if (this._isDefaultSchema(table)) {
-      data = {
-        key: key,
-        version: version,
-        value: value
-      };
-    } else {
-      const tmp = {};
-      tmp[primaryKey] = key;
-      Object.assign(data, tmp);
-    }
+    });
 
-    return this.db[name].put(data);
   }
 
   /**
@@ -101,6 +184,7 @@ class StorageManager {
     console.info('[StorageManager] - get ', key, value);
     table = table ? table : key;
     const name = this._getTable(table);
+    if (!name) return undefined;
     const primaryKey = this._getPrimaryKey(name);
 
     return this.db.transaction('rw!', this.db[name], () => {
@@ -215,7 +299,7 @@ class StorageManager {
   }
 
   /**
-   * Delete a entry from the database for a given key.
+   * Delete a entry from the database for a given key or the full DB in case the key is not provided.
    * @param {!string} key - key that was stored using {@link storageManager.set}
    * @param {!any} value - the value which sould be used to find the storage resource
    * @param {!string} table - table which should be looking for
@@ -223,20 +307,24 @@ class StorageManager {
    * @memberof StorageManager
    */
   delete(key, value, table) {
-    table = table ? table : key;
-    const name = this._getTable(table);
-    const primaryKey = this._getPrimaryKey(name);
 
-    let data = value;
-
-    if (!value) {
-      data = key;
-    }
-
-    return this.db[name]
-      .where(primaryKey)
-      .equals(data)
-      .delete();
+    if (key) {
+      table = table ? table : key;
+      const name = this._getTable(table);
+      const primaryKey = this._getPrimaryKey(name);
+  
+      let data = value;
+  
+      if (!value) {
+        data = key;
+      }
+  
+      return this.db[name]
+        .where(primaryKey)
+        .equals(data)
+        .delete();
+    } else return this.db.delete();
+  
   }
 
 }
