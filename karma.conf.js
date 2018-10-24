@@ -10,6 +10,8 @@ module.exports = function(config) {
       './test/PolicyEngine.spec.js',
       './test/HypertyResourceStorage.spec.js',
       './test/RuntimeCatalogue.spec.js',
+      './test/DataObjectsStorage.spec.js',
+      './test/StorageManager.spec.js',
       './test/PersistenceManager.spec.js'
 
     ],

@@ -4,7 +4,7 @@ const a = log.getLogger('address-allocation');
 const b = log.getLogger('Bus');
 const c = log.getLogger('MessageBus');
 const d = log.getLogger('CoreDiscovery');
-const e = log.getLogger('GraphConnector');
+const e = log.getLogger('StorageManager');
 const f = log.getLogger('HypertyResourcesStorage');
 const g = log.getLogger('IdentityModule');
 const h = log.getLogger('PEP');
@@ -23,6 +23,8 @@ const t = log.getLogger('SyncherManager');
 const u = log.getLogger('IdentityHandler');
 const v = log.getLogger('CryptoManager');
 const x = log.getLogger('Pipeline');
+const f1 = log.getLogger('Syncher');
+const f2 = log.getLogger('DataObjectObserver');
 
 
 export { log };
@@ -59,8 +61,8 @@ c.setLevel(3);
 // CoreDiscovery
 d.setLevel(5);
 
-// GraphConnector
-e.setLevel(5);
+// StorageManager
+e.setLevel(0);
 
 // HypertyResourcesStorage
 f.setLevel(3);
@@ -78,7 +80,7 @@ i.setLevel(3);
 j.setLevel(3);
 
 // RuntimeUA
-k.setLevel(3);
+k.setLevel(0);
 
 // Loader
 l.setLevel(3);
@@ -87,7 +89,7 @@ l.setLevel(3);
 m.setLevel(3);
 
 // DataObjectsStorage
-n.setLevel(3);
+n.setLevel(0);
 
 // Subscription
 o.setLevel(3);
@@ -96,16 +98,16 @@ o.setLevel(3);
 p.setLevel(3);
 
 // ObserverObject
-q.setLevel(3);
+q.setLevel(0);
 
 // ReporterObject
-r.setLevel(3);
+r.setLevel(0);
 
 // SynSubscription
 s.setLevel(3);
 
 // SyncherManager
-t.setLevel(3);
+t.setLevel(0);
 
 // IdentityHandler
 u.setLevel(3);
@@ -115,3 +117,9 @@ v.setLevel(3);
 
 // Pipeline
 x.setLevel(3);
+
+// Syncher
+f1.setLevel(0);
+
+// Syncher DataObjectObserver
+f1.setLevel(0);

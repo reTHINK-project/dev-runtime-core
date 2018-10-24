@@ -175,7 +175,7 @@ class ChatManager {
         let userInfo = new UserInfo(_this._myUrl, _this._domain, identity);
 
         // Add my identity
-        _this.communicationObject.participants[identity.userURL] = userInfo;
+        _this.communicationObject.participants[identity.guid] = userInfo;
 
         console.log('[ChatManager.create ] participants: ', _this.communicationObject.participants);
         console.log('[ChatManager.create ] communicationObject', _this.communicationObject);

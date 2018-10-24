@@ -132,7 +132,7 @@ class ChatController {
 
   get messages() {
 
-    return this.controllerMode === 'reporter' ? this._dataObjectReporter._childrenObjects['resources'] : this._dataObjectObserver._childrenObjects['resources'];
+    return this.controllerMode === 'reporter' ? this._dataObjectReporter._childrenObjects : this._dataObjectObserver._childrenObjects;
   }
 
   set dataObjectObserver(dataObjectObserver) {
@@ -232,7 +232,7 @@ class ChatController {
       domain: event.domain,
       identity: identity
     }
-    let userURL = event.identity.userProfile.userURL;
+    let userURL = event.identity.userProfile.guid;
 
     console.log('[ChatManager.ChatController.onSubscribe]  new participant', userInfo);
     if (event.identity.legacy) {
@@ -353,7 +353,7 @@ class ChatController {
       // TODO: change chatmessages to resource - chat, file
       // TODO: change message to hypertyResource - https://github.com/reTHINK-project/dev-service-framework/tree/develop/docs/datamodel/data-objects/hyperty-resource
       // TODO: handle with multiple resources - if the "message" will be different for each type of resources
-      dataObject.addChild('resources', msg, sender).then(function(dataObjectChild) {
+      dataObject.addChild(msg, sender).then(function(dataObjectChild) {
         console.log('[ChatManager.ChatController][addChild - Chat Message]: ', dataObjectChild);
         //resolve(dataObjectChild);
 
