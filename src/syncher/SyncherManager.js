@@ -519,15 +519,32 @@ class SyncherManager {
 
         //all OK -> create reporter and register listeners
         let reporter;
+        let offline;
 
         if (!this._reporters[resource]) {
-          let offline = storedObject.offline ? storedObject.offline : false;
+          offline = storedObject.offline ? storedObject.offline : false;
           reporter = new ReporterObject(_this, owner, resource, childrens, offline);
         } else {
           reporter = this._reporters[resource];
         }
 
         reporter.isToSaveData = storedObject.isToSaveData;
+
+        if (offline) { //update new DataObject at Offline Subscription Manager
+          let msg = {
+            from: _this._url,
+            to: offline + '/register',
+            type: 'update',
+            body: {}
+          };
+  
+          log.log('[SyncherManager._resumeCreate] update object at offline manager ', msg);
+  
+          _this._bus.postMessage(msg);
+  
+  
+        }
+  
 
         if (domainRegistration) {
           reporter.forwardSubscribe([storedObject.url]).then(() => {

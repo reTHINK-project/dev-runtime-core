@@ -152,11 +152,11 @@ class DataObjectReporter extends DataObject /* implements SyncStatus */ {
             };
 
             if (result.code < 300) resolve(result);
-            else if (result.code >= 300) {
+/*            else if (result.code >= 300) {
               if (_this.metadata.offline) {
-                resolve(_this._processOfflineInvitation(inviteMsg)); ;
-              } else reject(result);
-            } 
+                resolve(_this._processOfflineInvitation(inviteMsg));
+              }*/ else reject(result);
+//            } 
           });
         });
 
