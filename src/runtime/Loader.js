@@ -170,7 +170,7 @@ class Loader {
         }, handleError)
         .then((policyResult) => {
           if (haveError) return false;
-          log.info('[Runtime.Loader] 3: return policy engine result' + policyResult);
+          console.log('[Runtime.Loader] 3: return policy engine result' + policyResult);
 
           // we have completed step 6 to 9 of https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
           //

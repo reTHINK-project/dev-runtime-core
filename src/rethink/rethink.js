@@ -71,7 +71,15 @@ const rethink = {
             //TODO: Work the message errors, probably use message factory
             runtime.loadHyperty(hyperty, true).then(function(result) {
 
-              resolve(result);
+              let hypertyComponent = window.components[result.runtimeHypertyURL];
+              let hyperty = {
+                runtimeHypertyURL: result.runtimeHypertyURL,
+                status: result.status,
+                instance: hypertyComponent.instance,
+                name: hypertyComponent.name
+              };
+    
+              resolve(hyperty);
             }).catch(function(reason) {
               reject(reason);
             });
@@ -83,9 +91,18 @@ const rethink = {
           return new Promise(function(resolve, reject) {
 
             //TODO: Work the message errors, probably use message factory
-            runtime.loadStub(msg.body.value.domain).then(function(result) {
+            runtime.loadStub(domain).then(function(result) {
 
-              resolve(result);
+              let protostubURL = result.url || result.runtimeProtoStubURL;
+              let protostubComponent = window.components[protostubURL];
+              let protostub = {
+                runtimeProtostubURL: protostubURL,
+                status: result.status,
+                instance: protostubComponent.instance,
+                name: protostubComponent.name
+              };
+    
+              resolve(protostub);
             }).catch(function(reason) {
               reject(reason);
             });
