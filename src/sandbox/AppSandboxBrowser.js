@@ -3,7 +3,7 @@
 
 import MiniBus from '../bus/Minibus';
 import Sandbox from './Sandbox';
-import SandboxType from './Sandbox';
+import {SandboxType} from './Sandbox';
 import SandboxRegistry from './SandboxRegistry';
 
 // Mockup code for testing
