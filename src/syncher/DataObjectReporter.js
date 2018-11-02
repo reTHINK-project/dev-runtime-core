@@ -262,7 +262,7 @@ class DataObjectReporter extends DataObject /* implements SyncStatus */ {
     if (msg.body.hasOwnProperty('mutual') && !msg.body.mutual) mutual = false;
 
 
-    log.log('[DataObjectReporter._onSubscribe]', msg, domain, dividedURL);
+    console.log('[DataObjectReporter._onSubscribe]', msg, domain, dividedURL);
 
     let event = {
       type: msg.body.type,

@@ -612,8 +612,8 @@ class DataObjectsStorage {
 
       let type = this._getTypeOfObject(isReporter);
 
-      this.getAll(isReporter).then((storedDataObjects) => {
-//      let storedDataObjects = this._storeDataObject;
+//      this.getAll(isReporter).then((storedDataObjects) => {
+      let storedDataObjects = this._storeDataObject;
 
         if (!storedDataObjects) {
           log.log('[DataObjectsStorage.getResourcesByCriteria] don\'t have stored data objects');
@@ -692,7 +692,7 @@ class DataObjectsStorage {
         resolve(init);
       });
 
-    });
+//    });
 
   }
 
