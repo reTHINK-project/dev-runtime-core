@@ -612,7 +612,7 @@ class Syncher {
         if (criteria.hasOwnProperty('store')) subscribeMsg.body.store = criteria.store;
         if (criteria.hasOwnProperty('schema')) subscribeMsg.body.schema = criteria.schema;
         if (criteria.hasOwnProperty('identity')) subscribeMsg.body.identity = criteria.identity;
-        if (criteria.hasOwnProperty('resource')) subscribeMsg.body.resource = criteria.url;
+        if (criteria.hasOwnProperty('resource')) subscribeMsg.body.resource = criteria.resource;
       }
 
       subscribeMsg.body.resume = criteria.resume;
