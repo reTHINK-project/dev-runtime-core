@@ -104,7 +104,7 @@ class SyncherManager {
       _onExecute(msg) {
 
         let _this = this;
-  
+
         let reply = {
           type: 'response',
           from: msg.to,
@@ -113,7 +113,7 @@ class SyncherManager {
         }
 
         log.info('[SyncherManager.onExecute] new message', msg);
-  
+
         if (msg.hasOwnProperty('body') && msg.body.hasOwnProperty('method') && msg.body.hasOwnProperty('params')) {
 
         switch (msg.body.method) {
@@ -126,21 +126,21 @@ class SyncherManager {
             reply.body = {
               code: 200
             };
-    
+
             _this._bus.postMessage(reply);
           } else {
           reply.body = {
             code: 400,
             desc: 'missing body or body method / params mandatory fields'
           };
-  
+
           log.error('[SyncherManager.onExecute] error. Missing body or body method / params mandatory fields', msg);
-  
+
           _this._bus.postMessage(reply);
-  
-  
+
+
         }
-  
+
       }
 
     //FLOW-IN: message received from Syncher -> read
@@ -162,20 +162,20 @@ class SyncherManager {
             code: 200,
             value: dataObject
           };
-  
+
           log.info('[SyncherManager.onRead] found object: ', dataObject);
-  
+
           _this._bus.postMessage(reply);
         }, (error)=>{
           reply.body = {
             code: 400,
             desc: error
           };
-  
+
           log.error('[SyncherManager.onRead] error: ', error);
-  
+
           _this._bus.postMessage(reply);
-  
+
         });
 
       } else {
@@ -286,8 +286,8 @@ class SyncherManager {
     let resource = msg.body.resource;
     let attribute = msg.body.attribute;
 
-    if (attribute === 'childrenObjects') { 
-      _this._dataObjectsStorage.saveChildrens(false, resource, undefined, msg.body.value); 
+    if (attribute === 'childrenObjects') {
+      _this._dataObjectsStorage.saveChildrens(false, resource, undefined, msg.body.value);
     } else { _this._dataObjectsStorage.saveChildrens(true, resource, attribute, msg.body.value);
        }
 
@@ -304,7 +304,8 @@ class SyncherManager {
       domain = divideURL(_this.runtimeURL).domain;
     }
 
-    let domainRegistration = msg.body.value.hasOwnProperty('domain_registration') ? msg.body.value.domain_registration : true;
+//    let domainRegistration = msg.body.value.hasOwnProperty('domain_registration') ? msg.body.value.domain_registration : true;
+    let domainRouting = msg.body.value.hasOwnProperty('domain_routing') ? msg.body.value.domain_routing : true;
 
     // Process invitation message to observers
 
@@ -365,8 +366,10 @@ class SyncherManager {
           //all OK -> create reporter and register listeners
           let reporter;
 
+
           if (!this._reporters[objectRegistration.url]) {
-            reporter = new ReporterObject(_this, owner, objectRegistration.url);
+            let offline = objectRegistration.offline ? objectRegistration.offline : false;
+            reporter = new ReporterObject(_this, owner, objectRegistration.url, childrens, offline);
           } else {
             reporter = this._reporters[objectRegistration.url];
           }
@@ -404,7 +407,7 @@ class SyncherManager {
           if (msg.body.hasOwnProperty('store') && msg.body.store) {
             reporter.isToSaveData = true;
             metadata.isToSaveData = true;
-            if (msg.body.value.data) { 
+            if (msg.body.value.data) {
               metadata.data = deepClone(msg.body.value.data);
 //              _this._dataObjectsStorage.saveData(true, objectRegistration.url, null, msg.body.value.data); }
 //            _this._dataObjectsStorage.update(true, objectRegistration.url, 'isToSaveData', true);
@@ -415,6 +418,7 @@ class SyncherManager {
           _this._dataObjectsStorage.set(metadata).then((storeObject) => {
 
             if (metadata.offline) { //register new DataObject at Offline Subscription Manager
+              msg.body.identity.guid = _this._identityModule._identities.guid;
               let forward = {
                 from: msg.to,
                 to: metadata.offline + '/register',
@@ -440,7 +444,7 @@ class SyncherManager {
 
           // adding listeners to forward to reporter
 
-          if (domainRegistration) {
+          if (domainRouting) {
 
             reporter.forwardSubscribe([objectRegistration.url, subscriptionURL]).then(() => {
               reporter.addChildrens().then(() => {
@@ -515,14 +519,32 @@ class SyncherManager {
 
         //all OK -> create reporter and register listeners
         let reporter;
+        let offline;
 
         if (!this._reporters[resource]) {
-          reporter = new ReporterObject(_this, owner, resource);
+          offline = storedObject.offline ? storedObject.offline : false;
+          reporter = new ReporterObject(_this, owner, resource, childrens, offline);
         } else {
           reporter = this._reporters[resource];
         }
 
         reporter.isToSaveData = storedObject.isToSaveData;
+
+        if (offline) { //update new DataObject at Offline Subscription Manager
+          let msg = {
+            from: _this._url,
+            to: offline + '/register',
+            type: 'update',
+            body: {}
+          };
+  
+          log.log('[SyncherManager._resumeCreate] update object at offline manager ', msg);
+  
+          _this._bus.postMessage(msg);
+  
+  
+        }
+  
 
         if (domainRegistration) {
           reporter.forwardSubscribe([storedObject.url]).then(() => {
@@ -688,10 +710,10 @@ class SyncherManager {
     if (object) {
       //TODO: is there any policy verification before delete?
 
-      if (object.metadata.offline) { //register new DataObject at Offline Subscription Manager
+      if (object.offline) { //register new DataObject at Offline Subscription Manager
         let forward = {
           from: msg.to,
-          to: object.metadata.offline + '/register',
+          to: object.offline + '/register',
           type: 'forward',
           body: msg
         };
@@ -711,7 +733,7 @@ class SyncherManager {
         log.log('[SyncherManager - onDelete] - deleteResource: ', result);
 
         _this._registry.unregisterDataObject(objURL);
-        
+
 
         //TODO: unregister object?
         _this._bus.postMessage({
@@ -728,54 +750,63 @@ class SyncherManager {
   //FLOW-IN: message received from local Syncher -> subscribe
   _onLocalSubscribe(msg) {
     //debugger;
-    this._dataObjectsStorage.getResourcesByCriteria(msg, false).then((result) => {
 
-      log.info('[SyncherManager - Subscribe] - ResourcesByCriteria | Message: ', msg, ' result: ', result);
+    if (msg.body.hasOwnProperty('resume') && (msg.body.resume )) {
+      this._dataObjectsStorage.getResourcesByCriteria(msg, false).then((result) => {
 
-      if (result && Object.keys(result).length > 0) {
-
-        let listOfObservers = [];
-
-        // TODO: should reuse the stored information
-        Object.keys(result).forEach((objURL) => {
-          log.log('[SyncherManager - resume Subscribe] - reuse current object url: ', result[objURL]);
-          listOfObservers.push(this._resumeSubscription(msg, result[objURL]));
-        });
-
-        Promise.all(listOfObservers).then((resumedObservers) => {
-          log.log('[SyncherManager - Observers Resumed]', resumedObservers);
-
-          // TODO: shoud send the information if some object is failing;
-          let successfullyResumed = Object.values(resumedObservers).filter((observer) => {
-            return observer !== false;
+        log.info('[SyncherManager.onLocalSubscribe. resume]: ', msg, ' result: ', result);
+  
+        if (result && Object.keys(result).length > 0) {
+  
+          let listOfObservers = [];
+  
+          // TODO: should reuse the stored information
+          Object.keys(result).forEach((objURL) => {
+            log.log('[SyncherManager - resume Subscribe] - reuse current object url: ', result[objURL]);
+            listOfObservers.push(this._resumeSubscription(msg, result[objURL]));
           });
-
-          //FLOW-OUT: message response to Syncher -> create
-          this._bus.postMessage({
-            id: msg.id, type: 'response', from: msg.to, to: msg.from,
-            body: { code: 200, value: successfullyResumed }
+  
+          Promise.all(listOfObservers).then((resumedObservers) => {
+            log.log('[SyncherManager - Observers Resumed]', resumedObservers);
+  
+            // TODO: shoud send the information if some object is failing;
+            let successfullyResumed = Object.values(resumedObservers).filter((observer) => {
+              return observer !== false;
+            });
+  
+            let response = {
+              id: msg.id, type: 'response', from: msg.to, to: msg.from,
+              body: { code: 200, value: successfullyResumed }
+            };
+  
+            log.log('[SyncherManager - Observers Resumed] replying ', response);
+  
+            //FLOW-OUT: message response to Syncher -> create
+            this._bus.postMessage(response);
+  
           });
-
-        });
-
-      } else if (msg.body.schema && msg.body.resource) {
-        log.log('[SyncherManager.onLocalSubscribe - new Subscribe] - ', msg.body.schema, msg.body.resource);
-        this._newSubscription(msg);
-      } else {
-        //forward to hyperty:
-        let reply = {};
-        reply.id = msg.id;
-        reply.from = msg.to;
-        reply.to = msg.from;
-        reply.type = 'response';
-        reply.body = {
-          code: 404,
-          desc: 'No data objects observers to be resumed'
-        };
-        this._bus.postMessage(reply);
-      }
-
-    });
+  
+       
+        } else {
+          //forward to hyperty:
+          let reply = {};
+          reply.id = msg.id;
+          reply.from = msg.to;
+          reply.to = msg.from;
+          reply.type = 'response';
+          reply.body = {
+            code: 404,
+            desc: 'No data objects observers to be resumed'
+          };
+          this._bus.postMessage(reply);
+        }
+  
+      });
+    } else {
+      log.log('[SyncherManager.onLocalSubscribe - new Subscribe] - ', msg.body.schema, msg.body.resource);
+      this._newSubscription(msg);
+    }
+ 
 
   }
 
@@ -861,7 +892,7 @@ class SyncherManager {
             else {
               //TODO: send response back to Hyperty with error message received in the reply
             }
-          });    
+          });
   }
 
   _processOfflineSubscription(subscription, redirectTo, hypertyURL, objURL, childrens, msg) {
@@ -882,7 +913,7 @@ class SyncherManager {
       else {
         //TODO: send response back to Hyperty with error message received in the reply
       }
-    });    
+    });
 
 
   }
@@ -895,7 +926,7 @@ class SyncherManager {
     console.log('REUSETEST SyncherManager - 200 code[SyncherManager._newSubscription] - observers: ', _this._observers, objURL, _this._observers[objURL]);
     let observer = _this._observers[objURL];
     if (!observer) {
-      observer = new ObserverObject(_this, objURL);
+      observer = new ObserverObject(_this, objURL, childrens);
       log.log('[SyncherManager._newSubscription] - observers: create new ObserverObject: ', observer);
       _this._observers[objURL] = observer;
 
@@ -1004,7 +1035,7 @@ class SyncherManager {
 
         let observer = this._observers[objURL];
         if (!observer) {
-          observer = new ObserverObject(this, objURL);
+          observer = new ObserverObject(this, objURL, childrens);
           observer.isToSaveData = storedObject.isToSaveData;
           this._observers[objURL] = observer;
         }

@@ -116,7 +116,7 @@ u.setLevel(3);
 v.setLevel(3);
 
 // Pipeline
-x.setLevel(3);
+x.setLevel(0);
 
 // Syncher
 f1.setLevel(0);

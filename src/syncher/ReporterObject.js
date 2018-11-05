@@ -8,7 +8,7 @@ import * as cryptoManager from '../cryptoManager/CryptoManager';
 
 class ReporterObject {
 
-  constructor(parent, owner, url) {
+  constructor(parent, owner, url, childrens, offline) {
     let _this = this;
 
     _this._parent = parent;
@@ -21,7 +21,7 @@ class ReporterObject {
     _this._objSubscriptorURL = _this._url + '/subscription';
 
     _this._subscriptions = {};
-    _this._childrens = [];
+    _this._childrens = childrens;
     _this._childrenListeners = [];
 
     _this._forwards = {};
@@ -29,6 +29,12 @@ class ReporterObject {
     _this._isToSaveData = false;
 
     _this._allocateListeners();
+
+    _this._offline = offline ? offline : false;
+  }
+
+  get offline(){
+    return this._offline;
   }
 
   _allocateListeners() {
@@ -166,10 +172,10 @@ class ReporterObject {
     let _this = this;
 
     return new Promise((resolve, reject) => {
-/*      if (childrens.length === 0) {
+      if (_this._childrens.length === 0) {
         resolve();
         return;
-    }*/
+    }
 
       let childBaseURL = _this._url + '/children/';
       log.log('[SyncherManager.ReporterObject - addChildrens] - childrens: ', childBaseURL);

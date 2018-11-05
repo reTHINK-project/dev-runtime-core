@@ -150,7 +150,7 @@ class Syncher {
 
     //Object.assign(createInput, {resume: false});
     //debugger;
-    log.log('[syncher - create] - create Reporter - createInput: ', createInput);
+//    console.log('[syncher - create] - create Reporter - createInput: ', createInput);
 
     return _this._create(createInput);
   }
@@ -180,9 +180,8 @@ class Syncher {
   * @return {Promise<DataObjectObserver>} Return Promise to a new observer. It's associated with the reporter.
   */
 
-  //TODO: use input JSON param with all optional parameters similar to create
-  subscribe(schema, objURL, store = false, p2p = false, mutual = true, domain_subscription = true, identity) {
-    let _this = this;
+  subscribe(input) {
+  /*  let _this = this;
     let criteria = {};
 
     criteria.p2p = p2p;
@@ -198,9 +197,9 @@ class Syncher {
 
     log.log('[syncher - subscribe] - subscribe criteria: ', criteria);
 
-    Object.assign(criteria, {resume: false});
+    Object.assign(criteria, {resume: false});*/
 
-    return _this._subscribe(criteria);
+    return this._subscribe(input);
   }
 
   /**
@@ -361,7 +360,7 @@ class Syncher {
       if (reporterInput.store) requestMsg.body.store = reporterInput.store;
       if (reporterInput.identity) requestMsg.body.identity = reporterInput.identity;
 
-      log.log('[syncher._create]: ', reporterInput, requestMsg);
+      console.log('[syncher._create]: ', reporterInput, requestMsg);
 
       //request create to the allocation system. Can be rejected by the PolicyEngine.
       _this._bus.postMessage(requestMsg, (reply) => {
@@ -483,7 +482,7 @@ class Syncher {
       //FLOW-OUT: this message will be sent to the runtime instance of SyncherManager -> _onLocalSubscribe
       let subscribeMsg = {
         type: 'subscribe', from: _this._owner, to: _this._subURL,
-        body: {}
+        body: input
       };
 
       // Hyperty request to be an Observer
@@ -494,7 +493,7 @@ class Syncher {
 
       // Resume Subscriptions for a certain user and data schema independently of the Hyperty URL.
       // https://github.com/reTHINK-project/specs/blob/master/messages/data-sync-messages.md#resume-subscriptions-for-a-certain-user-and-data-schema-independently-of-the-hyperty-url
-      if (input) {
+/*      if (input) {
         if (input.hasOwnProperty('p2p')) subscribeMsg.body.p2p = input.p2p;
         if (input.hasOwnProperty('store')) subscribeMsg.body.store = input.store;
         if (input.hasOwnProperty('schema')) subscribeMsg.body.schema = input.schema;
@@ -507,7 +506,7 @@ class Syncher {
       subscribeMsg.body.resume = input.resume;
 
       //TODO: For Further Study
-      if (input.hasOwnProperty('mutual')) subscribeMsg.body.mutual = input.mutual;
+      if (input.hasOwnProperty('mutual')) subscribeMsg.body.mutual = input.mutual;*/
 
       log.log('[syncher_subscribe] - subscribe message: ', input, subscribeMsg);
 
@@ -613,7 +612,7 @@ class Syncher {
         if (criteria.hasOwnProperty('store')) subscribeMsg.body.store = criteria.store;
         if (criteria.hasOwnProperty('schema')) subscribeMsg.body.schema = criteria.schema;
         if (criteria.hasOwnProperty('identity')) subscribeMsg.body.identity = criteria.identity;
-        if (criteria.hasOwnProperty('resource')) subscribeMsg.body.resource = criteria.url;
+        if (criteria.hasOwnProperty('resource')) subscribeMsg.body.resource = criteria.resource;
       }
 
       subscribeMsg.body.resume = criteria.resume;
@@ -622,13 +621,13 @@ class Syncher {
       let mutual = criteria.mutual;
       if (criteria.hasOwnProperty('mutual')) subscribeMsg.body.mutual = mutual;
 
-      log.log('[syncher] - subscribe message: ', criteria, subscribeMsg);
+      console.log('[syncher] - subscribe message: ', criteria, subscribeMsg);
 
       //request subscription
       //Provisional data is applied to the DataObjectObserver after confirmation. Or discarded if there is no confirmation.
       //for more info see the DataProvisional class documentation.
       _this._bus.postMessage(subscribeMsg, (reply) => {
-        log.log('[syncher] - subscribe-resumed-response: ', reply);
+        console.log('[syncher] - subscribe-resumed-response: ', reply);
 
         let objURL = reply.body.resource;
 
@@ -649,7 +648,7 @@ class Syncher {
           for (let index in listOfObservers) {
 
             let dataObject = listOfObservers[index];
-            log.log('[syncher] - Resume Object Observer: ', reply, dataObject, _this._provisionals);
+            console.log('[syncher] - Resume Object Observer: ', reply, dataObject, _this._provisionals);
 
             if (dataObject.childrenObjects) { dataObject.childrenObjects = deepClone(dataObject.childrenObjects); }
 
@@ -658,7 +657,7 @@ class Syncher {
             dataObject.syncher = _this;
 
             //TODO: mutual For Further Study
-            log.log('[syncher._resumeSubscribe] - create new dataObject: ', dataObject);
+            console.log('[syncher._resumeSubscribe] - create new dataObject: ', dataObject);
             let newObj = new DataObjectObserver(dataObject);
 
             if (dataObject.childrenObjects) { newObj.resumeChildrens(dataObject.childrenObjects); }

@@ -152,11 +152,11 @@ class DataObjectReporter extends DataObject /* implements SyncStatus */ {
             };
 
             if (result.code < 300) resolve(result);
-            else if (result.code >= 300) {
+/*            else if (result.code >= 300) {
               if (_this.metadata.offline) {
-                resolve(_this._processOfflineInvitation(inviteMsg)); ;
-              } else reject(result);
-            } 
+                resolve(_this._processOfflineInvitation(inviteMsg));
+              }*/ else reject(result);
+//            } 
           });
         });
 
@@ -262,7 +262,7 @@ class DataObjectReporter extends DataObject /* implements SyncStatus */ {
     if (msg.body.hasOwnProperty('mutual') && !msg.body.mutual) mutual = false;
 
 
-    log.log('[DataObjectReporter._onSubscribe]', msg, domain, dividedURL);
+    console.log('[DataObjectReporter._onSubscribe]', msg, domain, dividedURL);
 
     let event = {
       type: msg.body.type,

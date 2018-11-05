@@ -8,12 +8,12 @@ import * as cryptoManager from '../cryptoManager/CryptoManager';
 
 class ObserverObject {
 
-  constructor(parent, url) {
+  constructor(parent, url, childrens) {
     let _this = this;
 
     _this._parent = parent;
     _this._url = url;
-//    _this._childrens = childrens;
+    _this._childrens = childrens;
 
     _this._bus = parent._bus;
 
@@ -63,6 +63,10 @@ class ObserverObject {
     let _this = this;
 
     return new Promise((resolve) => {
+      if (_this._childrens.length === 0) {
+        resolve();
+        return;
+    }
 
       let childBaseURL = _this._url + '/children/';
       log.log('[SyncherManager.ObserverObject - addChildrens] - childrens: ', childBaseURL);
