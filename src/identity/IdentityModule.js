@@ -303,6 +303,13 @@ class IdentityModule {
               _this._refreshIdAssertion().then((newAssertion)=>{
                 log.log('[IdentityModule.getIdentityAssertion] refreshed assertion.', newAssertion);
                 return resolve(newAssertion);
+              }, (error)=> {
+                log.error('[IdentityModule.getIdentityAssertion] error on refresIdAssertion: ', error, ' Asking for a new IdAssertion.')
+                _this._getIdAssertionForDomain(origin, idp, idHint).then((assertion)=> {
+                  resolve(assertion);
+                }, (error)=>{
+                  reject(error);
+                });                
               });
 
           } else {
@@ -332,6 +339,20 @@ class IdentityModule {
               log.log('[IdentityModule.getIdentityAssertion] refreshed assertion.', newAssertion);
               return resolve(newAssertion);
 
+            }, (error) => {
+              log.error('[IdentityModule.getIdentityAssertion] error on refresIdAssertion: ', error, ' Asking for a new IdAssertion.')
+
+              _this.selectIdentityFromGUI().then((assertion) => {
+
+                log.log('[IdentityModule] Identity selected from GUI.');
+  
+                _this.identities.defaultIdentity = assertion.userProfile.userURL;
+                return resolve(assertion);
+  
+              }, (err) => {
+                return reject(err);
+              });
+  
             });
 
         } else  {
