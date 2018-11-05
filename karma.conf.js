@@ -12,7 +12,8 @@ module.exports = function(config) {
       './test/RuntimeCatalogue.spec.js',
       './test/DataObjectsStorage.spec.js',
       './test/StorageManager.spec.js',
-      './test/PersistenceManager.spec.js'
+      './test/PersistenceManager.spec.js',
+      './test/SyncherManager.spec.js'
 
     ],
     preprocessors: {
