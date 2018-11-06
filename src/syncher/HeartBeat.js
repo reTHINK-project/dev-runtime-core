@@ -113,7 +113,8 @@ _startHeartBeat(rate) {
       value: secondsSinceEpoch(),
     }
   }
-  console.log('[HeartBeat._startHeartBeat] starting ... ');
+  console.log('[HeartBeat._startHeartBeat] starting ... ', msg.body.value);
+  console.log('[HeartBeat._startHeartBeat] secondsSinceEpoch ... ', secondsSinceEpoch());
 
   this._bus.postMessage(msg);
 

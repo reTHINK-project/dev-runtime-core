@@ -192,8 +192,8 @@ class CryptoManager {
     let isToDataObject = isDataObjectURL(message.to);
     let reporter = _this.registry.getDataObjectReporter(message.to);
 
-    let doMutualAuthentication = message.body.hasOwnProperty('value') && message.body.value.hasOwnProperty('mutual') ? message.body.value.mutual : true;
-//    let doMutualAuthentication = message.body.hasOwnProperty('mutual') ? message.body.mutual : true;
+    let doMutualAuthentication = message.body.hasOwnProperty('value') && message.body.value.hasOwnProperty('mutual') ? message.body.value.mutual 
+    : message.body.hasOwnProperty('mutual') ? message.body.mutual : true;
 
     if (!doMutualAuthentication) return false;
     if (reporter !== null && isLegacy(reporter)) {

@@ -194,12 +194,20 @@ class DataObjectsStorage {
         storage.connect(options).then(()=> {
           storage.set(db, 0, storeDataObject[type][metadata.url], table).then(() => {
               resolve(storeDataObject[type][metadata.url]);
+          },(error)=> {
+            log.error('[DataObjectStorage.set] failed to save into remote storage: ', error);
+            resolve(storeDataObject[type][metadata.url]);
           });
         }, (error) => {
           log.error('[DataObjectStorage.set] failed to connect with remote storage: ', error, ' trying again...');
           storage.connect(options).then(()=> {
-            storage.set(db, 1, storeDataObject[type][metadata.url], table);
-          resolve(storeDataObject[type][metadata.url]);
+            storage.set(db, 1, storeDataObject[type][metadata.url], table).then(() => {
+              resolve(storeDataObject[type][metadata.url]);
+          },(error)=> {
+            log.error('[DataObjectStorage.set] failed to save into remote storage: ', error);
+            resolve(storeDataObject[type][metadata.url]);
+          });
+//          resolve(storeDataObject[type][metadata.url]);
           }, (error) => {
             log.error('[DataObjectStorage.set] failed to connect with remote storage: ', error);
             resolve(storeDataObject[type][metadata.url]);
@@ -421,6 +429,8 @@ class DataObjectsStorage {
 
   deleteResource(resource) {
 
+    let _this = this;
+
     return new Promise((resolve, reject) => {
 
       if (resource) {
@@ -433,31 +443,31 @@ class DataObjectsStorage {
           let db;
           let storage;
 
-          if (this._storeDataObject.hasOwnProperty('observers') && this._storeDataObject.observers.hasOwnProperty(resource)) {
-            backup = (this._storeDataObject.observers[resource].backup) ? true : false;
+          if (_this._storeDataObject.hasOwnProperty('observers') && _this._storeDataObject.observers.hasOwnProperty(resource)) {
+            backup = (_this._storeDataObject.observers[resource].backup) ? true : false;
 
-            db = backup ? this._storeDataObject.observers[resource].url : 'syncherManager:ObjectURLs';
-            storage = backup ? this._remotes[db] : this._storageManager;
-            delete this._storeDataObject.observers[resource];
+            db = backup ? _this._storeDataObject.observers[resource].url : 'syncherManager:ObjectURLs';
+            storage = backup ? _this._remotes[db] : _this._storageManager;
+            delete _this._storeDataObject.observers[resource];
           }
 
-          if (this._storeDataObject.hasOwnProperty('reporters') && this._storeDataObject.reporters.hasOwnProperty(resource)) {
-            backup = (this._storeDataObject.reporters[resource].backup) ? true : false;
+          if (_this._storeDataObject.hasOwnProperty('reporters') && _this._storeDataObject.reporters.hasOwnProperty(resource)) {
+            backup = (_this._storeDataObject.reporters[resource].backup) ? true : false;
 
-            db = backup ? this._storeDataObject.reporters[resource].url : 'syncherManager:ObjectURLs';
-            storage = backup ? this._remotes[db] : this._storageManager;
-            delete this._storeDataObject.reporters[resource];
+            db = backup ? _this._storeDataObject.reporters[resource].url : 'syncherManager:ObjectURLs';
+            storage = backup ? _this._remotes[db] : _this._storageManager;
+            delete _this._storeDataObject.reporters[resource];
           }
 
 //          this._storeDataObject = this._storeDataObject;
 
           if (backup && storage) {
             storage.delete().then(() => {
-              delete this._remotes[db];
-              this._storageManager.delete( resource, null, 'remotes');
+              delete _this._remotes[db];
+              _this._storageManager.delete( resource, null, 'remotes');
             });
           } else {
-            storage.set(db, 1, this._storeDataObject);
+            storage.set(db, 1, _this._storeDataObject);
           }
 
           return resolve();

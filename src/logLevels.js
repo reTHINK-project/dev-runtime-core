@@ -113,7 +113,7 @@ t.setLevel(0);
 u.setLevel(3);
 
 // CryptoManager
-v.setLevel(3);
+v.setLevel(5);
 
 // Pipeline
 x.setLevel(0);
