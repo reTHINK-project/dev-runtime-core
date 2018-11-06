@@ -216,14 +216,28 @@ class DataObjectsStorage {
         });
 //          return storeDataObject[type][metadata.url];
       } else {
-        storage.set(db, 1, storeDataObject, table).then(()=>{
+        storage.set(db, 1, this._filterRemotes(storeDataObject) , table).then(()=>{
             resolve(storeDataObject[type][metadata.url]);
         });
       }
     });
+  }
 
+  // to filter Data Objects that are stored outside the ObjectURLs table
 
+  _filterRemotes(storeDataObject) {
+    let remotes = Object.keys(this._remotes);
 
+    let filtered = deepClone(storeDataObject);
+
+    remotes.forEach((remote) => {
+      if (filtered['reporters'][remote]) delete filtered['reporters'][remote];
+      else delete filtered['observers'][remote];
+    });
+
+    console.log('[DataObjectStorage._filterRemotes] ', filtered);
+
+    return filtered;
   }
 
   // Initial Sync of Observer to avoid later mismatches with sync revisions
@@ -297,7 +311,7 @@ class DataObjectsStorage {
     let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
     let storage = storeDataObject[type][resource].backup ? this._remotes[db] : this._storageManager;
     let table = storeDataObject[type][resource].backup ? db.split('/')[3] : this._table;
-    let data = storeDataObject[type][resource].backup ? storeDataObject[type][resource] : storeDataObject;
+    let data = storeDataObject[type][resource].backup ? storeDataObject[type][resource] : this._filterRemotes(storeDataObject);
     storage.set(db, 1, data, table, updateRuntimeStatus).then(() => {
       return storeDataObject[type][resource];
     }, (error)=>{
@@ -333,7 +347,7 @@ class DataObjectsStorage {
     let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
     let storage = storeDataObject[type][resource].backup ? this._remotes[db] : this._storageManager;
     let table = storeDataObject[type][resource].backup ? db.split('/')[3] : this._table;
-    let data = storeDataObject[type][resource].backup ? storeDataObject[type][resource] : storeDataObject;
+    let data = storeDataObject[type][resource].backup ? storeDataObject[type][resource] : this._filterRemotes(storeDataObject);
     storage.set(db, 1, data, table).then(()=>{
       return storeDataObject[type][resource];
     });
@@ -379,7 +393,7 @@ class DataObjectsStorage {
       let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
       let storage = storeDataObject[type][resource].backup ? this._remotes[db] : this._storageManager;
       let table = storeDataObject[type][resource].backup ? db.split('/')[3] : this._table;
-      let data = storeDataObject[type][resource].backup ? storeDataObject[type][resource] : storeDataObject;
+      let data = storeDataObject[type][resource].backup ? storeDataObject[type][resource] : this._filterRemotes(storeDataObject);
       storage.set(db, 1, data, table, updateRuntimeStatus).then(()=>{
         return storeDataObject[type][resource];
       });
@@ -416,7 +430,7 @@ class DataObjectsStorage {
       let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
       let storage = storeDataObject[type][resource].backup ? this._remotes[db] : this._storageManager;
       let table = storeDataObject[type][resource].backup ? db.split('/')[3] : this._table;
-      let data = storeDataObject[type][resource].backup ? storeDataObject[type][resource] : storeDataObject;
+      let data = storeDataObject[type][resource].backup ? storeDataObject[type][resource] : this._filterRemotes(storeDataObject);
       storage.set( db, 1, data, table);
 
       return storeDataObject[type][resource];
@@ -467,7 +481,7 @@ class DataObjectsStorage {
               _this._storageManager.delete( resource, null, 'remotes');
             });
           } else {
-            storage.set(db, 1, _this._storeDataObject);
+            storage.set(db, 1, this._filterRemotes(_this._storeDataObject) );
           }
 
           return resolve();
