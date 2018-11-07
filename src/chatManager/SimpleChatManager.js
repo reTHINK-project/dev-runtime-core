@@ -259,7 +259,7 @@ class SimpleSimpleChatManager {
    * @param  {URL.CommunicationURL} invitationURL  The Communication URL of the Group Chat to join that is provided in the invitation event
    * @return {<Promise>ChatController}             It returns the ChatController object as a Promise
    */
-  join(invitationURL, mutual = true, identity) {
+  join(invitationURL, mutual = false, identity) {
     let _this = this;
 
     return new Promise(function(resolve, reject) {

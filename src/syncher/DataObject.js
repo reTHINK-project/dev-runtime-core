@@ -106,6 +106,8 @@ class DataObject {
 
     _this._metadata = Object.assign(input);
 
+//    console.log('[DataObject] mutual ', _this._metadata.mutual);
+
     if (!input.hasOwnProperty('resume') || (input.hasOwnProperty('resume') && !input.resume)) {
       _this._metadata.lastModified = _this._metadata.created;
     }
@@ -517,6 +519,7 @@ class DataObject {
     childInput.schema = _this._schema;
     childInput.parent = _this.url;
     childInput.mutual = _this.metadata.mutual;
+//    console.log('[DataObject._getChildInput] mutual ', childInput.mutual);
 
     return childInput;
   }
