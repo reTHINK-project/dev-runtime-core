@@ -68,44 +68,45 @@ class DataObjectsStorage {
             });
             Promise.all(loadingDBs).then((dataObjs) => {
 
+              if (dataObjs.length === 0 ) resolve();
+
               dataObjs.forEach((dO)=> {
-                Object.keys(dO).forEach((url)=> {
-                  log.log('[StoreDataObjects.loadRemote] loaded remote ', dO);
-
-                  //              if (dO[remote].isReporter) {
-                    let type = this._getTypeOfObject(dO[url].isReporter);
-                  
-                      if (!_this._storeDataObject) _this._storeDataObject = {};
-                  
-                      if (!_this._storeDataObject.hasOwnProperty(type)) _this._storeDataObject[type] = {};
-
-//                      let backupRevision 
-
-                      let synching = [];
-
-                      synching.push(
-                        _this._sync(url, dO[url].data.backupRevision, true, url.split('/')[3] ).then((synchedObj)=>{
-                          _this._storeDataObject[type][url] = synchedObj;
-                          log.log('[StoreDataObjects.loadRemote] storeDataObject updated: ', _this._storeDataObject);
-                        })
-                      );
-
-                    Promise.all(synching).then(()=>{
-                      resolve(_this._storeDataObject);
-                    });
-                    
-                      setTimeout(function() {
-                        _this._remotes[url].disconnect().then(()=>{
-                        log.log('[DataObjectStorage.loadRemote] disconnected ');
-                        
-                        },(error)=> {
-                         log.error('[DataObjectStorage.sync] Error synching with remote storage');
-                           reject(error);
-                         });
-                      
-                     }, 1000);
-                });
+                log.log('[StoreDataObjects.loadRemote] loaded remote ', dO);
+                  Object.keys(dO).forEach((url)=> {
   
+                    //              if (dO[remote].isReporter) {
+                      let type = this._getTypeOfObject(dO[url].isReporter);
+                    
+                        if (!_this._storeDataObject) _this._storeDataObject = {};
+                    
+                        if (!_this._storeDataObject.hasOwnProperty(type)) _this._storeDataObject[type] = {};
+  
+  //                      let backupRevision 
+  
+                        let synching = [];
+  
+                        synching.push(
+                          _this._sync(url, dO[url].data.backupRevision, true, url.split('/')[3] ).then((synchedObj)=>{
+                            _this._storeDataObject[type][url] = synchedObj;
+                            log.log('[StoreDataObjects.loadRemote] storeDataObject updated: ', _this._storeDataObject);
+                          })
+                        );
+  
+                      Promise.all(synching).then(()=>{
+                        resolve(_this._storeDataObject);
+                      });
+                      
+                        setTimeout(function() {
+                          _this._remotes[url].disconnect().then(()=>{
+                          log.log('[DataObjectStorage.loadRemote] disconnected ');
+                          
+                          },(error)=> {
+                           log.error('[DataObjectStorage.sync] Error synching with remote storage');
+                             reject(error);
+                           });
+                        
+                       }, 1000);
+                  });
              });
      
         } , (error) => {reject(error)});
@@ -196,23 +197,13 @@ class DataObjectsStorage {
               resolve(storeDataObject[type][metadata.url]);
           },(error)=> {
             log.error('[DataObjectStorage.set] failed to save into remote storage: ', error);
+            this._connectToRemoteThread(storage, options, db, dataObject, table);
             resolve(storeDataObject[type][metadata.url]);
           });
         }, (error) => {
           log.error('[DataObjectStorage.set] failed to connect with remote storage: ', error, ' trying again...');
-          storage.connect(options).then(()=> {
-            storage.set(db, 1, storeDataObject[type][metadata.url], table).then(() => {
-              resolve(storeDataObject[type][metadata.url]);
-          },(error)=> {
-            log.error('[DataObjectStorage.set] failed to save into remote storage: ', error);
-            resolve(storeDataObject[type][metadata.url]);
-          });
-//          resolve(storeDataObject[type][metadata.url]);
-          }, (error) => {
-            log.error('[DataObjectStorage.set] failed to connect with remote storage: ', error);
-            resolve(storeDataObject[type][metadata.url]);
-//            reject(error);
-          });
+          this._connectToRemoteThread(storage, options, db, dataObject, table);
+          resolve(storeDataObject[type][metadata.url]);
         });
 //          return storeDataObject[type][metadata.url];
       } else {
@@ -221,6 +212,33 @@ class DataObjectsStorage {
         });
       }
     });
+  }
+
+  _connectToRemoteThread(storage, options, db, dataObject, table) {
+
+    let connected = false;
+    let id;
+
+    let connect = function () {
+      storage.connect(options).then(()=> {
+        storage.set(db, 0, dataObject, table).then(() => {
+          connected = true;
+          clearInterval(id);
+        },(error)=> {
+          log.error('[DataObjectStorage._connectToRemote] failed to save into remote storage: ', error);
+        });
+      },(error)=> {
+        log.error('[DataObjectStorage._connectToRemote] failed to connect to remote storage: ', error);
+      });
+      
+    }
+
+    id = setInterval(function () {
+
+      if (!connected) connect();
+      }, 1000);    
+
+
   }
 
   // to filter Data Objects that are stored outside the ObjectURLs table
