@@ -197,12 +197,12 @@ class DataObjectsStorage {
               resolve(storeDataObject[type][metadata.url]);
           },(error)=> {
             log.error('[DataObjectStorage.set] failed to save into remote storage: ', error);
-            this._connectToRemoteThread(storage, options, db, dataObject, table);
+//            this._connectToRemoteThread(storage, options, db, dataObject, table);
             resolve(storeDataObject[type][metadata.url]);
           });
         }, (error) => {
           log.error('[DataObjectStorage.set] failed to connect with remote storage: ', error, ' trying again...');
-          this._connectToRemoteThread(storage, options, db, dataObject, table);
+//          this._connectToRemoteThread(storage, options, db, dataObject, table);
           resolve(storeDataObject[type][metadata.url]);
         });
 //          return storeDataObject[type][metadata.url];
@@ -220,6 +220,7 @@ class DataObjectsStorage {
     let id;
 
     let connect = function () {
+      log.error('[DataObjectStorage._connectToRemote] trying to connect to remote storage ... ');
       storage.connect(options).then(()=> {
         storage.set(db, 0, dataObject, table).then(() => {
           connected = true;
@@ -236,7 +237,7 @@ class DataObjectsStorage {
     id = setInterval(function () {
 
       if (!connected) connect();
-      }, 1000);    
+      }, 5000);    
 
 
   }
