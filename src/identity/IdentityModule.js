@@ -1052,8 +1052,10 @@ class IdentityModule {
       message = { type: 'execute', to: domain, from: _this._idmURL, body: { resource: 'identity', method: 'refreshAssertion', params: { identity: assertion } } };
       try {
         _this._messageBus.postMessage(message, (res) => {
-          let result = res.body.value;
-          resolve(result);
+          if (res.body.code < 300) {
+            let result = res.body.value;
+            resolve(result);
+          } else resolve(res.body.value.body.params,identity);
         });
       } catch (err) {
         reject('In sendRefreshMessage on postMessage error: ' + err);
