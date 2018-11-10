@@ -88,7 +88,7 @@ class HeartBeat {
         console.log('[HeartBeat._getLastHearBeat] stop waiting ');
         resolve();
 
-      }, this._heartBeatRate * 2);
+      }, this._heartBeatRate * 1000 * 1.5);
   
     });
 
