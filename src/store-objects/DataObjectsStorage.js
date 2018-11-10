@@ -71,9 +71,9 @@ class DataObjectsStorage {
             if (dataObjs.length === 0) resolve();
 
             dataObjs.forEach((dO) => {
-              log.log('[StoreDataObjects.loadRemote] loaded remote ', dO);
               Object.keys(dO).forEach((url) => {
 
+                log.log('[StoreDataObjects.loadRemote] loaded remote ', dO[url]);
                 //              if (dO[remote].isReporter) {
                 let type = this._getTypeOfObject(dO[url].isReporter);
 
