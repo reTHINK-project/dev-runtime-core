@@ -81,6 +81,8 @@ class DataObjectsStorage {
 
                 if (!_this._storeDataObject.hasOwnProperty(type)) _this._storeDataObject[type] = {};
 
+                _this._storeDataObject[type][url] = dO[url];
+
                 //                      let backupRevision 
 
 /*                let synching = [];
@@ -220,10 +222,10 @@ class DataObjectsStorage {
     let connected = false;
     let id;
 
-    let connect = function () {
+    let connect = function (dO) {
       log.error('[DataObjectStorage._connectToRemote] trying to connect to remote storage ... ');
       storage.connect(options).then(() => {
-        storage.set(db, 0, dataObject, table).then(() => {
+        storage.set(db, 0, dO, table).then(() => {
           connected = true;
           clearInterval(id);
         }, (error) => {
@@ -237,7 +239,7 @@ class DataObjectsStorage {
 
     id = setInterval(function () {
 
-      if (!connected) connect();
+      if (!connected) connect(dataObject);
     }, 5000);
 
 
