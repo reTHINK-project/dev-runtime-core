@@ -76,7 +76,10 @@ class HeartBeat {
         }
 
       });
-    } else this._startSync();
+    } else {
+      this._startHeartBeat(this._heartBeatRate);
+      this._startSync();
+    } 
 
   }
 
