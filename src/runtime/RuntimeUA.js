@@ -500,35 +500,42 @@ class RuntimeUA {
       //TODO: delegate db reset operation to each component
       //    this.identityManager.reset();
 
-      this.storages.identity.get(false, false, 'identities').then((identities) => {
-        let identitiesKeys = Object.keys(identities);
-
-        identitiesKeys.forEach((key) => {
-          reseting.push(this.storages.identity.delete(key, false, 'identities'));
-
+      this._dataObjectsStorage.deleteRemotes().then(()=>{
+        return resolve();
+      }).
+      then(() => {
+        this.storages.identity.get(false, false, 'identities').then((identities) => {
+          let identitiesKeys = Object.keys(identities);
+  
+          identitiesKeys.forEach((key) => {
+            reseting.push(this.storages.identity.delete(key, false, 'identities'));
+  
+          });
+  
+          reseting.push(this.storages.capabilities.delete('capabilities'));
+          reseting.push(this.storages.cryptoManager.delete('userAsymmetricKey'));
+          reseting.push(this.storages.hypertyResources.delete('hypertyResources'));
+          reseting.push(this.storages.identity.delete('accessTokens'));
+          reseting.push(this.storages.registry.delete('registry:DataObjectURLs'));
+          reseting.push(this.storages.registry.delete('registry:HypertyURLs'));
+          reseting.push(this.storages.runtime.delete('p2pHandler:URL'));
+          reseting.push(this.storages.runtime.delete('runtime:URL'));
+          //    reseting.push(this.storages.runtimeCatalogue.delete('runtimeCatalogue'));
+          reseting.push(this.storages.subscriptions.delete('subscriptions'));
+          reseting.push(this.storages.syncherManager.delete('syncherManager:ObjectURLs'));
+          reseting.push(this.storages.syncherManager.delete('remotes'));
+  
+          Promise.all(reseting).then((result) => {
+  
+            log.info('[RuntimeUA.reset] reset with Success:', result);
+            return resolve(true);
+          }).catch(function (reason) {
+            log.error('Failed to reset all DBs', reason);
+            resolve(false);
+          });
         });
+      })
 
-        reseting.push(this.storages.capabilities.delete('capabilities'));
-        reseting.push(this.storages.cryptoManager.delete('userAsymmetricKey'));
-        reseting.push(this.storages.hypertyResources.delete('hypertyResources'));
-        reseting.push(this.storages.identity.delete('accessTokens'));
-        reseting.push(this.storages.registry.delete('registry:DataObjectURLs'));
-        reseting.push(this.storages.registry.delete('registry:HypertyURLs'));
-        reseting.push(this.storages.runtime.delete('p2pHandler:URL'));
-        reseting.push(this.storages.runtime.delete('runtime:URL'));
-        //    reseting.push(this.storages.runtimeCatalogue.delete('runtimeCatalogue'));
-        reseting.push(this.storages.subscriptions.delete('subscriptions'));
-        reseting.push(this.storages.syncherManager.delete('syncherManager:ObjectURLs'));
-
-        Promise.all(reseting).then((result) => {
-
-          log.info('All DBs were reset with Success:', result);
-          resolve(true);
-        }).catch(function (reason) {
-          log.error('Failed to reset all DBs', reason);
-          resolve(false);
-        });
-      });
     });
 
   }

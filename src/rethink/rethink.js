@@ -128,22 +128,6 @@ const rethink = {
                 }
               });
 
-              /*            let loaded = (e) => {
-                            console.log('[RuntimeBrowser.RuntimeUAStub.Authorise] reply:', e.data);
-                            if (e.data.to === 'runtime:authorised') {
-                              window.removeEventListener('message', loaded);
-                    
-                              resolve(e.data.body);
-                            } else if (e.data.to === 'runtime:not-authorised') {
-                              window.removeEventListener('message', loaded);
-                    
-                              console.error('[RuntimeBrowser.RuntimeUAStub.Authorise] Error:', e.data);
-                              reject(e.data.body);
-                            }
-                          };
-                          window.addEventListener('message', loaded);
-                          console.log('Authorising IDP ', idp, ' with scope ', scope);
-                          iframe.contentWindow.postMessage({ to: 'core:authorise', body: { idp: idp, scope: scope } }, '*');*/
             });
 
           },
@@ -159,15 +143,6 @@ const rethink = {
                 resolve(result);
               });
 
-              /*            let loaded = (e) => {
-                if (e.data.to === 'runtime:loggedIn') {
-                  window.removeEventListener('message', loaded);
-                  resolve(e.data.body);
-                }
-              };
-              window.addEventListener('message', loaded);
-              console.log('Logging with IDP: ', idp);
-              iframe.contentWindow.postMessage({ to: 'core:login', body: { idp: idp } }, '*');*/
             });
 
           },
@@ -225,14 +200,6 @@ const rethink = {
                   resolve(result);
                 });
 
-              /*            let loaded = (e) => {
-                            if (e.data.to === 'runtime:runtimeClosed') {
-                              window.removeEventListener('message', loaded);
-                              resolve(resolve(e.data.body));
-                            }
-                          };
-                          window.addEventListener('message', loaded);
-                          iframe.contentWindow.postMessage({ to: 'core:close', body: { logOut: logOut } }, '*');*/
             });
           }
 
