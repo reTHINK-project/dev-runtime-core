@@ -217,12 +217,12 @@ class DataObjectsStorage {
             resolve(storeDataObject[type][metadata.url]);
           }, (error) => {
             log.error('[DataObjectStorage.set] failed to save into remote storage: ', error);
-            this._connectToRemoteThread(storage, options, db, dataObject, table);
+            this._connectToRemoteThread(storage, options, db, storeDataObject[type][metadata.url], table);
             resolve(storeDataObject[type][metadata.url]);
           });
         }, (error) => {
           log.error('[DataObjectStorage.set] failed to connect with remote storage: ', error, ' trying again...');
-          this._connectToRemoteThread(storage, options, db, dataObject, table);
+          this._connectToRemoteThread(storage, options, db, storeDataObject[type][metadata.url], table);
           resolve(storeDataObject[type][metadata.url]);
         });
         //          return storeDataObject[type][metadata.url];

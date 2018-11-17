@@ -124,8 +124,8 @@ class DataObject {
       let lastHeartbeat = (input.hasOwnProperty('childrenObjects') && input.childrenObjects.hasOwnProperty('heartbeat'))
         ? input.childrenObjects.heartbeat : 0;
       _this._heartBeat = new HeartBeat(_this._bus, _this._owner, _this._syncher._runtimeUrl, this, 15, lastHeartbeat);
-      if (_this._resumed) _this._heartBeat.start(true);
-      else _this._heartBeat.start(false);
+      if (_this._resumed) _this._heartBeat.start(true, _this.metadata.isReporter);
+      else _this._heartBeat.start(false, _this.metadata.isReporter);
 
     }
   }
