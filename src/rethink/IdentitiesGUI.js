@@ -197,7 +197,7 @@ class IdentitiesGUI {
           this.resultURL = finalURL || url;
 
           console.log('[IdentitiesGUI.openPopup]', this.resultURL);
-          return this.openPopup(this.resultURL);
+          return this._openPopup(this.resultURL);
         }
 
 
@@ -213,7 +213,7 @@ class IdentitiesGUI {
         return this.callIdentityModuleFunc('addAssertion', result);
       }).then((value) => {
 
-        this._drawer.open = false;
+//        this._drawer.open = false;
         const userURL = { type: 'identity', value: value.userProfile.userURL };
         // const userIdentity = {type: 'identity', value: value.userProfile};
 

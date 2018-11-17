@@ -1311,7 +1311,7 @@ class Registry {
               }
             });
 
-            if (!registredComponent) {
+            if (!registredComponent || registredComponent.status === STATUS.FAILED ) {
               // this process will load the idp proxy, because is not yet registered;
               log.info('[Registry.resolveNormalStub] deploy new IDPProxy: ', domainUrl);
               _this.loader.loadIdpProxy(domainUrl).then(() => {
@@ -1345,7 +1345,7 @@ class Registry {
               }
             });
 
-            if (!registredComponent) {
+            if (!registredComponent || registredComponent.status === STATUS.FAILED) {
               // lets deploy the protostub
               log.info('[Registry.resolve] trigger new ProtocolStub: ', domainUrl);
               _this.loader.loadStub(domainUrl).then(() => {
