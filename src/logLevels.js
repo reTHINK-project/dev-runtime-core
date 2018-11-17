@@ -77,13 +77,13 @@ h.setLevel(3);
 i.setLevel(3);
 
 // Registry
-j.setLevel(3);
+j.setLevel(0);
 
 // RuntimeUA
 k.setLevel(0);
 
 // Loader
-l.setLevel(3);
+l.setLevel(0);
 
 // Descriptors
 m.setLevel(3);
