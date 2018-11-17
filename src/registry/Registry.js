@@ -1250,7 +1250,7 @@ class Registry {
       let domainUrl = dividedURL.domain;
       let type = dividedURL.type;
 
-      if (url.includes(_this.runtimeURL)) {
+      if (url.includes(_this.runtimeURL) || url.includes('://sandbox/')) {
         log.error('[Registry - resolve] URL to be resolved should have listeners ', url);
         reject('[Registry - resolve] URL to be resolved should have listeners ', url);
       }

@@ -189,12 +189,14 @@ class StorageManager {
 
     return this.db.transaction('rw!', this.db[name], () => {
 
-      if (!key && !value) {
+      if (!key && !value) { 
         return this.db[name].toArray().then(objects => {
-          return objects.reduce((acc, key) => {
-            acc[key[primaryKey]] = key;
-            return acc;
-          }, {});
+          if (objects.length > 0) {
+            return objects.reduce((acc, key) => {
+              acc[key[primaryKey]] = key;
+              return acc;
+            }, () =>{return {} });
+          } else return {};
         });
       }
 

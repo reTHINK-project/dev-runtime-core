@@ -750,58 +750,63 @@ class SyncherManager {
   //FLOW-IN: message received from local Syncher -> subscribe
   _onLocalSubscribe(msg) {
     //debugger;
-    this._dataObjectsStorage.getResourcesByCriteria(msg, false).then((result) => {
 
-      log.info('[SyncherManager - Subscribe] - ResourcesByCriteria | Message: ', msg, ' result: ', result);
+    if (msg.body.hasOwnProperty('resume') && (msg.body.resume )) {
+      this._dataObjectsStorage.getResourcesByCriteria(msg, false).then((result) => {
 
-      if (result && Object.keys(result).length > 0) {
-
-        let listOfObservers = [];
-
-        // TODO: should reuse the stored information
-        Object.keys(result).forEach((objURL) => {
-          log.log('[SyncherManager - resume Subscribe] - reuse current object url: ', result[objURL]);
-          listOfObservers.push(this._resumeSubscription(msg, result[objURL]));
-        });
-
-        Promise.all(listOfObservers).then((resumedObservers) => {
-          log.log('[SyncherManager - Observers Resumed]', resumedObservers);
-
-          // TODO: shoud send the information if some object is failing;
-          let successfullyResumed = Object.values(resumedObservers).filter((observer) => {
-            return observer !== false;
+        log.info('[SyncherManager.onLocalSubscribe. resume]: ', msg, ' result: ', result);
+  
+        if (result && Object.keys(result).length > 0) {
+  
+          let listOfObservers = [];
+  
+          // TODO: should reuse the stored information
+          Object.keys(result).forEach((objURL) => {
+            log.log('[SyncherManager - resume Subscribe] - reuse current object url: ', result[objURL]);
+            listOfObservers.push(this._resumeSubscription(msg, result[objURL]));
           });
-
-          let response = {
-            id: msg.id, type: 'response', from: msg.to, to: msg.from,
-            body: { code: 200, value: successfullyResumed }
+  
+          Promise.all(listOfObservers).then((resumedObservers) => {
+            log.log('[SyncherManager - Observers Resumed]', resumedObservers);
+  
+            // TODO: shoud send the information if some object is failing;
+            let successfullyResumed = Object.values(resumedObservers).filter((observer) => {
+              return observer !== false;
+            });
+  
+            let response = {
+              id: msg.id, type: 'response', from: msg.to, to: msg.from,
+              body: { code: 200, value: successfullyResumed }
+            };
+  
+            log.log('[SyncherManager - Observers Resumed] replying ', response);
+  
+            //FLOW-OUT: message response to Syncher -> create
+            this._bus.postMessage(response);
+  
+          });
+  
+       
+        } else {
+          //forward to hyperty:
+          let reply = {};
+          reply.id = msg.id;
+          reply.from = msg.to;
+          reply.to = msg.from;
+          reply.type = 'response';
+          reply.body = {
+            code: 404,
+            desc: 'No data objects observers to be resumed'
           };
-
-          log.log('[SyncherManager - Observers Resumed] replying ', response);
-
-          //FLOW-OUT: message response to Syncher -> create
-          this._bus.postMessage(response);
-
-        });
-
-      } else if (msg.body.schema && msg.body.resource) {
-        log.log('[SyncherManager.onLocalSubscribe - new Subscribe] - ', msg.body.schema, msg.body.resource);
-        this._newSubscription(msg);
-      } else {
-        //forward to hyperty:
-        let reply = {};
-        reply.id = msg.id;
-        reply.from = msg.to;
-        reply.to = msg.from;
-        reply.type = 'response';
-        reply.body = {
-          code: 404,
-          desc: 'No data objects observers to be resumed'
-        };
-        this._bus.postMessage(reply);
-      }
-
-    });
+          this._bus.postMessage(reply);
+        }
+  
+      });
+    } else {
+      log.log('[SyncherManager.onLocalSubscribe - new Subscribe] - ', msg.body.schema, msg.body.resource);
+      this._newSubscription(msg);
+    }
+ 
 
   }
 

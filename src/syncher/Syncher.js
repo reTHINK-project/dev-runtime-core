@@ -138,9 +138,9 @@ class Syncher {
     createInput.reporter = (input.hasOwnProperty('reporter') && ((typeof input.reporter) !== 'boolean')) ? input.reporter : _this._owner;
     createInput.resume = false;
     if (input) {
-      createInput.mutual = input.hasOwnProperty('mutual') ? input.mutual : true;
+      createInput.mutual = input.hasOwnProperty('mutual') ? input.mutual : false;
       createInput.name = input.hasOwnProperty('name') ? input.name : createInput.name;
-    } else { createInput.mutual = true; }
+    } else { createInput.mutual = false; }
 
     if (input.hasOwnProperty('reuseURL')) {
       createInput.resource = input.reuseURL;

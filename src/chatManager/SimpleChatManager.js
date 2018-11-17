@@ -42,12 +42,12 @@ import { UserInfo } from './UserInfo';
 * @author Vitor Silva [vitor-t-silva@telecom.pt]
 * @version 0.1.0
 */
-class SimpleChatManager {
+class SimpleSimpleChatManager {
 
   constructor(myUrl, bus, configuration, syncher, factory) {
-    if (!myUrl) throw new Error('[ChatManager.constructor] The myUrl is a needed parameter');
-    if (!bus) throw new Error('[ChatManager.constructor] The MiniBus is a needed parameter');
-    if (!configuration) throw new Error('[ChatManager.constructor] The configuration is a needed parameter');
+    if (!myUrl) throw new Error('[SimpleChatManager.constructor] The myUrl is a needed parameter');
+    if (!bus) throw new Error('[SimpleChatManager.constructor] The MiniBus is a needed parameter');
+    if (!configuration) throw new Error('[SimpleChatManager.constructor] The configuration is a needed parameter');
 
     let _this = this;
     if (!syncher) {
@@ -80,8 +80,8 @@ class SimpleChatManager {
 
     _this.communicationChildren = communicationChildren;
 
-//    console.log('[ChatManager] Discover ', discovery);
-    console.log('[ChatManager] Identity Manager ', identityManager);
+//    console.log('[SimpleChatManager] Discover ', discovery);
+    console.log('[SimpleChatManager] Identity Manager ', identityManager);
 
 
   }
@@ -94,10 +94,17 @@ class SimpleChatManager {
     return this._offline ? this._offline : false;
   }
 
+  set backup(backup) {
+    this._backup = backup;
+  }
+
+  get backup() {
+    return this._backup ? this._backup : false;
+  }
 
   processNotification(event) {
     let _this = this;
-    console.log('[ChatManager.processNotification: ', event);
+    console.log('[SimpleChatManager.processNotification: ', event);
 
     if (event.type === 'create') {
 
@@ -135,7 +142,7 @@ class SimpleChatManager {
     let _this = this;
 
     return new Promise((resolve, reject) => {
-      console.info('[ChatManager.myIdentity]');
+      console.info('[SimpleChatManager.myIdentity]');
       if (identity) return resolve(identity);
 
       if (_this._myUrl.includes('hyperty://')) {
@@ -178,7 +185,7 @@ class SimpleChatManager {
 
       _this.myIdentity().then((identity) => {
         myIdentity = identity;
-        console.log('[ChatManager.create ] My Identity', identity);
+        console.log('[SimpleChatManager.create ] My Identity', identity);
 
         // let url = _this.communicationObject.reporter;
 
@@ -187,12 +194,12 @@ class SimpleChatManager {
         // Add my identity
         _this.communicationObject.participants[identity.guid] = userInfo;
 
-        console.log('[ChatManager.create ] participants: ', _this.communicationObject.participants);
-        console.log('[ChatManager.create ] communicationObject', _this.communicationObject);
+        console.log('[SimpleChatManager.create ] participants: ', _this.communicationObject.participants);
+        console.log('[SimpleChatManager.create ] communicationObject', _this.communicationObject);
 
 
-          console.info('[ChatManager] ---------------------- Syncher Create ---------------------- \n');
-          console.info('[ChatManager] Selected Hyperties: !!! ', hyperties);
+          console.info('[SimpleChatManager] ---------------------- Syncher Create ---------------------- \n');
+          console.info('[SimpleChatManager] Selected Hyperties: !!! ', hyperties);
 //          console.info(`Have ${hyperties.length} users;`);
           let mutual = extra.mutual ? extra.mutual : true;
 
@@ -200,19 +207,20 @@ class SimpleChatManager {
           delete input.name;
 
           if (_this.offline) input.offline = _this.offline;
+          if (_this.backup) input.backup = _this.backup;
 
-          console.info('[ChatManager] input data:', input);
+          console.log('[SimpleChatManager] input data:', input);
           return syncher.create(_this._objectDescURL, hyperties, _this.communicationObject, true, false, name, {}, input);
         }).then(function(dataObjectReporter) {
 
-          console.info('[ChatManager] 3. Return Create Data Object Reporter', dataObjectReporter);
+          console.info('[SimpleChatManager] 3. Return Create Data Object Reporter', dataObjectReporter);
 
           let chat = new Chat(syncher, _this._domain, myIdentity, _this);
           chat.dataObjectReporter = dataObjectReporter;
 
           _this._reportersControllers[dataObjectReporter.url] = chat;
 
-//          console.log('[ChatManager] chat invitationsHandler: ',   chat.invitationsHandler);
+//          console.log('[SimpleChatManager] chat invitationsHandler: ',   chat.invitationsHandler);
 
           // process invitations to handle not received invitations
 /*          if (dataObjectReporter.invitations.length > 0) {
@@ -229,7 +237,7 @@ class SimpleChatManager {
         });
 
       }).catch((reason) => {
-        console.log('[ChatManager.create] MyIdentity Error:', reason);
+        console.log('[SimpleChatManager.create] MyIdentity Error:', reason);
         return reject(reason);
       });
 //    });
@@ -251,14 +259,14 @@ class SimpleChatManager {
    * @param  {URL.CommunicationURL} invitationURL  The Communication URL of the Group Chat to join that is provided in the invitation event
    * @return {<Promise>ChatController}             It returns the ChatController object as a Promise
    */
-  join(invitationURL, mutual = true, identity) {
+  join(invitationURL, mutual = false, identity) {
     let _this = this;
 
     return new Promise(function(resolve, reject) {
       let syncher = _this._syncher;
       let myIdentity;
 
-      console.info('[ChatManager] ------------------------ Syncher subscribe ---------------------- \n');
+      console.info('[SimpleChatManager] ------------------------ Syncher subscribe ---------------------- \n');
       console.info('invitationURL', invitationURL);
       _this.myIdentity(identity).then((identity) => {
         myIdentity = identity;
@@ -295,4 +303,4 @@ class SimpleChatManager {
 
 }
 
-export default SimpleChatManager;
+export default SimpleSimpleChatManager;
