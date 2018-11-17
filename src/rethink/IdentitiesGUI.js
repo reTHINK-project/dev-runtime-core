@@ -68,6 +68,11 @@ class IdentitiesGUI {
         this.win = win;
         resolve();
       } else {
+        if (!win) {
+          win = window.open('', 'openIDrequest', 'location=1,status=1');
+          this.win = win;
+        }
+
         wait(1000);
         win = this.win;
         win.location.href = urlreceived;
@@ -102,6 +107,7 @@ class IdentitiesGUI {
 
 //              win.close();
 //              return resolve(url);
+
               resolve(url);
               return win.close();
             }
