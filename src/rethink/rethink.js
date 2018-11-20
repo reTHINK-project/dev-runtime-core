@@ -46,7 +46,7 @@ const runtimeDescriptor = {
 
 const rethink = {
 
-  install: function ({ domain, runtimeURL, development } = {}) {
+  install: function ({ domain, guid, runtimeURL, development } = {}) {
 
     return new Promise((resolve, reject) => {
 
@@ -54,7 +54,7 @@ const rethink = {
 
       window.runtime = runtime;
 
-      runtime.init().then((result) => {
+      runtime.init(guid).then((result) => {
 
         let idmGuiURL = runtime.identityModule._runtimeURL + '/identity-gui';
         let idmURL = runtime.identityModule._runtimeURL + '/idm';

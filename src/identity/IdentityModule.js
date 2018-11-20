@@ -238,25 +238,33 @@ class IdentityModule {
     return _this.currentIdentity;
   }*/
 
-  init() {
+  init(guid) {
     let _this = this;
     return new Promise((resolve) => {
       _this._identities.loadIdentities().then(() => {
 
-        _this._crypto.getMyPublicKey().then((key) => {
-          let hash = _this._crypto.crypto._sha256(stringify(key)).then((hash) => {
-
-            let guid = 'user-guid://' + hash;
-            _this.identities.guid = guid;
-            _this._identities.loadAccessTokens().then(() => {
-
-              resolve();
+        if (!guid) {
+          _this._crypto.getMyPublicKey().then((key) => {
+            let hash = _this._crypto.crypto._sha256(stringify(key)).then((hash) => {
+  
+              guid = 'user-guid://' + hash;
+              _this.identities.guid = guid;
+              _this._identities.loadAccessTokens().then(() => {
+  
+                resolve();
+              });
+            }).catch((error) =>  {
+              console.log('[IdentityModule] error', error);
             });
-          }).catch((error) =>  {
-            console.log('[IdentityModule] error', error);
+  
           });
+        } else {
+          _this.identities.guid = guid;
+          _this._identities.loadAccessTokens().then(() => {
 
-        });
+            resolve();
+          });          
+        }
 
       });
 

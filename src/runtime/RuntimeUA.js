@@ -144,7 +144,7 @@ class RuntimeUA {
    *
    * @memberOf RuntimeUA
    */
-  init() {
+  init(guid) {
     return new Promise((resolve, reject) => {
 
       this.domain = this.runtimeConfiguration.domain;
@@ -186,7 +186,7 @@ class RuntimeUA {
 /*          log.info('[RuntimeUA - init] dataObjectsStorage remote load starting');
           this._dataObjectsStorage.loadRemote().then(()=> {
             log.info('[RuntimeUA - init] dataObjectsStorage remote load concluded');*/
-            return this._loadComponents();
+            return this._loadComponents(guid);
 
 //          });
 
@@ -284,7 +284,7 @@ class RuntimeUA {
    *
    * @memberOf RuntimeUA
    */
-  _loadComponents() {
+  _loadComponents(guid) {
 
     return new Promise((resolve, reject) => {
 
@@ -396,7 +396,7 @@ class RuntimeUA {
 
         const prepareComponents = [];
         prepareComponents.push(this.subscriptionManager.init());
-        prepareComponents.push(this.identityModule.init());
+        prepareComponents.push(this.identityModule.init(guid));
         prepareComponents.push(cryptoManager.loadSessionKeys());
         prepareComponents.push(this.registry.loadRegistry());
         prepareComponents.push(this._dataObjectsStorage.loadRemote());
