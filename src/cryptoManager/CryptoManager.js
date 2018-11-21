@@ -211,6 +211,11 @@ class CryptoManager {
       return false;
     }
 
+    if (message.type === 'forward') {
+      log.info('forward:encryption disabled');
+      return false;
+    }
+
     if (isLegacy(message.to)) return false;
 
     return ((isCreate && isFromHyperty && isToHyperty) || (isCreate && isFromHyperty && isToDataObject && doMutualAuthentication) || message.type === 'handshake' || (message.type === 'update' && doMutualAuthentication));
