@@ -512,6 +512,12 @@ class IdentityModule {
     }
   }*/
 
+  // to be used when runtime is not executed in a sandbox
+
+  listenShowAdmin(callback) {
+    this._showAdmin = callback;
+  }
+
   /**
   * Function that sends a request to the GUI using messages. Sends all identities registered and
   * the Idps supported, and return the identity/idp received by the GUI
@@ -755,23 +761,31 @@ class IdentityModule {
     let _this = this;
 
     return new Promise((resolve, reject) => {
-      let message = {
-        type: 'execute', to: _this._guiURL, from: _this._idmURL,
-        body: { resource: 'identity', method: methodName, params: parameters }
-      };
 
-      //post msg with callback but without timout
-      let callback = msg => {
-        _this._messageBus.removeResponseListener(_this._idmURL, msg.id);
-        let result = msg.body.value;
-        resolve(result);
-      };
-      try {
-
-        _this._messageBus.postMessage(message, callback, false);
-
-      } catch (err) {
-        reject('In method callIdentityModuleFunc error: ' + err);
+      if (_this._showAdmin){
+         _this._showAdmin(methodName, parameters);
+            resolve(true);
+        }
+      else {
+        let message = {
+          type: 'execute', to: _this._guiURL, from: _this._idmURL,
+          body: { resource: 'identity', method: methodName, params: parameters }
+        };
+  
+        //post msg with callback but without timout
+        let callback = msg => {
+          _this._messageBus.removeResponseListener(_this._idmURL, msg.id);
+          let result = msg.body.value;
+          resolve(result);
+        };
+        try {
+  
+          _this._messageBus.postMessage(message, callback, false);
+  
+        } catch (err) {
+          reject('In method callIdentityModuleFunc error: ' + err);
+        }
+  
       }
     });
   }

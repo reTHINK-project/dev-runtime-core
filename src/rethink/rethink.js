@@ -59,6 +59,7 @@ const rethink = {
         let idmGuiURL = runtime.identityModule._runtimeURL + '/identity-gui';
         let idmURL = runtime.identityModule._runtimeURL + '/idm';
         let messageBus = runtime.messageBus;
+        let idm = runtime.identityModule;
         let identitiesGUI = new IdentitiesGUI(idmGuiURL, idmURL, messageBus);
         console.log('identitiesGUI: ', identitiesGUI);
 
@@ -149,15 +150,10 @@ const rethink = {
 
           listenShowAdmin: () => {
             return new Promise((resolve, reject) => {
-              let loaded = (e) => {
-                if (e.data.to === 'runtime:gui-manager') {
-                  if (e.data.body.method === 'tokenExpired') {
-                    window.removeEventListener('message', loaded);
+              let loaded = (method, params) => {
                     resolve(true);
-                  }
-                }
               };
-              window.addEventListener('message', loaded);
+              idm.listenShowAdmin(loaded);
             });
           },
 
