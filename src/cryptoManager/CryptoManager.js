@@ -3,7 +3,7 @@ import * as logger from 'loglevel';
 let log = logger.getLogger('CryptoManager');
 
 import {divideURL, isDataObjectURL, isLegacy, chatkeysToStringCloner, chatkeysToArrayCloner, parseMessageURL,
-  parse, stringify, encode, decode, decodeToUint8Array, parseToUint8Array} from '../utils/utils.js';
+  parse, stringify, encode, decode, decodeToUint8Array, parseToUint8Array, generateGUID} from '../utils/utils.js';
 import Crypto from './Crypto';
 
 /**
@@ -1416,18 +1416,21 @@ if (isSubscription && isFromRemoteSM && mutual) {
     let _this = this;
     let keyPair = undefined;
     return new Promise((resolve, reject) => {
-      _this.crypto.generateRSAKeyPair().then(generatedKeyPair => {
+//      _this.crypto.generateRSAKeyPair().then(generatedKeyPair => {
+        let generatedKeyPair = {};
+        generatedKeyPair.private = generateGUID();
+        generatedKeyPair.public = generateGUID();
         log.log('_generateAndStoreNewAsymetricKey:userAsymmetricKeyGenerated', generatedKeyPair);
         keyPair = generatedKeyPair;
-        return _this.storageManager.set(userRef, 0, generatedKeyPair);
-      }).then(storedReference => {
-        log.log('_generateAndStoreNewAsymetricKey:userAsymmetricKeySuccess', storedReference);
+        _this.storageManager.set(userRef, 0, generatedKeyPair);
+//      }).then(storedReference => {
+//        log.log('_generateAndStoreNewAsymetricKey:userAsymmetricKeySuccess', storedReference);
         resolve(keyPair);
       }).catch(err => {
         log.error('[_generateAndStoreNewAsymetricKey:err]: ' + err.message);
         reject(err);
       });
-    });
+//    });
   }
 
 }
