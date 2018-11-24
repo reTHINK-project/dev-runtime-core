@@ -151,6 +151,8 @@ const rethink = {
           listenShowAdmin: () => {
             return new Promise((resolve, reject) => {
               let loaded = (method, params) => {
+                    console.log('[rethink.listenShowAdmin]');
+
                     resolve(true);
               };
               idm.listenShowAdmin(loaded);
