@@ -37,6 +37,7 @@
   },
   "homepage": "https://rethink-project.eu/",
   "dependencies": {
+    "babel-plugin-dynamic-import-webpack": "^1.1.0",
     "loglevel": "^1.5.1"
   },
   "devDependencies": {

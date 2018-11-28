@@ -101,10 +101,10 @@ class Loader {
    *
    * @memberOf Loader
    */
-  loadHyperty(hypertyCatalogueURL, reuseURL = false, IdpConstraint, appURL) {
+  loadHyperty(hyperty, reuseURL = false, IdpConstraint, appURL) {
 
     if (!this._readyToUse()) return false;
-    if (!hypertyCatalogueURL) throw new   Error('[Runtime.Loader] Hyperty descriptor url parameter is needed');
+    if (!hyperty) throw new   Error('[Runtime.Loader] Hyperty descriptor url parameter is needed');
 
     return new Promise((resolve, reject) => {
 
@@ -113,6 +113,7 @@ class Loader {
       let _hypertyDescriptor;
       let _hypertySourcePackage;
       let haveError = false;
+      let descriptor = hyperty.split('/')[0]+'/'+hyperty.split('/')[1]+'Desc';
 
       let errorReason = (reason) => {
         log.info('[Runtime.Loader] Something failed on the deploy hyperty: ', reason);
@@ -129,16 +130,17 @@ class Loader {
       // because at this moment it is incompatible with nodejs;
       // Probably we need to pass a factory like we do for sandboxes;
       log.info('[Runtime.Loader] ------------------ Hyperty ------------------------');
-      log.info('[Runtime.Loader] Get hyperty descriptor for :', hypertyCatalogueURL);
-      return this.descriptors.getHypertyDescriptor(hypertyCatalogueURL)
+      log.info('[Runtime.Loader] Get hyperty descriptor for :', descriptor);
+//      return this.descriptors.getHypertyDescriptor(hyperty)
+       import(descriptor)
         .then((hypertyDescriptor) => {
           // at this point, we have completed "step 2 and 3" as shown in https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md
-          log.info('[Runtime.Loader] 1: return hyperty descriptor');
+          log.info('[Runtime.Loader] 1: return hyperty descriptor: ', hypertyDescriptor);
 
           // hyperty contains the full path of the catalogue URL, e.g.
           // catalogue.rethink.eu/.well-known/..........
           _hypertyDescriptor = hypertyDescriptor;
-
+/*
           let sourcePackageURL = hypertyDescriptor.sourcePackageURL;
 
           if (sourcePackageURL === '/sourcePackage') {
@@ -183,15 +185,15 @@ class Loader {
           let inSameSandbox = true;
           let sandbox;
 
-          if (inSameSandbox) {
+          if (inSameSandbox) {*/
 
             // this don't need be a Promise;
-            sandbox = this.registry.getAppSandbox();
+            _hypertySandbox = this.registry.getAppSandbox();
 
             // we have completed step 11 here.
-          } else {
+/*          } else {
 
-            let domain = divideURL(hypertyCatalogueURL).domain;
+            let domain = divideURL(hyperty).domain;
 
             // getSandbox, this will return a promise;
             sandbox = this.registry.getSandbox(domain);
@@ -233,7 +235,7 @@ class Loader {
           if (haveError) return false;
           log.info('[Runtime.Loader] 5: return sandbox and register');
 
-          _hypertySandbox = sandbox;
+          _hypertySandbox = sandbox;*/
 
           let numberOfAddresses = 1;
           //debugger;
@@ -244,7 +246,7 @@ class Loader {
           log.info('[Runtime.Loader] 6: return the addresses for the hyperty', addresses);
 
           // Register hyperty
-          return this.registry.registerHyperty(_hypertySandbox, hypertyCatalogueURL, _hypertyDescriptor, addresses, IdpConstraint);
+          return this.registry.registerHyperty(_hypertySandbox, hyperty, _hypertyDescriptor, addresses, IdpConstraint);
         }, handleError)
         .then((registrationResult) => {
           if (haveError) return false;
@@ -273,7 +275,8 @@ class Loader {
           // We will deploy the component - step 17 of https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
 
           try {
-            return _hypertySandbox.deployComponent(_hypertySourcePackage.sourceCode, _hypertyURL, configuration);
+//            return _hypertySandbox.deployComponent(_hypertySourcePackage.sourceCode, _hypertyURL, configuration);
+            return _hypertySandbox.deployComponent(hyperty, _hypertyURL, configuration);
           } catch (e) {
             log.info('[Runtime.Loader] Error on deploy component:', e);
             reject(e);
@@ -308,7 +311,7 @@ class Loader {
           log.info('[Runtime.Loader] ------------------ END ------------------------');
         }, handleError)
         .catch(errorReason);
-    });
+      });
   }
 
   /**

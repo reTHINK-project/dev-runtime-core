@@ -25,24 +25,27 @@ class AppSandboxBrowser extends Sandbox {
     };
 
     _this._sbr = new SandboxRegistry(_this._bus);
-    _this._sbr._create = (url, sourceCode, config, factory) => {
-      console.log('SandboxRegistry._create ', url, config);
-      window.eval(sourceCode);
+//    _this._sbr._create = (url, sourceCode, config, factory) => {
+    _this._sbr._create = (url, importPath, config, factory) => {
+        console.log('SandboxRegistry._create ', url, importPath, config);
+//      window.eval(sourceCode);
+      import(importPath).then((component)=>{
+//        let component;
+        if (typeof activate === 'function') {
+          component = activate(url, this._bus, config, factory);
+        }
+  
+        if (typeof activate.default === 'function') {
+          component = activate.default(url, this._bus, config, factory);
+        }
+  
+        //for testing, this make components accessible from browser console
+        if (!window.components) window.components = {};
+        window.components[url] = component;
+  
+        return component;
+      });
 
-      let component;
-      if (typeof activate === 'function') {
-        component = activate(url, this._bus, config, factory);
-      }
-
-      if (typeof activate.default === 'function') {
-        component = activate.default(url, this._bus, config, factory);
-      }
-
-      //for testing, this make components accessible from browser console
-      if (!window.components) window.components = {};
-      window.components[url] = component;
-
-      return component;
     };
   }
 
