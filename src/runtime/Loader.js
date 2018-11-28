@@ -1,6 +1,6 @@
 // Log System
 import * as logger from 'loglevel';
-let log = logger.getLogger('loader');
+let log = logger.getLogger('Loader');
 
 import {divideURL, emptyObject} from '../utils/utils';
 import AddressAllocation from '../allocation/AddressAllocation';

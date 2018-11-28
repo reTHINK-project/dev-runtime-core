@@ -398,9 +398,11 @@ class RuntimeUA {
         prepareComponents.push(this.subscriptionManager.init());
         prepareComponents.push(this.identityModule.init());
         prepareComponents.push(cryptoManager.loadSessionKeys());
+        prepareComponents.push(this.registry.loadRegistry());
+        prepareComponents.push(this._dataObjectsStorage.loadRemote());
 
         Promise.all(prepareComponents).then((result) => {
-          if (result.length === 3) {
+          if (result.length === 5) {
             resolve(true);
           } else {
             reject('[RuntimeUA._loadComponents] Error ] ', result);

@@ -110,6 +110,24 @@ class Registry {
     let p2pConnectionResolve = new P2PConnectionResolve(_this);
 
     _this._p2pConnectionResolve = p2pConnectionResolve;
+
+    _this._hypertyUrls = {};
+    _this._dataObjectUrls = {};
+  }
+
+  loadRegistry() {
+
+    let _this = this;
+
+    return new Promise((resolve) => {
+      _this.storageManager.get('registry:HypertyURLs').then((urlsList) => {
+        if (urlsList) _this._hypertyUrls = urlsList;
+        _this.storageManager.get('registry:DataObjectURLs').then((urlsList) => {
+          if (urlsList) _this._dataObjectUrls = urlsList;
+          resolve();
+        });
+      });
+    });
   }
 
   set loader(loader) {
@@ -471,17 +489,17 @@ class Registry {
 
       _this.dataObjectList[objectRegistration.url] = objectRegistration;
 
-      _this.storageManager.get('registry:DataObjectURLs').then((urlsList) => {
+//      _this.storageManager.get('registry:DataObjectURLs').then((urlsList) => {
 
-        if (!urlsList) {
+/*        if (!urlsList) {
           urlsList = {};
-        }
+        }*/
 
         //update the list with the new elements
-        urlsList[objectRegistration.name + objectRegistration.schema + objectRegistration.resources + objectRegistration.reporter] = objectRegistration.url;
+        _this._dataObjectUrls[objectRegistration.name + objectRegistration.schema + objectRegistration.resources + objectRegistration.reporter] = objectRegistration.url;
 
         // step to obtain the list of all URL registered to updated with the new one.
-        _this.storageManager.set('registry:DataObjectURLs', 0, urlsList).then(() => {
+        _this.storageManager.set('registry:DataObjectURLs', 0, _this._dataObjectUrls).then(() => {
 
           if (_this.isInterworkingProtoStub(registration.reporter)) {
             registration.interworking = true;
@@ -501,7 +519,7 @@ class Registry {
           reject(reason);
         });
       });
-    });
+//    });
   }
 
 
@@ -649,7 +667,9 @@ class Registry {
           /*  _this.resolve(domainUrl).then(function(a) {
             // log.log('[Registry registerHyperty] stub to domain registry- ', a);*/
 
-          _this.storageManager.get('registry:HypertyURLs').then((urlsList) => {
+//          _this.storageManager.get('registry:HypertyURLs').then((urlsList) => {
+
+        
 
             // log.log('[Registry registerHyperty] storageManager] - ', urlsList);
 
@@ -657,12 +677,12 @@ class Registry {
 
               hypertyCapabilities = value;
 
-              if (!urlsList) {
+/*              if (!urlsList) {
                 urlsList = {};
-              }
+              }*/
 
-              urlsList[hypertyCapabilities.resources + hypertyCapabilities.dataSchema + hypertyCapabilities.name] = addressURL.address;
-              _this.storageManager.set('registry:HypertyURLs', 0, urlsList).then(() => {
+              _this._hypertyUrls[hypertyCapabilities.resources + hypertyCapabilities.dataSchema + hypertyCapabilities.name] = addressURL.address;
+              _this.storageManager.set('registry:HypertyURLs', 0, _this._hypertyUrls).then(() => {
 
 
                 //check whether the received sanbox e ApplicationSandbox or a normal sandbox
@@ -705,7 +725,7 @@ class Registry {
                 reject(reason);
               });
             });
-          });
+//          });
         }
       }, function(err) {
         reject('[Registry registerHyperty] ', err);
@@ -1230,7 +1250,7 @@ class Registry {
       let domainUrl = dividedURL.domain;
       let type = dividedURL.type;
 
-      if (url.includes(_this.runtimeURL)) {
+      if (url.includes(_this.runtimeURL) || url.includes('://sandbox/')) {
         log.error('[Registry - resolve] URL to be resolved should have listeners ', url);
         reject('[Registry - resolve] URL to be resolved should have listeners ', url);
       }
