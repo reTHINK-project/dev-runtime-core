@@ -173,7 +173,42 @@ class RuntimeCatalogue {
      * @returns {Promise}
      */
   getDataSchemaDescriptor(dataSchemaURL, getFull = true, constraints) {
-    return this.getDescriptor(dataSchemaURL, this.createDataSchema, getFull, constraints)
+
+    //    return this.getDescriptor(dataSchemaURL, this.createDataSchema, getFull, constraints)
+    return new Promise((resolve)=> {
+      let schema = dataSchemaURL.split('/dataschema/')[1];
+      let descriptor = {
+        sourcePackage: {
+          sourceCode: {
+            properties: {
+            }
+          }
+
+        }
+      };
+    //      let scheme = properties.scheme ? properties.scheme.co : [];
+  
+      switch (schema) {
+        case 'Context':
+          descriptor.sourcePackage.sourceCode.properties.scheme = 'context';
+          break;
+        case 'WalletData':
+          descriptor.sourcePackage.sourceCode.properties.scheme = 'walletData';
+          break;
+        case 'Communication':
+          descriptor.sourcePackage.sourceCode.properties.scheme = 'comm';
+          descriptor.sourcePackage.sourceCode.properties.childrens = ['resources'];
+          break;
+        default:
+          descriptor.sourcePackage.sourceCode.properties.scheme = 'resource';
+          descriptor.sourcePackage.sourceCode.properties.childrens = [];
+          break;
+      }
+      resolve(descriptor);
+
+    });
+
+
   }
 
   /**

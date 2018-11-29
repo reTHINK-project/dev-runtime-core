@@ -317,6 +317,9 @@ class SyncherManager {
     //get schema from catalogue and parse -> (scheme, children)
     _this._catalog.getDataSchemaDescriptor(msg.body.schema).then((descriptor) => {
 
+
+
+
       let properties = descriptor.sourcePackage.sourceCode.properties;
       let scheme = properties.scheme ? properties.scheme.constant : 'resource';
       let childrens = properties.children ? properties.children.constant : [];
