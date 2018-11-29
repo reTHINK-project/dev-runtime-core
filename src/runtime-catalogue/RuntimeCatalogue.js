@@ -49,16 +49,16 @@ class RuntimeCatalogue {
       descriptorPromise = Promise.all([this.httpRequest.get(descriptorURL + '/version'), this.httpRequest.get(descriptorURL + '/cguid')])
     }
     descriptorPromise = descriptorPromise.then(([version, cguid]) => {
-      log.info('[RuntimeCatalogue] - got version (' + version + ') and cguid (' + cguid + ') for descriptor ' + descriptorURL);
+      log.log('[RuntimeCatalogue.getDescriptor] - got version (' + version + ') and cguid (' + cguid + ') for descriptor ' + descriptorURL);
 
       // check if same version is contained in localStorage
       return this.storageManager.getVersion('cguid', cguid).then((dbVersion) => {
         if (dbVersion >= version) {
-          log.warn('storageManager contains saved version that is the same or newer than requested');
+          log.log('[RuntimeCatalogue.getDescriptor] local version is updated for ', descriptorURL);
           isSavedDescriptor = true;
           return this.storageManager.get('cguid', cguid);
         } else {
-          log.warn('storageManager does not contain saved version');
+          log.log('[RuntimeCatalogue.getDescriptor] local version not updated for ', descriptorURL, ' retrieving from remote catalogue ...');
 
           // no saved copy, proceed with retrieving descriptor
           let retrievePromise = constraints != undefined ? this.httpRequest.post(descriptorURL, {body: JSON.stringify(constraints)}) : this.httpRequest.get(descriptorURL);
