@@ -108,12 +108,14 @@ class Loader {
 
     return new Promise((resolve, reject) => {
 
+
+
+
       let _hypertyURL;
       let _hypertySandbox;
       let _hypertyDescriptor;
       let _hypertySourcePackage;
       let haveError = false;
-      let descriptor = hyperty.split('/')[0]+'/'+hyperty.split('/')[1]+'Desc';
 
       let errorReason = (reason) => {
         log.info('[Runtime.Loader] Something failed on the deploy hyperty: ', reason);
@@ -129,7 +131,11 @@ class Loader {
       // TODO: the request Module should be changed,
       // because at this moment it is incompatible with nodejs;
       // Probably we need to pass a factory like we do for sandboxes;
-      log.info('[Runtime.Loader] ------------------ Hyperty ------------------------');
+      log.info('[Runtime.Loader.loadHyperty] ', hyperty);
+//      let pref = 'hello-world/dist/';
+      let descriptor = hyperty.split('/')[0]+'/'+hyperty.split('/')[1]+'Desc.js';
+//      hyperty = pref + hyperty;
+
       log.info('[Runtime.Loader] Get hyperty descriptor for :', descriptor);
 //      return this.descriptors.getHypertyDescriptor(hyperty)
        import(descriptor)
