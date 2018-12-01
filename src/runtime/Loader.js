@@ -1,6 +1,7 @@
 // Log System
 import * as logger from 'loglevel';
 let log = logger.getLogger('Loader');
+import path from 'path';
 
 import {divideURL, emptyObject} from '../utils/utils';
 import AddressAllocation from '../allocation/AddressAllocation';
@@ -133,12 +134,15 @@ class Loader {
       // Probably we need to pass a factory like we do for sandboxes;
       log.info('[Runtime.Loader.loadHyperty] ', hyperty);
 //      let pref = 'hello-world/dist/';
-      let descriptor = hyperty.split('/')[0]+'/'+hyperty.split('/')[1]+'Desc.js';
+// let descriptor = 'resources/hyperties/'+hyperty.split('/')[0]+'/'+hyperty.split('/')[1]+'Desc';
+let descriptor = 'hello-world/HelloWorldObserverDesc.js';
+//      let descriptor = '../hyperties/' + hyperty.split('/')[0];
 //      hyperty = pref + hyperty;
 
       log.info('[Runtime.Loader] Get hyperty descriptor for :', descriptor);
+      log.info('[Runtime.Loader] dir :', __dirname);
 //      return this.descriptors.getHypertyDescriptor(hyperty)
-       import(descriptor)
+       import(path.join('..','..','dist','minibus.js') /* webpackMode: "lazy-once" */)
         .then((hypertyDescriptor) => {
           // at this point, we have completed "step 2 and 3" as shown in https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md
           log.info('[Runtime.Loader] 1: return hyperty descriptor: ', hypertyDescriptor);

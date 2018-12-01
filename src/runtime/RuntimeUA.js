@@ -21,7 +21,6 @@
 * limitations under the License.
 **/
 
-// import 'babel-polyfill';
 
 import { log as logLevels } from '../logLevels';
 

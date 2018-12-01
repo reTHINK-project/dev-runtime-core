@@ -94,5 +94,8 @@ function processSuffix() {
 
 module.exports = {
   getModeConfig: getModeConfig,
-  processSuffix: processSuffix
+  processSuffix: processSuffix,
+  resolve: {
+    modules: [path.resolve(__dirname, 'hyperties'), 'node_modules']
+  }
 };
