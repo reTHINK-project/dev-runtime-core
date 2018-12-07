@@ -24,7 +24,7 @@ const u = log.getLogger('IdentityHandler');
 const v = log.getLogger('CryptoManager');
 const x = log.getLogger('Pipeline');
 const f1 = log.getLogger('Syncher');
-const f2 = log.getLogger('DataObjectObserver');
+const f2 = log.getLogger('RuntimeCatalogue');
 
 
 export { log };
@@ -123,3 +123,6 @@ f1.setLevel(0);
 
 // Syncher DataObjectObserver
 f1.setLevel(0);
+
+// RuntimeCatalogue
+f2.setLevel(0);
