@@ -136,6 +136,8 @@ class Loader {
       //      let pref = 'hello-world/dist/';
       // let descriptor = 'resources/hyperties/'+hyperty.split('/')[0]+'/'+hyperty.split('/')[1]+'Desc';
       let _hypertyDescriptor = instance.descriptor;
+
+      _hypertyDescriptor.dataObjects[0] = _hypertyDescriptor.dataObjects[0].replace('%domain%', this._registry._domain);
       //      let descriptor = '../hyperties/' + hyperty.split('/')[0];
       //      hyperty = pref + hyperty;
 

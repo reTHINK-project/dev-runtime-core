@@ -177,6 +177,7 @@ class RuntimeCatalogue {
     //    return this.getDescriptor(dataSchemaURL, this.createDataSchema, getFull, constraints)
     return new Promise((resolve)=> {
       let schema = dataSchemaURL.split('/dataschema/')[1];
+      log.log('[RuntimeCatalogue.getDataSchemaDescriptor] schema ', schema);
       let descriptor = {
         sourcePackage: {
           sourceCode: {
@@ -192,12 +193,18 @@ class RuntimeCatalogue {
         case 'Context':
           descriptor.sourcePackage.sourceCode.properties.scheme = 'context';
           break;
+        case 'Connection':
+          descriptor.sourcePackage.sourceCode.properties.scheme = 'connection';
+          break;
         case 'WalletData':
           descriptor.sourcePackage.sourceCode.properties.scheme = 'walletData';
           break;
         case 'Communication':
           descriptor.sourcePackage.sourceCode.properties.scheme = 'comm';
           descriptor.sourcePackage.sourceCode.properties.childrens = ['resources'];
+          break;
+        case 'HelloWorldDataSchema':
+          descriptor.sourcePackage.sourceCode.properties.scheme = 'hello';
           break;
         default:
           descriptor.sourcePackage.sourceCode.properties.scheme = 'resource';
