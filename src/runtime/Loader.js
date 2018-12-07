@@ -310,7 +310,9 @@ class Loader {
         // we have completed step 20 of https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
         let deployed = {
           runtimeHypertyURL: _hypertyURL,
-          status: deployComponentStatus
+          status: deployComponentStatus,
+          name: hyperty,
+          instance: instance
         };
 
         log.info('[Runtime.Loader] Hyperty deployed: ', deployed);

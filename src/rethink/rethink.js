@@ -82,6 +82,9 @@ const rethink = {
                   name: result.name
                 };
 
+                console.log('[rethink.requireHyperty] loaded: ', instance);
+
+
                 resolve(instance);
               }).catch(function (reason) {
                 reject(reason);
