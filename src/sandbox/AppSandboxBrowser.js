@@ -26,12 +26,13 @@ class AppSandboxBrowser extends Sandbox {
 
     _this._sbr = new SandboxRegistry(_this._bus);
 //    _this._sbr._create = (url, sourceCode, config, factory) => {
-    _this._sbr._create = (url, importPath, config, factory) => {
-        console.log('SandboxRegistry._create ', url, importPath, config);
+    _this._sbr._create = (url, instance, config, factory) => {
+        console.log('SandboxRegistry._create ', url, config);
+        instance._start(url, this._bus, config, factory);
 //      window.eval(sourceCode);
-      import(importPath).then((component)=>{
+//      import(importPath).then((component)=>{
 //        let component;
-        if (typeof activate === 'function') {
+/*        if (typeof activate === 'function') {
           component = activate(url, this._bus, config, factory);
         }
   
@@ -41,10 +42,10 @@ class AppSandboxBrowser extends Sandbox {
   
         //for testing, this make components accessible from browser console
         if (!window.components) window.components = {};
-        window.components[url] = component;
+        window.components[url] = component;*/
   
-        return component;
-      });
+        return;
+//      });
 
     };
   }
