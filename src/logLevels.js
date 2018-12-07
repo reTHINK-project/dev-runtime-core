@@ -50,7 +50,7 @@ export { log };
 
 
 // address-allocation
-a.setLevel(3);
+a.setLevel(0);
 
 // Bus
 b.setLevel(3);
