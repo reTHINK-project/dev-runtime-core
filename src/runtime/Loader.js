@@ -128,129 +128,21 @@ class Loader {
         reject(reason);
       };
   
-      // Get Hyperty descriptor
-      // TODO: the request Module should be changed,
-      // because at this moment it is incompatible with nodejs;
-      // Probably we need to pass a factory like we do for sandboxes;
       log.info('[Runtime.Loader.loadHyperty] ', hyperty);
-      //      let pref = 'hello-world/dist/';
-      // let descriptor = 'resources/hyperties/'+hyperty.split('/')[0]+'/'+hyperty.split('/')[1]+'Desc';
       let _hypertyDescriptor = instance.descriptor;
 
       _hypertyDescriptor.dataObjects[0] = _hypertyDescriptor.dataObjects[0].replace('%domain%', this._registry._domain);
-      //      let descriptor = '../hyperties/' + hyperty.split('/')[0];
-      //      hyperty = pref + hyperty;
 
-      //      log.info('[Runtime.Loader] Get hyperty descriptor for :', _hypertyDescriptor);
-      //      return this.descriptors.getHypertyDescriptor(hyperty)
-      //       import(path.join('..','..','dist','minibus.js') /* webpackMode: "lazy-once" */)
-      //        .then((hypertyDescriptor) => {
       // at this point, we have completed "step 2 and 3" as shown in https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md
       log.info('[Runtime.Loader] 1: return hyperty descriptor: ', _hypertyDescriptor);
 
-      // hyperty contains the full path of the catalogue URL, e.g.
-      // catalogue.rethink.eu/.well-known/..........
-//      _hypertyDescriptor = hypertyDescriptor;
-      /*
-                let sourcePackageURL = hypertyDescriptor.sourcePackageURL;
-      
-                if (sourcePackageURL === '/sourcePackage') {
-                  return hypertyDescriptor.sourcePackage;
-                }
-      
-                // Get the hyperty source code
-                return this.runtimeCatalogue.getSourcePackageFromURL(sourcePackageURL);
-              }, handleError)
-              .then((sourcePackage) => {
-                if (haveError) return false;
-      
-                log.info('[Runtime.Loader] 2: return hyperty source code');
-      
-                // at this point, we have completed "step 4 and 5" as shown in https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md
-      
-                _hypertySourcePackage = sourcePackage;
-      
-                //
-                // steps 6 -- 9 are skipped.
-                // TODO: on release of core 0.2;
-                // TODO: Promise to check the policy engine
-      
-                // mock-up code;
-                // temporary code, only
-                let policy = true;
-      
-                return policy;
-              }, handleError)
-              .then((policyResult) => {
-                if (haveError) return false;
-                console.log('[Runtime.Loader] 3: return policy engine result' + policyResult);
-      
-                // we have completed step 6 to 9 of https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
-                //
-                // Steps 6 -- 9
-                // As a result of the sipped steps, we know at this point if we execute
-                // inSameSandbox or not.
-                //
-      
-                // For testing, just assume we execute in same Sandbox.
-                let inSameSandbox = true;
-                let sandbox;
-      
-                if (inSameSandbox) {*/
 
-      // this don't need be a Promise;
       _hypertySandbox = this.registry.getAppSandbox();
 
-      // we have completed step 11 here.
-      /*          } else {
-      
-                  let domain = divideURL(hyperty).domain;
-      
-                  // getSandbox, this will return a promise;
-                  sandbox = this.registry.getSandbox(domain);
-                }
-      
-                // this will return the sandbox or one promise to getSandbox;
-                return sandbox;
-              }, handleError)
-              .then((sandbox) => {
-                if (haveError) return false;
-                log.info('[Runtime.Loader] 4: return the sandbox', sandbox);
-      
-                // Return the sandbox indepentely if it running in the same sandbox or not
-                // we have completed step 14 here.
-                return sandbox;
-              }, (reason) => {
-                if (haveError) return false;
-                log.info('[Runtime.Loader] 4.1: Try to register a new sandbox');
-      
-                // check if the sandbox is registed for this hyperty descriptor url;
-                // Make Steps xxx --- xxx
-                // Instantiate the Sandbox
-      
-                let hypertyCapabilities = {};
-                if (_hypertyDescriptor && _hypertyDescriptor.hasOwnProperty('capabilities')) {
-                  hypertyCapabilities = _hypertyDescriptor.stubCapabilities;
-                }
-      
-                return this._runtimeFactory.createSandbox(hypertyCapabilities).then((sandbox) => {
-      
-                  sandbox.addListener('*', (msg) => {
-                    this.messageBus.postMessage(msg);
-                  });
-      
-                  return sandbox;
-                });
-              }, handleError)
-              .then((sandbox) => {
-                if (haveError) return false;
-                log.info('[Runtime.Loader] 5: return sandbox and register');
-      
-                _hypertySandbox = sandbox;*/
+
 
       let numberOfAddresses = 1;
       //debugger;
-//      return this._addressAllocation.create(this._registry._domain, numberOfAddresses, _hypertyDescriptor, 'hyperty', reuseURL);
       this._addressAllocation.create(this._registry._domain, numberOfAddresses, _hypertyDescriptor, 'hyperty', reuseURL)
       .then((addresses) => {
         if (haveError) return false;
@@ -318,7 +210,7 @@ class Loader {
         };
 
         log.info('[Runtime.Loader] Hyperty deployed: ', deployed);
-        resolve(deployed);
+        resolve(instance);
 
         // we have completed step 21 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
         log.info('[Runtime.Loader] ------------------ END ------------------------');
