@@ -335,10 +335,15 @@ class RuntimeUA {
 
         this.handlers = new MsgBusHandlers(this.policyEngine, this.identityHandler, cryptoManager);
 
-//        this.messageBus.pipelineOut.handlers = [this.handlers.idmHandler, this.handlers.pepOutHandler];
-        this.messageBus.pipelineOut.handlers = [this.handlers.idmHandler, this.handlers.pepOutHandler, this.handlers.encryptHandler];
-        this.messageBus.pipelineIn.handlers = [this.handlers.decryptHandler, this.handlers.pepInHandler];
-//        this.messageBus.pipelineIn.handlers = [ this.handlers.pepInHandler];
+        // (un)comment bellow to not encrypt messages
+
+        this.messageBus.pipelineOut.handlers = [this.handlers.idmHandler, this.handlers.pepOutHandler];
+        this.messageBus.pipelineIn.handlers = [ this.handlers.pepInHandler];
+
+        // (un)comment bellow to encrypt messages
+
+//      this.messageBus.pipelineOut.handlers = [this.handlers.idmHandler, this.handlers.pepOutHandler, this.handlers.encryptHandler];
+//      this.messageBus.pipelineIn.handlers = [this.handlers.decryptHandler, this.handlers.pepInHandler];
 
         // Add to App Sandbox the listener;
         appSandbox.addListener('*', (msg) => {
