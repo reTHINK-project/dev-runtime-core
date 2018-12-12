@@ -555,7 +555,7 @@ class Registry {
         let filteredDataSchemas = [];
         for (let index in dataSchemas) {
           let dataSchema = dataSchemas[index];
-          filteredDataSchemas.push(dataSchema.sourcePackage.sourceCode.properties.scheme.constant);
+          filteredDataSchemas.push(dataSchema.sourcePackage.sourceCode.properties.scheme);
         }
 
         // log.log('[Registry] Hyperty Schemas', filteredDataSchemas);
