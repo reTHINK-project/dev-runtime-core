@@ -191,6 +191,8 @@ class RuntimeCatalogue {
   
       switch (schema) {
         case 'Context':
+        case 'ContextReporter':
+        case 'ContextObserver':
           descriptor.sourcePackage.sourceCode.properties.scheme = 'context';
           break;
         case 'Connection':
