@@ -70,17 +70,12 @@ const rethink = {
             return new Promise(function (resolve, reject) {
 
               //TODO: Work the message errors, probably use message factory
-              runtime.loadHyperty(hyperty, true).then(function (result) {
+              runtime.loadHyperty(hyperty, true)
+              .then(function (hypertyInstance) {
 
-                let hypertyComponent = window.components[result.runtimeHypertyURL];
-                let hyperty = {
-                  runtimeHypertyURL: result.runtimeHypertyURL,
-                  status: result.status,
-                  instance: hypertyComponent.instance,
-                  name: hypertyComponent.name
-                };
+                console.log('[rethink.requireHyperty] loaded: ', hypertyInstance.name);
 
-                resolve(hyperty);
+                resolve(hypertyInstance);
               }).catch(function (reason) {
                 reject(reason);
               });

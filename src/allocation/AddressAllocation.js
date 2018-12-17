@@ -113,7 +113,7 @@ class AddressAllocation {
       }
 
     } else {
-      log.info('[AddressAllocation] - new address will be allocated');
+      log.log('[AddressAllocation] - new address will be allocated');
 
       // if there is no URL saved request a new URL
       return this._allocateNewAddress(domain, scheme, number, info);
@@ -165,16 +165,14 @@ class AddressAllocation {
       let result = {newAddress: true, address: addresses};
 
       if (scheme === 'hyperty' ) {
-        if (info.hasOwnProperty('_configuration')) {
-          let domainRouting = info._configuration.hasOwnProperty('domain_routing') ? info.configuration.domain_routing : true;
-          if (domainRouting) {
-            _this._subscriptionManager.createSubscription(domain,addresses, _this._url).then(()=>{
-              resolve(result);
-            });
-          } else resolve(result);
-        } else resolve(result);
+        if (info.hasOwnProperty('configuration') && info.configuration.hasOwnProperty('domain_routing') && !info.configuration.domain_routing) 
+          resolve(result);
+        else {
+          _this._subscriptionManager.createSubscription(domain,addresses, _this._url).then(()=>{
+            resolve(result);
+          });
 
-
+        }
       } else resolve(result);
 
 
@@ -196,7 +194,7 @@ class AddressAllocation {
         }
       });*/
 
-    });
+      });
 
   }
 
