@@ -90,7 +90,7 @@ class AddressAllocation {
    */
   create(domain, number, info, scheme, reuseURL) {
 
-    // // console.log('typeof(reuseURL)', typeof(reuseURL), reuseURL);
+    log.log('[AddressAllocation.create] info ', info);
     //debugger;
     if (reuseURL) {
 
