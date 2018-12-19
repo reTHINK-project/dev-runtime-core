@@ -5,8 +5,8 @@ module.exports = {
   entry: {
     PEP: './src/policy/PEP.js',
     ReThinkCtx: './src/policy/ReThinkCtx.js',
-    sandbox: './src/sandbox.js',
-    minibus: './src/minibus.js',
+    sandbox: './src/sandbox-pack.js',
+    minibus: './src/minibus-pack.js',
     rethink: './src/rethink.js',
     StorageManager: './src/storage-manager/StorageManager.js',
     RuntimeCatalogue: './src/runtime-catalogue/RuntimeCatalogue.js'
