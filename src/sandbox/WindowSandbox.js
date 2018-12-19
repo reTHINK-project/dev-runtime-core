@@ -1,7 +1,9 @@
-import MiniBus from '../bus/Minibus';
+
 import Sandbox from './Sandbox';
 import {SandboxType} from './Sandbox';
 import SandboxRegistry from './SandboxRegistry';
+import MiniBus from '../bus/MiniBus';
+
 
 // Mockup code for testing
 class WindowSandbox extends Sandbox {

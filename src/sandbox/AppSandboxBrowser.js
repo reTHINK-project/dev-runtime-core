@@ -1,10 +1,11 @@
 // jshint activate
 // activate
 
-import MiniBus from '../bus/Minibus';
+
 import Sandbox from './Sandbox';
 import {SandboxType} from './Sandbox';
 import SandboxRegistry from './SandboxRegistry';
+import MiniBus from '../bus/MiniBus';
 
 // Mockup code for testing
 class AppSandboxBrowser extends Sandbox {
@@ -35,15 +36,15 @@ class AppSandboxBrowser extends Sandbox {
 /*        if (typeof activate === 'function') {
           component = activate(url, this._bus, config, factory);
         }
-  
+
         if (typeof activate.default === 'function') {
           component = activate.default(url, this._bus, config, factory);
         }
-  
+
         //for testing, this make components accessible from browser console
         if (!window.components) window.components = {};
         window.components[url] = component;*/
-  
+
         return;
 //      });
 

@@ -1,7 +1,9 @@
-import MiniBus from '../bus/Minibus';
+import MiniBus from '../bus/MiniBus';
 import Sandbox from './Sandbox';
 import {SandboxType} from './Sandbox';
 import SandboxRegistry from './SandboxRegistry';
+
+
 
 // Mockup code for testing
 class SandboxBrowser extends Sandbox {
@@ -11,7 +13,7 @@ class SandboxBrowser extends Sandbox {
     let _this = this;
     _this.type = SandboxType.NORMAL;
 
-    console.log('[SandboxBrowser] New with capabilities: ',capabilities);
+    console.log('[SandboxBrowser] New with capabilities: ', capabilities);
 
     //simulate sandbox frontier
     _this._bus = new MiniBus();
