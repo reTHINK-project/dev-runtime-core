@@ -12,7 +12,7 @@
     "build:doc": "./node_modules/.bin/esdoc -c esdoc.json",
     "build:dev": "cross-env MODE=dev webpack && cp -r dist ../dev-hyperty-toolkit/node_modules/runtime-core && cp -r dist ../dev-runtime-browser/node_modules/runtime-core && cp -r dist ../dev-dsm-app/node_modules/runtime-core",
     "build:dev:monitor": "cross-env MODE=dev cross-env MONITOR=true webpack",
-    "build:prod": "cross-env MODE=prod webpack",
+    "build:prod": "cross-env MODE=prod webpack -p",
     "build:light": "cross-env MODE=light webpack",
     "build": "cross-env MODE=dev webpack && cross-env MODE=prod webpack && cross-env MODE=light webpack"
   },
