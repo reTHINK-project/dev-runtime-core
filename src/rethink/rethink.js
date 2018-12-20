@@ -128,6 +128,7 @@ const rethink = {
 
           },
 
+          
           login: (idp) => {
 
             return new Promise((resolve, reject) => {
@@ -144,11 +145,13 @@ const rethink = {
           },
 
           listenShowAdmin: () => {
-            return new Promise((resolve, reject) => {
-              let loaded = (method, params) => {
-                    console.log('[rethink.listenShowAdmin]');
 
-                    resolve(true);
+            return new Promise((resolve, reject) => {
+
+              let loaded = (method, url, domain, resource) => {
+                    console.log('[rethink.listenShowAdmin]');
+                    if (method === 'login') resolve({"method": method});
+                    else resolve({"method": method, "domain": domain, "resource": resource, "reauthorise": () => identitiesGUI.reauthorise(url, domain, resource)} )
               };
               idm.listenShowAdmin(loaded);
             });

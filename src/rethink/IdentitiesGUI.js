@@ -159,6 +159,36 @@ class IdentitiesGUI {
 
   }
 
+  reauthorise(url, idp, resource) {
+
+
+    return this._openPopup(url).then((result) => {
+
+        console.log('[IdentitiesGUI.reauthorise.openPopup.result]', result);
+
+        // resource as array
+
+
+        const data = { resources: [resource], idpDomain: idp, login: result };
+        return this.callIdentityModuleFunc('getAccessToken', data);
+      }).then((result) => {
+
+        if (result.hasOwnProperty('code') && result.code > 299) {
+          console.error('[IdentitiesGUI.authorise.getAccessToken] error', result);
+          return (result);
+
+        } else {
+          console.log('[IdentitiesGUI.authorise.getAccessToken.result]', result);
+          return this.callIdentityModuleFunc('addAccessToken', result);
+        }
+
+      }).then((value) => {
+//        this._drawer.open = false;
+        return value;
+      });
+
+  }
+
   loginWithIDP(idp) {
 
     let _publicKey;

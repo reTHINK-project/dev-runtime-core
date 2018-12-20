@@ -656,7 +656,7 @@ class IdentityModule {
 
     return new Promise((resolve, reject) => {
       log.log('[IdentityModule] openPopup');
-      _this.callIdentityModuleFunc('openPopup', { urlreceived: loginUrl }).then((idCode) => {
+      _this.callIdentityModuleFunc('login', { urlreceived: loginUrl }).then((idCode) => {
         return idCode;
       }, (err) => {
         log.error('Error while logging in for the selected identity.');
@@ -755,17 +755,20 @@ class IdentityModule {
   }
 
 
-  callIdentityModuleFunc(methodName, parameters) {
+  callIdentityModuleFunc(methodName, parameters, domain, resource) {
     log.log('[callIdentityModuleFunc:methodName]', methodName);
     log.log('[callIdentityModuleFunc:parameters]', parameters);
     let _this = this;
 
     return new Promise((resolve, reject) => {
 
-      if (_this._showAdmin &&  methodName === 'getAccessToken'){
-         _this._showAdmin(methodName, parameters);
-            resolve(true);
-        }
+      if (_this._showAdmin ){
+        if (methodName === 'getAccessToken') {
+          _this._showAdmin(methodName, parameters.urlreceived, domain, resource).then((result)=>{
+            resolve(result);
+           });
+        } else _this._showAdmin(methodName);
+        } 
       else {
         let message = {
           type: 'execute', to: _this._guiURL, from: _this._idmURL,
@@ -994,7 +997,7 @@ class IdentityModule {
         }
 
         // let's ask the user for authorisation
-        _this.callIdentityModuleFunc('openPopup', { urlreceived: res.body.value }).then((authorisation) => {
+        _this.callIdentityModuleFunc('getAccessToken', { urlreceived: res.body.value }, domain, resources[0]).then((authorisation) => {
           log.log('[IdentityModule:callIdentityModuleFunc:openPopup] auhtorisation result: ', authorisation);
 
           message.body.method = 'getAccessToken';
@@ -1200,7 +1203,7 @@ class IdentityModule {
 
       }, (error)=> {
         if (error.hasOwnProperty('description') && error.description.hasOwnProperty('loginUrl')) {
-          _this.callIdentityModuleFunc('openPopup', { urlreceived: error.description.loginUrl }).then((value) => {
+          _this.callIdentityModuleFunc('login', { urlreceived: error.description.loginUrl }).then((value) => {
             log.log('[IdentityModule:callIdentityModuleFunc:openPopup]', usernameHint);
   
             resolve(value);
