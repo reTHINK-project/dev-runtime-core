@@ -762,7 +762,7 @@ class IdentityModule {
 
     return new Promise((resolve, reject) => {
 
-      if (_this._showAdmin){
+      if (_this._showAdmin &&  methodName === 'getAccessToken'){
          _this._showAdmin(methodName, parameters);
             resolve(true);
         }
