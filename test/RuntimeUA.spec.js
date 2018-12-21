@@ -23,9 +23,11 @@ import PEP from '../src/policy/PEP';
 import MessageBus from '../src/bus/MessageBus';
 
 import { runtimeFactory } from './resources/runtimeFactory';
+import HelloWorldReporter from './resources/HelloWorldReporter.hy';
 
 // Testing runtimeUA;
 let domain = 'localhost';
+let hypertyAddress = 'hyperty://sp.domain/9c8c1949-e08e-4554-b201-bab201bdb21d';
 describe('RuntimeUA', function() {
 
   let runtime = new RuntimeUA(descriptors.Runtimes.Runtime, runtimeFactory, domain);
@@ -145,18 +147,21 @@ describe('RuntimeUA', function() {
   describe('loadHyperty(hypertyDescriptorURL)', function() {
 
     it('should throw when given no arguments', function(done) {
-      let hypertyDescriptorURL = 'hyperty-catalogue://catalogue.sp.domain/.well-known/hyperty/HelloHyperty';
-      let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL);
 
-      expect(loadHyperty)
-        .to.be.fulfilled
-        .and.notify(done);
+//      let hypertyDescriptorURL = 'hyperty-catalogue://catalogue.sp.domain/.well-known/hyperty/HelloHyperty';
+
+        let loadHyperty = runtime.loadHyperty(HelloWorldReporter);
+
+        expect(loadHyperty)
+          .to.be.fulfilled
+          .and.notify(done);
+  
     });
 
-    it('should be a Promise', function(done) {
+    it('Load Hyperty should return a promise', function(done) {
 
-      let hypertyDescriptorURL = 'hyperty-catalogue://catalogue.sp.domain/.well-known/hyperty/HelloHyperty';
-      let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL);
+//      let hypertyDescriptorURL = 'hyperty-catalogue://catalogue.sp.domain/.well-known/hyperty/HelloHyperty';
+      let loadHyperty = runtime.loadHyperty(HelloWorldReporter);
 
       expect(loadHyperty)
         .to.be.fulfilled
@@ -167,37 +172,36 @@ describe('RuntimeUA', function() {
 
     it('should be deployed', function(done) {
 
-      let hypertyDescriptorURL = 'hyperty-catalogue://catalogue.sp.domain/.well-known/hyperty/HelloHyperty';
-      let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL);
-      let hypertyResolved = ['runtimeHypertyURL', 'status'];
+//      let hypertyDescriptorURL = 'hyperty-catalogue://catalogue.sp.domain/.well-known/hyperty/HelloHyperty';
+      let loadHyperty = runtime.loadHyperty(HelloWorldReporter);
 
-      expect(loadHyperty).to.eventually.to.have.all.keys(hypertyResolved)
-        .and.to.be.fulfilled
+      expect(loadHyperty).to.be.fulfilled
+      .and.eventually.to.have.property('runtimeHypertyURL')
         .and.notify(done);
 
     });
 
     it('should load an hyperty based on given true value for the reuse', function(done) {
 
-      let hypertyDescriptorURL = 'hyperty-catalogue://catalogue.sp.domain/.well-known/hyperty/HelloHyperty';
-      let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL, true);
-      let hypertyResolved = ['runtimeHypertyURL', 'status'];
+//      let hypertyDescriptorURL = 'hyperty-catalogue://catalogue.sp.domain/.well-known/hyperty/HelloHyperty';
+      let loadHyperty = runtime.loadHyperty(HelloWorldReporter, true);
+  //    let hypertyResolved = ['runtimeHypertyURL', 'status'];
 
       expect(loadHyperty).to.be.fulfilled
-        .and.eventually.to.have.all.keys(hypertyResolved)
+        .and.eventually.to.have.property('runtimeHypertyURL')
         .and.notify(done);
 
     });
 
     it('should load an hyperty based on given reuse URL address', function(done) {
 
-      let hypertyDescriptorURL = 'hyperty-catalogue://catalogue.sp.domain/.well-known/hyperty/HelloHyperty';
-      let loadHyperty = runtime.loadHyperty(hypertyDescriptorURL, 'hyperty://sp.domain/1');
+//      let hypertyDescriptorURL = 'hyperty-catalogue://catalogue.sp.domain/.well-known/hyperty/HelloHyperty';
+      let loadHyperty = runtime.loadHyperty(HelloWorldReporter, 'hyperty://sp.domain/1');
       console.log('wtf', loadHyperty);
-      let hypertyResolved = ['runtimeHypertyURL', 'status'];
+//      let hypertyResolved = ['runtimeHypertyURL', 'status'];
 
       expect(loadHyperty).to.be.fulfilled
-        .and.eventually.to.have.all.keys(hypertyResolved)
+        .and.eventually.to.have.property('runtimeHypertyURL')
         .and.notify(done);
 
     });

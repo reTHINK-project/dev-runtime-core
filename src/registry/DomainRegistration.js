@@ -250,16 +250,6 @@ class DomainRegistration {
 
     return new Promise(function(resolve, reject) {
 
-    //assuming descriptor come in this format, the service-provider-domain url is retrieved by a split instruction
-      //hyperty-catalogue://<service-provider-domain>/<catalogue-object-identifier>
-/*      let domainUrl = divideURL(hyperty.descriptorURL).domain;
-
-      if (domainUrl.includes('catalogue')) {
-        domainUrl = domainUrl.replace('catalogue.', '');
-      }
-      _this.registryDomain = domainUrl;*/
-
-
     let runtime = _this.runtimeURL;
     let status = 'live';
 

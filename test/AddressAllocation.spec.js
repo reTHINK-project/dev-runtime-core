@@ -16,6 +16,7 @@ describe('AddressAllocation', function() {
 
   let aa;
   let registry;
+  let subscriptionManager;
   let bus;
   let guid = generateGUID();
   let domain = 'sp.domain';
@@ -25,6 +26,11 @@ describe('AddressAllocation', function() {
     registry = {
       registerHyperty: () => {},
       checkRegisteredURLs: () => {}
+    };
+
+    subscriptionManager = {
+      createSubscription: () => {
+      }
     };
 
     bus = {
@@ -56,8 +62,19 @@ describe('AddressAllocation', function() {
 
     });
 
+    sinon.stub(subscriptionManager, 'createSubscription').callsFake((domain,addresses, url) => {
+
+      return new Promise((resolve)=>{
+        resolve();
+      });
+
+    });
+
+
+    // TODO: pass subscription manager in the AddressAllocation constructor
+
     let runtimeURL = 'hyperty-runtime://ua.pt/123';
-    new AddressAllocation(runtimeURL, bus, registry);
+    new AddressAllocation(runtimeURL, bus, registry, subscriptionManager);
     aa = AddressAllocation.instance;
   });
 
@@ -67,7 +84,7 @@ describe('AddressAllocation', function() {
     let scheme = 'hyperty';
     let info = {
       name: 'test',
-      schema: 'hyperty-catalogue://' + domain + '/.well-known/dataschema/hello',
+      schema: 'hyperty-catalogue://' + domain + '/.well-known/dataschema/HelloWorldDataSchema',
       reporter: [],
       resources: []
     };

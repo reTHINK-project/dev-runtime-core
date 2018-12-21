@@ -52,11 +52,11 @@ class HeartBeat {
 
   }
 
-  start(resume) {
+  start(resume, isReporter = false) {
 
-    console.log('[HeartBeat] starting ... ');
+    console.log('[HeartBeat] starting. isReporter: ', isReporter);
 
-    if (resume) {
+    if (resume || !isReporter) {
       this._getLastHearBeat().then(() => {
         let isHeartBeatActive = this._isHeartBeatActive(this.heartBeat, this._heartBeatRate * 2);
 

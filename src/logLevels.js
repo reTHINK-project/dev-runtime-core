@@ -24,7 +24,7 @@ const u = log.getLogger('IdentityHandler');
 const v = log.getLogger('CryptoManager');
 const x = log.getLogger('Pipeline');
 const f1 = log.getLogger('Syncher');
-const f2 = log.getLogger('DataObjectObserver');
+const f2 = log.getLogger('RuntimeCatalogue');
 
 
 export { log };
@@ -50,7 +50,7 @@ export { log };
 
 
 // address-allocation
-a.setLevel(3);
+a.setLevel(0);
 
 // Bus
 b.setLevel(3);
@@ -68,7 +68,7 @@ e.setLevel(0);
 f.setLevel(3);
 
 // IdentityModule
-g.setLevel(3);
+g.setLevel(0);
 
 // PEP
 h.setLevel(3);
@@ -123,3 +123,6 @@ f1.setLevel(0);
 
 // Syncher DataObjectObserver
 f1.setLevel(0);
+
+// RuntimeCatalogue
+f2.setLevel(0);
