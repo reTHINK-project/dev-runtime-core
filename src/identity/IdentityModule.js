@@ -947,7 +947,11 @@ class IdentityModule {
             });
           } else {
             _this._revokeAccessToken(token, domainToCheck, resources).then(() => {
-              return _this._getNewAccessToken(domainToCheck, resources);
+              setTimeout(() => {
+                return _this._getNewAccessToken(domainToCheck, resources);
+
+              }, 1000);
+
             });
 
           } 
