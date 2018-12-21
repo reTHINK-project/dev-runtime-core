@@ -216,6 +216,29 @@ class Identities {
 
   }
 
+  removeAccessToken(domain, resources) {
+    let _this = this;
+
+    return new Promise((resolve) => {
+      let accessToken = this._accessTokens[domain];
+
+      if (!accessToken) { resolve(); } else if (
+        resources.every((i) => { 
+          return accessToken.resources.indexOf(i) != -1; 
+        })) {
+           delete this._accessTokens[domain]; 
+           _this._storeAccessTokens().then(() => {
+            resolve();
+          });
+          } else { 
+            resolve();
+          }
+  
+    });
+
+
+  }
+
   updateAssertion(assertion) {
     let _this = this;
 

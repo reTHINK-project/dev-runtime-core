@@ -128,6 +128,27 @@ const rethink = {
 
           },
 
+          unauthorise: (idp, scope) => {
+
+            return new Promise((resolve, reject) => {
+              identitiesGUI.unauthorise(idp, scope).then((result) => {
+                if (result) {
+                  console.log('[rethink.unauthorise] ', result);
+
+                  resolve(result);
+
+                  //                event.source.postMessage({ to: 'runtime:not-authorised', body: JSON.stringify(result) }, '*');
+                } else {
+                  console.warn('[rethink.unauthorise] failed: ', result);
+
+                  reject(result);
+                  //                event.source.postMessage({ to: 'runtime:authorised', body: JSON.stringify(result) }, '*');
+                }
+              });
+
+            });
+
+          },
           
           login: (idp) => {
 

@@ -946,11 +946,11 @@ class IdentityModule {
               return resolve(_this.identities.updateAccessToken(newToken));
             });
           } else {
-            _this._revokeAccessToken(token).then(() => {
+            _this._revokeAccessToken(token, domainToCheck, resources).then(() => {
               return _this._getNewAccessToken(domainToCheck, resources);
             });
 
-          } return resolve(_this._revokeAndGetNewAccessToken(token, domainToCheck, resources));
+          } 
 
         } else return resolve(deepClone(token));
       }
@@ -958,7 +958,8 @@ class IdentityModule {
     });
   }
 
-  _revokeAccessToken(token) {
+
+  _revokeAccessToken(token, domain, resources) {
 
     let _this = this;
 
@@ -970,7 +971,7 @@ class IdentityModule {
 
     return new Promise((resolve, reject) => {
 
-      let domain = _this._resolveDomain(token.domain);
+//      let domain = _this._resolveDomain(token.domain);
       let message;
 
       message = {
@@ -984,8 +985,13 @@ class IdentityModule {
       };
       try {
         _this._messageBus.postMessage(message, (res) => {
+
           let result = res.body.value;
-          resolve(result);
+          if (result) _this._identities.removeAccessToken(domain, resources).then(()=>{
+            resolve(result);
+
+          });
+          resolve();
         });
       } catch (err) {
         reject('In IdentityModule._revokeAccessToken on postMessage error: ' + err);
@@ -1456,6 +1462,33 @@ class IdentityModule {
           }
 
         });
+        return;
+      } else if (funcName === 'unauthorise') {
+        let domain = msg.body.params.domain;
+        let resources = msg.body.params.resources;
+
+        try {
+          _this._revokeAccessToken(_this.identities.getAccessToken(domain, resources), domain, resources);
+        } catch (e) {
+          return reject('[IdentityModule.addGUIListeners] unauthorise error ' + err);
+        }
+
+          let replyMsg = {
+            id: msg.id,
+            type: 'response',
+            to: msg.from,
+            from: msg.to,
+            body: {
+              value: true,
+              code: 200
+            }
+          };
+          try {
+            _this._messageBus.postMessage(replyMsg);
+          } catch (err) {
+            log.error('On addGUIListeners for refreshAccessToken request: ' + err);
+          }
+
         return;
       }/*else if (funcName === 'selectIdentityForHyperty') {
         let origin = msg.body.params.origin;

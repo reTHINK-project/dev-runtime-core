@@ -1,4 +1,5 @@
 // jshint browser:true, jquery: true
+import { deepClone } from '../utils/utils';
 
 class IdentitiesGUI {
 
@@ -155,6 +156,19 @@ class IdentitiesGUI {
       }).then((value) => {
 //        this._drawer.open = false;
         return value;
+      });
+
+  }
+
+  unauthorise(idp, resource) {
+
+    const data = { resources: [resource], domain: idp };
+
+    return this.callIdentityModuleFunc('unauthorise', deepClone(data))
+      .then((result) => {
+        console.log('[IdentitiesGUI.unauthorise] result: ' + result);
+
+        return result;
       });
 
   }
