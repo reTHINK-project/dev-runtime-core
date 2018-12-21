@@ -980,13 +980,16 @@ class IdentityModule {
 
       message = {
         type: 'execute',
-        to: domain,
+        to: _this._resolveDomain(token.domain),
         from: _this._idmURL,
         body: {
           method: 'revokeAccessToken',
           params: { token: token }
         }
       };
+
+      log.log('[IdentityModule._revokeAccessToken] revoke msg ', message);
+
       try {
         _this._messageBus.postMessage(message, (res) => {
 
