@@ -101,8 +101,8 @@ class IdentitiesGUI {
               clearInterval(pollTimer);
             }
 
-//            if (win.document.URL.indexOf('id_token') !== -1 || win.document.URL.indexOf(location.origin) !== -1) {
-            if ( win.document.URL.indexOf(location.origin) !== -1) {
+            if (win.document.URL.indexOf('id_token') !== -1 || win.document.URL.indexOf(location.origin) !== -1) {
+//            if ( win.document.URL.indexOf(location.origin) !== -1) {
                 window.clearInterval(pollTimer);
               let url = win.document.URL;
 
