@@ -1,6 +1,6 @@
 {
   "name": "runtime-core",
-  "version": "0.15.0",
+  "version": "0.16.0",
   "description": "core runtime development",
   "files": [
     "dist"
@@ -10,9 +10,9 @@
     "test": "karma start",
     "test:lint": "eslint --config .eslintrc.yml ./src/",
     "build:doc": "./node_modules/.bin/esdoc -c esdoc.json",
-    "build:dev": "cross-env MODE=dev webpack && cp -rf dist/Runtime.js ../dev-hyperty-toolkit/resources && cp -r dist ../dev-hyperty-toolkit/node_modules/runtime-core && cp -r dist ../dev-runtime-browser/node_modules/runtime-core",
+    "build:dev": "cross-env MODE=dev webpack && cp -r dist ../dev-hyperty-toolkit/node_modules/runtime-core && cp -r dist ../dev-runtime-browser/node_modules/runtime-core && cp -r dist ../dev-dsm-app/node_modules/runtime-core",
     "build:dev:monitor": "cross-env MODE=dev cross-env MONITOR=true webpack",
-    "build:prod": "cross-env MODE=prod webpack",
+    "build:prod": "cross-env MODE=prod webpack -p",
     "build:light": "cross-env MODE=light webpack",
     "build": "cross-env MODE=dev webpack && cross-env MODE=prod webpack && cross-env MODE=light webpack"
   },
@@ -37,15 +37,17 @@
   },
   "homepage": "https://rethink-project.eu/",
   "dependencies": {
+    "@babel/polyfill": "^7.0.0",
+    "babel-plugin-dynamic-import-webpack": "^1.1.0",
+    "babel-plugin-syntax-dynamic-import": "^6.18.0",
     "loglevel": "^1.5.1"
   },
   "devDependencies": {
-    "babel-loader": "^7.1.2",
-    "babel-plugin-add-module-exports": "^0.2.1",
-    "babel-plugin-transform-regenerator": "^6.26.0",
-    "babel-plugin-transform-runtime": "^6.15.0",
-    "babel-polyfill": "^6.26.0",
-    "babel-preset-env": "^1.6.0",
+    "@babel/cli": "^7.2.0",
+    "@babel/core": "^7.2.0",
+    "@babel/parser": "^7.2.0",
+    "@babel/preset-env": "^7.2.0",
+    "babel-loader": "^8.0.4",
     "base64-url": "^1.3.3",
     "bip39": "^2.4.0",
     "bitcoinjs-lib": "^3.3.2",
@@ -82,7 +84,8 @@
     "sync-client": "^1.0.0-beta.11",
     "tv4": "^1.2.7",
     "uglifyjs-webpack-plugin": "^1.1.5",
-    "webpack": "^3.10.0",
+    "webpack": "^4.27.1",
+    "webpack-cli": "^3.1.2",
     "webpack-monitor": "^1.0.14"
   }
 }

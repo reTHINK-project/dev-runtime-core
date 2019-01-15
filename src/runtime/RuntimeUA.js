@@ -21,7 +21,6 @@
 * limitations under the License.
 **/
 
-// import 'babel-polyfill';
 
 import { log as logLevels } from '../logLevels';
 
@@ -144,7 +143,7 @@ class RuntimeUA {
    *
    * @memberOf RuntimeUA
    */
-  init() {
+  init(guid) {
     return new Promise((resolve, reject) => {
 
       this.domain = this.runtimeConfiguration.domain;
@@ -186,7 +185,7 @@ class RuntimeUA {
 /*          log.info('[RuntimeUA - init] dataObjectsStorage remote load starting');
           this._dataObjectsStorage.loadRemote().then(()=> {
             log.info('[RuntimeUA - init] dataObjectsStorage remote load concluded');*/
-            return this._loadComponents();
+            return this._loadComponents(guid);
 
 //          });
 
@@ -284,7 +283,7 @@ class RuntimeUA {
    *
    * @memberOf RuntimeUA
    */
-  _loadComponents() {
+  _loadComponents(guid) {
 
     return new Promise((resolve, reject) => {
 
@@ -336,8 +335,15 @@ class RuntimeUA {
 
         this.handlers = new MsgBusHandlers(this.policyEngine, this.identityHandler, cryptoManager);
 
-        this.messageBus.pipelineOut.handlers = [this.handlers.idmHandler, this.handlers.pepOutHandler, this.handlers.encryptHandler];
-        this.messageBus.pipelineIn.handlers = [this.handlers.decryptHandler, this.handlers.pepInHandler];
+        // (un)comment bellow to not encrypt messages
+
+        this.messageBus.pipelineOut.handlers = [this.handlers.idmHandler, this.handlers.pepOutHandler];
+        this.messageBus.pipelineIn.handlers = [ this.handlers.pepInHandler];
+
+        // (un)comment bellow to encrypt messages
+
+//      this.messageBus.pipelineOut.handlers = [this.handlers.idmHandler, this.handlers.pepOutHandler, this.handlers.encryptHandler];
+//      this.messageBus.pipelineIn.handlers = [this.handlers.decryptHandler, this.handlers.pepInHandler];
 
         // Add to App Sandbox the listener;
         appSandbox.addListener('*', (msg) => {
@@ -396,7 +402,7 @@ class RuntimeUA {
 
         const prepareComponents = [];
         prepareComponents.push(this.subscriptionManager.init());
-        prepareComponents.push(this.identityModule.init());
+        prepareComponents.push(this.identityModule.init(guid));
         prepareComponents.push(cryptoManager.loadSessionKeys());
         prepareComponents.push(this.registry.loadRegistry());
         prepareComponents.push(this._dataObjectsStorage.loadRemote());
@@ -500,35 +506,42 @@ class RuntimeUA {
       //TODO: delegate db reset operation to each component
       //    this.identityManager.reset();
 
-      this.storages.identity.get(false, false, 'identities').then((identities) => {
-        let identitiesKeys = Object.keys(identities);
-
-        identitiesKeys.forEach((key) => {
-          reseting.push(this.storages.identity.delete(key, false, 'identities'));
-
+      this._dataObjectsStorage.deleteRemotes().then(()=>{
+        return resolve();
+      }).
+      then(() => {
+        this.storages.identity.get(false, false, 'identities').then((identities) => {
+          let identitiesKeys = Object.keys(identities);
+  
+          identitiesKeys.forEach((key) => {
+            reseting.push(this.storages.identity.delete(key, false, 'identities'));
+  
+          });
+  
+          reseting.push(this.storages.capabilities.delete('capabilities'));
+          reseting.push(this.storages.cryptoManager.delete('userAsymmetricKey'));
+          reseting.push(this.storages.hypertyResources.delete('hypertyResources'));
+          reseting.push(this.storages.identity.delete('accessTokens'));
+          reseting.push(this.storages.registry.delete('registry:DataObjectURLs'));
+          reseting.push(this.storages.registry.delete('registry:HypertyURLs'));
+          reseting.push(this.storages.runtime.delete('p2pHandler:URL'));
+          reseting.push(this.storages.runtime.delete('runtime:URL'));
+          //    reseting.push(this.storages.runtimeCatalogue.delete('runtimeCatalogue'));
+          reseting.push(this.storages.subscriptions.delete('subscriptions'));
+          reseting.push(this.storages.syncherManager.delete('syncherManager:ObjectURLs'));
+          reseting.push(this.storages.syncherManager.delete('remotes'));
+  
+          Promise.all(reseting).then((result) => {
+  
+            log.info('[RuntimeUA.reset] reset with Success:', result);
+            return resolve(true);
+          }).catch(function (reason) {
+            log.error('Failed to reset all DBs', reason);
+            resolve(false);
+          });
         });
+      })
 
-        reseting.push(this.storages.capabilities.delete('capabilities'));
-        reseting.push(this.storages.cryptoManager.delete('userAsymmetricKey'));
-        reseting.push(this.storages.hypertyResources.delete('hypertyResources'));
-        reseting.push(this.storages.identity.delete('accessTokens'));
-        reseting.push(this.storages.registry.delete('registry:DataObjectURLs'));
-        reseting.push(this.storages.registry.delete('registry:HypertyURLs'));
-        reseting.push(this.storages.runtime.delete('p2pHandler:URL'));
-        reseting.push(this.storages.runtime.delete('runtime:URL'));
-        //    reseting.push(this.storages.runtimeCatalogue.delete('runtimeCatalogue'));
-        reseting.push(this.storages.subscriptions.delete('subscriptions'));
-        reseting.push(this.storages.syncherManager.delete('syncherManager:ObjectURLs'));
-
-        Promise.all(reseting).then((result) => {
-
-          log.info('All DBs were reset with Success:', result);
-          resolve(true);
-        }).catch(function (reason) {
-          log.error('Failed to reset all DBs', reason);
-          resolve(false);
-        });
-      });
     });
 
   }

@@ -217,7 +217,7 @@ class IdentityModule {
           constraints.constraints.browser = isBrowser;
 
           this._runtimeCatalogue.getTypeList(url, constraints).then((idps) => {
-            const listOfIdps = idps.map(key => { return {domain: key, type: 'idToken'}; });
+            const listOfIdps = idps.map(key => { return { domain: key, type: 'idToken' }; });
             log.info('[IdentityModule.getIdentityAssertion:getIdentitiesToChoose]', idps, listOfIdps);
             this._listOfIdps = listOfIdps;
             return resolve({ defaultIdentity: this.identities.defaultIdentity, identities: this.identities.identities, idps: listOfIdps });
@@ -238,25 +238,33 @@ class IdentityModule {
     return _this.currentIdentity;
   }*/
 
-  init() {
+  init(guid) {
     let _this = this;
     return new Promise((resolve) => {
       _this._identities.loadIdentities().then(() => {
 
-        _this._crypto.getMyPublicKey().then((key) => {
-          let hash = _this._crypto.crypto._sha256(stringify(key)).then((hash) => {
+        if (!guid) {
+          _this._crypto.getMyPublicKey().then((key) => {
+            let hash = _this._crypto.crypto._sha256(stringify(key)).then((hash) => {
 
-            let guid = 'user-guid://' + hash;
-            _this.identities.guid = guid;
-            _this._identities.loadAccessTokens().then(() => {
+              guid = 'user-guid://' + hash;
+              _this.identities.guid = guid;
+              _this._identities.loadAccessTokens().then(() => {
 
-              resolve();
+                resolve();
+              });
+            }).catch((error) => {
+              console.log('[IdentityModule] error', error);
             });
-          }).catch((error) =>  {
-            console.log('[IdentityModule] error', error);
-          });
 
-        });
+          });
+        } else {
+          _this.identities.guid = guid;
+          _this._identities.loadAccessTokens().then(() => {
+
+            resolve();
+          });
+        }
 
       });
 
@@ -273,7 +281,7 @@ class IdentityModule {
     log.log('[IdentityModule.getIdentityAssertion:identityBundle]', identityBundle);
     let _this = this;
 
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
 
       //CHECK whether is browser environment or nodejs
       //if it is browser, then create a fake identity
@@ -300,32 +308,32 @@ class IdentityModule {
             } else if (assertion.hasOwnProperty('refresh')) {
               log.log('[Identity.IdentityModule.getIdentityAssertion] refreshing assertion: ', assertion);
 
-              _this._refreshIdAssertion().then((newAssertion)=>{
+              _this._refreshIdAssertion().then((newAssertion) => {
                 log.log('[IdentityModule.getIdentityAssertion] refreshed assertion.', newAssertion);
                 return resolve(newAssertion);
-              }, (error)=> {
+              }, (error) => {
                 log.error('[IdentityModule.getIdentityAssertion] error on refresIdAssertion: ', error, ' Asking for a new IdAssertion.')
-                _this._getIdAssertionForDomain(origin, idp, idHint).then((assertion)=> {
+                _this._getIdAssertionForDomain(origin, idp, idHint).then((assertion) => {
                   resolve(assertion);
-                }, (error)=>{
+                }, (error) => {
                   reject(error);
-                });                
+                });
               });
 
+            } else {
+              _this._getIdAssertionForDomain(origin, idp, idHint).then((assertion) => {
+                resolve(assertion);
+              }, (error) => {
+                reject(error);
+              });
+            }
           } else {
-            _this._getIdAssertionForDomain(origin, idp, idHint).then((assertion)=> {
+            _this._getIdAssertionForDomain(origin, idp, idHint).then((assertion) => {
               resolve(assertion);
-            }, (error)=>{
+            }, (error) => {
               reject(error);
             });
-          } 
-        } else {
-          _this._getIdAssertionForDomain(origin, idp, idHint).then((assertion)=> {
-            resolve(assertion);
-          }, (error)=>{
-            reject(error);
-          });
-        }
+          }
 
         } else if (_this.identities.defaultIdentity) {
           let assertion = _this.identities.defaultIdentity;
@@ -334,8 +342,8 @@ class IdentityModule {
             return resolve(assertion);
           } else if (assertion.hasOwnProperty('refresh')) {
             log.log('[Identity.IdentityModule.getValidToken] refreshing assertion: ', assertion);
-          
-            _this._refreshIdAssertion(assertion).then((newAssertion)=>{
+
+            _this._refreshIdAssertion(assertion).then((newAssertion) => {
               log.log('[IdentityModule.getIdentityAssertion] refreshed assertion.', newAssertion);
               return resolve(newAssertion);
 
@@ -345,17 +353,17 @@ class IdentityModule {
               _this.selectIdentityFromGUI().then((assertion) => {
 
                 log.log('[IdentityModule] Identity selected from GUI.');
-  
+
                 _this.identities.defaultIdentity = assertion.userProfile.userURL;
                 return resolve(assertion);
-  
+
               }, (err) => {
                 return reject(err);
               });
-  
+
             });
 
-        } else  {
+          } else {
             _this.selectIdentityFromGUI().then((assertion) => {
 
               log.log('[IdentityModule] Identity selected from GUI.');
@@ -416,13 +424,13 @@ class IdentityModule {
 
     let _this = this;
 
-    return new Promise((resolve, reject)=> {
+    return new Promise((resolve, reject) => {
       _this.selectIdentityForHyperty(origin, idp, idHint).then((assertion) => {
         log.log('[IdentityModule._getIdAssertionForDomain] Identity selected by hyperty.');
         return resolve(assertion);
       }, (err) => { // if it got an error then just select identity from GUI
         // log.error('[IdentityModule] Could not select identity from hyperty.');
-        
+
         _this.selectIdentityFromGUI().then((newAssertion) => {
           log.log('[IdentityModule._getIdAssertionForDomain] Identity selected by hyperty.');
           return resolve(newAssertion);
@@ -430,7 +438,7 @@ class IdentityModule {
           return reject(err);
         });
       });
-  
+
     });
 
   }
@@ -438,23 +446,23 @@ class IdentityModule {
   _refreshIdAssertion(assertion) {
     let _this = this;
 
-    return new Promise((resolve, reject)=>{
+    return new Promise((resolve, reject) => {
       _this.sendRefreshMessage(assertion).then((newAssertion) => {
         log.log('[Identity.IdentityModule.getValidToken] refreshed assertion: ', newAssertion);
-      _this.identities.updateAssertion(newAssertion).then(() => {
-        resolve(newAssertion);
+        _this.identities.updateAssertion(newAssertion).then(() => {
+          resolve(newAssertion);
+        }, (err) => {
+          log.error('[IdentityModule.getValidToken] error updating the assertion ', err);
+          reject(err);
+        });
       }, (err) => {
-        log.error('[IdentityModule.getValidToken] error updating the assertion ', err);
+        log.error('[IdentityModule.getValidToken] error refreshing the assertion ', err);
         reject(err);
       });
-    }, (err) => {
-      log.error('[IdentityModule.getValidToken] error refreshing the assertion ', err);
-      reject(err);
-    });    
-  
+
     });
   }
-  
+
 
   /**
   * Function to return all the users URLs registered within a session
@@ -504,6 +512,12 @@ class IdentityModule {
     }
   }*/
 
+  // to be used when runtime is not executed in a sandbox
+
+  listenShowAdmin(callback) {
+    this._showAdmin = callback;
+  }
+
   /**
   * Function that sends a request to the GUI using messages. Sends all identities registered and
   * the Idps supported, and return the identity/idp received by the GUI
@@ -516,7 +530,7 @@ class IdentityModule {
     log.log('[IdentityModule.requestIdentityToGUI:idps]', idps);
 
     let _this = this;
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
 
       //condition to check if the real GUI is deployed. If not, deploys a fake gui
       if (_this.guiDeployed === false) {
@@ -568,7 +582,7 @@ class IdentityModule {
       //let keyPair = nodeJSKeyPairPopulate;
 
       //generates the RSA key pair
-      _this._crypto.getMyPublicKey().then(function(key) {
+      _this._crypto.getMyPublicKey().then(function (key) {
 
         log.log('[callNodeJsGenerateMethods:key]', key);
 
@@ -578,13 +592,13 @@ class IdentityModule {
 
         return _this.generateAssertion(publicKey, origin, 'url', idp);
 
-      }).then(function(value) {
+      }).then(function (value) {
         if (value) {
           resolve(value);
         } else {
           reject('Error on obtaining Identity');
         }
-      }).catch(function(err) {
+      }).catch(function (err) {
         log.log(err);
         reject(err);
 
@@ -602,7 +616,7 @@ class IdentityModule {
       let publicKey;
 
       //generates the RSA key pair
-      _this._crypto.getMyPublicKey().then(function(key) {
+      _this._crypto.getMyPublicKey().then(function (key) {
 
         log.log('[callGenerateMethods:key]', key);
 
@@ -612,23 +626,23 @@ class IdentityModule {
         log.log('generateAssertion:no_hint');
         return _this.generateAssertion(publicKey, origin, '', idp);
 
-      }).then(function(url) {
+      }).then(function (url) {
         _this.myHint = url;
         log.log('generateAssertion:hint');
         return _this.generateAssertion(publicKey, origin, url, idp);
 
-      }).then(function(value) {
+      }).then(function (value) {
         if (value) {
           resolve(value);
         } else {
           reject('Error on obtaining Identity');
         }
-      }).catch(function(err) {
+      }).catch(function (err) {
         log.error(err);
         reject(err);
       });
     });
-}
+  }
 
 
   loginSelectedIdentity(publicKey, origin, idp, loginUrl) {
@@ -642,7 +656,7 @@ class IdentityModule {
 
     return new Promise((resolve, reject) => {
       log.log('[IdentityModule] openPopup');
-      _this.callIdentityModuleFunc('openPopup', { urlreceived: loginUrl }).then((idCode) => {
+      _this.callIdentityModuleFunc('login', { urlreceived: loginUrl }).then((idCode) => {
         return idCode;
       }, (err) => {
         log.error('Error while logging in for the selected identity.');
@@ -672,7 +686,7 @@ class IdentityModule {
     return new Promise((resolve, reject) => {
 
       //generates the RSA key pair
-      _this._crypto.getMyPublicKey().then(function(key) {
+      _this._crypto.getMyPublicKey().then(function (key) {
         let publicKey = stringify(key);
 
         _this.sendGenerateMessage(publicKey, origin, idHint, idp).then((response) => {
@@ -741,29 +755,40 @@ class IdentityModule {
   }
 
 
-  callIdentityModuleFunc(methodName, parameters) {
+  callIdentityModuleFunc(methodName, parameters, domain, resource) {
     log.log('[callIdentityModuleFunc:methodName]', methodName);
     log.log('[callIdentityModuleFunc:parameters]', parameters);
     let _this = this;
 
     return new Promise((resolve, reject) => {
-      let message = {
-        type: 'execute', to: _this._guiURL, from: _this._idmURL,
-        body: { resource: 'identity', method: methodName, params: parameters }
-      };
 
-      //post msg with callback but without timout
-      let callback = msg => {
-        _this._messageBus.removeResponseListener(_this._idmURL, msg.id);
-        let result = msg.body.value;
-        resolve(result);
-      };
-      try {
+      if (_this._showAdmin) {
+        if (methodName === 'getAccessToken') {
+          _this._showAdmin(methodName, parameters.urlreceived, domain, resource).then((result) => {
+            resolve(result);
+          });
+        } else _this._showAdmin(methodName);
+      }
+      else {
+        let message = {
+          type: 'execute', to: _this._guiURL, from: _this._idmURL,
+          body: { resource: 'identity', method: methodName, params: parameters }
+        };
 
-        _this._messageBus.postMessage(message, callback, false);
+        //post msg with callback but without timout
+        let callback = msg => {
+          _this._messageBus.removeResponseListener(_this._idmURL, msg.id);
+          let result = msg.body.value;
+          resolve(result);
+        };
+        try {
 
-      } catch (err) {
-        reject('In method callIdentityModuleFunc error: ' + err);
+          _this._messageBus.postMessage(message, callback, false);
+
+        } catch (err) {
+          reject('In method callIdentityModuleFunc error: ' + err);
+        }
+
       }
     });
   }
@@ -791,11 +816,11 @@ class IdentityModule {
       fromURL = msg.body.subscriber;
     }
 
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
       log.log('[IdentityModule.getToken] for msg ', msg);
 
       //log.log('toUrl', toUrl);
-      _this.registry.isLegacy(toUrl).then(function(result) {
+      _this.registry.isLegacy(toUrl).then(function (result) {
         // log.log('[Identity.IdentityModule.getToken] isLEGACY: ', result);
         if (result) {
 
@@ -821,7 +846,7 @@ class IdentityModule {
   getIdToken(hypertyURL) {
     log.info('getIdToken:hypertyURL ', hypertyURL);
     let _this = this;
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
       let splitURL = hypertyURL.split('://');
       let userURL;
       if (splitURL[0] !== 'hyperty') { // it is a Data Object URL
@@ -857,7 +882,7 @@ class IdentityModule {
   * @param  {String}  url     the external url
   * @return {JSON}    token    Access token to be added to the message
   */
-   _getAccessToken(msg) {
+  _getAccessToken(msg) {
     let url = msg.to;
 
     let _this = this;
@@ -873,22 +898,22 @@ class IdentityModule {
         return reject('[IdentityModule._getAccessToken] missing mandatory msg body value resources: ', msg);
       }
       let domainToCheck = divideURL(url).domain;
-  
+
       if (url.includes('protostub')) {
         domainToCheck = domainToCheck.replace(domainToCheck.split('.')[0] + '.', '');
       }
-  
+
       let resources = msg.body.value.resources;
-  
-      _this._getAccessTokenForDomain(domainToCheck, resources).then((token)=>{
+
+      _this._getAccessTokenForDomain(domainToCheck, resources).then((token) => {
         resolve(token);
       });
-  
+
     });
 
 
 
-   }
+  }
 
   _getAccessTokenForDomain(domainToCheck, resources) {
     let _this = this;
@@ -915,18 +940,77 @@ class IdentityModule {
         log.log('[Identity.IdentityModule._getAccessTokenForDomain] found  Access Token ', token);
 
         if (timeNow >= token.expires) {
-//        if (true) {
+          //        if (true) {
           if (token.hasOwnProperty("refresh")) {
-            _this._refreshAccessToken(deepClone(token)).then((newToken)=>{
-            return resolve(_this.identities.updateAccessToken(newToken));
-          });
-        } else return resolve(_this._getNewAccessToken(domainToCheck, resources));
+            _this._refreshAccessToken(deepClone(token)).then((newToken) => {
+              return resolve(_this.identities.updateAccessToken(newToken));
+            });
+          } else {
+            _this._revokeAccessToken(token, domainToCheck, resources).then(() => {
+              setTimeout(() => {
+                return _this._getNewAccessToken(domainToCheck, resources);
+
+              }, 1000);
+
+            });
+
+          } 
 
         } else return resolve(deepClone(token));
       }
 
     });
   }
+
+
+  _revokeAccessToken(token, domain, resources) {
+
+    let _this = this;
+
+    //    let domain = _this._resolveDomain(oldIdentity.idp);
+    //    let message;
+    //    let assertion = _this.getIdentity(oldIdentity.userProfile.userURL);
+
+    log.log('[IdentityModule._revokeAccessToken] to be revoked ', token);
+
+    return new Promise((resolve, reject) => {
+
+//      let domain = _this._resolveDomain(token.domain);
+      let message;
+
+      message = {
+        type: 'execute',
+        to: _this._resolveDomain(token.domain),
+        from: _this._idmURL,
+        body: {
+          method: 'revokeAccessToken',
+          params: { token: token }
+        }
+      };
+
+      log.log('[IdentityModule._revokeAccessToken] revoke msg ', message);
+
+      try {
+        _this._messageBus.postMessage(message, (res) => {
+
+          let result = res.body.value;
+          if (result) _this._identities.removeAccessToken(domain, resources).then(()=>{
+            resolve(result);
+
+          });
+          resolve();
+        });
+      } catch (err) {
+        reject('In IdentityModule._revokeAccessToken on postMessage error: ' + err);
+      }
+
+    });
+
+
+
+
+  }
+
 
   _inProgressAccessToken(domain, resources) {
     this.identities.watchingYou.observe('accessTokens', (change) => {
@@ -951,7 +1035,7 @@ class IdentityModule {
   _getNewAccessToken(domain, resources) {
     let _this = this;
 
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
 
       _this.identities.setAccessTokenInProgress(domain);
 
@@ -972,7 +1056,7 @@ class IdentityModule {
         }
 
         // let's ask the user for authorisation
-        _this.callIdentityModuleFunc('openPopup', { urlreceived: res.body.value }).then((authorisation) => {
+        _this.callIdentityModuleFunc('getAccessToken', { urlreceived: res.body.value }, domain, resources[0]).then((authorisation) => {
           log.log('[IdentityModule:callIdentityModuleFunc:openPopup] auhtorisation result: ', authorisation);
 
           message.body.method = 'getAccessToken';
@@ -1055,7 +1139,7 @@ class IdentityModule {
           if (res.body.code < 300) {
             let result = res.body.value;
             resolve(result);
-          } else resolve(res.body.value.body.params,identity);
+          } else resolve(res.body.value.body.params, identity);
         });
       } catch (err) {
         reject('In sendRefreshMessage on postMessage error: ' + err);
@@ -1160,11 +1244,11 @@ class IdentityModule {
     log.log('[generateAssertion:idpDomain]', idpDomain);
     let _this = this;
 
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
       log.log('[IdentityModule:sendGenerateMessage:sendGenerateMessage]', usernameHint);
       _this.sendGenerateMessage(contents, origin, usernameHint, idpDomain).then((result) => {
 
-       if (result) {
+        if (result) {
 
           _this.identities.addAssertion(result).then((value) => {
             resolve(result);
@@ -1176,11 +1260,11 @@ class IdentityModule {
           reject('error on obtaining identity information');
         }
 
-      }, (error)=> {
+      }, (error) => {
         if (error.hasOwnProperty('description') && error.description.hasOwnProperty('loginUrl')) {
-          _this.callIdentityModuleFunc('openPopup', { urlreceived: error.description.loginUrl }).then((value) => {
+          _this.callIdentityModuleFunc('login', { urlreceived: error.description.loginUrl }).then((value) => {
             log.log('[IdentityModule:callIdentityModuleFunc:openPopup]', usernameHint);
-  
+
             resolve(value);
           }, (err) => {
             reject(err);
@@ -1215,7 +1299,7 @@ class IdentityModule {
       }
     };
 
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
       try {
         _this._messageBus.postMessage(message, (result) => {
           if (result.body.code === 200) {
@@ -1287,7 +1371,7 @@ class IdentityModule {
             log.error('IdentityModule.addGUIListeners sendGenerateMessage error: ' + err);
           }
 
-        }, (err)=> {
+        }, (err) => {
           log.info('IDPProxy generateAssertion reply error ' + err);
           replyMsg.body = err;
           _this._messageBus.postMessage(replyMsg);
@@ -1327,7 +1411,7 @@ class IdentityModule {
         let domain = msg.body.params.idpDomain;
         let resources = msg.body.params.resources;
         let login = msg.body.params.login;
-        let replyMsg = { id: msg.id, type: 'response', to: msg.from, from: msg.to};
+        let replyMsg = { id: msg.id, type: 'response', to: msg.from, from: msg.to };
 
         _this.getAccessToken(domain, resources, login).then((returnedValue) => {
           let value = { type: 'execute', value: returnedValue, code: 200 };
@@ -1367,16 +1451,16 @@ class IdentityModule {
         let domain = msg.body.params.domain;
         let resources = msg.body.params.resources;
 
-        _this._getAccessTokenForDomain(domain, resources).then((token)=> {
-          let replyMsg = { 
-            id: msg.id, 
-            type: 'response', 
-            to: msg.from, 
-            from: msg.to, 
+        _this._getAccessTokenForDomain(domain, resources).then((token) => {
+          let replyMsg = {
+            id: msg.id,
+            type: 'response',
+            to: msg.from,
+            from: msg.to,
             body: {
               value: token.accessToken,
               code: 200
-            } 
+            }
           };
           try {
             _this._messageBus.postMessage(replyMsg);
@@ -1385,6 +1469,33 @@ class IdentityModule {
           }
 
         });
+        return;
+      } else if (funcName === 'unauthorise') {
+        let domain = msg.body.params.domain;
+        let resources = msg.body.params.resources;
+
+        try {
+          _this._revokeAccessToken(_this.identities.getAccessToken(domain, resources), domain, resources);
+        } catch (e) {
+          return reject('[IdentityModule.addGUIListeners] unauthorise error ' + err);
+        }
+
+          let replyMsg = {
+            id: msg.id,
+            type: 'response',
+            to: msg.from,
+            from: msg.to,
+            body: {
+              value: true,
+              code: 200
+            }
+          };
+          try {
+            _this._messageBus.postMessage(replyMsg);
+          } catch (err) {
+            log.error('On addGUIListeners for refreshAccessToken request: ' + err);
+          }
+
         return;
       }/*else if (funcName === 'selectIdentityForHyperty') {
         let origin = msg.body.params.origin;
@@ -1422,7 +1533,7 @@ class IdentityModule {
     log.log('[IdentityModule._getValidToken]:hypertyURL', hypertyURL);
     let _this = this;
     return new Promise((resolve, reject) => {
-      _this.getIdToken(hypertyURL).then(function(assertion) {
+      _this.getIdToken(hypertyURL).then(function (assertion) {
         log.log('[IdentityModule._getValidToken] retrieved IdAssertion', assertion);
         let timeNow = secondsSinceEpoch();
 
@@ -1452,12 +1563,12 @@ class IdentityModule {
         log.log('[Identity.IdentityModule.getValidToken] time now:', timeNow);
 
         if (timeNow >= expirationDate) {
-//        if (timeNow >= 0) {
-            if (assertion.hasOwnProperty('refresh')) {
-              log.log('[Identity.IdentityModule.getValidToken] refreshing assertion: ', assertion);
-            
+          //        if (timeNow >= 0) {
+          if (assertion.hasOwnProperty('refresh')) {
+            log.log('[Identity.IdentityModule.getValidToken] refreshing assertion: ', assertion);
+
             _this.sendRefreshMessage(assertion).then((newAssertion) => {
-                log.log('[Identity.IdentityModule.getValidToken] refreshed assertion: ', newAssertion);
+              log.log('[Identity.IdentityModule.getValidToken] refreshed assertion: ', newAssertion);
               _this.identities.updateAssertion(newAssertion).then(() => {
                 resolve(newAssertion);
               }, (err) => {
@@ -1477,7 +1588,7 @@ class IdentityModule {
         } else {
           resolve(assertion);
         }
-      }).catch(function(error) {
+      }).catch(function (error) {
         log.error('[IdentityModule.getValidToken] error on getIdToken', error);
         reject(error);
       });
@@ -1493,7 +1604,7 @@ class IdentityModule {
     log.info('_getHypertyFromDataObject:dataObjectURL', dataObjectURL);
     let _this = this;
 
-    return new Promise(function(resolve, reject) {
+    return new Promise(function (resolve, reject) {
 
       let splitedURL = divideURL(dataObjectURL);
       let domain = splitedURL.domain;

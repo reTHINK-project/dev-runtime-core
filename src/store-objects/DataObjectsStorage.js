@@ -83,31 +83,6 @@ class DataObjectsStorage {
 
                 _this._storeDataObject[type][url] = dO[url];
 
-                //                      let backupRevision 
-
-/*                let synching = [];
-
-                synching.push(
-                  _this._sync(url, dO[url].data.backupRevision, true, url.split('/')[3]).then((synchedObj) => {
-                    _this._storeDataObject[type][url] = synchedObj;
-                    log.log('[StoreDataObjects.loadRemote] storeDataObject updated: ', _this._storeDataObject);
-                  })
-                );
-
-                Promise.all(synching).then(() => {
-                  resolve(_this._storeDataObject);
-                });*/
-
-/*                setTimeout(function () {
-                  _this._remotes[url].disconnect().then(() => {
-                    log.log('[DataObjectStorage.loadRemote] disconnected ');
-
-                  }, (error) => {
-                    log.error('[DataObjectStorage.sync] Error synching with remote storage');
-                    reject(error);
-                  });
-
-                }, 1000);*/
               });
             });
             resolve(_this._storeDataObject);
@@ -122,6 +97,48 @@ class DataObjectsStorage {
 
     });
   }
+
+ // delete Data Objects synched with remote Storages
+
+ deleteRemotes() {
+  let _this = this;
+  return new Promise((resolve, reject) => {
+    let deleting = [];
+    let disconnecting = [];
+
+    _this._storageManager.get(null, null, 'remotes').then((remotes) => {
+
+      // in case we don't have any remotes locally stored
+      log.info('[StoreDataObjects.deleteRemotes] remotes: ', remotes);
+      if (!remotes) resolve();
+
+      let remoteObjects = Object.keys(_this._remotes);
+
+      // in case we don't have any remotes locally stored
+
+      if (remoteObjects.length === 0) resolve();
+
+      remoteObjects.forEach((db) => {
+        deleting.push(
+          _this._remotes[db].disconnect()
+        );
+        deleting.push(
+          _this._remotes[db].delete()
+        );
+      });
+
+      Promise.all(deleting).then(() => {
+        log.log('[StoreDataObjects.deleteRemotes] deleted.');
+
+          resolve();
+
+        }, (error) => { resolve(); });
+      });
+
+            resolve();
+
+  });
+}
 
   /**
    * @description should set the initial state of the dataObjectURL to be resumed if necessary;
@@ -200,12 +217,12 @@ class DataObjectsStorage {
             resolve(storeDataObject[type][metadata.url]);
           }, (error) => {
             log.error('[DataObjectStorage.set] failed to save into remote storage: ', error);
-            this._connectToRemoteThread(storage, options, db, dataObject, table);
+            this._connectToRemoteThread(storage, options, db, storeDataObject[type][metadata.url], table);
             resolve(storeDataObject[type][metadata.url]);
           });
         }, (error) => {
           log.error('[DataObjectStorage.set] failed to connect with remote storage: ', error, ' trying again...');
-          this._connectToRemoteThread(storage, options, db, dataObject, table);
+          this._connectToRemoteThread(storage, options, db, storeDataObject[type][metadata.url], table);
           resolve(storeDataObject[type][metadata.url]);
         });
         //          return storeDataObject[type][metadata.url];

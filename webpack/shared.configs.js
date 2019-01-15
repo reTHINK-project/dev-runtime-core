@@ -41,7 +41,7 @@ function getModeConfig() {
     }
   }));
 
-
+/*
   if (process.env.MODE === 'prod' || process.env.MODE === 'light') {
 
     plugins.push(new webpack.optimize.UglifyJsPlugin({
@@ -73,8 +73,8 @@ function getModeConfig() {
 
   } else {
     plugins.push(new UglifyJsPlugin());
-  }
-
+  }*/
+  plugins.push(new UglifyJsPlugin());
   return plugins;
 }
 
@@ -94,5 +94,8 @@ function processSuffix() {
 
 module.exports = {
   getModeConfig: getModeConfig,
-  processSuffix: processSuffix
+  processSuffix: processSuffix,
+  resolve: {
+    modules: [path.resolve(__dirname, 'hyperties'), 'node_modules']
+  }
 };

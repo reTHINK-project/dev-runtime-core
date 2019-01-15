@@ -555,7 +555,7 @@ class Registry {
         let filteredDataSchemas = [];
         for (let index in dataSchemas) {
           let dataSchema = dataSchemas[index];
-          filteredDataSchemas.push(dataSchema.sourcePackage.sourceCode.properties.scheme.constant);
+          filteredDataSchemas.push(dataSchema.sourcePackage.sourceCode.properties.scheme);
         }
 
         // log.log('[Registry] Hyperty Schemas', filteredDataSchemas);
@@ -646,7 +646,7 @@ class Registry {
   * @param {object} IdpConstraint - constraints to be used when selecting the identity to be associated with the Hyperty including origin, idp, and idHint.
   * @return {HypertyURL}          HypertyURL
   */
-  registerHyperty(sandbox, descriptorURL, descriptor, addressURL, IdpConstraint) {
+  registerHyperty(sandbox, importPath, descriptor, addressURL, IdpConstraint) {
     let _this = this;
 
     let hypertyCapabilities;
@@ -702,7 +702,7 @@ class Registry {
                   p2pRequester = runtimeUtils.runtimeDescriptor.p2pRequesterStub;
                 }
 
-                let hyperty = new HypertyInstance(_this.identifier, _this.registryURL, descriptorURL, descriptor,
+                let hyperty = new HypertyInstance(_this.identifier, _this.registryURL, importPath, descriptor,
                   addressURL.address[0], userProfile, 'guid', _this.runtimeURL, 'ctx', p2pHandler,
                  p2pRequester, hypertyCapabilities.dataSchema, hypertyCapabilities.resources);
 
@@ -1311,7 +1311,7 @@ class Registry {
               }
             });
 
-            if (!registredComponent) {
+            if (!registredComponent || registredComponent.status === STATUS.FAILED ) {
               // this process will load the idp proxy, because is not yet registered;
               log.info('[Registry.resolveNormalStub] deploy new IDPProxy: ', domainUrl);
               _this.loader.loadIdpProxy(domainUrl).then(() => {
@@ -1345,7 +1345,7 @@ class Registry {
               }
             });
 
-            if (!registredComponent) {
+            if (!registredComponent || registredComponent.status === STATUS.FAILED) {
               // lets deploy the protostub
               log.info('[Registry.resolve] trigger new ProtocolStub: ', domainUrl);
               _this.loader.loadStub(domainUrl).then(() => {
