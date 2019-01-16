@@ -656,7 +656,7 @@ class IdentityModule {
 
     return new Promise((resolve, reject) => {
       log.log('[IdentityModule] openPopup');
-      _this.callIdentityModuleFunc('login', { urlreceived: loginUrl }).then((idCode) => {
+      _this.callIdentityModuleFunc('openPopup', { urlreceived: loginUrl }).then((idCode) => {
         return idCode;
       }, (err) => {
         log.error('Error while logging in for the selected identity.');
@@ -1262,7 +1262,7 @@ class IdentityModule {
 
       }, (error) => {
         if (error.hasOwnProperty('description') && error.description.hasOwnProperty('loginUrl')) {
-          _this.callIdentityModuleFunc('login', { urlreceived: error.description.loginUrl }).then((value) => {
+          _this.callIdentityModuleFunc('openPopup', { urlreceived: error.description.loginUrl }).then((value) => {
             log.log('[IdentityModule:callIdentityModuleFunc:openPopup]', usernameHint);
 
             resolve(value);
