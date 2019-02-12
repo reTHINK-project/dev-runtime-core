@@ -511,7 +511,7 @@ class SyncherManager {
 
         let properties = descriptor.sourcePackage.sourceCode.properties;
         let scheme = properties.scheme ? properties.scheme.constant : 'resource';
-        let childrens = properties.children ? properties.children.constant : [];
+        let childrens = properties.childrens ? properties.childrens : [];
 
         log.log('[SyncherManager] - getDataSchemaDescriptor: ', descriptor, childrens);
 
@@ -827,7 +827,7 @@ class SyncherManager {
     //get schema from catalogue and parse -> (children)
     _this._catalog.getDataSchemaDescriptor(msg.body.schema).then((descriptor) => {
       let properties = descriptor.sourcePackage.sourceCode.properties;
-      let childrens = properties.children ? properties.children.constant : [];
+      let childrens = properties.childrens ? properties.childrens : [];
 
       let subscriptions = [];
       subscriptions.push(objURL + '/changes');
@@ -1013,7 +1013,7 @@ class SyncherManager {
       // TODO: remove this since children resources should be available in the DataObjectsStorage
       this._catalog.getDataSchemaDescriptor(schema).then((descriptor) => {
         let properties = descriptor.sourcePackage.sourceCode.properties;
-        let childrens = properties.children ? properties.children.constant : [];
+        let childrens = properties.childrens ? properties.childrens : [];
 
         //children addresses
         let subscriptions = [];
