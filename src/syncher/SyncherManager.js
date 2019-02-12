@@ -322,7 +322,7 @@ class SyncherManager {
 
       let properties = descriptor.sourcePackage.sourceCode.properties;
       let scheme = properties.scheme ? properties.scheme : 'resource';
-      let childrens = properties.children ? properties.children : [];
+      let childrens = properties.childrens ? properties.childrens : [];
 
       // Do schema validation
       // TODO: check if is need to handle with the result of validation
