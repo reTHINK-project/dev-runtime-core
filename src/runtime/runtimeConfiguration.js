@@ -27,7 +27,7 @@ export const runtimeConfiguration = {
       identities: 'userURL, userProfile.email, userProfile.userURL, userProfile.name'
     },
     runtimeCatalogue: {
-      runtimeCatalogue: '&cguid, accessControlPolicy, constraints, dataObjects, hypertyType, objectName, sourcePackage, version'
+      runtimeCatalogue: '&cguid, accessControlPolicy, constraints, dataObjects, type, objectName, sourcePackage, version, url'
     },
     policy: {
       'rethink:activePolicy': 'key,version,value',

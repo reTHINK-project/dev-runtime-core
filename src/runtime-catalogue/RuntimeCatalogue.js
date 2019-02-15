@@ -9,12 +9,14 @@ class RuntimeCatalogue {
   constructor(runtimeFactory, name, schema) {
     if (!runtimeFactory) throw Error('The catalogue needs the runtimeFactory');
 
+    this._runtimeFactory = runtimeFactory;
+
     this._factory = new CatalogueFactory();
     this.httpRequest = runtimeFactory.createHttpRequest();
     this.atob = runtimeFactory.atob ? runtimeFactory.atob : atob;
 
     const storageName = name ? name : 'runtimeCatalogue';
-    const storageSchema = schema ? schema : '&cguid, accessControlPolicy, constraints, dataObjects, hypertyType, objectName, sourcePackage, version';
+    const storageSchema = schema ? schema : '&cguid, accessControlPolicy, constraints, dataObjects, type, objectName, sourcePackage, version, url';
 
     const schemas = {};
     schemas[storageName] = storageSchema;
@@ -32,8 +34,24 @@ class RuntimeCatalogue {
      * @returns {Promise} - Promise that fulfills with the requested descriptor in the appropriate type.
      * If constraints were provided, a descriptor is only returned if it meets the constraints, otherwise the promise will be rejected.
      */
-  getDescriptor(descriptorURL, createFunc, getFull = true, constraints) {
-    log.info('[RuntimeCatalogue] - getting descriptor from: ', descriptorURL, ' with constraints: ', constraints);
+    getDescriptor(descriptorURL, createFunc, getFull = true, constraints) {
+      log.info('[RuntimeCatalogue] - getting descriptor from: ', descriptorURL, ' with constraints: ', constraints);
+
+      if (this._runtimeFactory.isOnline() ) {
+        this.storageManager.get('url', descriptorURL).then((descriptor) => {
+          console.log('[RuntimeCatalogue] saved descriptor ', descriptor);
+          return this._getDescriptor(descriptorURL, createFunc, getFull, constraints);
+        });
+      } else {
+        this.storageManager.get('url', descriptorURL).then((descriptor) => {
+          console.log('[RuntimeCatalogue] saved descriptor ', descriptor);
+        });
+      } 
+
+
+    }
+
+    _getDescriptor(descriptorURL, createFunc, getFull = true, constraints) {
 
     // some flags for optimization
     // (later the descriptor will not be saved in case both of these booleans are true)
@@ -101,6 +119,7 @@ class RuntimeCatalogue {
     returnPromise = returnPromise.then((descriptor) => {
       // store if not saved before, or if full descriptor was requested and only partial descriptor was stored.
       if (!isSavedDescriptor || (isSavedDescriptor && !isCompleteDescriptor && getFull)) {
+        descriptor.url = descriptorURL;
         this.storageManager.set(descriptor.cguid, descriptor.version, descriptor);
       }
       return createFunc.apply(this, [descriptor, constraints]);
