@@ -218,6 +218,15 @@ const rethink = {
                 });
 
             });
+          },
+          listenOnline: (callback) => {
+            return runtimeFactory.listenOnline(callback);
+
+          },
+
+          listenOffline: (callback) => {
+            return runtimeFactory.listenOffline(callback);
+
           }
 
         }

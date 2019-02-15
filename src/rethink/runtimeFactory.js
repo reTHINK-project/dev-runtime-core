@@ -134,6 +134,18 @@ const runtimeFactory = Object.create({
     return this.catalogue;
   },*/
 
+  isOnline() {
+    return window.navigator.onLine;
+  },
+
+  listenOnline(callback) {
+    window.addEventListener('online', callback);
+  },
+
+  listenOffline(callback) {
+    window.addEventListener('offline', callback);
+  },
+
   runtimeCapabilities() {
 
     if (!this.capabilitiesManager) {
