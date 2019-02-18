@@ -148,6 +148,8 @@ class RuntimeUA {
 
       this.domain = this.runtimeConfiguration.domain;
 
+      this._setNetworkStatusListeners();
+
       log.info('[RuntimeUA - init] Starting ');
 
       try {
@@ -215,6 +217,13 @@ class RuntimeUA {
       }
 
     });
+
+  }
+
+  _setNetworkStatusListeners() {
+
+    this.runtimeFactory.listenOnline( this.__updateRuntimeStatus('online') );
+    this.runtimeFactory.listenOffline( this.__updateRuntimeStatus('offline') );
 
   }
 
