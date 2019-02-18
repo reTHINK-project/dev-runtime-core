@@ -37,17 +37,20 @@ class RuntimeCatalogue {
     getDescriptor(descriptorURL, createFunc, getFull = true, constraints) {
       log.info('[RuntimeCatalogue] - getting descriptor from: ', descriptorURL, ' with constraints: ', constraints);
 
-      if (this._runtimeFactory.isOnline() ) {
-        this.storageManager.get('url', descriptorURL).then((descriptor) => {
-          console.log('[RuntimeCatalogue] saved descriptor ', descriptor);
-          return this._getDescriptor(descriptorURL, createFunc, getFull, constraints);
-        });
-      } else {
-        this.storageManager.get('url', descriptorURL).then((descriptor) => {
-          console.log('[RuntimeCatalogue] saved descriptor ', descriptor);
-        });
-      } 
+      return new Promise ((resolve, reject)=>{
+        if (this._runtimeFactory.isOnline() ) {
+            resolve( this._getDescriptor(descriptorURL, createFunc, getFull, constraints));
+        } else {
+          this.storageManager.get('url', descriptorURL).then((descriptor) => {
+            console.log('[RuntimeCatalogue] saved offline descriptor ', descriptor);
 
+            if (descriptor) resolve(createFunc.apply(this, [descriptor, constraints]));
+            else resolve( this._getDescriptor(descriptorURL, createFunc, getFull, constraints));
+
+          });
+        } 
+  
+      });
 
     }
 
