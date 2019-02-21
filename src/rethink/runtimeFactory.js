@@ -95,8 +95,7 @@ const runtimeFactory = Object.create({
         this.databases[name] =  new Dexie(name, {addons:[]});
         this.databases[name].version(1).stores(stores);
       } else {
-        //in case we use a remote storage server to be synched with
-        // we use SyncClient lib, an extension of Dexie
+        // TODO: change to use CouchDB
 
         let versions = [{
           version: 1,
