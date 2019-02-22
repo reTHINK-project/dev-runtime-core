@@ -6,16 +6,19 @@ import Request from './Request';
 //import {RuntimeCatalogue} from 'service-framework/dist/RuntimeCatalogue';
 //import PersistenceManager from 'service-framework/dist/PersistenceManager';
 import StorageManager from '../storage-manager/StorageManager';
+import SyncStorageManager from '../storage-manager/SyncStorageManager';
 
 import RuntimeCapabilities from './RuntimeCapabilities';
 
 // import StorageManagerFake from './StorageManagerFake';
 
 import Dexie from 'dexie';
-import 'dexie-observable';
+/*import 'dexie-observable';
 import 'dexie-syncable';
 
-import SyncClient from 'sync-client/dist/sync-client';
+import SyncClient from 'sync-client/dist/sync-client';*/
+
+import PouchDB from 'pouchdb';
 
 const runtimeFactory = Object.create({
 
@@ -94,23 +97,19 @@ const runtimeFactory = Object.create({
       if (!remote) {
         this.databases[name] =  new Dexie(name, {addons:[]});
         this.databases[name].version(1).stores(stores);
+        if (!this.storeManager.hasOwnProperty(name)) {
+          this.storeManager[name] = new StorageManager(this.databases[name], name, schemas, runtimeUA, 1, remote);
+        }
+    
       } else {
-        // TODO: change to use CouchDB
-
-        let versions = [{
-          version: 1,
-          stores: stores
-        }];
-
-        this.databases[name] =  new SyncClient(name, versions);
+        this.databases[name] =  new PouchDB(name);
+        if (!this.storeManager.hasOwnProperty(name)) {
+          this.storeManager[name] = new SyncStorageManager(this.databases[name], name, remote);
+        }
+        this.storeManager[name].remote = remote;
       } 
     }
 
-    if (!this.storeManager.hasOwnProperty(name)) {
-      this.storeManager[name] = new StorageManager(this.databases[name], name, schemas, runtimeUA, 1, remote);
-    }
-
-    if (remote) this.storeManager[name].remote = remote;
 
     return this.storeManager[name];
   },

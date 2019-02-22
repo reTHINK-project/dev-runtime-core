@@ -24,7 +24,12 @@ class SyncStorageManager {
 
   connect(options = { live: true, retry: true }) {
     // return this.db.connect(this._remoteStorage, options);
-    return this.replicationHandler = this.db.replicate.to(this._remoteStorage, options, this._syncError());
+
+    let live = (options && options.hasOwnProperty('once')) ? !options.once : true;
+
+    let opts = { live: live, retry: true };
+
+    return this.replicationHandler = this.db.replicate.to(this._remoteStorage, opts, this._syncError());
   }
 
   // There was some form or error syncing
@@ -98,27 +103,42 @@ class SyncStorageManager {
    * @memberof StorageManager
    */
   get(key, value) {
-    if (!key) throw Error('[SyncStorageManager.get] key is mandatory param');
+    // TODO: add options for pagination for DOs with high number of child objects
+//    if (!key) throw Error('[SyncStorageManager.get] key is mandatory param');
 
     return new Promise((resolve, reject) => {
 
       log.info('[SyncStorageManager.get] key ', key, ' value ', value);
 
-      if (!value) {
-        this.db.get(key).then((doc)=>{
-          resolve(doc);
+      if (key) {
+        if (!value) {
+          this.db.get(key).then((doc)=>{
+            resolve(doc);
+          }, (err)=>{
+            if (err.name === 'not_found') resolve(undefined)
+            else reject(err);
+          });
+        } 
+        else this.db.get(key).then((doc) => {
+          log.info('[SyncStorageManager.get] retrieved doc ', doc);
+          resolve(doc[value]);
+        }, (err)=>{
+          if (err.name === 'not_found') resolve(undefined)
+          else reject(err);
+      });
+      } else {
+        this.db.allDocs({include_docs: true}).then((docs)=>{
+          let result = [];
+          docs.forEach((doc)=>{
+            result.push(doc.doc);
+          });
+          resolve(result);
         }, (err)=>{
           if (err.name === 'not_found') resolve(undefined)
           else reject(err);
         });
-      } 
-      else this.db.get(key).then((doc) => {
-        log.info('[SyncStorageManager.get] retrieved doc ', doc);
-        resolve(doc[value]);
-      }, (err)=>{
-        if (err.name === 'not_found') resolve(undefined)
-        else reject(err);
-    });
+      }
+
     });
 
   }
@@ -132,24 +152,31 @@ class SyncStorageManager {
    */
 
   delete(key, value) {
-    if (!key) throw Error('[SyncStorageManager.get] key is mandatory param');
+    //todo: if no key delete the db
+//    if (!key) throw Error('[SyncStorageManager.get] key is mandatory param');
     return new Promise((resolve, reject) => {
 
       log.info('[SyncStorageManager.delete] key ', key, ' value ', value);
 
-      this.db.get(key).then((doc) => {
-        if (!value) {
-          this.db.remove(doc).then(()=>{
-            resolve();
-          }, resolve(undefined));
-        } else {
-          delete doc[value];
-          resolve(this.db.put(doc));
-        }
-      }, (err)=>{
-        if (err.name === 'not_found') resolve(undefined)
-        else reject(err);
-      });
+      if (key) {
+        this.db.get(key).then((doc) => {
+          if (!value) {
+            this.db.remove(doc).then(()=>{
+              resolve();
+            }, resolve(undefined));
+          } else {
+            delete doc[value];
+            resolve(this.db.put(doc));
+          }
+        }, (err)=>{
+          if (err.name === 'not_found') resolve(undefined)
+          else reject(err);
+        });
+  
+      } else {
+        db.destroy().then(()=> resolve(), (err) => reject(err) )
+      } 
+
     });
   }
 

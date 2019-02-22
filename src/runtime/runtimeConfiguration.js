@@ -94,5 +94,5 @@ export const runtimeConfiguration = {
     suffix: ''
   },
   globalRegistryURL: 'global://registry.',
-  remoteStorage: 'https://hysmart.rethink.ptinovacao.pt/backup/'
+  remoteStorage: 'http://admin:admin@localhost:5984'
 };

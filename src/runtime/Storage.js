@@ -18,11 +18,11 @@ export function storage(runtimeFactory, runtimeStatusUpdate) {
   return storages;
 }
 
-export function createSyncDB(key, runtimeFactory, schema, runtimeStatusUpdate, url = false) {
+export function createSyncDB(key, runtimeFactory, runtimeStatusUpdate, url = false) {
   if (!runtimeFactory) throw new Error('The runtime factory is a needed parameter');
 
   let remote = url ? url : runtimeConfiguration.remoteStorage;
 
-  return runtimeFactory.storageManager(key, schema, runtimeStatusUpdate, remote);
+  return runtimeFactory.storageManager(key, null, runtimeStatusUpdate, remote);
 
 }

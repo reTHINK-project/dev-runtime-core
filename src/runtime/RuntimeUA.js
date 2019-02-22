@@ -148,7 +148,6 @@ class RuntimeUA {
 
       this.domain = this.runtimeConfiguration.domain;
 
-      this._setNetworkStatusListeners();
 
       log.info('[RuntimeUA - init] Starting ');
 
@@ -193,6 +192,7 @@ class RuntimeUA {
 
 
         }).then((status) => {
+          this._setNetworkStatusListeners();
 
           this._hypertyResourcesStorage = new HypertyResourcesStorage(this.runtimeURL, this.messageBus, this.storages.hypertyResources, this._hypertyResources);
 
@@ -222,8 +222,8 @@ class RuntimeUA {
 
   _setNetworkStatusListeners() {
 
-    this.runtimeFactory.listenOnline( this.__updateRuntimeStatus('online') );
-    this.runtimeFactory.listenOffline( this.__updateRuntimeStatus('offline') );
+    this.runtimeFactory.listenOnline( this._updateRuntimeStatus('online') );
+    this.runtimeFactory.listenOffline( this._updateRuntimeStatus('offline') );
 
   }
 
