@@ -24,11 +24,11 @@ class SyncStorageManager {
 
   connect(options = { live: true, retry: true }) {
     // return this.db.connect(this._remoteStorage, options);
-    return this.replicationHandler = db.replicate.to(this._remoteStorage, options, syncError);
+    return this.replicationHandler = this.db.replicate.to(this._remoteStorage, options, this._syncError());
   }
 
   // There was some form or error syncing
-  syncError() {
+  _syncError() {
     // do something
   }
 

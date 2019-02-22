@@ -3,15 +3,19 @@ import PouchDB from 'pouchdb';
 import SyncStorageManager from '../src/storage-manager/SyncStorageManager';
 
 let expect = chai.expect;
-let remote = 'http://localhost:5984'
+let remote = 'http://admin:admin@localhost:5984'
 let storage;
 let db;
+
+// These tests require a local couchDB listening at 5984 with user admin and passwd admin
+
 describe('SyncStorageManager', function () {
   beforeEach(() => {
     const storeName = 'objects';
     db = new PouchDB(storeName);
 
     storage = new SyncStorageManager(db, storeName, remote);
+    storage.connect();
   });
 
   afterEach((done) => {
