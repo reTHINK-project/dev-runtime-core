@@ -22,15 +22,28 @@ class SyncStorageManager {
 
   // start backup with remoteStorage server. 
 
-  connect(options = { live: true, retry: true }) {
+  connect(options) {
     // return this.db.connect(this._remoteStorage, options);
 
-    let live = (options && options.hasOwnProperty('once')) ? !options.once : true;
+    let live = (options && options.hasOwnProperty('once')) ? !options.once : false;
 
-    let opts = { live: live, retry: true };
+    let opts = { retry: true, live: live };
 
     return this.replicationHandler = this.db.replicate.to(this._remoteStorage, opts, this._syncError());
   }
+
+  // backup at remote backup server of doc identified by id
+
+  backup(id) {
+    // return this.db.connect(this._remoteStorage, options);
+
+    let opts = { retry: true };
+
+    if (id) opts.doc_ids =[id];
+
+    return this.replicationHandler = this.db.replicate.to(this._remoteStorage, opts, this._syncError());
+  }
+
 
   // There was some form or error syncing
   _syncError() {
@@ -129,7 +142,7 @@ class SyncStorageManager {
       } else {
         this.db.allDocs({include_docs: true}).then((docs)=>{
           let result = [];
-          docs.forEach((doc)=>{
+          docs.rows.forEach((doc)=>{
             result.push(doc.doc);
           });
           resolve(result);
@@ -174,7 +187,7 @@ class SyncStorageManager {
         });
   
       } else {
-        db.destroy().then(()=> resolve(), (err) => reject(err) )
+        this.db.destroy().then(()=> resolve(), (err) => reject(err) )
       } 
 
     });

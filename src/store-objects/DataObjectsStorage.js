@@ -32,7 +32,7 @@ class DataObjectsStorage {
     let _this = this;
     return new Promise((resolve, reject) => {
       let loading = [];
-      let loadingDBs = [];
+      let synching = [];
 
       _this._storageManager.get(null, null, 'remotes').then((remotes) => {
 
@@ -56,32 +56,36 @@ class DataObjectsStorage {
           loading.push(_this._remotes[db].get());
         });
 
-        Promise.all(loading).then(() => {
-          log.log('[StoreDataObjects.loadRemote] loaded. Starting init');
+        Promise.all(loading).then((remotes) => {
+          log.log('[StoreDataObjects.loadRemote] loaded: ', remotes);
           //TODO: init this._storeDataObject with loaded data objects
-          Object.keys(_this._remotes).forEach((remote) => {
+/*          Object.keys(remotes).forEach((remote) => {
 
             synching.push(_this.sync(remote));
           });
-          Promise.all(synching).then((dataObjs) => {
+          Promise.all(synching).then((dataObjs) => {*/
+
+            let dataObjs = remotes;
 
             if (dataObjs.length === 0) resolve();
 
             dataObjs.forEach((dO) => {
-              Object.keys(dO).forEach((url) => {
 
-                log.log('[StoreDataObjects.loadRemote] loaded remote ', dO[url]);
+              let dataObj = _this._remoteDoc2dataObject(dO);
+//              Object.keys(dO).forEach((i) => {
+
+                log.log('[StoreDataObjects.loadRemote] loaded remote ', dataObj);
                 //              if (dO[remote].isReporter) {
-                let type = this._getTypeOfObject(dO[url].isReporter);
+                let type = this._getTypeOfObject(dataObj.isReporter);
 
                 if (!_this._storeDataObject) _this._storeDataObject = {};
 
                 if (!_this._storeDataObject.hasOwnProperty(type)) _this._storeDataObject[type] = {};
 
-                _this._storeDataObject[type][url] = dO[url];
+                _this._storeDataObject[type][dataObj.url] = dataObj;
 
-              });
-            });
+ //             });
+//            });
             resolve(_this._storeDataObject);
 
           }, (error) => { reject(error) });
@@ -194,7 +198,8 @@ class DataObjectsStorage {
 
       let backup = metadata.hasOwnProperty('backup') ? metadata.backup : false;
       let table = backup ? metadata.url : this._table;
-      let db = backup ? table.split('://')[1] : this._table;
+//      let db = backup ? table.split('://')[1] : this._table;
+      let db = backup ? 'do-'+table.split('/')[3] : this._table;
       if (backup && !this._remotes[metadata.url]) {
         let schema = {};
         schema[table] = this._remoteSchema;
@@ -207,16 +212,18 @@ class DataObjectsStorage {
 
       let storage = backup ? this._remotes[table] : this._storageManager;
 
-      if (backup) {// lets connect to remote storage to enable sync
-        storage.connect();
+      if (backup) {
+        // lets connect to remote storage to enable sync
           storage.set(table, storeDataObject[type][metadata.url]).then(() => {
+            if (metadata.isReporter) storage.connect();
             resolve(storeDataObject[type][metadata.url]);
           }, (error) => {
             log.error('[DataObjectStorage.set] failed to save into remote storage: ', error);
             reject(error);
           });
       } else {
-        storage.set(db, 1, this._filterRemotes(storeDataObject), table).then(() => {
+        console.log('[DataObjectStorage.set] _storeDataObject before filter ', this._storeDataObject);
+        storage.set(db, 1, this._filterRemotes(this._storeDataObject), table).then(() => {
           resolve(storeDataObject[type][metadata.url]);
         });
       }
@@ -231,8 +238,13 @@ class DataObjectsStorage {
 
     let filtered = deepClone(storeDataObject);
 
+    console.log('[DataObjectStorage._filterRemotes] starting filtering ', filtered);
+
     remotes.forEach((remote) => {
-      if (filtered['reporters'] && filtered['reporters'][remote]) delete filtered['reporters'][remote];
+      if (filtered['reporters'] && filtered['reporters'][remote]){
+        delete filtered['reporters'][remote];
+        console.log('[DataObjectStorage._filterRemotes] filter updated ', filtered);
+      } 
       else delete filtered['observers'][remote];
     });
 
@@ -313,10 +325,10 @@ class DataObjectsStorage {
     let storage = storeDataObject[type][resource].backup ? this._remotes[db] : this._storageManager;
 //    let table = storeDataObject[type][resource].backup ? db.split('/')[3] : this._table;
 
-    if (storeDataObject[type][resource].backup) {
-      return storage.set(db, this._filterRemotes(storeDataObject));
+    if (storeDataObject[type][resource].backup) {// should we remove childrens?
+      return storage.set(db, storeDataObject[type][resource]);
     } else {
-      return storage.set('syncherManager:ObjectURLs', 1, storeDataObject[type][resource], this._table, updateRuntimeStatus);
+      return storage.set('syncherManager:ObjectURLs', 1, this._filterRemotes(storeDataObject) , this._table, updateRuntimeStatus);
     }
 
   }
@@ -354,9 +366,13 @@ class DataObjectsStorage {
     });*/
 
     if (storeDataObject[type][resource].backup) {
-      return storage.set(attribute, value);
+        
+       return storage.set(attribute, value).then(()=>{
+          storage.backup(attribute);
+          
+        });
     } else {
-      return storage.set('syncherManager:ObjectURLs', 1, storeDataObject[type][resource], this._table, updateRuntimeStatus);
+      return storage.set('syncherManager:ObjectURLs', 1, this._filterRemotes(storeDataObject), this._table, updateRuntimeStatus);
     }
 
 
@@ -406,10 +422,10 @@ class DataObjectsStorage {
         return storeDataObject[type][resource];
       });*/
 
-      if (storeDataObject[type][resource].backup) {
-        return storage.set(db, this._filterRemotes(storeDataObject));
+      if (storeDataObject[type][resource].backup) {//just update the attribute that is changing
+        return storage.set(db, storeDataObject[type][resource]);
       } else {
-        return storage.set('syncherManager:ObjectURLs', 1, storeDataObject[type][resource], this._table, updateRuntimeStatus);
+        return storage.set('syncherManager:ObjectURLs', 1, this._filterRemotes(storeDataObject), this._table, updateRuntimeStatus);
       }
   
     }
@@ -553,7 +569,7 @@ class DataObjectsStorage {
           //          this._remotes[resource].get().then((dataObject)=>{
           log.info('[DataObjectStorage.sync] returning synched DO: ', doc);
 
-          if (!isReporter) _this._remotes[resource].disconnect();
+//          if (!isReporter) _this._remotes[resource].disconnect();
 
           // to ensure local data object as the right value for isReporter
           // remote data object should always have isReporter = true.
@@ -573,13 +589,13 @@ class DataObjectsStorage {
 
   _remoteDoc2dataObject(doc) {
     if (doc.length>1) {//has childrens
-      let dataObject = doc[0];
+      let dataObject = doc[doc.length-1];
 
       dataObject.childrenObjects = {};
 
       let i;
 
-      for ( i=1; i<doc.length; i++) {
+      for ( i=0; i<doc.length-1; i++) {
         dataObject.childrenObjects[doc[i]._id] = doc[i];
       }
 
