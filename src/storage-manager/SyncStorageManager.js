@@ -1,6 +1,7 @@
 // Log System
 import * as logger from 'loglevel';
 let log = logger.getLogger('StorageManager');
+import PouchDB from 'pouchdb';
 
 class SyncStorageManager {
 
@@ -14,11 +15,6 @@ class SyncStorageManager {
     this._remoteStorage = remoteStorage + '/' + storageName;
   }
 
-  // set remoteStorage backup server URL
-
-  set remoteStorage(remoteStorage) {
-    this._remoteStorage = remoteStorage + '/' + storageName;
-  }
 
   // start backup with remoteStorage server. 
 
@@ -44,6 +40,16 @@ class SyncStorageManager {
     return this.replicationHandler = this.db.replicate.to(this._remoteStorage, opts, this._syncError());
   }
 
+  sync(id) {
+    // return this.db.connect(this._remoteStorage, options);
+    console.log('[SyncStorageManager.sync] starting ');
+
+    let opts = { retry: true, include_docs: true };
+
+    if (id) opts.doc_ids =[id];
+
+    return this.replicationHandler = this.db.replicate.from(this._remoteStorage, opts, this._syncError());
+  }
 
   // There was some form or error syncing
   _syncError() {
@@ -187,7 +193,8 @@ class SyncStorageManager {
         });
   
       } else {
-        this.db.destroy().then(()=> resolve(), (err) => reject(err) )
+        let db = new PouchDB(this._remoteStorage);
+        db.destroy().then(()=> resolve(), (err) => reject(err) )
       } 
 
     });

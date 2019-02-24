@@ -4,7 +4,7 @@ let log = logger.getLogger('StorageManager');
 
 class StorageManager {
 
-  constructor(db, storageName, schemas, runtimeUA, version = 1, remoteStorage = false) {
+  constructor(db, storageName, schemas) {
     if (!db) throw Error('The Storage Manager needs the database instance');
     if (!storageName) throw Error('The Storage Manager needs the storage name');
 
@@ -23,71 +23,9 @@ class StorageManager {
 
     this.db = db;
     this.storageName = storageName;
-    this._remoteStorage = remoteStorage;
-    this._runtimeUA = runtimeUA;
   }
 
-  // set remoteStorage backup server URL
 
-  set remoteStorage(remoteStorage) {
-    this._remoteStorage = remoteStorage;
-  }
-
-  // start sync with remoteStorage server. Returns a promise that resolves if connection is performed otherwise it is rejected
-
-/*  connect(options) {
-    return this.db.connect(this._remoteStorage, options);
-  }*/
-
-  // stop sync with remoteStorage server. Returns promise 
-
-/*  disconnect() {
-   return new Promise((resolve,reject) => {
-      this.db.disconnect(this._remoteStorage).then(()=> {
-        resolve();
-      }, (error) => {
-      reject(error);
-    });
-  });
-  }*/
-  // to retrieve the last revision stored in the backup server
-
-/*  getBackupRevision(resource) {
-
-    return new Promise((resolve)=> {
-      this.db._syncNodes.get({type: 'remote'}).then((status)=> {
-        console.log('[StorageManager.getBackupRevision] retrieved status: ', status);
-        if (status && status.hasOwnProperty('appliedRemoteRevision')) {
-          if (status.appliedRemoteRevision === null) status.appliedRemoteRevision = 0;
-
-          resolve(status.appliedRemoteRevision);
-        } 
-    });
-  });
-  }*/
-
-  // to retrieve the last revision stored in the backup server
-  // and broadcast it
-
- /* _updateBackupRevision(resource) {
-
-    return new Promise((resolve)=> {
-      this.db._syncNodes.get({type: 'remote'}).then((status)=> {
-        console.log('[StorageManager._updateBackupRevision] retrieved status: ', status);
-        if (status && status.hasOwnProperty('appliedRemoteRevision')) {
-          if (status.appliedRemoteRevision === null) status.appliedRemoteRevision = 0;
-
-          this._runtimeUA._updateRuntimeStatus(
-            {
-              resource: resource,
-              value: { backupRevision: status.appliedRemoteRevision }
-            }
-          )
-          resolve(status.appliedRemoteRevision);
-        } 
-    });
-  });
-  }*/
 
   _checkKey(key) {
     if (typeof key !== 'string') return key.toString();

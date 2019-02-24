@@ -3,7 +3,7 @@ module.exports = function(config) {
     basePath: '',
     frameworks: ['mocha', 'chai', 'sinon'],
     files: [
-      './test/*.spec.js'
+      './test/SyncStorageManager.spec.js'
     ],
     exclude: [
       './test/GraphConnector.spec.js',

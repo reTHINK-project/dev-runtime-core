@@ -11,11 +11,11 @@ let db;
 
 describe('SyncStorageManager', function () {
   beforeEach(() => {
-    const storeName = 'objects';
+    const storeName = 'do-027c35c0-22cc-8e39-f164-a1c3e9c6377f';
     db = new PouchDB(storeName);
 
     storage = new SyncStorageManager(db, storeName, remote);
-    storage.connect();
+//    storage.connect();
   });
 
   afterEach((done) => {
@@ -62,6 +62,34 @@ describe('SyncStorageManager', function () {
     });
   });
 
+  describe('backup', function () {
+
+    it.skip('should backup the full database', function (done) {
+      storage.set('key', { value: 'value' })
+        .then(doc => {
+          console.log('[SyncStorageManager.spec] backup database ', doc);
+          storage.backup().then(()=>{
+            done();
+          })
+
+        });
+    });
+
+    it.skip('should backup just one doc', function (done) {
+      storage.set('key', { value: 'value' })
+        .then(() => {
+          storage.set('key1', { value: 'value2' })
+          .then(doc => {
+            console.log('[SyncStorageManager.spec] backup database ', doc);
+            storage.backup('key1').then(()=>{
+            done();
+          })
+        })
+
+        });
+    });
+
+  });  
 
   describe('get', function () {
     it('should get the value for a given key', function (done) {
@@ -126,6 +154,21 @@ describe('SyncStorageManager', function () {
         });
     });
 
+    it.skip('should delete the database', function (done) {
+      storage.delete()
+      .then(() => {
+        storage.get('key')
+          .then(() => {
+            console.error('[SyncStorageManager.spec] after full delete failed ');
+            done();
+          },(err)=>{
+            console.error('[SyncStorageManager.spec] full delete error: ', err);
+            expect(err).to.be.eql('Error: database is destroyed');
+            done();
+          });
+      });
+  });
+
     it('shouldnt remove a value from StorageManager if the given key doesnt exist', function (done) {
       storage.delete('key321')
         .then(result => {
@@ -134,6 +177,7 @@ describe('SyncStorageManager', function () {
         });
     });
   });
+
   describe('getVersion', function () {
     it('should get the value version for a given key', function (done) {
       storage.set('key', { value: 'teste' }, '1-teste')
@@ -153,6 +197,21 @@ describe('SyncStorageManager', function () {
           done();
         });
     });
+  });
+
+  describe('sync', function () {
+    it('should synchronise with remote db', function (done) {
+      storage.sync()
+        .then(() => {
+          storage.get()
+            .then(doc => {
+              console.log('[SyncStorageManager.sync] doc ', doc )
+              expect(doc).not.to.be.empty;
+              done();
+            });
+        });
+    });
+
   });
 
 });
