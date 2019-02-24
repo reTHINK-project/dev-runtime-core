@@ -13,7 +13,7 @@
         <td colspan="3" title="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.109 Safari/537.36">Browser: Chrome 72.0.3626 (Windows 10.0.0)</td>
       </tr>
       <tr class="overview">
-        <td colspan="3">Timestamp: 2019-2-24 14:45:37</td>
+        <td colspan="3">Timestamp: 2019-2-24 16:33:43</td>
       </tr>
       <tr>
         <td colspan="3"/>
@@ -30,15 +30,15 @@
         <td colspan="3" title="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.109 Safari/537.36">Browser: Chrome 72.0.3626 (Windows 10.0.0)</td>
       </tr>
       <tr class="overview">
-        <td colspan="3">Timestamp: 2019-2-24 15:16:17</td>
+        <td colspan="3">Timestamp: 2019-2-24 20:23:25</td>
       </tr>
       <tr>
         <td colspan="3">
-          15 tests / 
-          0 errors / 
+          0 tests / 
+          1 errors / 
           0 failures / 
-          3 skipped / 
-          runtime: 0.487s
+          0 skipped / 
+          runtime: 0s
         </td>
       </tr>
       <tr class="header">
@@ -46,110 +46,9 @@
         <td>Spec</td>
         <td>Suite / Results</td>
       </tr>
-      <tr class="pass">
-        <td>Passed in 0.027s</td>
-        <td>should set the value for a given key-value tuple</td>
-        <td>SyncStorageManager &raquo; set</td>
-      </tr>
-      <tr class="pass">
-        <td>Passed in 0.013s</td>
-        <td>should replace the value for a given key-version tuple if it exists</td>
-        <td>SyncStorageManager &raquo; set</td>
-      </tr>
-      <tr class="pass">
-        <td>Passed in 0.009s</td>
-        <td>should set the value and its version for a given key-value tuple</td>
-        <td>SyncStorageManager &raquo; set</td>
-      </tr>
-      <tr class="skip">
-        <td>Skipped</td>
-        <td>should backup the full database</td>
-        <td>SyncStorageManager &raquo; backup</td>
-      </tr>
-      <tr class="skip">
-        <td>Skipped</td>
-        <td>should backup just one doc</td>
-        <td>SyncStorageManager &raquo; backup</td>
-      </tr>
-      <tr class="pass">
-        <td>Passed in 0.011s</td>
-        <td>should get the value for a given key</td>
-        <td>SyncStorageManager &raquo; get</td>
-      </tr>
-      <tr class="pass">
-        <td>Passed in 0.01s</td>
-        <td>should get the value for a given attribute</td>
-        <td>SyncStorageManager &raquo; get</td>
-      </tr>
-      <tr class="pass">
-        <td>Passed in 0.005s</td>
-        <td>should return undefined if no object with the given key exists</td>
-        <td>SyncStorageManager &raquo; get</td>
-      </tr>
-      <tr class="pass">
-        <td>Passed in 0.01s</td>
-        <td>should remove a value from StorageManager for a given key</td>
-        <td>SyncStorageManager &raquo; delete</td>
-      </tr>
-      <tr class="pass">
-        <td>Passed in 0.016s</td>
-        <td>should remove an attribute for a given key </td>
-        <td>SyncStorageManager &raquo; delete</td>
-      </tr>
-      <tr class="skip">
-        <td>Skipped</td>
-        <td>should delete the database</td>
-        <td>SyncStorageManager &raquo; delete</td>
-      </tr>
-      <tr class="pass">
-        <td>Passed in 0.007s</td>
-        <td>shouldnt remove a value from StorageManager if the given key doesnt exist</td>
-        <td>SyncStorageManager &raquo; delete</td>
-      </tr>
-      <tr class="pass">
-        <td>Passed in 0.01s</td>
-        <td>should get the value version for a given key</td>
-        <td>SyncStorageManager &raquo; getVersion</td>
-      </tr>
-      <tr class="pass">
-        <td>Passed in 0.007s</td>
-        <td>should get undefined if no object with the given key exists</td>
-        <td>SyncStorageManager &raquo; getVersion</td>
-      </tr>
-      <tr class="pass">
-        <td>Passed in 0.362s</td>
-        <td>should synchronise with remote db</td>
-        <td>SyncStorageManager &raquo; sync</td>
-      </tr>
-      <tr class="system-out">
-        <td colspan="3"><strong>System output:</strong><br />Chrome 72.0.3626 (Windows 10.0.0) LOG: '[SyncStorageManager.set] key ', 'key', ' value ', Object{value: 'value'}
-<br />Chrome 72.0.3626 (Windows 10.0.0) ERROR: '[SyncStorageManager.set] ', F{status: 404, name: 'not_found', message: 'missing', error: true, reason: 'missing', docId: 'key'}
-<br />Chrome 72.0.3626 (Windows 10.0.0) LOG: '[SyncStorageManager.spec] set doc ', Object{value: 'value', _id: 'key'}
-<br />Chrome 72.0.3626 (Windows 10.0.0) LOG: '[SyncStorageManager.set] key ', 'key', ' value ', Object{value: 'value'}
-<br />Chrome 72.0.3626 (Windows 10.0.0) ERROR: '[SyncStorageManager.set] ', F{status: 404, name: 'not_found', message: 'missing', error: true, reason: 'missing', docId: 'key'}
-<br />Chrome 72.0.3626 (Windows 10.0.0) LOG: '[SyncStorageManager.set] key ', 'key', ' value ', Object{value: 'new value'}
-<br />Chrome 72.0.3626 (Windows 10.0.0) LOG: '[SyncStorageManager.spec] updated doc ', Object{value: 'new value', _id: 'key', _rev: '2-de8af86204c958d4068e4e5878a0da00'}
-<br />Chrome 72.0.3626 (Windows 10.0.0) LOG: '[SyncStorageManager.set] key ', 'key', ' value ', Object{value: 'value'}
-<br />Chrome 72.0.3626 (Windows 10.0.0) ERROR: '[SyncStorageManager.set] ', F{status: 404, name: 'not_found', message: 'missing', error: true, reason: 'missing', docId: 'key'}
-<br />Chrome 72.0.3626 (Windows 10.0.0) LOG: '[SyncStorageManager.spec] set doc with version ', Object{value: 'value', _id: 'key', _rev: '1-test'}
-<br />Chrome 72.0.3626 (Windows 10.0.0) LOG: '[SyncStorageManager.set] key ', 'key', ' value ', Object{name: 'test'}
-<br />Chrome 72.0.3626 (Windows 10.0.0) ERROR: '[SyncStorageManager.set] ', F{status: 404, name: 'not_found', message: 'missing', error: true, reason: 'missing', docId: 'key'}
-<br />Chrome 72.0.3626 (Windows 10.0.0) LOG: '[SyncStorageManager.set] key ', 'key', ' value ', Object{name: 'test'}
-<br />Chrome 72.0.3626 (Windows 10.0.0) ERROR: '[SyncStorageManager.set] ', F{status: 404, name: 'not_found', message: 'missing', error: true, reason: 'missing', docId: 'key'}
-<br />Chrome 72.0.3626 (Windows 10.0.0) LOG: '[SyncStorageManager.set] key ', 'key', ' value ', Object{value: 'value'}
-<br />Chrome 72.0.3626 (Windows 10.0.0) ERROR: '[SyncStorageManager.set] ', F{status: 404, name: 'not_found', message: 'missing', error: true, reason: 'missing', docId: 'key'}
-<br />Chrome 72.0.3626 (Windows 10.0.0) LOG: '[SyncStorageManager.set] key ', 'key', ' value ', Object{value: 'value', name: 'test'}
-<br />Chrome 72.0.3626 (Windows 10.0.0) ERROR: '[SyncStorageManager.set] ', F{status: 404, name: 'not_found', message: 'missing', error: true, reason: 'missing', docId: 'key'}
-<br />Chrome 72.0.3626 (Windows 10.0.0) LOG: '[SyncStorageManager.spec] after delete ', Object{name: 'test', _id: 'key', _rev: '2-b549e1d16d6bea9a8511945f9a3b4320'}
-<br />Chrome 72.0.3626 (Windows 10.0.0) LOG: '[SyncStorageManager.set] key ', 'key', ' value ', Object{value: 'teste'}
-<br />Chrome 72.0.3626 (Windows 10.0.0) ERROR: '[SyncStorageManager.set] ', F{status: 404, name: 'not_found', message: 'missing', error: true, reason: 'missing', docId: 'key'}
-<br />Chrome 72.0.3626 (Windows 10.0.0) LOG: '[SyncStorageManager.sync] starting '
-<br />Chrome 72.0.3626 (Windows 10.0.0) INFO: 'The above 404 is totally normal. PouchDB is just checking if a remote checkpoint exists.'
-<br />Chrome 72.0.3626 (Windows 10.0.0) LOG: '[SyncStorageManager.sync] doc ', [Object{identity: Object{assertion: ..., idp: ..., expires: ..., userProfile: ..., refresh: ..., userURL: ...}, value: Object{url: ..., reporter: ..., created: ..., runtime: ..., schema: ..., parent: ..., mutual: ..., data: ...}, _id: '98ececbe-146c-c846-c339-e571b1e6379e#2', _rev: '1-1b484dc3c8882336c2be1888a3c725b1'}, Object{identity: Object{assertion: ..., idp: ..., expires: ..., userProfile: ..., refresh: ..., userURL: ...}, value: Object{url: ..., reporter: ..., created: ..., runtime: ..., schema: ..., parent: ..., mutual: ..., data: ...}, _id: 'c5432481-a0eb-3d5d-a467-16a804c68788#2', _rev: '1-6a3f0a4622c3d53dcb1dc78700de96b8'}, Object{identity: Object{assertion: ..., idp: ..., expires: ..., userProfile: ..., refresh: ..., userURL: ...}, value: Object{url: ..., reporter: ..., created: ..., runtime: ..., schema: ..., parent: ..., mutual: ..., data: ...}, _id: 'c5432481-a0eb-3d5d-a467-16a804c68788#3', _rev: '1-1b0b6f7b4c6b950b678d0e4d504202f3'}, Object{identity: Object{assertion: ..., idp: ..., expires: ..., userProfile: ..., refresh: ..., userURL: ...}, value: Object{url: ..., reporter: ..., created: ..., runtime: ..., schema: ..., parent: ..., mutual: ..., data: ...}, _id: 'c5432481-a0eb-3d5d-a467-16a804c68788#4', _rev: '1-12d138f7452e057a2a74952404e91a91'}, Object{subscriptions: [], subscriberUsers: [...], childrenObjects: Object{}, data: Object{startingTime: ..., status: ..., participants: ..., cseq: ...}, resources: [...], mutual: false, domain_registration: false, reuseURL: true, offline: 'hyperty://sharing-cities-dsm/offline-sub-mgr', backup: true, schema: 'hyperty-catalogue://catalogue.localhost/.well-known/dataschema/Communication', name: 'Colégio Parque do Falcão', reporter: 'hyperty://localhost/98ececbe-146c-c846-c339-e571b1e6379e', resume: false, resource: true, created: '2019-02-24T12:47:45.219Z', runtime: 'runtime://localhost/e600d6ef-1186-35af-d93c-a869b510f75d', url: 'comm://localhost/027c35c0-22cc-8e39-f164-a1c3e9c6377f', childrens: [...], isReporter: true, isToSaveData: true, version: 2, lastModified: '2019-02-24T12:46:04.477Z', _id: 'comm://localhost/027c35c0-22cc-8e39-f164-a1c3e9c6377f', _rev: '4-3e12e94d42345fa8b4cc4b1560d05f44'}]
-</td>
-      </tr>
       <tr class="system-errors">
         <td colspan="3"><strong>Errors:</strong><br />Disconnectedundefined
+<br />Disconnectedundefined
 </td>
       </tr>
     </table>

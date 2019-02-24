@@ -508,7 +508,11 @@ class DataObject {
 
     //removing domain from childId to avoid backup issues with '.'
 
-    childInput.url = _this._owner.split('/')[3] + '#' + _this._childId;
+    let start = Math.floor(Date.now());
+
+    console.log('[DataObject._getChildInput] start ', start);
+
+    childInput.url = start + '-' + _this._owner.split('/')[3] + '#' + _this._childId;
 
     childInput.parentObject = _this;
     childInput.reporter = _this._owner;
