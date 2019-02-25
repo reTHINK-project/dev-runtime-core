@@ -237,7 +237,7 @@ class Syncher {
         if (criteria) readMsg.body.criteria = criteria;
 
           let callback = (reply) => {
-            return _this._readCallBack(reply, resolve, reject);
+            resolve(reply.body.value);
           };
     
           _this._bus.postMessage(readMsg, callback, false);
@@ -252,7 +252,7 @@ class Syncher {
 
   }
 
-  _readCallBack(reply, resolve,reject) {
+/*  _readCallBack(reply, resolve,reject) {
     let _this = this;
 
       console.log('[Syncher.read] reply: ', reply);
@@ -290,7 +290,7 @@ class Syncher {
       reject(reply.body.desc);
       }
 
-  }
+  }*/
 
   _readReporter(objURL) {
     let _this = this;

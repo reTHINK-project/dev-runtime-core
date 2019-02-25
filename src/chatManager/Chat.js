@@ -72,6 +72,7 @@ class Chat {
     if (!dataObjectReporter) throw new Error('[ChatController] The data object reporter is necessary parameter ');
     let _this = this;
 
+
     _this.controllerMode = 'reporter';
 
     // Handler to process received files

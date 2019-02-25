@@ -193,6 +193,7 @@ class DataObject {
 
   /**
    * Sync Data Object Observer with last version of Data Object Reporter. Useful for Resumes
+   * remove since hyperties can directly use syncher read?
    */
   sync() {
 
@@ -206,7 +207,7 @@ class DataObject {
 //      if (this.metadata.backupRevision) criteria.backupRevision = this.metadata.backupRevision;
 
       _this._syncher.read(_this._metadata.url, criteria).then((value) => {
-        log.info('[DataObject.sync] value to sync: ', value);
+        console.log('[DataObject.sync] value to sync: ', value);
 
         Object.assign(_this.data, deepClone(value.data));
 
@@ -218,7 +219,7 @@ class DataObject {
 
         if (value.childrenObjects) {
           _this.resumeChildrens(value.childrenObjects);
-          _this._storeChildrens();
+//          _this._storeChildrens();
           resolve(true);
         } else resolve(true);
 
