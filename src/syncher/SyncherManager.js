@@ -157,7 +157,7 @@ class SyncherManager {
       log.info('[SyncherManager.onRead] new message', msg);
 
       if (msg.hasOwnProperty('body') && msg.body.hasOwnProperty('resource')) {
-        _this._dataObjectsStorage.sync(msg.body.resource, criteria.backupRevision, true).then((dataObject)=>{
+        _this._dataObjectsStorage.sync(msg.body.resource, true).then((dataObject)=>{
           reply.body = {
             code: 200,
             value: dataObject

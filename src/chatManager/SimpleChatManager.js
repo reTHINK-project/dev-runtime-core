@@ -42,7 +42,7 @@ import { UserInfo } from './UserInfo';
 * @author Vitor Silva [vitor-t-silva@telecom.pt]
 * @version 0.1.0
 */
-class SimpleSimpleChatManager {
+class SimpleChatManager {
 
   constructor(myUrl, bus, configuration, syncher, factory) {
     if (!myUrl) throw new Error('[SimpleChatManager.constructor] The myUrl is a needed parameter');
@@ -303,4 +303,4 @@ class SimpleSimpleChatManager {
 
 }
 
-export default SimpleSimpleChatManager;
+export default SimpleChatManager;

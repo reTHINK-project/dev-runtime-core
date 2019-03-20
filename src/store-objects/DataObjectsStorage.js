@@ -8,7 +8,7 @@ import { createSyncDB } from '../runtime/Storage';
 
 class DataObjectsStorage {
 
-  constructor(storageManager, storedDataObjects = {}, factory, runtimeStatusUpdate) {
+  constructor(storageManager, storedDataObjects = {}, factory, runtimeUrl) {
     if (!storageManager) throw new Error('[Store Data Objects] - Needs the storageManager component');
 
     this._storageManager = storageManager;
@@ -23,7 +23,7 @@ class DataObjectsStorage {
     this._table = 'syncherManager:ObjectURLs';
     this._remoteStorageTable = 'dataObjectStorage';
     this._remoteSchema = 'url';
-    this._runtimeStatusUpdate = runtimeStatusUpdate;
+    this._runtimeUrl = runtimeUrl;
   }
 
   // load Data Objects synched with remote Storages
@@ -32,59 +32,60 @@ class DataObjectsStorage {
     let _this = this;
     return new Promise((resolve, reject) => {
       let loading = [];
-      let loadingDBs = [];
+      let synching = [];
 
       _this._storageManager.get(null, null, 'remotes').then((remotes) => {
 
         // in case we don't have any remotes locally stored
-        log.info('[StoreDataObjects.loadRemote] remotes: ', remotes);
+        log.log('[StoreDataObjects.loadRemote] remotes: ', remotes);
         if (!remotes) resolve();
 
         if (!resume) _this._remotes = remotes;
 
-        log.info('[StoreDataObjects.loadRemote] loading: ', _this._remotes);
+        log.log('[StoreDataObjects.loadRemote] loading: ', _this._remotes);
 
         let remoteObjects = Object.keys(remotes);
 
         // in case we don't have any remotes locally stored
-
         if (remoteObjects.length === 0) resolve();
 
         remoteObjects.forEach((db) => {
-          let schema = {};
-          let table = db.split('/')[3];
-          schema[table] = this._remoteSchema;
-          _this._remotes[db] = createSyncDB(db, this._factory, schema, this._runtimeStatusUpdate);
+          let table = 'do-'+db.split('/')[3];
+          _this._remotes[db] = createSyncDB(table, this._factory);
           //            _this._remotes[remote] = createSyncDB(remote, _this._factory, 'remoteDataObjectStorage' );
-          loading.push(_this._remotes[db].get(null, null, table));
+          loading.push(_this._remotes[db].get());
         });
 
-        Promise.all(loading).then(() => {
-          log.log('[StoreDataObjects.loadRemote] loaded. Starting init');
+        Promise.all(loading).then((remotes) => {
+          log.log('[StoreDataObjects.loadRemote] loaded: ', remotes);
           //TODO: init this._storeDataObject with loaded data objects
-          Object.keys(_this._remotes).forEach((remote) => {
-            let table = remote.split('/')[3];
-            loadingDBs.push(_this._remotes[remote].get(null, null, table));
+/*          Object.keys(remotes).forEach((remote) => {
+
+            synching.push(_this.sync(remote));
           });
-          Promise.all(loadingDBs).then((dataObjs) => {
+          Promise.all(synching).then((dataObjs) => {*/
+
+            let dataObjs = remotes;
 
             if (dataObjs.length === 0) resolve();
 
             dataObjs.forEach((dO) => {
-              Object.keys(dO).forEach((url) => {
 
-                log.log('[StoreDataObjects.loadRemote] loaded remote ', dO[url]);
+              let dataObj = _this._remoteDoc2dataObject(dO);
+//              Object.keys(dO).forEach((i) => {
+
+                log.log('[StoreDataObjects.loadRemote] loaded remote ', dataObj);
                 //              if (dO[remote].isReporter) {
-                let type = this._getTypeOfObject(dO[url].isReporter);
+                let type = this._getTypeOfObject(dataObj.isReporter);
 
                 if (!_this._storeDataObject) _this._storeDataObject = {};
 
                 if (!_this._storeDataObject.hasOwnProperty(type)) _this._storeDataObject[type] = {};
 
-                _this._storeDataObject[type][url] = dO[url];
+                _this._storeDataObject[type][dataObj.url] = dataObj;
 
-              });
-            });
+ //             });
+//            });
             resolve(_this._storeDataObject);
 
           }, (error) => { reject(error) });
@@ -196,71 +197,39 @@ class DataObjectsStorage {
       this._storeDataObject = storeDataObject;
 
       let backup = metadata.hasOwnProperty('backup') ? metadata.backup : false;
-      let db = backup ? metadata.url : this._table;
-      let table = backup ? db.split('/')[3] : this._table;
-      if (backup && !this._remotes[db]) {
+      let table = backup ? metadata.url : this._table;
+//      let db = backup ? table.split('://')[1] : this._table;
+      let db = backup ? 'do-'+table.split('/')[3] : this._table;
+      if (backup && !this._remotes[metadata.url]) {
         let schema = {};
         schema[table] = this._remoteSchema;
-        this._remotes[db] = createSyncDB(db, this._factory, schema, this._runtimeStatusUpdate);
+        this._remotes[metadata.url] = createSyncDB(db, this._factory);
       }
 
       // Save Data Object URL at remotes table to support resumes
 
-      if (backup) this._storageManager.set(metadata.url, 0, metadata.url, 'remotes');
+      if (backup) this._storageManager.set(table, 0, db, 'remotes');
 
-      let storage = backup ? this._remotes[db] : this._storageManager;
+      let storage = backup ? this._remotes[table] : this._storageManager;
 
-      if (metadata.isReporter && backup) {// lets connect to remote storage to enable sync
-        let options = { table: table };
-        storage.connect(options).then(() => {
-          storage.set(db, 0, storeDataObject[type][metadata.url], table).then(() => {
+      if (backup) {
+        // lets connect to remote storage to enable sync
+          storage.set(table, storeDataObject[type][metadata.url]).then(() => {
+            if (metadata.isReporter) storage.connect();
             resolve(storeDataObject[type][metadata.url]);
           }, (error) => {
             log.error('[DataObjectStorage.set] failed to save into remote storage: ', error);
-            this._connectToRemoteThread(storage, options, db, storeDataObject[type][metadata.url], table);
-            resolve(storeDataObject[type][metadata.url]);
+            reject(error);
           });
-        }, (error) => {
-          log.error('[DataObjectStorage.set] failed to connect with remote storage: ', error, ' trying again...');
-          this._connectToRemoteThread(storage, options, db, storeDataObject[type][metadata.url], table);
-          resolve(storeDataObject[type][metadata.url]);
-        });
-        //          return storeDataObject[type][metadata.url];
       } else {
-        storage.set(db, 1, this._filterRemotes(storeDataObject), table).then(() => {
+        console.log('[DataObjectStorage.set] _storeDataObject before filter ', this._storeDataObject);
+        storage.set(db, 1, this._filterRemotes(this._storeDataObject), table).then(() => {
           resolve(storeDataObject[type][metadata.url]);
         });
       }
     });
   }
 
-  _connectToRemoteThread(storage, options, db, dataObject, table) {
-
-    let connected = false;
-    let id;
-
-    let connect = function (dO) {
-      log.error('[DataObjectStorage._connectToRemote] trying to connect to remote storage ... ');
-      storage.connect(options).then(() => {
-        storage.set(db, 0, dO, table).then(() => {
-          connected = true;
-          clearInterval(id);
-        }, (error) => {
-          log.error('[DataObjectStorage._connectToRemote] failed to save into remote storage: ', error);
-        });
-      }, (error) => {
-        log.error('[DataObjectStorage._connectToRemote] failed to connect to remote storage: ', error);
-      });
-
-    }
-
-    id = setInterval(function () {
-
-      if (!connected) connect(dataObject);
-    }, 5000);
-
-
-  }
 
   // to filter Data Objects that are stored outside the ObjectURLs table
 
@@ -269,8 +238,13 @@ class DataObjectsStorage {
 
     let filtered = deepClone(storeDataObject);
 
+    console.log('[DataObjectStorage._filterRemotes] starting filtering ', filtered);
+
     remotes.forEach((remote) => {
-      if (filtered['reporters'][remote]) delete filtered['reporters'][remote];
+      if (filtered['reporters'] && filtered['reporters'][remote]){
+        delete filtered['reporters'][remote];
+        console.log('[DataObjectStorage._filterRemotes] filter updated ', filtered);
+      } 
       else delete filtered['observers'][remote];
     });
 
@@ -349,14 +323,14 @@ class DataObjectsStorage {
     this._storeDataObject = storeDataObject;
     let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
     let storage = storeDataObject[type][resource].backup ? this._remotes[db] : this._storageManager;
-    let table = storeDataObject[type][resource].backup ? db.split('/')[3] : this._table;
-    let data = storeDataObject[type][resource].backup ? storeDataObject[type][resource] : this._filterRemotes(storeDataObject);
-    storage.set(db, 1, data, table, updateRuntimeStatus).then(() => {
-      return storeDataObject[type][resource];
-    }, (error) => {
-      console.error(error);
-      return storeDataObject[type][resource];
-    });
+//    let table = storeDataObject[type][resource].backup ? db.split('/')[3] : this._table;
+
+    if (storeDataObject[type][resource].backup) {// should we remove childrens?
+      return storage.set(db, storeDataObject[type][resource]);
+    } else {
+      return storage.set('syncherManager:ObjectURLs', 1, this._filterRemotes(storeDataObject) , this._table, updateRuntimeStatus);
+    }
+
   }
 
   saveChildrens(isReporter, resource, attribute, value) {
@@ -385,11 +359,24 @@ class DataObjectsStorage {
     this._storeDataObject = storeDataObject;
     let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
     let storage = storeDataObject[type][resource].backup ? this._remotes[db] : this._storageManager;
-    let table = storeDataObject[type][resource].backup ? db.split('/')[3] : this._table;
+ /*   let table = storeDataObject[type][resource].backup ? db.split('/')[3] : this._table;
     let data = storeDataObject[type][resource].backup ? storeDataObject[type][resource] : this._filterRemotes(storeDataObject);
     storage.set(db, 1, data, table).then(() => {
       return storeDataObject[type][resource];
-    });
+    });*/
+
+    if (storeDataObject[type][resource].backup) {
+        
+       return storage.set(attribute, value).then(()=>{
+         // backup child object if reporter is local
+         if (this._runtimeUrl === value.value.runtime)
+            storage.backup(attribute);
+          
+        });
+    } else {
+      return storage.set('syncherManager:ObjectURLs', 1, this._filterRemotes(storeDataObject), this._table, updateRuntimeStatus);
+    }
+
 
   }
 
@@ -431,11 +418,18 @@ class DataObjectsStorage {
       this._storeDataObject = storeDataObject;
       let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
       let storage = storeDataObject[type][resource].backup ? this._remotes[db] : this._storageManager;
-      let table = storeDataObject[type][resource].backup ? db.split('/')[3] : this._table;
+/*      let table = storeDataObject[type][resource].backup ? db.split('/')[3] : this._table;
       let data = storeDataObject[type][resource].backup ? storeDataObject[type][resource] : this._filterRemotes(storeDataObject);
       storage.set(db, 1, data, table, updateRuntimeStatus).then(() => {
         return storeDataObject[type][resource];
-      });
+      });*/
+
+      if (storeDataObject[type][resource].backup) {//just update the attribute that is changing
+        return storage.set(db, storeDataObject[type][resource]);
+      } else {
+        return storage.set('syncherManager:ObjectURLs', 1, this._filterRemotes(storeDataObject), this._table, updateRuntimeStatus);
+      }
+  
     }
   }
 
@@ -468,11 +462,18 @@ class DataObjectsStorage {
       this._storeDataObject = storeDataObject;
       let db = storeDataObject[type][resource].backup ? storeDataObject[type][resource].url : 'syncherManager:ObjectURLs';
       let storage = storeDataObject[type][resource].backup ? this._remotes[db] : this._storageManager;
-      let table = storeDataObject[type][resource].backup ? db.split('/')[3] : this._table;
+ /*     let table = storeDataObject[type][resource].backup ? db.split('/')[3] : this._table;
       let data = storeDataObject[type][resource].backup ? storeDataObject[type][resource] : this._filterRemotes(storeDataObject);
       storage.set(db, 1, data, table);
 
-      return storeDataObject[type][resource];
+      return storeDataObject[type][resource];*/
+
+      if (storeDataObject[type][resource].backup) {
+        return storage.set(db, storeDataObject[type][resource]);
+      } else {
+        return storage.set(db, 1, this._filterRemotes(storeDataObject), this._table, updateRuntimeStatus);
+      }
+
     }
   }
 
@@ -488,7 +489,7 @@ class DataObjectsStorage {
 
       if (resource) {
         //        return this.getAll().then((storedDataObjects) => {
-        log.info('[DataObjectStorage.deleteResource] deleting: ', resource);
+        log.log('[DataObjectStorage.deleteResource] deleting: ', resource);
 
         //          let this._storeDataObject = Object.assign(this._storeDataObject || {});
 
@@ -497,7 +498,7 @@ class DataObjectsStorage {
         let storage;
 
         if (_this._storeDataObject.hasOwnProperty('observers') && _this._storeDataObject.observers.hasOwnProperty(resource)) {
-          backup = (_this._storeDataObject.observers[resource].backup) ? true : false;
+          backup = (_this._storeDataObject.observers[resource].backup) ? _this._storeDataObject.observers[resource].backup : false;
 
           db = backup ? _this._storeDataObject.observers[resource].url : 'syncherManager:ObjectURLs';
           storage = backup ? _this._remotes[db] : _this._storageManager;
@@ -505,7 +506,7 @@ class DataObjectsStorage {
         }
 
         if (_this._storeDataObject.hasOwnProperty('reporters') && _this._storeDataObject.reporters.hasOwnProperty(resource)) {
-          backup = (_this._storeDataObject.reporters[resource].backup) ? true : false;
+          backup = (_this._storeDataObject.reporters[resource].backup) ? _this._storeDataObject.reporters[resource].backup : false;
 
           db = backup ? _this._storeDataObject.reporters[resource].url : 'syncherManager:ObjectURLs';
           storage = backup ? _this._remotes[db] : _this._storageManager;
@@ -516,12 +517,18 @@ class DataObjectsStorage {
 
         if (backup && storage) {
           storage.delete().then(() => {
+            log.log('[DataObjectStorage.deleteResource] deleting sync db ', resource);
             delete _this._remotes[db];
-            _this._storageManager.delete(resource, null, 'remotes');
+            delete _this._factory.databases['do-'+db.split('/')[3]];
+            delete _this._factory.storeManager['do-'+db.split('/')[3]];
+                _this._storageManager.delete(resource, null, 'remotes');
           });
         } else {
-          storage.set(db, 1, this._filterRemotes(_this._storeDataObject));
+          delete _this._factory.databases[db];
+          delete _this._factory.storeManager[db];
+        storage.set(db, 1, this._filterRemotes(_this._storeDataObject));
         }
+
 
         return resolve();
 
@@ -535,7 +542,7 @@ class DataObjectsStorage {
 
   }
 
-  getAll() {
+/*  getAll() {
 
     let _this = this;
 
@@ -550,69 +557,69 @@ class DataObjectsStorage {
 
     });
     //    return this._storageManager.get('syncherManager:ObjectURLs');
-  }
+  }*/
 
   // To sync local storage with remote storage server
 
-  sync(resource, backupRevision, once = true) {
+  sync(resource) {
     let _this = this;
 
-    if (_this._remotes[resource]) {
-
-      let table = resource.split('/')[3];
-
-      if (backupRevision) return _this._sync(resource, backupRevision, once, table);
-      else _this._remotes[resource].getBackupRevision(resource).then((backupRevision) => {
-        return _this._sync(resource, backupRevision, once, table);
-
-      });
-    } else {
-      let info = '[DataObjectStorage.sync] Info: ' + resource + ' is not synched with remote storage.'
-      log.info(info);
-      //          reject(info);
-    }
-  }
-
-  _sync(resource, backupRevision, once, table) {
-    let _this = this;
-
-    console.log('[DataObjectStorage._sync] backupRevision: ', backupRevision);
+    console.log('[DataObjectStorage._sync] resource: ', resource);
 
     return new Promise((resolve, reject) => {
 
-      let options = { table: table, observer: false, syncedRevision: backupRevision + 3 };
-
-      _this._remotes[resource].connect(options).then(() => {
-        log.info('[DataObjectStorage.sync] connected with remote ');
-
-        _this._remotes[resource].get(null, null, table).then((dataObject) => {
+     _this._remotes[resource].get(resource, 'isReporter').then((isReporter) => {
+      _this._remotes[resource].sync().then(()=>{
+        _this._remotes[resource].get().then((doc) => {
           //          this._remotes[resource].get().then((dataObject)=>{
-          log.info('[DataObjectStorage.sync] returning synched DO: ', dataObject);
+          log.info('[DataObjectStorage.sync] returning synched DO: ', doc);
 
-          if (once) {
-            setTimeout(function () {
-              _this._remotes[resource].disconnect().then(() => {
-                log.info('[DataObjectStorage.sync] disconnected ');
-                //                      resolve(dataObject[resource]);
-              }, (error) => {
-                log.error('[DataObjectStorage.sync] Error synching with remote storage');
-                reject(error);
-              });
-            }, 2000)
+//          if (!isReporter) _this._remotes[resource].disconnect();
+
+          // to ensure local data object as the right value for isReporter
+          // remote data object should always have isReporter = true.
+          //doc[0].isReporter = isReporter;
+          let dO = _this._remoteDoc2dataObject(doc);
+
+          if (_this._storeDataObject.hasOwnProperty('observers') && _this._storeDataObject.observers.hasOwnProperty(resource)) {
+            _this._storeDataObject.observers[resource] = dO;
           }
-          resolve(dataObject[resource]);
+  
+          if (_this._storeDataObject.hasOwnProperty('reporters') && _this._storeDataObject.reporters.hasOwnProperty(resource)) {
+            _this._storeDataObject.reporters[resource] = dO;
+          }
+          resolve(dO);
         }, (error) => {
-          log.error('[DataObjectStorage.sync] Error retrieving stored data object');
+          log.error('[DataObjectStorage.sync] Error ', error);
           reject(error)
         });
       }, (error) => {
-        log.error('[DataObjectStorage.sync] Error connecting to remote storage ', error);
-        _this._remotes[resource].get(null, null, table).then((dataObject) => {
-          log.info('[DataObjectStorage.sync] returning synched DO: ', dataObject);
-          resolve(dataObject[resource]);
-        });
+        log.error('[DataObjectStorage.sync] Error ', error);
+        reject(error)
       });
+
+     });
+
+
     });
+  }
+
+  _remoteDoc2dataObject(doc) {
+    if (doc.length>1) {//has childrens
+      let dataObject = doc[doc.length-1];
+
+      dataObject.childrenObjects = {};
+
+      let i;
+
+      for ( i=0; i<doc.length-1; i++) {
+        dataObject.childrenObjects[doc[i]._id] = doc[i];
+      }
+
+      return dataObject;
+
+    } else return(doc[0]);
+
   }
 
   stopSync(resource) {

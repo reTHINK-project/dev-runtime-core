@@ -227,7 +227,7 @@ class Syncher {
 
     return new Promise((resolve, reject) => {
      // in case the object is synched in a remote storage, lets sync with it
-/*      if (_this._observers[objURL] && _this._observers[objURL].metadata.hasOwnProperty('backup') && _this._observers[objURL].metadata.backup) {
+//      if (_this._observers[objURL] && _this._observers[objURL].metadata.hasOwnProperty('backup') && _this._observers[objURL].metadata.backup) {
 
         let readMsg = {
           type: 'read', from: _this._owner, to: _this._subURL, 
@@ -237,22 +237,22 @@ class Syncher {
         if (criteria) readMsg.body.criteria = criteria;
 
           let callback = (reply) => {
-            return _this._readCallBack(reply, resolve, reject);
+            resolve(reply.body.value);
           };
     
           _this._bus.postMessage(readMsg, callback, false);
     
-      } else {*/
+ /*     } else {
         _this._readReporter(objURL).then((result)=> {
         resolve(result);
       });
-//    }
+    }*/
 
     });
 
   }
 
-  _readCallBack(reply, resolve,reject) {
+/*  _readCallBack(reply, resolve,reject) {
     let _this = this;
 
       console.log('[Syncher.read] reply: ', reply);
@@ -290,7 +290,7 @@ class Syncher {
       reject(reply.body.desc);
       }
 
-  }
+  }*/
 
   _readReporter(objURL) {
     let _this = this;

@@ -171,7 +171,7 @@ class RuntimeUA {
           this.capabilities = results[1];
           Object.assign(runtimeUtils.runtimeCapabilities.constraints, results[1]);
 
-          this._dataObjectsStorage = new DataObjectsStorage(this.storages.syncherManager, results[2] || {}, this.runtimeFactory, this );
+          this._dataObjectsStorage = new DataObjectsStorage(this.storages.syncherManager, results[2] || {}, this.runtimeFactory, this.runtimeURL );
 
           this._hypertyResources = results[3] || {};
 
@@ -193,7 +193,6 @@ class RuntimeUA {
 
         }).then((status) => {
           this._setNetworkStatusListeners();
-
 
           this._hypertyResourcesStorage = new HypertyResourcesStorage(this.runtimeURL, this.messageBus, this.storages.hypertyResources, this._hypertyResources);
 

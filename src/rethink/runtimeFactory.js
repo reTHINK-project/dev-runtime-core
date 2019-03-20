@@ -6,16 +6,19 @@ import Request from './Request';
 //import {RuntimeCatalogue} from 'service-framework/dist/RuntimeCatalogue';
 //import PersistenceManager from 'service-framework/dist/PersistenceManager';
 import StorageManager from '../storage-manager/StorageManager';
+import SyncStorageManager from '../storage-manager/SyncStorageManager';
 
 import RuntimeCapabilities from './RuntimeCapabilities';
 
 // import StorageManagerFake from './StorageManagerFake';
 
 import Dexie from 'dexie';
-import 'dexie-observable';
+/*import 'dexie-observable';
 import 'dexie-syncable';
 
-import SyncClient from 'sync-client/dist/sync-client';
+import SyncClient from 'sync-client/dist/sync-client';*/
+
+import PouchDB from 'pouchdb';
 
 const runtimeFactory = Object.create({
 
@@ -68,7 +71,7 @@ const runtimeFactory = Object.create({
     return atob(b64);
   },
 
-  storageManager(name, schemas, runtimeUA, remote = false) {
+  storageManager(name, schemas ) {
 
     if (!this.databases) { this.databases = {}; }
     if (!this.storeManager) { this.storeManager = {}; }
@@ -91,31 +94,42 @@ const runtimeFactory = Object.create({
         stores[name] = 'key,version,value';
       }
 
-      if (!remote) {
         this.databases[name] =  new Dexie(name, {addons:[]});
         this.databases[name].version(1).stores(stores);
-      } else {
-        //in case we use a remote storage server to be synched with
-        // we use SyncClient lib, an extension of Dexie
-
-        let versions = [{
-          version: 1,
-          stores: stores
-        }];
-
-        this.databases[name] =  new SyncClient(name, versions);
-      } 
+        if (!this.storeManager.hasOwnProperty(name)) {
+          this.storeManager[name] = new StorageManager(this.databases[name], name, schemas);
+        }
+    
     }
 
-    if (!this.storeManager.hasOwnProperty(name)) {
-      this.storeManager[name] = new StorageManager(this.databases[name], name, schemas, runtimeUA, 1, remote);
-    }
-
-    if (remote) this.storeManager[name].remote = remote;
 
     return this.storeManager[name];
   },
 
+  syncStorageManager(name, remote) {
+
+    if (!this.databases) { this.databases = {}; }
+    if (!this.storeManager) { this.storeManager = {}; }
+
+    if (navigator && navigator.storage && navigator.storage.persist) {
+      navigator.storage.persist().then(function(persistent) {
+        if (persistent) { console.log('Storage will not be cleared except by explicit user action'); } else { console.log('Storage may be cleared by the UA under storage pressure.'); }
+      });
+    }
+
+    // PouchDB is the IndexDB Wrapper for databases synchronised with backends
+    if (!this.databases.hasOwnProperty(name)) {
+
+
+        this.databases[name] =  new PouchDB(name);
+        if (!this.storeManager.hasOwnProperty(name)) {
+          this.storeManager[name] = new SyncStorageManager(this.databases[name], name, remote);
+        }
+      } 
+
+
+    return this.storeManager[name];
+  },  
 /*  persistenceManager() {
     if (!this.localStorage) {
       window.localStorage;
