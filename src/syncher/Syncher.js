@@ -515,8 +515,6 @@ class Syncher {
       //for more info see the DataProvisional class documentation.
       let msgId = _this._bus.postMessage(subscribeMsg);
 
-      debugger;
-
       _this._bus.addResponseListener(_this._owner, msgId,  (reply) => {
 
         log.log('[syncher] - subscribe-response: ', reply);
