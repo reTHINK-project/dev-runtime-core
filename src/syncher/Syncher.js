@@ -513,7 +513,10 @@ class Syncher {
       //request subscription
       //Provisional data is applied to the DataObjectObserver after confirmation. Or discarded if there is no confirmation.
       //for more info see the DataProvisional class documentation.
-      _this._bus.postMessage(subscribeMsg, (reply) => {
+      let msgId = _this._bus.postMessage(subscribeMsg);
+
+      _this._bus.addResponseListener(_this._subURL, msgId,  (reply) => {
+
         log.log('[syncher] - subscribe-response: ', reply);
 
         let objURL = reply.body.resource;
@@ -553,11 +556,13 @@ class Syncher {
 
           log.log('[syncher] - new Data Object Observer already exist: ', newObj);
 
+          _this._bus.removeResponseListener(_this._subURL, msgId);
           resolve(newObj);
 
           if (newProvisional) { newProvisional.apply(newObj); }
 
         } else {
+          _this._bus.removeResponseListener(_this._subURL, msgId);
           reject(reply.body.desc);
         }
       });
