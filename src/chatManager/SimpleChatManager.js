@@ -118,22 +118,26 @@ class SimpleChatManager {
       // TODO: replace the 200 for Message.Response
       event.ack(200);
 
-      _this._observersControllers[event.url].closeEvent = event;
+      if ( _this._observersControllers[event.url]){
+        _this._observersControllers[event.url].closeEvent = event;
 
-      delete _this._observersControllers[event.url];
+        delete _this._observersControllers[event.url];
+  
+        _this._observersControllers.closeEvent = event;
+  
+        _this.communicationObject = communicationObject;
+  
+      }
 
-      _this._observersControllers.closeEvent = event;
 
-      _this.communicationObject = communicationObject;
-
-
+/*
       for (let url in this._reportersControllers) {
         this._reportersControllers[url].close(event);
       }
 
       for (let url in this._observersControllers) {
         this._observersControllers[url].close(event);
-      }
+      }*/
 
     }
   }

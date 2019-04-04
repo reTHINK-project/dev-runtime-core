@@ -757,41 +757,43 @@ class Syncher {
 
     delete _this._observers[resource];
 
-    if (object) {
-      let event = {
-        type: msg.type,
-        url: resource,
-        identity: msg.body.identity,
+    let event = {
+      type: msg.type,
+      url: resource,
+      identity: msg.body.identity,
 
-        ack: (type) => {
-          let lType = 200;
-          if (type) {
-            lType = type;
-          }
-
-         //TODO: any other different options for the release process, like accept but nor release local?
-          if (lType === 200) {
-            object.delete();
-          }
-
-          //send ack response message
-          _this._bus.postMessage({
-            id: msg.id, type: 'response', from: msg.to, to: msg.from,
-            body: { code: lType, source: _this._owner }
-          });
+      ack: (type) => {
+        let lType = 200;
+        if (type) {
+          lType = type;
         }
-      };
+
+       //TODO: any other different options for the release process, like accept but nor release local?
+        if (lType === 200 && object) {
+          object.delete();
+        }
+
+        //send ack response message
+        _this._bus.postMessage({
+          id: msg.id, type: 'response', from: msg.to, to: msg.from,
+          body: { code: lType, source: _this._owner }
+        });
+      }
+    };
+
+//    if (object) {
+
 
       if (_this._onNotificationHandler) {
         log.log('NOTIFICATION-EVENT: ', event);
         _this._onNotificationHandler(event);
       }
-    } else {
+/*    } else {
       _this._bus.postMessage({
         id: msg.id, type: 'response', from: msg.to, to: msg.from,
         body: { code: 404, source: _this._owner }
       });
-    }
+    }*/
   }
 
   // close event received from runtime registry
