@@ -38,7 +38,7 @@ import Chat from './Chat';
 import { UserInfo } from './UserInfo';
 
 /**
-* Hyperty Simple Group Chat Manager API 
+* Hyperty Simple Group Chat Manager API
 * @author Vitor Silva [vitor-t-silva@telecom.pt]
 * @version 0.1.0
 */
@@ -118,15 +118,17 @@ class SimpleChatManager {
       // TODO: replace the 200 for Message.Response
       event.ack(200);
 
+      if (_this._onNotification) { _this._onNotification(event); }
+
       if ( _this._observersControllers[event.url]){
         _this._observersControllers[event.url].closeEvent = event;
 
         delete _this._observersControllers[event.url];
-  
+
         _this._observersControllers.closeEvent = event;
-  
+
         _this.communicationObject = communicationObject;
-  
+
       }
 
 
@@ -256,6 +258,15 @@ class SimpleChatManager {
   onInvitation(callback) {
     let _this = this;
     _this._onInvitation = callback;
+  }
+
+  /**
+   * This function is used to handle notifications about incoming invitations to join a Group Chat.
+   * @param  {Function} CreateEvent The CreateEvent fired by the Syncher when an invitaion is received
+   */
+  onNotification(callback) {
+    let _this = this;
+    _this._onNotification = callback;
   }
 
   /**
