@@ -581,6 +581,8 @@ class DataObjectsStorage {
           //doc[0].isReporter = isReporter;
           let dO = _this._remoteDoc2dataObject(doc);
 
+          dO.isReporter = isReporter;
+
           if (_this._storeDataObject.hasOwnProperty('observers') && _this._storeDataObject.observers.hasOwnProperty(resource)) {
             _this._storeDataObject.observers[resource] = dO;
           }
