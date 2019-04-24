@@ -33,7 +33,7 @@ class ReporterObject {
     _this._offline = offline ? offline : false;
   }
 
-  get offline(){
+  get offline() {
     return this._offline;
   }
 
@@ -57,7 +57,7 @@ class ReporterObject {
       log.info('[SyncherManager.ReporterObject ] SyncherManager-' + changeURL + '-RCV: ', msg);
 
       //do not save changes to backupRevision to avoid infinite loops
-      if (this._isToSaveData && msg.body.attribute ) {
+      if (this._isToSaveData && msg.body.attribute) {
         let updateRuntimeStatus = msg.body.attribute !== 'backupRevision' ? true : false;
         log.log('[SyncherManager.ReporterObject ] SyncherManager - save data: ', msg);
         _this._parent._dataObjectsStorage.update(true, _this._url, 'version', msg.body.version, updateRuntimeStatus);
@@ -164,25 +164,103 @@ class ReporterObject {
   }
 
   /**
+  * Add listeners for a list of childrens. Public channels used to transmit messages.
+  * @param  {string[]} childrens - channels to register
+  * @return {Promise} Return Promise OK or error
+  */
+  _addChildrenListeners(childrens) {
+    let _this = this;
+
+    //add children listeners on local ...
+    childrens.forEach((childURL) => {
+      let childListener = _this._bus.addListener(childURL, (msg) => {
+        //TODO: what todo here? Save childrens?
+        log.log('[SyncherManager.ReporterObject received]', msg);
+
+
+        if (msg.type === 'create' && msg.to.includes('children') && this._isToSaveData) {
+
+          // if the value is not encrypted lets encrypt it
+          // todo: should be subject to some policy
+          let splitedReporterURL = splitObjectURL(msg.to);
+
+          let url = splitedReporterURL.url;
+
+          if (!msg.body.hasOwnProperty('mutual')) msg.body.mutual = true;
+
+          //remove false when mutualAuthentication is enabled
+          if (!(typeof msg.body.value === 'string') && msg.body.mutual) {
+
+            log.log('[SyncherManager.ReporterObject] encrypting received data ', msg.body.value);
+
+            cryptoManager.default.encryptDataObject(msg.body.value, url).then((encryptedValue) => {
+              log.log('[SyncherManager.ReporterObject] encrypted data ', encryptedValue);
+
+              _this._storeChildObject(msg, JSON.stringify(encryptedValue));
+            }).catch((reason) => {
+              log.warn('[SyncherManager._decryptChildrens] failed : ', reason, ' Storing unencrypted');
+              _this._storeChildObject(msg, msg.body.value);
+            });
+          } else {
+            _this._storeChildObject(msg, msg.body.value);
+          }
+        }
+
+      });
+      _this._childrenListeners.push(childListener);
+
+      let selfForward = _this._bus.addForward(childURL, _this._owner);
+      _this._childrenListeners.push(selfForward);
+    });
+
+  }
+
+  /**
    * Register listeners for a list of childrens. Public channels used to transmit messages.
    * @param  {string[]} childrens - channels to register
    * @return {Promise} Return Promise OK or error
    */
-  addChildrens() {
+  _addChildrensDomainPath(childrens) {
+    let _this = this;
+    return new Promise((resolve, reject) => {
+      //FLOW-OUT: message sent to the msg-node SubscriptionManager component
+      let nodeSubscribeMsg = {
+        type: 'subscribe', from: _this._parent._url, to: 'domain://msg-node.' + _this._domain + '/sm',
+        body: { resources: childrens, source: _this._owner }
+      };
+
+      _this._bus.postMessage(nodeSubscribeMsg, (reply) => {
+        log.log('[SyncherManager.ReporterObject ]node-subscribe-response(reporter):', reply);
+        if (reply.body.code === 200) {
+          resolve(_this._addChildrenListeners(childrens));
+        } else {
+          reject('Error on msg-node subscription: ' + reply.body.desc);
+        }
+      });
+    });
+
+  }
+
+  /**
+   * Register listeners for a list of childrens. Public channels used to transmit messages.
+   * @param  {string[]} childrens - channels to register
+   * @return {Promise} Return Promise OK or error
+   */
+  addChildrens(resume) {
     let _this = this;
 
     return new Promise((resolve, reject) => {
       if (_this._childrens.length === 0) {
         resolve();
         return;
-    }
+      }
 
       let childBaseURL = _this._url + '/children/';
       log.log('[SyncherManager.ReporterObject - addChildrens] - childrens: ', childBaseURL);
 
-  /*    childrens.forEach((child) => {
-        _this._childrens.push(child);
-      });*/
+      /*    childrens.forEach((child) => {
+            _this._childrens.push(child);
+          });*/
 
       /*
       _this._childrens.forEach((child) => {
@@ -193,68 +271,20 @@ class ReporterObject {
       });*/
 
       let subscriptions = [];
-//      childrens.forEach((child) => subscriptions.push(childBaseURL + child));
-      subscriptions.push(childBaseURL );
+      //      childrens.forEach((child) => subscriptions.push(childBaseURL + child));
+      subscriptions.push(childBaseURL);
 
       //_this._storageSubscriptions[_this._objSubscriptorURL] = {url: _this._url, owner: _this._owner, childrens: _this._childrens};
 
-      //FLOW-OUT: message sent to the msg-node SubscriptionManager component
-      let nodeSubscribeMsg = {
-        type: 'subscribe', from: _this._parent._url, to: 'domain://msg-node.' + _this._domain + '/sm',
-        body: { resources: subscriptions, source: _this._owner }
-      };
-
-      _this._bus.postMessage(nodeSubscribeMsg, (reply) => {
-        log.log('[SyncherManager.ReporterObject ]node-subscribe-response(reporter):', reply);
-        if (reply.body.code === 200) {
-
-          //add children listeners on local ...
-          subscriptions.forEach((childURL) => {
-            let childListener = _this._bus.addListener(childURL, (msg) => {
-              //TODO: what todo here? Save childrens?
-              log.log('[SyncherManager.ReporterObject received]', msg);
-
-
-              if (msg.type === 'create' && msg.to.includes('children') && this._isToSaveData) {
-
-                // if the value is not encrypted lets encrypt it
-                // todo: should be subject to some policy
-                let splitedReporterURL = splitObjectURL(msg.to);
-
-                let url = splitedReporterURL.url;
-
-                if (!msg.body.hasOwnProperty('mutual')) msg.body.mutual = true;
-
-                //remove false when mutualAuthentication is enabled
-                if (!(typeof msg.body.value === 'string') && msg.body.mutual) {
-
-                  log.log('[SyncherManager.ReporterObject] encrypting received data ', msg.body.value);
-
-                  cryptoManager.default.encryptDataObject(msg.body.value, url).then((encryptedValue)=>{
-                    log.log('[SyncherManager.ReporterObject] encrypted data ',  encryptedValue);
-
-                    _this._storeChildObject(msg, JSON.stringify(encryptedValue));
-                  }).catch((reason) => {
-                    log.warn('[SyncherManager._decryptChildrens] failed : ', reason, ' Storing unencrypted');
-                    _this._storeChildObject(msg, msg.body.value);
-                  });
-                } else {
-                  _this._storeChildObject(msg, msg.body.value);
-                }
-              }
-
-            });
-            _this._childrenListeners.push(childListener);
-
-            let selfForward = _this._bus.addForward(childURL, _this._owner);
-            _this._childrenListeners.push(selfForward);
-          });
-
+//      if (!resume) {
+        _this._addChildrensDomainPath(subscriptions).then(() => {
           resolve();
-        } else {
-          reject('Error on msg-node subscription: ' + reply.body.desc);
-        }
-      });
+        }, (error) => {
+          log.error('[ReporterError.addChildrens] Children path not added to Domain');
+          if (resume) resolve();
+          else reject(error);
+        });
+  //    } else resolve(_this._addChildrenListeners(subscriptions));
     });
   }
 
@@ -269,24 +299,24 @@ class ReporterObject {
 
     let resource = splitedReporterURL.resource;
     let value;
-    
 
-/*    if (msg.body.identity) {
-      value.identity = msg.body.identity;
-      delete value.identity.assertion;
-      delete value.identity.expires;
-    }*/
+
+    /*    if (msg.body.identity) {
+          value.identity = msg.body.identity;
+          delete value.identity.assertion;
+          delete value.identity.expires;
+        }*/
 
     let objectURLResource = msg.body.resource;
     let attribute = resource;
 
-    if (objectURLResource === 'heartbeat' ) value = data;
+    if (objectURLResource === 'heartbeat') value = data;
     else value = {
       identity: msg.body.identity,
       value: data
     };
 
-//    if (objectURLResource) attribute += '.' + objectURLResource;
+    //    if (objectURLResource) attribute += '.' + objectURLResource;
     if (objectURLResource) attribute = objectURLResource;
 
     // this identity data is not needed to be stored

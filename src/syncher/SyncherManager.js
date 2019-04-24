@@ -580,7 +580,7 @@ class SyncherManager {
     return new Promise((resolve) => {
 
 
-    reporter.addChildrens().then(() => {
+    reporter.addChildrens(true).then(() => {
 
       reporter.resumeSubscriptions(storedObject.subscriptions);
 
