@@ -33,7 +33,7 @@ class SyncStorageManager {
   backup(id) {
     // return this.db.connect(this._remoteStorage, options);
 
-    let opts = { retry: true };
+    let opts = { retry: true, live: false };
 
     if (id) opts.doc_ids =[id];
 
@@ -44,7 +44,7 @@ class SyncStorageManager {
     // return this.db.connect(this._remoteStorage, options);
     console.log('[SyncStorageManager.sync] starting ');
 
-    let opts = { retry: true, include_docs: true };
+    let opts = { retry: true, include_docs: true, live: false };
 
     if (id) opts.doc_ids =[id];
 
@@ -92,7 +92,6 @@ class SyncStorageManager {
         Object.assign(doc, data);
         this.db.put(doc).then(() => {
           resolve(doc);
-
         });
 
       }, (err) => {
