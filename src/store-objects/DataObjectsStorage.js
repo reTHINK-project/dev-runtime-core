@@ -753,16 +753,19 @@ class DataObjectsStorage {
         if (result.length == 0 && isToProtoStubResume && type == 'observers' && msg.from.split('protostub').length > 0) {
           let storedObservers = storedDataObjects[type];
           let fromDomain = divideURL(msg.from).domain;
-          Object.keys(storedObservers).filter((objectURL) => {
-            let subscriptions = storedObservers[objectURL].subscriptions;
-            let hasSubscription = false;
-            subscriptions.forEach(function (subscription) {
-              let subscriptionDomain = divideURL(subscription).domain;
-              if (subscriptionDomain == fromDomain) {
-                result.push(objectURL);
-              }
+          if (storedObservers) {
+            Object.keys(storedObservers).filter((objectURL) => {
+              let subscriptions = storedObservers[objectURL].subscriptions;
+              let hasSubscription = false;
+              subscriptions.forEach(function (subscription) {
+                let subscriptionDomain = divideURL(subscription).domain;
+                if (subscriptionDomain == fromDomain) {
+                  result.push(objectURL);
+                }
+              });
             });
-          })
+          }
+
         }
       } else {
         return resolve(null);
