@@ -898,9 +898,9 @@ class DataObjectsStorage {
    */
   _checkProtostubResume(storedDataObjects, msg) {
 
-    return msg.from.includes('protostub');
+    //return msg.from.includes('protostub');
 
-    /*    if (!storedDataObjects) return false;
+        if (!storedDataObjects) return false;
     
         if (msg.hasOwnProperty('body') && msg.body.hasOwnProperty('value') && msg.body.value.hasOwnProperty('reporter')) {
           let reporter = msg.body.value.reporter;
@@ -929,7 +929,7 @@ class DataObjectsStorage {
               return true;
             }
           }).length > 0 ? true : false;
-        }*/
+        }
   }
 
   /**
