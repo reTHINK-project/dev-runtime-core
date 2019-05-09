@@ -568,45 +568,54 @@ class DataObjectsStorage {
 
     return new Promise((resolve, reject) => {
 
-      _this._remotes[resource].get(resource, 'isReporter').then((isReporter) => {
-        _this._remotes[resource].get(resource, 'subscriptions').then((subscriptions) => {
-          _this._remotes[resource].sync().then(() => {
-            _this._remotes[resource].get().then((doc) => {
-              //          this._remotes[resource].get().then((dataObject)=>{
-              log.info('[DataObjectStorage.sync] returning synched DO: ', doc);
-
-              //          if (!isReporter) _this._remotes[resource].disconnect();
-
-              // to ensure local data object as the right value for isReporter
-              // remote data object should always have isReporter = true.
-              //doc[0].isReporter = isReporter;
-              let dO = _this._remoteDoc2dataObject(doc);
-
-              dO.isReporter = isReporter;
-              dO.subscriptions = subscriptions;
-
-              if (_this._storeDataObject.hasOwnProperty('observers') && _this._storeDataObject.observers.hasOwnProperty(resource)) {
-                _this._storeDataObject.observers[resource] = dO;
-              }
-
-              if (_this._storeDataObject.hasOwnProperty('reporters') && _this._storeDataObject.reporters.hasOwnProperty(resource)) {
-                _this._storeDataObject.reporters[resource] = dO;
-              }
-              _this._remotes[resource].set(resource, dO).then(() => {
-                resolve(dO);
+      if (_this._remotes[resource]) {
+        _this._remotes[resource].get(resource, 'isReporter').then((isReporter) => {
+          _this._remotes[resource].get(resource, 'subscriptions').then((subscriptions) => {
+            _this._remotes[resource].sync().then(() => {
+              _this._remotes[resource].get().then((doc) => {
+                //          this._remotes[resource].get().then((dataObject)=>{
+                log.info('[DataObjectStorage.sync] returning synched DO: ', doc);
+  
+                //          if (!isReporter) _this._remotes[resource].disconnect();
+  
+                // to ensure local data object as the right value for isReporter
+                // remote data object should always have isReporter = true.
+                //doc[0].isReporter = isReporter;
+                let dO = _this._remoteDoc2dataObject(doc);
+  
+                dO.isReporter = isReporter;
+                dO.subscriptions = subscriptions;
+  
+                if (_this._storeDataObject.hasOwnProperty('observers') && _this._storeDataObject.observers.hasOwnProperty(resource)) {
+                  _this._storeDataObject.observers[resource] = dO;
+                }
+  
+                if (_this._storeDataObject.hasOwnProperty('reporters') && _this._storeDataObject.reporters.hasOwnProperty(resource)) {
+                  _this._storeDataObject.reporters[resource] = dO;
+                }
+                _this._remotes[resource].set(resource, dO).then(() => {
+                  resolve(dO);
+                });
+  
+              }, (error) => {
+                log.error('[DataObjectStorage.sync] Error ', error);
+                reject(error)
               });
-
             }, (error) => {
               log.error('[DataObjectStorage.sync] Error ', error);
               reject(error)
             });
-          }, (error) => {
-            log.error('[DataObjectStorage.sync] Error ', error);
-            reject(error)
+  
           });
-
         });
-      });
+      } else {
+        let warning = resource + ' not found in local storage.'
+        log.warn('[DataObjectStorage.sync] warning ', warning);
+        reject(warning);
+
+      }
+
+  
 
 
     });

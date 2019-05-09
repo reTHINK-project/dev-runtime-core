@@ -168,11 +168,11 @@ class SyncherManager {
           _this._bus.postMessage(reply);
         }, (error)=>{
           reply.body = {
-            code: 400,
+            code: 404,
             desc: error
           };
 
-          log.error('[SyncherManager.onRead] error: ', error);
+          log.warn('[SyncherManager.onRead] warning: ', error);
 
           _this._bus.postMessage(reply);
 
