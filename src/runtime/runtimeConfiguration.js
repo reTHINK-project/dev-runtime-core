@@ -94,5 +94,5 @@ export const runtimeConfiguration = {
     suffix: ''
   },
   globalRegistryURL: 'global://registry.',
-  remoteStorage: 'https://admin:admin@backup.rethink-dev.alticelabs.com'
+  remoteStorage: 'https://admin:admin@backup.rethink.alticelabs.com'
 };
