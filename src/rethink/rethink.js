@@ -52,7 +52,8 @@ const rethink = {
 
       let runtime = new RuntimeUA(runtimeDescriptor, runtimeFactory, domain);
 
-//      window.runtime = runtime;
+
+      window.rethink = runtime;
 
       runtime.init(guid).then((result) => {
 
