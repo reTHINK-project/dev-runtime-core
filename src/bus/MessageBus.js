@@ -179,7 +179,9 @@ class MessageBus extends Bus {
     if (!refCount) {
       let forwardListener = _this.addListener(from, (msg) => {
         log.info('MB-PUBLISH: ( ' + from + ' )');
-        _this._onPostMessage(msg);
+        // hack to skip external routes for messages coming from external hosts
+        if (!(msg.body && msg.body.source && msg.body.source.includes('/protostub/')))
+          _this._onPostMessage(msg);
       });
 
       refCount = {
