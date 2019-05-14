@@ -353,11 +353,14 @@ class Chat {
         userProfile: _this.myIdentity
       };
 
+      let input = {};
+      input.anonymous = true;
+
 
       // TODO: change chatmessages to resource - chat, file
       // TODO: change message to hypertyResource - https://github.com/reTHINK-project/dev-service-framework/tree/develop/docs/datamodel/data-objects/hyperty-resource
       // TODO: handle with multiple resources - if the "message" will be different for each type of resources
-      dataObject.addChild(msg, sender).then(function(dataObjectChild) {
+      dataObject.addChild(msg, sender, input).then(function(dataObjectChild) {
         console.log('[ChatManager.ChatController][addChild - Chat Message]: ', dataObjectChild);
         //resolve(dataObjectChild);
 
