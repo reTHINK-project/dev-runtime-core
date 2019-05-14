@@ -319,7 +319,7 @@ class RuntimeUA {
         this.registry.loader = this.loader;
 
         // Instantiate the Message Bus
-        this.messageBus = new MessageBus(this.registry);
+        this.messageBus = new MessageBus(this.registry, this.runtimeURL);
 
         // Instanciate the SubscriptionManager;
         this.subscriptionManager = new SubscriptionManager(this.runtimeURL, this.messageBus, this.storages.subscriptions);

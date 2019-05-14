@@ -45,10 +45,11 @@ class MessageBus extends Bus {
   //1. message batch processing with setInterval
   //2. resolve default gateway/protostub with register.resolve
 
-  constructor(registry) {
+  constructor(registry, runtimeUrl) {
     super();
     this._registry = registry;
     this._forwards = {};
+    this._runtimeUrl = runtimeUrl;
 
     this._pipelineIn = new Pipeline((error) => {
       log.error('PIPELINE-ERROR: ', JSON.stringify(error));
@@ -83,7 +84,7 @@ class MessageBus extends Bus {
             if (itemList) {
               //do not publish on default address, because of loopback cycle
               _this._publishOn(itemList, msg);
-            } else {
+            } else if (!msg.to.includes(_this._runtimeUrl)) {
               //if there is no listener, send to external interface
               _this._onPostMessage(msg);
             }
@@ -179,8 +180,10 @@ class MessageBus extends Bus {
     if (!refCount) {
       let forwardListener = _this.addListener(from, (msg) => {
         log.info('MB-PUBLISH: ( ' + from + ' )');
-        // hack to skip external routes for messages coming from external hosts
-        if (!(msg.body && msg.body.source && msg.body.source.includes('/protostub/')))
+        // hack to skip external routes for messages coming from external hosts 
+        // and messages targeting internal core runtime components
+        if (!(msg.body && msg.body.source && msg.body.source.includes('/protostub/')) &&
+        !msg.to.includes(_this._runtimeUrl))
           _this._onPostMessage(msg);
       });
 
