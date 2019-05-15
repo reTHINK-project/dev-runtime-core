@@ -69,6 +69,7 @@ class SimpleChatManager {
     _this._bus = bus;
     _this._syncher = syncher;
     _this._domain = domain;
+    _this._defaultStubTriggered = false;
 
 //    _this.discovery = discovery;
     _this.identityManager = identityManager;
@@ -258,6 +259,16 @@ class SimpleChatManager {
   onInvitation(callback) {
     let _this = this;
     _this._onInvitation = callback;
+
+    _this._triggerDefaultStubDeployment();
+  }
+
+  // send message to trigger domain default stub to ensure incoming messages are received
+
+  _triggerDefaultStubDeployment(){
+    let pingMessage = { from: this._myUrl, to: this._domain, type: 'execute'  };
+    if (!this._defaultStubTriggered) this._bus.postMessage(pingMessage);
+    this._defaultStubTriggered = true;
   }
 
   /**
