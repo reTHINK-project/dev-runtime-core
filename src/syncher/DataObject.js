@@ -160,6 +160,7 @@ class DataObject {
           log.log('DataObject-Children-RCV: ', msg);
           switch (msg.type) {
             case 'create': _this._onChildCreate(msg); break;
+            case 'event': _this._onEvent(msg); break;
             case 'delete': log.log(msg); break;
             default: _this._changeChildren(msg); break;
           }
@@ -574,6 +575,47 @@ class DataObject {
 
     this._onAddChildrenHandler = callback;
   }
+
+  /**
+   * Setup the callback to process events from Data Objects.
+   * @param {function(event: DataObjectEvent)} callback
+   */
+  onEvent(callback) {
+
+    this._onEventHandler = callback;
+  }
+
+  /**
+   * Send Data Object Events.
+   * @param {function(event: DataObjectEvent)} callback
+   */
+  sendEvent(event) {
+
+    let msgEvent = {
+      from: this._owner,
+      to: this._url+'/children/',
+      type: 'event',
+      body: { value: event}
+    }
+
+    this._bus.postMessage(msgEvent);
+  }
+
+
+//FLOW-IN: event received from a remote DataObject
+_onEvent(msg) {
+  let _this = this;
+
+  let event = {
+    from: msg.from,
+    value: msg.body.value,
+    identity: msg.body.identity,
+  };
+
+  if (_this._onEventHandler) _this._onEventHandler(event);  
+
+}
+
 
   //FLOW-IN: message received from a remote DataObject -> addChild
   _onChildCreate(msg) {

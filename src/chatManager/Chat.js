@@ -427,6 +427,30 @@ class Chat {
   }
 
   /**
+   * This function is used to receive typing events.
+   * @param  {Function} callback Function to handle typing event
+   */
+
+  onTyping(callback) {
+      if (this._dataObjectReporter) this._dataObjectReporter.onEvent((event)=>{
+        if (event.value === 'typing') callback;
+      });
+      else this._dataObjectObserver.onEvent((event)=>{
+        if (event.value === 'typing') callback;
+      });
+  }
+
+  /**
+   * This function is used to trigger typing events.
+   */
+
+  typing() {
+      if (this._dataObjectReporter) this._dataObjectReporter.sendEvent('typing');
+      else this._dataObjectObserver.sendEvent('typing');
+  }
+
+
+  /**
    * [onUserAdded description]
    * @param  {Function} callback [description]
    * @return {[type]}            [description]
