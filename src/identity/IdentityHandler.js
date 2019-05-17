@@ -42,6 +42,10 @@ class IdentityHandler {
       return false;
     }
 
+    if (message.type === 'event') {
+      return false;
+    }
+
     // Signalling Messages between P2P Stubs don't have Identities. FFS
     if (_from.includes('/p2prequester/') || _from.includes('/p2phandler/')) {
       return false;
