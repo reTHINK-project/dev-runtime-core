@@ -433,10 +433,14 @@ class Chat {
 
   onTyping(callback) {
       if (this._dataObjectReporter) this._dataObjectReporter.onEvent((event)=>{
-        if (event.value === 'typing') callback;
+        if (event.value === 'typing') {
+          callback();
+        }
       });
       else this._dataObjectObserver.onEvent((event)=>{
-        if (event.value === 'typing') callback;
+        if (event.value === 'typing') {
+          callback();
+        } 
       });
   }
 
