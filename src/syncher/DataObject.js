@@ -157,7 +157,7 @@ class DataObject {
       let listener = _this._bus.addListener(childURL, (msg) => {
         //ignore msg sent by himself
         if (msg.from !== this._owner) {
-          log.log('DataObject-Children-RCV: ', msg);
+          console.log('DataObject-Children-RCV: ', msg);
           switch (msg.type) {
             case 'create': _this._onChildCreate(msg); break;
             case 'event': _this._onEvent(msg); break;

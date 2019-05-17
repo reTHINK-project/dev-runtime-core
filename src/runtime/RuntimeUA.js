@@ -516,7 +516,7 @@ class RuntimeUA {
       //    this.identityManager.reset();
 
       this._dataObjectsStorage.deleteRemotes().then(()=>{
-        return resolve();
+        return;
       }).
       then(() => {
         this.storages.identity.get(false, false, 'identities').then((identities) => {
