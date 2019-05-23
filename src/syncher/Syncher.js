@@ -227,7 +227,7 @@ class Syncher {
 
     return new Promise((resolve, reject) => {
      // in case the object is synched in a remote storage, lets sync with it
-/*      if (_this._observers[objURL] && _this._observers[objURL].metadata.hasOwnProperty('backup') && _this._observers[objURL].metadata.backup) {
+//      if (_this._observers[objURL] && _this._observers[objURL].metadata.hasOwnProperty('backup') && _this._observers[objURL].metadata.backup) {
 
         let readMsg = {
           type: 'read', from: _this._owner, to: _this._subURL, 
@@ -237,22 +237,22 @@ class Syncher {
         if (criteria) readMsg.body.criteria = criteria;
 
           let callback = (reply) => {
-            return _this._readCallBack(reply, resolve, reject);
+            resolve(reply.body.value);
           };
     
           _this._bus.postMessage(readMsg, callback, false);
     
-      } else {*/
+ /*     } else {
         _this._readReporter(objURL).then((result)=> {
         resolve(result);
       });
-//    }
+    }*/
 
     });
 
   }
 
-  _readCallBack(reply, resolve,reject) {
+/*  _readCallBack(reply, resolve,reject) {
     let _this = this;
 
       console.log('[Syncher.read] reply: ', reply);
@@ -290,7 +290,7 @@ class Syncher {
       reject(reply.body.desc);
       }
 
-  }
+  }*/
 
   _readReporter(objURL) {
     let _this = this;
@@ -513,7 +513,10 @@ class Syncher {
       //request subscription
       //Provisional data is applied to the DataObjectObserver after confirmation. Or discarded if there is no confirmation.
       //for more info see the DataProvisional class documentation.
-      _this._bus.postMessage(subscribeMsg, (reply) => {
+      let msgId = _this._bus.postMessage(subscribeMsg);
+
+      _this._bus.addResponseListener(_this._owner, msgId,  (reply) => {
+
         log.log('[syncher] - subscribe-response: ', reply);
 
         let objURL = reply.body.resource;
@@ -553,11 +556,13 @@ class Syncher {
 
           log.log('[syncher] - new Data Object Observer already exist: ', newObj);
 
+          _this._bus.removeResponseListener(_this._owner, msgId);
           resolve(newObj);
 
           if (newProvisional) { newProvisional.apply(newObj); }
 
         } else {
+          _this._bus.removeResponseListener(_this._owner, msgId);
           reject(reply.body.desc);
         }
       });
@@ -752,41 +757,43 @@ class Syncher {
 
     delete _this._observers[resource];
 
-    if (object) {
-      let event = {
-        type: msg.type,
-        url: resource,
-        identity: msg.body.identity,
+    let event = {
+      type: msg.type,
+      url: resource,
+      identity: msg.body.identity,
 
-        ack: (type) => {
-          let lType = 200;
-          if (type) {
-            lType = type;
-          }
-
-         //TODO: any other different options for the release process, like accept but nor release local?
-          if (lType === 200) {
-            object.delete();
-          }
-
-          //send ack response message
-          _this._bus.postMessage({
-            id: msg.id, type: 'response', from: msg.to, to: msg.from,
-            body: { code: lType, source: _this._owner }
-          });
+      ack: (type) => {
+        let lType = 200;
+        if (type) {
+          lType = type;
         }
-      };
+
+       //TODO: any other different options for the release process, like accept but nor release local?
+        if (lType === 200 && object) {
+          object.delete();
+        }
+
+        //send ack response message
+        _this._bus.postMessage({
+          id: msg.id, type: 'response', from: msg.to, to: msg.from,
+          body: { code: lType, source: _this._owner }
+        });
+      }
+    };
+
+//    if (object) {
+
 
       if (_this._onNotificationHandler) {
         log.log('NOTIFICATION-EVENT: ', event);
         _this._onNotificationHandler(event);
       }
-    } else {
+/*    } else {
       _this._bus.postMessage({
         id: msg.id, type: 'response', from: msg.to, to: msg.from,
         body: { code: 404, source: _this._owner }
       });
-    }
+    }*/
   }
 
   // close event received from runtime registry

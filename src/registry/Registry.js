@@ -1252,7 +1252,7 @@ class Registry {
 
       if (url.includes(_this.runtimeURL) || url.includes('://sandbox/')) {
         log.error('[Registry - resolve] URL to be resolved should have listeners ', url);
-        reject('[Registry - resolve] URL to be resolved should have listeners ', url);
+        return reject('[Registry - resolve] URL to be resolved should have listeners ', url);
       }
 
       // resolve the domain protostub in case of a message to global registry

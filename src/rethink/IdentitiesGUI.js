@@ -16,7 +16,7 @@ class IdentitiesGUI {
       let funcName = msg.body.method;
       console.log('[IdentitiesGUI.listener] received msg: ' + msg);
 
-      if (funcName === 'openPopup') {
+      if (funcName === 'login') {
         let urlreceived = msg.body.params.urlreceived;
 
         _this._openPopup(urlreceived).then((returnedValue) => {

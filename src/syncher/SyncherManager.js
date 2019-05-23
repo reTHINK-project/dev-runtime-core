@@ -157,7 +157,7 @@ class SyncherManager {
       log.info('[SyncherManager.onRead] new message', msg);
 
       if (msg.hasOwnProperty('body') && msg.body.hasOwnProperty('resource')) {
-        _this._dataObjectsStorage.sync(msg.body.resource, criteria.backupRevision, true).then((dataObject)=>{
+        _this._dataObjectsStorage.sync(msg.body.resource, true).then((dataObject)=>{
           reply.body = {
             code: 200,
             value: dataObject
@@ -168,11 +168,11 @@ class SyncherManager {
           _this._bus.postMessage(reply);
         }, (error)=>{
           reply.body = {
-            code: 400,
+            code: 404,
             desc: error
           };
 
-          log.error('[SyncherManager.onRead] error: ', error);
+          log.warn('[SyncherManager.onRead] warning: ', error);
 
           _this._bus.postMessage(reply);
 

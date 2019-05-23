@@ -1139,7 +1139,7 @@ class IdentityModule {
           if (res.body.code < 300) {
             let result = res.body.value;
             resolve(result);
-          } else resolve(res.body.value.body.params, identity);
+          } else resolve(oldIdentity);
         });
       } catch (err) {
         reject('In sendRefreshMessage on postMessage error: ' + err);

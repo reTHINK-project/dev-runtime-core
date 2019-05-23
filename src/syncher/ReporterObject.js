@@ -131,7 +131,7 @@ class ReporterObject {
     };
 
     return new Promise((resolve, reject) => {
-      _this._bus.postMessage(nodeSubscribeMsg, (reply) => {
+      _this._bus.postMessageWithRetries(nodeSubscribeMsg, 10, (reply) => {
         log.log('[SyncherManager.ReporterObject ]forward-subscribe-response(reporter): ', reply);
         if (reply.body.code === 200) {
           let newForward = _this._bus.addForward(_this._url, _this._owner);

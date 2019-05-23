@@ -38,11 +38,11 @@ import Chat from './Chat';
 import { UserInfo } from './UserInfo';
 
 /**
-* Hyperty Simple Group Chat Manager API 
+* Hyperty Simple Group Chat Manager API
 * @author Vitor Silva [vitor-t-silva@telecom.pt]
 * @version 0.1.0
 */
-class SimpleSimpleChatManager {
+class SimpleChatManager {
 
   constructor(myUrl, bus, configuration, syncher, factory) {
     if (!myUrl) throw new Error('[SimpleChatManager.constructor] The myUrl is a needed parameter');
@@ -69,6 +69,7 @@ class SimpleSimpleChatManager {
     _this._bus = bus;
     _this._syncher = syncher;
     _this._domain = domain;
+    _this._defaultStubTriggered = false;
 
 //    _this.discovery = discovery;
     _this.identityManager = identityManager;
@@ -118,22 +119,28 @@ class SimpleSimpleChatManager {
       // TODO: replace the 200 for Message.Response
       event.ack(200);
 
-      _this._observersControllers[event.url].closeEvent = event;
+      if (_this._onNotification) { _this._onNotification(event); }
 
-      delete _this._observersControllers[event.url];
+      if ( _this._observersControllers[event.url]){
+        _this._observersControllers[event.url].closeEvent = event;
 
-      _this._observersControllers.closeEvent = event;
+        delete _this._observersControllers[event.url];
 
-      _this.communicationObject = communicationObject;
+        _this._observersControllers.closeEvent = event;
+
+        _this.communicationObject = communicationObject;
+
+      }
 
 
+/*
       for (let url in this._reportersControllers) {
         this._reportersControllers[url].close(event);
       }
 
       for (let url in this._observersControllers) {
         this._observersControllers[url].close(event);
-      }
+      }*/
 
     }
   }
@@ -252,6 +259,25 @@ class SimpleSimpleChatManager {
   onInvitation(callback) {
     let _this = this;
     _this._onInvitation = callback;
+
+    _this._triggerDefaultStubDeployment();
+  }
+
+  // send message to trigger domain default stub to ensure incoming messages are received
+
+  _triggerDefaultStubDeployment(){
+    let pingMessage = { from: this._myUrl, to: this._domain, type: 'execute'  };
+    if (!this._defaultStubTriggered) this._bus.postMessage(pingMessage);
+    this._defaultStubTriggered = true;
+  }
+
+  /**
+   * This function is used to handle notifications about incoming invitations to join a Group Chat.
+   * @param  {Function} CreateEvent The CreateEvent fired by the Syncher when an invitaion is received
+   */
+  onNotification(callback) {
+    let _this = this;
+    _this._onNotification = callback;
   }
 
   /**
@@ -303,4 +329,4 @@ class SimpleSimpleChatManager {
 
 }
 
-export default SimpleSimpleChatManager;
+export default SimpleChatManager;

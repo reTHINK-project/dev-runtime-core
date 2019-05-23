@@ -27,7 +27,7 @@ let log = logger.getLogger('DataObject');
 
 import SyncObject, { ChangeType, ObjectType } from './ProxyObject';
 import DataObjectChild from './DataObjectChild';
-import HeartBeat from './HeartBeat';
+//import HeartBeat from './HeartBeat';
 import { deepClone, divideURL } from '../utils/utils.js';
 import HypertyResourceFactory from '../hyperty-resource/HypertyResourceFactory.js';
 
@@ -120,14 +120,14 @@ class DataObject {
     _this._childrenObjects = {};
     _this._sharedChilds = []; //childObjects that were not sent yet to Reporters
 
-    if (input.backup && _this._childrens) {
+/*    if (input.backup && _this._childrens) {
       let lastHeartbeat = (input.hasOwnProperty('childrenObjects') && input.childrenObjects.hasOwnProperty('heartbeat'))
         ? input.childrenObjects.heartbeat : 0;
       _this._heartBeat = new HeartBeat(_this._bus, _this._owner, _this._syncher._runtimeUrl, this, 15, lastHeartbeat);
       if (_this._resumed) _this._heartBeat.start(true, _this.metadata.isReporter);
       else _this._heartBeat.start(false, _this.metadata.isReporter);
 
-    }
+    }*/
   }
 
   _getLastChildId() {
@@ -157,9 +157,10 @@ class DataObject {
       let listener = _this._bus.addListener(childURL, (msg) => {
         //ignore msg sent by himself
         if (msg.from !== this._owner) {
-          log.log('DataObject-Children-RCV: ', msg);
+          console.log('DataObject-Children-RCV: ', msg);
           switch (msg.type) {
             case 'create': _this._onChildCreate(msg); break;
+            case 'event': _this._onEvent(msg); break;
             case 'delete': log.log(msg); break;
             default: _this._changeChildren(msg); break;
           }
@@ -193,6 +194,7 @@ class DataObject {
 
   /**
    * Sync Data Object Observer with last version of Data Object Reporter. Useful for Resumes
+   * remove since hyperties can directly use syncher read?
    */
   sync() {
 
@@ -203,10 +205,10 @@ class DataObject {
 
       let criteria = {};
 
-      if (this.metadata.backupRevision) criteria.backupRevision = this.metadata.backupRevision;
+//      if (this.metadata.backupRevision) criteria.backupRevision = this.metadata.backupRevision;
 
       _this._syncher.read(_this._metadata.url, criteria).then((value) => {
-        log.info('[DataObject.sync] value to sync: ', value);
+        console.log('[DataObject.sync] value to sync: ', value);
 
         Object.assign(_this.data, deepClone(value.data));
 
@@ -218,7 +220,7 @@ class DataObject {
 
         if (value.childrenObjects) {
           _this.resumeChildrens(value.childrenObjects);
-          _this._storeChildrens();
+//          _this._storeChildrens();
           resolve(true);
         } else resolve(true);
 
@@ -508,7 +510,11 @@ class DataObject {
 
     //removing domain from childId to avoid backup issues with '.'
 
-    childInput.url = _this._owner.split('/')[3] + '#' + _this._childId;
+    let start = Math.floor(Date.now());
+
+    console.log('[DataObject._getChildInput] start ', start);
+
+    childInput.url = start + '-' + _this._owner.split('/')[3] + '#' + _this._childId;
 
     childInput.parentObject = _this;
     childInput.reporter = _this._owner;
@@ -570,6 +576,47 @@ class DataObject {
     this._onAddChildrenHandler = callback;
   }
 
+  /**
+   * Setup the callback to process events from Data Objects.
+   * @param {function(event: DataObjectEvent)} callback
+   */
+  onEvent(callback) {
+
+    this._onEventHandler = callback;
+  }
+
+  /**
+   * Send Data Object Events.
+   * @param {function(event: DataObjectEvent)} callback
+   */
+  sendEvent(event) {
+
+    let msgEvent = {
+      from: this._owner,
+      to: this._url+'/children/',
+      type: 'event',
+      body: { value: event}
+    }
+
+    this._bus.postMessage(msgEvent);
+  }
+
+
+//FLOW-IN: event received from a remote DataObject
+_onEvent(msg) {
+  let _this = this;
+
+  let event = {
+    from: msg.from,
+    value: msg.body.value,
+    identity: msg.body.identity,
+  };
+
+  if (_this._onEventHandler) _this._onEventHandler(event);  
+
+}
+
+
   //FLOW-IN: message received from a remote DataObject -> addChild
   _onChildCreate(msg) {
     let _this = this;
@@ -579,8 +626,8 @@ class DataObject {
     // if this is an heartbeat msg foward it to heatbeat handler
 
     if (msg.body.resource === 'heartbeat') {
-      console.log('[DataObject._onChildCreate] new heartbeat received ' + msg.body.value);
-      this._heartBeat.onNewHeartbeat(msg.body.value);
+//      console.log('[DataObject._onChildCreate] new heartbeat received ' + msg.body.value);
+//      this._heartBeat.onNewHeartbeat(msg.body.value);
     } else {
       console.log('[DataObject._onChildCreate] new child receivedBy ' + _this._owner + ' : ', msg);
       let response = {

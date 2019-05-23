@@ -5,6 +5,7 @@
 
 import * as logger from 'loglevel';
 import Identities from './Identities';
+import MsgBusHandlers from '../runtime/MsgBusHandlers';
 let log = logger.getLogger('IdentityHandler');
 
 class IdentityHandler {
@@ -41,10 +42,15 @@ class IdentityHandler {
       return false;
     }
 
+    if (message.type === 'event') {
+      return false;
+    }
+
     // Signalling Messages between P2P Stubs don't have Identities. FFS
     if (_from.includes('/p2prequester/') || _from.includes('/p2phandler/')) {
       return false;
     }
+
 
     let splitFrom = (_from).split('://');
     let fromSchema = splitFrom[0];
@@ -61,6 +67,15 @@ class IdentityHandler {
       // skip messages that don't need identity tokens in the body
 
       if (!this._isToSetID(message)) return resolve(message);
+
+      if (message.body && message.body.value && message.body.value.anonymous){
+        if (message.body.identity && message.body.identity.guid)
+          message.body.identity = { userProfile: { guid: message.body.identity.guid } };
+        else message.body.identity = { userProfile: { guid: 'anonymous' }  };
+        return resolve(message);
+  
+      }
+  
 
       /*      let from = message.from;
       let sourceURL = undefined;

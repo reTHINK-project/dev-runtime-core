@@ -72,6 +72,7 @@ class Chat {
     if (!dataObjectReporter) throw new Error('[ChatController] The data object reporter is necessary parameter ');
     let _this = this;
 
+
     _this.controllerMode = 'reporter';
 
     // Handler to process received files
@@ -352,11 +353,14 @@ class Chat {
         userProfile: _this.myIdentity
       };
 
+      let input = {};
+      input.anonymous = true;
+
 
       // TODO: change chatmessages to resource - chat, file
       // TODO: change message to hypertyResource - https://github.com/reTHINK-project/dev-service-framework/tree/develop/docs/datamodel/data-objects/hyperty-resource
       // TODO: handle with multiple resources - if the "message" will be different for each type of resources
-      dataObject.addChild(msg, sender).then(function(dataObjectChild) {
+      dataObject.addChild(msg, sender, input).then(function(dataObjectChild) {
         console.log('[ChatManager.ChatController][addChild - Chat Message]: ', dataObjectChild);
         //resolve(dataObjectChild);
 
@@ -421,6 +425,34 @@ class Chat {
     let _this = this;
     _this._onMessage = callback;
   }
+
+  /**
+   * This function is used to receive typing events.
+   * @param  {Function} callback Function to handle typing event
+   */
+
+  onTyping(callback) {
+      if (this._dataObjectReporter) this._dataObjectReporter.onEvent((event)=>{
+        if (event.value === 'typing') {
+          callback();
+        }
+      });
+      else this._dataObjectObserver.onEvent((event)=>{
+        if (event.value === 'typing') {
+          callback();
+        } 
+      });
+  }
+
+  /**
+   * This function is used to trigger typing events.
+   */
+
+  typing() {
+      if (this._dataObjectReporter) this._dataObjectReporter.sendEvent('typing');
+      else this._dataObjectObserver.sendEvent('typing');
+  }
+
 
   /**
    * [onUserAdded description]

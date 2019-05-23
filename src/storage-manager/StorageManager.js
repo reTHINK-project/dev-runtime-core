@@ -4,7 +4,7 @@ let log = logger.getLogger('StorageManager');
 
 class StorageManager {
 
-  constructor(db, storageName, schemas, runtimeUA, version = 1, remoteStorage = false) {
+  constructor(db, storageName, schemas) {
     if (!db) throw Error('The Storage Manager needs the database instance');
     if (!storageName) throw Error('The Storage Manager needs the storage name');
 
@@ -23,71 +23,9 @@ class StorageManager {
 
     this.db = db;
     this.storageName = storageName;
-    this._remoteStorage = remoteStorage;
-    this._runtimeUA = runtimeUA;
   }
 
-  // set remoteStorage backup server URL
 
-  set remoteStorage(remoteStorage) {
-    this._remoteStorage = remoteStorage;
-  }
-
-  // start sync with remoteStorage server. Returns a promise that resolves if connection is performed otherwise it is rejected
-
-  connect(options) {
-    return this.db.connect(this._remoteStorage, options);
-  }
-
-  // stop sync with remoteStorage server. Returns promise 
-
-  disconnect() {
-   return new Promise((resolve,reject) => {
-      this.db.disconnect(this._remoteStorage).then(()=> {
-        resolve();
-      }, (error) => {
-      reject(error);
-    });
-  });
-}
-  // to retrieve the last revision stored in the backup server
-
-  getBackupRevision(resource) {
-
-    return new Promise((resolve)=> {
-      this.db._syncNodes.get({type: 'remote'}).then((status)=> {
-        console.log('[StorageManager.getBackupRevision] retrieved status: ', status);
-        if (status && status.hasOwnProperty('appliedRemoteRevision')) {
-          if (status.appliedRemoteRevision === null) status.appliedRemoteRevision = 0;
-
-          resolve(status.appliedRemoteRevision);
-        } 
-    });
-  });
-}
-
-  // to retrieve the last revision stored in the backup server
-  // and broadcast it
-
-  _updateBackupRevision(resource) {
-
-    return new Promise((resolve)=> {
-      this.db._syncNodes.get({type: 'remote'}).then((status)=> {
-        console.log('[StorageManager._updateBackupRevision] retrieved status: ', status);
-        if (status && status.hasOwnProperty('appliedRemoteRevision')) {
-          if (status.appliedRemoteRevision === null) status.appliedRemoteRevision = 0;
-
-          this._runtimeUA._updateRuntimeStatus(
-            {
-              resource: resource,
-              value: { backupRevision: status.appliedRemoteRevision }
-            }
-          )
-          resolve(status.appliedRemoteRevision);
-        } 
-    });
-  });
-}
 
   _checkKey(key) {
     if (typeof key !== 'string') return key.toString();
@@ -156,12 +94,13 @@ class StorageManager {
         Object.assign(data, tmp);
       }
   
+      log.info('[StorageManager.set] data to put ', data);
        this.db[name].put(data).then(()=>{
-      if (updateRuntimeStatus && data.backup && data.url) {
+/*      if (updateRuntimeStatus && data.backup && data.url) {
         this._updateBackupRevision(data.url).then(()=> {
           resolve();
         });
-      } else resolve();
+      } else */resolve();
 
        }, ()=> {
          resolve();
@@ -182,62 +121,75 @@ class StorageManager {
    */
   get(key, value, table) {
     console.info('[StorageManager] - get ', key, value);
-    table = table ? table : key;
-    const name = this._getTable(table);
-    if (!name) return undefined;
-    const primaryKey = this._getPrimaryKey(name);
 
-    return this.db.transaction('rw!', this.db[name], () => {
-
-      if (!key && !value) { 
-        return this.db[name].toArray().then(objects => {
-          if (objects.length > 0) {
-            return objects.reduce((acc, key) => {
-              acc[key[primaryKey]] = key;
-              return acc;
-            }, () =>{return {} });
-          } else return {};
-        });
-      }
-
-      if (!value) {
-
-        return this.db[name].where(primaryKey).equals(key).first()
-          .then(object => {
-            if (object && object.hasOwnProperty('value')) {
-              return object.value;
-            } else {
-              return object;
-            }
+    return new Promise ((resolve, reject)=> {
+      table = table ? table : key;
+      const name = this._getTable(table);
+      if (!name) resolve(undefined); 
+      const primaryKey = this._getPrimaryKey(name);
+  
+      let result = this.db.transaction('rw!', this.db[name], () => {
+  
+        if (!key && !value) { 
+          return this.db[name].toArray().then(objects => {
+            if (objects.length > 0) {
+              return objects.reduce((acc, key) => {
+                acc[key[primaryKey]] = key;
+                return acc;
+              }, () =>{return {} });
+            } else return {};
           });
-
-      } else {
-
-        let type = typeof value;
-
-        if (Array.isArray(value)) {
-          type = 'array';
         }
-
-        switch (type) {
-          case 'string':
-
-            return this.db[name].where(key).equals(value).first()
-              .then(object => {
-                if (object && object.hasOwnProperty('value')) {
-                  return object.value;
-                } else {
-                  return object;
-                }
-              });
-
-          case 'object': {
-            const strPath = 'value.' + Object.keys(value).toString();
-            const strValue = Object.values(value);
-            console.log(strPath, strValue);
-
-            return this.db[name].where(strPath).anyOf(strValue).first()
-              .then(object => {
+  
+        if (!value) {
+  
+          return this.db[name].where(primaryKey).equals(key).first()
+            .then(object => {
+              if (object && object.hasOwnProperty('value')) {
+                return object.value;
+              } else {
+                return object;
+              }
+            });
+  
+        } else {
+  
+          let type = typeof value;
+  
+          if (Array.isArray(value)) {
+            type = 'array';
+          }
+  
+          switch (type) {
+            case 'string':
+  
+              return this.db[name].where(key).equals(value).first()
+                .then(object => {
+                  if (object && object.hasOwnProperty('value')) {
+                    return object.value;
+                  } else {
+                    return object;
+                  }
+                });
+  
+            case 'object': {
+              const strPath = 'value.' + Object.keys(value).toString();
+              const strValue = Object.values(value);
+              console.log(strPath, strValue);
+  
+              return this.db[name].where(strPath).anyOf(strValue).first()
+                .then(object => {
+                  if (object && object.hasOwnProperty('value')) {
+                    return object.value;
+                  } else {
+                    return object;
+                  }
+                });
+            }
+  
+            case 'array':
+              console.log('ARRAY:', value);
+              return this.db[name].where(value).then(object => {
                 if (object && object.hasOwnProperty('value')) {
                   return object.value;
                 } else {
@@ -245,19 +197,13 @@ class StorageManager {
                 }
               });
           }
-
-          case 'array':
-            console.log('ARRAY:', value);
-            return this.db[name].where(value).then(object => {
-              if (object && object.hasOwnProperty('value')) {
-                return object.value;
-              } else {
-                return object;
-              }
-            });
         }
-      }
+      });
+      resolve(result);
+
     });
+
+
   }
 
   /**
