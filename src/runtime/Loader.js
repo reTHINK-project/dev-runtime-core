@@ -2,6 +2,8 @@
 import * as logger from 'loglevel';
 let log = logger.getLogger('Loader');
 import path from 'path';
+import System from 'systemjs/dist/system';
+import Transform from 'systemjs/dist/extras/transform';
 
 import { divideURL, emptyObject } from '../utils/utils';
 import AddressAllocation from '../allocation/AddressAllocation';
@@ -304,27 +306,30 @@ class Loader {
         log.info('[Runtime.Loader.loadStub]1. Proto Stub not found ' + reason);
 
         // step 8 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-        this.descriptors.getStubDescriptor(protostubURL)
-          .then((stubDescriptor) => {
+        System.import(protostubURL)
+//        this.descriptors.getStubDescriptor(protostubURL)
+
+          .then((stub) => {
 
             if (haveError) return false;
             log.info('[Runtime.Loader.loadStub]2. return the ProtoStub descriptor');
 
             // step 9 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-            _stubDescriptor = stubDescriptor;
+            _stubDescriptor = stub.descriptor;
 
-            let sourcePackageURL = stubDescriptor.sourcePackageURL;
+/*            let sourcePackageURL = stubDescriptor.sourcePackageURL;
 
             if (sourcePackageURL === '/sourcePackage') {
               return stubDescriptor.sourcePackage;
-            }
+            }*/
 
             // step 10 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-            return this.runtimeCatalogue.getSourcePackageFromURL(sourcePackageURL);
-          }, handleError)
+//            return this.runtimeCatalogue.getSourcePackageFromURL(sourcePackageURL);
+
+/*          }, handleError)
           .catch(errorReason)
           .then((stubSourcePackage) => {
-            if (haveError) return false;
+            if (haveError) return false;*/
 
             // According to debug, it seems RuntimeCatalogue does not support yet constraints. It appears empty!!!!
 
@@ -334,7 +339,7 @@ class Loader {
 
             // step 11 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
             log.info('[Runtime.Loader.loadStub]3. return the ProtoStub Source Code');
-            _stubSourcePackage = stubSourcePackage;
+//            _stubSourcePackage = stubSourcePackage;
 
             // this will return the sandbox or one promise to getSandbox;
             // step 12 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
@@ -420,7 +425,7 @@ class Loader {
                 _stubSandbox.postMessage(msg);
               });
 
-              return _stubSandbox.deployComponent(_stubSourcePackage.sourceCode, _runtimeProtoStubURL, configuration);
+              return _stubSandbox.deployComponent(stub, _runtimeProtoStubURL, configuration);
             } catch (e) {
               log.error('[Runtime.Loader.loadStub] Error on deploy component:', e);
               reject(e);
@@ -431,18 +436,18 @@ class Loader {
 
 
             // step 28 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-            let stub;
+            let registeredStub;
             if (p2pConfig) {
               log.log('[Runtime.Loader.loadStub] p2pConfig: ', p2pConfig);
 
-              if (p2pConfig.hasOwnProperty('isHandlerStub')) stub = this.registry.p2pHandlerStub[this._runtimeURL];
-              if (p2pConfig.hasOwnProperty('p2pRequesterStub')) stub = this.registry.p2pRequesterStub[p2pConfig.remoteRuntimeURL];
+              if (p2pConfig.hasOwnProperty('isHandlerStub')) registeredStub = this.registry.p2pHandlerStub[this._runtimeURL];
+              if (p2pConfig.hasOwnProperty('p2pRequesterStub')) registeredStub = this.registry.p2pRequesterStub[p2pConfig.remoteRuntimeURL];
             } else {
-              stub = this.registry.protostubsList[domain];
+              registeredStub = this.registry.protostubsList[domain];
             }
 
-            log.log('[Runtime.Loader.loadStub] Stub: ', stub);
-            resolve(stub);
+            log.log('[Runtime.Loader.loadStub] Stub: ', registeredStub);
+            resolve(registeredStub);
             log.info('[Runtime.Loader.loadStub]------------------- END ---------------------------\n');
           }, handleError)
           .catch(errorReason);
@@ -512,15 +517,16 @@ class Loader {
         // we have completed step 3 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
 
         // we need to get ProtoStub descriptor step 4 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-        this.descriptors.getIdpProxyDescriptor(idpProxyURL)
-          .then((proxyDescriptor) => {
+        // this.descriptors.getIdpProxyDescriptor(idpProxyURL)
+        System.import(idpProxyURL)
+          .then((idpProxy) => {
 
             log.info('[Runtime.Loader] 2. Return the IDPProxy descriptor');
 
             // we have completed step 5 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-            _proxyDescriptor = proxyDescriptor;
+            _proxyDescriptor = idpProxy.descriptor;
 
-            let sourcePackageURL = proxyDescriptor.sourcePackageURL;
+/*            let sourcePackageURL = proxyDescriptor.sourcePackageURL;
 
             if (sourcePackageURL === '/sourcePackage') {
               return proxyDescriptor.sourcePackage;
@@ -542,7 +548,7 @@ class Loader {
             return policy;
           }, handleError)
           .then((policy) => {
-            if (haveError) return false;
+            if (haveError) return false;*/
 
             // this will return the sandbox or one promise to getSandbox;
             return this.registry.getSandbox(domain);
@@ -609,7 +615,7 @@ class Loader {
                 _proxySandbox.postMessage(msg);
               });
 
-              return _proxySandbox.deployComponent(_proxySourcePackage.sourceCode, runtimeIdpProxyURL, configuration);
+              return _proxySandbox.deployComponent(idpProxy, runtimeIdpProxyURL, configuration);
             } catch (e) {
               log.info('[Runtime.Loader] Error on deploy component:', e);
               reject(e);
@@ -628,11 +634,11 @@ class Loader {
             // };
 
             //this.registry.idpProxyList[domain].status = 'deployed';
-            let idpProxy = this.registry.idpProxyList[domain];
+            let registeredIdpProxy = this.registry.idpProxyList[domain];
 
-            log.log('[Runtime.Loader.loadIdpProxy] 8: loaded: ', idpProxy);
+            log.log('[Runtime.Loader.loadIdpProxy] 8: loaded: ', registeredIdpProxy);
 
-            resolve(idpProxy);
+            resolve(registeredIdpProxy);
             log.info('[Runtime.Loader.loadIdpProxy] ------------------- END ---------------------------\n');
 
           }, handleError)

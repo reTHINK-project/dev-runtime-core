@@ -15,14 +15,15 @@ if (process.env.MONITOR) {
 
 module.exports = {
   entry: {
-    Runtime: ['@babel/polyfill', './src/runtime/RuntimeUA.js']
+    Runtime: ['systemjs/dist/extras/transform','@babel/polyfill', './src/runtime/RuntimeUA.js']
   },
   output: {
     path: path.join(__dirname, '..', 'dist'),
     filename: '[name]' + processSuffix() + '.js',
     library: '[name]',
-    libraryTarget: 'umd',
-    umdNamedDefine: true
+    libraryTarget: 'system'
+//    libraryTarget: 'umd',
+//    umdNamedDefine: true
   },
   devtool: process.env.MODE === 'dev' ? 'cheap-module-eval-source-map' : 'none',
   module: {
@@ -43,6 +44,7 @@ module.exports = {
           { loader: 'babel-loader' }
         ]
       }
+//      { parser: { system: false } }
     ]
   },
 

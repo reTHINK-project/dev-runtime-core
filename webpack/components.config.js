@@ -15,6 +15,7 @@ module.exports = {
     path: path.join(__dirname, '..', 'dist'),
     filename: '[name].js',
     library: '[name]',
+//    libraryTarget: 'system'
     libraryTarget: 'umd',
     umdNamedDefine: true
   },
