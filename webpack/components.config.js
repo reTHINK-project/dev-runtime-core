@@ -31,6 +31,7 @@ module.exports = {
       //     { loader: 'eslint-loader', options: { configFile: './.eslintrc.yml' }}
       //   ]
       // },
+      { parser: { system: false } },
       {
         test: /\.js$/,
         exclude: /node_modules/,

@@ -1,11 +1,10 @@
 // Log System
 import * as logger from 'loglevel';
 let log = logger.getLogger('Loader');
-import path from 'path';
-import System from 'systemjs/dist/system';
-import Transform from 'systemjs/dist/extras/transform';
+//import path from 'path';
+//import System from 'systemjs/dist/system';
 
-import { divideURL, emptyObject } from '../utils/utils';
+import { divideURL, emptyObject, getConfigurationResources, buildURL } from '../utils/utils';
 import AddressAllocation from '../allocation/AddressAllocation';
 
 class Loader {
@@ -18,6 +17,10 @@ class Loader {
 
     this.runtimeConfiguration = runtimeConfiguration;
     this.descriptors = runtimeDescriptorsInstance;
+    console.log(System);
+    console.log(AddressAllocation);
+//    System.noConflict();
+
   }
 
   /**
@@ -89,6 +92,7 @@ class Loader {
   get runtimeFactory() {
     return this._runtimeFactory;
   }
+
 
 
   /**
@@ -247,6 +251,7 @@ class Loader {
       let _stubSourcePackage;
       let haveError = false;
       let stubId;
+      let stub;
 
       let errorReason = (reason) => {
         log.info('[Runtime.Loader.loadStub]Something failed on the deploy of protocolstub: ', reason);
@@ -306,16 +311,17 @@ class Loader {
         log.info('[Runtime.Loader.loadStub]1. Proto Stub not found ' + reason);
 
         // step 8 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-        System.import(protostubURL)
+        this._load('protocolstub', protostubURL)
 //        this.descriptors.getStubDescriptor(protostubURL)
 
-          .then((stub) => {
+          .then((instance) => {
 
             if (haveError) return false;
             log.info('[Runtime.Loader.loadStub]2. return the ProtoStub descriptor');
 
             // step 9 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-            _stubDescriptor = stub.descriptor;
+            _stubDescriptor = instance.descriptor;
+            stub = instance;
 
 /*            let sourcePackageURL = stubDescriptor.sourcePackageURL;
 
@@ -458,6 +464,61 @@ class Loader {
 
   }
 
+  _load(type, url) {
+    return new Promise((resolve, reject) => {
+
+      let domain;
+      let stub;
+
+      let originDividedURL = divideURL(this.runtimeURL);
+      let originDomain = originDividedURL.domain;
+/*      let constraints = this.constraints;
+
+      constraints.constraints.onlyAccessToken = true;
+      constraints.constraints.onlyIdAssertionValidation = true;
+      console.log('LOG HERE', constraints);*/
+      if (url.includes('://')) {
+        let dividedURL = divideURL(url);
+        domain = dividedURL.domain;
+        let path = dividedURL.identity;
+        if (path) {
+          stub = path.substring(path.lastIndexOf('/') + 1);
+        } else {
+          stub = 'default';
+        }
+
+      } else {
+        stub = 'default';
+        domain = url;
+      }
+
+
+      let resource = getConfigurationResources(this.runtimeConfiguration, 'catalogueURLs', type);
+
+      url = resource.prefix + domain + resource.suffix + stub +'.js';
+      // log.log('Load Idp Proxy for domain, ' + domain + ' : ', url);
+      return System.import(url).then((result) => {
+
+        resolve(new result.default());
+
+      }).catch(() => {
+
+        stub = domain;
+        domain = originDomain;
+
+        url = buildURL(this.runtimeConfiguration, 'catalogueURLs', type, stub, true);
+
+        // log.log('Load Idp Proxy for domain, ' + domain + ' : ', url);
+        return System.import(url);
+      }).then((result) => {
+        resolve(new result.default());
+      }).catch((reason) => {
+        reject(reason);
+      });
+
+    });
+  }
+
   /**
   * Deploy idpProxy from Catalogue URL or domain url
   * @param  {URL.URL}     domain          domain
@@ -481,6 +542,7 @@ class Loader {
       let _runtimeIdpProxyURL;
       let _proxySourcePackage;
       let haveError = false;
+      let idpProxy;
 
       let errorReason = (reason) => {
         log.info('[Runtime.Loader] Something failed on the deploy of IdpProxy: ', reason);
@@ -518,13 +580,16 @@ class Loader {
 
         // we need to get ProtoStub descriptor step 4 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
         // this.descriptors.getIdpProxyDescriptor(idpProxyURL)
-        System.import(idpProxyURL)
-          .then((idpProxy) => {
+
+        this._load('idp-proxy',idpProxyURL)
+          .then((instance) => {
 
             log.info('[Runtime.Loader] 2. Return the IDPProxy descriptor');
 
             // we have completed step 5 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-            _proxyDescriptor = idpProxy.descriptor;
+            _proxyDescriptor = instance.descriptor;
+
+            idpProxy = instance;
 
 /*            let sourcePackageURL = proxyDescriptor.sourcePackageURL;
 

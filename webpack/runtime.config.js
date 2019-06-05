@@ -15,7 +15,7 @@ if (process.env.MONITOR) {
 
 module.exports = {
   entry: {
-    Runtime: ['systemjs/dist/extras/transform','@babel/polyfill', './src/runtime/RuntimeUA.js']
+    Runtime: ['@babel/polyfill', './src/runtime/RuntimeUA.js']
   },
   output: {
     path: path.join(__dirname, '..', 'dist'),
@@ -37,6 +37,7 @@ module.exports = {
       //     { loader: 'eslint-loader', options: { configFile: './.eslintrc.yml' }}
       //   ]
       // },
+      { parser: { system: false } },
       {
         test: /\.js$/,
         exclude: /node_modules/,
@@ -44,7 +45,17 @@ module.exports = {
           { loader: 'babel-loader' }
         ]
       }
-//      { parser: { system: false } }
+/*      {
+        test: /systemjs/,
+        use: [
+          {
+            loader: 'exports-loader',
+            options: {
+              'self.System': true
+            }
+          }
+        ]
+      }*/
     ]
   },
 
