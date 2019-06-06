@@ -73,13 +73,13 @@ export const runtimeConfiguration = {
   catalogueURLs: {
     protocolstub: {
       prefix: 'https://',
-      suffix: ':8080/well-known/protocolstub/',
-      fallback: 'https://%domain%:8080/well-known/protocolstub/'
+      suffix: ':8080/.well-known/protocolstub/',
+      fallback: 'https://%domain%:8080/.well-known/protocolstub/'
     },
     'idp-proxy': {
       prefix: 'https://',
-      suffix: '/well-known/idp-proxy/',
-      fallback: 'https://%domain%:8080/well-known/idp-proxy/'
+      suffix: '/.well-known/idp-proxy/',
+      fallback: 'https://%domain%:8080/.well-known/idp-proxy/'
     }
   },
   msgNodeURL: {

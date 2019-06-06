@@ -251,7 +251,7 @@ class Loader {
       let _stubSourcePackage;
       let haveError = false;
       let stubId;
-      let stub;
+      let stubInstance;
 
       let errorReason = (reason) => {
         log.info('[Runtime.Loader.loadStub]Something failed on the deploy of protocolstub: ', reason);
@@ -316,12 +316,13 @@ class Loader {
 
           .then((instance) => {
 
+
             if (haveError) return false;
-            log.info('[Runtime.Loader.loadStub]2. return the ProtoStub descriptor');
 
             // step 9 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
             _stubDescriptor = instance.descriptor;
-            stub = instance;
+            log.info('[Runtime.Loader.loadStub]2. return the ProtoStub descriptor ', _stubDescriptor);
+            stubInstance = instance;
 
 /*            let sourcePackageURL = stubDescriptor.sourcePackageURL;
 
@@ -431,7 +432,7 @@ class Loader {
                 _stubSandbox.postMessage(msg);
               });
 
-              return _stubSandbox.deployComponent(stub, _runtimeProtoStubURL, configuration);
+              return _stubSandbox.deployComponent(stubInstance, _runtimeProtoStubURL, configuration);
             } catch (e) {
               log.error('[Runtime.Loader.loadStub] Error on deploy component:', e);
               reject(e);
@@ -492,14 +493,17 @@ class Loader {
         domain = url;
       }
 
-
       let resource = getConfigurationResources(this.runtimeConfiguration, 'catalogueURLs', type);
 
-      url = resource.prefix + domain + resource.suffix + stub +'.js';
-      // log.log('Load Idp Proxy for domain, ' + domain + ' : ', url);
-      return System.import(url).then((result) => {
+      let ext = type === 'idp-proxy' ? '.idp.js' : '.ps.js';
 
-        resolve(new result.default());
+      url = resource.prefix + domain + resource.suffix + stub + ext;
+      log.log('[Loader._load] first import for ' + url);
+      System.import(url).then((result) => {
+
+        let instance = new result.default();
+        log.log('[Loader._load] first import result ' + instance.name);
+        return resolve(instance);
 
       }).catch(() => {
 
@@ -508,13 +512,21 @@ class Loader {
 
         url = buildURL(this.runtimeConfiguration, 'catalogueURLs', type, stub, true);
 
-        // log.log('Load Idp Proxy for domain, ' + domain + ' : ', url);
-        return System.import(url);
-      }).then((result) => {
-        resolve(new result.default());
+        log.log('[Loader._load] 2nd import for ' + url);
+
+        System.import(url).then((result2) => {
+
+          log.log('[Loader._load] 2nd import result ' + result2);
+
+        let instance2 = new result2.default();
+
+        log.log('[Loader._load] 2nd import result ' + instance2.name);
+
+        return resolve(instance2);
       }).catch((reason) => {
         reject(reason);
       });
+    });
 
     });
   }

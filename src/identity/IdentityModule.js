@@ -201,8 +201,10 @@ class IdentityModule {
     // ];
 
     return new Promise((resolve) => {
+      let prefix = runtimeConfiguration['catalogueURLs']['idp-proxy'].prefix;
+      let suffix = runtimeConfiguration['catalogueURLs']['idp-proxy'].suffix;
 
-      const url = runtimeConfiguration.catalogueURLs.idpProxy.prefix + this._domain + runtimeConfiguration.catalogueURLs.idpProxy.suffix;
+      const url = prefix + this._domain + suffix;
 
       Promise.all([
         this.runtimeCapabilities.isAvailable('browser'),

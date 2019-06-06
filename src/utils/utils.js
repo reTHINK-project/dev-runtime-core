@@ -221,11 +221,13 @@ export function buildURL(configuration, component, type, resource, useFallback =
 
   let resourceType = objectResource[type];
 
+
   if (type) {
+    let ext = type === 'idp-proxy' ? '.idp.js' : '.ps.js';
     url = resourceType.prefix + configuration.domain + resourceType.suffix + resource;
     if (resourceType.hasOwnProperty('fallback') && useFallback) {
       if (resourceType.fallback.indexOf('%domain%')) {
-        url = resourceType.fallback.replace(/(%domain%)/g, configuration.domain) + resource+'.js';
+        url = resourceType.fallback.replace(/(%domain%)/g, configuration.domain) + resource+ext;
       } else {
         url = resourceType.fallback + resource;
       }
