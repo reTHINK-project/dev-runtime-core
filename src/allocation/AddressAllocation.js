@@ -168,9 +168,9 @@ class AddressAllocation {
         if (info.hasOwnProperty('configuration') && info.configuration.hasOwnProperty('domain_routing') && !info.configuration.domain_routing) 
           resolve(result);
         else {
-          _this._subscriptionManager.createSubscription(domain,addresses, _this._url).then(()=>{
+//          _this._subscriptionManager.createSubscription(domain,addresses, _this._url).then(()=>{
             resolve(result);
-          });
+//          });
 
         }
       } else resolve(result);

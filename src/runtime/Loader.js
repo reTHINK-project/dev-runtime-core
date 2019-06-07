@@ -473,6 +473,8 @@ class Loader {
 
       let originDividedURL = divideURL(this.runtimeURL);
       let originDomain = originDividedURL.domain;
+      let loader = new System.constructor();
+
 /*      let constraints = this.constraints;
 
       constraints.constraints.onlyAccessToken = true;
@@ -497,32 +499,35 @@ class Loader {
 
       let ext = type === 'idp-proxy' ? '.idp.js' : '.ps.js';
 
-      url = resource.prefix + domain + resource.suffix + stub + ext;
+      let loadingUrl = resource.prefix + domain + resource.suffix + stub + ext;
       log.log('[Loader._load] first import for ' + url);
-      System.import(url).then((result) => {
+
+      loader.import(loadingUrl).then((result) => {
 
         let instance = new result.default();
         log.log('[Loader._load] first import result ' + instance.name);
-        return resolve(instance);
+        loader.delete(loadingUrl);
+        resolve(instance);
 
       }).catch(() => {
 
         stub = domain;
         domain = originDomain;
 
-        url = buildURL(this.runtimeConfiguration, 'catalogueURLs', type, stub, true);
+        let loadingUrl2 = buildURL(this.runtimeConfiguration, 'catalogueURLs', type, stub, true);
 
-        log.log('[Loader._load] 2nd import for ' + url);
+        log.log('[Loader._load] 2nd import for ' + loadingUrl2);
 
-        System.import(url).then((result2) => {
+        loader.import(loadingUrl2).then((result2) => {
 
-          log.log('[Loader._load] 2nd import result ' + result2);
+//          log.log('[Loader._load] 2nd import result ' + result2);
 
         let instance2 = new result2.default();
 
         log.log('[Loader._load] 2nd import result ' + instance2.name);
+        loader.delete(loadingUrl2);
 
-        return resolve(instance2);
+        resolve(instance2);
       }).catch((reason) => {
         reject(reason);
       });
