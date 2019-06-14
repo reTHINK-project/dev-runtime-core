@@ -218,7 +218,7 @@ class IdentityModule {
           constraints.constraints.node = isNode;
           constraints.constraints.browser = isBrowser;
 
-          this._runtimeCatalogue.getTypeList(url, constraints).then((idps) => {
+          this._getAllIdps().then((idps) => {
             const listOfIdps = idps.map(key => { return { domain: key, type: 'idToken' }; });
             log.info('[IdentityModule.getIdentityAssertion:getIdentitiesToChoose]', idps, listOfIdps);
             this._listOfIdps = listOfIdps;
@@ -230,6 +230,42 @@ class IdentityModule {
     });
 
   }
+
+  _getAllIdps() {
+
+  let allUrl = 'https://' + this._domain + ':8080/.well-known/idp-proxy/all.json';
+
+  return new Promise(function(resolve, reject) {
+    fetch(allUrl).then(function(result) {
+/*    $.ajax({
+      url: hypertiesURL,
+      success: function(result) {*/
+
+
+        console.log(result);
+
+        result.json().then(function (idps) {
+          console.log(idps);
+/*          let response = [];
+        if (typeof hyperties === 'object') {
+          hyperties.forEach(function(key) {
+            response.push(key);
+          });
+        } else if (typeof hyperties === 'string') {
+          response = JSON.parse(hyperties);
+        }*/
+
+        resolve(idps['idps']);
+
+        })
+      },function(reason) {
+//      fail: function(reason) {
+        reject(reason);
+//        notification(reason, 'warn');
+      });
+  });    
+  }
+
 
   /**
   * Function to return the selected Identity within a session

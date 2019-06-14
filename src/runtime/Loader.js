@@ -474,6 +474,9 @@ class Loader {
       let originDividedURL = divideURL(this.runtimeURL);
       let originDomain = originDividedURL.domain;
       let loader = new System.constructor();
+      let dividedURL = divideURL(url);
+      domain = dividedURL.domain;
+      let path = dividedURL.identity;
 
 /*      let constraints = this.constraints;
 
@@ -481,16 +484,18 @@ class Loader {
       constraints.constraints.onlyIdAssertionValidation = true;
       console.log('LOG HERE', constraints);*/
       if (url.includes('://')) {
-        let dividedURL = divideURL(url);
         domain = dividedURL.domain;
-        let path = dividedURL.identity;
         if (path) {
           stub = path.substring(path.lastIndexOf('/') + 1);
         } else {
           stub = 'default';
         }
 
-      } else {
+      } else if (type === 'idp-proxy') {
+        domain = originDomain;
+        stub = url;
+      } 
+      else {
         stub = 'default';
         domain = url;
       }
@@ -498,6 +503,7 @@ class Loader {
       let resource = getConfigurationResources(this.runtimeConfiguration, 'catalogueURLs', type);
 
       let ext = type === 'idp-proxy' ? '.idp.js' : '.ps.js';
+
 
       let loadingUrl = resource.prefix + domain + resource.suffix + stub + ext;
       log.log('[Loader._load] first import for ' + url);
@@ -511,7 +517,7 @@ class Loader {
 
       }).catch(() => {
 
-        stub = domain;
+/*        stub = domain;
         domain = originDomain;
 
         let loadingUrl2 = buildURL(this.runtimeConfiguration, 'catalogueURLs', type, stub, true);
@@ -528,12 +534,12 @@ class Loader {
         loader.delete(loadingUrl2);
 
         resolve(instance2);
-      }).catch((reason) => {
+      }).catch((reason) => {*/
         reject(reason);
       });
     });
 
-    });
+//    });
   }
 
   /**

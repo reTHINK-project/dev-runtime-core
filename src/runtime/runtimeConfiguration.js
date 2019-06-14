@@ -78,7 +78,7 @@ export const runtimeConfiguration = {
     },
     'idp-proxy': {
       prefix: 'https://',
-      suffix: '/.well-known/idp-proxy/',
+      suffix: ':8080/.well-known/idp-proxy/',
       fallback: 'https://%domain%:8080/.well-known/idp-proxy/'
     }
   },
