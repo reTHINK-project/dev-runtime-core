@@ -454,7 +454,7 @@ class Loader {
             }
 
             log.log('[Runtime.Loader.loadStub] Stub: ', registeredStub);
-            resolve(registeredStub);
+            resolve(stubInstance);
             log.info('[Runtime.Loader.loadStub]------------------- END ---------------------------\n');
           }, handleError)
           .catch(errorReason);
@@ -517,7 +517,7 @@ class Loader {
 
       }).catch(() => {
 
-/*        stub = domain;
+        stub = domain;
         domain = originDomain;
 
         let loadingUrl2 = buildURL(this.runtimeConfiguration, 'catalogueURLs', type, stub, true);
@@ -534,12 +534,12 @@ class Loader {
         loader.delete(loadingUrl2);
 
         resolve(instance2);
-      }).catch((reason) => {*/
+      }).catch((reason) => {
         reject(reason);
       });
     });
 
-//    });
+    });
   }
 
   /**
