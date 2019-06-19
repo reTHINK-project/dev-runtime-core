@@ -491,14 +491,10 @@ class Loader {
           stub = 'default';
         }
 
-      } else if (type === 'idp-proxy') {
-        domain = originDomain;
-        stub = url;
-      } 
-      else {
+      } else {
         stub = 'default';
         domain = url;
-      }
+      } 
 
       let resource = getConfigurationResources(this.runtimeConfiguration, 'catalogueURLs', type);
 

@@ -203,8 +203,9 @@ class IdentityModule {
     return new Promise((resolve) => {
       let prefix = runtimeConfiguration['catalogueURLs']['idp-proxy'].prefix;
       let suffix = runtimeConfiguration['catalogueURLs']['idp-proxy'].suffix;
+      let all = runtimeConfiguration['catalogueURLs']['idp-proxy'].all;
 
-      const url = prefix + this._domain + suffix;
+      const url = prefix + this._domain + suffix + all;
 
       Promise.all([
         this.runtimeCapabilities.isAvailable('browser'),
@@ -218,7 +219,7 @@ class IdentityModule {
           constraints.constraints.node = isNode;
           constraints.constraints.browser = isBrowser;
 
-          this._getAllIdps().then((idps) => {
+          this._getAllIdps(url).then((idps) => {
             const listOfIdps = idps.map(key => { return { domain: key, type: 'idToken' }; });
             log.info('[IdentityModule.getIdentityAssertion:getIdentitiesToChoose]', idps, listOfIdps);
             this._listOfIdps = listOfIdps;
@@ -231,9 +232,9 @@ class IdentityModule {
 
   }
 
-  _getAllIdps() {
+  _getAllIdps(allUrl) {
 
-  let allUrl = 'https://' + this._domain + ':8080/.well-known/idp-proxy/all.json';
+//  let allUrl = 'https://' + this._domain + '/.well-known/idp-proxy/all.json';
 
   return new Promise(function(resolve, reject) {
     fetch(allUrl).then(function(result) {
