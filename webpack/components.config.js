@@ -8,8 +8,7 @@ module.exports = {
     sandbox: './src/sandbox-pack.js',
     minibus: './src/minibus-pack.js',
     rethink: './src/rethink.js',
-    StorageManager: './src/storage-manager-pack.js',
-    RuntimeCatalogue: './src/runtime-catalogue/RuntimeCatalogue.js'
+    StorageManager: './src/storage-manager-pack.js'
   },
   output: {
     path: path.join(__dirname, '..', 'dist'),

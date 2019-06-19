@@ -59,7 +59,7 @@ class Registry {
   * @param  {DomainURL}           remoteRegistry        remoteRegistry
   * @param  {storageManager}      storageManager
   */
-  constructor(runtimeURL, appSandbox, identityModule, runtimeCatalogue, runtimeCapabilities, storageManager, p2pHandlerURL, remoteRegistry) {
+  constructor(runtimeURL, appSandbox, identityModule, runtimeCapabilities, storageManager, p2pHandlerURL, remoteRegistry) {
 
     // how some functions receive the parameters for example:
     // new Registry('hyperty-runtime://sp1/123', appSandbox, idModule, remoteRegistry);
@@ -78,7 +78,6 @@ class Registry {
     _this.appSandbox = appSandbox;
     _this.runtimeURL = runtimeURL;
     _this.p2pHandlerURL = p2pHandlerURL;
-    _this.runtimeCatalogue = runtimeCatalogue;
     _this.remoteRegistry = remoteRegistry;
     _this.idModule = identityModule;
     _this.storageManager = storageManager;
@@ -546,7 +545,7 @@ class Registry {
 
       //this will create a array with a Promise in each position
       for (let index in descriptorDataSchema) {
-        dataSchemasArray.push(_this.runtimeCatalogue.getDataSchemaDescriptor(descriptorDataSchema[index]));
+        dataSchemasArray.push(_this.getDataSchemaDescriptor(descriptorDataSchema[index]));
       }
 
       // as soon as the previous array is completed, this will wait for the resolve of all promises in the array
@@ -566,6 +565,62 @@ class Registry {
     });
   }
 
+  /**
+     * Get DataSchemaDescriptor -> hack to remove runtime catalogue. 
+     * definitive solution should use Hyperty configuration or scheme defined at Hyperty descriptor level.
+     * @param dataSchemaURL - e.g. mydomain.com/.well-known/dataschema/MyDataSchema
+     * @param {boolean} [getFull] - boolean to decide to get the descriptor with the sourcePackage or (potentially) without
+     * @param {JSON} constraints - constraints object
+     * @returns {Promise}
+     */
+
+    getDataSchemaDescriptor(dataSchemaURL, getFull = true, constraints) {
+
+      //    return this.getDescriptor(dataSchemaURL, this.createDataSchema, getFull, constraints)
+      return new Promise((resolve)=> {
+        let schema = dataSchemaURL.split('/dataschema/')[1];
+        log.log('[RuntimeCatalogue.getDataSchemaDescriptor] schema ', schema);
+        let descriptor = {
+          sourcePackage: {
+            sourceCode: {
+              properties: {
+              }
+            }
+  
+          }
+        };
+      //      let scheme = properties.scheme ? properties.scheme.co : [];
+    
+        switch (schema) {
+          case 'Context':
+          case 'ContextReporter':
+          case 'ContextObserver':
+            descriptor.sourcePackage.sourceCode.properties.scheme = 'context';
+            break;
+          case 'Connection':
+            descriptor.sourcePackage.sourceCode.properties.scheme = 'connection';
+            break;
+          case 'WalletData':
+            descriptor.sourcePackage.sourceCode.properties.scheme = 'walletData';
+            break;
+          case 'Communication':
+            descriptor.sourcePackage.sourceCode.properties.scheme = 'comm';
+            descriptor.sourcePackage.sourceCode.properties.childrens = ['resources'];
+            break;
+          case 'HelloWorldDataSchema':
+            descriptor.sourcePackage.sourceCode.properties.scheme = 'hello';
+            break;
+          default:
+            descriptor.sourcePackage.sourceCode.properties.scheme = 'resource';
+            descriptor.sourcePackage.sourceCode.properties.childrens = [];
+            break;
+        }
+        resolve(descriptor);
+  
+      });
+  
+  
+    }  
   /**
   * method that returns previously registered Hyperty or DataObjects URLS, for given characteristics
   * @param  {JSON}        info           object or hyperty charateristics info

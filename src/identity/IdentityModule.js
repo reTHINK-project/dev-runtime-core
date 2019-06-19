@@ -41,17 +41,14 @@ class IdentityModule {
   /**
   * This is the constructor to initialise the Identity Module it does not require any input.
   */
-  constructor(runtimeURL, runtimeCapabilities, storageManager, dataObjectsStorage, cryptoManager, runtimeCatalogue) {
+  constructor(runtimeURL, runtimeCapabilities, storageManager, dataObjectsStorage, cryptoManager) {
     let _this = this;
 
     if (!runtimeURL) throw new Error('runtimeURL is missing.');
     if (!storageManager) throw new Error('storageManager is missing');
     if (!cryptoManager) throw new Error('cryptoManager is missing');
-    if (!runtimeCatalogue) throw new Error('runtimeCatalogue is missing');
 
     _this._runtimeURL = runtimeURL;
-
-    _this._runtimeCatalogue = runtimeCatalogue;
 
     _this.dataObjectsStorage = dataObjectsStorage;
     _this._idmURL = _this._runtimeURL + '/idm';
