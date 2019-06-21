@@ -18,6 +18,11 @@ class Descriptors {
     this.constraints = runtimeUtils.runtimeCapabilities;
   }
 
+  getDescriptor(url) {
+
+  return  fetch(url).then(result => result.json() );
+    }
+
   getHypertyDescriptor(hypertyURL) {
     return this.catalogue.getHypertyDescriptor(hypertyURL, true, this.constraints);
   }

@@ -310,19 +310,18 @@ class Loader {
         // is not registed?
         log.info('[Runtime.Loader.loadStub]1. Proto Stub not found ' + reason);
 
+        // see promise chaining at https://javascript.info/promise-chaining
+
         // step 8 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-        this._load('protocolstub', protostubURL)
-//        this.descriptors.getStubDescriptor(protostubURL)
-
-          .then((instance) => {
-
-
+        return this._load('protocolstub', protostubURL)
+          .then( (result) =>{
+            
             if (haveError) return false;
 
             // step 9 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-            _stubDescriptor = instance.descriptor;
+            _stubDescriptor = result.descriptor;
             log.info('[Runtime.Loader.loadStub]2. return the ProtoStub descriptor ', _stubDescriptor);
-            stubInstance = instance;
+            stubInstance = result.instance;
 
 /*            let sourcePackageURL = stubDescriptor.sourcePackageURL;
 
@@ -466,7 +465,7 @@ class Loader {
   }
 
   _load(type, url) {
-    return new Promise((resolve, reject) => {
+//    return new Promise((resolve, reject) => {
 
       let domain;
       let stub;
@@ -498,44 +497,53 @@ class Loader {
 
       let resource = getConfigurationResources(this.runtimeConfiguration, 'catalogueURLs', type);
 
-      let ext = type === 'idp-proxy' ? '.idp.js' : '.ps.js';
+      let ext = type === 'idp-proxy' ? '.idp' : '.ps';
 
 
-      let loadingUrl = resource.prefix + domain + resource.suffix + stub + ext;
+      let loadingUrl = resource.prefix + domain + resource.suffix + stub + ext + '.js';
       log.log('[Loader._load] first import for ' + url);
+      let protostubURL = resource.prefix + domain + resource.suffix + stub + ext + '.json';
 
-      loader.import(loadingUrl).then((result) => {
+      return loader.import(loadingUrl)
+      .then((result) => {
 
         let instance = new result.default();
         log.log('[Loader._load] first import result ' + instance.name);
-        loader.delete(loadingUrl);
-        resolve(instance);
 
-      }).catch(() => {
+        return(instance);
+      })
+        .then( (instance) => {
+         return this.descriptors.getDescriptor(protostubURL, instance)
+         .then((descriptor)=>{
+          return ({ "descriptor": descriptor, "instance": instance });
+         });
+        }).catch(() => {
 
         stub = domain;
         domain = originDomain;
 
         let loadingUrl2 = buildURL(this.runtimeConfiguration, 'catalogueURLs', type, stub, true);
+        let descriptorUrl2 = loadingUrl2.replace('.js','.json');
 
         log.log('[Loader._load] 2nd import for ' + loadingUrl2);
 
-        loader.import(loadingUrl2).then((result2) => {
-
-//          log.log('[Loader._load] 2nd import result ' + result2);
+        return loader.import(loadingUrl2).then((result2) => {
 
         let instance2 = new result2.default();
 
         log.log('[Loader._load] 2nd import result ' + instance2.name);
-        loader.delete(loadingUrl2);
 
-        resolve(instance2);
-      }).catch((reason) => {
-        reject(reason);
-      });
+        return(instance2);
+        })
+        .then( (inst) => {
+        return this.descriptors.getDescriptor(descriptorUrl2)
+        .then(desc => {
+          // return function or json
+          return({ "descriptor": desc, "instance": inst})
+        });
+        });
     });
-
-    });
+ 
   }
 
   /**
@@ -601,14 +609,14 @@ class Loader {
         // this.descriptors.getIdpProxyDescriptor(idpProxyURL)
 
         this._load('idp-proxy',idpProxyURL)
-          .then((instance) => {
+          .then((result) => {
 
             log.info('[Runtime.Loader] 2. Return the IDPProxy descriptor');
 
             // we have completed step 5 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-protostub.md
-            _proxyDescriptor = instance.descriptor;
+            _proxyDescriptor = result.descriptor;
 
-            idpProxy = instance;
+            idpProxy = result.instance;
 
 /*            let sourcePackageURL = proxyDescriptor.sourcePackageURL;
 
