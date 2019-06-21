@@ -72,14 +72,15 @@ export const runtimeConfiguration = {
   },
   catalogueURLs: {
     protocolstub: {
-      prefix: 'hyperty-catalogue://catalogue.',
+      prefix: 'https://',
       suffix: '/.well-known/protocolstub/',
-      fallback: 'hyperty-catalogue://catalogue.%domain%/.well-known/protocolstub/'
+      fallback: 'https://%domain%/.well-known/protocolstub/'
     },
-    idpProxy: {
-      prefix: 'hyperty-catalogue://catalogue.',
+    'idp-proxy': {
+      prefix: 'https://',
       suffix: '/.well-known/idp-proxy/',
-      fallback: 'hyperty-catalogue://catalogue.%domain%/.well-known/idp-proxy/'
+      fallback: 'https://%domain%/.well-known/idp-proxy/',
+      all: '/all.json'
     }
   },
   msgNodeURL: {

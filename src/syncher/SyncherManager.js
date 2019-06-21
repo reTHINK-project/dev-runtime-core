@@ -48,18 +48,16 @@ class SyncherManager {
   _observers: { ObjectURL: ObserverObject }
   */
 
-  constructor(runtimeURL, bus, registry, catalog, storageManager, allocator, storeDataObjects, identityModule) {
+  constructor(runtimeURL, bus, registry, storageManager, allocator, storeDataObjects, identityModule) {
     if (!runtimeURL) throw new Error('[Syncher Manager] - needs the runtimeURL parameter');
     if (!bus) throw new Error('[Syncher Manager] - needs the MessageBus instance');
     if (!registry) throw new Error('[Syncher Manager] - needs the Registry instance');
-    if (!catalog) throw new Error('[Syncher Manager] - needs the RuntimeCatalogue instance');
     if (!storageManager) throw new Error('[Syncher Manager] - need the storageManager instance');
 
     let _this = this;
 
     _this._bus = bus;
     _this._registry = registry;
-    _this._catalog = catalog;
     _this._storageManager = storageManager;
     _this._identityModule = identityModule;
 
@@ -315,7 +313,7 @@ class SyncherManager {
     }*/
 
     //get schema from catalogue and parse -> (scheme, children)
-    _this._catalog.getDataSchemaDescriptor(msg.body.schema).then((descriptor) => {
+    _this._registry.getDataSchemaDescriptor(msg.body.schema).then((descriptor) => {
 
 
 
@@ -507,7 +505,7 @@ class SyncherManager {
       log.log('[SyncherManager] - resume create', msg, storedObject);
 
       //get schema from catalogue and parse -> (scheme, children)
-      _this._catalog.getDataSchemaDescriptor(schema).then((descriptor) => {
+      _this._registry.getDataSchemaDescriptor(schema).then((descriptor) => {
 
         let properties = descriptor.sourcePackage.sourceCode.properties;
         let scheme = properties.scheme ? properties.scheme.constant : 'resource';
@@ -825,7 +823,7 @@ class SyncherManager {
     let childBaseURL = objURL + '/children/';
 
     //get schema from catalogue and parse -> (children)
-    _this._catalog.getDataSchemaDescriptor(msg.body.schema).then((descriptor) => {
+    _this._registry.getDataSchemaDescriptor(msg.body.schema).then((descriptor) => {
       let properties = descriptor.sourcePackage.sourceCode.properties;
       let childrens = properties.childrens ? properties.childrens : [];
 
@@ -1011,7 +1009,7 @@ class SyncherManager {
 
       //get schema from catalogue and parse -> (children)
       // TODO: remove this since children resources should be available in the DataObjectsStorage
-      this._catalog.getDataSchemaDescriptor(schema).then((descriptor) => {
+      this._registry.getDataSchemaDescriptor(schema).then((descriptor) => {
         let properties = descriptor.sourcePackage.sourceCode.properties;
         let childrens = properties.childrens ? properties.childrens : [];
 

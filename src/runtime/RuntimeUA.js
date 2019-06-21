@@ -55,7 +55,6 @@ import HypertyResourcesStorage from '../hyperty-resource/HypertyResourcesStorage
 import SyncherManager from '../syncher/SyncherManager';
 import SubscriptionManager from '../subscriptionManager/SubscriptionManager';
 import RuntimeCoreCtx from '../policy/context/RuntimeCoreCtx';
-import RuntimeCatalogue from '../runtime-catalogue/RuntimeCatalogue';
 
 /**
  * Runtime User Agent Interface will process all the dependecies of the core runtime;
@@ -63,7 +62,6 @@ import RuntimeCatalogue from '../runtime-catalogue/RuntimeCatalogue';
  * @version 0.4.0
  *
  * @property {runtimeFactory} runtimeFactory - Specific implementation for all environments;
- * @property {RuntimeCatalogue} runtimeCatalogue - Catalogue of components can be installed;
  * @property {runtimeURL} runtimeURL - This identify the core runtime, should be unique;
  * @property {IdentityModule} identityModule - Identity Module;
  * @property {PEP} policyEngine - Policy Engine Module;
@@ -109,7 +107,6 @@ class RuntimeUA {
       throw new Error('Check your Runtime Factory because it needs the Runtime Catalogue implementation');
     }*/
 
-    this.runtimeCatalogue = new RuntimeCatalogue(runtimeFactory);
 
 
 
@@ -299,13 +296,13 @@ class RuntimeUA {
       try {
 
         // Prepare the on instance to handle with the fallbacks and runtimeCatalogue;
-        this.descriptorInstance = new Descriptors(this.runtimeURL, this.runtimeCatalogue, this.runtimeConfiguration);
+        this.descriptorInstance = new Descriptors(this.runtimeURL, this.runtimeConfiguration);
 
         // Prepare the loader to load the hyperties, protostubs and idpproxy;
         this.loader = new Loader(this.runtimeURL, this.runtimeConfiguration, this.descriptorInstance);
 
         // Instantiate the identity Module
-        this.identityModule = new IdentityModule(this.runtimeURL, this.runtimeCapabilities, this.storages.identity, this._dataObjectsStorage, cryptoManager, this.runtimeCatalogue);
+        this.identityModule = new IdentityModule(this.runtimeURL, this.runtimeCapabilities, this.storages.identity, this._dataObjectsStorage, cryptoManager);
 
         // Use the sandbox factory to create an AppSandbox;
         // In the future can be decided by policyEngine if we need
@@ -313,7 +310,7 @@ class RuntimeUA {
         let appSandbox = this.runtimeFactory.createAppSandbox();
 
         // Instantiate the Registry Module
-        this.registry = new Registry(this.runtimeURL, appSandbox, this.identityModule, this.runtimeCatalogue, this.runtimeCapabilities, this.storages.registry, this.p2pHandlerURL);
+        this.registry = new Registry(this.runtimeURL, appSandbox, this.identityModule, this.runtimeCapabilities, this.storages.registry, this.p2pHandlerURL);
 
         // Set the loader to load Hyperties, Stubs and IdpProxies
         this.registry.loader = this.loader;
@@ -381,14 +378,13 @@ class RuntimeUA {
         this.runtimeFactory.messageBus = this.messageBus;
 
         // Instanciate the SyncherManager;
-        this.syncherManager = new SyncherManager(this.runtimeURL, this.messageBus, this.registry, this.runtimeCatalogue, this.storages.syncherManager, null, this._dataObjectsStorage, this.identityModule);
+        this.syncherManager = new SyncherManager(this.runtimeURL, this.messageBus, this.registry, this.storages.syncherManager, null, this._dataObjectsStorage, this.identityModule);
 
 
         // Set into loader the needed components;
         this.loader.runtimeURL = this.runtimeURL;
         this.loader.messageBus = this.messageBus;
         this.loader.registry = this.registry;
-        this.loader.runtimeCatalogue = this.runtimeCatalogue;
         this.loader.runtimeFactory = this.runtimeFactory;
 
         //Instantiate Discovery Lib for notification testing

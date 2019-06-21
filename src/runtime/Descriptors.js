@@ -6,19 +6,22 @@ let log = logger.getLogger('Descriptors');
 
 class Descriptors {
 
-  constructor(runtimeURL, catalogue, runtimeConfiguration) {
+  constructor(runtimeURL, runtimeConfiguration) {
     if (!runtimeURL) throw Error('The descriptor need to know the runtime url to be used');
-    if (!catalogue) throw Error('The descriptor needs the catalogue instance');
     if (!runtimeConfiguration) throw Error('The descriptor needs the runtime configuration');
 
     this.log = log;
 
     this.runtimeConfiguration = runtimeConfiguration;
     this.runtimeURL = runtimeURL;
-    this.catalogue = catalogue;
 
     this.constraints = runtimeUtils.runtimeCapabilities;
   }
+
+  getDescriptor(url) {
+
+  return  fetch(url).then(result => result.json() );
+    }
 
   getHypertyDescriptor(hypertyURL) {
     return this.catalogue.getHypertyDescriptor(hypertyURL, true, this.constraints);

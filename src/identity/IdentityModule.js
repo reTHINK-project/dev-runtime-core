@@ -41,17 +41,14 @@ class IdentityModule {
   /**
   * This is the constructor to initialise the Identity Module it does not require any input.
   */
-  constructor(runtimeURL, runtimeCapabilities, storageManager, dataObjectsStorage, cryptoManager, runtimeCatalogue) {
+  constructor(runtimeURL, runtimeCapabilities, storageManager, dataObjectsStorage, cryptoManager) {
     let _this = this;
 
     if (!runtimeURL) throw new Error('runtimeURL is missing.');
     if (!storageManager) throw new Error('storageManager is missing');
     if (!cryptoManager) throw new Error('cryptoManager is missing');
-    if (!runtimeCatalogue) throw new Error('runtimeCatalogue is missing');
 
     _this._runtimeURL = runtimeURL;
-
-    _this._runtimeCatalogue = runtimeCatalogue;
 
     _this.dataObjectsStorage = dataObjectsStorage;
     _this._idmURL = _this._runtimeURL + '/idm';
@@ -201,8 +198,11 @@ class IdentityModule {
     // ];
 
     return new Promise((resolve) => {
+      let prefix = runtimeConfiguration['catalogueURLs']['idp-proxy'].prefix;
+      let suffix = runtimeConfiguration['catalogueURLs']['idp-proxy'].suffix;
+      let all = runtimeConfiguration['catalogueURLs']['idp-proxy'].all;
 
-      const url = runtimeConfiguration.catalogueURLs.idpProxy.prefix + this._domain + runtimeConfiguration.catalogueURLs.idpProxy.suffix;
+      const url = prefix + this._domain + suffix + all;
 
       Promise.all([
         this.runtimeCapabilities.isAvailable('browser'),
@@ -216,7 +216,7 @@ class IdentityModule {
           constraints.constraints.node = isNode;
           constraints.constraints.browser = isBrowser;
 
-          this._runtimeCatalogue.getTypeList(url, constraints).then((idps) => {
+          this._getAllIdps(url).then((idps) => {
             const listOfIdps = idps.map(key => { return { domain: key, type: 'idToken' }; });
             log.info('[IdentityModule.getIdentityAssertion:getIdentitiesToChoose]', idps, listOfIdps);
             this._listOfIdps = listOfIdps;
@@ -228,6 +228,42 @@ class IdentityModule {
     });
 
   }
+
+  _getAllIdps(allUrl) {
+
+//  let allUrl = 'https://' + this._domain + '/.well-known/idp-proxy/all.json';
+
+  return new Promise(function(resolve, reject) {
+    fetch(allUrl).then(function(result) {
+/*    $.ajax({
+      url: hypertiesURL,
+      success: function(result) {*/
+
+
+        console.log(result);
+
+        result.json().then(function (idps) {
+          console.log(idps);
+/*          let response = [];
+        if (typeof hyperties === 'object') {
+          hyperties.forEach(function(key) {
+            response.push(key);
+          });
+        } else if (typeof hyperties === 'string') {
+          response = JSON.parse(hyperties);
+        }*/
+
+        resolve(idps['idps']);
+
+        })
+      },function(reason) {
+//      fail: function(reason) {
+        reject(reason);
+//        notification(reason, 'warn');
+      });
+  });    
+  }
+
 
   /**
   * Function to return the selected Identity within a session

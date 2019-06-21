@@ -8,13 +8,13 @@ module.exports = {
     sandbox: './src/sandbox-pack.js',
     minibus: './src/minibus-pack.js',
     rethink: './src/rethink.js',
-    StorageManager: './src/storage-manager-pack.js',
-    RuntimeCatalogue: './src/runtime-catalogue/RuntimeCatalogue.js'
+    StorageManager: './src/storage-manager-pack.js'
   },
   output: {
     path: path.join(__dirname, '..', 'dist'),
     filename: '[name].js',
     library: '[name]',
+//    libraryTarget: 'system'
     libraryTarget: 'umd',
     umdNamedDefine: true
   },
@@ -30,6 +30,7 @@ module.exports = {
       //     { loader: 'eslint-loader', options: { configFile: './.eslintrc.yml' }}
       //   ]
       // },
+      { parser: { system: false } },
       {
         test: /\.js$/,
         exclude: /node_modules/,

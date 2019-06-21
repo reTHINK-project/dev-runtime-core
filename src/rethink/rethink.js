@@ -88,18 +88,19 @@ const rethink = {
             return new Promise(function (resolve, reject) {
 
               //TODO: Work the message errors, probably use message factory
-              runtime.loadStub(domain).then(function (result) {
+              runtime.loadStub(domain).then(function (instance) {
 
-                let protostubURL = result.url || result.runtimeProtoStubURL;
+/*                let protostubURL = result.url || result.runtimeProtoStubURL;
                 let protostubComponent = window.components[protostubURL];
                 let protostub = {
                   runtimeProtostubURL: protostubURL,
                   status: result.status,
                   instance: protostubComponent.instance,
                   name: protostubComponent.name
-                };
+                };*/
+                console.log('[rethink.requireProtostub] loaded: ', instance);
 
-                resolve(protostub);
+                resolve(instance);
               }).catch(function (reason) {
                 reject(reason);
               });

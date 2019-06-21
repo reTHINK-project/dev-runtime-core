@@ -21,8 +21,9 @@ module.exports = {
     path: path.join(__dirname, '..', 'dist'),
     filename: '[name]' + processSuffix() + '.js',
     library: '[name]',
-    libraryTarget: 'umd',
-    umdNamedDefine: true
+    libraryTarget: 'system'
+//    libraryTarget: 'umd',
+//    umdNamedDefine: true
   },
   devtool: process.env.MODE === 'dev' ? 'cheap-module-eval-source-map' : 'none',
   module: {
@@ -36,13 +37,25 @@ module.exports = {
       //     { loader: 'eslint-loader', options: { configFile: './.eslintrc.yml' }}
       //   ]
       // },
-      {
+      { parser: { system: false } },
+ /*     {
         test: /\.js$/,
         exclude: /node_modules/,
         use: [
           { loader: 'babel-loader' }
         ]
       }
+      {
+        test: /systemjs/,
+        use: [
+          {
+            loader: 'exports-loader',
+            options: {
+              'self.System': true
+            }
+          }
+        ]
+      }*/
     ]
   },
 

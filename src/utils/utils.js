@@ -211,23 +211,25 @@ export function getConfigurationResources(configuration, component, resource) {
  * @param  {boolean} useFallback  if true the function will check if have a fallback url;
  * @return {string}               partial url to contact the resource;
  */
-export function buildURL(configuration, component, resource, type, useFallback = false) {
+export function buildURL(configuration, component, type, resource, useFallback = false) {
   let objectResource = configuration[component];
   let url;
 
-  if (!objectResource.hasOwnProperty(resource)) {
-    throw Error('The configuration ' + JSON.stringify(objectResource, '', 2) + ' don\'t have the ' + resource + ' resource you are looking for');
+  if (!objectResource.hasOwnProperty(type)) {
+    throw Error('The configuration ' + JSON.stringify(objectResource, '', 2) + ' don\'t have the ' + type + ' resource you are looking for');
   }
 
-  let resourceType = objectResource[resource];
+  let resourceType = objectResource[type];
+
 
   if (type) {
-    url = resourceType.prefix + configuration.domain + resourceType.suffix + type;
+    let ext = type === 'idp-proxy' ? '.idp.js' : '.ps.js';
+    url = resourceType.prefix + configuration.domain + resourceType.suffix + resource;
     if (resourceType.hasOwnProperty('fallback') && useFallback) {
       if (resourceType.fallback.indexOf('%domain%')) {
-        url = resourceType.fallback.replace(/(%domain%)/g, configuration.domain) + type;
+        url = resourceType.fallback.replace(/(%domain%)/g, configuration.domain) + resource+ext;
       } else {
-        url = resourceType.fallback + type;
+        url = resourceType.fallback + resource;
       }
     }
   } else {

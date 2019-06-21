@@ -25,9 +25,11 @@ class SandboxBrowser extends Sandbox {
     };
 
     _this._sbr = new SandboxRegistry(_this._bus);
-    _this._sbr._create = (url, sourceCode, config, factory) => {
+    _this._sbr._create = (url, instance, config, factory) => {
       console.log('SandboxRegistry._create ', url, config);
-      window.eval(sourceCode);
+      instance._start(url, this._bus, config, factory);
+
+/*      window.eval(sourceCode);
 
       let component;
       if (typeof activate === 'function') {
@@ -42,7 +44,8 @@ class SandboxBrowser extends Sandbox {
       if (!window.components) window.components = {};
       window.components[url] = component;
 
-      return component;
+      return component;*/
+      return;
     };
   }
 
