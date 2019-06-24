@@ -108,18 +108,19 @@ class Loader {
    *
    * @memberOf Loader
    */
-  loadHyperty(hypertyClass, reuseURL = false, IdpConstraint, appURL) {
+  loadHyperty(hypertyUrl, reuseURL = false, IdpConstraint, appURL) {
 
     if (!this._readyToUse()) return false;
-    if (!hypertyClass) throw new Error('[Runtime.Loader] hypertyClass parameter is needed');
+    if (!hypertyUrl) throw new Error('[Runtime.Loader] hypertyUrl parameter is needed');
 
 
     let _hypertyURL;
     let _hypertySandbox;
-    let _hypertySourcePackage;
+//    let _hypertySourcePackage;
     let haveError = false;
-    let instance = new hypertyClass();
-    let hyperty = instance.name;
+//    let hyperty = instance.name;
+    let descriptorUrl = hypertyUrl.replace('.js', '.json');
+    let hyperty;
 
 
     return new Promise((resolve, reject) => {
@@ -134,18 +135,29 @@ class Loader {
         reject(reason);
       };
   
-      log.info('[Runtime.Loader.loadHyperty] ', hyperty);
-      let _hypertyDescriptor = instance.descriptor;
+      System.import(hypertyUrl)
+      .then( (result) =>{
+
+        hyperty = new result.default();
+//        log.log('[Loader._load] first import result ' + hyperty.name);
+
+        return;
+      })
+        .then( () => {
+         return this.descriptors.getDescriptor(descriptorUrl)
+        })
+         .then((descriptor)=>{
+        log.info('[Runtime.Loader.loadHyperty] hyperty Instance ', hyperty);
+      let _hypertyDescriptor = descriptor;
 
       _hypertyDescriptor.dataObjects[0] = _hypertyDescriptor.dataObjects[0].replace('%domain%', this._registry._domain);
 
       // at this point, we have completed "step 2 and 3" as shown in https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md
       log.info('[Runtime.Loader] 1: return hyperty descriptor: ', _hypertyDescriptor);
 
+      hyperty.name = descriptor.name;
 
       _hypertySandbox = this.registry.getAppSandbox();
-
-
 
       let numberOfAddresses = 1;
       //debugger;
@@ -155,7 +167,7 @@ class Loader {
         log.info('[Runtime.Loader] 6: return the addresses for the hyperty', addresses);
 
         // Register hyperty
-        return this.registry.registerHyperty(_hypertySandbox, hyperty, _hypertyDescriptor, addresses, IdpConstraint);
+        return this.registry.registerHyperty(_hypertySandbox, descriptorUrl, _hypertyDescriptor, addresses, IdpConstraint);
       }, handleError)
       .then((registrationResult) => {
         if (haveError) return false;
@@ -185,7 +197,7 @@ class Loader {
 
         try {
           //            return _hypertySandbox.deployComponent(_hypertySourcePackage.sourceCode, _hypertyURL, configuration);
-          return _hypertySandbox.deployComponent(instance, _hypertyURL, configuration);
+          return _hypertySandbox.deployComponent(hyperty, _hypertyURL, configuration);
         } catch (e) {
           log.info('[Runtime.Loader] Error on deploy component:', e);
           reject(e);
@@ -211,19 +223,20 @@ class Loader {
         let deployed = {
           runtimeHypertyURL: _hypertyURL,
           status: deployComponentStatus,
-          name: hyperty,
-          instance: instance
+          name: hyperty.name,
+          instance: hyperty
         };
 
         log.info('[Runtime.Loader] Hyperty deployed: ', deployed);
-        resolve(instance);
+        resolve(hyperty);
 
         // we have completed step 21 https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md right now.
         log.info('[Runtime.Loader] ------------------ END ------------------------');
       }, handleError)
       .catch(errorReason);
-      });
-  }
+    });
+  });
+}
 
   /**
   * Deploy Stub from Catalogue URL or domain url
@@ -508,7 +521,6 @@ class Loader {
       .then((result) => {
 
         let instance = new result.default();
-        log.log('[Loader._load] first import result ' + instance.name);
 
         return(instance);
       })
@@ -530,8 +542,6 @@ class Loader {
         return loader.import(loadingUrl2).then((result2) => {
 
         let instance2 = new result2.default();
-
-        log.log('[Loader._load] 2nd import result ' + instance2.name);
 
         return(instance2);
         })
