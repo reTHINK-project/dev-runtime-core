@@ -139,7 +139,7 @@ class Loader {
       .then( (result) =>{
 
         hyperty = new result.default();
-        log.log('[Loader._load] first import result ' + hyperty.name);
+//        log.log('[Loader._load] first import result ' + hyperty.name);
 
         return;
       })
@@ -154,6 +154,8 @@ class Loader {
 
       // at this point, we have completed "step 2 and 3" as shown in https://github.com/reTHINK-project/core-framework/blob/master/docs/specs/runtime/dynamic-view/basics/deploy-hyperty.md
       log.info('[Runtime.Loader] 1: return hyperty descriptor: ', _hypertyDescriptor);
+
+      hyperty.name = descriptor.name;
 
       _hypertySandbox = this.registry.getAppSandbox();
 
@@ -519,7 +521,6 @@ class Loader {
       .then((result) => {
 
         let instance = new result.default();
-        log.log('[Loader._load] first import result ' + instance.name);
 
         return(instance);
       })
@@ -541,8 +542,6 @@ class Loader {
         return loader.import(loadingUrl2).then((result2) => {
 
         let instance2 = new result2.default();
-
-        log.log('[Loader._load] 2nd import result ' + instance2.name);
 
         return(instance2);
         })
