@@ -14,14 +14,14 @@ import GraphConnector from '../src/graphconnector/GraphConnector';
 import CoreDiscovery from '../src/discovery/CoreDiscovery';
 import Registry from '../src/registry/Registry';
 import AddressAllocation from '../src/allocation/AddressAllocation';
-import RuntimeCatalogue from '../src/runtime-catalogue/RuntimeCatalogue';
+//import RuntimeCatalogue from '../src/runtime-catalogue/RuntimeCatalogue';
 
 let msgbus;
 let runtimeURL = 'hyperty-runtime://ua.pt/123';
 let domain = 'ua.pt';
 let appSandbox = runtimeFactory.createAppSandbox();
 let storageManager = runtimeFactory.storageManager('capabilities');
-let runtimeCatalogue = new RuntimeCatalogue(runtimeFactory);
+//let runtimeCatalogue = new RuntimeCatalogue(runtimeFactory);
 let coreDiscovery;
 let runtimeCapabilities = runtimeFactory.runtimeCapabilities(storageManager);
 

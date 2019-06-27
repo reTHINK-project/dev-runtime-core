@@ -3,17 +3,20 @@ module.exports = function(config) {
     basePath: '',
     frameworks: ['mocha', 'chai', 'sinon'],
     files: [
-      './test/SyncStorageManager.spec.js'
+      './test/*.spec.js'
     ],
     exclude: [
       './test/GraphConnector.spec.js',
       './test/PolicyEngine.spec.js',
       './test/HypertyResourceStorage.spec.js',
-      './test/RuntimeCatalogue.spec.js',
       './test/DataObjectsStorage.spec.js',
       './test/StorageManager.spec.js',
       './test/PersistenceManager.spec.js',
-      './test/SyncherManager.spec.js'
+      './test/CoreDiscovery.spec.js',
+      './test/Descriptors.spec.js',
+      './test/SyncherManager.spec.js',
+      './test/RuntimeUA.spec.js',
+      './test/Registry.spec.js'
 
     ],
     preprocessors: {
