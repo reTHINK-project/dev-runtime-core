@@ -1,6 +1,6 @@
 {
   "name": "runtime-core",
-  "version": "0.17.0",
+  "version": "0.18.1",
   "description": "core runtime development",
   "files": [
     "dist"
@@ -10,9 +10,9 @@
     "test": "karma start",
     "test:lint": "eslint --config .eslintrc.yml ./src/",
     "build:doc": "./node_modules/.bin/esdoc -c esdoc.json",
-    "build:dev": "cross-env MODE=dev webpack && cp -r dist ../dev-protostubs/node_modules/runtime-core && cp -r dist ../dev-dsm-app/node_modules/runtime-core",
+    "build:dev": "cross-env MODE=dev webpack && cp -r dist/*.js ../dev-protostubs/dist/.well-known/runtime/ && cp -r dist ../dev-protostubs/node_modules/runtime-core && cp -r dist ../dev-dsm-app/node_modules/runtime-core",
     "build:dev:monitor": "cross-env MODE=dev cross-env MONITOR=true webpack",
-    "build:prod": "cross-env MODE=prod webpack -p",
+    "build:prod": "cross-env MODE=prod webpack -p  && cp -r dist/*.js ../dev-protostubs/dist/.well-known/runtime/ && cp -r dist ../dev-protostubs/node_modules/runtime-core && cp -r dist ../dev-dsm-app/node_modules/runtime-core",
     "build:light": "cross-env MODE=light webpack",
     "build": "cross-env MODE=dev webpack && cross-env MODE=prod webpack && cross-env MODE=light webpack"
   },
